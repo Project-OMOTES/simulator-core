@@ -1,0 +1,110 @@
+name: Build-Test-Lint-etc (linux)
+
+on: [push]
+
+jobs:
+
+  flake8-lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v3
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: flake8 Lint
+        uses: TrueBrain/actions-flake8@v2
+        with:
+          plugins: Flake8-pyproject==1.2.3 flake8-docstrings==1.7.0 flake8-quotes==3.3.2
+          # only_warn: 1  #causes action to always be succesful, but still provide annotations
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+#        python-version: [3.8, 3.9, 3.10, 3.11]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    - run: |
+        ./ci/linux/create_venv.sh
+        ./ci/linux/install_dev.sh
+
+    - name: run unit tests
+      run: |
+        ./ci/linux/test_unit.sh
+
+    - name: Surface failing tests
+      if: always()
+      uses: pmeier/pytest-results-action@main
+      with:
+        # A list of JUnit XML files, directories containing the former, and wildcard
+        # patterns to process.
+        # See @actions/glob for supported patterns.
+        path: test-results.xml
+
+        # Add a summary of the results at the top of the report
+        # Default: true
+        summary: true
+
+        # Select which results should be included in the report.
+        # Follows the same syntax as
+        # `pytest -r`
+        # Default: fEX
+        display-options: fEX
+
+        # Fail the workflow if no JUnit XML was found.
+        # Default: true
+        fail-on-empty: true
+
+  typecheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+#        python-version: [3.8, 3.9, 3.10, 3.11]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    - run: |
+        ./ci/linux/create_venv.sh
+        ./ci/linux/install_dependencies.sh
+
+    - name: Add mypy annotator
+      uses: pr-annotators/mypy-pr-annotator@v1.0.0
+
+    - name: run typechecker
+      run: |
+        ./ci/linux/typecheck.sh
+
+  build:
+    name: Build the python package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - run: |
+          ./ci/linux/create_venv.sh
+          ./ci/linux/install_dependencies.sh
+
+      - name: build
+        run: |
+          ./ci/linux/build_python_package.sh
