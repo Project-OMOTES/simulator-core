@@ -1,2 +1,5 @@
 # simulator-core
-Core library for NWN simulator
+
+This repository is part of the 'Nieuwe Warmte Nu Design Toolkit' project. 
+
+Core library of the NWN simulator
