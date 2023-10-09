@@ -79,7 +79,7 @@ jobs:
         cache: 'pip'
     - run: |
         ./ci/linux/create_venv.sh
-        ./ci/linux/install_dependencies.sh
+        ./ci/linux/install_dev.sh
 
     - name: Add mypy annotator
       uses: pr-annotators/mypy-pr-annotator@v1.0.0
@@ -103,7 +103,7 @@ jobs:
           cache: 'pip'
       - run: |
           ./ci/linux/create_venv.sh
-          ./ci/linux/install_dependencies.sh
+          ./ci/linux/install_dev.sh
 
       - name: build
         run: |
