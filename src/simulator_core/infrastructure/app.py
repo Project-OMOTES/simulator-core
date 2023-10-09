@@ -2,19 +2,15 @@ from simulator_core.entities import SimulationConfiguration
 from simulator_core.infrastructure.simulation_manager import SimulationManager
 from simulator_core.entities.esdl_object import EsdlObject
 from .utils import pyesdl_from_file
-
-from esdl import EnergySystem
-
 import sys
 import logging
 import traceback
+import uuid
 
 logger = logging.getLogger(__name__)
 
 
 def run(file_path: str = None):
-    from simulator_core.entities import SimulationConfiguration
-    import uuid
     config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                      name="test run",
                                      timestep=3600,
