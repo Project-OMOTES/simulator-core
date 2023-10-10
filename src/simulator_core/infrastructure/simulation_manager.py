@@ -13,8 +13,8 @@ class SimulationManager:
     def execute(self):
         # convert ESDL to Heat Network, NetworkController
 
-        network = EsdlEnergySystemMapper().to_entity(self.esdl.es)
-        controller = EsdlControllerMapper().to_entity(self.esdl.es)
+        network = EsdlEnergySystemMapper().to_entity(self.esdl.esh)
+        controller = EsdlControllerMapper().to_entity(self.esdl.esh)
 
         worker = NetworkSimulation(network, controller)
         worker.run(self.config)
