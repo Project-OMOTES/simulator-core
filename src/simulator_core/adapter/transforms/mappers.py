@@ -10,10 +10,10 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """
     Creates a Heatnetwork entity object based on a PyESDL EnergySystem object
     """
-    def to_esdl(self, entity: HeatNetwork) -> PyEsdlEnergySystem:
+    def to_esdl(self, entity: HeatNetwork) -> EsdlObject:
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
-    def to_entity(self, model: PyEsdlEnergySystem) -> HeatNetwork:
+    def to_entity(self, model: EsdlObject) -> HeatNetwork:
         """
         Method to convert esdl to Heatnetwork object.
         This method first converts all assets into a list of assets.
@@ -48,6 +48,11 @@ class EsdlAssetMapper(EsdlMapperAbstract):
     def to_esdl(self, entity: AssetAbstract) -> Any:
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    def to_entity(self, model: PyEsdlAsset) -> AssetAbstract:
+    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
         # TODO
+        pass
+
+class ProductionAssetMapper(EsdlAssetMapper):
+
+    def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
         pass
