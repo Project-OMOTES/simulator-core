@@ -1,7 +1,7 @@
 from .asset_abstract import AssetAbstract
 
 
-class ProductionCluster(AssetAbstract):
+class Pipe(AssetAbstract):
     def __init__(self):
         pass
 
