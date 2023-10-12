@@ -4,11 +4,11 @@ from simulator_core.entities import HeatNetwork, NetworkController, EsdlObject, 
 from typing import Any
 
 
-
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """
     Creates a Heatnetwork entity object based on a PyESDL EnergySystem object
     """
+
     def to_esdl(self, entity: HeatNetwork) -> EsdlObject:
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
@@ -22,8 +22,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         # convert esdl network to heat network
         # create junctions
         # create assets
-        #create connection between them
-        assets_list = [EsdlAssetMapper().to_entity(x)  for x in model.get_all_assets_of_type('asset')]
+        # create connection between them
+        assets_list = [EsdlAssetMapper().to_entity(x) for x in model.get_all_assets_of_type('asset')]
         junction_list = model.get_all_assets_of_type('junction')
         return HeatNetwork(assets_list, junction_list)
 
@@ -32,6 +32,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
     """
     Creates a NetworkController entity object based on a PyESDL EnergySystem object
     """
+
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
@@ -44,12 +45,17 @@ class EsdlAssetMapper(EsdlMapperAbstract):
     """
     Creates entity Asset objects based on a PyESDL EnergySystem assets
     """
+
     def to_esdl(self, entity: AssetAbstract) -> Any:
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
     def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
-        # TODO
-        pass
+        """
+        Method to map an esdl asse to local class
+        """
+        return model.convert_esdl()
+
+
 
 class ProductionAssetMapper(EsdlAssetMapper):
 
