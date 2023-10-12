@@ -1,9 +1,31 @@
 import logging
 from esdl import esdl
 from esdl.esdl_handler import EnergySystemHandler
-from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster
+from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster, Pipe
 
 logger = logging.getLogger(__name__)
+
+
+class EsdlAssetObject:
+    """Class to hold an esdl asset and convert it to local class objects"""
+
+    esdl_asset: esdl.Asset
+    conversion_dict = {
+        esdl.Producer: ProductionCluster,
+        esdl.GenericProducer: ProductionCluster,
+        esdl.Consumer: DemandCluster,
+        esdl.HeatingDemand: DemandCluster,
+        esdl.Pipe: Pipe
+    }
+
+    def __init__(self, asset: esdl.Asset) -> None:
+        self.esdl_asset = asset
+
+    def convert_esdl(self) -> AssetAbstract:
+        """ Converts the esdl asset into the own class object"""
+        if not type(self.esdl_asset) in self.conversion_dict:
+            raise NotImplementedError(self.esdl_asset.__repr__()+ ' not implemented in conversion')
+        return self.conversion_dict[type(self.esdl_asset)]()
 
 
 class EsdlObject:
@@ -21,7 +43,7 @@ class EsdlObject:
     def __repr__(self) -> str:
         return str(self.esh)
 
-    def get_all_assets_of_type(self, esdl_asset_type: str) -> list[esdl.Asset]:
+    def get_all_assets_of_type(self, esdl_asset_type: str) -> list[EsdlAssetObject]:
         """
         returns a list of all the esdl assets of the specified type in the esdl file
         if the type is not found an empty list is returned
@@ -40,24 +62,6 @@ class EsdlObject:
         if esdl_asset_type not in str_to_type_dict:
             logger.error(esdl_asset_type + " not implemented in get_all_asset_of_type method")
             return []
-        return self.esh.get_all_instances_of_type(str_to_type_dict[esdl_asset_type])
+        return [EsdlAssetObject(asset)
+                for asset in self.esh.get_all_instances_of_type(str_to_type_dict[esdl_asset_type])]
 
-
-class EsdlAssetObject:
-    """Class to hold an esdl asset and convert it to local class objects"""
-
-    esdl_asset: esdl.Asset
-    conversion_dict = {
-        esdl.Producer: ProductionCluster,
-        esdl.Consumer: DemandCluster,
-    }
-
-    def __init__(self, asset: esdl.Asset) -> None:
-
-        self.esdl_asset = asset
-
-    def convert_esdl(self) -> AssetAbstract:
-        """ Converts the esdl asset into the own class object"""
-        if not type(self.esdl_asset) in self.conversion_dict:
-            raise NotImplementedError(type(self.esdl_asset) + ' not implemented in conversion')
-        return self.conversion_dict[type(self.esdl_asset)]()
