@@ -23,7 +23,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         # create junctions
         # create assets
         #create connection between them
-        assets_list = [EsdlAssetMapper.to_entity(x)  for x in model.get_all_assets_of_type('asset')]
+        assets_list = [EsdlAssetMapper().to_entity(x)  for x in model.get_all_assets_of_type('asset')]
         junction_list = model.get_all_assets_of_type('junction')
         return HeatNetwork(assets_list, junction_list)
 
@@ -32,10 +32,10 @@ class EsdlControllerMapper(EsdlMapperAbstract):
     """
     Creates a NetworkController entity object based on a PyESDL EnergySystem object
     """
-    def to_esdl(self, entity: NetworkController) -> PyEsdlEnergySystem:
+    def to_esdl(self, entity: NetworkController) -> EsdlObject:
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, model: PyEsdlEnergySystem) -> NetworkController:
+    def to_entity(self, model: EsdlObject) -> NetworkController:
         # TODO
         pass
 
