@@ -24,8 +24,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         # create junctions
         # create assets
         #create connection between them
-        assets_list = []
-        junction_list = []
+        assets_list = [EsdlAssetMapper.to_entity(x)  for x in model.get_all_assets_of_type('asset')]
+        junction_list = model.get_all_assets_of_type('junction')
         return HeatNetwork(assets_list, junction_list)
 
 
