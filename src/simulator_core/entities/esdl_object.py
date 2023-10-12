@@ -33,7 +33,8 @@ class EsdlObject:
             'geothermal': esdl.GeothermalSource,
             'conversion': esdl.Conversion,
             'pipe': esdl.Pipe,
-            'transport': esdl.Transport
+            'transport': esdl.Transport,
+            'junction': esdl.Joint
         }
         if esdl_asset_type not in str_to_type_dict:
             logger.error(esdl_asset_type + " not implemented in get_all_asset_of_type method")
