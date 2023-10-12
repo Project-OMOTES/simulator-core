@@ -16,3 +16,5 @@
 """ __init__.py file for initialization code. """
 
 from .asset_abstract import AssetAbstract
+from .demand_cluster import DemandCluster
+from .production_cluster import ProductionCluster

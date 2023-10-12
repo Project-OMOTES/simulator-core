@@ -1,6 +1,7 @@
 import logging
 from esdl import esdl
 from esdl.esdl_handler import EnergySystemHandler
+from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class EsdlObject:
         :param esdl_asset_type: str of the asset type assets need to be gathered.
         """
         str_to_type_dict = {
-            'assets': esdl.Asset,
+            'asset': esdl.Asset,
             'producer': esdl.Producer,
             'consumer': esdl.Consumer,
             'geothermal': esdl.GeothermalSource,
