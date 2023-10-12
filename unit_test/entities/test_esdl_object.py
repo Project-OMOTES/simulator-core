@@ -1,5 +1,5 @@
-from src.simulator_core.entities.esdl_object import EsdlObject
-from src.simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.infrastructure.utils import pyesdl_from_file
 import unittest
 
 

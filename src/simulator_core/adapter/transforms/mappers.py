@@ -1,9 +1,8 @@
-from src.simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from src.simulator_core.entities.assets import AssetAbstract
-from src.simulator_core.entities import HeatNetwork, NetworkController
+from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+from simulator_core.entities.assets import AssetAbstract, ProductionCluster
+from simulator_core.entities import HeatNetwork, NetworkController, EsdlObject, EsdlAssetObject
 from typing import Any
-from esdl.esdl import Asset as PyEsdlAsset
-from esdl.esdl import EnergySystem as PyEsdlEnergySystem
+
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
