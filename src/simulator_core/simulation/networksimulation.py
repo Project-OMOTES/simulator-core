@@ -16,7 +16,9 @@
 """ Simulates an heat network for the specified duration."""
 
 from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
+import logging
 
+logger = logging.getLogger(__name__)
 
 class NetworkSimulation:
     """Network simulation class
@@ -46,7 +48,19 @@ class NetworkSimulation:
         and duration
         :return: None
         """
-        self.config = config# we do we store this here?
+        self.config = config # Why do we store it in here?
 
         # time loop
-        
+        for time in np.arange(self.config.start, self.config.stop, self.config.timestep):
+            not_converged = True
+            while not_converged:
+                not_converged = False # for the moment we do not check on convergence, to get stuff running.
+                # Also need to add break after 10 iteration.
+                logger.debug("Simulating for timestep " + str(time))
+                controller_input = self.controller.run_time_step(time)
+                self.network.run_time_step(time, controller_input)
+            self.network.store_output()
+
+
+
+

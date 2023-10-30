@@ -24,4 +24,5 @@ class SimulationConfiguration:
     simulation_id: uuid.UUID
     name: str
     timestep: float
-    duration: float
+    start: float
+    stop: float
