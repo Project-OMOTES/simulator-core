@@ -18,11 +18,11 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def register_pandapipes(self) -> None:
+    def register_pandapipes(self, **kwargs) -> None:
         """Placeholder to register asset in a pandapipes network"""
         pass
 
     @abstractmethod
-    def get_timeseries(self) -> DataFrame:
+    def get_timeseries(self, **kwargs) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset"""
         pass
