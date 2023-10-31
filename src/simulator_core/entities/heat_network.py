@@ -2,12 +2,12 @@
 
 
 class HeatNetwork:
-    """Heatnetwork class which can be used to simulate a heat network."""
+    """HeatNetwork class which can be used to simulate a heat network."""
 
     def __init__(self):
         pass
 
-    def run_timestep(self, time: float, controller_input: dict):
+    def run_time_step(self, time: float, controller_input: dict):
         """Method to simulate a time step.
 
         :param float time: Timestep for which to simulate the model
@@ -24,3 +24,4 @@ class HeatNetwork:
         not converged for the input of the controller.
         :return: None
         """
+        pass
