@@ -41,7 +41,7 @@ class EsdlAssetObject:
 class EsdlObject:
     """EsdlObject class is a wrapper around PyEsdl."""
 
-    esh: EnergySystemHandler
+    energy_system_handler: EnergySystemHandler
 
     def __init__(self, esdl_energysystem_handler: EnergySystemHandler) -> None:
         """
@@ -49,11 +49,11 @@ class EsdlObject:
 
         :param esdl_energysystem: PyEsdl EnergySystem object
         """
-        self.esh = esdl_energysystem_handler
+        self.energy_system_handler = esdl_energysystem_handler
 
     def __repr__(self) -> str:
         """Returns a string describing the esdl file object."""
-        return str(self.esh)
+        return str(self.energy_system_handler)
 
     def get_all_assets_of_type(self, esdl_asset_type: str) -> list[EsdlAssetObject]:
         """
@@ -76,4 +76,4 @@ class EsdlObject:
             logger.error(esdl_asset_type + " not implemented in get_all_asset_of_type method")
             return []
         return [EsdlAssetObject(asset)
-                for asset in self.esh.get_all_instances_of_type(str_to_type_dict[esdl_asset_type])]
+                for asset in self.energy_system_handler.get_all_instances_of_type(str_to_type_dict[esdl_asset_type])]
