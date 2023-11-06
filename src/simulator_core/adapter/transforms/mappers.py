@@ -61,10 +61,11 @@ class ProductionAssetMapper(EsdlAssetMapper):
 
 
 class StringEsdlAssetMapper(EsdlMapperAbstract):
+    """Mapper class to convert strings to an esdl class type and vica-versa.
+
+    Please note that the str_to_type_dict needs to have unique keys and values.
     """
-    Mapper class to convert strings to an esdl class type and vica-versa.
-    Please notate that the str_to_type_dict needs to have unique keys and values.
-    """
+
     str_to_type_dict = {
         'asset': esdl.Asset,
         'producer': esdl.Producer,
@@ -77,7 +78,7 @@ class StringEsdlAssetMapper(EsdlMapperAbstract):
     }
 
     def to_esdl(self, entity: str) -> type:
-        """Method to convert a string to esdl class type
+        """Method to convert a string to esdl class type.
 
         :param str entity: String to be converted to an esdl class type object.
         :return: ESDL class described in the string.
@@ -100,5 +101,3 @@ class StringEsdlAssetMapper(EsdlMapperAbstract):
             raise NotImplementedError(str(entity) + " not implemented in StringESDLAssetMapper "
                                                     "class")
         return list(self.str_to_type_dict.keys())[index]
-
-
