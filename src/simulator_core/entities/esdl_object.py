@@ -34,4 +34,4 @@ class EsdlObject:
         """
         return [EsdlAssetObject(asset)
                 for asset in self.energy_system_handler.get_all_instances_of_type(
-                (esdl.Asset))]
+                StringEsdlAssetMapper().to_esdl(esdl_asset_type))]
