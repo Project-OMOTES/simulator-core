@@ -1,5 +1,5 @@
 from simulator_core.entities import EsdlObject, SimulationConfiguration
-from simulator_core.adapter.transforms import EsdlEnergySystemMapper, EsdlControllerMapper
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper, EsdlControllerMapper
 from simulator_core.simulation import NetworkSimulation
 import pandas as pd
 import numpy as np
