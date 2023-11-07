@@ -167,7 +167,7 @@ class ProductionCluster:
         height_m: float = DEFAULT_NODE_HEIGHT,
         internal_diameter: float = DEFAULT_DIAMETER,
         pressure_supply: float = DEFAULT_PRESSURE,
-        set_pressure: bool = False,
+        control_mass_flow: bool = False,
     ):
         """Initialize a ProductionCluster object.
 
@@ -192,8 +192,9 @@ class ProductionCluster:
         :param float pressure_supply: The pressure that the asset delivers
             to the "to_junction". The pressure should be supplied in bar, it
             defaults to DEFAULT_PRESSURE.
-        :param bool set_pressure: If True, a pandapipes "Circulation Pump Pressure" is used to set the pressure
-            of the system. If False, a pandapipes "Control Valve" is used to set the mass flow rate of the system.
+        :param bool control_mass_flow: If True, the mass flow rate of the asset
+            is controlled by the "Control Valve". If False, the mass flow rate
+            of the asset is floating.
         """
         # Define the asset properties
         self.asset_name = asset_name
@@ -213,7 +214,7 @@ class ProductionCluster:
         )
         # DemandCluster pressure specifications
         self.pressure_supply = pressure_supply
-        self.set_pressure = set_pressure
+        self.control_mass_flow = control_mass_flow
         # Objects of the asset
         self._intermediate_junction = None
         self._circ_pump = None
@@ -232,12 +233,12 @@ class ProductionCluster:
     def create(self, pandapipes_net: pandapipesNet) -> None:
         """Create a representation of the asset in pandapipes.
 
-        The ProductionCluster asset contains multiple pandapipes components. It can operate in either a "pressure" or
-        "temperature" mode.
+        The ProductionCluster asset contains multiple pandapipes components.
 
         The component model contains the following components:
         - A flow control valve to set the mass flow rate of the system.
-        - A circulation pump to set the pressure of the system.
+        - A circulation pump to set the pressure and the temperature of the
+        system.
         - An intermediate junction to link both components.
         """
         # Create intermediate junction
@@ -280,7 +281,7 @@ class ProductionCluster:
                 net=pandapipes_net,
             ),
             diameter_m=self.internal_diameter,
-            control_active=self.set_pressure,
+            control_active=self.control_mass_flow,
             in_service=True,
             name=f"flow_control_{self.asset_name}",
         )
