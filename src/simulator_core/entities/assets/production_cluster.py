@@ -3,14 +3,14 @@ from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
-from pandapipes import (
-    create_circ_pump_const_mass_flow,
-    create_flow_control,
-    create_junction,
-    pandapipesNet,
-)
+from pandapipes import pandapipesNet
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.pump import CirculationPumpConstantMass
+from simulator_core.entities.assets.valve import ControlValve
+
+# TODO: Move this to a config file; but where?
 
 DEFAULT_DIAMETER = 1.2  # [m]
 DEFAULT_PRESSURE = 5.0  # [bar]
@@ -20,117 +20,7 @@ DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
 
 
-class Junction:
-    """Wrapper class for pandapipes junctions."""
-
-    def __init__(
-        self,
-        pn_bar: float = 5.0,
-        tfluid_k: float = 300.0,
-        height_m: float = 0.0,
-        geodata: List = None,
-        name: str = None,
-        in_service: bool = True,
-        index: int = None,
-    ):
-        """Initialize a Junction object."""
-        self.pn_bar = pn_bar
-        self.tfluid_k = tfluid_k
-        self.height_m = height_m
-        self.geodata = geodata
-        self.name = name
-        self.in_service = in_service
-        self.index = index
-
-    def create(self, pandapipes_net: pandapipesNet) -> None:
-        """Register the junction in the pandapipes network."""
-        self.index = create_junction(
-            net=pandapipes_net,
-            pn_bar=self.pn_bar,
-            tfluid_k=self.tfluid_k,
-            height_m=self.height_m,
-            geodata=self.geodata,
-            name=self.name,
-            in_service=self.in_service,
-        )
-
-
-class ControlValve:
-    """Wrapper class for pandapipes control valves."""
-
-    def __init__(
-        self,
-        from_junction: int,
-        to_junction: int,
-        controlled_mdot_kg_per_s: float,
-        diameter_m: float,
-        control_active: bool = False,
-        in_service: bool = True,
-        name: str = None,
-        index: int = None,
-    ):
-        """Initialize a ControlValve object."""
-        self.from_junction = from_junction
-        self.to_junction = to_junction
-        self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
-        self.diameter_m = diameter_m
-        self.control_active = control_active
-        self.in_service = in_service
-        self.name = name
-        self.index = index
-
-    def create(self, pandapipes_net: pandapipesNet) -> None:
-        """Register the control valve in the pandapipes network."""
-        self.index = create_flow_control(
-            net=pandapipes_net,
-            from_junction=self.from_junction,
-            to_junction=self.to_junction,
-            controlled_mdot_kg_per_s=self.controlled_mdot_kg_per_s,
-            diameter_m=self.diameter_m,
-            control_active=self.control_active,
-            in_service=self.in_service,
-            name=self.name,
-        )
-
-
-class CirculationPumpConstantMass:
-    """Wrapper class for pandapipes circulation pumps with constant mass flow."""
-
-    def __init__(
-        self,
-        from_junction: int,
-        to_junction: int,
-        p_to_junction: float,
-        mdot_kg_per_s: float,
-        t_to_junction: float,
-        in_service: bool = True,
-        name: str = None,
-        index: int = None,
-    ):
-        """Initialize a CirculationPumpConstantMass object."""
-        self.from_junction = from_junction
-        self.to_junction = to_junction
-        self.p_to_junction = p_to_junction
-        self.mdot_kg_per_s = mdot_kg_per_s
-        self.t_to_junction = t_to_junction
-        self.in_service = in_service
-        self.name = name
-        self.index = index
-
-    def create(self, pandapipes_net: pandapipesNet) -> None:
-        self.index = create_circ_pump_const_mass_flow(
-            net=pandapipes_net,
-            return_junction=self.from_junction,
-            flow_junction=self.to_junction,
-            p_flow_bar=self.p_to_junction,
-            mdot_flow_kg_per_s=self.mdot_kg_per_s,
-            t_flow_k=self.t_to_junction,
-            in_service=self.in_service,
-            name=self.name,
-            index=self.index,
-        )
-
-
+# TODO Move this function to a utils file; but where?
 def heat_demand_and_temperature_to_mass_flow(
     thermal_demand: float, temperature_supply: float, temperature_return: float, net: pandapipesNet
 ) -> float:
