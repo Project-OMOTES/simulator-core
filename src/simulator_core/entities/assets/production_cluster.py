@@ -5,7 +5,8 @@ from pandapipes import pandapipesNet
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pump import CirculationPumpConstantMass
-from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
+from simulator_core.entities.assets.utils import \
+    heat_demand_and_temperature_to_mass_flow
 from simulator_core.entities.assets.valve import ControlValve
 
 # TODO: Move this to a config file; but where?
