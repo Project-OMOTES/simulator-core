@@ -1,13 +1,16 @@
 from pandapipes import create_flow_control, pandapipesNet
 
+from simulator_core.entities.assets.junction import Junction
+
 
 class ControlValve:
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
         self,
-        from_junction: int,
-        to_junction: int,
+        pandapipes_net: pandapipesNet,
+        from_junction: Junction,
+        to_junction: Junction,
         controlled_mdot_kg_per_s: float,
         diameter_m: float,
         control_active: bool = False,
@@ -16,6 +19,7 @@ class ControlValve:
         index: int = None,
     ):
         """Initialize a ControlValve object."""
+        self.pandas_net = pandapipes_net
         self.from_junction = from_junction
         self.to_junction = to_junction
         self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
@@ -24,13 +28,15 @@ class ControlValve:
         self.in_service = in_service
         self.name = name
         self.index = index
+        # Initialize the control valve
+        self._create()
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def _create(self) -> None:
         """Register the control valve in the pandapipes network."""
         self.index = create_flow_control(
-            net=pandapipes_net,
-            from_junction=self.from_junction,
-            to_junction=self.to_junction,
+            net=self.pandapipes_net,
+            from_junction=self.from_junction.index,
+            to_junction=self.to_junction.index,
             controlled_mdot_kg_per_s=self.controlled_mdot_kg_per_s,
             diameter_m=self.diameter_m,
             control_active=self.control_active,
