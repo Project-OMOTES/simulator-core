@@ -29,17 +29,20 @@ class ControlValve:
         self.name = name
         self.index = index
         # Initialize the control valve
+        self._initialized = False
         self._create()
 
     def _create(self) -> None:
         """Register the control valve in the pandapipes network."""
-        self.index = create_flow_control(
-            net=self.pandapipes_net,
-            from_junction=self.from_junction.index,
-            to_junction=self.to_junction.index,
-            controlled_mdot_kg_per_s=self.controlled_mdot_kg_per_s,
-            diameter_m=self.diameter_m,
-            control_active=self.control_active,
-            in_service=self.in_service,
-            name=self.name,
-        )
+        if not self._initialized:
+            self._initialized = True
+            self.index = create_flow_control(
+                net=self.pandapipes_net,
+                from_junction=self.from_junction.index,
+                to_junction=self.to_junction.index,
+                controlled_mdot_kg_per_s=self.controlled_mdot_kg_per_s,
+                diameter_m=self.diameter_m,
+                control_active=self.control_active,
+                in_service=self.in_service,
+                name=self.name,
+            )

@@ -27,16 +27,19 @@ class Junction:
         self.in_service = in_service
         self.index = index
         # Initialize the junction
+        self._initialized = False
         self._create()
 
     def _create(self) -> None:
         """Register the junction in the pandapipes network."""
-        self.index = create_junction(
-            net=self.pandapipes_net,
-            pn_bar=self.pn_bar,
-            tfluid_k=self.tfluid_k,
-            height_m=self.height_m,
-            geodata=self.geodata,
-            name=self.name,
-            in_service=self.in_service,
-        )
+        if not self._initialized:
+            self._initialized = True
+            self.index = create_junction(
+                net=self.pandapipes_net,
+                pn_bar=self.pn_bar,
+                tfluid_k=self.tfluid_k,
+                height_m=self.height_m,
+                geodata=self.geodata,
+                name=self.name,
+                in_service=self.in_service,
+            )

@@ -31,17 +31,21 @@ class CirculationPumpConstantMass:
         self.name = name
         self.index = index
         # Initialize the pump
+        self._initialized = False
         self._create()
 
     def _create(self) -> None:
-        self.index = create_circ_pump_const_mass_flow(
-            net=self.pandapipes_net,
-            return_junction=self.from_junction.index,
-            flow_junction=self.to_junction.index,
-            p_flow_bar=self.p_to_junction,
-            mdot_flow_kg_per_s=self.mdot_kg_per_s,
-            t_flow_k=self.t_to_junction,
-            in_service=self.in_service,
-            name=self.name,
-            index=self.index,
-        )
+        if not self._initialized:
+            self._initialized = True
+            # Register the pump in the pandapipes network
+            self.index = create_circ_pump_const_mass_flow(
+                net=self.pandapipes_net,
+                return_junction=self.from_junction.index,
+                flow_junction=self.to_junction.index,
+                p_flow_bar=self.p_to_junction,
+                mdot_flow_kg_per_s=self.mdot_kg_per_s,
+                t_flow_k=self.t_to_junction,
+                in_service=self.in_service,
+                name=self.name,
+                index=self.index,
+            )
