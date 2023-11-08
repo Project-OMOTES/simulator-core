@@ -96,6 +96,7 @@ class ProductionCluster(AssetAbstract):
             pandapipes_net=self.pandapipes_net,
         )
         # Objects of the asset
+        self._initialized = False
         self._create()
 
         # Output of the asset
@@ -119,36 +120,38 @@ class ProductionCluster(AssetAbstract):
         system.
         - An intermediate junction to link both components.
         """
-        # Create intermediate junction
-        self._intermediate_junction = Junction(
-            pandapipes_net=self.pandapipes_net,
-            pn_bar=self.pressure_supply,
-            tfluid_k=self.temperature_supply,
-            height_m=self.height_m,
-            name=f"intermediate_junction_{self.asset_name}",
-        )
-        # Create the pump to supply pressure and or massflow
-        self._circ_pump = CirculationPumpConstantMass(
-            pandapipes_net=self.pandapipes_net,
-            from_junction=self.from_junction,
-            to_junction=self._intermediate_junction,
-            p_to_junction=self.pressure_supply,
-            mdot_kg_per_s=self._controlled_mass_flow,
-            t_to_junction=self.temperature_supply,
-            name=f"circ_pump_{self.asset_name}",
-            in_service=True,
-        )
-        # Create the control valve
-        self._flow_control = ControlValve(
-            pandapipes_net=self.pandapipes_net,
-            from_junction=self._intermediate_junction,
-            to_junction=self.to_junction,
-            controlled_mdot_kg_per_s=self._controlled_mass_flow,
-            diameter_m=self.internal_diameter,
-            control_active=self.control_mass_flow,
-            in_service=True,
-            name=f"flow_control_{self.asset_name}",
-        )
+        if not self._initialized:            
+            self._initialized = True
+            # Create intermediate junction
+            self._intermediate_junction = Junction(
+                pandapipes_net=self.pandapipes_net,
+                pn_bar=self.pressure_supply,
+                tfluid_k=self.temperature_supply,
+                height_m=self.height_m,
+                name=f"intermediate_junction_{self.asset_name}",
+            )
+            # Create the pump to supply pressure and or massflow
+            self._circ_pump = CirculationPumpConstantMass(
+                pandapipes_net=self.pandapipes_net,
+                from_junction=self.from_junction,
+                to_junction=self._intermediate_junction,
+                p_to_junction=self.pressure_supply,
+                mdot_kg_per_s=self._controlled_mass_flow,
+                t_to_junction=self.temperature_supply,
+                name=f"circ_pump_{self.asset_name}",
+                in_service=True,
+            )
+            # Create the control valve
+            self._flow_control = ControlValve(
+                pandapipes_net=self.pandapipes_net,
+                from_junction=self._intermediate_junction,
+                to_junction=self.to_junction,
+                controlled_mdot_kg_per_s=self._controlled_mass_flow,
+                diameter_m=self.internal_diameter,
+                control_active=self.control_mass_flow,
+                in_service=True,
+                name=f"flow_control_{self.asset_name}",
+            )
 
     def get_output(self) -> pd.DataFrame:
         """Get the output of the asset."""
