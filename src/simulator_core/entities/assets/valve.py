@@ -19,7 +19,7 @@ class ControlValve:
         index: int = None,
     ):
         """Initialize a ControlValve object."""
-        self.pandas_net = pandapipes_net
+        self.pandapipes_net = pandapipes_net
         self.from_junction = from_junction
         self.to_junction = to_junction
         self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
