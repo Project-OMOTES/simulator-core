@@ -13,7 +13,7 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def get(self, **kwargs) -> Dict:
+    def get(self, **kwargs) -> Any:
         """Placeholder to get attributes of an asset"""
         pass
 
