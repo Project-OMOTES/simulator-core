@@ -18,7 +18,7 @@ class Junction:
         index: int = None,
     ):
         """Initialize a Junction object."""
-        self.pandas_net = pandapipes_net
+        self.pandapipes_net = pandapipes_net
         self.pn_bar = pn_bar
         self.tfluid_k = tfluid_k
         self.height_m = height_m

@@ -18,7 +18,15 @@ def heat_demand_and_temperature_to_mass_flow(
         "from_junction". The temperature should be supplied in Kelvin.
     :param pandapipesNet net: The pandapipes network used to calculate the specific heat capacity.
     """
-    return thermal_demand / (
-        (temperature_supply - temperature_return)
-        * float(pandapipes_net.fluid.get_heat_capacity(temperature_supply))
-    )
+    if temperature_supply > temperature_return:
+        return thermal_demand / (
+            (temperature_supply - temperature_return)
+            * float(pandapipes_net.fluid.get_heat_capacity(temperature_supply))
+        )
+    else:
+        return thermal_demand / (
+                    (temperature_return - temperature_supply)
+                    * float(pandapipes_net.fluid.get_heat_capacity(temperature_return))
+                )
+
+    
