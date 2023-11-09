@@ -1,3 +1,5 @@
+""" Abstract class for asset. """
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -8,7 +10,7 @@ class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
     @abstractmethod
-    def set(self, **kwargs) -> None:
+    def set(self, **kwargs) -> None:    
         """Placeholder to set attributes of an asset."""
         pass
 
