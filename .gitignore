@@ -220,5 +220,6 @@ fabric.properties
 
 unit_test_coverage/
 test-results.xml
-
 .env.*
+*requirements.txt
+
