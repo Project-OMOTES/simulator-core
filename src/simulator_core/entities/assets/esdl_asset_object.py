@@ -13,13 +13,7 @@ class EsdlAssetObject:
     """
 
     esdl_asset: esdl.Asset
-    conversion_dict = {
-        esdl.Producer: ProductionCluster,
-        esdl.GenericProducer: ProductionCluster,
-        esdl.Consumer: DemandCluster,
-        esdl.HeatingDemand: DemandCluster,
-        esdl.Pipe: Pipe
-    }
+
 
     def __init__(self, asset: esdl.Asset) -> None:
         """
@@ -28,10 +22,4 @@ class EsdlAssetObject:
         :param asset, esdl.Asset which os stored int hsi class for interaction.
         """
         self.esdl_asset = asset
-
-    def convert_esdl(self) -> AssetAbstract:
-        """Converts the esdl asset into the own class object."""
-        if not type(self.esdl_asset) in self.conversion_dict:
-            raise NotImplementedError(self.esdl_asset.__repr__() + ' not implemented in conversion')
-        return self.conversion_dict[type(self.esdl_asset)]()
 

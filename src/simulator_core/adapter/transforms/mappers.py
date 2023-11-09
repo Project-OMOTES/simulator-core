@@ -45,16 +45,6 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         pass
 
 
-class EsdlAssetMapper(EsdlMapperAbstract):
-    """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
-
-    def to_esdl(self, entity: AssetAbstract) -> Any:
-        raise NotImplementedError("EsdlAssetMapper.to_esdl()")
-
-    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
-        """Method to map an esdl asse to local class."""
-        return model.convert_esdl()
-
 
 class ProductionAssetMapper(EsdlAssetMapper):
 
