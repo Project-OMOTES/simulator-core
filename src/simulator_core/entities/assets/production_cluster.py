@@ -237,7 +237,11 @@ class ProductionCluster:
             )
 
     def simulation_performed(self) -> bool:
-        """Check if the simulation has been performed."""
+        """Check if the simulation has been performed.
+
+        :return bool simulation_performed: True if the simulation has been performed,
+            otherwise a ValueError is raised.
+        """
         if self.pandapipes_net.res_circ_pump_mass is AttributeError:
             # TODO: Implement specific error
             raise ValueError(f"The pandapipes network {self.pandapipes_net} has no results.")
@@ -270,8 +274,12 @@ class ProductionCluster:
         }
 
     def update(self) -> None:
-        """Update the asset properties to the results from the previous (timestep) simulation."""
-        # TODO: Is the False covered by the error message?
+        """Update the asset properties to the results from the previous (timestep) simulation.
+
+        Sets the values of the supply temperature, return temperature and heat demand
+        to the values of the previous simulation. In addition, the mass flow rate is set
+        to the value of the previous simulation.
+        """
         if self.simulation_performed():
             # Retrieve the setpoints (Ts, Tr, Qh)
             setpoints = self.get_setpoints()
@@ -287,6 +295,14 @@ class ProductionCluster:
 
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
+
+        The output of the asset is a dictionary with the following keys:
+        - PROPERTY_HEAT_DEMAND: The heat demand of the asset.
+        - PROPERTY_TEMPERATURE_SUPPLY: The supply temperature of the asset.
+        - PROPERTY_TEMPERATURE_RETURN: The return temperature of the asset.
+        - PROPERTY_PRESSURE_SUPPLY: The supply pressure of the asset.
+        - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
+        - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
         # Retrieve the general model setpoints (Ts, Tr, Qh)
         setpoints = self.get_setpoints()
