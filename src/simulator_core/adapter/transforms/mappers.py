@@ -6,6 +6,8 @@ from simulator_core.entities.assets import AssetAbstract, ProductionCluster, Esd
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+
 from typing import Any
 
 
