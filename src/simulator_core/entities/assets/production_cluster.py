@@ -1,3 +1,4 @@
+"""ProductionCluster class."""
 from typing import Dict
 from warnings import warn
 
@@ -7,20 +8,29 @@ from pandapipes import pandapipesNet
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_DIAMETER, DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE, DEFAULT_TEMPERATURE_DIFFERENCE, PROPERTY_HEAT_DEMAND,
-    PROPERTY_TEMPERATURE_RETURN, PROPERTY_TEMPERATURE_SUPPLY)
+    DEFAULT_DIAMETER,
+    DEFAULT_NODE_HEIGHT,
+    DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE_RETURN,
+    PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
+)
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pump import CirculationPumpConstantMass
-from simulator_core.entities.assets.utils import \
-    heat_demand_and_temperature_to_mass_flow
+from simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+    mass_flow_and_temperature_to_heat_demand,
+)
 from simulator_core.entities.assets.valve import ControlValve
 
 
 class ProductionCluster:
-    """
-    A ProductionCluster represents an asset that produces heat.
-    """
+    """A ProductionCluster represents an asset that produces heat."""
 
     def __init__(
         self,
@@ -97,16 +107,9 @@ class ProductionCluster:
         self._initialized = False
         self._create()
 
-        # Output of the asset
-        # TODO: we need to discuss output!
-        self.from_junction_temperature = np.NaN
-        self.to_junction_temperature = np.NaN
-        self.from_junction_pressure = np.NaN
-        self.to_junction_pressure = np.NaN
-        self.mass_flow = np.NaN
-        self.thermal_production = np.NaN
+        # Output list
+        self.output = []
 
-    # TODO: How do we carry the pandapipes net?
     def _create(self) -> None:
         """Create a representation of the asset in pandapipes.
 
@@ -118,7 +121,7 @@ class ProductionCluster:
         system.
         - An intermediate junction to link both components.
         """
-        if not self._initialized:            
+        if not self._initialized:
             self._initialized = True
             # Create intermediate junction
             self._intermediate_junction = Junction(
@@ -155,18 +158,20 @@ class ProductionCluster:
         """Set the supply temperature of the asset.
 
         :param float temperature_supply: The supply temperature of the asset.
-            The temperature should be supplied in Kelvin.        
+            The temperature should be supplied in Kelvin.
         """
         # Set the temperature of the circulation pump mass flow
         self.temperature_supply = temperature_supply
         # Retrieve the value array of the temperature
-        self.pandapipes_net['circ_pump_mass']['t_flow_k'][self._circ_pump.index] = self.temperature_supply
+        self.pandapipes_net["circ_pump_mass"]["t_flow_k"][
+            self._circ_pump.index
+        ] = self.temperature_supply
 
     def _set_return_temperature(self, temperature_return: float) -> None:
         """Set the return temperature of the asset.
 
         :param float temperature_return: The return temperature of the asset.
-            The temperature should be supplied in Kelvin.        
+            The temperature should be supplied in Kelvin.
         """
         # Set the return temperature of the asset
         self.temperature_return = temperature_return
@@ -175,7 +180,7 @@ class ProductionCluster:
         """Set the heat demand of the asset.
 
         :param float heat_demand: The heat demand of the asset.
-            The heat demand should be supplied in Watts.        
+            The heat demand should be supplied in Watts.
         """
         # Calculate the mass flow rate
         self._controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
@@ -187,27 +192,30 @@ class ProductionCluster:
         # Check if the mass flow rate is positive
         if self._controlled_mass_flow < 0:
             raise ValueError(
-                f"The mass flow rate {self._controlled_mass_flow} of the asset {self.asset_name} is negative."
+                f"The mass flow rate {self._controlled_mass_flow} of the asset {self.asset_name}"
+                + " is negative."
             )
         else:
             # Set the mass flow rate of the circulation pump
-            self.pandapipes_net['circ_pump_mass']['mdot_flow_kg_per_s'][self._circ_pump.index] = self._controlled_mass_flow
+            self.pandapipes_net["circ_pump_mass"]["mdot_flow_kg_per_s"][
+                self._circ_pump.index
+            ] = self._controlled_mass_flow
             # Set the mass flow rate of the control valve
-            self.pandapipes_net['flow_control']['controlled_mdot_kg_per_s'][self._flow_control.index] = self._controlled_mass_flow
+            self.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][
+                self._flow_control.index
+            ] = self._controlled_mass_flow
 
     def set_setpoints(self, setpoints: Dict) -> None:
-        """ Set the setpoints of the asset.
+        """Set the setpoints of the asset.
 
-        :param Dict setpoints: The setpoints of the asset in a dictionary, 
+        :param Dict setpoints: The setpoints of the asset in a dictionary,
             as "property_name": value pairs.
-        
+
         """
         # Default keys required
-        necessary_setpoints = set([
-            PROPERTY_TEMPERATURE_SUPPLY, 
-            PROPERTY_TEMPERATURE_RETURN, 
-            PROPERTY_HEAT_DEMAND
-        ])
+        necessary_setpoints = set(
+            [PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN, PROPERTY_HEAT_DEMAND]
+        )
         # Dict to set
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
@@ -219,54 +227,89 @@ class ProductionCluster:
             # Raise warning if there are more setpoints
             if len(setpoints_set.difference(necessary_setpoints)) > 0:
                 warn(
-                    f"The setpoints {setpoints_set.difference(necessary_setpoints)}" +
-                    f" are not required for the asset {self.asset_name}."
+                    f"The setpoints {setpoints_set.difference(necessary_setpoints)}"
+                    + f" are not required for the asset {self.asset_name}."
                 )
         else:
             # Print missing setpoints
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-                
 
-    def get_output(self) -> pd.DataFrame:
-        """Get the output of the asset."""
-        (
-            self.from_junction_pressure,
-            self.from_junction_temperature,
-        ) = self.pandapipes_net.res_junction.loc[self.from_junction.index, ["p_bar", "t_k"]]
-        (
-            self.to_junction_pressure,
-            self.to_junction_temperature,
-        ) = self.pandapipes_net.res_junction.loc[self.to_junction.index, ["p_bar", "t_k"]]
-        self.mass_flow = self.pandapipes_net.res_flow_control.loc[
-            self._flow_control.index, "mdot_from_kg_per_s"
+    def simulation_performed(self) -> bool:
+        """Check if the simulation has been performed."""
+        if self.pandapipes_net.res_circ_pump_mass is AttributeError:
+            # TODO: Implement specific error
+            raise ValueError(f"The pandapipes network {self.pandapipes_net} has no results.")
+        else:
+            # Retrieve the setpoints
+            return True
+
+    def get_setpoints(self) -> Dict:
+        """Get the setpoints of the asset.
+
+        :return Dict setpoints: The setpoints of the asset in a dictionary,
+            as "property_name": value pairs.
+        """
+        # Return the setpoints
+        temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
+        temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
+        mass_flow = self.pandapipes_net.res_circ_pump_mass["mdot_flow_kg_per_s"][
+            self._circ_pump.index
         ]
-        self.thermal_production = (
-            self.mass_flow
-            * (self.to_junction_temperature - self.from_junction_temperature)
-            * self.pandapipes_net.fluid.get_heat_capacity(self.from_junction_temperature)
+        heat_demand = mass_flow_and_temperature_to_heat_demand(
+            temperature_supply=temp_supply,
+            temperature_return=temp_return,
+            mass_flow=mass_flow,
+            pandapipes_net=self.pandapipes_net,
         )
-        # Create output dataframe
-        output = pd.DataFrame(
-            {
-                "from_junction_temperature (K)": self.from_junction_temperature,
-                "from_junction_pressure (K)": self.from_junction_pressure,
-                "to_junction_pressure (bar)": self.to_junction_pressure,
-                "to_junction_temperature (bar)": self.to_junction_temperature,
-                "mass_flow (kg/s)": self.mass_flow,
-                "thermal_production (W)": self.thermal_production,
-            },
-            index=[self.asset_name],
-        )
-        return output
+        return {
+            PROPERTY_TEMPERATURE_SUPPLY: temp_supply,
+            PROPERTY_TEMPERATURE_RETURN: temp_return,
+            PROPERTY_HEAT_DEMAND: heat_demand,
+        }
+
+    def update(self) -> None:
+        """Update the asset properties to the results from the previous (timestep) simulation."""
+        # TODO: Is the False covered by the error message?
+        if self.simulation_performed():
+            # Retrieve the setpoints (Ts, Tr, Qh)
+            setpoints = self.get_setpoints()
+            # Set the setpoints (Ts, Tr, Qh)
+            self.set_setpoints(setpoints)
+            # Set massflow
+            self._controlled_mass_flow = self.pandapipes_net.res_circ_pump_mass[
+                "mdot_flow_kg_per_s"
+            ][self._circ_pump.index]
+
+    def write_to_output(self) -> None:
+        """Write the output of the asset to the output list.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+        """
+        # Retrieve the general model setpoints (Ts, Tr, Qh)
+        setpoints = self.get_setpoints()
+        # Retrieve the mass flow (mdot)
+        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_mass["mdot_flow_kg_per_s"][
+            self._circ_pump.index
+        ]
+        # Retrieve the pressure (Ps, Pr)
+        setpoints[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_junction["p_bar"][
+            self.to_junction.index
+        ]
+        setpoints[PROPERTY_PRESSURE_RETURN] = self.pandapipes_net.res_junction["p_bar"][
+            self.from_junction.index
+        ]
+        # Append dict to output list
+        self.output.append(setpoints)
+
 
 if __name__ == "__main__":
     # Check functionality of the ProductinCluster
     # Create a simple pandapipes network woith a production cluster
     # and a demand cluster.
     import pandapipes as pp
-    import pandas as pd
 
     # Create a pandapipes network
     net = pp.create_empty_network(fluid="water")
@@ -279,14 +322,17 @@ if __name__ == "__main__":
         pandapipes_net=net,
     )
     # Create junctions
-    junc_list = [Junction(
-        pandapipes_net=net,
-        pn_bar=5.0,
-        tfluid_k=300.0,
-        height_m=0.0,
-        geodata=geo_sub,
-        name="junc0_demand_cluster01",
-    ) for junc_idx, geo_sub in enumerate([[0, 0], [4, 0], [0, 1], [4, 1], [0, 2], [4, 2]])]
+    junc_list = [
+        Junction(
+            pandapipes_net=net,
+            pn_bar=5.0,
+            tfluid_k=300.0,
+            height_m=0.0,
+            geodata=geo_sub,
+            name="junc0_demand_cluster01",
+        )
+        for junc_idx, geo_sub in enumerate([[0, 0], [4, 0], [0, 1], [4, 1], [0, 2], [4, 2]])
+    ]
     # Create pipes
     pipe_list = pp.create_pipes_from_parameters(
         net,
@@ -350,13 +396,13 @@ if __name__ == "__main__":
                 from_junction=sub_list[0],
                 to_junction=sub_list[1],
                 thermal_production_required=-Qh_demand1 / 2.0,
-                temperature_supply=DEFAULT_TEMPERATURE,                
+                temperature_supply=DEFAULT_TEMPERATURE,
                 internal_diameter=DEFAULT_DIAMETER,
                 pressure_supply=5.0,
                 control_mass_flow=control_mass_flow,
                 height_m=0.0,
             )
-        )        
+        )
     # Solve the network
     pp.pipeflow(net)
     production_cluster_list[0].get_output()
