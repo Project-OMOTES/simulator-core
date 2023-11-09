@@ -29,7 +29,7 @@ class Junction:
         pn_bar: float = 5.0,
         tfluid_k: float = 300.0,
         height_m: float = 0.0,
-        geodata: List[Any] = [None, None],
+        geodata: List[Any] = None,
         name: str = "None",
         in_service: bool = True,
         index: int = None,
