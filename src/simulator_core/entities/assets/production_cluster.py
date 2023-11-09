@@ -1,22 +1,20 @@
+from typing import Dict
+from warnings import warn
+
 import numpy as np
 import pandas as pd
 from pandapipes import pandapipesNet
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_DIAMETER, DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE, DEFAULT_TEMPERATURE_DIFFERENCE, PROPERTY_HEAT_DEMAND,
+    PROPERTY_TEMPERATURE_RETURN, PROPERTY_TEMPERATURE_SUPPLY)
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pump import CirculationPumpConstantMass
 from simulator_core.entities.assets.utils import \
     heat_demand_and_temperature_to_mass_flow
 from simulator_core.entities.assets.valve import ControlValve
-
-# TODO: Move this to a config file; but where?
-
-DEFAULT_DIAMETER = 1.2  # [m]
-DEFAULT_PRESSURE = 5.0  # [bar]
-DEFAULT_NET_PRESSURE = 10.0  # [bar]
-DEFAULT_TEMPERATURE = 300.0  # [K]
-DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
-DEFAULT_NODE_HEIGHT = 0.0  # [m]
 
 
 class ProductionCluster:
@@ -153,6 +151,83 @@ class ProductionCluster:
                 name=f"flow_control_{self.asset_name}",
             )
 
+    def _set_supply_temperature(self, temperature_supply: float) -> None:
+        """Set the supply temperature of the asset.
+
+        :param float temperature_supply: The supply temperature of the asset.
+            The temperature should be supplied in Kelvin.        
+        """
+        # Set the temperature of the circulation pump mass flow
+        self.temperature_supply = temperature_supply
+        # Retrieve the value array of the temperature
+        self.pandapipes_net['circ_pump_mass']['t_flow_k'][self._circ_pump.index] = self.temperature_supply
+
+    def _set_return_temperature(self, temperature_return: float) -> None:
+        """Set the return temperature of the asset.
+
+        :param float temperature_return: The return temperature of the asset.
+            The temperature should be supplied in Kelvin.        
+        """
+        # Set the return temperature of the asset
+        self.temperature_return = temperature_return
+
+    def _set_heat_demand(self, heat_demand: float) -> None:
+        """Set the heat demand of the asset.
+
+        :param float heat_demand: The heat demand of the asset.
+            The heat demand should be supplied in Watts.        
+        """
+        # Calculate the mass flow rate
+        self._controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
+            thermal_demand=heat_demand,
+            temperature_supply=self.temperature_supply,
+            temperature_return=self.temperature_return,
+            pandapipes_net=self.pandapipes_net,
+        )
+        # Check if the mass flow rate is positive
+        if self._controlled_mass_flow < 0:
+            raise ValueError(
+                f"The mass flow rate {self._controlled_mass_flow} of the asset {self.asset_name} is negative."
+            )
+        else:
+            # Set the mass flow rate of the circulation pump
+            self.pandapipes_net['circ_pump_mass']['mdot_flow_kg_per_s'][self._circ_pump.index] = self._controlled_mass_flow
+            # Set the mass flow rate of the control valve
+            self.pandapipes_net['flow_control']['controlled_mdot_kg_per_s'][self._flow_control.index] = self._controlled_mass_flow
+
+    def set_setpoints(self, setpoints: Dict) -> None:
+        """ Set the setpoints of the asset.
+
+        :param Dict setpoints: The setpoints of the asset in a dictionary, 
+            as "property_name": value pairs.
+        
+        """
+        # Default keys required
+        necessary_setpoints = set([
+            PROPERTY_TEMPERATURE_SUPPLY, 
+            PROPERTY_TEMPERATURE_RETURN, 
+            PROPERTY_HEAT_DEMAND
+        ])
+        # Dict to set
+        setpoints_set = set(setpoints.keys())
+        # Check if all setpoints are in the setpoints
+        if necessary_setpoints.issubset(setpoints_set):
+            # Set the setpoints
+            self._set_supply_temperature(setpoints[PROPERTY_TEMPERATURE_SUPPLY])
+            self._set_return_temperature(setpoints[PROPERTY_TEMPERATURE_RETURN])
+            self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
+            # Raise warning if there are more setpoints
+            if len(setpoints_set.difference(necessary_setpoints)) > 0:
+                warn(
+                    f"The setpoints {setpoints_set.difference(necessary_setpoints)}" +
+                    f" are not required for the asset {self.asset_name}."
+                )
+        else:
+            # Print missing setpoints
+            raise ValueError(
+                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
+            )
+                
 
     def get_output(self) -> pd.DataFrame:
         """Get the output of the asset."""
