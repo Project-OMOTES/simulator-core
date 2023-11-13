@@ -2,6 +2,7 @@
 import logging
 from esdl import esdl
 from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster, Pipe
+
 logger = logging.getLogger(__name__)
 
 
@@ -14,7 +15,6 @@ class EsdlAssetObject:
 
     esdl_asset: esdl.Asset
 
-
     def __init__(self, asset: esdl.Asset) -> None:
         """
         Constructor for EsdlAssetObject class.
@@ -22,4 +22,3 @@ class EsdlAssetObject:
         :param asset, esdl.Asset which os stored int hsi class for interaction.
         """
         self.esdl_asset = asset
-
