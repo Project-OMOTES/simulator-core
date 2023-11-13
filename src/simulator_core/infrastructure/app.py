@@ -18,7 +18,7 @@
 from simulator_core.entities import SimulationConfiguration
 from simulator_core.infrastructure.simulation_manager import SimulationManager
 from simulator_core.entities.esdl_object import EsdlObject
-from .utils import pyesdl_from_file
+from utils import pyesdl_from_file
 import sys
 import logging
 import traceback
@@ -44,4 +44,4 @@ def run(file_path: str = None):
 
 
 if __name__ == "__main__":
-    print(run())
+    print(run(r'd:\repos\NWN\simulator-core\testdata\test1.esdl'))

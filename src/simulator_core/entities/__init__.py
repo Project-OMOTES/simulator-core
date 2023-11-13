@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" __init__.py file for initialization code. """
+"""__init__.py file for initialization code."""
 
 from .network_controller import NetworkController
 from .heat_network import HeatNetwork
 from .simulation_configuration import SimulationConfiguration
-from .esdl_object import EsdlObject
+from .esdl_object import EsdlObject, EsdlAssetObject

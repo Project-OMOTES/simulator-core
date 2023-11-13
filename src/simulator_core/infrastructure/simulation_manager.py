@@ -16,7 +16,7 @@
 """ Simulation manager creates and controls the simulation objects."""
 
 from simulator_core.entities import EsdlObject, SimulationConfiguration
-from simulator_core.adapter.transforms import EsdlEnergySystemMapper, EsdlControllerMapper
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper, EsdlControllerMapper
 from simulator_core.simulation import NetworkSimulation
 import pandas as pd
 import numpy as np
@@ -30,8 +30,8 @@ class SimulationManager:
     def execute(self):
         # convert ESDL to Heat Network, NetworkController
 
-        network = EsdlEnergySystemMapper().to_entity(self.esdl.es)
-        controller = EsdlControllerMapper().to_entity(self.esdl.es)
+        network = EsdlEnergySystemMapper().to_entity(self.esdl)
+        controller = EsdlControllerMapper().to_entity(self.esdl)
 
         worker = NetworkSimulation(network, controller)
         worker.run(self.config)
