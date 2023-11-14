@@ -31,7 +31,8 @@ def run(file_path: str = None):
     config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                      name="test run",
                                      timestep=3600,
-                                     duration=3600 * 48)
+                                     start=0,
+                                     stop=3600 * 48)
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
     try:
