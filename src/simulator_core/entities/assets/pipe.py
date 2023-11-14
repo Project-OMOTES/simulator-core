@@ -29,7 +29,6 @@ class Pipe(AssetAbstract):
         """
         pass
 
-
     def _create(self) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass

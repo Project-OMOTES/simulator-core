@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Simulates an heat network for the specified duration."""
+"""Simulates an heat network for the specified duration."""
 
 from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
 import logging
@@ -57,10 +57,10 @@ class NetworkSimulation:
         # time loop
         for time in np.arange(self.config.start, self.config.stop, self.config.timestep):
             not_converged = True
+            controller_input = self.controller.run_time_step(time)
             while not_converged:
                 not_converged = False  # for the moment we do not check on convergence,
                 # to get stuff running. Also need to add break after 10 iteration.
                 logger.debug("Simulating for timestep " + str(time))
-                controller_input = self.controller.run_time_step(time)
                 self.network.run_time_step(time, controller_input)
             self.network.store_output()

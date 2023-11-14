@@ -13,15 +13,16 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Demand cluster asset."""
+"""Demand cluster asset."""
 
 from .asset_abstract import AssetAbstract
 from pandas import DataFrame
 from typing import Dict
+
+
 class DemandCluster(AssetAbstract):
     def __init__(self):
         pass
-
 
     def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -31,7 +32,6 @@ class DemandCluster(AssetAbstract):
         """
         pass
 
-
     def get_setpoints(self, **kwargs) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
@@ -40,7 +40,6 @@ class DemandCluster(AssetAbstract):
         """
         pass
 
-
     def simulation_performed(self) -> bool:
         """Placeholder to indicate that a simulation has been performed.
 
@@ -48,11 +47,9 @@ class DemandCluster(AssetAbstract):
         """
         pass
 
-
     def _create(self) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
-
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
@@ -61,7 +58,6 @@ class DemandCluster(AssetAbstract):
         represents the output of its asset for a specific timestep.
         """
         pass
-
 
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.

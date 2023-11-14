@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" NetworkController entity."""
+"""NetworkController entity."""
 
 
 class NetworkController:
@@ -21,7 +21,7 @@ class NetworkController:
         pass
 
     def run_time_step(self, time: float) -> dict:
-        """ Method to get the controller inputs for the network
+        """Method to get the controller inputs for the network.
 
         :param float time: Time step for which to run the controller.
         :return: dict with the key the asset id and the heat demand for that asset.
