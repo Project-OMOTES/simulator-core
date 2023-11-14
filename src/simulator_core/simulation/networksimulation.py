@@ -17,6 +17,7 @@
 
 from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

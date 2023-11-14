@@ -58,7 +58,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
     def to_entity(self, model: EsdlObject) -> NetworkController:
         # TODO
-        pass
+        return NetworkController()
 
 
 
