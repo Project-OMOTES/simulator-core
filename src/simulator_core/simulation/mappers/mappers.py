@@ -7,14 +7,11 @@ EsdlAsset = TypeVar("EsdlAsset")
 
 
 class EsdlMapperAbstract(ABC, Generic[Entity, EsdlAsset]):
-    #Abstract class to be used for deriving mapper classes from esdl to our own classes.
+    # Abstract class to be used for deriving mapper classes from esdl to our own classes.
     @abstractmethod
     def to_esdl(self, entity: Entity) -> EsdlAsset:
         """Map an Entity to a EsdlAsset"""
 
     @abstractmethod
-    def to_entity(self, model: EsdlAsset) -> Entity:
+    def to_entity(self, model: EsdlAsset, **kwargs) -> Entity:
         """Map am esdl asset  to an Entity"""
-
-
-

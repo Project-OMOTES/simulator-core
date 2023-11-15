@@ -48,7 +48,6 @@ class ProductionCluster(AssetAbstract):
 
     def __init__(
         self,
-        pandapipes_net: pandapipesNet,
         asset_name: str,
         asset_id: str,
         from_junction: Junction,
@@ -91,7 +90,7 @@ class ProductionCluster(AssetAbstract):
             of the asset is floating.
         """
         # Define the pandapipes network
-        self.pandapipes_net = pandapipes_net
+        self.pandapipes_net = None
         # Define the asset properties
         self.asset_name = asset_name
         self.asset_id = asset_id
@@ -111,15 +110,15 @@ class ProductionCluster(AssetAbstract):
         # DemandCluster pressure specifications
         self.pressure_supply = pressure_supply
         self.control_mass_flow = control_mass_flow
-        self._controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=self.thermal_production_required,
-            temperature_supply=self.temperature_supply,
-            temperature_return=self.temperature_return,
-            pandapipes_net=self.pandapipes_net,
-        )
+#        self._controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
+#            thermal_demand=self.thermal_production_required,
+#            temperature_supply=self.temperature_supply,
+#            temperature_return=self.temperature_return,
+#            pandapipes_net=self.pandapipes_net,
+#        )
         # Objects of the asset
         self._initialized = False
-        self._create()
+        #self._create()
 
         # Output list
         self.output = []

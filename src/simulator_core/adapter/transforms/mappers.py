@@ -44,7 +44,11 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         # create junctions
         # create assets
         # create connection between them
-        assets_list = [EsdlAssetMapper().to_entity(x)
+
+        assets_list = [EsdlAssetMapper().to_entity(x,
+                                                   from_junction=None,
+                                                   to_junction=None, thermal_production=0.0,
+                                                   temperature_supply=0.0)
                        for x in model.get_all_assets_of_type('asset')]
         junction_list = model.get_all_assets_of_type('junction')
         return HeatNetwork(assets_list, junction_list)
@@ -61,10 +65,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         pass
 
 
-
 class ProductionAssetMapper(EsdlAssetMapper):
 
     def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
         pass
-
-

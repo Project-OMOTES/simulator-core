@@ -17,10 +17,31 @@
 from .asset_abstract import AssetAbstract
 from typing import Dict
 from pandas import DataFrame
-
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_DIAMETER,
+    DEFAULT_NODE_HEIGHT,
+    DEFAULT_PRESSURE
+)
+from simulator_core.entities.assets.junction import Junction
+from pandapipes import pandapipesNet
+import numpy as np
 
 class Pipe(AssetAbstract):
-    def __init__(self):
+    def __init__(
+            self,
+            asset_name: str,
+            asset_id: str,
+            from_junction: Junction,
+            to_junction: Junction,
+            thermal_production_required: float,
+            temperature_supply: float,
+            temperature_return: float = np.NaN,
+            height_m: float = DEFAULT_NODE_HEIGHT,
+            internal_diameter: float = DEFAULT_DIAMETER,
+            pressure_supply: float = DEFAULT_PRESSURE,
+            control_mass_flow: bool = False,
+    ):
         pass
 
     def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
