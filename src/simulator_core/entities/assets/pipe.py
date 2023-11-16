@@ -1,3 +1,4 @@
+"""Module containing pipe class."""
 #  Copyright (c) 2023. Deltares & TNO
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -14,28 +15,33 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from .asset_abstract import AssetAbstract
 from typing import Dict
 from pandas import DataFrame
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_DIAMETER,
-    DEFAULT_NODE_HEIGHT,
-    DEFAULT_PRESSURE
-)
-from simulator_core.entities.assets.junction import Junction
-from pandapipes import pandapipesNet
-import numpy as np
+
 
 class Pipe(AssetAbstract):
+    """A class representing a pipe in a heat network."""
+
     def __init__(
             self,
             asset_name: str,
             asset_id: str,
     ):
+        """Initialize a Pipe object.
+
+        :param str asset_name: The name of the asset.
+        :param str asset_id: The unique identifier of the asset.
+        """
         super().__init__(asset_name, asset_id)
 
     def add_physical_data(self, data: Dict[str, float]):
+        """Method to add physical data to the asset.
+
+        :param dict data:dictionary containing the data to be added the asset. The key is the name
+                        of the property, the value of the dict is the value of the property.
+        :return:
+        """
         pass
 
     def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
