@@ -13,10 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" NetworkController entity."""
+"""NetworkController entity."""
 
 
 class NetworkController:
+    """Class to store the network controller."""
+
     def __init__(self):
         pass
 
