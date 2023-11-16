@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Esdl asset wrapper class."""
+"""Esdl asset wrapper class."""
 
 from esdl import esdl
 from esdl.esdl_handler import EnergySystemHandler
@@ -54,7 +54,7 @@ class EsdlObject:
                 for asset in self.energy_system_handler.get_all_instances_of_type(
                 StringEsdlAssetMapper().to_esdl(esdl_asset_type))]
 
-    def get_connected_assets(self, id: str, port: Port) -> List[Tuple[str, float]]:
+    def get_connected_assets(self, id: str, port: Port) -> List[Tuple[str, Port]]:
         """Method to get the id's of connected assets from the esdl.
 
         This returns a list of list with the connected asset id and the port to which it is
@@ -69,6 +69,7 @@ class EsdlObject:
         type_port = esdl.InPort
         if port == Port.Out:
             type_port = esdl.OutPort
+        connected_port_ids = []
         for esdl_port in esdl_asset.port:
             if isinstance(esdl_port, type_port):
                 connected_port_ids = esdl_port.connectedTo
@@ -77,5 +78,5 @@ class EsdlObject:
             connected_port_type = Port.In
             if isinstance(connected_port_id, esdl.OutPort):
                 connected_port_type = Port.Out
-            connected_assets.append([connected_port_id.energyasset.id, connected_port_type])
+            connected_assets.append((connected_port_id.energyasset.id, connected_port_type))
         return connected_assets
