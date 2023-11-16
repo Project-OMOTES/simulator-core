@@ -17,16 +17,11 @@
 from typing import Dict
 from warnings import warn
 
-import numpy as np
 
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_DIAMETER,
-    DEFAULT_NODE_HEIGHT,
-    DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
@@ -46,10 +41,7 @@ from simulator_core.entities.assets.valve import ControlValve
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
 
-    def __init__(
-        self,
-        asset_name: str,
-        asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
@@ -70,6 +62,12 @@ class ProductionCluster(AssetAbstract):
         self.output = []
 
     def add_physical_data(self, data: Dict[str, float]):
+        """Method to add physical data to the asset.
+
+        :param dict data:dictionary containing the data to be added the asset. The key is the name
+                        of the property, the value of the dict is the value of the property.
+        :return:
+        """
         pass
 
     def _create(self) -> None:
