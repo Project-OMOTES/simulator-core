@@ -19,10 +19,27 @@ from abc import ABC, abstractmethod
 from typing import Dict
 
 from pandas import DataFrame
+from typing import TypeVar
+
+Junction_type = TypeVar("Junction")
 
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
+
+    from_junction: Junction_type | None
+    to_junction: Junction_type | None
+
+    def __init__(self, asset_name: str, asset_id: str):
+        """Basic constructor for asset objects.
+
+        :param str asset_name: The name of the asset.
+        :param str asset_id: The unique identifier of the asset.
+        """
+        self.from_junction = None
+        self.to_junction = None
+        self.name = asset_name
+        self.id = asset_id
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
@@ -54,6 +71,21 @@ class AssetAbstract(ABC):
     def _create(self) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
+
+    @abstractmethod
+    def add_physical_data(self, data: Dict[str, float]):
+        """Placeholder method to add physical data to an asset."""
+        pass
+
+    def connect_junctions(self, from_junction, to_junction):
+        """Method to connect junctions to a asset.
+
+        :param Junction from_junction: The junction where the asset starts.
+        :param Junction to_junction: The junction where the asset end.
+        :return:
+        """
+        self.from_junction = from_junction
+        self.to_junction = to_junction
 
     @abstractmethod
     def write_to_output(self) -> None:
