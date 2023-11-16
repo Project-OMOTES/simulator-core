@@ -16,10 +16,10 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict
-
+from typing import Dict, TypeVar
+from pandapipes import pandapipesNet
 from pandas import DataFrame
-from typing import TypeVar
+
 
 Junction_type = TypeVar("Junction")
 
@@ -29,6 +29,7 @@ class AssetAbstract(ABC):
 
     from_junction: Junction_type | None
     to_junction: Junction_type | None
+    pandapipes_net: pandapipesNet | None
 
     def __init__(self, asset_name: str, asset_id: str):
         """Basic constructor for asset objects.
@@ -38,6 +39,8 @@ class AssetAbstract(ABC):
         """
         self.from_junction = None
         self.to_junction = None
+        # Define the pandapipes network
+        self.pandapipes_net = None
         self.name = asset_name
         self.id = asset_id
 
