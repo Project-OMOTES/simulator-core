@@ -22,7 +22,7 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlAssetObject, **kwargs) -> AssetAbstract:
+    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
