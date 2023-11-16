@@ -12,7 +12,7 @@ from simulator_core.entities.assets.utils import Port
 class EsdlObjectTest(unittest.TestCase):
 
     def setUp(self):
-        esdl_file_path = r'.\..\..\testdata\test1.esdl'
+        esdl_file_path = r'.\testdata\test1.esdl'
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
@@ -50,8 +50,8 @@ class EsdlObjectTest(unittest.TestCase):
     def test_get_connected_assets(self):
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type('producer')[0].esdl_asset
-        test_list1 = [['Pipe1_ret', Port.Out]]
-        test_list2 = [['Pipe1', Port.In]]
+        test_list1 = [('Pipe1_ret', Port.Out)]
+        test_list2 = [('Pipe1', Port.In)]
         # Act
         connected_assets1 = self.esdl_object.get_connected_assets(asset.id, Port.In)
         connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)

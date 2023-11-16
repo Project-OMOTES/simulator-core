@@ -24,9 +24,10 @@ class HeatNetworkTest(unittest.TestCase):
     def test_heat_network(self) -> None:
         """Generic/template test for Heatnetwork."""
         # Arrange
-
+        assets = []
+        junctions = []
         # Act
-        result = HeatNetwork()
+        result = HeatNetwork(assets, junctions)
 
         # Assert
         assert isinstance(result, simulator_core.entities.heat_network.HeatNetwork)

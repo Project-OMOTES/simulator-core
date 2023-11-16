@@ -23,7 +23,7 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
 
     def test_to_entity(self):
         # act
-        esdl_file_path = r'.\..\..\testdata\test1.esdl'
+        esdl_file_path = r'.\testdata\test1.esdl'
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # arrange
         network = EsdlEnergySystemMapper().to_entity(esdl_object)
