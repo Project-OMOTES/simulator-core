@@ -37,7 +37,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
-        to create the Heatnetwork object.
+        to create and return the Heatnetwork object.
         """
         assets_list = [EsdlAssetMapper().to_entity(asset)
                        for asset in model.get_all_assets_of_type('asset')]
