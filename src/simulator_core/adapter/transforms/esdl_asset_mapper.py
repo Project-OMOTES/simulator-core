@@ -31,8 +31,4 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         if not type(model.esdl_asset) in self.conversion_dict:
             raise NotImplementedError(str(model.esdl_asset) + ' not implemented in conversion')
         return self.conversion_dict[type(model.esdl_asset)](model.esdl_asset.name,
-                                                            model.esdl_asset.id,
-                                                            kwargs['from_junction'],
-                                                            kwargs['to_junction'],
-                                                            kwargs['thermal_production'],
-                                                            kwargs['temperature_supply'])
+                                                            model.esdl_asset.id)
