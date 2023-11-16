@@ -4,7 +4,8 @@ from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from simulator_core.infrastructure.utils import pyesdl_from_file
 import unittest
-from simulator_core.entities.assets import  DemandCluster, ProductionCluster, Pipe
+from simulator_core.entities.assets import DemandCluster, ProductionCluster, Pipe
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from src.simulator_core.entities.assets.utils import Port
 
 class EsdlObjectTest(unittest.TestCase):
@@ -37,9 +38,9 @@ class EsdlObjectTest(unittest.TestCase):
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
         # Act
-        asset_producer = producers[0].convert_esdl()
-        asset_consumer = consumers[0].convert_esdl()
-        asset_pipe = pipes[0].convert_esdl()
+        asset_producer = EsdlAssetMapper().to_entity(producers[0])
+        asset_consumer = EsdlAssetMapper().to_entity(consumers[0])
+        asset_pipe = EsdlAssetMapper().to_entity(pipes[0])
         # Assert
         self.assertTrue(isinstance(asset_producer, ProductionCluster))
         self.assertTrue(isinstance(asset_consumer, DemandCluster))
