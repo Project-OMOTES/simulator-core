@@ -16,13 +16,13 @@
 """ Mapper classes."""
 
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets import AssetAbstract, ProductionCluster, EsdlAssetObject
+from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject, Junction
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-
 from typing import Any
+from simulator_core.entities.assets.utils import Port
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -39,15 +39,26 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
         """
-        # TODO
-        # convert esdl network to heat network
-        # create junctions
-        # create assets
-        # create connection between them
-
         assets_list = [EsdlAssetMapper().to_entity(asset)
                        for asset in model.get_all_assets_of_type('asset')]
-        junction_list = model.get_all_assets_of_type('junction')
+        # loop over assets and create junctions and connect them
+        junction_list = []
+        for asset in assets_list:
+            if asset.from_junction is None:
+                junction = Junction()
+                asset.from_junction = junction
+                connected_assets = model.get_connected_assets(asset.id, Port.In)
+                # get connected assets and connect them to this junction
+            if asset.to_junction is None:
+                junction = Junction()
+                asset.to_junction = junction
+                connected_assets = model.get_connected_assets(asset.id, Port.Out)
+            for connected_asset in connected_assets:
+                if connected_asset[1] == Port.In:  # from
+                    connected_asset[0].from_junction = junction
+                else:  # to
+                    connected_asset[0].to_junction = junction
+            junction_list.append(junction)
         return HeatNetwork(assets_list, junction_list)
 
 
