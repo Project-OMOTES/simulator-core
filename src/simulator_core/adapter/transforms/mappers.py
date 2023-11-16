@@ -54,10 +54,11 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 asset.to_junction = junction
                 connected_assets = model.get_connected_assets(asset.id, Port.Out)
             for connected_asset in connected_assets:
+                index = [asset.id for asset in assets_list].index(connected_asset[0])
                 if connected_asset[1] == Port.In:  # from
-                    connected_asset[0].from_junction = junction
+                    assets_list[index].from_junction = junction
                 else:  # to
-                    connected_asset[0].to_junction = junction
+                    assets_list[index].to_junction = junction
             junction_list.append(junction)
         return HeatNetwork(assets_list, junction_list)
 

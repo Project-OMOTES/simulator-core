@@ -44,7 +44,6 @@ class Junction:
         self.index = index
         # Initialize the junction
         self._initialized = False
-        self._create()
 
     def _create(self) -> None:
         """Register the junction in the pandapipes network."""
