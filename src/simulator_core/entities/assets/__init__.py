@@ -20,3 +20,4 @@ from .demand_cluster import DemandCluster
 from .production_cluster import ProductionCluster
 from .pipe import Pipe
 from .esdl_asset_object import EsdlAssetObject
+from .junction import Junction
