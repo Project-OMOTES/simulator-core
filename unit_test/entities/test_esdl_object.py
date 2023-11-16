@@ -6,7 +6,8 @@ from simulator_core.infrastructure.utils import pyesdl_from_file
 import unittest
 from simulator_core.entities.assets import DemandCluster, ProductionCluster, Pipe
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from src.simulator_core.entities.assets.utils import Port
+from simulator_core.entities.assets.utils import Port
+
 
 class EsdlObjectTest(unittest.TestCase):
 

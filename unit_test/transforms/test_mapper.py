@@ -13,13 +13,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" HeatNetwork entity class."""
+import unittest
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
+class EsdlEnergySystemMapperTest(unittest.TestCase):
 
-class HeatNetwork:
-    def __init__(self, asset_list: list[AssetAbstract], junction_list: list[AssetAbstract]):
-        self.assets = asset_list
-        self.junctions = junction_list
+    def test_to_entity(self):
+        # act
+        esdl_file_path = r'.\..\..\testdata\test1.esdl'
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        # arrange
+        network = EsdlEnergySystemMapper().to_entity(esdl_object)
+        # assert
+        self.assertTrue(True)
+        self.assertEquals(len(network.assets), 4)
+        self.assertEquals(len(network.junctions), 4)
 
