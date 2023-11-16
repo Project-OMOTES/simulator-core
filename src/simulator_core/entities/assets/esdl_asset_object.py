@@ -6,6 +6,19 @@ from simulator_core.entities.assets import AssetAbstract, DemandCluster, Product
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class EsdlKey:
+    name: str
+    default: any
+
+
+ASSET_DICT = {
+    "producer": {
+        "heating demand": EsdlKey(name="power", default=0.0),
+    },
+}
+
+
 class EsdlAssetObject:
     """
     Class to hold an esdl asset and convert it to local class objects.
