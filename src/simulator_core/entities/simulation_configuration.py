@@ -23,5 +23,6 @@ import uuid
 class SimulationConfiguration:
     simulation_id: uuid.UUID
     name: str
-    timestep: float
-    duration: float
+    timestep: int
+    start: int
+    stop: int

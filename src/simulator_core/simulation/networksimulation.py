@@ -15,9 +15,10 @@
 
 """ Simulates an heat network for the specified duration."""
 
-from simulator_core.entities.heat_network import HeatNetwork
-from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class NetworkSimulation:
@@ -33,4 +34,16 @@ class NetworkSimulation:
         """Run the simulation.
 
         :param SimulationConfiguration"""
-        self.config = config
+        self.config = config  # Why do we store it in here?
+
+        # time loop
+        for time in range(self.config.start, self.config.stop, self.config.timestep):
+            not_converged = True
+            controller_input = self.controller.run_time_step(time)
+            while not_converged:
+                not_converged = False  # for the moment we do not check on convergence,
+                # to get stuff running. Also need to add break after 10 iteration.
+                logger.debug("Simulating for timestep " + str(time))
+                self.network.run_time_step(time, controller_input)
+            self.network.store_output()
+
