@@ -51,9 +51,30 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(asset_consumer, DemandCluster))
         self.assertTrue(isinstance(asset_pipe, Pipe))
 
+    def test_get_asset_parameters(self):
+        # Arrange
+        producers = self.esdl_object.get_all_assets_of_type("producer")
+        # Act
+        producer_parameters = producers[0].get_asset_parameters()
+        # Assert
+        self.assertTrue(producer_parameters["heating demand"] == producers[0].esdl_asset.power)
+
+    def test_missing_esdl_asset_parameters(self):
+        # Arrange
+        producer = self.esdl_object.get_all_assets_of_type("producer")[0]
+        producer.asset_specific_parameters["heating demand extra"] = EsdlKey(
+            name="heating demand extra", default=10.0
+        )
+        # Act
+        producer_parameters = producer.get_asset_parameters()
+        # Assert
+        self.assertTrue(
+            producer_parameters["heating demand extra"]
+            == producer.asset_specific_parameters["heating demand extra"].default
+        )
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
-
     def setUp(self) -> None:
         self.asset = esdl.Asset
         self.producer = esdl.Producer

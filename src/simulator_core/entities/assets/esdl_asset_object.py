@@ -11,6 +11,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class EsdlKey:
+    """Class to hold the name and default value of an esdl key.
+
+    :param name: str the name of the key
+    :param default: any the default value of the key
+    """
+
     name: str
     default: any
 
@@ -18,6 +24,19 @@ class EsdlKey:
 ASSET_DICT = {
     "producer": {
         "heating demand": EsdlKey(name="power", default=0.0),
+    },
+    "consumer": {
+        "heating demand": EsdlKey(name="power", default=0.0),
+        "maximum temperature": EsdlKey(name="maximumTemperature", default=0.0),
+        "minimum temperature": EsdlKey(name="minimumTemperature", default=0.0),
+    },
+    "pipe": {
+        "length": EsdlKey(name="length", default=0.0),
+        "roughness": EsdlKey(name="roughness", default=0.0),
+        "diameter": EsdlKey(name="diameter", default=0.0),
+        "inner diameter": EsdlKey(name="innerDiameter", default=0.0),
+        "outer diameter": EsdlKey(name="outerDiameter", default=0.0),
+        "material": EsdlKey(name="material", default=""),
     },
 }
 
@@ -35,20 +54,19 @@ class EsdlAssetObject:
         """
         Constructor for EsdlAssetObject class.
 
-        :param asset, esdl.Asset which os stored int hsi class for interaction.
+        :param asset, esdl.Asset: PyEsdl Asset object
         """
         self.esdl_asset = asset
+        self.asset_specific_parameters = self.get_property_dict_for_asset()
 
-    def get_property_dict_for_asset(self, asset_type: type) -> dict:
+    def get_property_dict_for_asset(self) -> dict:
         """
         Get the properties of the ESDL asset required for the simulation.
 
-        :param asset_type: type of the asset
         :return: dict of properties
         """
-        # Retrieve NWN string from ESDL asset type
-        asset_type_string = StringEsdlAssetMapper().to_entity(asset_type)
-        # Retrieve the properties from the asset
+        # Retrieve the entinty type of the asset
+        asset_type_string = StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
         return ASSET_DICT[asset_type_string]
 
     def get_asset_parameters(self) -> dict:
@@ -57,13 +75,8 @@ class EsdlAssetObject:
 
         :return: dict of parameters
         """
-        # Retrieve the asset specific parameter dictionary
-        asset_specific_parameter = self.get_property_dict_for_asset(
-            asset_type=type(self.esdl_asset)
-        )
-        # Retrieve the parameters from the asset
         parameters = {}
-        for parameter_key, esdl_key in asset_specific_parameter.items():
+        for parameter_key, esdl_key in self.asset_specific_parameters.items():
             try:
                 parameters[parameter_key] = getattr(self.esdl_asset, esdl_key.name)
             except AttributeError:
