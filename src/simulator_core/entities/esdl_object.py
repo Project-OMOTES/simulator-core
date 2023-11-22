@@ -15,11 +15,13 @@
 
 """ Esdl asset wrapper class."""
 
+import logging
+
 from esdl import esdl
 from esdl.esdl_handler import EnergySystemHandler
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-import logging
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +50,9 @@ class EsdlObject:
         If the type is not found an empty list is returned.
         :param esdl_asset_type: str of the asset type assets need to be gathered.
         """
-        return [EsdlAssetObject(asset)
-                for asset in self.energy_system_handler.get_all_instances_of_type(
-                StringEsdlAssetMapper().to_esdl(esdl_asset_type))]
+        return [
+            EsdlAssetObject(asset)
+            for asset in self.energy_system_handler.get_all_instances_of_type(
+                StringEsdlAssetMapper().to_esdl(esdl_asset_type)
+            )
+        ]

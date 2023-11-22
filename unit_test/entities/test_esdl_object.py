@@ -1,28 +1,34 @@
+import os
+import unittest
+
 import esdl
 
-from simulator_core.entities.esdl_object import EsdlObject, EsdlAssetObject
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.demand_cluster import DemandCluster
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject, EsdlKey
+from simulator_core.entities.assets.pipe import Pipe
+from simulator_core.entities.assets.production_cluster import ProductionCluster
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-import unittest
-from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster, Pipe
 
 
 class EsdlObjectTest(unittest.TestCase):
-
     def setUp(self):
-        esdl_file_path = r'.\..\..\testdata\test1.esdl'
+        esdl_file_path = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), r".\..\..\testdata\test1.esdl")
+        )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
         # Arrange
-        producer = 'producer'
-        consumer = 'consumer'
-        pipe = 'pipe'
+        producer = "producer"
+        consumer = "consumer"
+        pipe = "pipe"
         # Act
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
-
         # Assert
         self.assertEqual(len(producers), 1)
         self.assertEqual(len(consumers), 1)
@@ -30,9 +36,9 @@ class EsdlObjectTest(unittest.TestCase):
 
     def test_EsdlAssetObject(self):
         # Arrange
-        producer = 'producer'
-        consumer = 'consumer'
-        pipe = 'pipe'
+        producer = "producer"
+        consumer = "consumer"
+        pipe = "pipe"
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)

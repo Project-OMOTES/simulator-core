@@ -1,7 +1,10 @@
 """Module containing classes to be able to interact with esdl objects."""
 import logging
+from dataclasses import dataclass
+
 from esdl import esdl
-from simulator_core.entities.assets import AssetAbstract, DemandCluster, ProductionCluster, Pipe
+
+from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 
 logger = logging.getLogger(__name__)
 
