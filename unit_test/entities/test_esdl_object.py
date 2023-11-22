@@ -4,9 +4,8 @@ import unittest
 import esdl
 
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.demand_cluster import DemandCluster
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject, EsdlKey
+from simulator_core.entities.assets.esdl_asset_object import EsdlKey
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.esdl_object import EsdlObject

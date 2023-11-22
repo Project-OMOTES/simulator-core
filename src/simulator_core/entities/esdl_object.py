@@ -17,7 +17,6 @@
 
 import logging
 
-from esdl import esdl
 from esdl.esdl_handler import EnergySystemHandler
 
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
