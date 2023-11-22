@@ -15,7 +15,7 @@ from simulator_core.infrastructure.utils import pyesdl_from_file
 class EsdlObjectTest(unittest.TestCase):
     def setUp(self):
         esdl_file_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), r".\..\..\testdata\test1.esdl")
+            os.path.join(os.path.dirname(__file__), r"..\..\testdata\test1.esdl")
         )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
