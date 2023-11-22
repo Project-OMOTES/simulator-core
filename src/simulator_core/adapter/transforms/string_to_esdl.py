@@ -8,15 +8,28 @@ class StringEsdlAssetMapper:
     Please note that the str_to_type_dict needs to have unique keys and values.
     """
 
+    type_to_str_dict = {
+        esdl.Asset: "asset",
+        esdl.Producer: "producer",
+        esdl.GenericProducer: "producer",
+        esdl.Consumer: "consumer",
+        esdl.HeatingDemand: "consumer",
+        esdl.GeothermalSource: "geothermal",
+        esdl.Conversion: "conversion",
+        esdl.Pipe: "pipe",
+        esdl.Transport: "transport",
+        esdl.Joint: "junction",
+    }
+
     str_to_type_dict = {
-        'asset': esdl.Asset,
-        'producer': esdl.Producer,
-        'consumer': esdl.Consumer,
-        'geothermal': esdl.GeothermalSource,
-        'conversion': esdl.Conversion,
-        'pipe': esdl.Pipe,
-        'transport': esdl.Transport,
-        'junction': esdl.Joint
+        "asset": esdl.Asset,
+        "producer": esdl.Producer,
+        "consumer": esdl.Consumer,
+        "geothermal": esdl.GeothermalSource,
+        "conversion": esdl.Conversion,
+        "pipe": esdl.Pipe,
+        "transport": esdl.Transport,
+        "junction": esdl.Joint,
     }
 
     def to_esdl(self, entity: str) -> type:
@@ -37,9 +50,8 @@ class StringEsdlAssetMapper:
         :param type entity: ESDl object clas to be converted to a string
         :return: str belonging to the entity.
         """
-        try:
-            index = list(self.str_to_type_dict.values()).index(entity)
-        except ValueError:
-            raise NotImplementedError(str(entity) + " not implemented in StringESDLAssetMapper "
-                                                    "class")
-        return list(self.str_to_type_dict.keys())[index]
+        if entity not in self.type_to_str_dict:
+            raise NotImplementedError(
+                str(entity) + " not implemented in StringESDLAssetMapper class"
+            )
+        return self.type_to_str_dict[entity]
