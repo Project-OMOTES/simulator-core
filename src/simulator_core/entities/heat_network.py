@@ -19,9 +19,14 @@ from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
 class HeatNetwork:
-    """Heat network class to be used to store the data of a heat network."""
+    """Class to store information on the heat network."""
 
     def __init__(self, asset_list: list[AssetAbstract], junction_list: list[AssetAbstract]):
+        """Constructor of heat network class.
+
+        :param list[AssetAbstract] asset_list: List with assets in the network
+        :param list[AssetAbstract] junction_list: List with junction in the network.
+        """
         pass
 
     def run_time_step(self, time: float, controller_input: dict):

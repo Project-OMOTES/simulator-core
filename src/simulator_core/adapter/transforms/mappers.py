@@ -16,11 +16,12 @@
 """Mapper classes."""
 
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject, Junction
+from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+
 from typing import Any
 from simulator_core.entities.assets.utils import Port
 

@@ -20,6 +20,7 @@ class NetworkController:
     """Class to store the network controller."""
 
     def __init__(self):
+        """Constructor for controller for a heat network."""
         pass
 
     def run_time_step(self, time: float) -> dict:
