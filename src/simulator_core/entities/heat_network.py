@@ -13,13 +13,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" HeatNetwork entity class."""
+"""HeatNetwork entity class."""
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
 class HeatNetwork:
+    """Class to store information on the heat network."""
+
     def __init__(self, asset_list: list[AssetAbstract], junction_list: list[AssetAbstract]):
+        """Constructor of heat network class.
+
+        :param list[AssetAbstract] asset_list: List with assets in the network
+        :param list[AssetAbstract] junction_list: List with junction in the network.
+        """
         pass
 
     def run_time_step(self, time: float, controller_input: dict):
