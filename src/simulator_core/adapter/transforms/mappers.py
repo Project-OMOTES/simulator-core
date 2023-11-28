@@ -23,7 +23,6 @@ from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 
 
-
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a Heatnetwork entity object based on a PyESDL EnergySystem object."""
 
