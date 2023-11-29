@@ -45,9 +45,10 @@ class Junction:
         # Initialize the junction
         self._initialized = False
 
-    def _create(self) -> None:
+    def create(self, pandapipes_net: pandapipesNet) -> None:
         """Register the junction in the pandapipes network."""
         if not self._initialized:
+            self.pandapipes_net = pandapipes_net
             self._initialized = True
             self.index = create_junction(
                 net=self.pandapipes_net,

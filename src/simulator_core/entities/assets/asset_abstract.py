@@ -71,7 +71,7 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def _create(self) -> None:
+    def create(self, pandapipes_net: pandapipesNet) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
 
