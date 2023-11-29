@@ -26,16 +26,15 @@ class NetworkSimulation:
 
     def __init__(self, network: HeatNetwork, controller: NetworkController):
         """Instantiate the NetworkSimulation object."""
-        self.config = None
         self.network = network
         self.controller = controller
+        self.output = []
 
     def run(self, config: SimulationConfiguration):
         """Run the simulation.
 
         :param SimulationConfiguration config: Configuration to run the simulation with.
         """
-
         # time loop
         for time in range(config.start, config.stop, config.timestep):
             not_converged = True
@@ -45,4 +44,4 @@ class NetworkSimulation:
                 # to get stuff running. Also need to add break after 10 iteration.
                 logger.debug("Simulating for timestep " + str(time))
                 self.network.run_time_step(time, controller_input)
-            self.network.store_output()
+            self.output.append(self.network.store_output())
