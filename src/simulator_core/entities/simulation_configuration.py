@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Configuration parameters for the simulation that are not included in the ESDL."""
+"""Configuration parameters for the simulation that are not included in the ESDL."""
 
 from dataclasses import dataclass
 import uuid
