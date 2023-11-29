@@ -18,7 +18,7 @@
 from simulator_core.entities import SimulationConfiguration
 from simulator_core.infrastructure.simulation_manager import SimulationManager
 from simulator_core.entities.esdl_object import EsdlObject
-from utils import pyesdl_from_file
+from simulator_core.infrastructure.utils import pyesdl_from_file
 import sys
 import logging
 import traceback
