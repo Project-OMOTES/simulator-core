@@ -35,10 +35,9 @@ class NetworkSimulation:
 
         :param SimulationConfiguration config: Configuration to run the simulation with.
         """
-        self.config = config  # Why do we store it in here?
 
         # time loop
-        for time in range(self.config.start, self.config.stop, self.config.timestep):
+        for time in range(config.start, config.stop, config.timestep):
             not_converged = True
             controller_input = self.controller.run_time_step(time)
             while not_converged:
