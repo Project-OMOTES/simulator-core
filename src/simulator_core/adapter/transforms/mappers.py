@@ -29,15 +29,22 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a Heatnetwork entity object based on a PyESDL EnergySystem object."""
 
     def to_esdl(self, entity: HeatNetwork) -> EsdlObject:
+        """Method to convert a HeatNetwork object back to an esdlobject.
+
+        For now this method is not implemented.
+        :param HeatNetwork entity: HeatNetwork object to be converted to esdl object
+        :return: EsdlObject, which is the converted HeatNetwork object.
+        """
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
     def to_entity(self, model: EsdlObject) -> HeatNetwork:
-        """
-        Method to convert esdl to Heatnetwork object.
+        """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
-        to create and return the Heatnetwork object.
+        to create the Heatnetwork object.
+        :param EsdlObject entity: EsdlObject object to be converted to HeatNetwork object
+        :return: HeatNetwork, which is the converted EsdlObject object.
         """
         assets_list = [EsdlAssetMapper().to_entity(asset)
                        for asset in model.get_all_assets_of_type('asset')]
@@ -67,13 +74,33 @@ class EsdlControllerMapper(EsdlMapperAbstract):
     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
+        """Method to convert a NetworkController object to an esdlobject.
+
+        For now this method is not implemented.
+        :param NetworkController entity: NetworkController object to be converted to esdl object
+        :return: EsdlObject, which is the converted NetworkController object.
+        """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
     def to_entity(self, model: EsdlObject) -> NetworkController:
-        # TODO
+        """Method to convert esdl to NetworkController object.
+
+        This method first converts all assets into a list of assets.
+        Next to this a list of Junctions is created. This is then used
+        to create the NetworkController object.
+        :param EsdlObject entity: EsdlObject object to be converted to NetworkController object
+        :return: NetworkController, which is the converted EsdlObject object.
+        """
         return NetworkController()
 
 
 class ProductionAssetMapper(EsdlAssetMapper):
+    """Class to convert ESDL Production cluster asset to a ProductionClusterObject."""
+
     def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
+        """Method to convert Esdl asset ot a production cluster object.
+
+        :param EsdlAssetObject model: Asset ot be converted
+        :return: ProductionCluster, converted object.
+        """
         pass
