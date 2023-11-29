@@ -10,7 +10,7 @@ from simulator_core.entities.assets import AssetAbstract, DemandCluster, Product
 class EsdlObjectTest(unittest.TestCase):
 
     def setUp(self):
-        esdl_file_path = r'.\..\..\testdata\test1.esdl'
+        esdl_file_path = r'.\testdata\test1.esdl'
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
