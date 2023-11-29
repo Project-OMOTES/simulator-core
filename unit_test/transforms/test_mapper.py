@@ -17,6 +17,7 @@ import unittest
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
+from simulator_core.entities.heat_network import HeatNetwork
 
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
@@ -28,7 +29,7 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         # arrange
         network = EsdlEnergySystemMapper().to_entity(esdl_object)
         # assert
-        self.assertTrue(True)
+        self.assertIsInstance(network, HeatNetwork)
         self.assertEquals(len(network.assets), 4)
         self.assertEquals(len(network.junctions), 4)
 
