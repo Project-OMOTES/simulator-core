@@ -14,18 +14,27 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Mapper classes."""
-
+from pandapipes import pandapipesNet
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.entities.assets import EsdlAssetObject, Junction, ProductionCluster
+from simulator_core.entities.assets import (EsdlAssetObject, Junction, ProductionCluster,
+                                            AssetAbstract)
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+from typing import List, Tuple
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
-    """Creates a Heatnetwork entity object based on a PyESDL EnergySystem object."""
+    """Creates a HeatNetwork entity object based on a PyESDL EnergySystem object."""
+
+    def __init__(self, esdl_object: EsdlObject):
+        """Constructor for esdl to heat network mapper.
+
+        :param esdl_object: Esdl object to be converted to a Heatnetwork
+        """
+        self.esdl_object = esdl_object
 
     def to_esdl(self, entity: HeatNetwork) -> EsdlObject:
         """Method to convert a HeatNetwork object back to an esdlobject.
@@ -36,17 +45,19 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlObject) -> HeatNetwork:
+    def to_entity(self, pandapipes_net: pandapipesNet) -> Tuple[List[AssetAbstract],
+                                                                List[Junction]]:
         """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
-        :param EsdlObject entity: EsdlObject object to be converted to HeatNetwork object
-        :return: HeatNetwork, which is the converted EsdlObject object.
+        :param pandapipesNet pandapipes_net: Pandapipes net to register asset and junctions in
+        :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         py_assets_list = [
-            EsdlAssetMapper().to_entity(asset) for asset in model.get_all_assets_of_type("asset")
+            EsdlAssetMapper().to_entity(asset) for asset in self.esdl_object.
+            get_all_assets_of_type("asset")
         ]
         # loop over assets and create junctions and connect them
         py_junction_list = []
@@ -54,12 +65,14 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             if py_asset.from_junction is None:
                 junction = Junction()
                 py_asset.from_junction = junction
-                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.In)
+                connected_py_assets = (self.esdl_object.
+                                       get_connected_assets(py_asset.asset_id, Port.In))
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
                 junction = Junction()
                 py_asset.to_junction = junction
-                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.Out)
+                connected_py_assets = (self.esdl_object.
+                                       get_connected_assets(py_asset.asset_id, Port.Out))
             for connected_py_asset in connected_py_assets:
                 index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                     connected_py_asset[0]
@@ -69,7 +82,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 else:  # to
                     py_assets_list[index].to_junction = junction
             py_junction_list.append(junction)
-        return HeatNetwork(py_assets_list, py_junction_list)
+        return py_assets_list, py_junction_list
 
 
 class EsdlControllerMapper(EsdlMapperAbstract):
