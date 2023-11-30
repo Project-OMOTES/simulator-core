@@ -38,16 +38,7 @@ class StringEsdlAssetMapper:
         esdl.Joint: "junction",
     }
 
-    str_to_type_dict = {
-        "asset": esdl.Asset,
-        "producer": esdl.Producer,
-        "consumer": esdl.Consumer,
-        "geothermal": esdl.GeothermalSource,
-        "conversion": esdl.Conversion,
-        "pipe": esdl.Pipe,
-        "transport": esdl.Transport,
-        "junction": esdl.Joint,
-    }
+    str_to_type_dict = reverse_dict(original_dict=type_to_str_dict)
 
     def to_esdl(self, entity: str) -> type:
         """Method to convert a string to esdl class type.
