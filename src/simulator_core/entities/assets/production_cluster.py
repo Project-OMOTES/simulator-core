@@ -22,6 +22,8 @@ from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_DIAMETER,
+    DEFAULT_NODE_HEIGHT,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
@@ -48,7 +50,7 @@ class ProductionCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name, asset_id)
-        self.height_m = None
+        self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
         self.temperature_supply = None
@@ -56,6 +58,8 @@ class ProductionCluster(AssetAbstract):
         # DemandCluster pressure specifications
         self.pressure_supply = None
         self.control_mass_flow = None
+        # Define internal diameter
+        self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
         self._initialized = False
         # Output list
@@ -108,7 +112,7 @@ class ProductionCluster(AssetAbstract):
                 from_junction=self._intermediate_junction,
                 to_junction=self.to_junction,
                 controlled_mdot_kg_per_s=self._controlled_mass_flow,
-                diameter_m=self.internal_diameter,
+                diameter_m=self._internal_diameter,
                 control_active=self.control_mass_flow,
                 in_service=True,
                 name=f"flow_control_{self.name}",
@@ -154,7 +158,7 @@ class ProductionCluster(AssetAbstract):
         # Check if the mass flow rate is positive
         if self._controlled_mass_flow < 0:
             raise ValueError(
-                f"The mass flow rate {self._controlled_mass_flow} of the asset {self.asset_name}"
+                f"The mass flow rate {self._controlled_mass_flow} of the asset {self.name}"
                 + " is negative."
             )
         else:
@@ -190,7 +194,7 @@ class ProductionCluster(AssetAbstract):
             if len(setpoints_set.difference(necessary_setpoints)) > 0:
                 warn(
                     f"The setpoints {setpoints_set.difference(necessary_setpoints)}"
-                    + f" are not required for the asset {self.asset_name}."
+                    + f" are not required for the asset {self.name}."
                 )
         else:
             # Print missing setpoints
