@@ -37,18 +37,11 @@ class EsdlKey:
 
 
 ASSET_DICT = {
-    "producer": {
-        "heating demand": EsdlKey(name="power", default=0.0),
-    },
-    "consumer": {
-        "heating demand": EsdlKey(name="power", default=0.0),
-        "maximum temperature": EsdlKey(name="maximumTemperature", default=0.0),
-        "minimum temperature": EsdlKey(name="minimumTemperature", default=0.0),
-    },
+    "producer": {},
+    "consumer": {},
     "pipe": {
         "length": EsdlKey(name="length", default=0.0),
         "roughness": EsdlKey(name="roughness", default=0.0),
-        "diameter": EsdlKey(name="diameter", default=0.0),
         "inner diameter": EsdlKey(name="innerDiameter", default=0.0),
         "outer diameter": EsdlKey(name="outerDiameter", default=0.0),
         "material": EsdlKey(name="material", default=""),
