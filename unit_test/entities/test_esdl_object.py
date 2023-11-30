@@ -45,8 +45,8 @@ class EsdlObjectTest(unittest.TestCase):
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
         # Assert
-        self.assertEqual(len(producers), 1)
-        self.assertEqual(len(consumers), 1)
+        self.assertEqual(len(producers), 2)
+        self.assertEqual(len(consumers), 2)
         self.assertEqual(len(pipes), 2)
 
     def test_EsdlAssetObject(self):
