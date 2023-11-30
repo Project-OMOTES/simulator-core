@@ -17,9 +17,9 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, TypeVar
+
 from pandapipes import pandapipesNet
 from pandas import DataFrame
-
 
 Junction_type = TypeVar("Junction")
 
@@ -42,7 +42,7 @@ class AssetAbstract(ABC):
         # Define the pandapipes network
         self.pandapipes_net = None
         self.name = asset_name
-        self.id = asset_id
+        self.asset_id = asset_id
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
