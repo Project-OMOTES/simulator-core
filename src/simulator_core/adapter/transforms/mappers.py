@@ -15,15 +15,14 @@
 
 """Mapper classes."""
 
-from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from simulator_core.entities.assets import EsdlAssetObject, Junction, ProductionCluster
+from simulator_core.entities.assets.utils import Port
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
-from typing import Any
-from simulator_core.entities.assets.utils import Port
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a Heatnetwork entity object based on a PyESDL EnergySystem object."""
@@ -46,8 +45,9 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :param EsdlObject entity: EsdlObject object to be converted to HeatNetwork object
         :return: HeatNetwork, which is the converted EsdlObject object.
         """
-        assets_list = [EsdlAssetMapper().to_entity(asset)
-                       for asset in model.get_all_assets_of_type('asset')]
+        assets_list = [
+            EsdlAssetMapper().to_entity(asset) for asset in model.get_all_assets_of_type("asset")
+        ]
         # loop over assets and create junctions and connect them
         junction_list = []
         for asset in assets_list:

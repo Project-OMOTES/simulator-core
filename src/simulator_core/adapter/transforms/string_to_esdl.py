@@ -12,7 +12,6 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """Module containing class to convert a string to asdl class type and vica-versa."""
 import esdl
 

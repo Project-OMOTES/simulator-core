@@ -17,6 +17,7 @@
 from typing import Dict
 from warnings import warn
 
+from pandapipes import pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -35,7 +36,6 @@ from simulator_core.entities.assets.utils import (
     mass_flow_and_temperature_to_heat_demand,
 )
 from simulator_core.entities.assets.valve import ControlValve
-from pandapipes import pandapipesNet
 
 
 class ProductionCluster(AssetAbstract):
