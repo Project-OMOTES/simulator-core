@@ -45,29 +45,31 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :param EsdlObject entity: EsdlObject object to be converted to HeatNetwork object
         :return: HeatNetwork, which is the converted EsdlObject object.
         """
-        assets_list = [
+        py_assets_list = [
             EsdlAssetMapper().to_entity(asset) for asset in model.get_all_assets_of_type("asset")
         ]
         # loop over assets and create junctions and connect them
-        junction_list = []
-        for asset in assets_list:
-            if asset.from_junction is None:
+        py_junction_list = []
+        for py_asset in py_assets_list:
+            if py_asset.from_junction is None:
                 junction = Junction()
-                asset.from_junction = junction
-                connected_assets = model.get_connected_assets(asset.id, Port.In)
+                py_asset.from_junction = junction
+                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.In)
                 # get connected assets and connect them to this junction
-            if asset.to_junction is None:
+            if py_asset.to_junction is None:
                 junction = Junction()
-                asset.to_junction = junction
-                connected_assets = model.get_connected_assets(asset.id, Port.Out)
-            for connected_asset in connected_assets:
-                index = [asset.id for asset in assets_list].index(connected_asset[0])
-                if connected_asset[1] == Port.In:  # from
-                    assets_list[index].from_junction = junction
+                py_asset.to_junction = junction
+                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.Out)
+            for connected_py_asset in connected_py_assets:
+                index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
+                    connected_py_asset[0]
+                )
+                if connected_py_asset[1] == Port.In:  # from
+                    py_assets_list[index].from_junction = junction
                 else:  # to
-                    assets_list[index].to_junction = junction
-            junction_list.append(junction)
-        return HeatNetwork(assets_list, junction_list)
+                    py_assets_list[index].to_junction = junction
+            py_junction_list.append(junction)
+        return HeatNetwork(py_assets_list, py_junction_list)
 
 
 class EsdlControllerMapper(EsdlMapperAbstract):
