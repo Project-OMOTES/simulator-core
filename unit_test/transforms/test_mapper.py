@@ -13,8 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import unittest
+from pathlib import Path
 
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.esdl_object import EsdlObject
@@ -25,9 +25,8 @@ from simulator_core.infrastructure.utils import pyesdl_from_file
 class EsdlEnergySystemMapperTest(unittest.TestCase):
     def test_to_entity(self):
         # act
-        esdl_file_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), r"..\..\testdata\test1.esdl")
-        )
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # arrange
         network = EsdlEnergySystemMapper().to_entity(esdl_object)

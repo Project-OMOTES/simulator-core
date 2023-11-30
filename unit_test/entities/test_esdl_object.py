@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test esdl object class."""
-import os
 import unittest
+from pathlib import Path
 
 import esdl
 
@@ -30,9 +30,8 @@ from simulator_core.infrastructure.utils import pyesdl_from_file
 
 class EsdlObjectTest(unittest.TestCase):
     def setUp(self):
-        esdl_file_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), r"..\..\testdata\test1.esdl")
-        )
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file_path = str(esdl_file_path)
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
