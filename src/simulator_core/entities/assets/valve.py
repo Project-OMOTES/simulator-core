@@ -14,27 +14,29 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Valve classes."""
-from pandapipes import create_flow_control, pandapipesNet
-from typing import Dict, Optional
-from pandas import DataFrame
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
 import uuid
+from typing import Dict, Optional
+
+from pandapipes import create_flow_control, pandapipesNet
+from pandas import DataFrame
+
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
 
 
 class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
-            self,
-            from_junction: Junction,
-            to_junction: Junction,
-            controlled_mdot_kg_per_s: float,
-            diameter_m: float,
-            control_active: bool = False,
-            in_service: bool = True,
-            name: Optional[str] = None, ## discuss with mike seems strange to have the name optional en then pass it to function which expects str.
-            index: Optional[int] = None,
+        self,
+        from_junction: Junction,
+        to_junction: Junction,
+        controlled_mdot_kg_per_s: float,
+        diameter_m: float,
+        control_active: bool = False,
+        in_service: bool = True,
+        name: Optional[str] = None,
+        index: Optional[int] = None,
     ):
         """Initialize a ControlValve object."""
         super().__init__(name, str(uuid.uuid4()))
