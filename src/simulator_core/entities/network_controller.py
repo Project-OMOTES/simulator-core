@@ -19,7 +19,7 @@
 class NetworkController:
     """Class to store the network controller."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor for controller for a heat network."""
         pass
 
@@ -30,4 +30,4 @@ class NetworkController:
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-        pass
+        return {}

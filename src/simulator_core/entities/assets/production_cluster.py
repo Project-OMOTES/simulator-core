@@ -70,7 +70,7 @@ class ProductionCluster(AssetAbstract):
         # Output list
         self.output = []
 
-    def add_physical_data(self, data: Dict[str, float]):
+    def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
 
         :param dict data:dictionary containing the data to be added the asset. The key is the name
