@@ -16,7 +16,7 @@
 import unittest
 from unittest.mock import Mock
 
-from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities import HeatNetwork
 
 
 class HeatNetworkTest(unittest.TestCase):
@@ -31,4 +31,4 @@ class HeatNetworkTest(unittest.TestCase):
         result = HeatNetwork(assets, junctions)
 
         # Assert
-        assert isinstance(result, simulator_core.entities.heat_network.HeatNetwork)
+        self.assertIsInstance(result, HeatNetwork)

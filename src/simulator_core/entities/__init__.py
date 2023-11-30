@@ -14,3 +14,4 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """__init__.py file for initialization code."""
+from .heat_network import HeatNetwork
