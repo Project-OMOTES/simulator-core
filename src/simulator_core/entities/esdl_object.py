@@ -60,7 +60,7 @@ class EsdlObject:
             ]
         return output_list
 
-    def get_connected_assets(self, id: str, port: Port) -> List[Tuple[str, Port]]:
+    def get_connected_assets(self, asset_id: str, port: Port) -> List[Tuple[str, Port]]:
         """Method to get the id's of connected assets from the esdl.
 
         This returns a list of list with the connected asset id and the port to which it is
@@ -76,7 +76,7 @@ class EsdlObject:
         # TODO 1. Add support for components with multiple in and outports, like heat exchanger
         # TODO 2. What if it is connected to a joint?
         connected_assets = []
-        esdl_asset = self.energy_system_handler.get_by_id(id)
+        esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
         type_port = InPort if port == Port.Out else OutPort
         connected_port_ids = []

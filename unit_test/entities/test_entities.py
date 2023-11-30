@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Test Entitites."""
 import unittest
 from unittest.mock import Mock
 
@@ -27,6 +28,7 @@ class HeatNetworkTest(unittest.TestCase):
         # Arrange
         junctions = Mock()
         assets = Mock()
+
         # Act
         result = HeatNetwork(assets, junctions)
 
