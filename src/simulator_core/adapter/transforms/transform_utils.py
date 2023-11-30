@@ -13,4 +13,21 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""__init__.py file for initialization code."""
+"""File containing utility functions for the transforms."""
+
+
+def reverse_dict(original_dict: dict) -> dict:
+    """Method to reverse a dict.
+
+    Creates a dict with set(values) as keys and the keys of the original dict as list values.
+
+    :param dict original_dict: Dict to be reversed {keys:values}.
+    :return: Reversed dict with {set(values):list[keys]}.
+    """
+    new_dict = {}
+    for key, value in original_dict.items():
+        if value not in new_dict:
+            new_dict[value] = [key]
+        else:
+            new_dict[value].append(key)
+    return new_dict

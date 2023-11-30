@@ -15,11 +15,14 @@
 
 """ Simulates an heat network for the specified duration."""
 
-from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
+from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.network_controller import NetworkController
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
 
 
 class NetworkSimulation:
-    """NetworkSimulation connects the controller and HeatNetwork (incl. assets). """
+    """NetworkSimulation connects the controller and HeatNetwork (incl. assets)."""
+
     def __init__(self, network: HeatNetwork, controller: NetworkController):
         """Instantiate the NetworkSimulation object"""
         self.config = None

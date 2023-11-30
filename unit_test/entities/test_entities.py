@@ -13,9 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import simulator_core.entities.heat_network
-from simulator_core.entities import HeatNetwork
 import unittest
+
+import simulator_core.entities.heat_network
+from simulator_core.entities.heat_network import HeatNetwork
 
 
 class HeatNetworkTest(unittest.TestCase):

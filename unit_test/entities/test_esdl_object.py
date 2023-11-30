@@ -1,40 +1,61 @@
+#  Copyright (c) 2023. Deltares & TNO
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import os
+import unittest
+
 import esdl
 
-from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from simulator_core.entities.assets.esdl_asset_object import EsdlKey
+
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-import unittest
+
 from simulator_core.entities.assets import DemandCluster, ProductionCluster, Pipe
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.utils import Port
 
 
-class EsdlObjectTest(unittest.TestCase):
 
+class EsdlObjectTest(unittest.TestCase):
     def setUp(self):
-        esdl_file_path = r'.\testdata\test1.esdl'
+        esdl_file_path = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), r"..\..\testdata\test1.esdl")
+        )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
         # Arrange
-        producer = 'producer'
-        consumer = 'consumer'
-        pipe = 'pipe'
+        producer = "producer"
+        consumer = "consumer"
+        pipe = "pipe"
         # Act
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
-
         # Assert
-        self.assertEqual(len(producers), 1)
-        self.assertEqual(len(consumers), 1)
+        self.assertEqual(len(producers), 2)
+        self.assertEqual(len(consumers), 2)
         self.assertEqual(len(pipes), 2)
 
     def test_EsdlAssetObject(self):
         # Arrange
-        producer = 'producer'
-        consumer = 'consumer'
-        pipe = 'pipe'
+        producer = "producer"
+        consumer = "consumer"
+        pipe = "pipe"
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
@@ -59,9 +80,30 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(connected_assets1, test_list1)
         self.assertEqual(connected_assets2, test_list2)
 
+    def test_get_asset_parameters(self):
+        # Arrange
+        pipes = self.esdl_object.get_all_assets_of_type("pipe")
+        # Act
+        pipe_parameters = pipes[0].get_asset_parameters()
+        # Assert
+        self.assertTrue(pipe_parameters["length"] == pipes[0].esdl_asset.length)
+
+    def test_missing_esdl_asset_parameters(self):
+        # Arrange
+        producer = self.esdl_object.get_all_assets_of_type("producer")[0]
+        producer.asset_specific_parameters["heating demand extra"] = EsdlKey(
+            name="heating demand extra", default=10.0
+        )
+        # Act
+        producer_parameters = producer.get_asset_parameters()
+        # Assert
+        self.assertTrue(
+            producer_parameters["heating demand extra"]
+            == producer.asset_specific_parameters["heating demand extra"].default
+        )
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
-
     def setUp(self) -> None:
         self.asset = esdl.Asset
         self.producer = esdl.Producer
@@ -104,14 +146,14 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
     def test_to_esdl(self):
         # Arrange
         # Act
-        asset = StringEsdlAssetMapper().to_esdl(self.asset_str)
-        producer = StringEsdlAssetMapper().to_esdl(self.producer_str)
-        consumer = StringEsdlAssetMapper().to_esdl(self.consumer_str)
-        conversion = StringEsdlAssetMapper().to_esdl(self.conversion_str)
-        pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)
-        transport = StringEsdlAssetMapper().to_esdl(self.transport_str)
-        joint = StringEsdlAssetMapper().to_esdl(self.joint_str)
-        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)
+        asset = StringEsdlAssetMapper().to_esdl(self.asset_str)[0]
+        producer = StringEsdlAssetMapper().to_esdl(self.producer_str)[0]
+        consumer = StringEsdlAssetMapper().to_esdl(self.consumer_str)[0]
+        conversion = StringEsdlAssetMapper().to_esdl(self.conversion_str)[0]
+        pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
+        transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
+        joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
+        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]
         # Assert
         self.assertTrue(asset == self.asset)
         self.assertTrue(producer == self.producer)

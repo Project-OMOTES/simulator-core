@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Mapper classes."""
+"""Mapper classes."""
 
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject, Junction
@@ -75,6 +75,5 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
 
 class ProductionAssetMapper(EsdlAssetMapper):
-
     def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
         pass

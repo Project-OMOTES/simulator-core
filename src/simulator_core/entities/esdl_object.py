@@ -15,13 +15,16 @@
 
 """Esdl asset wrapper class."""
 
-from esdl import esdl
+import logging
+
 from esdl.esdl_handler import EnergySystemHandler
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+
 import logging
 from simulator_core.entities.assets.utils import Port
 from typing import List, Tuple
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +53,14 @@ class EsdlObject:
         If the type is not found an empty list is returned.
         :param esdl_asset_type: str of the asset type assets need to be gathered.
         """
-        return [EsdlAssetObject(asset)
-                for asset in self.energy_system_handler.get_all_instances_of_type(
-                StringEsdlAssetMapper().to_esdl(esdl_asset_type))]
-
+        output_list = []
+        for asset_type in StringEsdlAssetMapper().to_esdl(esdl_asset_type):
+            output_list += [
+                EsdlAssetObject(asset)
+                for asset in self.energy_system_handler.get_all_instances_of_type(asset_type)
+            ]
+        return output_list
+      
     def get_connected_assets(self, id: str, port: Port) -> List[Tuple[str, Port]]:
         """Method to get the id's of connected assets from the esdl.
 
