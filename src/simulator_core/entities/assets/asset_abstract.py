@@ -17,18 +17,18 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, TypeVar
+
 from pandapipes import pandapipesNet
 from pandas import DataFrame
 
-
-Junction_type = TypeVar("Junction")
+Junction = TypeVar("Junction")
 
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    from_junction: Junction_type | None
-    to_junction: Junction_type | None
+    from_junction: Junction | None
+    to_junction: Junction | None
     pandapipes_net: pandapipesNet | None
 
     def __init__(self, asset_name: str, asset_id: str):
@@ -42,10 +42,10 @@ class AssetAbstract(ABC):
         # Define the pandapipes network
         self.pandapipes_net = None
         self.name = asset_name
-        self.id = asset_id
+        self.asset_id = asset_id
 
     @abstractmethod
-    def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
+    def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -54,7 +54,7 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def get_setpoints(self, **kwargs) -> Dict:
+    def get_setpoints(self) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the

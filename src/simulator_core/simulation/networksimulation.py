@@ -13,24 +13,35 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Simulates an heat network for the specified duration."""
+"""Simulates an heat network for the specified duration."""
 
-from simulator_core.entities.heat_network import HeatNetwork
-from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class NetworkSimulation:
     """NetworkSimulation connects the controller and HeatNetwork (incl. assets)."""
 
     def __init__(self, network: HeatNetwork, controller: NetworkController):
-        """Instantiate the NetworkSimulation object"""
-        self.config = None
+        """Instantiate the NetworkSimulation object."""
         self.network = network
         self.controller = controller
+        self.output = []
 
     def run(self, config: SimulationConfiguration):
         """Run the simulation.
 
-        :param SimulationConfiguration"""
-        self.config = config
+        :param SimulationConfiguration config: Configuration to run the simulation with.
+        """
+        # time loop
+        for time in range(config.start, config.stop, config.timestep):
+            not_converged = True
+            controller_input = self.controller.run_time_step(time)
+            while not_converged:
+                not_converged = False  # for the moment we do not check on convergence,
+                # to get stuff running. Also need to add break after 10 iteration.
+                logger.debug("Simulating for timestep " + str(time))
+                self.network.run_time_step(time, controller_input)
+            self.output.append(self.network.store_output())

@@ -16,15 +16,14 @@
 """Esdl asset wrapper class."""
 
 import logging
+from typing import List, Tuple
 
+from esdl import InPort, OutPort
 from esdl.esdl_handler import EnergySystemHandler
 
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-
-import logging
-from simulator_core.entities.assets.utils import Port
-from typing import List, Tuple
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.utils import Port
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +59,8 @@ class EsdlObject:
                 for asset in self.energy_system_handler.get_all_instances_of_type(asset_type)
             ]
         return output_list
-      
-    def get_connected_assets(self, id: str, port: Port) -> List[Tuple[str, Port]]:
+
+    def get_connected_assets(self, asset_id: str, port: Port) -> List[Tuple[str, Port]]:
         """Method to get the id's of connected assets from the esdl.
 
         This returns a list of list with the connected asset id and the port to which it is
@@ -77,16 +76,15 @@ class EsdlObject:
         # TODO 1. Add support for components with multiple in and outports, like heat exchanger
         # TODO 2. What if it is connected to a joint?
         connected_assets = []
-        esdl_asset = self.energy_system_handler.get_by_id(id)
+        esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
-        type_port = esdl.InPort if port == Port.Out else esdl.OutPort
+        type_port = OutPort if port == Port.Out else InPort
         connected_port_ids = []
         for esdl_port in esdl_asset.port:
             if isinstance(esdl_port, type_port):
                 connected_port_ids = esdl_port.connectedTo
                 break
         for connected_port_id in connected_port_ids:
-            connected_port_type = Port.In if isinstance(connected_port_id, esdl.OutPort) \
-                else Port.Out
+            connected_port_type = Port.Out if isinstance(connected_port_id, OutPort) else Port.In
             connected_assets.append((connected_port_id.energyasset.id, connected_port_type))
         return connected_assets

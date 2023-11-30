@@ -15,65 +15,94 @@
 
 """Mapper classes."""
 
-from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets import ProductionCluster, EsdlAssetObject, Junction
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from simulator_core.entities.assets import EsdlAssetObject, Junction, ProductionCluster
+from simulator_core.entities.assets.utils import Port
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from typing import Any
-from simulator_core.entities.assets.utils import Port
+from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a Heatnetwork entity object based on a PyESDL EnergySystem object."""
 
     def to_esdl(self, entity: HeatNetwork) -> EsdlObject:
+        """Method to convert a HeatNetwork object back to an esdlobject.
+
+        For now this method is not implemented.
+        :param HeatNetwork entity: HeatNetwork object to be converted to esdl object
+        :return: EsdlObject, which is the converted HeatNetwork object.
+        """
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
     def to_entity(self, model: EsdlObject) -> HeatNetwork:
-        """
-        Method to convert esdl to Heatnetwork object.
+        """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
-        to create and return the Heatnetwork object.
+        to create the Heatnetwork object.
+        :param EsdlObject entity: EsdlObject object to be converted to HeatNetwork object
+        :return: HeatNetwork, which is the converted EsdlObject object.
         """
-        assets_list = [EsdlAssetMapper().to_entity(asset)
-                       for asset in model.get_all_assets_of_type('asset')]
+        py_assets_list = [
+            EsdlAssetMapper().to_entity(asset) for asset in model.get_all_assets_of_type("asset")
+        ]
         # loop over assets and create junctions and connect them
-        junction_list = []
-        for asset in assets_list:
-            if asset.from_junction is None:
+        py_junction_list = []
+        for py_asset in py_assets_list:
+            if py_asset.from_junction is None:
                 junction = Junction()
-                asset.from_junction = junction
-                connected_assets = model.get_connected_assets(asset.id, Port.In)
+                py_asset.from_junction = junction
+                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.In)
                 # get connected assets and connect them to this junction
-            if asset.to_junction is None:
+            if py_asset.to_junction is None:
                 junction = Junction()
-                asset.to_junction = junction
-                connected_assets = model.get_connected_assets(asset.id, Port.Out)
-            for connected_asset in connected_assets:
-                index = [asset.id for asset in assets_list].index(connected_asset[0])
-                if connected_asset[1] == Port.In:  # from
-                    assets_list[index].from_junction = junction
+                py_asset.to_junction = junction
+                connected_py_assets = model.get_connected_assets(py_asset.asset_id, Port.Out)
+            for connected_py_asset in connected_py_assets:
+                index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
+                    connected_py_asset[0]
+                )
+                if connected_py_asset[1] == Port.In:  # from
+                    py_assets_list[index].from_junction = junction
                 else:  # to
-                    assets_list[index].to_junction = junction
-            junction_list.append(junction)
-        return HeatNetwork(assets_list, junction_list)
+                    py_assets_list[index].to_junction = junction
+            py_junction_list.append(junction)
+        return HeatNetwork(py_assets_list, py_junction_list)
 
 
 class EsdlControllerMapper(EsdlMapperAbstract):
     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
+        """Method to convert a NetworkController object to an esdlobject.
+
+        For now this method is not implemented.
+        :param NetworkController entity: NetworkController object to be converted to esdl object
+        :return: EsdlObject, which is the converted NetworkController object.
+        """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
     def to_entity(self, model: EsdlObject) -> NetworkController:
-        # TODO
-        pass
+        """Method to convert esdl to NetworkController object.
+
+        This method first converts all assets into a list of assets.
+        Next to this a list of Junctions is created. This is then used
+        to create the NetworkController object.
+        :param EsdlObject entity: EsdlObject object to be converted to NetworkController object
+        :return: NetworkController, which is the converted EsdlObject object.
+        """
+        return NetworkController()
 
 
 class ProductionAssetMapper(EsdlAssetMapper):
+    """Class to convert ESDL Production cluster asset to a ProductionClusterObject."""
+
     def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
+        """Method to convert Esdl asset ot a production cluster object.
+
+        :param EsdlAssetObject model: Asset ot be converted
+        :return: ProductionCluster, converted object.
+        """
         pass

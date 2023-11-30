@@ -13,10 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Test Entitites."""
 import unittest
+from unittest.mock import Mock
 
-import simulator_core.entities.heat_network
-from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities import HeatNetwork
 
 
 class HeatNetworkTest(unittest.TestCase):
@@ -25,10 +26,11 @@ class HeatNetworkTest(unittest.TestCase):
     def test_heat_network(self) -> None:
         """Generic/template test for Heatnetwork."""
         # Arrange
-        assets = []
-        junctions = []
+        junctions = Mock()
+        assets = Mock()
+
         # Act
         result = HeatNetwork(assets, junctions)
 
         # Assert
-        assert isinstance(result, simulator_core.entities.heat_network.HeatNetwork)
+        self.assertIsInstance(result, HeatNetwork)

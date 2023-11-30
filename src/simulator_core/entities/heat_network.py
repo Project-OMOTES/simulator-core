@@ -19,13 +19,32 @@ from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
 class HeatNetwork:
-    """Heat network class to be used to store the data of a heat network."""
+    """Class to store information on the heat network."""
 
     def __init__(self, asset_list: list[AssetAbstract], junction_list: list[AssetAbstract]):
-        """Constructor of heatnework class to initialize the object.
+        """Constructor of heat network class.
 
-        :param list[AssetAbstract] asset_list: List of assets which are in the network
-        :param list[AssetAbstract] junction_list: List of junctions which are in the network.
+        :param list[AssetAbstract] asset_list: List with assets in the network
+        :param list[AssetAbstract] junction_list: List with junction in the network.
         """
         self.assets = asset_list
         self.junctions = junction_list
+
+    def run_time_step(self, time: float, controller_input: dict):
+        """Method to simulate a time step.
+
+        :param float time: Timestep for which to simulate the model
+        :param dict controller_input: Dict specifying the heat demand for the different assets.
+        :return: None
+        """
+        pass
+
+    def store_output(self):
+        """Method to store the output data.
+
+        This method takes the data from the pandapipes dataframe and stores it into our own
+        dataframe. This is needed since we have the possibility to redo a timestep when results are
+        not converged for the input of the controller.
+        :return: None
+        """
+        pass

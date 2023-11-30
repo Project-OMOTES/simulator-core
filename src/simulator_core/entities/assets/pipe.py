@@ -36,7 +36,7 @@ class Pipe(AssetAbstract):
         """
         super().__init__(asset_name, asset_id)
 
-    def add_physical_data(self, data: Dict[str, float]):
+    def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
 
         :param dict data:dictionary containing the data to be added the asset. The key is the name
@@ -59,14 +59,14 @@ class Pipe(AssetAbstract):
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        pass
+        return {}
 
     def simulation_performed(self) -> bool:
         """Placeholder to indicate that a simulation has been performed.
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        pass
+        return True
 
     def create(self, pandapipes_net: pandapipesNet) -> None:
         """Placeholder to create an asset in a pandapipes network."""

@@ -14,37 +14,38 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Valve classes."""
-from pandapipes import create_flow_control, pandapipesNet
-from typing import Dict
-from pandas import DataFrame
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
 import uuid
+from typing import Dict, Optional
+
+from pandapipes import create_flow_control, pandapipesNet
+from pandas import DataFrame
+
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
 
 
 class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
-            self,
-            from_junction: Junction,
-            to_junction: Junction,
-            controlled_mdot_kg_per_s: float,
-            diameter_m: float,
-            control_active: bool = False,
-            in_service: bool = True,
-            name: str = None,
-            index: int = None,
+        self,
+        from_junction: Junction,
+        to_junction: Junction,
+        controlled_mdot_kg_per_s: float,
+        diameter_m: float,
+        control_active: bool = False,
+        in_service: bool = True,
+        name: Optional[str] = None,
+        index: Optional[int] = None,
     ):
         """Initialize a ControlValve object."""
-        super().__init__(name, str(uuid.uuid5()))
+        super().__init__(name, str(uuid.uuid4()))
         self.from_junction = from_junction
         self.to_junction = to_junction
         self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
         self.diameter_m = diameter_m
         self.control_active = control_active
         self.in_service = in_service
-        self.name = name
         self.index = index
         # Initialize the control valve
         self._initialized = False
@@ -65,7 +66,7 @@ class ControlValve(AssetAbstract):
                 name=self.name,
             )
 
-    def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
+    def set_setpoints(self, setpoints: Dict, **kwargs: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -73,22 +74,22 @@ class ControlValve(AssetAbstract):
         """
         pass
 
-    def get_setpoints(self, **kwargs) -> Dict:
+    def get_setpoints(self, **kwargs: Dict) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        pass
+        return {}
 
     def simulation_performed(self) -> bool:
         """Placeholder to indicate that a simulation has been performed.
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        pass
+        return True
 
-    def add_physical_data(self, data: Dict[str, float]):
+    def add_physical_data(self, data: Dict[str, float]) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 

@@ -13,28 +13,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
+"""Test esdl object class."""
 import unittest
+from pathlib import Path
 
 import esdl
 
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from simulator_core.entities.assets import DemandCluster, Pipe, ProductionCluster
 from simulator_core.entities.assets.esdl_asset_object import EsdlKey
-
+from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-
-from simulator_core.entities.assets import DemandCluster, ProductionCluster, Pipe
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.entities.assets.utils import Port
-
 
 
 class EsdlObjectTest(unittest.TestCase):
     def setUp(self):
-        esdl_file_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), r"..\..\testdata\test1.esdl")
-        )
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file_path = str(esdl_file_path)
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
@@ -70,9 +67,9 @@ class EsdlObjectTest(unittest.TestCase):
 
     def test_get_connected_assets(self):
         # Arrange
-        asset = self.esdl_object.get_all_assets_of_type('producer')[0].esdl_asset
-        test_list1 = [('Pipe1_ret', Port.Out)]
-        test_list2 = [('Pipe1', Port.In)]
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0].esdl_asset
+        test_list1 = [("Pipe1_ret", Port.Out)]
+        test_list2 = [("Pipe1", Port.In)]
         # Act
         connected_assets1 = self.esdl_object.get_connected_assets(asset.id, Port.In)
         connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)

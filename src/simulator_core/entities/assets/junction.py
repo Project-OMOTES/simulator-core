@@ -15,7 +15,7 @@
 
 """Junction classes."""
 
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pandapipes import create_junction, pandapipesNet
 
@@ -28,10 +28,10 @@ class Junction:
         pn_bar: float = 5.0,
         tfluid_k: float = 300.0,
         height_m: float = 0.0,
-        geodata: List[Any] = None,
+        geodata: Optional[List[Any]] = None,
         name: str = "None",
         in_service: bool = True,
-        index: int = None,
+        index: Optional[int] = None,
     ):
         """Initialize a Junction object."""
         self.pandapipes_net = None

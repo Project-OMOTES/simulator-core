@@ -13,12 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Entry point for running simulator-core library from cmdline."""
+"""Entry point for running simulator-core library from cmdline."""
 
 from simulator_core.entities import SimulationConfiguration
 from simulator_core.infrastructure.simulation_manager import SimulationManager
 from simulator_core.entities.esdl_object import EsdlObject
-from utils import pyesdl_from_file
+from simulator_core.infrastructure.utils import pyesdl_from_file
 import sys
 import logging
 import traceback
@@ -28,10 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 def run(file_path: str = None):
+    """Main run function for the heatnetwork simulator."""
     config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                      name="test run",
                                      timestep=3600,
-                                     duration=3600 * 48)
+                                     start=0,
+                                     stop=3600 * 48)
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
     try:
