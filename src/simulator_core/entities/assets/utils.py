@@ -14,8 +14,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Utility functions for assets."""
-from pandapipes import pandapipesNet
 from enum import IntEnum
+
+from pandapipes import pandapipesNet
+
 
 def heat_demand_and_temperature_to_mass_flow(
     thermal_demand: float,
@@ -65,5 +67,6 @@ def mass_flow_and_temperature_to_heat_demand(
 
 class Port(IntEnum):
     """Simple enumeration class to set if it is In (from) or out(to) port of asset."""
+
     In = 0
     Out = 1

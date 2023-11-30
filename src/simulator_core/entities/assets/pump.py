@@ -15,12 +15,14 @@
 
 """Pump classes."""
 import uuid
+from typing import Dict
 
 from pandapipes import create_circ_pump_const_mass_flow, pandapipesNet
-from typing import Dict
 from pandas import DataFrame
-from simulator_core.entities.assets.junction import Junction
+
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
+
 # TODO: Do we need to define a "general" pump class?
 
 
@@ -76,7 +78,6 @@ class CirculationPumpConstantMass(AssetAbstract):
         """
         pass
 
-
     def get_setpoints(self, **kwargs) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
@@ -96,7 +97,6 @@ class CirculationPumpConstantMass(AssetAbstract):
         """Placeholder method to add physical data to an asset."""
         pass
 
-
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
 
@@ -104,7 +104,6 @@ class CirculationPumpConstantMass(AssetAbstract):
         represents the output of its asset for a specific timestep.
         """
         pass
-
 
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
