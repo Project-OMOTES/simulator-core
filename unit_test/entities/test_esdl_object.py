@@ -68,11 +68,11 @@ class EsdlObjectTest(unittest.TestCase):
 
     def test_get_asset_parameters(self):
         # Arrange
-        producers = self.esdl_object.get_all_assets_of_type("producer")
+        pipes = self.esdl_object.get_all_assets_of_type("pipe")
         # Act
-        producer_parameters = producers[0].get_asset_parameters()
+        pipe_parameters = pipes[0].get_asset_parameters()
         # Assert
-        self.assertTrue(producer_parameters["heating demand"] == producers[0].esdl_asset.power)
+        self.assertTrue(pipe_parameters["length"] == pipes[0].esdl_asset.length)
 
     def test_missing_esdl_asset_parameters(self):
         # Arrange
