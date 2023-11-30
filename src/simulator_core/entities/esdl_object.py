@@ -49,9 +49,10 @@ class EsdlObject:
         If the type is not found an empty list is returned.
         :param esdl_asset_type: str of the asset type assets need to be gathered.
         """
-        return [
-            EsdlAssetObject(asset)
-            for asset in self.energy_system_handler.get_all_instances_of_type(
-                StringEsdlAssetMapper().to_esdl(esdl_asset_type)
-            )
-        ]
+        output_list = []
+        for asset_type in StringEsdlAssetMapper().to_esdl(esdl_asset_type):
+            output_list += [
+                EsdlAssetObject(asset)
+                for asset in self.energy_system_handler.get_all_instances_of_type(asset_type)
+            ]
+        return output_list

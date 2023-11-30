@@ -18,6 +18,7 @@ import unittest
 
 import esdl
 
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.esdl_asset_object import EsdlKey
@@ -57,9 +58,9 @@ class EsdlObjectTest(unittest.TestCase):
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
         # Act
-        asset_producer = producers[0].convert_esdl()
-        asset_consumer = consumers[0].convert_esdl()
-        asset_pipe = pipes[0].convert_esdl()
+        asset_producer = EsdlAssetMapper().to_entity(producers[0])
+        asset_consumer = EsdlAssetMapper().to_entity(consumers[0])
+        asset_pipe = EsdlAssetMapper().to_entity(pipes[0])
         # Assert
         self.assertTrue(isinstance(asset_producer, ProductionCluster))
         self.assertTrue(isinstance(asset_consumer, DemandCluster))
@@ -131,14 +132,14 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
     def test_to_esdl(self):
         # Arrange
         # Act
-        asset = StringEsdlAssetMapper().to_esdl(self.asset_str)
-        producer = StringEsdlAssetMapper().to_esdl(self.producer_str)
-        consumer = StringEsdlAssetMapper().to_esdl(self.consumer_str)
-        conversion = StringEsdlAssetMapper().to_esdl(self.conversion_str)
-        pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)
-        transport = StringEsdlAssetMapper().to_esdl(self.transport_str)
-        joint = StringEsdlAssetMapper().to_esdl(self.joint_str)
-        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)
+        asset = StringEsdlAssetMapper().to_esdl(self.asset_str)[0]
+        producer = StringEsdlAssetMapper().to_esdl(self.producer_str)[0]
+        consumer = StringEsdlAssetMapper().to_esdl(self.consumer_str)[0]
+        conversion = StringEsdlAssetMapper().to_esdl(self.conversion_str)[0]
+        pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
+        transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
+        joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
+        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]
         # Assert
         self.assertTrue(asset == self.asset)
         self.assertTrue(producer == self.producer)
