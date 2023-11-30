@@ -14,21 +14,22 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-
-import simulator_core.entities.heat_network
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.heat_network import HeatNetwork
 
 
-class HeatNetworkTest(unittest.TestCase):
-    """Testcase for HeatNetwork class."""
+class EsdlEnergySystemMapperTest(unittest.TestCase):
 
-    def test_heat_network(self) -> None:
-        """Generic/template test for Heatnetwork."""
-        # Arrange
-        assets = []
-        junctions = []
-        # Act
-        result = HeatNetwork(assets, junctions)
+    def test_to_entity(self):
+        # act
+        esdl_file_path = r'.\testdata\test1.esdl'
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        # arrange
+        network = EsdlEnergySystemMapper().to_entity(esdl_object)
+        # assert
+        self.assertIsInstance(network, HeatNetwork)
+        self.assertEquals(len(network.assets), 4)
+        self.assertEquals(len(network.junctions), 4)
 
-        # Assert
-        assert isinstance(result, simulator_core.entities.heat_network.HeatNetwork)

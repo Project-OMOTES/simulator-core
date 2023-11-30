@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Utililty functions for assets."""
+"""Utility functions for assets."""
 from pandapipes import pandapipesNet
-
+from enum import IntEnum
 
 def heat_demand_and_temperature_to_mass_flow(
     thermal_demand: float,
@@ -61,3 +61,9 @@ def mass_flow_and_temperature_to_heat_demand(
         (temperature_return + temperature_supply) / 2
     )
     return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
+
+
+class Port(IntEnum):
+    """Simple enumeration class to set if it is In (from) or out(to) port of asset."""
+    In = 0
+    Out = 1

@@ -25,7 +25,6 @@ class Junction:
 
     def __init__(
         self,
-        pandapipes_net: pandapipesNet,
         pn_bar: float = 5.0,
         tfluid_k: float = 300.0,
         height_m: float = 0.0,
@@ -35,7 +34,7 @@ class Junction:
         index: int = None,
     ):
         """Initialize a Junction object."""
-        self.pandapipes_net = pandapipes_net
+        self.pandapipes_net = None
         self.pn_bar = pn_bar
         self.tfluid_k = tfluid_k
         self.height_m = height_m
@@ -45,11 +44,11 @@ class Junction:
         self.index = index
         # Initialize the junction
         self._initialized = False
-        self._create()
 
-    def _create(self) -> None:
+    def create(self, pandapipes_net: pandapipesNet) -> None:
         """Register the junction in the pandapipes network."""
         if not self._initialized:
+            self.pandapipes_net = pandapipes_net
             self._initialized = True
             self.index = create_junction(
                 net=self.pandapipes_net,

@@ -17,6 +17,7 @@
 
 from typing import Dict
 from pandas import DataFrame
+from pandapipes import pandapipesNet
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
@@ -67,7 +68,7 @@ class Pipe(AssetAbstract):
         """
         pass
 
-    def _create(self) -> None:
+    def create(self, pandapipes_net: pandapipesNet) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
 
