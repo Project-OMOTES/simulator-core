@@ -78,13 +78,13 @@ class EsdlObject:
         connected_assets = []
         esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
-        type_port = InPort if port == Port.Out else OutPort
+        type_port = OutPort if port == Port.Out else InPort
         connected_port_ids = []
         for esdl_port in esdl_asset.port:
             if isinstance(esdl_port, type_port):
                 connected_port_ids = esdl_port.connectedTo
                 break
         for connected_port_id in connected_port_ids:
-            connected_port_type = Port.In if isinstance(connected_port_id, OutPort) else Port.Out
+            connected_port_type = Port.Out if isinstance(connected_port_id, OutPort) else Port.In
             connected_assets.append((connected_port_id.energyasset.id, connected_port_type))
         return connected_assets

@@ -27,7 +27,8 @@ class HeatNetwork:
         :param list[AssetAbstract] asset_list: List with assets in the network
         :param list[AssetAbstract] junction_list: List with junction in the network.
         """
-        pass
+        self.assets = asset_list
+        self.junctions = junction_list
 
     def run_time_step(self, time: float, controller_input: dict):
         """Method to simulate a time step.
