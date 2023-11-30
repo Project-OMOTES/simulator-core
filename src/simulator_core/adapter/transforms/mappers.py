@@ -13,16 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Mapper classes."""
+"""Mapper classes."""
 
-from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets import AssetAbstract, ProductionCluster, EsdlAssetObject
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.production_cluster import ProductionCluster
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-
-from typing import Any
+from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -45,9 +44,10 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         # create assets
         # create connection between them
 
-        assets_list = [EsdlAssetMapper().to_entity(asset)
-                       for asset in model.get_all_assets_of_type('asset')]
-        junction_list = model.get_all_assets_of_type('junction')
+        assets_list = [
+            EsdlAssetMapper().to_entity(asset) for asset in model.get_all_assets_of_type("asset")
+        ]
+        junction_list = model.get_all_assets_of_type("junction")
         return HeatNetwork(assets_list, junction_list)
 
 
@@ -63,6 +63,5 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
 
 class ProductionAssetMapper(EsdlAssetMapper):
-
     def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
         pass

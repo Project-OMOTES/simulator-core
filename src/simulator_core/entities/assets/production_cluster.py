@@ -17,7 +17,6 @@
 from typing import Dict
 from warnings import warn
 
-
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
