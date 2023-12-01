@@ -41,7 +41,7 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
+    def to_entity(self, model: EsdlAssetObject, pandapipes_net) -> AssetAbstract:
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
@@ -50,5 +50,5 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         if not type(model.esdl_asset) in self.conversion_dict:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
         return self.conversion_dict[type(model.esdl_asset)](
-            model.esdl_asset.name, model.esdl_asset.id
+            model.esdl_asset.name, model.esdl_asset.id, pandapipes_net
         )

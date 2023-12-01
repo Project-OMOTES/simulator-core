@@ -56,20 +56,20 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         py_assets_list = [
-            EsdlAssetMapper().to_entity(asset) for asset in self.esdl_object.
+            EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net) for esdl_asset in self.esdl_object.
             get_all_assets_of_type("asset")
         ]
         # loop over assets and create junctions and connect them
         py_junction_list = []
         for py_asset in py_assets_list:
             if py_asset.from_junction is None:
-                junction = Junction()
+                junction = Junction(pandapipes_net)
                 py_asset.from_junction = junction
                 connected_py_assets = (self.esdl_object.
                                        get_connected_assets(py_asset.asset_id, Port.In))
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
-                junction = Junction()
+                junction = Junction(pandapipes_net)
                 py_asset.to_junction = junction
                 connected_py_assets = (self.esdl_object.
                                        get_connected_assets(py_asset.asset_id, Port.Out))
@@ -82,6 +82,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 else:  # to
                     py_assets_list[index].to_junction = junction
             py_junction_list.append(junction)
+            py_asset.create()
         return py_assets_list, py_junction_list
 
 

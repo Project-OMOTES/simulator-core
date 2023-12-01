@@ -27,22 +27,18 @@ Junction = TypeVar("Junction")
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    from_junction: Junction | None
-    to_junction: Junction | None
-    pandapipes_net: pandapipesNet | None
-
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, panda_pipe_net: pandapipesNet):
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         """
-        self.from_junction = None
-        self.to_junction = None
+        self.from_junction: Junction = None
+        self.to_junction: Junction = None
         # Define the pandapipes network
-        self.pandapipes_net = None
-        self.name = asset_name
-        self.asset_id = asset_id
+        self.pandapipes_net: pandapipesNet = panda_pipe_net
+        self.name: str = asset_name
+        self.asset_id: str = asset_id
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -71,7 +67,7 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
 

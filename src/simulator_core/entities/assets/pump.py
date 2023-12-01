@@ -31,19 +31,16 @@ class CirculationPumpConstantMass(AssetAbstract):
 
     def __init__(
         self,
-        from_junction: Junction,
-        to_junction: Junction,
+        pandapipes_net: pandapipesNet,
         p_to_junction: float,
         mdot_kg_per_s: float,
         t_to_junction: float,
         in_service: bool = True,
         name: str = None,
-        index: int = None,
+        index: int = None
     ):
         """Initialize a CirculationPumpConstantMass object."""
-        super().__init__(name, str(uuid.uuid5()))
-        self.from_junction = from_junction
-        self.to_junction = to_junction
+        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()), panda_pipe_net=pandapipes_net)
         self.p_to_junction = p_to_junction
         self.mdot_kg_per_s = mdot_kg_per_s
         self.t_to_junction = t_to_junction
@@ -53,9 +50,9 @@ class CirculationPumpConstantMass(AssetAbstract):
         # Initialize the pump
         self._initialized = False
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
         if not self._initialized:
-            self.pandapipes_net = pandapipes_net
+            self.pandapipes_net = self.pandapipes_net
             self._initialized = True
             # Register the pump in the pandapipes network
             self.index = create_circ_pump_const_mass_flow(

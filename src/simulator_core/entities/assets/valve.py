@@ -29,8 +29,7 @@ class ControlValve(AssetAbstract):
 
     def __init__(
         self,
-        from_junction: Junction,
-        to_junction: Junction,
+        pandapipes_net: pandapipesNet,
         controlled_mdot_kg_per_s: float,
         diameter_m: float,
         control_active: bool = False,
@@ -39,9 +38,8 @@ class ControlValve(AssetAbstract):
         index: Optional[int] = None,
     ):
         """Initialize a ControlValve object."""
-        super().__init__(name, str(uuid.uuid4()))
-        self.from_junction = from_junction
-        self.to_junction = to_junction
+        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()),
+                         panda_pipe_net=pandapipes_net)
         self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
         self.diameter_m = diameter_m
         self.control_active = control_active
@@ -50,11 +48,9 @@ class ControlValve(AssetAbstract):
         # Initialize the control valve
         self._initialized = False
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
         """Register the control valve in the pandapipes network."""
         if not self._initialized:
-            self.pandapipes_net = pandapipes_net
-            self._initialized = True
             self.index = create_flow_control(
                 net=self.pandapipes_net,
                 from_junction=self.from_junction.index,
@@ -65,6 +61,7 @@ class ControlValve(AssetAbstract):
                 in_service=self.in_service,
                 name=self.name,
             )
+            self._initialized = True
 
     def set_setpoints(self, setpoints: Dict, **kwargs: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.

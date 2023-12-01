@@ -28,13 +28,14 @@ class Pipe(AssetAbstract):
             self,
             asset_name: str,
             asset_id: str,
+            panda_pipes_net: pandapipesNet
     ):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         """
-        super().__init__(asset_name, asset_id)
+        super().__init__(asset_name, asset_id, panda_pipes_net)
 
     def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
@@ -68,7 +69,7 @@ class Pipe(AssetAbstract):
         """
         return True
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
         """Placeholder to create an asset in a pandapipes network."""
         pass
 
