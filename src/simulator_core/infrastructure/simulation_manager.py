@@ -13,24 +13,37 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" Simulation manager creates and controls the simulation objects."""
+"""Simulation manager creates and controls the simulation objects."""
 
 from simulator_core.entities import EsdlObject, SimulationConfiguration
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper, EsdlControllerMapper
 from simulator_core.simulation import NetworkSimulation
+from simulator_core.entities import HeatNetwork
 import pandas as pd
 import numpy as np
 
 
 class SimulationManager:
+    """Manager class for managing the simulation."""
+
     def __init__(self, esdl: EsdlObject, config: SimulationConfiguration):
+        """Constructor for SimulationManager class.
+
+        :param EsdlObject esdl: Esdlobject, which stores the network information
+        :param SimulationConfiguration config: Config object to hold the simulation start, stop, end
+        """
         self.esdl = esdl
         self.config = config
 
     def execute(self):
-        # convert ESDL to Heat Network, NetworkController
+        """Method to simulate the network.
 
-        network = EsdlEnergySystemMapper().to_entity(self.esdl)
+        First the network is converted to pandapipes and then the simulation is run.
+
+        :return:
+        """
+        # convert ESDL to Heat Network, NetworkController
+        network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
         controller = EsdlControllerMapper().to_entity(self.esdl)
 
         worker = NetworkSimulation(network, controller)

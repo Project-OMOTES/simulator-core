@@ -15,22 +15,25 @@
 
 """HeatNetwork entity class."""
 
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from pandapipes import create_empty_network, pandapipesNet
+from typing import Callable, List, Tuple
+from simulator_core.entities.assets.asset_abstract import AssetAbstract, Junction
 
 
 class HeatNetwork:
     """Class to store information on the heat network."""
 
-    def __init__(self, asset_list: list[AssetAbstract], junction_list: list[AssetAbstract]):
+    def __init__(self, conversion_factory: Callable[[pandapipesNet], Tuple[List[AssetAbstract],
+                                                                           List[Junction]]]):
         """Constructor of heat network class.
 
-        :param list[AssetAbstract] asset_list: List with assets in the network
-        :param list[AssetAbstract] junction_list: List with junction in the network.
+        :param conversion_factory: method to convert the esdl network to pandapipes
+        assets and junctions and returns list of both
         """
-        self.assets = asset_list
-        self.junctions = junction_list
+        self.panda_pipes_net = create_empty_network(fluid="water")
+        self.assets, self.junctions = conversion_factory(self.panda_pipes_net)
 
-    def run_time_step(self, time: float, controller_input: dict):
+    def run_time_step(self, time: float, controller_input: dict) -> None:
         """Method to simulate a time step.
 
         :param float time: Timestep for which to simulate the model
@@ -39,7 +42,7 @@ class HeatNetwork:
         """
         pass
 
-    def store_output(self):
+    def store_output(self) -> None:
         """Method to store the output data.
 
         This method takes the data from the pandapipes dataframe and stores it into our own

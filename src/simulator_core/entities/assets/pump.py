@@ -21,7 +21,6 @@ from pandapipes import create_circ_pump_const_mass_flow, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.junction import Junction
 
 # TODO: Do we need to define a "general" pump class?
 
@@ -31,19 +30,16 @@ class CirculationPumpConstantMass(AssetAbstract):
 
     def __init__(
         self,
-        from_junction: Junction,
-        to_junction: Junction,
+        pandapipes_net: pandapipesNet,
         p_to_junction: float,
         mdot_kg_per_s: float,
         t_to_junction: float,
         in_service: bool = True,
         name: str = None,
-        index: int = None,
+        index: int = None
     ):
         """Initialize a CirculationPumpConstantMass object."""
-        super().__init__(name, str(uuid.uuid5()))
-        self.from_junction = from_junction
-        self.to_junction = to_junction
+        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()), pandapipe_net=pandapipes_net)
         self.p_to_junction = p_to_junction
         self.mdot_kg_per_s = mdot_kg_per_s
         self.t_to_junction = t_to_junction
@@ -53,9 +49,9 @@ class CirculationPumpConstantMass(AssetAbstract):
         # Initialize the pump
         self._initialized = False
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
+        """Register the control valve in the pandapipes network."""
         if not self._initialized:
-            self.pandapipes_net = pandapipes_net
             self._initialized = True
             # Register the pump in the pandapipes network
             self.index = create_circ_pump_const_mass_flow(
@@ -84,14 +80,14 @@ class CirculationPumpConstantMass(AssetAbstract):
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        pass
+        return {}
 
     def simulation_performed(self) -> bool:
         """Placeholder to indicate that a simulation has been performed.
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        pass
+        return True
 
     def add_physical_data(self, data: Dict[str, float]):
         """Placeholder method to add physical data to an asset."""

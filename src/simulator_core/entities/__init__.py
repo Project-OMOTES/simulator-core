@@ -17,3 +17,4 @@
 from .heat_network import HeatNetwork
 from .network_controller import NetworkController
 from .simulation_configuration import SimulationConfiguration
+from .esdl_object import EsdlObject

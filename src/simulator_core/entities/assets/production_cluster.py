@@ -24,6 +24,10 @@ from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
     DEFAULT_NODE_HEIGHT,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+    DEFAULT_MASS_FLOW_RATE,
+    DEFAULT_PRESSURE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
@@ -38,37 +42,39 @@ from simulator_core.entities.assets.utils import (
     mass_flow_and_temperature_to_heat_demand,
 )
 from simulator_core.entities.assets.valve import ControlValve
+from typing import Optional
 
 
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
-        super().__init__(asset_name, asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
-        self.temperature_supply = None
-        self.temperature_return = None
+        self.temperature_supply = DEFAULT_TEMPERATURE
+        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         # DemandCluster pressure specifications
-        self.pressure_supply = None
-        self.control_mass_flow = None
+        self.pressure_supply = DEFAULT_PRESSURE
+        self.control_mass_flow = DEFAULT_MASS_FLOW_RATE
         # Define internal diameter
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction = None
+        self._intermediate_junction: Optional[Junction] = None
         self._circ_pump = None
         self._flow_control = None
         # Controlled mass flow
         self._controlled_mass_flow = None
         # Output list
-        self.output = []
+        self.output: list = []
 
     def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
@@ -79,7 +85,7 @@ class ProductionCluster(AssetAbstract):
         """
         pass
 
-    def create(self, pandapipes_net: pandapipesNet) -> None:
+    def create(self) -> None:
         """Create a representation of the asset in pandapipes.
 
         The ProductionCluster asset contains multiple pandapipes components.
@@ -92,37 +98,38 @@ class ProductionCluster(AssetAbstract):
         :param pandapipesNet pandapipes_net: pandapipes network object
         """
         if not self._initialized:
-            self.pandapipes_net = pandapipes_net
             # Create intermediate junction
             self._intermediate_junction = Junction(
+                pandapipes_net=self.pandapipes_net,
                 pn_bar=self.pressure_supply,
                 tfluid_k=self.temperature_supply,
                 height_m=self.height_m,
                 name=f"intermediate_junction_{self.name}",
             )
-            self._intermediate_junction.create(self.pandapipes_net)
             # Create the pump to supply pressure and or massflow
             self._circ_pump = CirculationPumpConstantMass(
-                from_junction=self.from_junction,
-                to_junction=self._intermediate_junction,
+                pandapipes_net=self.pandapipes_net,
                 p_to_junction=self.pressure_supply,
                 mdot_kg_per_s=self._controlled_mass_flow,
                 t_to_junction=self.temperature_supply,
                 name=f"circ_pump_{self.name}",
                 in_service=True,
             )
-            self._circ_pump.create(self.pandapipes_net)
+            self._circ_pump.from_junction = self.from_junction
+            self._circ_pump.to_junction = self._intermediate_junction
+            self._circ_pump.create()
             # Create the control valve
             self._flow_control = ControlValve(
-                from_junction=self._intermediate_junction,
-                to_junction=self.to_junction,
+                pandapipes_net=self.pandapipes_net,
                 controlled_mdot_kg_per_s=self._controlled_mass_flow,
                 diameter_m=self._internal_diameter,
                 control_active=self.control_mass_flow,
                 in_service=True,
                 name=f"flow_control_{self.name}",
             )
-            self._flow_control.create(pandapipes_net)
+            self._flow_control.from_junction = self._intermediate_junction
+            self._flow_control.to_junction = self.to_junction
+            self._flow_control.create()
             self._initialized = True
 
     def _set_supply_temperature(self, temperature_supply: float) -> None:

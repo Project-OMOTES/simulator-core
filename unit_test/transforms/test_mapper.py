@@ -14,12 +14,14 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-from pathlib import Path
 
+from pathlib import Path
+from pandapipes import create_empty_network
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.entities.assets import (Junction, AssetAbstract)
+from typing import Tuple, List
 
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
@@ -28,9 +30,14 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        pandapipes_net = create_empty_network(fluid="water")
         # arrange
-        network = EsdlEnergySystemMapper().to_entity(esdl_object)
+        result = EsdlEnergySystemMapper(esdl_object).to_entity(pandapipes_net)
         # assert
-        self.assertIsInstance(network, HeatNetwork)
-        self.assertEqual(len(network.assets), 4)
-        self.assertEqual(len(network.junctions), 4)
+        self.assertIsInstance(result, Tuple)
+        self.assertIsInstance(result[0], List)
+        self.assertIsInstance(result[0][0], AssetAbstract)
+        self.assertIsInstance(result[1], List)
+        self.assertIsInstance(result[1][0], Junction)
+        self.assertEqual(len(result[0]), 4)
+        self.assertEqual(len(result[1]), 4)

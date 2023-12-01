@@ -15,9 +15,11 @@
 
 """Test Entitites."""
 import unittest
-from unittest.mock import Mock
-
+from pathlib import Path
 from simulator_core.entities import HeatNetwork
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class HeatNetworkTest(unittest.TestCase):
@@ -26,11 +28,12 @@ class HeatNetworkTest(unittest.TestCase):
     def test_heat_network(self) -> None:
         """Generic/template test for Heatnetwork."""
         # Arrange
-        junctions = Mock()
-        assets = Mock()
-
-        # Act
-        result = HeatNetwork(assets, junctions)
-
-        # Assert
-        self.assertIsInstance(result, HeatNetwork)
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        # arrange
+        network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
+        # assert
+        self.assertIsInstance(network, HeatNetwork)
+        self.assertEqual(len(network.assets), 4)
+        self.assertEqual(len(network.junctions), 4)
