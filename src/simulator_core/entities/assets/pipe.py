@@ -34,6 +34,7 @@ class Pipe(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
         super().__init__(asset_name, asset_id, panda_pipes_net)
 

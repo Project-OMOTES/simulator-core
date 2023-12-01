@@ -52,7 +52,6 @@ class CirculationPumpConstantMass(AssetAbstract):
     def create(self) -> None:
         """Register the control valve in the pandapipes network."""
         if not self._initialized:
-            self.pandapipes_net = self.pandapipes_net
             self._initialized = True
             # Register the pump in the pandapipes network
             self.index = create_circ_pump_const_mass_flow(

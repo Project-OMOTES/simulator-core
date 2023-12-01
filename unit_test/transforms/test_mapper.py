@@ -16,12 +16,13 @@
 import unittest
 
 from pathlib import Path
-from pandapipes import create_empty_network, pandapipesNet
+from pandapipes import create_empty_network
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-from simulator_core.entities.assets import ( Junction, AssetAbstract)
+from simulator_core.entities.assets import (Junction, AssetAbstract)
 from typing import Tuple, List
+
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
     def test_to_entity(self):

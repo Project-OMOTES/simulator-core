@@ -27,16 +27,17 @@ Junction = TypeVar("Junction")
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    def __init__(self, asset_name: str, asset_id: str, panda_pipe_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
         self.from_junction: Junction = None
         self.to_junction: Junction = None
         # Define the pandapipes network
-        self.pandapipes_net: pandapipesNet = panda_pipe_net
+        self.pandapipes_net: pandapipesNet = pandapipe_net
         self.name: str = asset_name
         self.asset_id: str = asset_id
 
@@ -76,7 +77,7 @@ class AssetAbstract(ABC):
         """Placeholder method to add physical data to an asset."""
         pass
 
-    def connect_junctions(self, from_junction, to_junction) -> None:
+    def connect_junctions(self, from_junction: Junction, to_junction: Junction) -> None:
         """Method to connect junctions to a asset.
 
         :param Junction from_junction: The junction where the asset starts.

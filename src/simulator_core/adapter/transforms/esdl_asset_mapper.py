@@ -45,6 +45,8 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param PandapipesNet pandapipes_net: Pandapipes network object to which
+        the asset need to register.
         :return: Entity object.
         """
         if not type(model.esdl_asset) in self.conversion_dict:
