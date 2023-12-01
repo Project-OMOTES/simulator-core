@@ -15,6 +15,7 @@
 
 """Test esdl object class."""
 import unittest
+from unittest.mock import Mock
 from pathlib import Path
 
 import esdl
@@ -56,10 +57,11 @@ class EsdlObjectTest(unittest.TestCase):
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
+        pandapipes_net = Mock()
         # Act
-        asset_producer = EsdlAssetMapper().to_entity(producers[0])
-        asset_consumer = EsdlAssetMapper().to_entity(consumers[0])
-        asset_pipe = EsdlAssetMapper().to_entity(pipes[0])
+        asset_producer = EsdlAssetMapper().to_entity(producers[0], pandapipes_net)
+        asset_consumer = EsdlAssetMapper().to_entity(consumers[0], pandapipes_net)
+        asset_pipe = EsdlAssetMapper().to_entity(pipes[0], pandapipes_net)
         # Assert
         self.assertTrue(isinstance(asset_producer, ProductionCluster))
         self.assertTrue(isinstance(asset_consumer, DemandCluster))

@@ -17,7 +17,7 @@
 from typing import Any
 
 import esdl
-
+from pandapipes import pandapipesNet
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -41,7 +41,7 @@ class EsdlAssetMapper(EsdlMapperAbstract):
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlAssetObject, pandapipes_net) -> AssetAbstract:
+    def to_entity(self, model: EsdlAssetObject, pandapipes_net:pandapipesNet) -> AssetAbstract:
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
