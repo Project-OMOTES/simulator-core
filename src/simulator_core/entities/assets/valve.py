@@ -38,7 +38,7 @@ class ControlValve(AssetAbstract):
     ):
         """Initialize a ControlValve object."""
         super().__init__(asset_name=name, asset_id=str(uuid.uuid4()),
-                         panda_pipe_net=pandapipes_net)
+                         pandapipe_net=pandapipes_net)
         self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
         self.diameter_m = diameter_m
         self.control_active = control_active

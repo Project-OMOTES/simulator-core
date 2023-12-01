@@ -48,14 +48,14 @@ from typing import Optional
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
 
-    def __init__(self, asset_name: str, asset_id: str, panda_pipes_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id, panda_pipe_net=panda_pipes_net)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None

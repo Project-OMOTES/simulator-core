@@ -39,7 +39,7 @@ class CirculationPumpConstantMass(AssetAbstract):
         index: int = None
     ):
         """Initialize a CirculationPumpConstantMass object."""
-        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()), panda_pipe_net=pandapipes_net)
+        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()), pandapipe_net=pandapipes_net)
         self.p_to_junction = p_to_junction
         self.mdot_kg_per_s = mdot_kg_per_s
         self.t_to_junction = t_to_junction
