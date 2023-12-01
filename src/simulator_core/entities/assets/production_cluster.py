@@ -103,7 +103,7 @@ class ProductionCluster(AssetAbstract):
             # Create the pump to supply pressure and or massflow
             self._circ_pump = CirculationPumpConstantMass(
                 pandapipes_net=self.pandapipes_net,
-                p_to_junction=0.5, #self.pressure_supply,
+                p_to_junction=0.5,  # self.pressure_supply,
                 mdot_kg_per_s=self._controlled_mass_flow,
                 t_to_junction=self.temperature_supply,
                 name=f"circ_pump_{self.name}",

@@ -21,7 +21,6 @@ from pandapipes import create_flow_control, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.junction import Junction
 
 
 class ControlValve(AssetAbstract):

@@ -21,7 +21,6 @@ from pandapipes import create_circ_pump_const_mass_flow, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.junction import Junction
 
 # TODO: Do we need to define a "general" pump class?
 
@@ -51,6 +50,7 @@ class CirculationPumpConstantMass(AssetAbstract):
         self._initialized = False
 
     def create(self) -> None:
+        """Register the control valve in the pandapipes network."""
         if not self._initialized:
             self.pandapipes_net = self.pandapipes_net
             self._initialized = True

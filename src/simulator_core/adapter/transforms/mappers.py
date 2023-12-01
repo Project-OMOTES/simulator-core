@@ -56,7 +56,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         py_assets_list = [
-            EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net) for esdl_asset in self.esdl_object.
+            EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net)
+            for esdl_asset in self.esdl_object.
             get_all_assets_of_type("asset")
         ]
         # loop over assets and create junctions and connect them
