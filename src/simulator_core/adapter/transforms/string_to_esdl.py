@@ -18,6 +18,7 @@ import esdl
 from simulator_core.adapter.transforms.transform_utils import reverse_dict
 from typing import List
 
+
 class StringEsdlAssetMapper:
     """Mapper class to convert strings to an esdl class type and vica-versa.
 

@@ -126,7 +126,7 @@ class ProductionCluster(AssetAbstract):
                 in_service=True,
                 name=f"flow_control_{self.name}",
             )
-            self._flow_control.from_junction = self.intermediate_junction
+            self._flow_control.from_junction = self._intermediate_junction
             self._flow_control.to_junction = self.to_junction
             self._flow_control.create()
             self._initialized = True
@@ -314,9 +314,3 @@ class ProductionCluster(AssetAbstract):
             (self.asset_id, column_name) for column_name in temp_dataframe.columns
         ]
         return temp_dataframe
-
-    @property
-    def intermediate_junction(self) -> Junction:
-        if self._intermediate_junction is None:
-            raise AttributeError("Intermediate junction is not set.")
-        return self._intermediate_junction

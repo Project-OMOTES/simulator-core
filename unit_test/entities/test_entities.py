@@ -19,8 +19,9 @@ from pathlib import Path
 from simulator_core.entities import HeatNetwork
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.infrastructure.utils import pyesdl_from_file
+
+
 class HeatNetworkTest(unittest.TestCase):
     """Testcase for HeatNetwork class."""
 
