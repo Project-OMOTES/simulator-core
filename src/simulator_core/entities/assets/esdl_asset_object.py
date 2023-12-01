@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from esdl import esdl
 
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +34,10 @@ class EsdlKey:
     """
 
     name: str
-    default: any
+    default: Any
 
 
-ASSET_DICT = {
+ASSET_DICT: Dict[str, Dict[str, EsdlKey]] = {
     "producer": {},
     "consumer": {},
     "pipe": {

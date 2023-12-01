@@ -55,11 +55,11 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :param pandapipesNet pandapipes_net: Pandapipes net to register asset and junctions in
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
-        py_assets_list = [
-            EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net)
-            for esdl_asset in self.esdl_object.
-            get_all_assets_of_type("asset")
-        ]
+        py_assets_list = []
+        for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
+            py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net))
+            py_assets_list[-1].add_physical_data(esdl_asset.get_asset_parameters())
+
         # loop over assets and create junctions and connect them
         py_junction_list = []
         for py_asset in py_assets_list:

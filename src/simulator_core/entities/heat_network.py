@@ -33,7 +33,7 @@ class HeatNetwork:
         self.panda_pipes_net = create_empty_network(fluid="water")
         self.assets, self.junctions = conversion_factory(self.panda_pipes_net)
 
-    def run_time_step(self, time: float, controller_input: dict):
+    def run_time_step(self, time: float, controller_input: dict) -> None:
         """Method to simulate a time step.
 
         :param float time: Timestep for which to simulate the model
@@ -42,7 +42,7 @@ class HeatNetwork:
         """
         pass
 
-    def store_output(self):
+    def store_output(self) -> None:
         """Method to store the output data.
 
         This method takes the data from the pandapipes dataframe and stores it into our own

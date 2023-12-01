@@ -62,13 +62,13 @@ class ProductionCluster(AssetAbstract):
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction = None
+        self._intermediate_junction: Junction = None
         self._circ_pump = None
         self._flow_control = None
         # Controlled mass flow
         self._controlled_mass_flow = None
         # Output list
-        self.output = []
+        self.output:list = []
 
     def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.

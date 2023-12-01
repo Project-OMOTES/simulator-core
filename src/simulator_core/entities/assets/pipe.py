@@ -46,7 +46,7 @@ class Pipe(AssetAbstract):
         """
         pass
 
-    def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
+    def set_setpoints(self, setpoints: Dict, **kwargs: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -54,7 +54,7 @@ class Pipe(AssetAbstract):
         """
         pass
 
-    def get_setpoints(self, **kwargs) -> Dict:
+    def get_setpoints(self, **kwargs: dict) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the

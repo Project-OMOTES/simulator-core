@@ -72,11 +72,11 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def add_physical_data(self, data: Dict[str, float]):
+    def add_physical_data(self, data: Dict[str, float]) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 
-    def connect_junctions(self, from_junction, to_junction):
+    def connect_junctions(self, from_junction, to_junction) -> None:
         """Method to connect junctions to a asset.
 
         :param Junction from_junction: The junction where the asset starts.

@@ -81,14 +81,14 @@ class CirculationPumpConstantMass(AssetAbstract):
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        pass
+        return {}
 
     def simulation_performed(self) -> bool:
         """Placeholder to indicate that a simulation has been performed.
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        pass
+        return True
 
     def add_physical_data(self, data: Dict[str, float]):
         """Placeholder method to add physical data to an asset."""
