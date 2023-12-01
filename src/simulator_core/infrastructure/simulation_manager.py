@@ -51,6 +51,7 @@ class SimulationManager:
 
         # Run output presenter that iterates over het network (/controller?) and
         # gathers the output into a single data object
+        result = worker.gather_output()
 
         # return dataframe.
         return pd.DataFrame(

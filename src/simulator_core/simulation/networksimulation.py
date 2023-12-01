@@ -17,6 +17,7 @@
 
 from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
 import logging
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,6 @@ class NetworkSimulation:
         """Instantiate the NetworkSimulation object."""
         self.network = network
         self.controller = controller
-        self.output = []
 
     def run(self, config: SimulationConfiguration):
         """Run the simulation.
@@ -44,4 +44,12 @@ class NetworkSimulation:
                 # to get stuff running. Also need to add break after 10 iteration.
                 logger.debug("Simulating for timestep " + str(time))
                 self.network.run_time_step(time, controller_input)
-            self.output.append(self.network.store_output())
+            self.network.store_output()
+
+    def gather_output(self) -> Dict[str, Dict[str, List[float]]]:
+        """Gathers all output and return a dict with this output.
+
+        :return: Dict with all output from all assets.
+        """
+        result = self.network.gather_output()
+        return result

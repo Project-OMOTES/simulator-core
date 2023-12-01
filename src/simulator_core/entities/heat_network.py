@@ -15,8 +15,8 @@
 
 """HeatNetwork entity class."""
 
-from pandapipes import create_empty_network, pandapipesNet
-from typing import Callable, List, Tuple
+from pandapipes import create_empty_network, pandapipesNet, pipeflow, PipeflowNotConverged
+from typing import Callable, List, Tuple, Dict
 from simulator_core.entities.assets.asset_abstract import AssetAbstract, Junction
 
 
@@ -36,11 +36,20 @@ class HeatNetwork:
     def run_time_step(self, time: float, controller_input: dict) -> None:
         """Method to simulate a time step.
 
+        It first sets the controller input to the assets and then simulates the time step.
+
         :param float time: Timestep for which to simulate the model
         :param dict controller_input: Dict specifying the heat demand for the different assets.
         :return: None
         """
-        pass
+        for py_asset in self.assets:
+            if py_asset.asset_id in controller_input:
+                py_asset.set_setpoints(controller_input[py_asset.asset_id])
+        try:
+            # pipeflow(self.panda_pipes_net, "all")
+            i = 1
+        except PipeflowNotConverged:
+            raise RuntimeError("Error in time step calculation pipe flow did not converge.")
 
     def store_output(self) -> None:
         """Method to store the output data.
@@ -50,4 +59,18 @@ class HeatNetwork:
         not converged for the input of the controller.
         :return: None
         """
-        pass
+        for py_asset in self.assets:
+            py_asset.write_to_output()
+        for py_junction in self.junctions:
+            py_junction.write_to_output()
+
+    def gather_output(self) -> Dict[str, Dict[str, List[float]]]:
+        """Method to gather output of all assets and return it as a dict.
+
+        :return: Dict with for all asset a dict with all outputs.
+        """
+        # Todo what do we do with the junction output do we need it?
+        result = {}
+        for py_asset in self.assets:
+            result[py_asset.asset_id] = py_asset.get_output()
+        return result
