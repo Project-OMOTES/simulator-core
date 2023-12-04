@@ -15,9 +15,9 @@
 
 """Simulates an heat network for the specified duration."""
 
+from pandas import DataFrame
 from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
 import logging
-from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +46,10 @@ class NetworkSimulation:
                 self.network.run_time_step(time, controller_input)
             self.network.store_output()
 
-    def gather_output(self) -> Dict[str, Dict[str, List[float]]]:
+    def gather_output(self) -> DataFrame:
         """Gathers all output and return a dict with this output.
 
-        :return: Dict with all output from all assets.
+        :return: DataFrame with all the results for the simulation
         """
         result = self.network.gather_output()
         return result

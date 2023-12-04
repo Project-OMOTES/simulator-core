@@ -24,15 +24,15 @@ class Junction:
     """Wrapper class for pandapipes junctions."""
 
     def __init__(
-        self,
-        pandapipes_net: pandapipesNet,
-        pn_bar: float = 5.0,
-        tfluid_k: float = 300.0,
-        height_m: float = 0.0,
-        geodata: Optional[List[Any]] = None,
-        name: str = "None",
-        in_service: bool = True,
-        index: Optional[int] = None,
+            self,
+            pandapipes_net: pandapipesNet,
+            pn_bar: float = 5.0,
+            tfluid_k: float = 300.0,
+            height_m: float = 0.0,
+            geodata: Optional[List[Any]] = None,
+            name: str = "None",
+            in_service: bool = True,
+            index: Optional[int] = None,
     ):
         """Initialize a Junction object."""
         self.pandapipes_net = pandapipes_net

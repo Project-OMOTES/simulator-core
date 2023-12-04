@@ -15,8 +15,9 @@
 
 """HeatNetwork entity class."""
 
+import pandas as pd
 from pandapipes import create_empty_network, pandapipesNet, pipeflow, PipeflowNotConverged
-from typing import Callable, List, Tuple, Dict
+from typing import Callable, List, Tuple
 from simulator_core.entities.assets.asset_abstract import AssetAbstract, Junction
 
 
@@ -46,8 +47,10 @@ class HeatNetwork:
             if py_asset.asset_id in controller_input:
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
         try:
-            # pipeflow(self.panda_pipes_net, "all")
-            i = 1
+            pass
+            # pipeflow(self.panda_pipes_net, "all") This lien can be used when all
+            # components are in pp.
+
         except PipeflowNotConverged:
             raise RuntimeError("Error in time step calculation pipe flow did not converge.")
 
@@ -64,13 +67,13 @@ class HeatNetwork:
         for py_junction in self.junctions:
             py_junction.write_to_output()
 
-    def gather_output(self) -> Dict[str, Dict[str, List[float]]]:
+    def gather_output(self) -> pd.DataFrame:
         """Method to gather output of all assets and return it as a dict.
 
         :return: Dict with for all asset a dict with all outputs.
         """
         # Todo what do we do with the junction output do we need it?
-        result = {}
+        result = pd.DataFrame()
         for py_asset in self.assets:
-            result[py_asset.asset_id] = py_asset.get_output()
+            result = pd.concat([result, py_asset.get_timeseries()])
         return result

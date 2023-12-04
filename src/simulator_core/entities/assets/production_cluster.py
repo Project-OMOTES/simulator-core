@@ -73,8 +73,6 @@ class ProductionCluster(AssetAbstract):
         self._flow_control = None
         # Controlled mass flow
         self._controlled_mass_flow = None
-        # Output list
-        self.output: list = []
 
     def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
@@ -220,14 +218,14 @@ class ProductionCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        #if self.pandapipes_net.res_circ_pump_mass is AttributeError:
-            # TODO: Implement specific error
-       #     return False
-       # else:
-            # Retrieve the setpoints
-      #      return True
+        if self.pandapipes_net.res_circ_pump_mass is AttributeError:
+            #  TODO: Implement specific error
+            return False
+        else:
+            #  Retrieve the setpoints
+            return True
 
-    def get_setpoints(self) -> Dict:
+    def get_setpoints(self) -> Dict[str, float]:
         """Get the setpoints of the asset.
 
         :return Dict setpoints: The setpoints of the asset in a dictionary,
@@ -249,7 +247,6 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_TEMPERATURE_RETURN: temp_return,
             PROPERTY_HEAT_DEMAND: heat_demand,
         }
-
 
     def update(self) -> None:
         """Update the asset properties to the results from the previous (timestep) simulation.
