@@ -15,9 +15,15 @@
 
 from simulator_core.simulation.networksimulation import NetworkSimulation
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.network_controller import NetworkController
 import unittest
 import uuid
 from unittest.mock import Mock
+from pathlib import Path
 
 
 class NetworkSimulationTest(unittest.TestCase):
@@ -33,8 +39,11 @@ class NetworkSimulationTest(unittest.TestCase):
 
     def test_network_simulation_run(self):
         # Arrange
-        network = Mock()
-        controller = Mock()
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
+        controller = NetworkController()
         network_simulation = NetworkSimulation(network, controller)
         config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                          name="test run",
@@ -44,5 +53,6 @@ class NetworkSimulationTest(unittest.TestCase):
         # Act
         network_simulation.run(config)
         # Assert
-        self.assertEqual(len(network_simulation.output), config.stop / config.timestep)
+        # this does not work since the network is mocked.
+        self.assertEqual(len(network_simulation.gather_output()), config.stop / config.timestep)
 
