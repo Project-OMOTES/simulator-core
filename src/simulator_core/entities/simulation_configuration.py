@@ -22,6 +22,7 @@ import uuid
 @dataclass
 class SimulationConfiguration:
     """Class to store configuration parameters of the simulations."""
+
     simulation_id: uuid.UUID
     name: str
     timestep: int
