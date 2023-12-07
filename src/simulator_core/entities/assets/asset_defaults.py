@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Define default values and names for assets."""
+from dataclasses import dataclass
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
@@ -23,6 +24,27 @@ DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
 DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 
+
+@dataclass
+class PipeDefaults:
+    """Class containing the default values for a pipe.
+
+    :param float k_value: The k value of the pipe [m].
+    :param float alpha_value: The alpha value of the pipe [W/(m2 K)].
+    :param float minor_loss_coefficient: The minor loss coefficient of the pipe [-].
+    :param float external_temperature: The external temperature of the pipe [K].
+    :param float qheat_external: The external heat flow of the pipe [W].
+    """
+
+    k_value: float = 2e-3
+    alpha_value: float = 0.0
+    minor_loss_coefficient: float = 0.0
+    external_temperature: float = 273.15 + 20.0
+    qheat_external: float = 0.0
+    length: float = 1.0
+    diameter: float = DEFAULT_DIAMETER
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_TEMPERATURE_SUPPLY = "temperature_supply"
@@ -30,3 +52,8 @@ PROPERTY_TEMPERATURE_RETURN = "temperature_return"
 PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
 PROPERTY_MASSFLOW = "mass_flow"
+PROPERTY_VELOCITY_SUPPLY = "velocity_supply"
+PROPERTY_VELOCITY_RETURN = "velocity_return"
+
+# Static members
+PIPE_DEFAULTS = PipeDefaults()
