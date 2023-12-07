@@ -16,10 +16,10 @@
 """Define default values and names for assets."""
 
 # Default values
-DEFAULT_DIAMETER = 1.2  # [m]
+DEFAULT_DIAMETER = 0.4  # [m]
 DEFAULT_PRESSURE = 5.0  # [bar]
-DEFAULT_TEMPERATURE = 300.0  # [K]
-DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
+DEFAULT_TEMPERATURE = 358.0  # [K]
+DEFAULT_TEMPERATURE_DIFFERENCE = 50.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
 DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 
