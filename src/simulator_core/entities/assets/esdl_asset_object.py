@@ -16,11 +16,11 @@
 """Module containing classes to be able to interact with esdl objects."""
 import logging
 from dataclasses import dataclass
+from typing import Any, Dict
 
 from esdl import esdl
 
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -93,3 +93,10 @@ class EsdlAssetObject:
                 logger.warning(f"Default value of {esdl_key.default} used for {esdl_key.name}.")
                 parameters[parameter_key] = esdl_key.default
         return parameters
+
+    def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
+        """Get property value from the esdl_asset based on the "ESDL" name."""
+        try:
+            return getattr(self.esdl_asset, esdl_property_name)
+        except AttributeError:
+            return default_value
