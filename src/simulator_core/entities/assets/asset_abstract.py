@@ -28,10 +28,10 @@ EsdlAssetObject = TypeVar("EsdlAssetObject")
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    from_junction: Junction
+    from_junction: Junction | None
     """The junction where the asset starts."""
 
-    to_junction: Junction
+    to_junction: Junction | None
     """The junction where the asset ends."""
 
     pandapipes_net: pandapipesNet
@@ -53,8 +53,8 @@ class AssetAbstract(ABC):
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
-        # self.from_junction = None
-        # self.to_junction: Junction = None
+        self.from_junction = None
+        self.to_junction: Junction = None
         # Define the pandapipes network
         self.pandapipes_net = pandapipe_net
         self.name = asset_name
@@ -94,14 +94,18 @@ class AssetAbstract(ABC):
         """Placeholder method to add physical data to an asset."""
         pass
 
-    def connect_junctions(self, from_junction: Junction, to_junction: Junction) -> None:
-        """Method to connect junctions to a asset.
+    def set_from_juction(self, from_junction: Junction) -> None:
+        """Method to set the from junction of an asset.
 
         :param Junction from_junction: The junction where the asset starts.
-        :param Junction to_junction: The junction where the asset end.
-        :return:
         """
         self.from_junction = from_junction
+
+    def set_to_junction(self, to_junction: Junction) -> None:
+        """Method to set the to junction of an asset.
+
+        :param Junction to_junction: The junction where the asset ends.
+        """
         self.to_junction = to_junction
 
     @abstractmethod
