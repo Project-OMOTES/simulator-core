@@ -14,16 +14,22 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Mapper classes."""
+from typing import List, Tuple
+
 from pandapipes import pandapipesNet
+
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.entities.assets import (EsdlAssetObject, Junction, ProductionCluster,
-                                            AssetAbstract)
+from simulator_core.entities.assets import (
+    AssetAbstract,
+    EsdlAssetObject,
+    Junction,
+    ProductionCluster,
+)
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from typing import List, Tuple
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -45,8 +51,9 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
-    def to_entity(self, pandapipes_net: pandapipesNet) -> Tuple[List[AssetAbstract],
-                                                                List[Junction]]:
+    def to_entity(
+        self, pandapipes_net: pandapipesNet
+    ) -> Tuple[List[AssetAbstract], List[Junction]]:
         """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
@@ -58,7 +65,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         py_assets_list = []
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
             py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net))
-            py_assets_list[-1].add_physical_data(esdl_asset.get_asset_parameters())
+            py_assets_list[-1].add_physical_data(esdl_asset=EsdlAssetObject(esdl_asset))
 
         # loop over assets and create junctions and connect them
         py_junction_list = []
@@ -67,14 +74,16 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             if py_asset.from_junction is None:
                 junction = Junction(pandapipes_net=pandapipes_net)
                 py_asset.from_junction = junction
-                connected_py_assets = (self.esdl_object.
-                                       get_connected_assets(py_asset.asset_id, Port.In))
+                connected_py_assets = self.esdl_object.get_connected_assets(
+                    py_asset.asset_id, Port.In
+                )
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
                 junction = Junction(pandapipes_net)
                 py_asset.to_junction = junction
-                connected_py_assets = (self.esdl_object.
-                                       get_connected_assets(py_asset.asset_id, Port.Out))
+                connected_py_assets = self.esdl_object.get_connected_assets(
+                    py_asset.asset_id, Port.Out
+                )
             for connected_py_asset in connected_py_assets:
                 index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                     connected_py_asset[0]

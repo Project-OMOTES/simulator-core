@@ -22,6 +22,7 @@ from pandapipes import pandapipesNet
 from pandas import DataFrame
 
 Junction = TypeVar("Junction")
+EsdlAssetObject = TypeVar("EsdlAssetObject")
 
 
 class AssetAbstract(ABC):
@@ -89,7 +90,7 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 
