@@ -82,19 +82,19 @@ def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float],
     layer_thicknesses = []
     diameters = []
     heat_coef = []
-    if esdl_asset.material is not None:
-        if hasattr(esdl_asset.material, "component"):
-            material_object = esdl_asset.material.component
-        elif hasattr(esdl_asset.material, "reference"):
-            material_object = esdl_asset.material.reference.component
+    if esdl_asset.esdl_asset.material is not None:
+        if hasattr(esdl_asset.esdl_asset.material, "component"):
+            material_object = esdl_asset.esdl_asset.material.component
+        elif hasattr(esdl_asset.esdl_asset.material, "reference"):
+            material_object = esdl_asset.esdl_asset.material.reference.component
         else:
             raise NotImplementedError("Unknown material type or reference.")
         # Append initial internal diameter
-        diameters.append(esdl_asset.innerDiameter)
+        diameters.append(esdl_asset.esdl_asset.innerDiameter)
         # Loop over material object
         for layer in material_object:
             layer_thicknesses.append(layer.layerWidth * 2)
-            diameters.append(sum(layer_thicknesses) + esdl_asset.innerDiameter)
+            diameters.append(sum(layer_thicknesses) + esdl_asset.esdl_asset.innerDiameter)
             heat_coef.append(layer.matter.thermalConductivity)
     return diameters, heat_coef
 

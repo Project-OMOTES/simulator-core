@@ -17,20 +17,18 @@
 
 
 from typing import Dict
-from pandas import DataFrame
+
 from pandapipes import pandapipesNet
+from pandas import DataFrame
+
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
 class DemandCluster(AssetAbstract):
     """A DemandCluster represents an asset that consumes heat."""
 
-    def __init__(
-            self,
-            asset_name: str,
-            asset_id: str,
-            panda_pipes_net: pandapipesNet
-    ):
+    def __init__(self, asset_name: str, asset_id: str, panda_pipes_net: pandapipesNet):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
@@ -39,7 +37,7 @@ class DemandCluster(AssetAbstract):
         """
         super().__init__(asset_name, asset_id, panda_pipes_net)
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 
         :param dict data:dictionary containing the data to be added the asset. The key is the name

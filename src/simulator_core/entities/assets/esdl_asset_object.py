@@ -39,9 +39,13 @@ class EsdlAssetObject:
         """
         self.esdl_asset = asset
 
-    def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
-        """Get property value from the esdl_asset based on the "ESDL" name."""
+    def get_property(self, esdl_property_name: str, default_value: Any) -> (Any, bool):
+        """Get property value from the esdl_asset based on the "ESDL" name.
+
+        :return: Tuple with the value of the property and a boolean indicating whether the property
+        was found in the esdl_asset.
+        """
         try:
-            return getattr(self.esdl_asset, esdl_property_name)
+            return (getattr(self.esdl_asset, esdl_property_name), True)
         except AttributeError:
-            return default_value
+            return (default_value, False)
