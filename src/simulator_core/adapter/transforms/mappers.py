@@ -65,7 +65,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         py_assets_list = []
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
             py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset, pandapipes_net))
-            py_assets_list[-1].add_physical_data(esdl_asset=EsdlAssetObject(esdl_asset))
+            py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
 
         # loop over assets and create junctions and connect them
         py_junction_list = []
@@ -89,9 +89,9 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                     connected_py_asset[0]
                 )
                 if connected_py_asset[1] == Port.In:  # from
-                    py_assets_list[index].from_junction = junction
+                    py_assets_list[index].set_to_junction(to_junction=junction)
                 else:  # to
-                    py_assets_list[index].to_junction = junction
+                    py_assets_list[index].set_from_juction(from_junction=junction)
             py_junction_list.append(junction)
             py_asset.create()
         return py_assets_list, py_junction_list
