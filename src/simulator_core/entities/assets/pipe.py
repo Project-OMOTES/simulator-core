@@ -121,7 +121,7 @@ class Pipe(AssetAbstract):
                 coefficient cannot be calculated - for example when the material table is
                 not specified - , the default alpha value is returned.
         """
-        diameters, heat_coefficients = get_thermal_conductivity_table(esdl_asset=EsdlAssetObject)
+        diameters, heat_coefficients = get_thermal_conductivity_table(esdl_asset=esdl_asset)
         if diameters:
             # Create a numpy array of the diameters and heat coefficients
             diameters = np.array(diameters)

@@ -15,12 +15,12 @@
 
 """Simulation manager creates and controls the simulation objects."""
 
-from simulator_core.entities import EsdlObject, SimulationConfiguration
-from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper, EsdlControllerMapper
-from simulator_core.simulation import NetworkSimulation
-from simulator_core.entities import HeatNetwork
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from simulator_core.adapter.transforms.mappers import EsdlControllerMapper, EsdlEnergySystemMapper
+from simulator_core.entities import EsdlObject, HeatNetwork, SimulationConfiguration
+from simulator_core.simulation import NetworkSimulation
 
 
 class SimulationManager:
@@ -56,5 +56,5 @@ class SimulationManager:
         return pd.DataFrame(
             np.random.randn(10, 3),
             index=pd.date_range("1/1/2001", periods=10, freq="H"),
-            columns=['DEMO flowrate', 'DEMO Pressure', 'DEMO Temperature'],
+            columns=["DEMO flowrate", "DEMO Pressure", "DEMO Temperature"],
         )
