@@ -17,7 +17,7 @@
 from typing import Dict, List
 
 import numpy as np
-from pandapipes import pandapipesNet
+from pandapipes import create_pipe_from_parameters, pandapipesNet
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -88,9 +88,10 @@ class Pipe(AssetAbstract):
         """Create a representation of the pipe in the pandapipes network."""
         if not self._initialized:
             # Create the pipe in the pandapipes network
-            self._pipe_index = self.pandapipes_net.create_pipe(
-                from_junction=self.from_junction,
-                to_junction=self.to_junction,
+            self._pipe_index = create_pipe_from_parameters(
+                net=self.pandapipes_net,
+                from_junction=self.from_junction.index,
+                to_junction=self.to_junction.index,
                 length_km=self.length * 1e-3,
                 diameter_m=self.diameter,
                 k_mm=self.roughness * 1e3,
