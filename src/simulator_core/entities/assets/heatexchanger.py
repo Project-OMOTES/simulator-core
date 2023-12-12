@@ -44,6 +44,7 @@ class HeatExchanger:
         self._initialized = False
 
     def create(self) -> None:
+        """Register the heat exchanger in the pandapipes network."""
         if not self._initialized:
             self._initialized = True
             # Register the heat exchanger in the pandapipes network
