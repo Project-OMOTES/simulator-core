@@ -27,15 +27,7 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
     DEFAULT_SUPPLY_TEMPERATURE,
     DEFAULT_RETURN_TEMPERATURE,
-    DEFAULT_MASS_FLOW_RATE,
     DEFAULT_PRESSURE,
-    PROPERTY_THERMAL_POWER,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN_TARGET,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
 )
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.heatexchanger import HeatExchanger
@@ -154,7 +146,7 @@ class DemandCluster(AssetAbstract):
             temp_supply = self.parameters['temperature_supply_desired']
             Cp = net.fluid.get_heat_capacity(temp_supply)
             dT = temp_supply - self.parameters['temperature_return_target']
-            self.states['mass_flowrate'] = self.setpoints['thermal_power_allocation'] /(Cp * dT)
+            self.states['mass_flowrate'] = self.setpoints['thermal_power_allocation'] / (Cp * dT)
 
         if self._flow_control.control_active == True:  # if pump is active, set flowrate to meet Target Temperature
             self._heat_exchanger.qext_w = self.setpoints['thermal_power_allocation']
@@ -323,9 +315,9 @@ if __name__ == "__main__":
     if using_demand_cluster == False:
         # Create Demand
         intermediate_junction = Junction(pandapipes_net=net,
-                                                   pn_bar=DEFAULT_PRESSURE,
-                                                   tfluid_k=DEFAULT_SUPPLY_TEMPERATURE,
-                                                   name='intermediate junction ' + 'DemandCluster1')
+                                         pn_bar=DEFAULT_PRESSURE,
+                                         tfluid_k=DEFAULT_SUPPLY_TEMPERATURE,
+                                         name='intermediate junction ' + 'DemandCluster1')
 
         pp.create_flow_control(net,
                                from_junction=j1.index,
@@ -367,7 +359,6 @@ if __name__ == "__main__":
         demand_setpoints = dict()
         demand_setpoints['thermal_power_allocation'] = demand_power
         demand_cluster.set_setpoints(demand_setpoints)
-
 
     # producer
     net.circ_pump_mass.mdot_flow_kg_per_s[0] = supply_flow
