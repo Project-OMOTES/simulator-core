@@ -16,7 +16,6 @@
 """ProductionCluster class."""
 
 from typing import Dict
-from warnings import warn
 
 from pandapipes import pandapipesNet
 from pandas import DataFrame
@@ -148,12 +147,15 @@ class DemandCluster(AssetAbstract):
             dT = temp_supply - self.parameters['temperature_return_target']
             self.states['mass_flowrate'] = self.setpoints['thermal_power_allocation'] / (Cp * dT)
 
-        if self._flow_control.control_active == True:  # if pump is active, set flowrate to meet Target Temperature
+        if self._flow_control.control_active is True:
+            # if pump is active, set flowrate to meet Target Temperature
             self._heat_exchanger.qext_w = self.setpoints['thermal_power_allocation']
 
             demand_flow = self.setpoints['thermal_power_allocation'] / (Cp * dT)
-            self.pandapipes_net.flow_control.controlled_mdot_kg_per_s[self._flow_control.index] = demand_flow
-        else:  # if pump is disabled, set thermal power to meet Target Temperature
+            self.pandapipes_net.flow_control.controlled_mdot_kg_per_s[self._flow_control.index] \
+                = demand_flow
+        else:
+            # if pump is disabled, set thermal power to meet Target Temperature
             demand_power = self.states['mass_flowrate'] * Cp * dT
             self.pandapipes_net.heat_exchanger.qext_w[self._heat_exchanger.index] = demand_power
 
@@ -186,70 +188,78 @@ class DemandCluster(AssetAbstract):
     def update_states(self):
         """Placeholder to update states attributes of an asset.
 
+        if simulation has been performed, the states properties is updated from pandapipe_net
         """
-
         if self.simulation_performed():
             water_density = net.fluid.get_density(
                 self.pandapipes_net.res_heat_exchanger['t_from_k'][self._heat_exchanger.index])
             water_heat_capacity = net.fluid.get_heat_capacity(
-                self.pandapipes_net.res_heat_exchanger['t_from_k'][self._heat_exchanger.index])
-            dT = self.pandapipes_net.res_heat_exchanger['t_from_k'][self._heat_exchanger.index] - \
-                 self.pandapipes_net.res_heat_exchanger['t_to_k'][self._heat_exchanger.index]
+                self.pandapipes_net.res_heat_exchanger['t_from_k']
+                [self._heat_exchanger.index])
+            dT = self.pandapipes_net.res_heat_exchanger['t_from_k']
+            [self._heat_exchanger.index] - \
+                self.pandapipes_net.res_heat_exchanger['t_to_k']
+            [self._heat_exchanger.index]
 
-            self.states['temperature_input'] = self.pandapipes_net.res_flow_control[
-                't_from_k'][self._flow_control.index]
-            self.states['temperature_output'] = self.pandapipes_net.res_heat_exchanger[
-                't_to_k'][self._heat_exchanger.index]
-            self.states['mass_flowrate'] = self.pandapipes_net.res_heat_exchanger[
-                'mdot_from_kg_per_s'][self._heat_exchanger.index]
-            self.states['volume_flowrate'] = self.states['mass_flowrate'] * 3600 / water_density
-            self.states['thermal_power'] = self.states['mass_flowrate'] * water_heat_capacity * dT
-            self.states['pressure_input'] = self.pandapipes_net.res_flow_control['p_from_bar'][self._flow_control.index]
-            self.states['pressure_output'] = self.pandapipes_net.res_heat_exchanger[
-                'p_to_bar'][self._heat_exchanger.index]
+        self.states['temperature_input'] = self.pandapipes_net.res_flow_control[
+            't_from_k'][self._flow_control.index]
+        self.states['temperature_output'] = self.pandapipes_net.res_heat_exchanger[
+            't_to_k'][self._heat_exchanger.index]
+        self.states['mass_flowrate'] = self.pandapipes_net.res_heat_exchanger[
+            'mdot_from_kg_per_s'][self._heat_exchanger.index]
+        self.states['volume_flowrate'] = self.states['mass_flowrate'] * 3600 / water_density
+        self.states['thermal_power'] = self.states['mass_flowrate'] * water_heat_capacity * dT
+        self.states['pressure_input'] = self.pandapipes_net.res_flow_control['p_from_bar'][
+            self._flow_control.index]
+        self.states['pressure_output'] = self.pandapipes_net.res_heat_exchanger[
+            'p_to_bar'][self._heat_exchanger.index]
 
-    def get_results(self) -> Dict:
-        """Placeholder to get the results attributes of an asset.
 
-        :return Dict: The results of the asset. The keys of the dictionary are the names of the
-            results and the values are the values.
-        """
+def get_results(self) -> Dict:
+    """Placeholder to get the results attributes of an asset.
 
-        results = self.states  # currenty publish states as results
+    :return Dict: The results of the asset. The keys of the dictionary are the names of the
+        results and the values are the values.
+    """
+    results = self.states  # currenty publish states as results
 
-        return results
+    return results
 
-    def simulation_performed(self) -> bool:
-        """Check if the simulation has been performed.
 
-        :return bool simulation_performed: True if the simulation has been performed,
-            False otherwise.
-        """
-        return self._simulated
+def simulation_performed(self) -> bool:
+    """Check if the simulation has been performed.
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
-        """Method to add physical data to the asset.
+    :return bool simulation_performed: True if the simulation has been performed,
+        False otherwise.
+    """
+    return self._simulated
 
-        :param dict data:dictionary containing the data to be added the asset. The key is the name
-                        of the property, the value of the dict is the value of the property.
-        :return:
-        """
-        pass
 
-    def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
+def add_physical_data(self, data: Dict[str, float]) -> None:
+    """Method to add physical data to the asset.
 
-        The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
-        """
-        pass
+    :param dict data:dictionary containing the data to be added the asset. The key is the name
+                    of the property, the value of the dict is the value of the property.
+    :return:
+    """
+    pass
 
-    def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
 
-        The header is a tuple of the asset id and the property name.
-        """
-        pass
+def write_to_output(self) -> None:
+    """Placeholder to write the asset to the output.
+
+    The output list is a list of dictionaries, where each dictionary
+    represents the output of its asset for a specific timestep.
+    """
+    pass
+
+
+def get_timeseries(self) -> DataFrame:
+    """Get timeseries as a dataframe from a pandapipes asset.
+
+    The header is a tuple of the asset id and the property name.
+    """
+    pass
 
 
 if __name__ == "__main__":
@@ -312,7 +322,7 @@ if __name__ == "__main__":
                                         name='ProductionCluster1',
                                         type='auto')
 
-    if using_demand_cluster == False:
+    if using_demand_cluster is False:
         # Create Demand
         intermediate_junction = Junction(pandapipes_net=net,
                                          pn_bar=DEFAULT_PRESSURE,
@@ -346,7 +356,7 @@ if __name__ == "__main__":
     demand_flow = demand_power / (Cp * dT)
     supply_flow = demand_flow
 
-    if using_demand_cluster == False:
+    if using_demand_cluster is False:
         # demand
         net.heat_exchanger.qext_w[0] = demand_power
         flow_control_index = net.flow_control.index[
@@ -362,13 +372,14 @@ if __name__ == "__main__":
 
     # producer
     net.circ_pump_mass.mdot_flow_kg_per_s[0] = supply_flow
-    flow_control_index = net.flow_control.index[net.flow_control.name.str.contains(net.circ_pump_mass.name[0])].tolist()
+    flow_control_index = net.flow_control.index[net.flow_control.name.str.contains(
+        net.circ_pump_mass.name[0])].tolist()
     net.flow_control.controlled_mdot_kg_per_s[flow_control_index] = supply_flow
     net.flow_control.control_active[flow_control_index] = False
 
     pp.pipeflow(net, mode='all')
 
-    if using_demand_cluster == False:
+    if using_demand_cluster is False:
         pass
     else:
         demand_cluster._simulated = True
