@@ -35,6 +35,8 @@ class HeatExchanger:
         self.pandapipes_net = pandapipes_net
         self.diameter_m = diameter_m
         self.heat_flux_w = heat_flux_w
+        self.from_junction = Junction
+        self.to_junction = Junction
         self.in_service = in_service
         self.name = name
         self.index = index
