@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-from typing import Dict
+from typing import Dict, Optional
 from warnings import warn
 
 from pandapipes import pandapipesNet
@@ -23,11 +23,11 @@ from pandas import DataFrame
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
+    DEFAULT_MASS_FLOW_RATE,
     DEFAULT_NODE_HEIGHT,
+    DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
-    DEFAULT_MASS_FLOW_RATE,
-    DEFAULT_PRESSURE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
@@ -42,7 +42,6 @@ from simulator_core.entities.assets.utils import (
     mass_flow_and_temperature_to_heat_demand,
 )
 from simulator_core.entities.assets.valve import ControlValve
-from typing import Optional
 
 
 class ProductionCluster(AssetAbstract):
