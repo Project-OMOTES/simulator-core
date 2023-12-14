@@ -18,6 +18,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
+from pytest import raises
+
 from simulator_core.entities.assets.utils import (
     calculate_heat_transfer_coefficient,
     get_thermal_conductivity_table,
@@ -127,5 +129,5 @@ class UtilFunctionTest(unittest.TestCase):
         delattr(esdl_asset_mock.esdl_asset.material, "component")
         delattr(esdl_asset_mock.esdl_asset.material, "reference")
         # Assert
-        with self.assertRaises(NotImplementedError):
+        with raises(NotImplementedError):
             get_thermal_conductivity_table(esdl_asset=esdl_asset_mock)

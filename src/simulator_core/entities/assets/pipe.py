@@ -134,7 +134,7 @@ class Pipe(AssetAbstract):
                 calculate_heat_transfer_coefficient(
                     inner_diameter=diameters[:-1],
                     outer_diameter=diameters[1:],
-                    thermal_conductivity=heat_coefficients[:-1],
+                    thermal_conductivity=heat_coefficients,
                 )
             )
             return 1 / heat_transfer_coefficient
