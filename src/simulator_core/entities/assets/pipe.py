@@ -61,20 +61,19 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str, panda_pipes_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=panda_pipes_net)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
         # Initialize the default values of the pipe
         self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient
         self._external_temperature = PIPE_DEFAULTS.external_temperature
         self._qheat_external = PIPE_DEFAULTS.qheat_external
         # Define properties of the pipe
-        # TODO: Define the defaults or set values?
         self.length = PIPE_DEFAULTS.length
         self.diameter = PIPE_DEFAULTS.diameter
         self.roughness = PIPE_DEFAULTS.k_value
@@ -110,7 +109,10 @@ class Pipe(AssetAbstract):
             return temp_diameter
         else:
             # Implement DN-conversion
-            raise NotImplementedError
+            raise NotImplementedError(
+                f"The innderDiamter property is unavailable for {esdl_asset.name}. \
+                    Conversion from DN to diameter is not yet implemented."
+            )
 
     def _get_heat_transfer_coefficient(self, esdl_asset: EsdlAssetObject) -> float:
         """Calculate the heat transfer coefficient of the pipe.
@@ -146,10 +148,10 @@ class Pipe(AssetAbstract):
                 current pipe object.
         """
         # Error handling is performed in EsdlAssetObject.get_asset_parameters
-        self.length, length_available = esdl_asset.get_property(
+        self.length, _ = esdl_asset.get_property(
             esdl_property_name="length", default_value=self.length
         )
-        self.roughness, roughness_available = esdl_asset.get_property(
+        self.roughness, _ = esdl_asset.get_property(
             esdl_property_name="roughness", default_value=self.length
         )
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)

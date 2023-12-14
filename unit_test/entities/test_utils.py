@@ -122,10 +122,10 @@ class UtilFunctionTest(unittest.TestCase):
         """Test get_thermal_conductivity_table."""
         # Arrange
         esdl_asset_mock = Mock()
+        # Act
         esdl_asset_mock.esdl_asset.material.Error = "Error"
         delattr(esdl_asset_mock.esdl_asset.material, "component")
         delattr(esdl_asset_mock.esdl_asset.material, "reference")
-        # Act
         # Assert
         with self.assertRaises(NotImplementedError):
             get_thermal_conductivity_table(esdl_asset=esdl_asset_mock)

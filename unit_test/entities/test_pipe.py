@@ -13,34 +13,85 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Test Entitites."""
+"""Test Junction entities."""
 import unittest
-from pathlib import Path
+from unittest.mock import Mock
 
 import pandapipes as pp
 
-from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from simulator_core.entities.assets import Junction, Pipe
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class PipeTest(unittest.TestCase):
     """Testcase for HeatNetwork class."""
 
     def setUp(self):
+        """Set up test case."""
         # Create empty pandapipes network
         self.network = pp.create_empty_network()
         # Create two junctions
-        self.from_juction = Junction("from_junction", "from_junction_id", self.network)
-        self.to_junction = Junction("to_junction", "to_junction_id", self.network)
+        self.from_junction = Junction(name="from_junction", pandapipes_net=self.network)
+        self.to_junction = Junction(name="to_junction", pandapipes_net=self.network)
 
-    def test_pipe_init(self):
-        """Generic/template test for Pipe."""
+    def test_pipe_create(self):
+        """Evaluate the creation of a pipe object."""
         # Arrange
-        pipe = Pipe("pipe", "pipe_id", self.network)
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe.from_junction = self.from_junction
+        pipe.to_junction = self.to_junction
+
+        # Act
+        pipe.create()
+
         # Assert
-        self.assertIsInstance(pipe, Pipe)
-        self.assertEqual(pipe.name, "pipe")
-        self.assertEqual(pipe.id, "pipe_id")
-        self.assertEqual(pipe.network, self.network)
+        assert isinstance(pipe, Pipe)
+        assert pipe.name == "pipe"
+        assert pipe.asset_id == "pipe_id"
+        assert pipe.pandapipes_net == self.network
+        assert any(self.network.pipe.name == "Pipe_pipe")
+
+    def test_pipe_unit_conversion(self):
+        """Evaluate the unit conversion of the pipe object."""
+        # Arrange
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe.from_junction = self.from_junction
+        pipe.to_junction = self.to_junction
+        pipe.create()
+
+        # Act
+        pp_pipe_dataframe = self.network.pipe.iloc[pipe._pipe_index]
+
+        # Assert
+        assert pp_pipe_dataframe["length_km"] == pipe.length * 1e-3
+        assert pp_pipe_dataframe["k_mm"] == pipe.roughness * 1e3
+
+    def test_pipe_get_property_diameter(self):
+        """Evaluate the get property diameter method to retrieve diameters."""
+        # Arrange
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe.from_junction = self.from_junction
+        pipe.to_junction = self.to_junction
+        esdl_asset_mock = Mock()
+        esdl_asset_mock.get_property.return_value = (1.0, True)
+
+        # Act
+        pipe.create()
+
+        # Assert
+        assert pipe._get_diameter(esdl_asset=esdl_asset_mock) == 1.0
+
+    def test_pipe_get_property_diameter_failed(self):
+        """Evaluate failure to retrieve diameter from ESDL asset."""
+        # Arrange
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe.from_junction = self.from_junction
+        pipe.to_junction = self.to_junction
+        esdl_asset_mock = Mock()
+        esdl_asset_mock.get_property.return_value = (1.0, False)
+
+        # Act
+        pipe.create()
+
+        # Assert
+        with self.assertRaises(NotImplementedError):
+            pipe._get_diameter(esdl_asset=esdl_asset_mock)
