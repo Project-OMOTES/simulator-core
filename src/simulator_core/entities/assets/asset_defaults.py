@@ -17,12 +17,11 @@
 from dataclasses import dataclass
 
 # Default values
-DEFAULT_DIAMETER = 0.4  # [m]
+DEFAULT_DIAMETER = 1.2  # [m]
 DEFAULT_PRESSURE = 5.0  # [bar]
+DEFAULT_PRESSURE_DIFFERENCE = 0.5  # [bar]
 DEFAULT_TEMPERATURE = 300.0  # [K]
 DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
-DEFAULT_SUPPLY_TEMPERATURE = 358.0  # [K]
-DEFAULT_RETURN_TEMPERATURE = 308.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
 DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 
@@ -50,10 +49,9 @@ class PipeDefaults:
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_TEMPERATURE_SUPPLY = "temperature_supply"
-PROPERTY_TEMPERATURE_SUPPLY_TARGET = "temperature_supply_target"
 PROPERTY_TEMPERATURE_RETURN = "temperature_return"
-PROPERTY_TEMPERATURE_RETURN_TARGET = "temperature_return_target"
 PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
 PROPERTY_MASSFLOW = "mass_flow"
+PROPERTY_VOLUMEFLOW = "volume_flow"
 PROPERTY_THERMAL_POWER = "thermal_power"
