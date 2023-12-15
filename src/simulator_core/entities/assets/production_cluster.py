@@ -278,7 +278,7 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
         if not self.simulation_performed():
-            return  # Remove this when you can perform a simulation
+            return  # TODO Remove this when you can perform a simulation, check is also performed
             raise ValueError("Simulation data not available.")
         # Retrieve the general model setpoints (Ts, Tr, Qh)
         setpoints = self.get_setpoints()
