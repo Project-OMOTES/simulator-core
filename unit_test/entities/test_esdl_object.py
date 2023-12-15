@@ -86,7 +86,7 @@ class EsdlObjectTest(unittest.TestCase):
         length, property_available = asset.get_property("length", 0.0)
         # Assert
         assert length == asset.esdl_asset.length
-        assert property_available is True
+        assert property_available
 
     def test_get_property_not_found(self):
         """Test get_property when the property is not found."""
