@@ -33,7 +33,7 @@ from simulator_core.entities.assets.asset_defaults import (
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.utils import (
-    calculate_heat_transfer_coefficient,
+    calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
     mass_flow_and_temperature_to_heat_demand,
 )
@@ -130,14 +130,14 @@ class Pipe(AssetAbstract):
             diameters = np.array(diameters)
             heat_coefficients = np.array(heat_coefficients)
             # Calculate the heat transfer coefficient from the heat transfer table
-            heat_transfer_coefficient = np.sum(
-                calculate_heat_transfer_coefficient(
+            inverse_heat_transfer_coefficient = np.sum(
+                calculate_inverse_heat_transfer_coefficient(
                     inner_diameter=diameters[:-1],
                     outer_diameter=diameters[1:],
                     thermal_conductivity=heat_coefficients,
                 )
             )
-            return 1 / heat_transfer_coefficient
+            return 1 / inverse_heat_transfer_coefficient
         else:
             return self.alpha_value
 
