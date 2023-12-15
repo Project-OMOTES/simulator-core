@@ -20,10 +20,10 @@ from pandapipes import pandapipesNet
 
 
 def heat_demand_and_temperature_to_mass_flow(
-    thermal_demand: float,
-    temperature_supply: float,
-    temperature_return: float,
-    pandapipes_net: pandapipesNet,
+        thermal_demand: float,
+        temperature_supply: float,
+        temperature_return: float,
+        pandapipes_net: pandapipesNet,
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
@@ -43,10 +43,10 @@ def heat_demand_and_temperature_to_mass_flow(
 
 
 def mass_flow_and_temperature_to_heat_demand(
-    temperature_supply: float,
-    temperature_return: float,
-    mass_flow: float,
-    pandapipes_net: pandapipesNet,
+        temperature_supply: float,
+        temperature_return: float,
+        mass_flow: float,
+        pandapipes_net: pandapipesNet,
 ) -> float:
     """Calculate the thermal demand that is met by the mass flow rate.
 
@@ -63,6 +63,40 @@ def mass_flow_and_temperature_to_heat_demand(
         (temperature_return + temperature_supply) / 2
     )
     return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
+
+
+def mass_flow_to_volume_flow(
+        mass_flowrate: float,
+        temperature_fluid: float,
+        pandapipes_net: pandapipesNet,
+) -> float:
+    """Calculate the volume flowrate from mass flowrate.
+
+    :param float mass_flowrate: the mass flowrate in kg/s
+    :param float temperature_fluid: the fluid temperature in K
+    :param pandapipesNet net: The pandapipes network used to calculate the specific density.
+    """
+    density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
+    volume_flowrate = mass_flowrate * 3600 / density_fluid
+
+    return volume_flowrate
+
+
+def volume_flow_to_mass_flow(
+        volume_flowrate: float,
+        temperature_fluid: float,
+        pandapipes_net: pandapipesNet,
+) -> float:
+    """Calculate the mass flowrate from volume flowrate.
+
+    :param float volume_flowrate: the volume flowrate in m3/h
+    :param float temperature_fluid: the fluid temperature in K
+    :param pandapipesNet net: The pandapipes network used to calculate the specific density.
+    """
+    density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
+    mass_flowrate = volume_flowrate / 3600 * density_fluid
+
+    return mass_flowrate
 
 
 class Port(IntEnum):
