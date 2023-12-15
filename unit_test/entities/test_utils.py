@@ -21,7 +21,7 @@ from unittest.mock import Mock
 from pytest import raises
 
 from simulator_core.entities.assets.utils import (
-    calculate_heat_transfer_coefficient,
+    calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
     heat_demand_and_temperature_to_mass_flow,
     mass_flow_and_temperature_to_heat_demand,
@@ -82,8 +82,8 @@ class UtilFunctionTest(unittest.TestCase):
         # Assert
         assert heat_demand_calculated == 1000.0
 
-    def test_calculate_heat_transfer_coefficient(self) -> None:
-        """Test calculate_heat_transfer_coefficient.
+    def test_calculate_inverse_heat_transfer_coefficient(self) -> None:
+        """Test calculate_inverse_heat_transfer_coefficient.
 
         The method returns the inverse of the heat transfer coefficient.
         """
@@ -92,7 +92,7 @@ class UtilFunctionTest(unittest.TestCase):
         outer_diameter = 0.2
         thermal_conductivity = 0.5
         # Act
-        heat_transfer_coefficient = calculate_heat_transfer_coefficient(
+        heat_transfer_coefficient = calculate_inverse_heat_transfer_coefficient(
             inner_diameter, outer_diameter, thermal_conductivity
         )
         # Assert
