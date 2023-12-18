@@ -23,17 +23,16 @@ from pandapipes import create_junction, pandapipesNet
 class Junction:
     """Wrapper class for pandapipes junctions."""
 
-    def __init__(
-        self,
-        pandapipes_net: pandapipesNet,
-        pn_bar: float = 5.0,
-        tfluid_k: float = 300.0,
-        height_m: float = 0.0,
-        geodata: Optional[List[Any]] = None,
-        name: str = "None",
-        in_service: bool = True,
-        index: Optional[int] = None,
-    ):
+    def __init__(self,
+                 pandapipes_net: pandapipesNet,
+                 pn_bar: float = 5.0,
+                 tfluid_k: float = 300.0,
+                 height_m: float = 0.0,
+                 geodata: Optional[List[Any]] = None,
+                 name: str = "None",
+                 in_service: bool = True,
+                 index: Optional[int] = None,
+                 ):
         """Initialize a Junction object."""
         self.pandapipes_net = pandapipes_net
         self.pn_bar = pn_bar
@@ -60,3 +59,11 @@ class Junction:
                 name=self.name,
                 in_service=self.in_service,
             )
+
+    def write_to_output(self) -> None:
+        """Placeholder to write the asset to the output.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+        """
+        pass

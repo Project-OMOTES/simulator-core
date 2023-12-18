@@ -73,8 +73,6 @@ class ProductionCluster(AssetAbstract):
         self._flow_control = None
         # Controlled mass flow
         self._controlled_mass_flow = None
-        # Output list
-        self.output: list = []
 
     def add_physical_data(self, data: Dict[str, float]) -> None:
         """Method to add physical data to the asset.
@@ -220,39 +218,31 @@ class ProductionCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        if self.pandapipes_net.res_circ_pump_mass is AttributeError:
-            # TODO: Implement specific error
-            return False
-        else:
-            # Retrieve the setpoints
-            return True
+        return hasattr(self.pandapipes_net, 'res_circ_pump_mass')
 
-    def get_setpoints(self) -> Dict:
+    def get_setpoints(self) -> Dict[str, float]:
         """Get the setpoints of the asset.
 
         :return Dict setpoints: The setpoints of the asset in a dictionary,
             as "property_name": value pairs.
         """
         # Return the setpoints
-        if self.simulation_performed():
-            temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
-            temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
-            mass_flow = self.pandapipes_net.res_circ_pump_mass["mdot_flow_kg_per_s"][
-                self._circ_pump.index
-            ]
-            heat_demand = mass_flow_and_temperature_to_heat_demand(
-                temperature_supply=temp_supply,
-                temperature_return=temp_return,
-                mass_flow=mass_flow,
-                pandapipes_net=self.pandapipes_net,
-            )
-            return {
-                PROPERTY_TEMPERATURE_SUPPLY: temp_supply,
-                PROPERTY_TEMPERATURE_RETURN: temp_return,
-                PROPERTY_HEAT_DEMAND: heat_demand,
-            }
-        else:
+        if not self.simulation_performed():
             raise ValueError("Simulation data not available.")
+        temp_supply = self.pandapipes_net.res_junction["tfluid_k"][self.to_junction.index]
+        temp_return = self.pandapipes_net.res_junction["tfluid_k"][self.from_junction.index]
+        mass_flow = self.pandapipes_net.circ_pump_mass["mdot_flow_kg_per_s"][self._circ_pump.index]
+        heat_demand = mass_flow_and_temperature_to_heat_demand(
+            temperature_supply=temp_supply,
+            temperature_return=temp_return,
+            mass_flow=mass_flow,
+            pandapipes_net=self.pandapipes_net,
+        )
+        return {
+            PROPERTY_TEMPERATURE_SUPPLY: temp_supply,
+            PROPERTY_TEMPERATURE_RETURN: temp_return,
+            PROPERTY_HEAT_DEMAND: heat_demand,
+        }
 
     def update(self) -> None:
         """Update the asset properties to the results from the previous (timestep) simulation.
@@ -261,17 +251,17 @@ class ProductionCluster(AssetAbstract):
         to the values of the previous simulation. In addition, the mass flow rate is set
         to the value of the previous simulation.
         """
-        if self.simulation_performed():
-            # Retrieve the setpoints (Ts, Tr, Qh)
-            setpoints = self.get_setpoints()
-            # Set the setpoints (Ts, Tr, Qh)
-            self.set_setpoints(setpoints)
-            # Set massflow
-            self._controlled_mass_flow = self.pandapipes_net.res_circ_pump_mass[
-                "mdot_flow_kg_per_s"
-            ][self._circ_pump.index]
-        else:
+        if not self.simulation_performed():
             raise ValueError("Simulation data not available.")
+
+        # Retrieve the setpoints (Ts, Tr, Qh)
+        setpoints = self.get_setpoints()
+        # Set the setpoints (Ts, Tr, Qh)
+        self.set_setpoints(setpoints)
+        # Set massflow
+        self._controlled_mass_flow = self.pandapipes_net.res_circ_pump_mass[
+            "mdot_flow_kg_per_s"
+        ][self._circ_pump.index]
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
@@ -287,6 +277,9 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
+        if not self.simulation_performed():
+            return  # TODO Remove this when you can perform a simulation, check is also performed
+            raise ValueError("Simulation data not available.")
         # Retrieve the general model setpoints (Ts, Tr, Qh)
         setpoints = self.get_setpoints()
         # Retrieve the mass flow (mdot)

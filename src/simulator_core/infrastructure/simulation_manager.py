@@ -15,12 +15,11 @@
 
 """Simulation manager creates and controls the simulation objects."""
 
+from pandas import DataFrame
 from simulator_core.entities import EsdlObject, SimulationConfiguration
 from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper, EsdlControllerMapper
 from simulator_core.simulation import NetworkSimulation
 from simulator_core.entities import HeatNetwork
-import pandas as pd
-import numpy as np
 
 
 class SimulationManager:
@@ -35,12 +34,12 @@ class SimulationManager:
         self.esdl = esdl
         self.config = config
 
-    def execute(self):
+    def execute(self) -> DataFrame:
         """Method to simulate the network.
 
         First the network is converted to pandapipes and then the simulation is run.
 
-        :return:
+        :return: DataFrame with the result of the simulations
         """
         # convert ESDL to Heat Network, NetworkController
         network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
@@ -51,10 +50,4 @@ class SimulationManager:
 
         # Run output presenter that iterates over het network (/controller?) and
         # gathers the output into a single data object
-
-        # return dataframe.
-        return pd.DataFrame(
-            np.random.randn(10, 3),
-            index=pd.date_range("1/1/2001", periods=10, freq="H"),
-            columns=['DEMO flowrate', 'DEMO Pressure', 'DEMO Temperature'],
-        )
+        return worker.gather_output()

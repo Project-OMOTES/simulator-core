@@ -16,7 +16,7 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, TypeVar
+from typing import Dict, TypeVar, List
 
 from pandapipes import pandapipesNet
 from pandas import DataFrame
@@ -40,6 +40,7 @@ class AssetAbstract(ABC):
         self.pandapipes_net: pandapipesNet = pandapipe_net
         self.name: str = asset_name
         self.asset_id: str = asset_id
+        self.output: List[Dict[str, float]] = []
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -78,7 +79,7 @@ class AssetAbstract(ABC):
         pass
 
     def connect_junctions(self, from_junction: Junction, to_junction: Junction) -> None:
-        """Method to connect junctions to a asset.
+        """Method to connect junctions to an asset.
 
         :param Junction from_junction: The junction where the asset starts.
         :param Junction to_junction: The junction where the asset end.
@@ -89,12 +90,15 @@ class AssetAbstract(ABC):
 
     @abstractmethod
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
-
-        The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
-        """
+        """Placeholder to get data from pandapipes and store it in the asset."""
         pass
+
+    def get_output(self) -> List[Dict[str, float]]:
+        """Returns all the output of the asset.
+
+        :return: A dict of property name and list of values.
+        """
+        return self.output
 
     @abstractmethod
     def get_timeseries(self) -> DataFrame:
