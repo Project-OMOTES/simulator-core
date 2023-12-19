@@ -16,16 +16,35 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, TypeVar, List
+from typing import Dict, List, TypeVar
 
 from pandapipes import pandapipesNet
 from pandas import DataFrame
 
 Junction = TypeVar("Junction")
+EsdlAssetObject = TypeVar("EsdlAssetObject")
 
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
+
+    from_junction: Junction | None
+    """The junction where the asset starts."""
+
+    to_junction: Junction | None
+    """The junction where the asset ends."""
+
+    pandapipes_net: pandapipesNet
+    """The pandapipes network to which the asset belongs."""
+
+    name: str
+    """The name of the asset."""
+
+    asset_id: str
+    """The unique identifier of the asset."""
+
+    output: List[Dict[str, float]]
+    """The output of the asset as a list with a dictionary per timestep."""
 
     def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
         """Basic constructor for asset objects.
@@ -34,7 +53,7 @@ class AssetAbstract(ABC):
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
-        self.from_junction: Junction = None
+        self.from_junction = None
         self.to_junction: Junction = None
         # Define the pandapipes network
         self.pandapipes_net: pandapipesNet = pandapipe_net
@@ -42,8 +61,7 @@ class AssetAbstract(ABC):
         self.asset_id: str = asset_id
         self.output: List[Dict[str, float]] = []
 
-    @abstractmethod
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: Dict) -> None:  # noqa: B027
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -51,14 +69,13 @@ class AssetAbstract(ABC):
         """
         pass
 
-    @abstractmethod
     def get_setpoints(self) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        pass
+        return {}
 
     @abstractmethod
     def simulation_performed(self) -> bool:
@@ -74,18 +91,22 @@ class AssetAbstract(ABC):
         pass
 
     @abstractmethod
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 
-    def connect_junctions(self, from_junction: Junction, to_junction: Junction) -> None:
-        """Method to connect junctions to an asset.
+    def set_from_juction(self, from_junction: Junction) -> None:
+        """Method to set the from junction of an asset.
 
         :param Junction from_junction: The junction where the asset starts.
-        :param Junction to_junction: The junction where the asset end.
-        :return:
         """
         self.from_junction = from_junction
+
+    def set_to_junction(self, to_junction: Junction) -> None:
+        """Method to set the to junction of an asset.
+
+        :param Junction to_junction: The junction where the asset ends.
+        """
         self.to_junction = to_junction
 
     @abstractmethod
@@ -100,10 +121,15 @@ class AssetAbstract(ABC):
         """
         return self.output
 
-    @abstractmethod
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
 
         The header is a tuple of the asset id and the property name.
         """
-        pass
+        # Create dataframe
+        temp_dataframe = DataFrame(self.output)
+        # Set header
+        temp_dataframe.columns = [
+            (self.asset_id, column_name) for column_name in temp_dataframe.columns
+        ]
+        return temp_dataframe

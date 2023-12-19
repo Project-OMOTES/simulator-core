@@ -19,21 +19,37 @@ from typing import Any, List, Optional
 
 from pandapipes import create_junction, pandapipesNet
 
+from simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_NODE_HEIGHT,
+    DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE,
+)
+
 
 class Junction:
     """Wrapper class for pandapipes junctions."""
 
-    def __init__(self,
-                 pandapipes_net: pandapipesNet,
-                 pn_bar: float = 5.0,
-                 tfluid_k: float = 300.0,
-                 height_m: float = 0.0,
-                 geodata: Optional[List[Any]] = None,
-                 name: str = "None",
-                 in_service: bool = True,
-                 index: Optional[int] = None,
-                 ):
-        """Initialize a Junction object."""
+    def __init__(
+        self,
+        pandapipes_net: pandapipesNet,
+        pn_bar: float = DEFAULT_PRESSURE,
+        tfluid_k: float = DEFAULT_TEMPERATURE,
+        height_m: float = DEFAULT_NODE_HEIGHT,
+        geodata: Optional[List[Any]] = None,
+        name: str = "None",
+        in_service: bool = True,
+        index: Optional[int] = None,
+    ):
+        """Initialize a Junction object.
+
+        :param pn_bar: The pressure at the junction [bar], defaults to DEFAULT_PRESSURE
+        :type pn_bar: float, optional
+        :param tfluid_k: The temperature at the junction [K], defaults to DEFAULT_TEMPERATURE
+        :type tfluid_k: float, optional
+        :param height_m: The height of the junction [m], defaults to DEFAULT_NODE_HEIGHT
+        :type height_m: float, optional
+
+        """
         self.pandapipes_net = pandapipes_net
         self.pn_bar = pn_bar
         self.tfluid_k = tfluid_k

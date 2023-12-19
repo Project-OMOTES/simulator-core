@@ -18,7 +18,6 @@ from typing import Dict, Optional
 from warnings import warn
 
 from pandapipes import pandapipesNet
-from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -35,6 +34,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pump import CirculationPumpConstantMass
 from simulator_core.entities.assets.utils import (
@@ -73,7 +73,7 @@ class ProductionCluster(AssetAbstract):
         # Controlled mass flow
         self._controlled_mass_flow = None
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 
         :param dict data:dictionary containing the data to be added the asset. The key is the name
@@ -294,16 +294,3 @@ class ProductionCluster(AssetAbstract):
         ]
         # Append dict to output list
         self.output.append(setpoints)
-
-    def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
-
-        The header is a tuple of the asset id and the property name.
-        """
-        # Create dataframe
-        temp_dataframe = DataFrame(self.output)
-        # Set header
-        temp_dataframe.columns = [
-            (self.asset_id, column_name) for column_name in temp_dataframe.columns
-        ]
-        return temp_dataframe
