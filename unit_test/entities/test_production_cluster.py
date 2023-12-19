@@ -73,15 +73,31 @@ class ProductionClusterTest(unittest.TestCase):
 
         # Act
         self.production_cluster.set_setpoints(setpoints=setpoints)
+        mass_flow = heat_demand_and_temperature_to_mass_flow(
+            temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
+            temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
+            thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
+            pandapipes_net=self.network,
+        )
 
         # Assert
         assert self.production_cluster.temperature_supply == 80
+        assert self.production_cluster.temperature_return == 60
+        assert self.production_cluster._controlled_mass_flow == mass_flow
+        assert (
+            self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][
+                self.production_cluster._flow_control.index
+            ]
+            == self.production_cluster._controlled_mass_flow
+        )
 
-    def test_production_cluster_set_setpoints_extra_setpoint(self):
+    def test_production_cluster_set_setpoints_missing_setpoint(self):
         """Test raise ValueError with missing setpoint."""
         # Arrange
         self.production_cluster.create()
-        necessary_setpoints = set([PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_SUPPLY])
+        necessary_setpoints = set(
+            [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN]
+        )
 
         setpoints = {
             PROPERTY_TEMPERATURE_SUPPLY: 80,
