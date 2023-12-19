@@ -75,3 +75,11 @@ class Junction:
                 name=self.name,
                 in_service=self.in_service,
             )
+
+    def write_to_output(self) -> None:
+        """Placeholder to write the asset to the output.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+        """
+        pass

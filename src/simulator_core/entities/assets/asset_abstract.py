@@ -56,9 +56,10 @@ class AssetAbstract(ABC):
         self.from_junction = None
         self.to_junction: Junction = None
         # Define the pandapipes network
-        self.pandapipes_net = pandapipe_net
-        self.name = asset_name
-        self.asset_id = asset_id
+        self.pandapipes_net: pandapipesNet = pandapipe_net
+        self.name: str = asset_name
+        self.asset_id: str = asset_id
+        self.output: List[Dict[str, float]] = []
 
     def set_setpoints(self, setpoints: Dict) -> None:  # noqa: B027
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -110,12 +111,15 @@ class AssetAbstract(ABC):
 
     @abstractmethod
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
-
-        The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
-        """
+        """Placeholder to get data from pandapipes and store it in the asset."""
         pass
+
+    def get_output(self) -> List[Dict[str, float]]:
+        """Returns all the output of the asset.
+
+        :return: A dict of property name and list of values.
+        """
+        return self.output
 
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
