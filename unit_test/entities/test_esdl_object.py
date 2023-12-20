@@ -15,15 +15,14 @@
 
 """Test esdl object class."""
 import unittest
-from unittest.mock import Mock
 from pathlib import Path
+from unittest.mock import Mock
 
 import esdl
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from simulator_core.entities.assets import DemandCluster, Pipe, ProductionCluster
-from simulator_core.entities.assets.esdl_asset_object import EsdlKey
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
@@ -79,27 +78,25 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(connected_assets1, test_list1)
         self.assertEqual(connected_assets2, test_list2)
 
-    def test_get_asset_parameters(self):
+    def test_get_property(self):
+        """Test get_property method."""
         # Arrange
-        pipes = self.esdl_object.get_all_assets_of_type("pipe")
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
-        pipe_parameters = pipes[0].get_asset_parameters()
+        length, property_available = asset.get_property("length", 0.0)
         # Assert
-        self.assertTrue(pipe_parameters["length"] == pipes[0].esdl_asset.length)
+        assert length == asset.esdl_asset.length
+        assert property_available
 
-    def test_missing_esdl_asset_parameters(self):
+    def test_get_property_not_found(self):
+        """Test get_property when the property is not found."""
         # Arrange
-        producer = self.esdl_object.get_all_assets_of_type("producer")[0]
-        producer.asset_specific_parameters["heating demand extra"] = EsdlKey(
-            name="heating demand extra", default=10.0
-        )
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
-        producer_parameters = producer.get_asset_parameters()
+        length, property_available = asset.get_property("length_not_found", 0.0)
         # Assert
-        self.assertTrue(
-            producer_parameters["heating demand extra"]
-            == producer.asset_specific_parameters["heating demand extra"].default
-        )
+        assert length == 0.0
+        assert property_available is False
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):

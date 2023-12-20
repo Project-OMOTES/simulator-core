@@ -65,7 +65,45 @@ def mass_flow_and_temperature_to_heat_demand(
     return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
 
 
-def mass_flow_to_volume_flow(
+def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float], List[float]):
+    """Retrieve the thermal conductivity table of the asset.
+
+    :param EsdlAssetObject esdl_asset: The asset of which the heat transfer table should be
+        retrieved.
+    :return: The diameters and thermal conductivities of the asset in a tuple with the diameters
+        as the first element and the thermal conductivities as the second element. Each element
+        represents a layer of the asset.
+    """
+    # create heat transfer table
+    layer_thicknesses = []
+    diameters = []
+    heat_coef = []
+    if esdl_asset.esdl_asset.material is not None:
+        if hasattr(esdl_asset.esdl_asset.material, "component"):
+            material_object = esdl_asset.esdl_asset.material.component
+        elif hasattr(esdl_asset.esdl_asset.material, "reference"):
+            material_object = esdl_asset.esdl_asset.material.reference.component
+        else:
+            raise NotImplementedError("Unknown material type or reference.")
+        # Append initial internal diameter
+        diameters.append(esdl_asset.esdl_asset.innerDiameter)
+        # Loop over material object
+        for layer in material_object:
+            layer_thicknesses.append(layer.layerWidth * 2)
+            diameters.append(sum(layer_thicknesses) + esdl_asset.esdl_asset.innerDiameter)
+            heat_coef.append(layer.matter.thermalConductivity)
+    return diameters, heat_coef
+
+
+def calculate_inverse_heat_transfer_coefficient(
+    inner_diameter: float, outer_diameter: float, thermal_conductivity: float
+) -> float:
+    """Calculate the inverse heat transfer coefficient of a pipe.
+
+    :param thermal_conductivity: Thermal conductivity of the pipe material in W/(m K)
+    :return: Inverse heat transfer coefficient in W/(m^2 K)
+    """
+    return (inner_diameter * log(outer_diameter / inner_diameter)) / (2 * thermal_conductivity)def mass_flow_to_volume_flow(
         mass_flowrate: float,
         temperature_fluid: float,
         pandapipes_net: pandapipesNet,
