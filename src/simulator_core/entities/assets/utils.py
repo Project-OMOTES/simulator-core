@@ -75,6 +75,8 @@ def mass_flow_to_volume_flow(
     :param float mass_flowrate: the mass flowrate in kg/s
     :param float temperature_fluid: the fluid temperature in K
     :param pandapipesNet net: The pandapipes network used to calculate the specific density.
+
+    :return float volume_flowrate: the volume flowrate in m3/h
     """
     density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
     volume_flowrate = mass_flowrate * 3600 / density_fluid
@@ -92,6 +94,8 @@ def volume_flow_to_mass_flow(
     :param float volume_flowrate: the volume flowrate in m3/h
     :param float temperature_fluid: the fluid temperature in K
     :param pandapipesNet net: The pandapipes network used to calculate the specific density.
+
+    :return float mass_flowrate: the mass flowrate in kg/s
     """
     density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
     mass_flowrate = volume_flowrate / 3600 * density_fluid
