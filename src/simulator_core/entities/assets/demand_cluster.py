@@ -64,11 +64,7 @@ class DemandCluster(AssetAbstract):
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
 
-        self.setpoints = dict()
-        self.parameters = dict()
-        self.states = dict()
-
-        self.internal_diameter = DEFAULT_DIAMETER
+        self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.temperature_return_target = self.temperature_return
@@ -82,8 +78,6 @@ class DemandCluster(AssetAbstract):
         self._flow_control = None
         self._heat_exchanger = None
         self._simulated = False
-        self._from_junction = None
-        self._to_junction = None
         # Output list
         self.output: list = []
 
@@ -111,25 +105,25 @@ class DemandCluster(AssetAbstract):
             self._flow_control = ControlValve(
                 pandapipes_net=self.pandapipes_net,
                 controlled_mdot_kg_per_s=self.mass_flowrate,
-                diameter_m=self.internal_diameter,
+                diameter_m=self._internal_diameter,
                 control_active=True,
                 in_service=True,
                 name=f"flow_control_{self.name}",
             )
-            self._flow_control.from_junction = self._from_junction
+            self._flow_control.from_junction = self.from_junction
             self._flow_control.to_junction = self._intermediate_junction
             self._flow_control.create()
 
             # Create the heat exchanger
             self._heat_exchanger = HeatExchanger(
                 pandapipes_net=self.pandapipes_net,
-                diameter_m=self.internal_diameter,
+                diameter_m=self._internal_diameter,
                 heat_flux_w=self.thermal_power_allocation,
                 name=f"heat_exchanger_{self.name}",
                 in_service=True,
             )
             self._heat_exchanger.from_junction = self._intermediate_junction
-            self._heat_exchanger.to_junction = self._to_junction
+            self._heat_exchanger.to_junction = self.to_junction
             self._heat_exchanger.create()
 
             self._initialized = True
@@ -151,6 +145,11 @@ class DemandCluster(AssetAbstract):
             self.mass_flowrate = self.pandapipes_net.res_heat_exchanger['mdot_from_kg_per_s'][
                 self._heat_exchanger.index]
 
+        self._set_demand_control()
+
+    def _set_demand_control(self):
+        """Function to control the DemandCluster to achieve target return temperature
+        """
         # adjust flowrate or power to meet the return temperature
         if self.pandapipes_net.flow_control.control_active[self._flow_control.index] is True:
             # if pump is active, set flowrate to meet Target Temperature
@@ -186,7 +185,7 @@ class DemandCluster(AssetAbstract):
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        setpoints = dict()
+        setpoints = {}
         setpoints[PROPERTY_HEAT_DEMAND] = self.thermal_power_allocation
         setpoints[PROPERTY_TEMPERATURE_RETURN] = self.temperature_return
 
@@ -238,6 +237,8 @@ class DemandCluster(AssetAbstract):
                 outputs[PROPERTY_TEMPERATURE_RETURN],
                 outputs[PROPERTY_MASSFLOW],
                 self.pandapipes_net)
+        else:
+            raise ValueError("Simulation data not available.")
 
         self.output.append(outputs)
 

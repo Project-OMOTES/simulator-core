@@ -14,12 +14,17 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Heat exchanger classes."""
+import uuid
+from typing import Dict, Optional
+
 from pandapipes import create_heat_exchanger, pandapipesNet
+from pandas import DataFrame
 
 from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
-class HeatExchanger:
+class HeatExchanger(AssetAbstract):
     """Wrapper class for pandapipes heat exchanger."""
 
     def __init__(
@@ -32,11 +37,13 @@ class HeatExchanger:
             index: int = None,
     ):
         """Initialize a HeatExchanger object."""
+        """Initialize a ControlValve object."""
+        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()),
+                         pandapipe_net=pandapipes_net)
+
         self.pandapipes_net = pandapipes_net
         self.diameter_m = diameter_m
         self.heat_flux_w = heat_flux_w
-        self.from_junction = Junction
-        self.to_junction = Junction
         self.in_service = in_service
         self.name = name
         self.index = index
@@ -58,3 +65,45 @@ class HeatExchanger:
                 name=self.name,
                 index=self.index,
             )
+
+    def set_setpoints(self, setpoints: Dict, **kwargs: Dict) -> None:
+        """Placeholder to set the setpoints of an asset prior to a simulation.
+
+        :param Dict setpoints: The setpoints that should be set for the asset.
+            The keys of the dictionary are the names of the setpoints and the values are the values
+        """
+        pass
+
+    def get_setpoints(self, **kwargs: Dict) -> Dict:
+        """Placeholder to get the setpoint attributes of an asset.
+
+        :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
+            setpoints and the values are the values.
+        """
+        return {}
+
+    def simulation_performed(self) -> bool:
+        """Placeholder to indicate that a simulation has been performed.
+
+        :return bool: True if a simulation has been performed, False otherwise.
+        """
+        return True
+
+    def add_physical_data(self, data: Dict[str, float]) -> None:
+        """Placeholder method to add physical data to an asset."""
+        pass
+
+    def write_to_output(self) -> None:
+        """Placeholder to write the asset to the output.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+        """
+        pass
+
+    def get_timeseries(self) -> DataFrame:
+        """Get timeseries as a dataframe from a pandapipes asset.
+
+        The header is a tuple of the asset id and the property name.
+        """
+        pass
