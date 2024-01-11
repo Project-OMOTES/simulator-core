@@ -15,9 +15,7 @@
 
 """Utility functions for assets."""
 from enum import IntEnum
-from typing import List
 
-from numpy import log
 from pandapipes import pandapipesNet
 import numpy as np
 
