@@ -137,7 +137,7 @@ def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float],
 
 
 def calculate_inverse_heat_transfer_coefficient(
-    inner_diameter: float, outer_diameter: float, thermal_conductivity: float
+        inner_diameter: float, outer_diameter: float, thermal_conductivity: float
 ) -> float:
     """Calculate the inverse heat transfer coefficient of a pipe.
 
@@ -145,6 +145,8 @@ def calculate_inverse_heat_transfer_coefficient(
     :return: Inverse heat transfer coefficient in W/(m^2 K)
     """
     return (inner_diameter * np.log(outer_diameter / inner_diameter)) / (2 * thermal_conductivity)
+
+
 def mass_flow_to_volume_flow(
         mass_flowrate: float,
         temperature_fluid: float,
