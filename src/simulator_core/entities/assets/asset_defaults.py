@@ -19,6 +19,7 @@ from dataclasses import dataclass
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
 DEFAULT_PRESSURE = 5.0  # [bar]
+DEFAULT_PRESSURE_DIFFERENCE = 0.5  # [bar]
 DEFAULT_TEMPERATURE = 300.0  # [K]
 DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
@@ -52,6 +53,8 @@ PROPERTY_TEMPERATURE_RETURN = "temperature_return"
 PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
 PROPERTY_MASSFLOW = "mass_flow"
+PROPERTY_VOLUMEFLOW = "volume_flow"
+PROPERTY_THERMAL_POWER = "thermal_power"
 PROPERTY_VELOCITY_SUPPLY = "velocity_supply"
 PROPERTY_VELOCITY_RETURN = "velocity_return"
 
