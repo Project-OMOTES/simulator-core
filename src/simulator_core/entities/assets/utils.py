@@ -19,6 +19,8 @@ from enum import IntEnum
 from pandapipes import pandapipesNet
 import numpy as np
 
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+
 
 def heat_demand_and_temperature_to_mass_flow(
         thermal_demand: float,
@@ -66,7 +68,7 @@ def mass_flow_and_temperature_to_heat_demand(
     return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
 
 
-def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float], List[float]):
+def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (list[float], list[float]):
     """Retrieve the thermal conductivity table of the asset.
 
     :param EsdlAssetObject esdl_asset: The asset of which the heat transfer table should be
@@ -97,7 +99,7 @@ def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float],
 
 
 def calculate_inverse_heat_transfer_coefficient(
-    inner_diameter: float, outer_diameter: float, thermal_conductivity: float
+        inner_diameter: float, outer_diameter: float, thermal_conductivity: float
 ) -> float:
     """Calculate the inverse heat transfer coefficient of a pipe.
 
@@ -105,6 +107,8 @@ def calculate_inverse_heat_transfer_coefficient(
     :return: Inverse heat transfer coefficient in W/(m^2 K)
     """
     return (inner_diameter * np.log(outer_diameter / inner_diameter)) / (2 * thermal_conductivity)
+
+
 def mass_flow_to_volume_flow(
         mass_flowrate: float,
         temperature_fluid: float,
