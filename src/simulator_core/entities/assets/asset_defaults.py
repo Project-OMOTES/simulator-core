@@ -54,7 +54,8 @@ PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
 PROPERTY_MASSFLOW = "mass_flow"
 PROPERTY_VOLUMEFLOW = "volume_flow"
-PROPERTY_THERMAL_POWER = "thermal_power"PROPERTY_VELOCITY_SUPPLY = "velocity_supply"
+PROPERTY_THERMAL_POWER = "thermal_power"
+PROPERTY_VELOCITY_SUPPLY = "velocity_supply"
 PROPERTY_VELOCITY_RETURN = "velocity_return"
 
 # Static members
