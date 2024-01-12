@@ -44,9 +44,8 @@ class ProductionClusterTest(unittest.TestCase):
             asset_id="production_cluster_id",
             pandapipe_net=self.network,
         )
-        self.production_cluster.connect_junctions(
-            from_junction=self.from_junction, to_junction=self.to_junction
-        )
+        self.production_cluster.set_from_juction(from_junction=self.from_junction)
+        self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
     def test_production_cluster_create(self):
         """Evaluate the creation of a production_cluster object."""
