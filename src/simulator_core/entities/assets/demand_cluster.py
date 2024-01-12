@@ -138,6 +138,7 @@ class DemandCluster(AssetAbstract):
         """
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
+        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
 
         if self.simulation_performed():
             self.temperature_supply = self.pandapipes_net.res_flow_control['t_from_k'][
@@ -152,7 +153,7 @@ class DemandCluster(AssetAbstract):
     def _set_demand_control(self):
         """Function to control the DemandCluster to achieve target return temperature."""
         # adjust flowrate or power to meet the return temperature
-        if self.pandapipes_net.flow_control.control_active[self._flow_control.index] is True:
+        if self.pandapipes_net.flow_control.control_active[self._flow_control.index]:
             # if pump is active, set flowrate to meet Target Temperature
             self._heat_exchanger.qext_w = self.thermal_power_allocation
             self.pandapipes_net.heat_exchanger.qext_w[

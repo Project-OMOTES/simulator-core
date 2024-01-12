@@ -186,9 +186,9 @@ class Pipe(AssetAbstract):
         output_dict = {}
         # Retrieve the temperature of the pipe at the in- and outlet (Ts, Tr)
         output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_pipe[
-            "temp_from_k"
+            "t_from_k"
         ].values[self._pipe_index]
-        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_pipe["temp_to_k"].values[
+        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_pipe["t_to_k"].values[
             self._pipe_index
         ]
         # Retrieve the pressure of the pipe at the in- and outlet (Ps, Pr)
@@ -204,9 +204,9 @@ class Pipe(AssetAbstract):
         ]
         # Retrieve the velocity of the pipe at the in- and outlet (Vs, Vr)
         output_dict[PROPERTY_VELOCITY_SUPPLY] = self.pandapipes_net.res_pipe[
-            "v_from_m_per_s"
+            "v_mean_m_per_s"
         ].values[self._pipe_index]
-        output_dict[PROPERTY_VELOCITY_RETURN] = self.pandapipes_net.res_pipe["v_to_m_per_s"].values[
+        output_dict[PROPERTY_VELOCITY_RETURN] = self.pandapipes_net.res_pipe["v_mean_m_per_s"].values[
             self._pipe_index
         ]
         # Calculate the heat demand of the pipe (Q)

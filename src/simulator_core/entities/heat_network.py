@@ -47,11 +47,7 @@ class HeatNetwork:
             if py_asset.asset_id in controller_input:
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
         try:
-            pass
-            # TODO remove comments and pass keyword when all assets are available.
-            # pipeflow(self.panda_pipes_net, "all") This lien can be used when all
-            # components are in pp.
-
+            pipeflow(self.panda_pipes_net, "all")
         except PipeflowNotConverged:
             raise RuntimeError("Error in time step calculation pipe flow did not converge.")
 

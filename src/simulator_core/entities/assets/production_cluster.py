@@ -62,7 +62,7 @@ class ProductionCluster(AssetAbstract):
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         # DemandCluster pressure specifications
         self.pressure_supply = DEFAULT_PRESSURE
-        self.control_mass_flow = DEFAULT_MASS_FLOW_RATE
+        self.control_mass_flow = False
         # Define internal diameter
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
@@ -228,8 +228,8 @@ class ProductionCluster(AssetAbstract):
         # Return the setpoints
         if not self.simulation_performed():
             raise ValueError("Simulation data not available.")
-        temp_supply = self.pandapipes_net.res_junction["tfluid_k"][self.to_junction.index]
-        temp_return = self.pandapipes_net.res_junction["tfluid_k"][self.from_junction.index]
+        temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
+        temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
         mass_flow = self.pandapipes_net.circ_pump_mass["mdot_flow_kg_per_s"][self._circ_pump.index]
         heat_demand = mass_flow_and_temperature_to_heat_demand(
             temperature_supply=temp_supply,
