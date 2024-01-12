@@ -162,12 +162,7 @@ class Pipe(AssetAbstract):
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        if self.pandapipes_net.res_pipe[self._pipe_index] is AttributeError:
-            # TODO: Implement specific error
-            return False
-        else:
-            # Retrieve the setpoints
-            return True
+        return hasattr(self.pandapipes_net, 'res_pipe')
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
@@ -185,6 +180,9 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
+        if not self.simulation_performed():
+            return  # TODO Remove this when you can perform a simulation, check is also performed
+            raise ValueError("Simulation data not available.")
         output_dict = {}
         # Retrieve the temperature of the pipe at the in- and outlet (Ts, Tr)
         output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_pipe[

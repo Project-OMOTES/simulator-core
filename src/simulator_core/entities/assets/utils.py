@@ -20,7 +20,7 @@ from pandapipes import pandapipesNet
 import numpy as np
 
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-
+from typing import List
 
 def heat_demand_and_temperature_to_mass_flow(
         thermal_demand: float,
