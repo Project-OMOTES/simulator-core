@@ -52,7 +52,7 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
 
         # Act
-        self.production_cluster.create()
+        self.production_cluster.create()  # act
 
         # Assert
         assert isinstance(self.production_cluster, ProductionCluster)
@@ -69,47 +69,42 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_TEMPERATURE_SUPPLY: 80,
             PROPERTY_TEMPERATURE_RETURN: 60,
         }
+        self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Act
-        self.production_cluster.set_setpoints(setpoints=setpoints)
         mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
             temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
             pandapipes_net=self.network,
-        )
+        )  # act
 
         # Assert
         assert self.production_cluster.temperature_supply == 80
         assert self.production_cluster.temperature_return == 60
         assert self.production_cluster._controlled_mass_flow == mass_flow
-        assert (
-            self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][
-                self.production_cluster._flow_control.index
-            ]
-            == self.production_cluster._controlled_mass_flow
-        )
+        assert (self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"]
+                == self.production_cluster._controlled_mass_flow)
 
     def test_production_cluster_set_setpoints_missing_setpoint(self):
         """Test raise ValueError with missing setpoint."""
         # Arrange
         self.production_cluster.create()
+
+        # Act
         necessary_setpoints = set(
             [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN]
         )
-
         setpoints = {
             PROPERTY_TEMPERATURE_SUPPLY: 80,
             PROPERTY_TEMPERATURE_RETURN: 60,
         }
 
-        # Act
-
         # Assert
         with pytest.raises(
-            ValueError,
-            match=f"The setpoints {necessary_setpoints.difference(set(setpoints))} are missing.",
-        ):
+                ValueError,
+                match=f"The setpoints {necessary_setpoints.difference(set(setpoints))} "
+                      f"are missing."):
             self.production_cluster.set_setpoints(setpoints=setpoints)
 
     def test_production_cluster_set_setpoints_negative_mass_flow(self):
@@ -132,8 +127,8 @@ class ProductionClusterTest(unittest.TestCase):
 
         # Assert
         with pytest.raises(
-            ValueError,
-            match=f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
-            + " is negative.",
+                ValueError,
+                match=f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
+                      + " is negative.",
         ):
             self.production_cluster.set_setpoints(setpoints=setpoints)

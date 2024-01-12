@@ -19,6 +19,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import esdl
+import pytest
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
@@ -29,26 +30,34 @@ from simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class EsdlObjectTest(unittest.TestCase):
+    """Test class for ESDL objects class."""
+
     def setUp(self):
+        """Arranging standard objects for the other test."""
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
     def test_get_all_assets_of_type(self):
+        """Test to get a list of all assets of a certain type."""
         # Arrange
         producer = "producer"
         consumer = "consumer"
         pipe = "pipe"
+
         # Act
         producers = self.esdl_object.get_all_assets_of_type(producer)
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
-        pipes = self.esdl_object.get_all_assets_of_type(pipe)
+
+        pipes = self.esdl_object.get_all_assets_of_type(pipe)  # act
+
         # Assert
         self.assertEqual(len(producers), 2)
         self.assertEqual(len(consumers), 2)
         self.assertEqual(len(pipes), 2)
 
     def test_EsdlAssetObject(self):
+        """Test for creation of objects."""
         # Arrange
         producer = "producer"
         consumer = "consumer"
@@ -57,23 +66,30 @@ class EsdlObjectTest(unittest.TestCase):
         consumers = self.esdl_object.get_all_assets_of_type(consumer)
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
         pandapipes_net = Mock()
+
         # Act
         asset_producer = EsdlAssetMapper().to_entity(producers[0], pandapipes_net)
         asset_consumer = EsdlAssetMapper().to_entity(consumers[0], pandapipes_net)
-        asset_pipe = EsdlAssetMapper().to_entity(pipes[0], pandapipes_net)
+
+        asset_pipe = EsdlAssetMapper().to_entity(pipes[0], pandapipes_net)  # act
+
         # Assert
         self.assertTrue(isinstance(asset_producer, ProductionCluster))
         self.assertTrue(isinstance(asset_consumer, DemandCluster))
         self.assertTrue(isinstance(asset_pipe, Pipe))
 
     def test_get_connected_assets(self):
+        """Test for connection of two assets."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0].esdl_asset
         test_list1 = [("Pipe1_ret", Port.Out)]
         test_list2 = [("Pipe1", Port.In)]
+
         # Act
         connected_assets1 = self.esdl_object.get_connected_assets(asset.id, Port.In)
-        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)
+
+        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)  # act
+
         # Assert
         self.assertEqual(connected_assets1, test_list1)
         self.assertEqual(connected_assets2, test_list2)
@@ -82,8 +98,11 @@ class EsdlObjectTest(unittest.TestCase):
         """Test get_property method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
         # Act
-        length, property_available = asset.get_property("length", 0.0)
+        length, property_available = asset.get_property("length",
+                                                        0.0)  # act
+
         # Assert
         assert length == asset.esdl_asset.length
         assert property_available
@@ -92,15 +111,21 @@ class EsdlObjectTest(unittest.TestCase):
         """Test get_property when the property is not found."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
         # Act
-        length, property_available = asset.get_property("length_not_found", 0.0)
+        length, property_available = asset.get_property(
+            "length_not_found", 0.0)  # act
+
         # Assert
         assert length == 0.0
         assert property_available is False
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
+    """Class to test conversion from esdl asset to string and back."""
+
     def setUp(self) -> None:
+        """Arranging of the data for the tests."""
         self.asset = esdl.Asset
         self.producer = esdl.Producer
         self.consumer = esdl.Consumer
@@ -119,7 +144,9 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.joint_str = "junction"
 
     def test_to_string(self):
+        """Test for conversion from esdl asset to string."""
         # Arrange
+
         # Act
         asset_str = StringEsdlAssetMapper().to_entity(self.asset)
         producer_str = StringEsdlAssetMapper().to_entity(self.producer)
@@ -128,7 +155,9 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         conversion_str = StringEsdlAssetMapper().to_entity(self.conversion)
         pipe_str = StringEsdlAssetMapper().to_entity(self.pipe)
         transport_str = StringEsdlAssetMapper().to_entity(self.transport)
-        joint_str = StringEsdlAssetMapper().to_entity(self.joint)
+
+        joint_str = StringEsdlAssetMapper().to_entity(self.joint)  # act
+
         # Assert
         self.assertTrue(asset_str == self.asset_str)
         self.assertTrue(producer_str == self.producer_str)
@@ -140,7 +169,9 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.assertTrue(joint_str == self.joint_str)
 
     def test_to_esdl(self):
+        """Test for mapping back to esdl assets."""
         # Arrange
+
         # Act
         asset = StringEsdlAssetMapper().to_esdl(self.asset_str)[0]
         producer = StringEsdlAssetMapper().to_esdl(self.producer_str)[0]
@@ -149,7 +180,9 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
         transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
         joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
-        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]
+
+        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]  # act
+
         # Assert
         self.assertTrue(asset == self.asset)
         self.assertTrue(producer == self.producer)
@@ -161,12 +194,15 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.assertTrue(geothermal == self.geothermal_source)
 
     def test_raise_error(self):
+        """Test to test if an error is raised for unknown component in ESDL."""
         # Arrange
         test_string = "nothing"
         test_esdl_asset = esdl.WindTurbine
         # Act
+
         # Assert
-        with self.assertRaises(NotImplementedError):
-            StringEsdlAssetMapper().to_esdl(test_string)
-        with self.assertRaises(NotImplementedError):
-            StringEsdlAssetMapper().to_entity(test_esdl_asset)
+        with pytest.raises(NotImplementedError):
+            StringEsdlAssetMapper().to_esdl(test_string)  # act
+
+        with pytest.raises(NotImplementedError):
+            StringEsdlAssetMapper().to_entity(test_esdl_asset)  # act

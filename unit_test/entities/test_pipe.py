@@ -19,7 +19,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pandapipes as pp
-from pytest import raises
+import pytest
 
 from simulator_core.entities.assets import Junction, Pipe
 from simulator_core.entities.esdl_object import EsdlObject
@@ -45,7 +45,7 @@ class PipeTest(unittest.TestCase):
         pipe.to_junction = self.to_junction
 
         # Act
-        pipe.create()
+        pipe.create()  # act
 
         # Assert
         assert isinstance(pipe, Pipe)
@@ -63,7 +63,7 @@ class PipeTest(unittest.TestCase):
         pipe.create()
 
         # Act
-        pp_pipe_dataframe = self.network.pipe.iloc[pipe._pipe_index]
+        pp_pipe_dataframe = self.network.pipe.iloc[pipe._pipe_index]  # act
 
         # Assert
         assert pp_pipe_dataframe["length_km"] == pipe.length * 1e-3
@@ -79,7 +79,7 @@ class PipeTest(unittest.TestCase):
         esdl_asset_mock.get_property.return_value = (1.0, True)
 
         # Act
-        pipe.create()
+        pipe.create()  # act
 
         # Assert
         assert pipe._get_diameter(esdl_asset=esdl_asset_mock) == 1.0
@@ -94,10 +94,10 @@ class PipeTest(unittest.TestCase):
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
-        pipe.create()
+        pipe.create()  # act
 
         # Assert
-        with raises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             pipe._get_diameter(esdl_asset=esdl_asset_mock)
 
     def test_pipe_get_heat_transfer_coefficient(self):
@@ -118,7 +118,7 @@ class PipeTest(unittest.TestCase):
         pipe.create()
 
         # Act
-        alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)
+        alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)  # act
 
         # Assert
         assert alpha_value == 0.8901927763663371

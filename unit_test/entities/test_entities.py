@@ -31,9 +31,11 @@ class HeatNetworkTest(unittest.TestCase):
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        # arrange
-        network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
-        # assert
+
+        # Act
+        network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)  # act
+
+        # Assert
         self.assertIsInstance(network, HeatNetwork)
         self.assertEqual(len(network.assets), 4)
         self.assertEqual(len(network.junctions), 4)

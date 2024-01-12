@@ -21,6 +21,7 @@ from simulator_core.adapter.transforms.mappers import EsdlControllerMapper, Esdl
 from simulator_core.entities import EsdlObject, HeatNetwork, SimulationConfiguration
 from simulator_core.simulation import NetworkSimulation
 
+
 class SimulationManager:
     """Manager class for managing the simulation."""
 

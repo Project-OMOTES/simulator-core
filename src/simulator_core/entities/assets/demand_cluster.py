@@ -150,8 +150,7 @@ class DemandCluster(AssetAbstract):
         self._set_demand_control()
 
     def _set_demand_control(self):
-        """Function to control the DemandCluster to achieve target return temperature
-        """
+        """Function to control the DemandCluster to achieve target return temperature."""
         # adjust flowrate or power to meet the return temperature
         if self.pandapipes_net.flow_control.control_active[self._flow_control.index] is True:
             # if pump is active, set flowrate to meet Target Temperature

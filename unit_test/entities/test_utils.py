@@ -17,8 +17,7 @@
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
-
-from pytest import raises
+import pytest
 
 from simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
@@ -62,10 +61,12 @@ class UtilFunctionTest(unittest.TestCase):
         thermal_demand = 1000  # [w]
         temperature_supply = 373  # [K]
         temperature_return = 353  # [K]
-        # Act
+
+        # act
         mass_flow_calculated = heat_demand_and_temperature_to_mass_flow(
             thermal_demand, temperature_supply, temperature_return, self.pandapipes_net
-        )
+        )  # act
+
         # Assert
         assert mass_flow_calculated == 0.011956001912960305
 
@@ -75,10 +76,12 @@ class UtilFunctionTest(unittest.TestCase):
         temperature_supply = 373  # [K]
         temperature_return = 353  # [K]
         mass_flow = 0.011956001912960305
+
         # Act
         heat_demand_calculated = mass_flow_and_temperature_to_heat_demand(
             temperature_supply, temperature_return, mass_flow, self.pandapipes_net
-        )
+        )  # act
+
         # Assert
         assert heat_demand_calculated == 1000.0
 
@@ -91,20 +94,24 @@ class UtilFunctionTest(unittest.TestCase):
         inner_diameter = 0.1
         outer_diameter = 0.2
         thermal_conductivity = 0.5
+
         # Act
         heat_transfer_coefficient = calculate_inverse_heat_transfer_coefficient(
             inner_diameter, outer_diameter, thermal_conductivity
-        )
+        )  # act
+
         # Assert
         assert heat_transfer_coefficient == 0.06931471805599453
 
     def test_get_thermal_conductivity_table_component(self) -> None:
         """Test get_thermal_conductivity_table."""
         # Arrange
+
         # Act
         diameters, heat_coefficients = get_thermal_conductivity_table(
             esdl_asset=self.pipe_with_material
-        )
+        )  # act
+
         # Assert
         assert diameters == [0.1071, 0.1143, 0.1936, 0.2]
         assert heat_coefficients == [52.15, 0.027, 0.4]
@@ -112,10 +119,12 @@ class UtilFunctionTest(unittest.TestCase):
     def test_get_thermal_conductivity_table_no_material(self) -> None:
         """Test get_thermal_conductivity_table."""
         # Arrange
+
         # Act
         diameters, heat_coefficients = get_thermal_conductivity_table(
             esdl_asset=self.pipe_without_material
-        )
+        )  # act
+
         # Assert
         assert diameters == []
         assert heat_coefficients == []
@@ -124,10 +133,12 @@ class UtilFunctionTest(unittest.TestCase):
         """Test get_thermal_conductivity_table."""
         # Arrange
         esdl_asset_mock = Mock()
+
         # Act
         esdl_asset_mock.esdl_asset.material.Error = "Error"
         delattr(esdl_asset_mock.esdl_asset.material, "component")
         delattr(esdl_asset_mock.esdl_asset.material, "reference")
+
         # Assert
-        with raises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             get_thermal_conductivity_table(esdl_asset=esdl_asset_mock)
