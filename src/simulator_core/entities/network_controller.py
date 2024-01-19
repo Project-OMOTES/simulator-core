@@ -14,7 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """NetworkController entity."""
-from simulator_core.entities.assets.asset_defaults import PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN, PROPERTY_HEAT_DEMAND
+from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
+                                                           PROPERTY_TEMPERATURE_RETURN,
+                                                           PROPERTY_HEAT_DEMAND)
 
 
 class NetworkController:
