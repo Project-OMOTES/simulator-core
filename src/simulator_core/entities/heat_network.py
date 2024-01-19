@@ -14,9 +14,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """HeatNetwork entity class."""
+import math
 
 import pandas as pd
-from pandapipes import create_empty_network, pandapipesNet, pipeflow, PipeflowNotConverged
+from pandapipes import create_empty_network, pandapipesNet, pipeflow, PipeflowNotConverged, plotting
 from typing import Callable, List, Tuple
 from simulator_core.entities.assets.asset_abstract import AssetAbstract, Junction
 
@@ -50,6 +51,18 @@ class HeatNetwork:
             pipeflow(self.panda_pipes_net, "all")
         except PipeflowNotConverged:
             raise RuntimeError("Error in time step calculation pipe flow did not converge.")
+
+    def plot_network(self):
+        """Method to plot the network.
+
+        plots the network in a simple plot all junctions are translated to a circle.
+        :return:
+        """
+        step = 360 / len(self.panda_pipes_net["junction_geodata"])
+        for i in range(len(self.panda_pipes_net["junction_geodata"])):
+            self.panda_pipes_net["junction_geodata"].loc[i, "x"] = math.sin(i * step)
+            self.panda_pipes_net["junction_geodata"].loc[i, "y"] = math.cos(i * step)
+        plotting.simple_plot(self.panda_pipes_net)
 
     def store_output(self) -> None:
         """Method to store the output data.
