@@ -83,7 +83,8 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.temperature_supply == 80
         assert self.production_cluster.temperature_return == 60
         assert self.production_cluster._controlled_mass_flow == mass_flow
-        assert (self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"]
+        assert (self.production_cluster.pandapipes_net["flow_control"]
+                ["controlled_mdot_kg_per_s"][0]
                 == self.production_cluster._controlled_mass_flow)
 
     def test_production_cluster_set_setpoints_missing_setpoint(self):
