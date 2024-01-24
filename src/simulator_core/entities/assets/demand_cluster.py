@@ -18,7 +18,6 @@
 from typing import Dict
 
 from pandapipes import pandapipesNet
-from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
