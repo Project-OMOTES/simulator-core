@@ -79,7 +79,6 @@ class DemandCluster(AssetAbstract):
         self._intermediate_junction: Optional[Junction] = None
         self._flow_control = None
         self._heat_exchanger = None
-        self._simulated = False
         # Output list
         self.output: list = []
 
@@ -199,7 +198,7 @@ class DemandCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        return self._simulated
+        return hasattr(self.pandapipes_net, 'res_flow_control')
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -217,7 +216,6 @@ class DemandCluster(AssetAbstract):
         represents the output of its asset for a specific timestep.
         """
         if not self.simulation_performed():
-            return  # TODO Remove this when you can perform a simulation, check is also performed
             raise ValueError("Simulation data not available.")
         outputs = dict()
 
@@ -243,10 +241,3 @@ class DemandCluster(AssetAbstract):
             self.pandapipes_net)
 
         self.output.append(outputs)
-
-    def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
-
-        The header is a tuple of the asset id and the property name.
-        """
-        pass

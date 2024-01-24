@@ -205,7 +205,7 @@ class ProductionCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        return hasattr(self.pandapipes_net, 'res_circ_pump_mass')
+        return hasattr(self.pandapipes_net, 'res_circ_pump_pressure')
 
     def get_setpoints(self) -> Dict[str, float]:
         """Get the setpoints of the asset.
@@ -218,7 +218,8 @@ class ProductionCluster(AssetAbstract):
             raise ValueError("Simulation data not available.")
         temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
         temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
-        mass_flow = self.pandapipes_net.circ_pump_mass["mdot_flow_kg_per_s"][self._circ_pump.index]
+        mass_flow = self.pandapipes_net.res_circ_pump_pressure[
+            "mdot_flow_kg_per_s"][self._circ_pump.index]
         heat_demand = mass_flow_and_temperature_to_heat_demand(
             temperature_supply=temp_supply,
             temperature_return=temp_return,
@@ -265,14 +266,12 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
         if not self.simulation_performed():
-            return  # TODO Remove this when you can perform a simulation, check is also performed
             raise ValueError("Simulation data not available.")
         # Retrieve the general model setpoints (Ts, Tr, Qh)
         setpoints = self.get_setpoints()
         # Retrieve the mass flow (mdot)
-        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_mass["mdot_flow_kg_per_s"][
-            self._circ_pump.index
-        ]
+        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_pressure[
+            "mdot_flow_kg_per_s"][self._circ_pump.index]
         # Retrieve the pressure (Ps, Pr)
         setpoints[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_junction["p_bar"][
             self.to_junction.index

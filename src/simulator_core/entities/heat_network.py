@@ -85,5 +85,5 @@ class HeatNetwork:
         # Todo what do we do with the junction output do we need it?
         result = pd.DataFrame()
         for py_asset in self.assets:
-            result = pd.concat([result, py_asset.get_timeseries()])
+            result = pd.concat([result, py_asset.get_timeseries()], axis=1)
         return result

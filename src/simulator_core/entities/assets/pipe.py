@@ -180,7 +180,6 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
         if not self.simulation_performed():
-            return  # TODO Remove this when you can perform a simulation, check is also performed
             raise ValueError("Simulation data not available.")
         output_dict = {}
         # Retrieve the temperature of the pipe at the in- and outlet (Ts, Tr)
