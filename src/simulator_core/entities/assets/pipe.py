@@ -149,11 +149,9 @@ class Pipe(AssetAbstract):
         """
         # Error handling is performed in EsdlAssetObject.get_asset_parameters
         self.length, _ = esdl_asset.get_property(
-            esdl_property_name="length", default_value=self.length
-        )
+            esdl_property_name="length", default_value=self.length)
         self.roughness, _ = esdl_asset.get_property(
-             esdl_property_name="roughness", default_value=self.roughness
-         )
+            esdl_property_name="roughness", default_value=self.roughness)
         self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
