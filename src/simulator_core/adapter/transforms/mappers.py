@@ -32,14 +32,12 @@ from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
-def connect_connected_asset(connected_py_assets, junction, py_assets_list,
-                            py_junction_list):
+def connect_connected_asset(connected_py_assets, junction, py_assets_list):
     """Method to connect assets connected to one asset to the same junction.
 
     :param connected_py_assets: List of connected assets
     :param junction: Junction to connect the assets to
     :param py_assets_list: List of assets
-    :param py_junction_list: List of junctions
     :return: None
     """
     for connected_py_asset in connected_py_assets:
@@ -50,7 +48,6 @@ def connect_connected_asset(connected_py_assets, junction, py_assets_list,
             py_assets_list[index].set_from_juction(from_junction=junction)
         else:  # to
             py_assets_list[index].set_to_junction(to_junction=junction)
-    py_junction_list.append(junction)
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -98,8 +95,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 connected_py_assets = self.esdl_object.get_connected_assets(
                     py_asset.asset_id, Port.In
                 )
-                connect_connected_asset(connected_py_assets, junction, py_assets_list,
-                                        py_junction_list)
+                connect_connected_asset(connected_py_assets, junction, py_assets_list)
+                py_junction_list.append(junction)
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
                 junction = Junction(pandapipes_net)
@@ -107,8 +104,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 connected_py_assets = self.esdl_object.get_connected_assets(
                     py_asset.asset_id, Port.Out
                 )
-                connect_connected_asset(connected_py_assets, junction, py_assets_list,
-                                        py_junction_list)
+                connect_connected_asset(connected_py_assets, junction, py_assets_list)
+            py_junction_list.append(junction)
             py_asset.create()
         return py_assets_list, py_junction_list
 
