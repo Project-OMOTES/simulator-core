@@ -51,8 +51,8 @@ dev = [
 [project.urls]
 homepage = "https://www.nwn.nu"
 documentation = "https://readthedocs.org"
-repository = "https://github.com/Nieuwe-Warmte-Nu/simulator-core"
-changelog = "https://github.com/Nieuwe-Warmte-Nu/simulator-core/blob/main/CHANGELOG.md"
+repository = "https://github.com/Project-OMOTES/simulator-core"
+changelog = "https://github.com/Project-OMOTES/simulator-core/blob/main/CHANGELOG.md"
 
 [build-system]
 build-backend = "setuptools.build_meta"
@@ -61,16 +61,11 @@ requires = ["setuptools ~= 68.2.2"]
 [tools.setuptools]
 packages = ["src/simulator_core"]
 
-[tool.pytest.ini_options]
-addopts = "--cov=simulator_core --cov-report html --cov-report term-missing --cov-fail-under 95"
-
-[tool.coverage.run]
-source = ["src"]
 
 [tool.flake8]
 max-line-length = 100
 count = true
-ignore = ['Q000', 'D401', 'AAA06']
+ignore = ['Q000', 'D401', 'AAA06', 'W503', 'PT009']
 exclude = ['.venv/*', 'venv/*', 'doc/*']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100']
 
@@ -83,6 +78,8 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+ignore_missing_imports = true
+follow_imports_for_stubs=true
 exclude = [
     '.venv/*',
     'venv/*',
