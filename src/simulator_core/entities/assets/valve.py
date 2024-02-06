@@ -14,8 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Valve classes."""
-import uuid
-from typing import Dict, Optional
+from typing import Dict
 
 from pandapipes import create_flow_control, pandapipesNet
 from pandas import DataFrame
@@ -28,23 +27,16 @@ class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
-        self,
-        pandapipes_net: pandapipesNet,
-        controlled_mdot_kg_per_s: float,
-        diameter_m: float,
-        name: str,
-        control_active: bool = False,
-        in_service: bool = True,
-        index: Optional[int] = None,
+        self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet
     ):
         """Initialize a ControlValve object."""
-        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()),
-                         pandapipe_net=pandapipes_net)
-        self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
-        self.diameter_m = diameter_m
-        self.control_active = control_active
-        self.in_service = in_service
-        self.index = index
+        super().__init__(asset_name=asset_name, asset_id=asset_id,
+                         pandapipe_net=pandapipe_net)
+        self.controlled_mdot_kg_per_s = 10.0
+        self.diameter_m = 0.5
+        self.control_active = True
+        self.in_service = True
+        self.index = 0
         # Initialize the control valve
         self._initialized = False
 

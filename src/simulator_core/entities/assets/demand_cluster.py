@@ -13,8 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""ProductionCluster class."""
-
+"""demandCluster class."""
+import uuid
 from typing import Dict
 
 from pandapipes import pandapipesNet
@@ -44,7 +44,6 @@ from simulator_core.entities.assets.utils import (
     mass_flow_and_temperature_to_heat_demand,
     mass_flow_to_volume_flow,
 )
-from typing import Optional
 
 
 class DemandCluster(AssetAbstract):
@@ -74,7 +73,7 @@ class DemandCluster(AssetAbstract):
 
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction: Optional[Junction] = None
+        self._intermediate_junction: Junction | None = None
         self._flow_control: None | ControlValve = None
         self._heat_exchanger: None | HeatExchanger = None
         # Output list
@@ -102,12 +101,10 @@ class DemandCluster(AssetAbstract):
             )
             # Create the control valve
             self._flow_control = ControlValve(
-                pandapipes_net=self.pandapipes_net,
-                controlled_mdot_kg_per_s=self.mass_flowrate,
-                diameter_m=self._internal_diameter,
-                control_active=True,
-                in_service=True,
-                name=f"flow_control_{self.name}",
+                pandapipe_net=self.pandapipes_net,
+
+                asset_name=f"flow_control_{self.name}",
+                asset_id=str(uuid.uuid4())
             )
             self._flow_control.from_junction = self.from_junction
             self._flow_control.to_junction = self._intermediate_junction

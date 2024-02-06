@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
+import uuid
 from typing import Dict
 from warnings import warn
 
@@ -107,12 +108,9 @@ class ProductionCluster(AssetAbstract):
             self._circ_pump.create()
             # Create the control valve
             self._flow_control = ControlValve(
-                pandapipes_net=self.pandapipes_net,
-                controlled_mdot_kg_per_s=self._controlled_mass_flow,
-                diameter_m=self._internal_diameter,
-                control_active=False,
-                in_service=False,
-                name=f"flow_control_{self.name}",
+                pandapipe_net=self.pandapipes_net,
+                asset_name=f"flow_control_{self.name}",
+                asset_id=str(uuid.uuid4()),
             )
             self._flow_control.from_junction = self.from_junction
             self._flow_control.to_junction = self.to_junction
