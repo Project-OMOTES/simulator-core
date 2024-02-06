@@ -18,7 +18,6 @@
 from typing import Dict
 
 from pandapipes import pandapipesNet
-from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -44,7 +43,9 @@ from simulator_core.entities.assets.utils import (
     mass_flow_and_temperature_to_heat_demand,
     mass_flow_to_volume_flow,
 )
-from typing import Optional
+from typing import Optional, TypeVar
+
+EsdlAssetObject = TypeVar("EsdlAssetObject")
 
 
 class DemandCluster(AssetAbstract):
@@ -77,7 +78,6 @@ class DemandCluster(AssetAbstract):
         self._intermediate_junction: Optional[Junction] = None
         self._flow_control = None
         self._heat_exchanger = None
-        self._simulated = False
         # Output list
         self.output: list = []
 
@@ -136,6 +136,7 @@ class DemandCluster(AssetAbstract):
         """
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
+        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
 
         if self.simulation_performed():
             self.temperature_supply = self.pandapipes_net.res_flow_control['t_from_k'][
@@ -148,10 +149,9 @@ class DemandCluster(AssetAbstract):
         self._set_demand_control()
 
     def _set_demand_control(self):
-        """Function to control the DemandCluster to achieve target return temperature
-        """
+        """Function to control the DemandCluster to achieve target return temperature."""
         # adjust flowrate or power to meet the return temperature
-        if self.pandapipes_net.flow_control.control_active[self._flow_control.index] is True:
+        if self.pandapipes_net.flow_control.control_active[self._flow_control.index]:
             # if pump is active, set flowrate to meet Target Temperature
             self._heat_exchanger.qext_w = self.thermal_power_allocation
             self.pandapipes_net.heat_exchanger.qext_w[
@@ -197,9 +197,9 @@ class DemandCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        return self._simulated
+        return hasattr(self.pandapipes_net, 'res_flow_control')
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 
         :param dict data:dictionary containing the data to be added the asset. The key is the name
@@ -214,37 +214,29 @@ class DemandCluster(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
+        if not self.simulation_performed():
+            raise ValueError("Simulation data not available.")
         outputs = dict()
 
-        if self.simulation_performed():
-            outputs[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_flow_control['t_from_k'][
-                self._flow_control.index]
-            outputs[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_heat_exchanger['t_to_k'][
+        outputs[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_flow_control['t_from_k'][
+            self._flow_control.index]
+        outputs[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_heat_exchanger['t_to_k'][
+            self._heat_exchanger.index]
+        outputs[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_flow_control['p_from_bar'][
+            self._flow_control.index]
+        outputs[PROPERTY_PRESSURE_RETURN] = self.pandapipes_net.res_heat_exchanger['p_to_bar'][
+            self._heat_exchanger.index]
+        outputs[PROPERTY_MASSFLOW] = \
+            self.pandapipes_net.res_heat_exchanger['mdot_from_kg_per_s'][
                 self._heat_exchanger.index]
-            outputs[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_flow_control['p_from_bar'][
-                self._flow_control.index]
-            outputs[PROPERTY_PRESSURE_RETURN] = self.pandapipes_net.res_heat_exchanger['p_to_bar'][
-                self._heat_exchanger.index]
-            outputs[PROPERTY_MASSFLOW] = \
-                self.pandapipes_net.res_heat_exchanger['mdot_from_kg_per_s'][
-                    self._heat_exchanger.index]
-            outputs[PROPERTY_VOLUMEFLOW] = mass_flow_to_volume_flow(
-                outputs[PROPERTY_MASSFLOW],
-                outputs[PROPERTY_TEMPERATURE_SUPPLY],
-                self.pandapipes_net)
-            outputs[PROPERTY_THERMAL_POWER] = mass_flow_and_temperature_to_heat_demand(
-                outputs[PROPERTY_TEMPERATURE_SUPPLY],
-                outputs[PROPERTY_TEMPERATURE_RETURN],
-                outputs[PROPERTY_MASSFLOW],
-                self.pandapipes_net)
-        else:
-            raise ValueError("Simulation data not available.")
+        outputs[PROPERTY_VOLUMEFLOW] = mass_flow_to_volume_flow(
+            outputs[PROPERTY_MASSFLOW],
+            outputs[PROPERTY_TEMPERATURE_SUPPLY],
+            self.pandapipes_net)
+        outputs[PROPERTY_THERMAL_POWER] = mass_flow_and_temperature_to_heat_demand(
+            outputs[PROPERTY_TEMPERATURE_SUPPLY],
+            outputs[PROPERTY_TEMPERATURE_RETURN],
+            outputs[PROPERTY_MASSFLOW],
+            self.pandapipes_net)
 
         self.output.append(outputs)
-
-    def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
-
-        The header is a tuple of the asset id and the property name.
-        """
-        pass

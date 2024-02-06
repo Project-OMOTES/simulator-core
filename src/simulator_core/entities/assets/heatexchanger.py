@@ -15,12 +15,11 @@
 
 """Heat exchanger classes."""
 import uuid
-from typing import Dict, Optional
+from typing import Dict
 
 from pandapipes import create_heat_exchanger, pandapipesNet
 from pandas import DataFrame
 
-from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 

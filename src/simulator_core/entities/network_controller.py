@@ -14,6 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """NetworkController entity."""
+from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
+                                                           PROPERTY_TEMPERATURE_RETURN,
+                                                           PROPERTY_HEAT_DEMAND)
 
 
 class NetworkController:
@@ -30,4 +33,13 @@ class NetworkController:
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-        return {}
+        controller_input = {
+            "cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4":
+                {PROPERTY_TEMPERATURE_SUPPLY: 80 + 273.15,
+                 PROPERTY_TEMPERATURE_RETURN: 40 + 273.15,
+                 PROPERTY_HEAT_DEMAND: 5000000},
+            "48f3e425-2143-4dcd-9101-c7e22559e82b": {PROPERTY_HEAT_DEMAND: 5000000,
+                                                     PROPERTY_TEMPERATURE_RETURN: 40 + 273.15,
+                                                     PROPERTY_TEMPERATURE_SUPPLY: 80 + 273.15}
+        }
+        return controller_input

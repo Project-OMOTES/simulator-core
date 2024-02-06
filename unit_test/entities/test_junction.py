@@ -33,8 +33,10 @@ class JunctionTest(unittest.TestCase):
     def test_junction_create(self):
         """Generic/template test for Junction."""
         # Arrange
-        from_junction = Junction(name="from_junction", pandapipes_net=self.network)
+
         # Act
+        from_junction = Junction(name="from_junction", pandapipes_net=self.network)  # act
+
         # Assert
         assert isinstance(from_junction, Junction)
         assert from_junction._initialized

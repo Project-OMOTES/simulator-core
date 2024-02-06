@@ -39,6 +39,7 @@ class NetworkSimulation:
         for time in range(config.start, config.stop, config.timestep):
             not_converged = True
             controller_input = self.controller.run_time_step(time)
+
             while not_converged:
                 not_converged = False  # for the moment we do not check on convergence,
                 # to get stuff running. Also need to add break after 10 iteration.

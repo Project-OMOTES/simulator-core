@@ -17,7 +17,7 @@
 import uuid
 from typing import Dict
 
-from pandapipes import create_circ_pump_const_mass_flow, pandapipesNet
+from pandapipes import (pandapipesNet, create_circ_pump_const_pressure)
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -54,12 +54,12 @@ class CirculationPumpConstantMass(AssetAbstract):
         if not self._initialized:
             self._initialized = True
             # Register the pump in the pandapipes network
-            self.index = create_circ_pump_const_mass_flow(
+            self.index = create_circ_pump_const_pressure(
                 net=self.pandapipes_net,
                 return_junction=self.from_junction.index,
                 flow_junction=self.to_junction.index,
+                plift_bar=5.0,
                 p_flow_bar=self.p_to_junction,
-                mdot_flow_kg_per_s=self.mdot_kg_per_s,
                 t_flow_k=self.t_to_junction,
                 in_service=self.in_service,
                 name=self.name,

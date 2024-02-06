@@ -25,14 +25,19 @@ from typing import Tuple, List
 
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
+    """Class to test energy system mapper class."""
+
     def test_to_entity(self):
+        """Method to test the to entity mapper class."""
         # act
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         pandapipes_net = create_empty_network(fluid="water")
+
         # arrange
         result = EsdlEnergySystemMapper(esdl_object).to_entity(pandapipes_net)
+
         # assert
         self.assertIsInstance(result, Tuple)
         self.assertIsInstance(result[0], List)

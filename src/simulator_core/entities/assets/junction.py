@@ -54,7 +54,7 @@ class Junction:
         self.pn_bar = pn_bar
         self.tfluid_k = tfluid_k
         self.height_m = height_m
-        self.geodata = geodata
+        self.geodata = (0, 0) if geodata is None else geodata
         self.name = name
         self.in_service = in_service
         self.index = index
@@ -73,7 +73,7 @@ class Junction:
                 height_m=self.height_m,
                 geodata=self.geodata,
                 name=self.name,
-                in_service=self.in_service,
+                in_service=self.in_service
             )
 
     def write_to_output(self) -> None:

@@ -27,17 +27,22 @@ from pathlib import Path
 
 
 class NetworkSimulationTest(unittest.TestCase):
+    """Test clas for network simulation object."""
 
     def test_network_simulation_class(self):
+        """Test for network simulation class creation."""
         # Arrange
         network = Mock()
         controller = Mock()
+
         # Act
-        network_simulation = NetworkSimulation(network, controller)
+        network_simulation = NetworkSimulation(network, controller)  # act
+
         # Assert
         self.assertIsInstance(network_simulation, NetworkSimulation)
 
     def test_network_simulation_run(self):
+        """Test for network simulation."""
         # Arrange
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
@@ -50,9 +55,10 @@ class NetworkSimulationTest(unittest.TestCase):
                                          timestep=3600,
                                          start=0,
                                          stop=3600 * 48)
+
         # Act
-        network_simulation.run(config)
+        network_simulation.run(config)  # act
+
         # Assert
         # this does not work since the network is mocked, since we cannot simulate yet
         # self.assertEqual(len(network_simulation.gather_output()), config.stop / config.timestep)
-

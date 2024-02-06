@@ -15,7 +15,6 @@
 
 """Simulation manager creates and controls the simulation objects."""
 
-import numpy as np
 import pandas as pd
 
 from simulator_core.adapter.transforms.mappers import EsdlControllerMapper, EsdlEnergySystemMapper
@@ -35,7 +34,7 @@ class SimulationManager:
         self.esdl = esdl
         self.config = config
 
-    def execute(self) -> DataFrame:
+    def execute(self) -> pd.DataFrame:
         """Method to simulate the network.
 
         First the network is converted to pandapipes and then the simulation is run.

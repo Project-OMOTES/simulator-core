@@ -32,6 +32,24 @@ from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
+def connect_connected_asset(connected_py_assets, junction, py_assets_list):
+    """Method to connect assets connected to one asset to the same junction.
+
+    :param connected_py_assets: List of connected assets
+    :param junction: Junction to connect the assets to
+    :param py_assets_list: List of assets
+    :return: None
+    """
+    for connected_py_asset in connected_py_assets:
+        index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
+            connected_py_asset[0]
+        )
+        if connected_py_asset[1] == Port.In:  # from
+            py_assets_list[index].set_from_juction(from_junction=junction)
+        else:  # to
+            py_assets_list[index].set_to_junction(to_junction=junction)
+
+
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a HeatNetwork entity object based on a PyESDL EnergySystem object."""
 
@@ -52,7 +70,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
     def to_entity(
-        self, pandapipes_net: pandapipesNet
+            self, pandapipes_net: pandapipesNet
     ) -> Tuple[List[AssetAbstract], List[Junction]]:
         """Method to convert esdl to Heatnetwork object.
 
@@ -77,6 +95,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 connected_py_assets = self.esdl_object.get_connected_assets(
                     py_asset.asset_id, Port.In
                 )
+                connect_connected_asset(connected_py_assets, junction, py_assets_list)
+                py_junction_list.append(junction)
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
                 junction = Junction(pandapipes_net)
@@ -84,14 +104,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 connected_py_assets = self.esdl_object.get_connected_assets(
                     py_asset.asset_id, Port.Out
                 )
-            for connected_py_asset in connected_py_assets:
-                index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
-                    connected_py_asset[0]
-                )
-                if connected_py_asset[1] == Port.In:  # from
-                    py_assets_list[index].set_from_juction(from_junction=junction)
-                else:  # to
-                    py_assets_list[index].set_to_junction(to_junction=junction)
+                connect_connected_asset(connected_py_assets, junction, py_assets_list)
             py_junction_list.append(junction)
             py_asset.create()
         return py_assets_list, py_junction_list

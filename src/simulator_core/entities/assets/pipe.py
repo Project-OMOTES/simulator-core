@@ -149,11 +149,10 @@ class Pipe(AssetAbstract):
         """
         # Error handling is performed in EsdlAssetObject.get_asset_parameters
         self.length, _ = esdl_asset.get_property(
-            esdl_property_name="length", default_value=self.length
-        )
+            esdl_property_name="length", default_value=self.length)
         self.roughness, _ = esdl_asset.get_property(
-            esdl_property_name="roughness", default_value=self.length
-        )
+            esdl_property_name="roughness", default_value=self.roughness)
+        self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
 
@@ -162,12 +161,7 @@ class Pipe(AssetAbstract):
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        if self.pandapipes_net.res_pipe[self._pipe_index] is AttributeError:
-            # TODO: Implement specific error
-            return False
-        else:
-            # Retrieve the setpoints
-            return True
+        return hasattr(self.pandapipes_net, 'res_pipe')
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
@@ -185,12 +179,14 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
+        if not self.simulation_performed():
+            raise ValueError("Simulation data not available.")
         output_dict = {}
         # Retrieve the temperature of the pipe at the in- and outlet (Ts, Tr)
         output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_pipe[
-            "temp_from_k"
+            "t_from_k"
         ].values[self._pipe_index]
-        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_pipe["temp_to_k"].values[
+        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_pipe["t_to_k"].values[
             self._pipe_index
         ]
         # Retrieve the pressure of the pipe at the in- and outlet (Ps, Pr)
@@ -206,11 +202,10 @@ class Pipe(AssetAbstract):
         ]
         # Retrieve the velocity of the pipe at the in- and outlet (Vs, Vr)
         output_dict[PROPERTY_VELOCITY_SUPPLY] = self.pandapipes_net.res_pipe[
-            "v_from_m_per_s"
+            "v_mean_m_per_s"
         ].values[self._pipe_index]
-        output_dict[PROPERTY_VELOCITY_RETURN] = self.pandapipes_net.res_pipe["v_to_m_per_s"].values[
-            self._pipe_index
-        ]
+        output_dict[PROPERTY_VELOCITY_RETURN] = (
+            self.pandapipes_net.res_pipe["v_mean_m_per_s"].values)[self._pipe_index]
         # Calculate the heat demand of the pipe (Q)
         output_dict[PROPERTY_HEAT_DEMAND] = mass_flow_and_temperature_to_heat_demand(
             temperature_supply=output_dict[PROPERTY_TEMPERATURE_SUPPLY],

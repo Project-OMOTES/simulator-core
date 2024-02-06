@@ -22,7 +22,6 @@ from pandapipes import pandapipesNet
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
-    DEFAULT_MASS_FLOW_RATE,
     DEFAULT_NODE_HEIGHT,
     DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
@@ -62,7 +61,7 @@ class ProductionCluster(AssetAbstract):
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         # DemandCluster pressure specifications
         self.pressure_supply = DEFAULT_PRESSURE
-        self.control_mass_flow = DEFAULT_MASS_FLOW_RATE
+        self.control_mass_flow = False
         # Define internal diameter
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
@@ -95,14 +94,6 @@ class ProductionCluster(AssetAbstract):
         :param pandapipesNet pandapipes_net: pandapipes network object
         """
         if not self._initialized:
-            # Create intermediate junction
-            self._intermediate_junction = Junction(
-                pandapipes_net=self.pandapipes_net,
-                pn_bar=self.pressure_supply,
-                tfluid_k=self.temperature_supply,
-                height_m=self.height_m,
-                name=f"intermediate_junction_{self.name}",
-            )
             # Create the pump to supply pressure and or massflow
             self._circ_pump = CirculationPumpConstantMass(
                 pandapipes_net=self.pandapipes_net,
@@ -113,18 +104,18 @@ class ProductionCluster(AssetAbstract):
                 in_service=True,
             )
             self._circ_pump.from_junction = self.from_junction
-            self._circ_pump.to_junction = self._intermediate_junction
+            self._circ_pump.to_junction = self.to_junction
             self._circ_pump.create()
             # Create the control valve
             self._flow_control = ControlValve(
                 pandapipes_net=self.pandapipes_net,
                 controlled_mdot_kg_per_s=self._controlled_mass_flow,
                 diameter_m=self._internal_diameter,
-                control_active=self.control_mass_flow,
-                in_service=True,
+                control_active=False,
+                in_service=False,
                 name=f"flow_control_{self.name}",
             )
-            self._flow_control.from_junction = self._intermediate_junction
+            self._flow_control.from_junction = self.from_junction
             self._flow_control.to_junction = self.to_junction
             self._flow_control.create()
             self._initialized = True
@@ -138,7 +129,7 @@ class ProductionCluster(AssetAbstract):
         # Set the temperature of the circulation pump mass flow
         self.temperature_supply = temperature_supply
         # Retrieve the value array of the temperature
-        self.pandapipes_net["circ_pump_mass"]["t_flow_k"][
+        self.pandapipes_net["circ_pump_pressure"]["t_flow_k"][
             self._circ_pump.index
         ] = self.temperature_supply
 
@@ -164,6 +155,7 @@ class ProductionCluster(AssetAbstract):
             temperature_return=self.temperature_return,
             pandapipes_net=self.pandapipes_net,
         )
+
         # Check if the mass flow rate is positive
         if self._controlled_mass_flow < 0:
             raise ValueError(
@@ -171,10 +163,6 @@ class ProductionCluster(AssetAbstract):
                 + " is negative."
             )
         else:
-            # Set the mass flow rate of the circulation pump
-            self.pandapipes_net["circ_pump_mass"]["mdot_flow_kg_per_s"][
-                self._circ_pump.index
-            ] = self._controlled_mass_flow
             # Set the mass flow rate of the control valve
             self.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][
                 self._flow_control.index
@@ -217,7 +205,7 @@ class ProductionCluster(AssetAbstract):
         :return bool simulation_performed: True if the simulation has been performed,
             False otherwise.
         """
-        return hasattr(self.pandapipes_net, 'res_circ_pump_mass')
+        return hasattr(self.pandapipes_net, 'res_circ_pump_pressure')
 
     def get_setpoints(self) -> Dict[str, float]:
         """Get the setpoints of the asset.
@@ -228,9 +216,10 @@ class ProductionCluster(AssetAbstract):
         # Return the setpoints
         if not self.simulation_performed():
             raise ValueError("Simulation data not available.")
-        temp_supply = self.pandapipes_net.res_junction["tfluid_k"][self.to_junction.index]
-        temp_return = self.pandapipes_net.res_junction["tfluid_k"][self.from_junction.index]
-        mass_flow = self.pandapipes_net.circ_pump_mass["mdot_flow_kg_per_s"][self._circ_pump.index]
+        temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
+        temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
+        mass_flow = self.pandapipes_net.res_circ_pump_pressure[
+            "mdot_flow_kg_per_s"][self._circ_pump.index]
         heat_demand = mass_flow_and_temperature_to_heat_demand(
             temperature_supply=temp_supply,
             temperature_return=temp_return,
@@ -277,14 +266,12 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
         if not self.simulation_performed():
-            return  # TODO Remove this when you can perform a simulation, check is also performed
             raise ValueError("Simulation data not available.")
         # Retrieve the general model setpoints (Ts, Tr, Qh)
         setpoints = self.get_setpoints()
         # Retrieve the mass flow (mdot)
-        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_mass["mdot_flow_kg_per_s"][
-            self._circ_pump.index
-        ]
+        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_pressure[
+            "mdot_flow_kg_per_s"][self._circ_pump.index]
         # Retrieve the pressure (Ps, Pr)
         setpoints[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_junction["p_bar"][
             self.to_junction.index
