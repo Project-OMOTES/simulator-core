@@ -61,6 +61,11 @@ requires = ["setuptools ~= 68.2.2"]
 [tools.setuptools]
 packages = ["src/simulator_core"]
 
+[tool.pytest.ini_options]
+addopts = "--cov=simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+
+[tool.coverage.run]
+source = ["src"]
 
 [tool.flake8]
 max-line-length = 100
