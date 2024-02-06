@@ -23,7 +23,6 @@ from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster
-from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlAssetMapper:

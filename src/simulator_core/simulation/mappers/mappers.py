@@ -16,14 +16,13 @@
 """Module containing the abstract class for the mappers."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import TypeVar
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
-# what is this?
 Entity = TypeVar("Entity")
-EsdlAssetObject = TypeVar("EsdlAssetObject")
 
 
-class EsdlMapperAbstract(ABC, Generic[Entity, EsdlAssetObject]):
+class EsdlMapperAbstract(ABC):
     """Abstract class to be used for deriving mapper classes from esdl to our own classes."""
 
     @abstractmethod
