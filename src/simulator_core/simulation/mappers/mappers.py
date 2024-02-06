@@ -16,7 +16,7 @@
 """Module containing the abstract class for the mappers."""
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 # what is this?
 Entity = TypeVar("Entity")

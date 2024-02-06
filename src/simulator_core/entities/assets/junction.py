@@ -82,4 +82,4 @@ class Junction:
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        pass
+        return

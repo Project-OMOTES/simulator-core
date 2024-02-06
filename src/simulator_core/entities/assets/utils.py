@@ -18,9 +18,10 @@ from enum import IntEnum
 
 from pandapipes import pandapipesNet
 import numpy as np
+import numpy.typing as npt
 
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from typing import List
+from typing import List, Tuple
 
 
 def heat_demand_and_temperature_to_mass_flow(
@@ -69,7 +70,7 @@ def mass_flow_and_temperature_to_heat_demand(
     return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
 
 
-def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float], List[float]):
+def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> Tuple[List[float], List[float]]:
     """Retrieve the thermal conductivity table of the asset.
 
     :param EsdlAssetObject esdl_asset: The asset of which the heat transfer table should be
@@ -100,14 +101,17 @@ def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> (List[float],
 
 
 def calculate_inverse_heat_transfer_coefficient(
-        inner_diameter: float, outer_diameter: float, thermal_conductivity: float
-) -> float:
+        inner_diameter:  np.ndarray, outer_diameter: np.ndarray, thermal_conductivity: np.ndarray
+) -> np.ndarray:
     """Calculate the inverse heat transfer coefficient of a pipe.
 
+    :param inner_diameter: Inner diameter of the pipe in m
+    :param outer_diameter: Outer diameter of the pipe in m
     :param thermal_conductivity: Thermal conductivity of the pipe material in W/(m K)
     :return: Inverse heat transfer coefficient in W/(m^2 K)
     """
-    return (inner_diameter * np.log(outer_diameter / inner_diameter)) / (2 * thermal_conductivity)
+    return np.array((inner_diameter * np.log(outer_diameter / inner_diameter))
+              / (2.0 * thermal_conductivity))
 
 
 def mass_flow_to_volume_flow(
@@ -125,9 +129,10 @@ def mass_flow_to_volume_flow(
     :return float volume_flow rate: the volume flow rate in m3/s
     """
     density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
+    if (density_fluid == 0) | (density_fluid is None):
+        raise ValueError("The density of the fluid is zero or None.")
     volume_flowrate = mass_flow_rate / density_fluid
-
-    return volume_flowrate
+    return float(volume_flowrate)
 
 
 def volume_flow_to_mass_flow(
@@ -146,7 +151,7 @@ def volume_flow_to_mass_flow(
     density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
     mass_flowrate = volume_flowrate * density_fluid
 
-    return mass_flowrate
+    return float(mass_flowrate)
 
 
 class Port(IntEnum):

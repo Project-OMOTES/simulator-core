@@ -15,7 +15,8 @@
 
 """Entry point for running simulator-core library from cmdline."""
 
-from simulator_core.entities import SimulationConfiguration
+import pandas as pd
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from simulator_core.infrastructure.simulation_manager import SimulationManager
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
@@ -27,7 +28,7 @@ import uuid
 logger = logging.getLogger(__name__)
 
 
-def run(file_path: str = None):
+def run(file_path: str | None = None) -> pd.DataFrame:
     """Main run function for the heatnetwork simulator."""
     config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                      name="test run",

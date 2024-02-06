@@ -14,9 +14,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """File containing utility functions for the transforms."""
+from typing import Dict, List
 
 
-def reverse_dict(original_dict: dict) -> dict:
+def reverse_dict(original_dict: dict) -> Dict[str, List[type]]:
     """Method to reverse a dict.
 
     Creates a dict with set(values) as keys and the keys of the original dict as list values.

@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-from typing import Dict, Optional
+from typing import Dict
 from warnings import warn
 
 from pandapipes import pandapipesNet
@@ -66,17 +66,16 @@ class ProductionCluster(AssetAbstract):
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction: Optional[Junction] = None
-        self._circ_pump = None
-        self._flow_control = None
+        self._intermediate_junction: None | Junction = None
+        self._circ_pump: None | CirculationPumpConstantMass = None
+        self._flow_control: None | ControlValve = None
         # Controlled mass flow
-        self._controlled_mass_flow = None
+        self._controlled_mass_flow = 0.0
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 
-        :param dict data:dictionary containing the data to be added the asset. The key is the name
-                        of the property, the value of the dict is the value of the property.
+        :param EsdlAssetObject esdl_asset: The ESDL asset object containing the physical data.
         :return:
         """
         pass
@@ -157,7 +156,7 @@ class ProductionCluster(AssetAbstract):
         )
 
         # Check if the mass flow rate is positive
-        if self._controlled_mass_flow < 0:
+        if self._controlled_mass_flow < 0.0:
             raise ValueError(
                 f"The mass flow rate {self._controlled_mass_flow} of the asset {self.name}"
                 + " is negative."

@@ -19,7 +19,9 @@ from typing import Dict, List
 import numpy as np
 from pandapipes import create_pipe_from_parameters, pandapipesNet
 
+
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.asset_defaults import (
     PIPE_DEFAULTS,
     PROPERTY_HEAT_DEMAND,
@@ -31,7 +33,6 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_VELOCITY_RETURN,
     PROPERTY_VELOCITY_SUPPLY,
 )
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
@@ -106,11 +107,11 @@ class Pipe(AssetAbstract):
         """Retrieve the diameter of the pipe and convert it if necessary."""
         temp_diameter, property_available = esdl_asset.get_property("innerDiameter", self.diameter)
         if property_available:
-            return temp_diameter
+            return float(temp_diameter)
         else:
             # Implement DN-conversion
             raise NotImplementedError(
-                f"The innderDiamter property is unavailable for {esdl_asset.name}. \
+                f"The innderDiamter property is unavailable for {esdl_asset.esdl_asset.name}. \
                     Conversion from DN to diameter is not yet implemented."
             )
 
@@ -127,17 +128,17 @@ class Pipe(AssetAbstract):
         diameters, heat_coefficients = get_thermal_conductivity_table(esdl_asset=esdl_asset)
         if diameters:
             # Create a numpy array of the diameters and heat coefficients
-            diameters = np.array(diameters)
-            heat_coefficients = np.array(heat_coefficients)
+            diameters_np = np.array(diameters)
+            heat_coefficients_np = np.array(heat_coefficients)
             # Calculate the heat transfer coefficient from the heat transfer table
             inverse_heat_transfer_coefficient = np.sum(
                 calculate_inverse_heat_transfer_coefficient(
-                    inner_diameter=diameters[:-1],
-                    outer_diameter=diameters[1:],
-                    thermal_conductivity=heat_coefficients,
+                    inner_diameter=diameters_np[:-1],
+                    outer_diameter=diameters_np[1:],
+                    thermal_conductivity=heat_coefficients_np,
                 )
             )
-            return 1 / inverse_heat_transfer_coefficient
+            return 1.0 / float(inverse_heat_transfer_coefficient)
         else:
             return self.alpha_value
 

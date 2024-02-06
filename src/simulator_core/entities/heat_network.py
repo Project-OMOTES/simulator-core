@@ -52,7 +52,7 @@ class HeatNetwork:
         except PipeflowNotConverged:
             raise RuntimeError("Error in time step calculation pipe flow did not converge.")
 
-    def plot_network(self):
+    def plot_network(self) -> None:
         """Method to plot the network.
 
         plots the network in a simple plot all junctions are translated to a circle.

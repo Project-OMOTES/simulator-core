@@ -18,7 +18,9 @@
 import pandas as pd
 
 from simulator_core.adapter.transforms.mappers import EsdlControllerMapper, EsdlEnergySystemMapper
-from simulator_core.entities import EsdlObject, HeatNetwork, SimulationConfiguration
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from simulator_core.simulation import NetworkSimulation
 
 

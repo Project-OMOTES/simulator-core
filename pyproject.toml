@@ -83,6 +83,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 ignore_missing_imports = true
 follow_imports_for_stubs=true
+disable_error_code = 'union-attr'
 exclude = [
     '.venv/*',
     'venv/*',

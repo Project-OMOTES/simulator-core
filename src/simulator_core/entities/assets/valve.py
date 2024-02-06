@@ -21,7 +21,7 @@ from pandapipes import create_flow_control, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
@@ -31,9 +31,9 @@ class ControlValve(AssetAbstract):
         pandapipes_net: pandapipesNet,
         controlled_mdot_kg_per_s: float,
         diameter_m: float,
+        name: str,
         control_active: bool = False,
         in_service: bool = True,
-        name: Optional[str] = None,
         index: Optional[int] = None,
     ):
         """Initialize a ControlValve object."""
@@ -85,10 +85,9 @@ class ControlValve(AssetAbstract):
         """
         return True
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
-
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
 
