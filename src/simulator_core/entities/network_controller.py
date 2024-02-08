@@ -16,7 +16,8 @@
 """NetworkController entity."""
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_TEMPERATURE_RETURN,
-                                                           PROPERTY_HEAT_DEMAND)
+                                                           PROPERTY_HEAT_DEMAND,
+                                                           PROPERTY_SET_PRESSURE)
 from simulator_core.entities.assets.controller_classes import ControllerSource, ControllerConsumer
 from typing import List
 
@@ -49,7 +50,10 @@ class NetworkController:
             controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time)
                                            / len(self.sources),
                                            PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                                           PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply}
+                                           PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                                           PROPERTY_SET_PRESSURE: False}
+            # setting the first source to set the pressure for now.
+            controller_input[self.sources[0].id][PROPERTY_SET_PRESSURE] = True
         return controller_input
 
     def get_total_demand(self, time: int) -> float:

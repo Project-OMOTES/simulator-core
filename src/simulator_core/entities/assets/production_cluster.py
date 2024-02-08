@@ -33,6 +33,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_SET_PRESSURE,
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
@@ -165,6 +166,18 @@ class ProductionCluster(AssetAbstract):
                 self._flow_control.index
             ] = self._controlled_mass_flow
 
+    def _set_pressure(self, pressure_supply: bool) -> None:
+        """Set the asset to predescribe the pressure.
+
+        :param bool pressure_supply: True when the pressure needs to be set
+        """
+        if pressure_supply:
+            self.pandapipes_net.flow_control.in_service[self._flow_control.index] = False
+            self.pandapipes_net.circular_pump.in_service[self._circ_pump.index] = True
+        else:
+            self.pandapipes_net.flow_control.in_service[self._flow_control.index] = True
+            self.pandapipes_net.circ_pump_pressure.in_service[self._circ_pump.index] = False
+
     def set_setpoints(self, setpoints: Dict) -> None:
         """Set the setpoints of the asset.
 
@@ -173,9 +186,8 @@ class ProductionCluster(AssetAbstract):
 
         """
         # Default keys required
-        necessary_setpoints = set(
-            [PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN, PROPERTY_HEAT_DEMAND]
-        )
+        necessary_setpoints = {PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN,
+                               PROPERTY_HEAT_DEMAND, PROPERTY_SET_PRESSURE}
         # Dict to set
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
@@ -190,6 +202,7 @@ class ProductionCluster(AssetAbstract):
                     f"The setpoints {setpoints_set.difference(necessary_setpoints)}"
                     + f" are not required for the asset {self.name}."
                 )
+            self._set_pressure(setpoints[PROPERTY_SET_PRESSURE])
         else:
             # Print missing setpoints
             raise ValueError(
