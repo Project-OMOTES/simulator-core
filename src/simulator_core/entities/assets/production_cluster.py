@@ -173,7 +173,7 @@ class ProductionCluster(AssetAbstract):
         """
         if pressure_supply:
             self.pandapipes_net.flow_control.in_service[self._flow_control.index] = False
-            self.pandapipes_net.circular_pump.in_service[self._circ_pump.index] = True
+            self.pandapipes_net.circ_pump_pressure.in_service[self._circ_pump.index] = True
         else:
             self.pandapipes_net.flow_control.in_service[self._flow_control.index] = True
             self.pandapipes_net.circ_pump_pressure.in_service[self._circ_pump.index] = False
