@@ -24,12 +24,13 @@ from typing import List
 class NetworkController:
     """Class to store the network controller."""
 
-    def __init__(self,  consumers: List[ControllerConsumer], sources: List[ControllerSource]) -> None:
+    def __init__(self, consumers: List[ControllerConsumer], sources: List[ControllerSource]) \
+            -> None:
         """Constructor for controller for a heat network."""
         self.sources = sources
         self.consumers = consumers
 
-    def run_time_step(self, time: float) -> dict:
+    def run_time_step(self, time: int) -> dict:
         """Method to get the controller inputs for the network.
 
         :param float time: Time step for which to run the controller.
@@ -40,20 +41,21 @@ class NetworkController:
         controller_input = {}
         for consumer in self.consumers:
             controller_input[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time),
-                                             PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
-                                             PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
+                                             PROPERTY_TEMPERATURE_RETURN:
+                                                 consumer.temperature_return,
+                                             PROPERTY_TEMPERATURE_SUPPLY:
+                                                 consumer.temperature_supply}
         for source in self.sources:
-            controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time) /
-                                                                 len(self.sources),
+            controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time)
+                                           / len(self.sources),
                                            PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
                                            PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply}
         return controller_input
 
-    def get_total_demand(self, time) -> float:
+    def get_total_demand(self, time: int) -> float:
         """Method to get the total heat demand of the network."""
         return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network."""
-        return sum([source.power for source in self.sources])
-
+        return float(sum([source.power for source in self.sources]))
