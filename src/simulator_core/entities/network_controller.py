@@ -17,14 +17,17 @@
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_TEMPERATURE_RETURN,
                                                            PROPERTY_HEAT_DEMAND)
+from simulator_core.entities.assets.controller_classes import ControllerSource, ControllerConsumer
+from typing import List
 
 
 class NetworkController:
     """Class to store the network controller."""
 
-    def __init__(self) -> None:
+    def __init__(self,  consumers: List[ControllerConsumer], sources: List[ControllerSource]) -> None:
         """Constructor for controller for a heat network."""
-        pass
+        self.sources = sources
+        self.consumers = consumers
 
     def run_time_step(self, time: float) -> dict:
         """Method to get the controller inputs for the network.
@@ -33,13 +36,24 @@ class NetworkController:
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-        controller_input = {
-            "cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4":
-                {PROPERTY_TEMPERATURE_SUPPLY: 80 + 273.15,
-                 PROPERTY_TEMPERATURE_RETURN: 40 + 273.15,
-                 PROPERTY_HEAT_DEMAND: 5000000},
-            "48f3e425-2143-4dcd-9101-c7e22559e82b": {PROPERTY_HEAT_DEMAND: 5000000,
-                                                     PROPERTY_TEMPERATURE_RETURN: 40 + 273.15,
-                                                     PROPERTY_TEMPERATURE_SUPPLY: 80 + 273.15}
-        }
+
+        controller_input = {}
+        for consumer in self.consumers:
+            controller_input[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time),
+                                             PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
+                                             PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
+        for source in self.sources:
+            controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time) /
+                                                                 len(self.sources),
+                                           PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
+                                           PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply}
         return controller_input
+
+    def get_total_demand(self, time) -> float:
+        """Method to get the total heat demand of the network."""
+        return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
+
+    def get_total_supply(self) -> float:
+        """Method to get the total heat supply of the network."""
+        return sum([source.power for source in self.sources])
+

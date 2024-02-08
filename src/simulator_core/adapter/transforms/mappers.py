@@ -18,7 +18,7 @@ from typing import List, Tuple
 
 from pandapipes import pandapipesNet
 
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper, EsdlAssetControlMapper
 from simulator_core.entities.assets.junction import Junction
 
 from simulator_core.entities.assets.utils import Port
@@ -129,4 +129,10 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         :param EsdlObject entity: EsdlObject object to be converted to NetworkController object
         :return: NetworkController, which is the converted EsdlObject object.
         """
-        return NetworkController()
+        consumers = []
+        for esdl_asset in model.get_all_assets_of_type("consumer"):
+            consumers.append(EsdlAssetControlMapper().to_entity(esdl_asset))
+        sources = []
+        for esdl_asset in model.get_all_assets_of_type("producer"):
+            sources.append(EsdlAssetControlMapper().to_entity(esdl_asset))
+        return NetworkController(consumers, sources)

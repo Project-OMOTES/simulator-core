@@ -23,13 +23,14 @@ class StringEsdlAssetMapper:
     """Mapper class to convert strings to an esdl class type and vica-versa.
 
     Please note that the str_to_type_dict needs to have unique keys and values.
+    Also note that fo the esdl class only the derived classes should be listed.
+    Otherwise asset might be selected twice, since a HeatingDemand is also and Consumer.
     """
 
     type_to_str_dict = {
         esdl.Asset: "asset",
-        esdl.Producer: "producer",
         esdl.GenericProducer: "producer",
-        esdl.Consumer: "consumer",
+        esdl.GenericConsumer: "consumer",
         esdl.HeatingDemand: "consumer",
         esdl.GeothermalSource: "geothermal",
         esdl.Conversion: "conversion",
