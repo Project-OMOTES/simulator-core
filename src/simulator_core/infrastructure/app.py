@@ -34,7 +34,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
                                      name="test run",
                                      timestep=3600,
                                      start=0,
-                                     stop=3600 * 1)
+                                     stop=3600 * 10)
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
     try:

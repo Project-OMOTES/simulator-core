@@ -1,3 +1,4 @@
+import pandas as pd
 
 
 class ControllerConsumer:
@@ -8,10 +9,15 @@ class ControllerConsumer:
         self.id = identifier
         self.temperature_return = 40 + 273.15
         self.temperature_supply = 80 + 273.15
+        self.profile: pd.DataFrame | None = None
 
     def get_heat_demand(self, time: int) -> float:
         """Method to get the heat demand of the consumer."""
-        return float(5000000 * time / 3600.0)
+        return self.profile.loc[time, "values"]
+
+    def add_profile(self, profile: pd.DataFrame) -> None:
+        """Method to add a profile to the consumer."""
+        self.profile = profile
 
 
 class ControllerSource:

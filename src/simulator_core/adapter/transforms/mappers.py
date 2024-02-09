@@ -132,6 +132,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         consumers = []
         for esdl_asset in model.get_all_assets_of_type("consumer"):
             consumers.append(EsdlAssetControlMapper().to_entity(esdl_asset))
+            consumers[-1].add_profile(esdl_asset.get_profile())
+
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
             sources.append(EsdlAssetControlMapper().to_entity(esdl_asset))
