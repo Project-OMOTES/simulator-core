@@ -24,6 +24,7 @@ import sys
 import logging
 import traceback
 import uuid
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,13 @@ def run(file_path: str | None = None) -> pd.DataFrame:
     config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                      name="test run",
                                      timestep=3600,
-                                     start=0,
-                                     stop=3600 * 10)
+                                     start=datetime.strptime("2019-01-01T00:00:00",
+                                                             "%Y-%m-%dT%H:%M:%S"),
+                                     stop=datetime.strptime("2019-01-02T00:00:00",
+                                                             "%Y-%m-%dT%H:%M:%S"),
+                                    # stop=datetime.strptime("2019-12-31T23:00:00",
+                                    #                        "%Y-%m-%dT%H:%M:%S"),
+                                     )
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
     try:

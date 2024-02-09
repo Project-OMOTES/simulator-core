@@ -16,6 +16,7 @@
 """Configuration parameters for the simulation that are not included in the ESDL."""
 
 from dataclasses import dataclass
+from datetime import datetime
 import uuid
 
 
@@ -26,5 +27,5 @@ class SimulationConfiguration:
     simulation_id: uuid.UUID
     name: str
     timestep: int
-    start: int
-    stop: int
+    start: datetime
+    stop: datetime

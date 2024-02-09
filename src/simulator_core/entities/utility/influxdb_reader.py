@@ -87,7 +87,7 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
         )
 
     unit = get_unit(profile)
-    dates = [time_stamp.strftime("%Y-%m-%dT%H:%M:%SZ") for time_stamp, _ in
+    dates = [time_stamp for time_stamp, _ in
              time_series_data.profile_data_list]
     values = [convert_to_unit(value, profile.profileQuantityAndUnit, unit) * profile.multiplier
               for _, value in time_series_data.profile_data_list]

@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 
 
@@ -11,9 +13,15 @@ class ControllerConsumer:
         self.temperature_supply = 80 + 273.15
         self.profile: pd.DataFrame | None = None
 
-    def get_heat_demand(self, time: int) -> float:
-        """Method to get the heat demand of the consumer."""
-        return self.profile.loc[time, "values"]
+    def get_heat_demand(self, time: datetime.datetime) -> float:
+        """Method to get the heat demand of the consumer.
+
+        :param datetime.datetime time: Time for which to get the heat demand.
+        :return: float with the heat demand."""
+
+        for index in range(len(self.profile)):
+            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
+                return self.profile["values"][index]
 
     def add_profile(self, profile: pd.DataFrame) -> None:
         """Method to add a profile to the consumer."""

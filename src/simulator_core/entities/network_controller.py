@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """NetworkController entity."""
+import datetime
+
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_TEMPERATURE_RETURN,
                                                            PROPERTY_HEAT_DEMAND,
@@ -31,7 +33,7 @@ class NetworkController:
         self.sources = sources
         self.consumers = consumers
 
-    def run_time_step(self, time: int) -> dict:
+    def run_time_step(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
 
         :param float time: Time step for which to run the controller.
