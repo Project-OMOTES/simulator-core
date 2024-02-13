@@ -95,7 +95,7 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     return pd.DataFrame(data_points)
 
 
-def get_unit(profile: esdl.InfluxDBProfile):
+def get_unit(profile: esdl.InfluxDBProfile) -> esdl.PhysicalQuantityEnum:
     """Method to get the SI unit of the profile.
 
     This method tries to get the unit of the profile.

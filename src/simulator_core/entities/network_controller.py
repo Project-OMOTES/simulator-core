@@ -58,7 +58,7 @@ class NetworkController:
             controller_input[self.sources[0].id][PROPERTY_SET_PRESSURE] = True
         return controller_input
 
-    def get_total_demand(self, time: int) -> float:
+    def get_total_demand(self, time: datetime.datetime) -> float:
         """Method to get the total heat demand of the network."""
         return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
 

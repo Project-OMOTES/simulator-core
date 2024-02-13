@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """HeatNetwork entity class."""
+import datetime
 import math
 
 import pandas as pd
@@ -35,7 +36,7 @@ class HeatNetwork:
         self.panda_pipes_net = create_empty_network(fluid="water")
         self.assets, self.junctions = conversion_factory(self.panda_pipes_net)
 
-    def run_time_step(self, time: float, controller_input: dict) -> None:
+    def run_time_step(self, time: datetime.datetime, controller_input: dict) -> None:
         """Method to simulate a time step.
 
         It first sets the controller input to the assets and then simulates the time step.

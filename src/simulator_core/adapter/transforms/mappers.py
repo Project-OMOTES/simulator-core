@@ -18,8 +18,8 @@ from typing import List, Tuple
 
 from pandapipes import pandapipesNet
 
-from simulator_core.adapter.transforms.esdl_asset_mapper import (EsdlAssetMapper,
-                                                                 EsdlAssetControlMapper)
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+
 from simulator_core.entities.assets.junction import Junction
 
 from simulator_core.entities.assets.utils import Port
@@ -28,6 +28,7 @@ from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.controller_classes import ControllerConsumer, ControllerSource
 
 
 def connect_connected_asset(connected_py_assets: List[Tuple[str, Port]],
@@ -127,15 +128,17 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the NetworkController object.
-        :param EsdlObject entity: EsdlObject object to be converted to NetworkController object
+        :param EsdlObject model: EsdlObject object to be converted to NetworkController object
         :return: NetworkController, which is the converted EsdlObject object.
         """
         consumers = []
         for esdl_asset in model.get_all_assets_of_type("consumer"):
-            consumers.append(EsdlAssetControlMapper().to_entity(esdl_asset))
+            consumers.append(ControllerConsumer(esdl_asset.esdl_asset.name,
+                                                esdl_asset.esdl_asset.id))
             consumers[-1].add_profile(esdl_asset.get_profile())
 
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
-            sources.append(EsdlAssetControlMapper().to_entity(esdl_asset))
+            sources.append(ControllerSource(esdl_asset.esdl_asset.name,
+                                            esdl_asset.esdl_asset.id))
         return NetworkController(consumers, sources)

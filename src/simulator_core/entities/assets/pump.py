@@ -65,6 +65,7 @@ class CirculationPumpConstantMass(AssetAbstract):
                 in_service=self.in_service,
                 name=self.name,
                 index=self.index,
+                type='pt'
             )
 
     def set_setpoints(self, setpoints: Dict, **kwargs: Dict) -> None:
