@@ -18,8 +18,8 @@ from dataclasses import dataclass
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
-DEFAULT_PRESSURE = 5.0  # [bar]
-DEFAULT_PRESSURE_DIFFERENCE = 0.5  # [bar]
+DEFAULT_PRESSURE = 10.0  # [bar]
+DEFAULT_PRESSURE_DIFFERENCE = 5  # [bar]
 DEFAULT_TEMPERATURE = 300.0  # [K]
 DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
 DEFAULT_NODE_HEIGHT = 0.0  # [m]
