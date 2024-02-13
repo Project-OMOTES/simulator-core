@@ -102,7 +102,6 @@ class DemandCluster(AssetAbstract):
             # Create the control valve
             self._flow_control = ControlValve(
                 pandapipe_net=self.pandapipes_net,
-
                 asset_name=f"flow_control_{self.name}",
                 asset_id=str(uuid.uuid4())
             )
