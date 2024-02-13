@@ -1,10 +1,10 @@
+"""Module to read the esdl profiles from an energy system."""
 from esdl.profiles.influxdbprofilemanager import InfluxDBProfileManager
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
 from typing import Dict
 import pandas as pd
-import warnings
 
 
 def parse_esdl_profiles(esh: EnergySystemHandler) -> Dict[str, pd.DataFrame]:
@@ -48,7 +48,6 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     if influx_host in influx_cred_map:
         (username, password) = influx_cred_map[influx_host]
     else:
-        warnings.warn("Creditentials for InfluxDB not found in influx_cred_map using None.")
         username = None
         password = None
     time_series_data = InfluxDBProfileManager.create_esdl_influxdb_profile_manager(
@@ -62,25 +61,25 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
 
     # I do not thing this is required since you set it in mapeditor.
     if time_series_data.end_datetime != profile.endDate:
-        raise (
+        raise RuntimeError(
             f"The user input profile end datetime: {profile.endDate} does not match the end"
             f" datetime in the datbase: {time_series_data.end_datetime} for variable: "
             f"{profile.field}"
         )
     if time_series_data.start_datetime != profile.startDate:
-        raise (
+        raise RuntimeError(
             f"The user input profile start datetime: {profile.startDate} does not match the"
             f" start date in the datbase: {time_series_data.start_datetime} for variable: "
             f"{profile.field}"
         )
     if time_series_data.start_datetime != time_series_data.profile_data_list[0][0]:
-        raise (
+        raise RuntimeError(
             f"The profile's variable value for the start datetime: "
             f"{time_series_data.start_datetime} does not match the start datetime of the"
             f" profile data: {time_series_data.profile_data_list[0][0]}"
         )
     if time_series_data.end_datetime != time_series_data.profile_data_list[-1][0]:
-        raise (
+        raise RuntimeError(
             f"The profile's variable value for the end datetime: "
             f"{time_series_data.end_datetime} does not match the end datetime of the"
             f" profile data: {time_series_data.profile_data_list[-1][0]}"

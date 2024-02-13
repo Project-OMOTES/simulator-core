@@ -100,14 +100,16 @@ class ProductionCluster(AssetAbstract):
                 pandapipes_net=self.pandapipes_net,
                 p_to_junction=self.pressure_supply,
                 mdot_kg_per_s=self._controlled_mass_flow,
-                t_to_junction=self.temperature_supply,
+                t_to_junction=self.temperature_supply + 20.0,
                 name=f"circ_pump_{self.name}",
                 in_service=True,
             )
             self._circ_pump.from_junction = self.from_junction
             self._circ_pump.to_junction = self.to_junction
+
             self._circ_pump.create()
             # Create the control valve
+
             self._flow_control = ControlValve(
                 pandapipe_net=self.pandapipes_net,
                 asset_name=f"flow_control_{self.name}",

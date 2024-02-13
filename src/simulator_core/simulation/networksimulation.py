@@ -43,7 +43,8 @@ class NetworkSimulation:
         number_of_time_steps = int((config.stop - config.start).total_seconds() / config.timestep)
         for time_step in range(number_of_time_steps):
             not_converged = True
-            time = (config.start + timedelta(seconds=time_step * config.timestep)).replace(tzinfo=timezone.utc)
+            time = (config.start + timedelta(seconds=time_step * config.timestep)
+                    ).replace(tzinfo=timezone.utc)
             controller_input = self.controller.run_time_step(time)
 
             while not_converged:

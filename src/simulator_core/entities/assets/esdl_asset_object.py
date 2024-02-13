@@ -57,5 +57,3 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return get_data_from_profile(esdl_port.profile[0])
-
-
