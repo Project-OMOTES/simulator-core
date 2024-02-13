@@ -54,8 +54,8 @@ class EsdlObjectTest(unittest.TestCase):
         pipes = self.esdl_object.get_all_assets_of_type(pipe)  # act
 
         # Assert
-        self.assertEqual(len(producers), 2)
-        self.assertEqual(len(consumers), 2)
+        self.assertEqual(len(producers), 1)
+        self.assertEqual(len(consumers), 1)
         self.assertEqual(len(pipes), 2)
 
     def test_EsdlAssetObject(self):
@@ -129,8 +129,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
     def setUp(self) -> None:
         """Arranging of the data for the tests."""
         self.asset = esdl.Asset
-        self.producer = esdl.Producer
-        self.consumer = esdl.Consumer
+        self.producer = esdl.GenericProducer
+        self.consumer = esdl.GenericConsumer
         self.geothermal_source = esdl.GeothermalSource
         self.conversion = esdl.Conversion
         self.pipe = esdl.Pipe
