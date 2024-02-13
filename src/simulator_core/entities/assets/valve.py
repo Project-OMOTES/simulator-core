@@ -21,19 +21,21 @@ from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.asset_defaults import DEFAULT_DIAMETER
 
 
 class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
-        self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet
+        self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet,
+            diameter: float = DEFAULT_DIAMETER
     ):
         """Initialize a ControlValve object."""
         super().__init__(asset_name=asset_name, asset_id=asset_id,
                          pandapipe_net=pandapipe_net)
         self.controlled_mdot_kg_per_s = 10.0
-        self.diameter_m = 0.5
+        self.diameter_m = diameter
         self.control_active = True
         self.in_service = True
         self.index = 0
