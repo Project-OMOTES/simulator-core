@@ -21,6 +21,8 @@ from pandapipes import create_heat_exchanger, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.asset_defaults import DEFAULT_DIAMETER
 
 
 class HeatExchanger(AssetAbstract):
@@ -29,11 +31,11 @@ class HeatExchanger(AssetAbstract):
     def __init__(
             self,
             pandapipes_net: pandapipesNet,
-            diameter_m: float,
             heat_flux_w: float,
+            name: str,
+            diameter_m: float = DEFAULT_DIAMETER,
             in_service: bool = True,
-            name: str = None,
-            index: int = None,
+            index: int | None = None,
     ):
         """Initialize a HeatExchanger object."""
         """Initialize a ControlValve object."""
@@ -88,7 +90,7 @@ class HeatExchanger(AssetAbstract):
         """
         return True
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 

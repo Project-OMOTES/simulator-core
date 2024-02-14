@@ -14,36 +14,31 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Valve classes."""
-import uuid
-from typing import Dict, Optional
+from typing import Dict
 
 from pandapipes import create_flow_control, pandapipesNet
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.asset_defaults import DEFAULT_DIAMETER
 
 
 class ControlValve(AssetAbstract):
     """Wrapper class for pandapipes control valves."""
 
     def __init__(
-        self,
-        pandapipes_net: pandapipesNet,
-        controlled_mdot_kg_per_s: float,
-        diameter_m: float,
-        control_active: bool = False,
-        in_service: bool = True,
-        name: Optional[str] = None,
-        index: Optional[int] = None,
+        self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet,
+            diameter: float = DEFAULT_DIAMETER
     ):
         """Initialize a ControlValve object."""
-        super().__init__(asset_name=name, asset_id=str(uuid.uuid4()),
-                         pandapipe_net=pandapipes_net)
-        self.controlled_mdot_kg_per_s = controlled_mdot_kg_per_s
-        self.diameter_m = diameter_m
-        self.control_active = control_active
-        self.in_service = in_service
-        self.index = index
+        super().__init__(asset_name=asset_name, asset_id=asset_id,
+                         pandapipe_net=pandapipe_net)
+        self.controlled_mdot_kg_per_s = 10.0
+        self.diameter_m = diameter
+        self.control_active = True
+        self.in_service = True
+        self.index = 0
         # Initialize the control valve
         self._initialized = False
 
@@ -85,7 +80,7 @@ class ControlValve(AssetAbstract):
         """
         return True
 
-    def add_physical_data(self, data: Dict[str, float]) -> None:
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 

@@ -23,7 +23,9 @@ import pytest
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-from simulator_core.entities.assets import DemandCluster, Pipe, ProductionCluster
+from simulator_core.entities.assets.production_cluster import ProductionCluster
+from simulator_core.entities.assets.demand_cluster import DemandCluster
+from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file

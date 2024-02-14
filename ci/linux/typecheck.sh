@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 . .venv/bin/activate
-python -m mypy ./src/simulator_core ./unit_test/
+python -m mypy ./src/simulator_core

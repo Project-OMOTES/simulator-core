@@ -16,23 +16,16 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, TypeVar
+from typing import Dict, List
 
 from pandapipes import pandapipesNet
 from pandas import DataFrame
-
-Junction = TypeVar("Junction")
-EsdlAssetObject = TypeVar("EsdlAssetObject")
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from simulator_core.entities.assets.junction import Junction
 
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
-
-    from_junction: Junction | None
-    """The junction where the asset starts."""
-
-    to_junction: Junction | None
-    """The junction where the asset ends."""
 
     pandapipes_net: pandapipesNet
     """The pandapipes network to which the asset belongs."""
@@ -53,8 +46,8 @@ class AssetAbstract(ABC):
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
-        self.from_junction = None
-        self.to_junction: Junction = None
+        self.from_junction: None | Junction = None
+        self.to_junction: None | Junction = None
         # Define the pandapipes network
         self.pandapipes_net: pandapipesNet = pandapipe_net
         self.name: str = asset_name
@@ -69,7 +62,7 @@ class AssetAbstract(ABC):
         """
         pass
 
-    def get_setpoints(self) -> Dict:
+    def get_setpoints(self) -> Dict[str, float]:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
@@ -95,7 +88,7 @@ class AssetAbstract(ABC):
         """Placeholder method to add physical data to an asset."""
         pass
 
-    def set_from_juction(self, from_junction: Junction) -> None:
+    def set_from_junction(self, from_junction: Junction) -> None:
         """Method to set the from junction of an asset.
 
         :param Junction from_junction: The junction where the asset starts.

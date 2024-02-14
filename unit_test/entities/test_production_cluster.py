@@ -19,7 +19,8 @@ import unittest
 import pandapipes as pp
 import pytest
 
-from simulator_core.entities.assets import Junction, ProductionCluster
+from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
@@ -44,7 +45,7 @@ class ProductionClusterTest(unittest.TestCase):
             asset_id="production_cluster_id",
             pandapipe_net=self.network,
         )
-        self.production_cluster.set_from_juction(from_junction=self.from_junction)
+        self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
     def test_production_cluster_create(self):

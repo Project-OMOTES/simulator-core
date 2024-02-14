@@ -21,7 +21,8 @@ from unittest.mock import Mock
 import pandapipes as pp
 import pytest
 
-from simulator_core.entities.assets import Junction, Pipe
+from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
 

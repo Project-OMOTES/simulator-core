@@ -18,7 +18,7 @@ import unittest
 
 import pandapipes as pp
 
-from simulator_core.entities.assets import Junction
+from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.asset_defaults import DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE
 
 

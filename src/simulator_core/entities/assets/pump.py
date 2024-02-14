@@ -21,6 +21,7 @@ from pandapipes import (pandapipesNet, create_circ_pump_const_pressure)
 from pandas import DataFrame
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 # TODO: Do we need to define a "general" pump class?
 
@@ -34,9 +35,9 @@ class CirculationPumpConstantMass(AssetAbstract):
         p_to_junction: float,
         mdot_kg_per_s: float,
         t_to_junction: float,
+        name: str,
         in_service: bool = True,
-        name: str = None,
-        index: int = None
+        index: int | None = None
     ):
         """Initialize a CirculationPumpConstantMass object."""
         super().__init__(asset_name=name, asset_id=str(uuid.uuid4()), pandapipe_net=pandapipes_net)
@@ -66,7 +67,7 @@ class CirculationPumpConstantMass(AssetAbstract):
                 index=self.index,
             )
 
-    def set_setpoints(self, setpoints: Dict, **kwargs) -> None:
+    def set_setpoints(self, setpoints: Dict, **kwargs: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -74,7 +75,7 @@ class CirculationPumpConstantMass(AssetAbstract):
         """
         pass
 
-    def get_setpoints(self, **kwargs) -> Dict:
+    def get_setpoints(self, **kwargs: Dict) -> Dict:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
@@ -89,7 +90,7 @@ class CirculationPumpConstantMass(AssetAbstract):
         """
         return True
 
-    def add_physical_data(self, data: Dict[str, float]):
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
         pass
 

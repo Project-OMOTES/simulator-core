@@ -19,20 +19,19 @@ from typing import List, Tuple
 from pandapipes import pandapipesNet
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.entities.assets import (
-    AssetAbstract,
-    EsdlAssetObject,
-    Junction,
-    ProductionCluster,
-)
+from simulator_core.entities.assets.junction import Junction
+
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
-def connect_connected_asset(connected_py_assets, junction, py_assets_list):
+def connect_connected_asset(connected_py_assets: List[Tuple[str, Port]],
+                            junction: Junction,
+                            py_assets_list: List[AssetAbstract]) -> None:
     """Method to connect assets connected to one asset to the same junction.
 
     :param connected_py_assets: List of connected assets
@@ -45,7 +44,7 @@ def connect_connected_asset(connected_py_assets, junction, py_assets_list):
             connected_py_asset[0]
         )
         if connected_py_asset[1] == Port.In:  # from
-            py_assets_list[index].set_from_juction(from_junction=junction)
+            py_assets_list[index].set_from_junction(from_junction=junction)
         else:  # to
             py_assets_list[index].set_to_junction(to_junction=junction)
 
@@ -91,12 +90,11 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             connected_py_assets = []
             if py_asset.from_junction is None:
                 junction = Junction(pandapipes_net=pandapipes_net)
-                py_asset.set_from_juction(from_junction=junction)
+                py_asset.set_from_junction(from_junction=junction)
                 connected_py_assets = self.esdl_object.get_connected_assets(
                     py_asset.asset_id, Port.In
                 )
                 connect_connected_asset(connected_py_assets, junction, py_assets_list)
-                py_junction_list.append(junction)
                 # get connected assets and connect them to this junction
             if py_asset.to_junction is None:
                 junction = Junction(pandapipes_net)
@@ -132,15 +130,3 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         :return: NetworkController, which is the converted EsdlObject object.
         """
         return NetworkController()
-
-
-class ProductionAssetMapper(EsdlAssetMapper):
-    """Class to convert ESDL Production cluster asset to a ProductionClusterObject."""
-
-    def to_entity(self, model: EsdlAssetObject) -> ProductionCluster:
-        """Method to convert Esdl asset ot a production cluster object.
-
-        :param EsdlAssetObject model: Asset ot be converted
-        :return: ProductionCluster, converted object.
-        """
-        pass

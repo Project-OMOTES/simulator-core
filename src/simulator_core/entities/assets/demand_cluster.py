@@ -13,8 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""ProductionCluster class."""
-
+"""demandCluster class."""
+import uuid
 from typing import Dict
 
 from pandapipes import pandapipesNet
@@ -37,15 +37,13 @@ from simulator_core.entities.assets.asset_defaults import (
 )
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.heatexchanger import HeatExchanger
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.valve import ControlValve
 from simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
     mass_flow_and_temperature_to_heat_demand,
     mass_flow_to_volume_flow,
 )
-from typing import Optional, TypeVar
-
-EsdlAssetObject = TypeVar("EsdlAssetObject")
 
 
 class DemandCluster(AssetAbstract):
@@ -67,7 +65,7 @@ class DemandCluster(AssetAbstract):
 
         self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.temperature_return_target = self.temperature_return
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = 0
@@ -75,9 +73,9 @@ class DemandCluster(AssetAbstract):
 
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction: Optional[Junction] = None
-        self._flow_control = None
-        self._heat_exchanger = None
+        self._intermediate_junction: Junction | None = None
+        self._flow_control: None | ControlValve = None
+        self._heat_exchanger: None | HeatExchanger = None
         # Output list
         self.output: list = []
 
@@ -103,12 +101,9 @@ class DemandCluster(AssetAbstract):
             )
             # Create the control valve
             self._flow_control = ControlValve(
-                pandapipes_net=self.pandapipes_net,
-                controlled_mdot_kg_per_s=self.mass_flowrate,
-                diameter_m=self._internal_diameter,
-                control_active=True,
-                in_service=True,
-                name=f"flow_control_{self.name}",
+                pandapipe_net=self.pandapipes_net,
+                asset_name=f"flow_control_{self.name}",
+                asset_id=str(uuid.uuid4())
             )
             self._flow_control.from_junction = self.from_junction
             self._flow_control.to_junction = self._intermediate_junction
@@ -148,7 +143,7 @@ class DemandCluster(AssetAbstract):
 
         self._set_demand_control()
 
-    def _set_demand_control(self):
+    def _set_demand_control(self) -> None:
         """Function to control the DemandCluster to achieve target return temperature."""
         # adjust flowrate or power to meet the return temperature
         if self.pandapipes_net.flow_control.control_active[self._flow_control.index]:
@@ -179,15 +174,14 @@ class DemandCluster(AssetAbstract):
             self.pandapipes_net.heat_exchanger.qext_w[
                 self._heat_exchanger.index] = adjusted_thermal_power_demand
 
-    def get_setpoints(self) -> Dict:
+    def get_setpoints(self) -> Dict[str, float]:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
         """
-        setpoints = {}
-        setpoints[PROPERTY_HEAT_DEMAND] = self.thermal_power_allocation
-        setpoints[PROPERTY_TEMPERATURE_RETURN] = self.temperature_return
+        setpoints: Dict[str, float] = {PROPERTY_HEAT_DEMAND: self.thermal_power_allocation,
+                                       PROPERTY_TEMPERATURE_RETURN: self.temperature_return}
 
         return setpoints
 
@@ -202,9 +196,8 @@ class DemandCluster(AssetAbstract):
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 
-        :param dict data:dictionary containing the data to be added the asset. The key is the name
-                        of the property, the value of the dict is the value of the property.
-        :return:
+        :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
+         :return:
         """
         pass
 
@@ -214,6 +207,8 @@ class DemandCluster(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
+        if not self._initialized:
+            raise ValueError("Asset not initialized.")
         if not self.simulation_performed():
             raise ValueError("Simulation data not available.")
         outputs = dict()

@@ -16,7 +16,10 @@
 """Simulates an heat network for the specified duration."""
 
 from pandas import DataFrame
-from simulator_core.entities import HeatNetwork, NetworkController, SimulationConfiguration
+from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.network_controller import NetworkController
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ class NetworkSimulation:
         self.network = network
         self.controller = controller
 
-    def run(self, config: SimulationConfiguration):
+    def run(self, config: SimulationConfiguration) -> None:
         """Run the simulation.
 
         :param SimulationConfiguration config: Configuration to run the simulation with.
