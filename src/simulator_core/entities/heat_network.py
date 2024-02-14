@@ -49,7 +49,7 @@ class HeatNetwork:
             if py_asset.asset_id in controller_input:
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
         try:
-            pipeflow(self.panda_pipes_net, "all")
+            pipeflow(self.panda_pipes_net, mode="all")
         except PipeflowNotConverged:
             raise RuntimeError("Error in time step calculation pipe flow did not converge.")
 

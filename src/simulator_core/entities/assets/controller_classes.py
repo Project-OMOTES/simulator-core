@@ -30,6 +30,7 @@ class ControllerConsumer(AssetControllerAbstract):
         self.temperature_return = 40 + 273.15
         self.temperature_supply = 80 + 273.15
         self.profile: pd.DataFrame = pd.DataFrame()
+        self.start_index = 0
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -37,8 +38,9 @@ class ControllerConsumer(AssetControllerAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        for index in range(len(self.profile)):
+        for index in range(self.start_index, len(self.profile)):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
+                self.start_index = index
                 return float(self.profile["values"][index])
         return 0
 
