@@ -20,15 +20,14 @@ from esdl.esdl import Joint as esdl_junction
 from pandapipes import pandapipesNet
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.controller_classes import ControllerConsumer, ControllerSource
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.controller_classes import ControllerConsumer, ControllerSource
 
 
 def connect_connected_asset(
@@ -80,10 +79,11 @@ def replace_joint_in_connected_assets(
                 # remove the joint from the list and add the connected assets
                 connected_py_assets.pop(index)
                 # get the connected assets
-                additional_assets = py_joint_dict[connected_py_asset_id]
+                additional_assets = py_joint_dict[connected_py_asset_id].copy()
                 # remove the current asset from the list
-                for index, _ in enumerate(additional_assets):
-                    if connected_py_asset_id == py_asset_id:
+                for index, additional_asset_properties in enumerate(additional_assets):
+                    additional_asset_id, _ = additional_asset_properties
+                    if additional_asset_id == py_asset_id:
                         additional_assets.pop(index)
                         break
                 # add the connected assets to the list
@@ -197,12 +197,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         consumers = []
         for esdl_asset in model.get_all_assets_of_type("consumer"):
-            consumers.append(ControllerConsumer(esdl_asset.esdl_asset.name,
-                                                esdl_asset.esdl_asset.id))
+            consumers.append(
+                ControllerConsumer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
+            )
             consumers[-1].add_profile(esdl_asset.get_profile())
 
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
-            sources.append(ControllerSource(esdl_asset.esdl_asset.name,
-                                            esdl_asset.esdl_asset.id))
+            sources.append(ControllerSource(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
         return NetworkController(consumers, sources)
