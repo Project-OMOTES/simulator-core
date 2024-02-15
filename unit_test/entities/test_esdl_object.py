@@ -19,13 +19,12 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import esdl
-import pytest
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.pipe import Pipe
+from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
@@ -102,8 +101,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        length, property_available = asset.get_property("length",
-                                                        0.0)  # act
+        length, property_available = asset.get_property("length", 0.0)  # act
 
         # Assert
         assert length == asset.esdl_asset.length
@@ -115,8 +113,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        length, property_available = asset.get_property(
-            "length_not_found", 0.0)  # act
+        length, property_available = asset.get_property("length_not_found", 0.0)  # act
 
         # Assert
         assert length == 0.0
@@ -203,8 +200,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         # Act
 
         # Assert
-        with pytest.raises(NotImplementedError):
+        with self.assertRaises(NotImplementedError):
             StringEsdlAssetMapper().to_esdl(test_string)  # act
 
-        with pytest.raises(NotImplementedError):
+        with self.assertRaises(NotImplementedError):
             StringEsdlAssetMapper().to_entity(test_esdl_asset)  # act
