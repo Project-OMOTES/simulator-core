@@ -105,13 +105,15 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_SET_PRESSURE: False,
         }
 
-        # Assert
-        with self.assertRaises(
-            ValueError,
-            match=f"The setpoints {necessary_setpoints.difference(set(setpoints))} "
-            f"are missing.",
-        ):
+        with self.assertRaises(ValueError) as cm:
             self.production_cluster.set_setpoints(setpoints=setpoints)
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            cm.exception.args[0],
+            f"The setpoints {necessary_setpoints.difference(set(setpoints))} " + f"are missing.",
+        )
 
     def test_production_cluster_set_setpoints_negative_mass_flow(self):
         """Test raise ValueError with negative mass flow."""
@@ -132,10 +134,13 @@ class ProductionClusterTest(unittest.TestCase):
             pandapipes_net=self.network,
         )
 
-        # Assert
-        with self.assertRaises(
-            ValueError,
-            match=f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
-            + " is negative.",
-        ):
+        with self.assertRaises(ValueError) as cm:
             self.production_cluster.set_setpoints(setpoints=setpoints)
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            cm.exception.args[0],
+            f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
+            + " is negative.",
+        )
