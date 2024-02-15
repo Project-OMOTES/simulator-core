@@ -19,7 +19,6 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pandapipes as pp
-import pytest
 
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pipe import Pipe
@@ -98,7 +97,7 @@ class PipeTest(unittest.TestCase):
         pipe.create()  # act
 
         # Assert
-        with pytest.raises(NotImplementedError):
+        with self.assertRaises(NotImplementedError):
             pipe._get_diameter(esdl_asset=esdl_asset_mock)
 
     def test_pipe_get_heat_transfer_coefficient(self):
