@@ -1,7 +1,24 @@
+#  Copyright (c) 2023. Deltares & TNO
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
+
 import datetime
 
 import pandas as pd
+from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
+                                                           DEFAULT_TEMPERATURE_DIFFERENCE)
 
 
 class AssetControllerAbstract:
@@ -27,8 +44,8 @@ class ControllerConsumer(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         """
         super().__init__(name, identifier)
-        self.temperature_return = 40 + 273.15
-        self.temperature_supply = 80 + 273.15
+        self.temperature_return = DEFAULT_TEMPERATURE
+        self.temperature_supply = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         self.profile: pd.DataFrame = pd.DataFrame()
         self.start_index = 0
 
@@ -59,6 +76,6 @@ class ControllerSource(AssetControllerAbstract):
         :param str identifier: Unique identifier of the source.
         """
         super().__init__(name, identifier)
-        self.temperature_return: float = 40 + 273.15
-        self.temperature_supply: float = 80 + 273.15
+        self.temperature_return: float = DEFAULT_TEMPERATURE
+        self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         self.power: float = 5000000000

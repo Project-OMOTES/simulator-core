@@ -114,10 +114,3 @@ def get_unit(profile: esdl.InfluxDBProfile) -> esdl.PhysicalQuantityEnum:
     if profile_unit in conversion_dict:
         return conversion_dict[profile_unit]
     return profile_unit
-
-
-if __name__ == "__main__":
-    esdl_file = r'.\testdata\test1.esdl'
-    esh = EnergySystemHandler()
-    es = esh.load_file(esdl_file)
-    print(parse_esdl_profiles(esh))

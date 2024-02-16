@@ -26,6 +26,7 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     DEFAULT_PRESSURE,
+    DEFAULT_POWER,
     PROPERTY_MASSFLOW,
     PROPERTY_VOLUMEFLOW,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -68,7 +69,7 @@ class DemandCluster(AssetAbstract):
         self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.temperature_return_target = self.temperature_return
         self.pressure_input = DEFAULT_PRESSURE
-        self.thermal_power_allocation = 50000.0
+        self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0
 
         # Objects of the asset

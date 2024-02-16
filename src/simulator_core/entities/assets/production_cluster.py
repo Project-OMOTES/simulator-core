@@ -100,7 +100,7 @@ class ProductionCluster(AssetAbstract):
                 pandapipes_net=self.pandapipes_net,
                 p_to_junction=self.pressure_supply,
                 mdot_kg_per_s=self._controlled_mass_flow,
-                t_to_junction=self.temperature_supply + 20.0,
+                t_to_junction=self.temperature_supply,
                 name=f"circ_pump_{self.name}",
                 in_service=True,
             )
