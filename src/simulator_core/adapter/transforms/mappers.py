@@ -118,7 +118,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
     def to_entity(
-            self, network: Network) -> List[AssetAbstract]:
+            self, network: Network) -> Tuple[List[AssetAbstract], List[Junction]]:
         """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
@@ -153,12 +153,22 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                         index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                             connected_py_asset[0])
                         if connected_py_asset[1] == Port.In:
-                            network.connect_assets(py_asset.solver_asset.name, con_point,
-                                                   py_assets_list[index].solver_asset.name, 0)
+                            node_id = network.connect_assets(py_asset.solver_asset.name, con_point,
+                                                             py_assets_list[
+                                                                 index].solver_asset.name, 0)
+                            py_junction_list.append(Junction(network.get_node(node_id),
+                                                             name=str(node_id)))
+                            py_assets_list[index].set_to_junction(py_junction_list[-1])
                         else:
-                            network.connect_assets(py_asset.solver_asset.name, con_point,
-                                                   py_assets_list[index].solver_asset.name, 1)
-        return py_assets_list
+                            node_id = network.connect_assets(py_asset.solver_asset.name, con_point,
+                                                             py_assets_list[
+                                                                 index].solver_asset.name, 1)
+                            py_junction_list.append(Junction(network.get_node(node_id),
+                                                             name=str(node_id)))
+                            py_assets_list[index].set_from_junction(py_junction_list[-1])
+                        py_asset.set_to_junction(py_junction_list[-1]) if con_point == 0 else (
+                            py_asset.set_from_junction(py_junction_list[-1]))
+        return py_assets_list, py_junction_list
 
 
 class EsdlControllerMapper(EsdlMapperAbstract):

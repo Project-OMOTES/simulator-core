@@ -34,7 +34,7 @@ class HeatNetwork:
         assets and junctions and returns list of both
         """
         self.network = Network()
-        self.assets = conversion_factory(self.network)
+        self.assets, self.junctions = conversion_factory(self.network)
         self.solver = Solver(self.network)
 
     def run_time_step(self, time: datetime.datetime, controller_input: dict) -> None:

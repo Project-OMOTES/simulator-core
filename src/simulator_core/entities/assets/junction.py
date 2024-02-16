@@ -30,6 +30,7 @@ class Junction:
 
     def __init__(
         self,
+        solver_node: Node,
         pn_bar: float = DEFAULT_PRESSURE,
         tfluid_k: float = DEFAULT_TEMPERATURE,
         height_m: float = DEFAULT_NODE_HEIGHT,
@@ -54,7 +55,7 @@ class Junction:
         self.name = name
         self.index = index
         # Initialize the junction
-        self.solver_junction = Node()
+        self.solver_junction = solver_node
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
