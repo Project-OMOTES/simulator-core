@@ -33,19 +33,18 @@ class Matrix:
         self.sol_old += [0.0] * number_unknowns
         return self.num_unknowns - number_unknowns
 
-    def add_equation(self, equation_object: EquationObject) -> uuid.UUID:
+    def add_equation(self, equation_object: EquationObject):
         """Method to add an equation to the matrix.
 
         Add equation to the matrix it returns a unique id to the equation for easy access.
         :param EquationObject equation_object: Object containing all information of the equation
-        :return: Unique id of the equation.
+        :return:
         """
-        handle = uuid.uuid4()
-        self.equation_handle_dict[handle] = len(self.rhs)
+        row = len(self.rhs)
         self.rhs.append(0.0)
         self.mat.append([])
-        self.set_equation(handle, equation_object)
-        return handle
+        self.mat[row] = equation_object.to_list(self.num_unknowns)
+        self.rhs[row] = equation_object.rhs
 
     def remove_equation(self, handle: uuid.UUID):
         """Method to remove an equation from the matrix.
@@ -88,7 +87,8 @@ class Matrix:
         self.mat = []
         for equation in equations:
             self.add_equation(equation)
-        if dumb: self.dumb_matrix()
+        if dumb:
+            self.dumb_matrix()
         self.sol_old = self.sol_new
         a = np.array(self.mat)
         b = np.array(self.rhs)
