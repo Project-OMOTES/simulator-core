@@ -17,8 +17,7 @@
 import uuid
 from typing import Dict
 from warnings import warn
-
-from pandapipes import pandapipesNet
+from src.simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -36,26 +35,23 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.pump import CirculationPumpConstantMass
 from simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
     mass_flow_and_temperature_to_heat_demand,
 )
-from simulator_core.entities.assets.valve import ControlValve
 
 
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
 
-    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
+        super().__init__(asset_name=asset_name, asset_id=asset_id)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
@@ -68,11 +64,10 @@ class ProductionCluster(AssetAbstract):
         self._internal_diameter = DEFAULT_DIAMETER
         # Objects of the asset
         self._initialized = False
-        self._intermediate_junction: None | Junction = None
-        self._circ_pump: None | CirculationPumpConstantMass = None
-        self._flow_control: None | ControlValve = None
         # Controlled mass flow
-        self._controlled_mass_flow = 0.0
+        self._controlled_mass_flow = None
+        self.solver_asset = ProductionAsset(uuid.uuid4(), pre_scribe_mass_flow=False)
+
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -81,44 +76,6 @@ class ProductionCluster(AssetAbstract):
         :return:
         """
         pass
-
-    def create(self) -> None:
-        """Create a representation of the asset in pandapipes.
-
-        The ProductionCluster asset contains multiple pandapipes components.
-
-        The component model contains the following components:
-        - A flow control valve to set the mass flow rate of the system.
-        - A circulation pump to set the pressure and the temperature of the
-        system.
-        - An intermediate junction to link both components.
-        :param pandapipesNet pandapipes_net: pandapipes network object
-        """
-        if not self._initialized:
-            # Create the pump to supply pressure and or massflow
-            self._circ_pump = CirculationPumpConstantMass(
-                pandapipes_net=self.pandapipes_net,
-                p_to_junction=self.pressure_supply,
-                mdot_kg_per_s=self._controlled_mass_flow,
-                t_to_junction=self.temperature_supply,
-                name=f"circ_pump_{self.name}",
-                in_service=True,
-            )
-            self._circ_pump.from_junction = self.from_junction
-            self._circ_pump.to_junction = self.to_junction
-
-            self._circ_pump.create()
-            # Create the control valve
-
-            self._flow_control = ControlValve(
-                pandapipe_net=self.pandapipes_net,
-                asset_name=f"flow_control_{self.name}",
-                asset_id=str(uuid.uuid4()),
-            )
-            self._flow_control.from_junction = self.from_junction
-            self._flow_control.to_junction = self.to_junction
-            self._flow_control.create()
-            self._initialized = True
 
     def _set_supply_temperature(self, temperature_supply: float) -> None:
         """Set the supply temperature of the asset.
@@ -277,19 +234,5 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
-        if not self.simulation_performed():
-            raise ValueError("Simulation data not available.")
-        # Retrieve the general model setpoints (Ts, Tr, Qh)
-        setpoints = self.get_setpoints()
-        # Retrieve the mass flow (mdot)
-        setpoints[PROPERTY_MASSFLOW] = self.pandapipes_net.res_circ_pump_pressure[
-            "mdot_flow_kg_per_s"][self._circ_pump.index]
-        # Retrieve the pressure (Ps, Pr)
-        setpoints[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_junction["p_bar"][
-            self.to_junction.index
-        ]
-        setpoints[PROPERTY_PRESSURE_RETURN] = self.pandapipes_net.res_junction["p_bar"][
-            self.from_junction.index
-        ]
-        # Append dict to output list
-        self.output.append(setpoints)
+
+        self.output.append({})

@@ -17,13 +17,12 @@
 
 from typing import Any, List, Optional
 
-from pandapipes import create_junction, pandapipesNet
-
 from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
     DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
 )
+from simulator_core.solver.network.assets.Node import Node
 
 
 class Junction:
@@ -31,7 +30,6 @@ class Junction:
 
     def __init__(
         self,
-        pandapipes_net: pandapipesNet,
         pn_bar: float = DEFAULT_PRESSURE,
         tfluid_k: float = DEFAULT_TEMPERATURE,
         height_m: float = DEFAULT_NODE_HEIGHT,
@@ -50,31 +48,13 @@ class Junction:
         :type height_m: float, optional
 
         """
-        self.pandapipes_net = pandapipes_net
         self.pn_bar = pn_bar
         self.tfluid_k = tfluid_k
         self.height_m = height_m
-        self.geodata = (0, 0) if geodata is None else geodata
         self.name = name
-        self.in_service = in_service
         self.index = index
         # Initialize the junction
-        self._initialized = False
-        self.create()
-
-    def create(self) -> None:
-        """Register the junction in the pandapipes network."""
-        if not self._initialized:
-            self._initialized = True
-            self.index = create_junction(
-                net=self.pandapipes_net,
-                pn_bar=self.pn_bar,
-                tfluid_k=self.tfluid_k,
-                height_m=self.height_m,
-                geodata=self.geodata,
-                name=self.name,
-                in_service=self.in_service
-            )
+        self.solver_junction = Node()
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.

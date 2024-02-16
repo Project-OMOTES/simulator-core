@@ -13,11 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing pipe class."""
-
+import uuid
 from typing import Dict, List
 
 import numpy as np
-from pandapipes import create_pipe_from_parameters, pandapipesNet
 
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -38,6 +37,7 @@ from simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
     mass_flow_and_temperature_to_heat_demand,
 )
+from src.simulator_core.solver.network.assets.SolverPipe import SolverPipe
 
 
 class Pipe(AssetAbstract):
@@ -62,14 +62,14 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id, pandapipe_net=pandapipe_net)
+        super().__init__(asset_name=asset_name, asset_id=asset_id)
         # Initialize the default values of the pipe
         self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient
         self._external_temperature = PIPE_DEFAULTS.external_temperature
@@ -80,28 +80,8 @@ class Pipe(AssetAbstract):
         self.roughness = PIPE_DEFAULTS.k_value
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
-        self._initialized = False
-        self._pipe_index = None
+        self.solver_asset = SolverPipe(uuid.uuid4())
         self.output = []
-
-    def create(self) -> None:
-        """Create a representation of the pipe in the pandapipes network."""
-        if not self._initialized:
-            # Create the pipe in the pandapipes network
-            self._pipe_index = create_pipe_from_parameters(
-                net=self.pandapipes_net,
-                from_junction=self.from_junction.index,
-                to_junction=self.to_junction.index,
-                length_km=self.length * 1e-3,
-                diameter_m=self.diameter,
-                k_mm=self.roughness * 1e3,
-                alpha_w_per_m2k=self.alpha_value,
-                qext_w=self._qheat_external,
-                name=f"Pipe_{self.name}",
-                in_service=True,
-            )
-            # Set the initialized flag to True
-            self._initialized = True
 
     def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
         """Retrieve the diameter of the pipe and convert it if necessary."""
@@ -180,38 +160,7 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
-        if not self.simulation_performed():
-            raise ValueError("Simulation data not available.")
+
         output_dict = {}
-        # Retrieve the temperature of the pipe at the in- and outlet (Ts, Tr)
-        output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.pandapipes_net.res_pipe[
-            "t_from_k"
-        ].values[self._pipe_index]
-        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.pandapipes_net.res_pipe["t_to_k"].values[
-            self._pipe_index
-        ]
-        # Retrieve the pressure of the pipe at the in- and outlet (Ps, Pr)
-        output_dict[PROPERTY_PRESSURE_SUPPLY] = self.pandapipes_net.res_pipe["p_from_bar"].values[
-            self._pipe_index
-        ]
-        output_dict[PROPERTY_PRESSURE_RETURN] = self.pandapipes_net.res_pipe["p_to_bar"].values[
-            self._pipe_index
-        ]
-        # Retrieve the mass flow rate of the pipe (mdot)
-        output_dict[PROPERTY_MASSFLOW] = self.pandapipes_net.res_pipe["mdot_from_kg_per_s"].values[
-            self._pipe_index
-        ]
-        # Retrieve the velocity of the pipe at the in- and outlet (Vs, Vr)
-        output_dict[PROPERTY_VELOCITY_SUPPLY] = self.pandapipes_net.res_pipe[
-            "v_mean_m_per_s"
-        ].values[self._pipe_index]
-        output_dict[PROPERTY_VELOCITY_RETURN] = (
-            self.pandapipes_net.res_pipe["v_mean_m_per_s"].values)[self._pipe_index]
-        # Calculate the heat demand of the pipe (Q)
-        output_dict[PROPERTY_HEAT_DEMAND] = mass_flow_and_temperature_to_heat_demand(
-            temperature_supply=output_dict[PROPERTY_TEMPERATURE_SUPPLY],
-            temperature_return=output_dict[PROPERTY_TEMPERATURE_RETURN],
-            mass_flow=output_dict[PROPERTY_MASSFLOW],
-            pandapipes_net=self.pandapipes_net,
-        )
+
         self.output.append(output_dict)

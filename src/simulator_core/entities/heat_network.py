@@ -18,23 +18,24 @@ import datetime
 import math
 
 import pandas as pd
-from pandapipes import create_empty_network, pandapipesNet, pipeflow, PipeflowNotConverged, plotting
-from typing import Callable, List, Tuple
-from simulator_core.entities.assets.asset_abstract import AssetAbstract, Junction
+from typing import Callable, List
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.solver.network.Network import Network
+from simulator_core.solver.Solver import Solver
 
 
 class HeatNetwork:
     """Class to store information on the heat network."""
 
-    def __init__(self, conversion_factory: Callable[[pandapipesNet], Tuple[List[AssetAbstract],
-                                                                           List[Junction]]]):
+    def __init__(self, conversion_factory: Callable[[Network], List[AssetAbstract]]):
         """Constructor of heat network class.
 
         :param conversion_factory: method to convert the esdl network to pandapipes
         assets and junctions and returns list of both
         """
-        self.panda_pipes_net = create_empty_network(fluid="water")
-        self.assets, self.junctions = conversion_factory(self.panda_pipes_net)
+        self.network = Network()
+        self.assets = conversion_factory(self.network)
+        self.solver = Solver(self.network)
 
     def run_time_step(self, time: datetime.datetime, controller_input: dict) -> None:
         """Method to simulate a time step.
@@ -45,6 +46,10 @@ class HeatNetwork:
         :param dict controller_input: Dict specifying the heat demand for the different assets.
         :return: None
         """
+        #for py_asset in self.assets:
+        #    if py_asset.asset_id in controller_input:
+        #        py_asset.set_setpoints(controller_input[py_asset.asset_id])
+        self.solver.solve()
         for py_asset in self.assets:
             if py_asset.asset_id in controller_input:
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
@@ -59,11 +64,7 @@ class HeatNetwork:
         plots the network in a simple plot all junctions are translated to a circle.
         :return:
         """
-        step = 360 / len(self.panda_pipes_net["junction_geodata"])
-        for i in range(len(self.panda_pipes_net["junction_geodata"])):
-            self.panda_pipes_net["junction_geodata"].loc[i, "x"] = math.sin(i * step)
-            self.panda_pipes_net["junction_geodata"].loc[i, "y"] = math.cos(i * step)
-        plotting.simple_plot(self.panda_pipes_net)
+        pass
 
     def store_output(self) -> None:
         """Method to store the output data.
@@ -75,8 +76,6 @@ class HeatNetwork:
         """
         for py_asset in self.assets:
             py_asset.write_to_output()
-        for py_junction in self.junctions:
-            py_junction.write_to_output()
 
     def gather_output(self) -> pd.DataFrame:
         """Method to gather output of all assets and return it as a dict.

@@ -18,7 +18,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from pandapipes import pandapipesNet
 from pandas import DataFrame
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
@@ -27,8 +26,11 @@ from simulator_core.entities.assets.junction import Junction
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    pandapipes_net: pandapipesNet
-    """The pandapipes network to which the asset belongs."""
+    from_junction: Junction | None
+    """The junction where the asset starts."""
+
+    to_junction: Junction | None
+    """The junction where the asset ends."""
 
     name: str
     """The name of the asset."""
@@ -38,18 +40,17 @@ class AssetAbstract(ABC):
 
     output: List[Dict[str, float]]
     """The output of the asset as a list with a dictionary per timestep."""
+    solver_asset: BaseAsset
 
-    def __init__(self, asset_name: str, asset_id: str, pandapipe_net: pandapipesNet):
+    def __init__(self, asset_name: str, asset_id: str):
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
-        self.from_junction: None | Junction = None
-        self.to_junction: None | Junction = None
-        # Define the pandapipes network
-        self.pandapipes_net: pandapipesNet = pandapipe_net
+        self.from_junction = None
+        self.to_junction: Junction = None
         self.name: str = asset_name
         self.asset_id: str = asset_id
         self.output: List[Dict[str, float]] = []
@@ -76,11 +77,6 @@ class AssetAbstract(ABC):
 
         :return bool: True if a simulation has been performed, False otherwise.
         """
-        pass
-
-    @abstractmethod
-    def create(self) -> None:
-        """Placeholder to create an asset in a pandapipes network."""
         pass
 
     @abstractmethod
