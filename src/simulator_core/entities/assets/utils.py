@@ -25,8 +25,8 @@ from typing import List, Tuple
 def heat_demand_and_temperature_to_mass_flow(
         thermal_demand: float,
         temperature_supply: float,
-        temperature_return: float,
-        pandapipes_net: pandapipesNet,
+        temperature_return: float
+
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
@@ -37,11 +37,8 @@ def heat_demand_and_temperature_to_mass_flow(
         the specific heat capacity of the fluid.
     :param float temperature_return: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
-    :param pandapipesNet net: The pandapipes network used to calculate the specific heat capacity.
     """
-    heat_capacity = pandapipes_net.fluid.get_heat_capacity(
-        (temperature_return + temperature_supply) / 2
-    )
+    heat_capacity = 4218  # for now hard coded needs to be get from fluid props.
     return thermal_demand / ((temperature_supply - temperature_return) * float(heat_capacity))
 
 

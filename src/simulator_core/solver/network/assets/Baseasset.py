@@ -169,3 +169,11 @@ class BaseAsset(BaseItem):
 
     def get_equations(self) -> list[EquationObject]:
         return []
+
+    def get_mass_flow_rate(self, con_point: int) -> float:
+        """Method to get the mass flow rate of a connection point.
+
+        :param int con_point: The connection point for which to get the mass flow rate.
+        :return: The mass flow rate of the connection point.
+        """
+        return self.prev_sol[IndexEnum.discharge + con_point * NUMBER_CORE_QUANTITIES]

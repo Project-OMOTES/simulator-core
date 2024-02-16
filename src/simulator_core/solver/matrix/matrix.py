@@ -154,3 +154,6 @@ class Matrix:
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
             write.writerows(self.mat)
+
+    def reset_solution(self):
+        self.sol_new = [1] * len(self.sol_new)

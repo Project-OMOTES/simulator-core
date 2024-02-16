@@ -72,7 +72,6 @@ class DemandCluster(AssetAbstract):
         # Output list
         self.output: list = []
 
-
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
@@ -82,49 +81,13 @@ class DemandCluster(AssetAbstract):
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
-        self._set_demand_control()
+        adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
+            self.thermal_power_allocation,
+            self.temperature_supply,
+            self.temperature_return_target)
+        self.solver_asset.supply_temperature = self.temperature_return_target
+        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate
 
-    def _set_demand_control(self) -> None:
-        """Function to control the DemandCluster to achieve target return temperature."""
-        # adjust flowrate or power to meet the return temperature
-        if self.pandapipes_net.flow_control.control_active[self._flow_control.index]:
-            # if pump is active, set flowrate to meet Target Temperature
-            self._heat_exchanger.qext_w = self.thermal_power_allocation
-            self.pandapipes_net.heat_exchanger.qext_w[
-                self._heat_exchanger.index] = self.thermal_power_allocation
-
-            adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-                self.thermal_power_allocation,
-                self.temperature_supply,
-                self.temperature_return_target,
-                self.pandapipes_net)
-
-            self._flow_control.controlled_mdot_kg_per_s = adjusted_mass_flowrate
-            self.pandapipes_net.flow_control.controlled_mdot_kg_per_s[
-                self._flow_control.index] = adjusted_mass_flowrate
-
-        else:
-            # if pump is disabled, set thermal power to meet Target Temperature
-            adjusted_thermal_power_demand = mass_flow_and_temperature_to_heat_demand(
-                self.temperature_supply,
-                self.temperature_return_target,
-                self.mass_flowrate,
-                self.pandapipes_net)
-
-            self._heat_exchanger.qext_w = adjusted_thermal_power_demand
-            self.pandapipes_net.heat_exchanger.qext_w[
-                self._heat_exchanger.index] = adjusted_thermal_power_demand
-
-    def get_setpoints(self) -> Dict[str, float]:
-        """Placeholder to get the setpoint attributes of an asset.
-
-        :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
-            setpoints and the values are the values.
-        """
-        setpoints: Dict[str, float] = {PROPERTY_HEAT_DEMAND: self.thermal_power_allocation,
-                                       PROPERTY_TEMPERATURE_RETURN: self.temperature_return}
-
-        return setpoints
 
     def simulation_performed(self) -> bool:
         """Check if the simulation has been performed.
@@ -149,5 +112,6 @@ class DemandCluster(AssetAbstract):
         represents the output of its asset for a specific timestep.
         """
         outputs = dict()
+        outputs[PROPERTY_MASSFLOW] = self.solver_asset.get_mass_flow_rate(0)
 
         self.output.append(outputs)

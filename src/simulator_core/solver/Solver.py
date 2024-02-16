@@ -27,6 +27,7 @@ class Solver:
 
     def solve(self):
         iteration = 0
+        self.matrix.reset_solution()
         while not (self.matrix.is_converged()):
             iteration += 1
             self.matrix.dumb_matrix()

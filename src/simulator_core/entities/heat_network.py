@@ -46,9 +46,9 @@ class HeatNetwork:
         :param dict controller_input: Dict specifying the heat demand for the different assets.
         :return: None
         """
-        #for py_asset in self.assets:
-        #    if py_asset.asset_id in controller_input:
-        #        py_asset.set_setpoints(controller_input[py_asset.asset_id])
+        for py_asset in self.assets:
+            if py_asset.asset_id in controller_input:
+                py_asset.set_setpoints(controller_input[py_asset.asset_id])
         self.solver.solve()
         for py_asset in self.assets:
             if py_asset.asset_id in controller_input:
