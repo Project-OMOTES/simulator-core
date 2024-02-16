@@ -14,13 +14,8 @@ class BaseAsset(BaseItem):
 
     This class inherits from BaseItem and provides methods for connecting nodes, checking connection
     status, and adding thermal and pressure equations.
-
-    :param uuid.UUID name: The unique identifier of the asset.
-    :param int, optional number_of_unknowns: The number of unknown variables in the asset,
-    defaults to 6.
-    :param int, optional number_con_points: The number of connection points in the asset,
-    defaults to 2.
     """
+
     connected_nodes: Dict[int, Node]
 
     def __init__(self, name: uuid.UUID,
@@ -125,10 +120,10 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.internal_energy +
-                                   connection_point * NUMBER_CORE_QUANTITIES,
-                                   self.get_connected_node(connection_point).matrix_index +
-                                   IndexEnum.internal_energy]
+        equation_object.indices = [self.matrix_index + IndexEnum.internal_energy
+                                   + connection_point * NUMBER_CORE_QUANTITIES,
+                                   self.get_connected_node(connection_point).matrix_index
+                                   + IndexEnum.internal_energy]
         equation_object.coefficients = [1.0, -1.0]
         equation_object.rhs = 0.0
         return equation_object
