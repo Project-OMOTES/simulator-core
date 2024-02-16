@@ -27,6 +27,7 @@ class SolverPipe(FallType):
 
     def update_loss_coefficient(self):
         """Method to update the loss coefficient of the pipe."""
+        self.area = np.pi * self.diam ** 2 / 4
         self.calc_lambda_loss()
         self.loss_coefficient = (self.lambda_loss * self.length /
                                  (2 * self.diam * self.area ** 2 * 9.81))

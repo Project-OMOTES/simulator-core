@@ -177,3 +177,21 @@ class BaseAsset(BaseItem):
         :return: The mass flow rate of the connection point.
         """
         return self.prev_sol[IndexEnum.discharge + con_point * NUMBER_CORE_QUANTITIES]
+
+    def get_pressure(self, con_point: int) -> float:
+        """Method to get the pressure of a connection point.
+
+        :param int con_point: The connection point for which to get the pressure.
+        :return: The pressure of the connection point.
+        """
+        return self.prev_sol[IndexEnum.pressure + con_point * NUMBER_CORE_QUANTITIES]
+
+    def get_temperature(self, con_point: int) -> float:
+        """Method to get the temperature of a connection point.
+
+        :param int con_point: The connection point for which to get the temperature.
+        :return: The temperature of the connection point.
+        """
+        return self.fluid_properties.get_t(
+            self.prev_sol[IndexEnum.internal_energy + con_point * NUMBER_CORE_QUANTITIES]
+        )
