@@ -71,13 +71,6 @@ class AssetAbstract(ABC):
         """
         return {}
 
-    @abstractmethod
-    def simulation_performed(self) -> bool:
-        """Placeholder to indicate that a simulation has been performed.
-
-        :return bool: True if a simulation has been performed, False otherwise.
-        """
-        pass
 
     @abstractmethod
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:

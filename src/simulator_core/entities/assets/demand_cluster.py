@@ -88,15 +88,6 @@ class DemandCluster(AssetAbstract):
         self.solver_asset.supply_temperature = self.temperature_return_target
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate
 
-
-    def simulation_performed(self) -> bool:
-        """Check if the simulation has been performed.
-
-        :return bool simulation_performed: True if the simulation has been performed,
-            False otherwise.
-        """
-        return hasattr(self.pandapipes_net, 'res_flow_control')
-
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
 

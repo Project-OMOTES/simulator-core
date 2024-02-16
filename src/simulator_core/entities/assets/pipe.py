@@ -136,6 +136,9 @@ class Pipe(AssetAbstract):
         self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
+        self.solver_asset.length = self.length
+        self.solver_asset.roughness = self.roughness
+        self.solver_asset.diameter = self.diameter
 
     def simulation_performed(self) -> bool:
         """Check whether a simulation has been performed.
@@ -162,5 +165,10 @@ class Pipe(AssetAbstract):
         """
 
         output_dict = {}
+        output_dict[PROPERTY_MASSFLOW] = self.solver_asset.get_mass_flow_rate(1)
+        output_dict[PROPERTY_PRESSURE_SUPPLY] = self.solver_asset.get_pressure(0)
+        output_dict[PROPERTY_PRESSURE_RETURN] = self.solver_asset.get_pressure(1)
+        output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.solver_asset.get_temperature(0)
+        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.solver_asset.get_temperature(1)
 
         self.output.append(output_dict)
