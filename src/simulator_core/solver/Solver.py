@@ -30,7 +30,6 @@ class Solver:
         self.matrix.reset_solution()
         while not (self.matrix.is_converged()):
             iteration += 1
-            self.matrix.dumb_matrix()
             equations = self.get_equations()
             self.matrix.solve(equations, dumb=False)
             self.results_to_assets()
