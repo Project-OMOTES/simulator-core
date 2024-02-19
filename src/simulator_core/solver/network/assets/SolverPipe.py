@@ -2,6 +2,7 @@
 import uuid
 from simulator_core.solver.network.assets.Fall_type import FallType
 import numpy as np
+from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class SolverPipe(FallType):
@@ -38,11 +39,11 @@ class SolverPipe(FallType):
         :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
         :param float, optional temperature: The temperature of the fluid in the pipe.
         """
-        density = self.fluid_properties.get_density(temperature)
+        density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
         velocity = discharge / self.area
         self.reynolds_number = (density * velocity * self.diam
-                                / self.fluid_properties.get_viscosity(temperature))
+                                / fluid_props.get_viscosity(temperature))
 
     def calc_lambda_loss(self):
         """Method to calculate the lambda loss of the pipe."""

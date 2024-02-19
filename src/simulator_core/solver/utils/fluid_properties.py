@@ -58,3 +58,6 @@ class FluidProperties:
         :return: The viscosity of the fluid at the given temperature.
         """
         return float(np.interp(t, self.T, self.visc))
+
+
+fluid_props = FluidProperties()

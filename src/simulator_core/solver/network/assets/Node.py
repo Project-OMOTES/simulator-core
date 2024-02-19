@@ -4,6 +4,7 @@ from simulator_core.solver.network.assets.BaseItem import BaseItem
 from simulator_core.solver.network.assets.Baseasset import BaseAsset
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
+from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class Node(BaseItem):
@@ -154,7 +155,7 @@ class Node(BaseItem):
         equation_object = EquationObject()
         equation_object.indices = [self.matrix_index + IndexEnum.internal_energy]
         equation_object.coefficients = [1.0]
-        equation_object.rhs = self.fluid_properties.get_ie(self.initial_temperature)
+        equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
 
     def add_energy_equation(self) -> EquationObject:

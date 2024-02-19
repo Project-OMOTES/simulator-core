@@ -5,7 +5,7 @@ from simulator_core.solver.network.assets.Fall_type import FallType
 from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 from simulator_core.solver.network.assets.Node import Node
 from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
-from simulator_core.solver.utils.fluid_properties import FluidProperties
+from simulator_core.solver.utils.fluid_properties import fluid_props
 import uuid
 
 
@@ -27,9 +27,8 @@ class Network:
         """
         self.assets = {}
         self.nodes = {}
-        self.fluid_properties = FluidProperties()
 
-    def add_asset(self, asset_type: str, name: uuid.UUID=None) -> uuid.UUID:
+    def add_asset(self, asset_type: str, name: uuid.UUID = None) -> uuid.UUID:
         """Method to add an asset to the network.
 
         This method creates and asset of the given type.
@@ -70,7 +69,7 @@ class Network:
         if not self.exists_asset(asset2):
             raise ValueError(str(asset2) + " does not exists in network")
         if (not self.assets[asset1].is_connected(connection_point_1) and not
-                self.assets[asset2].is_connected(connection_point_2)):
+        self.assets[asset2].is_connected(connection_point_2)):
             # both asset connect points not connected
             id = uuid.uuid4()
             self.nodes[id] = Node(id)
@@ -80,7 +79,7 @@ class Network:
             self.nodes[id].connect_asset(self.assets[asset2], connection_point_2)
             return id
         if (self.assets[asset1].is_connected(connection_point_1) and not
-            self.assets[asset2].is_connected(connection_point_2)):
+        self.assets[asset2].is_connected(connection_point_2)):
             # asset 1 connected asset 2 not
             node = self.assets[asset1].get_connected_node(connection_point_1)
             self.assets[asset2].connect_node(connection_point_2, node)

@@ -5,6 +5,7 @@ from simulator_core.solver.network.assets.BaseItem import BaseItem
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
 from typing import Dict, TypeVar
+from simulator_core.solver.utils.fluid_properties import fluid_props
 
 Node = TypeVar("Node")
 
@@ -108,7 +109,7 @@ class BaseAsset(BaseItem):
         equation_object.indices = [self.matrix_index + IndexEnum.internal_energy
                                    + connection_point * NUMBER_CORE_QUANTITIES]
         equation_object.coefficients = [1.0]
-        equation_object.rhs = self.fluid_properties.get_ie(self.supply_temperature)
+        equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
         return equation_object
 
     def add_temp_to_node_equation(self, connection_point: int) -> EquationObject:
@@ -154,7 +155,7 @@ class BaseAsset(BaseItem):
         for i in range(self.number_of_connection_point):
             for j in range(math.floor(self.number_of_unknowns / self.number_of_connection_point)):
                 if j == 2:
-                    results.append(self.fluid_properties.get_t(
+                    results.append(fluid_props.get_t(
                         self.prev_sol[i * math.floor(self.number_of_unknowns
                                                      / self.number_of_connection_point) + j]))
                 else:
@@ -187,6 +188,6 @@ class BaseAsset(BaseItem):
         :param int con_point: The connection point for which to get the temperature.
         :return: The temperature of the connection point.
         """
-        return self.fluid_properties.get_t(
+        return fluid_props.get_t(
             self.prev_sol[IndexEnum.internal_energy + con_point * NUMBER_CORE_QUANTITIES]
         )
