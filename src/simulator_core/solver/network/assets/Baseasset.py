@@ -160,10 +160,17 @@ class BaseAsset(BaseItem):
                                                      / self.number_of_connection_point) + j]))
                 else:
                     results.append(self.prev_sol[i * math.floor(self.number_of_unknowns
-                                                                / self.number_of_connection_point) + j])
+                                                                / self.number_of_connection_point)
+                                                 + j])
         return results
 
     def get_equations(self) -> list[EquationObject]:
+        """Method to get the equations of the asset.
+
+        This method is implemented in the derived classes of this class.
+
+        :return: A list of equation objects representing the equations of the asset.
+        """
         return []
 
     def get_mass_flow_rate(self, con_point: int) -> float:

@@ -5,7 +5,6 @@ from simulator_core.solver.network.assets.Fall_type import FallType
 from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 from simulator_core.solver.network.assets.Node import Node
 from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
-from simulator_core.solver.utils.fluid_properties import fluid_props
 import uuid
 
 
@@ -45,6 +44,13 @@ class Network:
         return name
 
     def add_existing_asset(self, asset: BaseAsset):
+        """Method to add an existing asset to the network.
+
+        This method adds an existing asset to the network. It checks if the asset already exists.
+        If it does a ValueError is raised.
+        :param BaseAsset asset: The asset to be added to the network.
+        :return: Unique id of the asset.
+        """
         if asset.name in self.assets:
             raise ValueError(f"{asset.name} already exists in network")
         self.assets[asset.name] = asset
@@ -68,8 +74,8 @@ class Network:
             raise ValueError(str(asset1) + " does not exists in network")
         if not self.exists_asset(asset2):
             raise ValueError(str(asset2) + " does not exists in network")
-        if (not self.assets[asset1].is_connected(connection_point_1) and not
-        self.assets[asset2].is_connected(connection_point_2)):
+        if ((not self.assets[asset1].is_connected(connection_point_1))
+                and not (self.assets[asset2].is_connected(connection_point_2))):
             # both asset connect points not connected
             id = uuid.uuid4()
             self.nodes[id] = Node(id)
@@ -78,22 +84,22 @@ class Network:
             self.nodes[id].connect_asset(self.assets[asset1], connection_point_1)
             self.nodes[id].connect_asset(self.assets[asset2], connection_point_2)
             return id
-        if (self.assets[asset1].is_connected(connection_point_1) and not
-        self.assets[asset2].is_connected(connection_point_2)):
+        if ((self.assets[asset1].is_connected(connection_point_1))
+                and not (self.assets[asset2].is_connected(connection_point_2))):
             # asset 1 connected asset 2 not
             node = self.assets[asset1].get_connected_node(connection_point_1)
             self.assets[asset2].connect_node(connection_point_2, node)
             node.connect_asset(self.assets[asset2], connection_point_2)
             return node.name
-        if (not self.assets[asset1].is_connected(connection_point_1) and
-                self.assets[asset2].is_connected(connection_point_2)):
+        if (not self.assets[asset1].is_connected(connection_point_1)
+                and self.assets[asset2].is_connected(connection_point_2)):
             # asset 2 connected asset 1 not
             node = self.assets[asset2].get_connected_node(connection_point_2)
             self.assets[asset1].connect_node(connection_point_1, node)
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
         if (not self.assets[asset1].is_connected(connection_point_1)
-                and not self.assets[asset2].is_connected(connection_point_2)):
+                and (not self.assets[asset2].is_connected(connection_point_2))):
             # both asset already connected need to delete one node.
             pass
 
@@ -114,9 +120,11 @@ class Network:
         return id in self.nodes
 
     def remove_asset(self):
+        """Method to remove an asset from the network."""
         pass
 
     def disconnect_asset(self):
+        """Method to disconnect an asset from the network."""
         pass
 
     def get_asset(self, id: uuid.UUID) -> BaseAsset:
@@ -194,6 +202,7 @@ class Network:
             self.get_node(node).prev_sol = solution[index:index + nou]
 
     def print_result(self):
+        """Method to print the result of the network."""
         for asset in self.assets:
             print(type(self.get_asset(asset)))
             print(self.get_asset(asset).get_result())

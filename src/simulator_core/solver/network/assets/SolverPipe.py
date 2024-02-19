@@ -1,4 +1,4 @@
-"""module containing pipe class"""
+"""module containing pipe class."""
 import uuid
 from simulator_core.solver.network.assets.Fall_type import FallType
 import numpy as np
@@ -30,10 +30,10 @@ class SolverPipe(FallType):
         """Method to update the loss coefficient of the pipe."""
         self.area = np.pi * self.diam ** 2 / 4
         self.calc_lambda_loss()
-        self.loss_coefficient = (self.lambda_loss * self.length /
-                                 (2 * self.diam * self.area ** 2 * 9.81))
+        self.loss_coefficient = (self.lambda_loss * self.length
+                                 / (2 * self.diam * self.area ** 2 * 9.81))
 
-    def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0) :
+    def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0):
         """Method to calculate the Reynolds number of the flow in the pipe.
 
         :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.

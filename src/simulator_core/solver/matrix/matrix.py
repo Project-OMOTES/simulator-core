@@ -1,5 +1,4 @@
 """Module containing a matrix class to store the matrix and solve it using numpy."""
-import uuid
 import numpy as np
 import scipy
 import csv
@@ -46,34 +45,6 @@ class Matrix:
         self.mat[row] = equation_object.to_list(self.num_unknowns)
         self.rhs[row] = equation_object.rhs
 
-    def remove_equation(self, handle: uuid.UUID):
-        """Method to remove an equation from the matrix.
-
-        Removes the equation with the given handle from the matrix.
-        :param handle: Handle of the equation to be removed from the matrix.
-        :return:
-        """
-        row = self.equation_handle_dict[handle]
-        self.rhs.pop(row)
-        self.mat.pop(row)
-        self.equation_handle_dict.pop(handle)
-        # since you remove an equation all indices most by shifted by 1.
-        for equation in self.equation_handle_dict:
-            if self.equation_handle_dict[equation] > row:
-                self.equation_handle_dict[equation] -= 1
-
-    def set_equation(self, handle: uuid.UUID, equation_object: EquationObject):
-        """Method to set the coefficient of an equation in the matrix.
-
-        Sets the coefficients of an equation with the given handle.
-        :param uuid.UUID handle: handle of the equation.
-        :param equation_object: object containing all information of the equation
-        :return: None
-        """
-        row = self.equation_handle_dict[handle]
-        self.mat[row] = equation_object.to_list(self.num_unknowns)
-        self.rhs[row] = equation_object.rhs
-
     def solve(self, equations: list[EquationObject], dumb: bool = False) -> list:
         """Method to solve the system of equation given in the matrix.
 
@@ -115,7 +86,7 @@ class Matrix:
             col = np.append(col, equation.indices)
             data = np.append(data, equation.coefficients)
         A = scipy.sparse.csc_matrix((data, (row, col)),
-                                shape=(self.num_unknowns, self.num_unknowns))
+                                    shape=(self.num_unknowns, self.num_unknowns))
         self.sol_new = scipy.sparse.linalg.spsolve(A, self.rhs)
         return self.sol_new.tolist()
 
@@ -156,4 +127,5 @@ class Matrix:
             write.writerows(self.mat)
 
     def reset_solution(self):
+        """Method to reset the solution to 1, so the new iteration can start."""
         self.sol_new = [1] * len(self.sol_new)

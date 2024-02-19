@@ -1,4 +1,4 @@
-""""module containing utility functions for the matrix"""
+"""module containing utility functions for the matrix."""
 
 
 def relative_difference(value_1: float, value_2: float) -> float:

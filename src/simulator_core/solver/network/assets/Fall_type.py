@@ -127,8 +127,8 @@ class FallType(BaseAsset):
         equation_object.indices = [self.matrix_index + IndexEnum.discharge,
                                    self.matrix_index + IndexEnum.internal_energy,
                                    self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
-                                   self.matrix_index + IndexEnum.internal_energy +
-                                   NUMBER_CORE_QUANTITIES]
+                                   self.matrix_index + IndexEnum.internal_energy
+                                   + NUMBER_CORE_QUANTITIES]
         equation_object.coefficients = [self.prev_sol[2], self.prev_sol[0], self.prev_sol[5],
                                         self.prev_sol[3]]
         equation_object.rhs = (self.prev_sol[0] * self.prev_sol[2]

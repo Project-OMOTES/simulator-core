@@ -1,8 +1,14 @@
+"""This module contains the fluid properties class."""
 import numpy as np
 import csv
 
 
 class FluidProperties:
+    """Class to represent the fluid properties.
+
+    This class contains methods to get the internal energy, temperature, density,
+    and viscosity of the fluid. THe data is loaded from a csv file in the same folder as this file.
+    """
 
     def __init__(self):
         """Constructor of the fluid properties class.
@@ -24,8 +30,8 @@ class FluidProperties:
 
         self.IE = [0.0]
         for i in range(1, len(self.T)):
-            self.IE.append(self.IE[-1] + (self.cp[i-1] + self.cp[i])
-                           / 2 * (self.T[i] - self.T[i-1]))
+            self.IE.append(self.IE[-1] + (self.cp[i - 1] + self.cp[i])
+                           / 2 * (self.T[i] - self.T[i - 1]))
 
     def get_ie(self, t: float) -> float:
         """Returns the internal energy of the fluid at a given temperature.
