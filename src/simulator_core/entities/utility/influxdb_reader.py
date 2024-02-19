@@ -100,7 +100,8 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     unit = get_unit(esdl_profile)
     dates = [time_stamp for time_stamp, _ in
              time_series_data.profile_data_list]
-    values = [convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit) * esdl_profile.multiplier
+    values = [convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit)
+              * esdl_profile.multiplier
               for _, value in time_series_data.profile_data_list]
     data_points = {"date": dates, "values": values}
 
