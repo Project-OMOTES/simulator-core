@@ -129,7 +129,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         """
         py_assets_list = []
         py_joint_dict = {}
-        py_junction_list = []
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
             # Junctions need to be skipped, as they are replaced by merged pandapipes junctions.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
@@ -142,12 +141,20 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
                 network.add_existing_asset(py_assets_list[-1].solver_asset)
 
+        py_junction_list = []
+
+
         # loop over assets and create junctions and connect them
         for py_asset in py_assets_list:
             for con_point in range(0, 2):
                 if not py_asset.solver_asset.is_connected(con_point):
                     connected_py_assets = self.esdl_object.get_connected_assets(
                         py_asset.asset_id, Port.In if con_point == 0 else Port.Out)
+                    # Replace items in the connected_py_assets list that are connected to a Joint
+                    # with the items that are connected to the Joint, except for the current asset.
+                    connected_py_assets = replace_joint_in_connected_assets(
+                        connected_py_assets, py_joint_dict, py_asset.asset_id
+                    )
                     for connected_py_asset in connected_py_assets:
                         index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                             connected_py_asset[0])
