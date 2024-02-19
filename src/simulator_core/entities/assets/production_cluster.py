@@ -152,16 +152,7 @@ class ProductionCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             # Set the setpoints
-            self._set_supply_temperature(setpoints[PROPERTY_TEMPERATURE_SUPPLY])
-            self._set_return_temperature(setpoints[PROPERTY_TEMPERATURE_RETURN])
-            self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
-            # Raise warning if there are more setpoints
-            if len(setpoints_set.difference(necessary_setpoints)) > 0:
-                warn(
-                    f"The setpoints {setpoints_set.difference(necessary_setpoints)}"
-                    + f" are not required for the asset {self.name}."
-                )
-            self._set_pressure(setpoints[PROPERTY_SET_PRESSURE])
+            pass
         else:
             # Print missing setpoints
             raise ValueError(

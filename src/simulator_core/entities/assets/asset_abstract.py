@@ -21,6 +21,7 @@ from typing import Dict, List
 from pandas import DataFrame
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
+from simulator_core.solver.network.assets.Baseasset import BaseAsset
 
 
 class AssetAbstract(ABC):
