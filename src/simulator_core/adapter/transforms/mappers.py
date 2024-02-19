@@ -64,7 +64,8 @@ def replace_joint_in_connected_assets(
     with the items that are connected to the Joint, except for the current asset.
 
     :param connected_py_assets: List of connected assets
-    :param py_joint_dict: Dict of connected assets
+    :param py_joint_dict: Dictionary with joint id as key and list of tuples with
+    connected asset id and port as value.
     :param py_asset_id: Id of the asset all the connected assets are connected to
     :param iteration_limit: Limit for the number of iterations
 
