@@ -17,23 +17,22 @@
 import unittest
 
 import pandapipes as pp
-import pytest
 
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_SET_PRESSURE
 )
+from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 
 
 class ProductionClusterTest(unittest.TestCase):
     """Testcase for ProductionCluster class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test case."""
         # Create empty pandapipes network
         self.network = pp.create_empty_network(fluid="water")
@@ -49,7 +48,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
-    def test_production_cluster_create(self):
+    def test_production_cluster_create(self) -> None:
         """Evaluate the creation of a production_cluster object."""
         # Arrange
 
@@ -62,7 +61,7 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.asset_id == "production_cluster_id"
         assert any(self.network.flow_control.name == "flow_control_production_cluster")
 
-    def test_production_cluster_set_setpoints(self):
+    def test_production_cluster_set_setpoints(self) -> None:
         """Test setting setpoints of a production cluster."""
         # Arrange
         self.production_cluster.create()
@@ -86,11 +85,12 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.temperature_supply == 80
         assert self.production_cluster.temperature_return == 60
         assert self.production_cluster._controlled_mass_flow == mass_flow
-        assert (self.production_cluster.pandapipes_net["flow_control"]
-                ["controlled_mdot_kg_per_s"][0]
-                == self.production_cluster._controlled_mass_flow)
+        assert (
+            self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][0]
+            == self.production_cluster._controlled_mass_flow
+        )
 
-    def test_production_cluster_set_setpoints_missing_setpoint(self):
+    def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
         # Arrange
         self.production_cluster.create()
@@ -105,14 +105,17 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_SET_PRESSURE: False,
         }
 
-        # Assert
-        with pytest.raises(
-                ValueError,
-                match=f"The setpoints {necessary_setpoints.difference(set(setpoints))} "
-                      f"are missing."):
+        with self.assertRaises(ValueError) as cm:
             self.production_cluster.set_setpoints(setpoints=setpoints)
 
-    def test_production_cluster_set_setpoints_negative_mass_flow(self):
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            cm.exception.args[0],
+            f"The setpoints {necessary_setpoints.difference(set(setpoints))} are missing.",
+        )
+
+    def test_production_cluster_set_setpoints_negative_mass_flow(self) -> None:
         """Test raise ValueError with negative mass flow."""
         # Arrange
         self.production_cluster.create()
@@ -131,10 +134,13 @@ class ProductionClusterTest(unittest.TestCase):
             pandapipes_net=self.network,
         )
 
-        # Assert
-        with pytest.raises(
-                ValueError,
-                match=f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
-                      + " is negative.",
-        ):
+        with self.assertRaises(ValueError) as cm:
             self.production_cluster.set_setpoints(setpoints=setpoints)
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            cm.exception.args[0],
+            f"The mass flow rate {mass_flow} of the asset {self.production_cluster.name}"
+            + " is negative.",
+        )

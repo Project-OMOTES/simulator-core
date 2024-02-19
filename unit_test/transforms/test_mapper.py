@@ -14,15 +14,20 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-
 from pathlib import Path
+from typing import List, Tuple
+
 from pandapipes import create_empty_network
-from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
+
+from simulator_core.adapter.transforms.mappers import (
+    EsdlEnergySystemMapper,
+    replace_joint_in_connected_assets,
+)
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
+from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from typing import Tuple, List
 
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
@@ -47,3 +52,46 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         self.assertIsInstance(result[1][0], Junction)
         self.assertEqual(len(result[0]), 4)
         self.assertEqual(len(result[1]), 4)
+
+    def test_replace_joint_in_connected_assets(self):
+        """Method to test the replace joint in connected assets method."""
+        # act
+        connected_py_assets = [("joint1", Port.In), ("asset2", Port.Out)]
+        py_joint_dict = {"joint1": [("asset1", Port.In), ("asset3", Port.Out)]}
+        py_asset_id = "joint1"
+
+        # arrange
+        new_py_assets = replace_joint_in_connected_assets(
+            connected_py_assets, py_joint_dict, py_asset_id
+        )
+        new_py_assets.sort()
+
+        # assert
+        self.assertEqual(
+            new_py_assets, [("asset1", Port.In), ("asset2", Port.Out), ("asset3", Port.Out)]
+        )
+
+    def test_replace_joint_in_connected_assets_error(self):
+        """Method to test error handling of the replace."""
+        # act
+        connected_py_assets = [("joint1", Port.In), ("asset1", Port.Out)]
+        py_joint_dict = {
+            "joint1": [("joint2", Port.In), ("asset2", Port.Out)],
+            "joint2": [("joint3", Port.In), ("asset3", Port.Out)],
+            "joint3": [("asset4", Port.In), ("asset5", Port.Out)],
+        }
+        py_asset_id = "joint1"
+
+        # arrange
+        with self.assertRaises(RuntimeError) as cm:
+            # ("Error in replacing joint in connected assets.")
+            replace_joint_in_connected_assets(
+                connected_py_assets=connected_py_assets,
+                py_joint_dict=py_joint_dict,
+                py_asset_id=py_asset_id,
+                iteration_limit=1,
+            )
+
+        # assert
+        self.assertIsInstance(cm.exception, RuntimeError)
+        self.assertEqual(cm.exception.args[0], "Error in replacing joint in connected assets.")
