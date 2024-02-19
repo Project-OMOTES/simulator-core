@@ -32,7 +32,7 @@ from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_
 class ProductionClusterTest(unittest.TestCase):
     """Testcase for ProductionCluster class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test case."""
         # Create empty pandapipes network
         self.network = pp.create_empty_network(fluid="water")
@@ -48,7 +48,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
-    def test_production_cluster_create(self):
+    def test_production_cluster_create(self) -> None:
         """Evaluate the creation of a production_cluster object."""
         # Arrange
 
@@ -61,7 +61,7 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.asset_id == "production_cluster_id"
         assert any(self.network.flow_control.name == "flow_control_production_cluster")
 
-    def test_production_cluster_set_setpoints(self):
+    def test_production_cluster_set_setpoints(self) -> None:
         """Test setting setpoints of a production cluster."""
         # Arrange
         self.production_cluster.create()
@@ -90,7 +90,7 @@ class ProductionClusterTest(unittest.TestCase):
             == self.production_cluster._controlled_mass_flow
         )
 
-    def test_production_cluster_set_setpoints_missing_setpoint(self):
+    def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
         # Arrange
         self.production_cluster.create()
@@ -112,10 +112,10 @@ class ProductionClusterTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(
             cm.exception.args[0],
-            f"The setpoints {necessary_setpoints.difference(set(setpoints))} " + f"are missing.",
+            f"The setpoints {necessary_setpoints.difference(set(setpoints))} are missing.",
         )
 
-    def test_production_cluster_set_setpoints_negative_mass_flow(self):
+    def test_production_cluster_set_setpoints_negative_mass_flow(self) -> None:
         """Test raise ValueError with negative mass flow."""
         # Arrange
         self.production_cluster.create()
