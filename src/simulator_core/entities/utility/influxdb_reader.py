@@ -18,7 +18,7 @@ from esdl.profiles.influxdbprofilemanager import InfluxDBProfileManager
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
-from typing import Dict
+from typing import Dict, Tuple
 import pandas as pd
 
 
@@ -44,7 +44,7 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    influx_cred_map = {}
+    influx_cred_map: Dict[str, Tuple[str, str]] = {}
     profile_host = esdl_profile.host
     ssl_setting = False
     if "https" in profile_host:
