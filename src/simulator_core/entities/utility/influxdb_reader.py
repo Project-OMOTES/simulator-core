@@ -22,18 +22,15 @@ def parse_esdl_profiles(esh: EnergySystemHandler) -> Dict[str, pd.DataFrame]:
     return data_set
 
 
-def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
+def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     """Method to get the data from the esdl influxdb profile.
 
     This method tries to get the data from the esdl profile.
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    influx_cred_map = {
-        "wu-profiles.esdl-beta.hesi.energy:443": ("warmingup", "warmingup"),
-        "omotes-poc-test.hesi.energy:8086": ("write-user", "nwn_write_test"),
-    }
-    profile_host = profile.host
+    influx_cred_map = {}
+    profile_host = esdl_profile.host
     ssl_setting = False
     if "https" in profile_host:
         profile_host = profile_host[8:]
@@ -41,17 +38,17 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     elif "http" in profile_host:
         profile_host = profile_host[7:]
     # why is this here?
-    if profile.port == 443:
+    if esdl_profile.port == 443:
         ssl_setting = True
 
-    influx_host = "{}:{}".format(profile_host, profile.port)
+    influx_host = "{}:{}".format(profile_host, esdl_profile.port)
     if influx_host in influx_cred_map:
         (username, password) = influx_cred_map[influx_host]
     else:
         username = None
         password = None
     time_series_data = InfluxDBProfileManager.create_esdl_influxdb_profile_manager(
-        profile,
+        esdl_profile,
         username,
         password,
         ssl_setting,
@@ -60,17 +57,17 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     # Error check start and end dates of profiles
 
     # I do not thing this is required since you set it in mapeditor.
-    if time_series_data.end_datetime != profile.endDate:
+    if time_series_data.end_datetime != esdl_profile.endDate:
         raise RuntimeError(
-            f"The user input profile end datetime: {profile.endDate} does not match the end"
+            f"The user input profile end datetime: {esdl_profile.endDate} does not match the end"
             f" datetime in the datbase: {time_series_data.end_datetime} for variable: "
-            f"{profile.field}"
+            f"{esdl_profile.field}"
         )
-    if time_series_data.start_datetime != profile.startDate:
+    if time_series_data.start_datetime != esdl_profile.startDate:
         raise RuntimeError(
-            f"The user input profile start datetime: {profile.startDate} does not match the"
+            f"The user input profile start datetime: {esdl_profile.startDate} does not match the"
             f" start date in the datbase: {time_series_data.start_datetime} for variable: "
-            f"{profile.field}"
+            f"{esdl_profile.field}"
         )
     if time_series_data.start_datetime != time_series_data.profile_data_list[0][0]:
         raise RuntimeError(
@@ -85,10 +82,10 @@ def get_data_from_profile(profile: esdl.InfluxDBProfile) -> pd.DataFrame:
             f" profile data: {time_series_data.profile_data_list[-1][0]}"
         )
 
-    unit = get_unit(profile)
+    unit = get_unit(esdl_profile)
     dates = [time_stamp for time_stamp, _ in
              time_series_data.profile_data_list]
-    values = [convert_to_unit(value, profile.profileQuantityAndUnit, unit) * profile.multiplier
+    values = [convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit) * esdl_profile.multiplier
               for _, value in time_series_data.profile_data_list]
     data_points = {"date": dates, "values": values}
 
