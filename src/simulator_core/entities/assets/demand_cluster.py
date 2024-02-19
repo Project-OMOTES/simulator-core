@@ -26,6 +26,7 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     DEFAULT_PRESSURE,
+    DEFAULT_POWER,
     PROPERTY_MASSFLOW,
     PROPERTY_VOLUMEFLOW,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -68,7 +69,7 @@ class DemandCluster(AssetAbstract):
         self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.temperature_return_target = self.temperature_return
         self.pressure_input = DEFAULT_PRESSURE
-        self.thermal_power_allocation = 0
+        self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0
 
         # Objects of the asset
@@ -132,15 +133,6 @@ class DemandCluster(AssetAbstract):
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
-
-        if self.simulation_performed():
-            self.temperature_supply = self.pandapipes_net.res_flow_control['t_from_k'][
-                self._flow_control.index]
-            self.temperature_return = self.pandapipes_net.res_heat_exchanger['t_to_k'][
-                self._heat_exchanger.index]
-            self.mass_flowrate = self.pandapipes_net.res_heat_exchanger['mdot_from_kg_per_s'][
-                self._heat_exchanger.index]
-
         self._set_demand_control()
 
     def _set_demand_control(self) -> None:

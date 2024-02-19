@@ -13,19 +13,4 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Configuration parameters for the simulation that are not included in the ESDL."""
-
-from dataclasses import dataclass
-from datetime import datetime
-import uuid
-
-
-@dataclass
-class SimulationConfiguration:
-    """Class to store configuration parameters of the simulations."""
-
-    simulation_id: uuid.UUID
-    name: str
-    timestep: int
-    start: datetime
-    stop: datetime
+"""__init__.py file for initialization code."""

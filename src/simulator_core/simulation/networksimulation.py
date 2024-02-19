@@ -19,6 +19,7 @@ from pandas import DataFrame
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from datetime import timedelta, timezone
 
 import logging
 
@@ -39,8 +40,11 @@ class NetworkSimulation:
         :param SimulationConfiguration config: Configuration to run the simulation with.
         """
         # time loop
-        for time in range(config.start, config.stop, config.timestep):
+        number_of_time_steps = int((config.stop - config.start).total_seconds() / config.timestep)
+        for time_step in range(number_of_time_steps):
             not_converged = True
+            time = (config.start + timedelta(seconds=time_step * config.timestep)
+                    ).replace(tzinfo=timezone.utc)
             controller_input = self.controller.run_time_step(time)
 
             while not_converged:

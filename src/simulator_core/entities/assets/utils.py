@@ -35,7 +35,7 @@ def heat_demand_and_temperature_to_mass_flow(
     :param float temperature_supply: The temperature that the asset delivers to the "to_junction".
         The temperature should be supplied in Kelvin. The supply temperature is used to calculate
         the specific heat capacity of the fluid.
-    :param float temeprature_return: The temperature that the asset receives from the
+    :param float temperature_return: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     :param pandapipesNet net: The pandapipes network used to calculate the specific heat capacity.
     """

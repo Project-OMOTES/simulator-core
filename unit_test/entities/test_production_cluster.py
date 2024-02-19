@@ -25,6 +25,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_SET_PRESSURE
 )
 from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 
@@ -69,6 +70,7 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_SUPPLY: 80,
             PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_SET_PRESSURE: False,
         }
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
@@ -100,6 +102,7 @@ class ProductionClusterTest(unittest.TestCase):
         setpoints = {
             PROPERTY_TEMPERATURE_SUPPLY: 80,
             PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_SET_PRESSURE: False,
         }
 
         # Assert
@@ -117,6 +120,7 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_SUPPLY: 80,
             PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_SET_PRESSURE: False,
         }
 
         # Act

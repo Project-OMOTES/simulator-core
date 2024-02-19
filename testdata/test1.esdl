@@ -15,7 +15,7 @@
         <geometry xsi:type="esdl:Point" lon="4.63726043701172" lat="52.158769628869045" CRS="WGS84"/>
         <port xsi:type="esdl:InPort" connectedTo="3f2dc09a-0cee-44bd-a337-cea55461a334" id="af0904f7-ba1f-4e79-9040-71e08041601b" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a" name="In"/>
         <port xsi:type="esdl:OutPort" id="e890f65f-80e7-46fa-8c52-5385324bf686" connectedTo="422cb921-23d2-4410-9072-aaa5796a0620" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret" name="Out">
-          <profile xsi:type="esdl:InfluxDBProfile" multiplier="0.0" startDate="2019-01-01T00:00:00.000000+0000" filters="" id="62d7e2a4-9919-4fa2-90f4-29e8f188919f" measurement="Nijmegen" database="energy_profiles" host="profiles.warmingup.info" port="443" field="Weezenhof (MW)" endDate="2019-12-31T23:00:00.000000+0000">
+          <profile xsi:type="esdl:InfluxDBProfile" multiplier="1.0" startDate="2019-01-01T00:00:00.000000+0000" filters="" id="62d7e2a4-9919-4fa2-90f4-29e8f188919f" measurement="Nijmegen" database="energy_profiles" host="profiles.warmingup.info" port="443" field="Weezenhof (MW)" endDate="2019-12-31T23:00:00.000000+0000">
             <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="e9405fc8-5e57-4df5-8584-4babee7cdf1b"/>
           </profile>
         </port>

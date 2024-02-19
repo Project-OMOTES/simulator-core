@@ -17,7 +17,9 @@
 import logging
 from typing import Any, Tuple
 
+import pandas as pd
 from esdl import esdl
+from simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
 
@@ -49,3 +51,10 @@ class EsdlAssetObject:
             return getattr(self.esdl_asset, esdl_property_name), True
         except AttributeError:
             return default_value, False
+
+    def get_profile(self) -> pd.DataFrame:
+        """Get the profile of the asset."""
+        for esdl_port in self.esdl_asset.port:
+            if esdl_port.profile:
+                return get_data_from_profile(esdl_port.profile[0])
+        raise ValueError("No profile found for asset: " + self.esdl_asset.name)

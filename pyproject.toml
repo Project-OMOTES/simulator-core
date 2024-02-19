@@ -21,9 +21,10 @@ dependencies = [
     "numpy==1.26.0",
     "pandas==2.1.1",
     "pandapipes==0.8.4",
-    "pyesdl==23.3.0",
+    "pyesdl==24.2.0",
     "dataclass-wizard==0.22.2",
     "coloredlogs==15.0.1",
+    "influxdb==5.3.1",
 ]
 
 [project.optional-dependencies]
