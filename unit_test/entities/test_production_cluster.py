@@ -15,8 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-
-import pandapipes as pp
+from unittest.mock import Mock
 
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -35,15 +34,13 @@ class ProductionClusterTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test case."""
         # Create empty pandapipes network
-        self.network = pp.create_empty_network(fluid="water")
         # Create two junctions
-        self.from_junction = Junction(name="from_junction", pandapipes_net=self.network)
-        self.to_junction = Junction(name="to_junction", pandapipes_net=self.network)
+        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
+        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
         # Create a production cluster object
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
-            pandapipe_net=self.network,
         )
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
@@ -53,18 +50,14 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
 
         # Act
-        self.production_cluster.create()  # act
-
         # Assert
         assert isinstance(self.production_cluster, ProductionCluster)
         assert self.production_cluster.name == "production_cluster"
         assert self.production_cluster.asset_id == "production_cluster_id"
-        assert any(self.network.flow_control.name == "flow_control_production_cluster")
 
     def test_production_cluster_set_setpoints(self) -> None:
         """Test setting setpoints of a production cluster."""
         # Arrange
-        self.production_cluster.create()
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_SUPPLY: 80,
@@ -77,8 +70,8 @@ class ProductionClusterTest(unittest.TestCase):
         mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
             temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
-            thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
-            pandapipes_net=self.network,
+            thermal_demand=setpoints[PROPERTY_HEAT_DEMAND]
+
         )  # act
 
         # Assert
@@ -86,14 +79,13 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.temperature_return == 60
         assert self.production_cluster._controlled_mass_flow == mass_flow
         assert (
-            self.production_cluster.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][0]
+            self.production_cluster.solver_asset.mass_flow_rate_set_point
             == self.production_cluster._controlled_mass_flow
         )
 
     def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
         # Arrange
-        self.production_cluster.create()
 
         # Act
         necessary_setpoints = set(
@@ -118,7 +110,6 @@ class ProductionClusterTest(unittest.TestCase):
     def test_production_cluster_set_setpoints_negative_mass_flow(self) -> None:
         """Test raise ValueError with negative mass flow."""
         # Arrange
-        self.production_cluster.create()
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_SUPPLY: 80,
@@ -130,8 +121,7 @@ class ProductionClusterTest(unittest.TestCase):
         mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
             temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
-            thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
-            pandapipes_net=self.network,
+            thermal_demand=setpoints[PROPERTY_HEAT_DEMAND]
         )
 
         with self.assertRaises(ValueError) as cm:

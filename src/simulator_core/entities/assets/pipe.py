@@ -18,7 +18,6 @@ from typing import Dict, List
 
 import numpy as np
 
-
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.asset_defaults import (
@@ -76,7 +75,8 @@ class Pipe(AssetAbstract):
         self.roughness = PIPE_DEFAULTS.k_value
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
-        self.solver_asset = SolverPipe(uuid.uuid4())
+        self.solver_asset = SolverPipe(uuid.uuid4(), length=self.length, diameter=self.diameter,
+                                       roughness=self.roughness)
         self.output = []
 
     def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:

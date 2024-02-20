@@ -10,7 +10,10 @@ class SolverPipe(FallType):
 
     def __init__(self, name: uuid.UUID,
                  number_of_unknowns: int = 6,
-                 number_con_points: int = 2):
+                 number_con_points: int = 2,
+                 length: float = 1000,
+                 diameter: float = 0.2,
+                 roughness: float = 0.0001):
         """Constructor of pipe class.
 
         :param uuid.UUID name: The unique identifier of the pipe.
@@ -18,9 +21,9 @@ class SolverPipe(FallType):
         :param int, optional number_con_points: The number of connection points for the pipe.
         """
         super().__init__(name, number_of_unknowns, number_con_points)
-        self.length: float = 1000
-        self.diameter: float = 0.2
-        self.roughness: float = 0.0001
+        self.length: float = length
+        self.diameter: float = diameter
+        self.roughness: float = roughness
         self.area: float = np.pi * self.diameter ** 2 / 4
         self.lambda_loss: float = 0.01
         self.loss_coefficient: float = 0.0

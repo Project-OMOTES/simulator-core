@@ -27,7 +27,6 @@ def heat_demand_and_temperature_to_mass_flow(
         thermal_demand: float,
         temperature_supply: float,
         temperature_return: float
-
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
@@ -59,10 +58,9 @@ def mass_flow_and_temperature_to_heat_demand(
     :param float mass_flow: The mass flow rate that is used to meet the thermal demand. The mass
         flow rate should be supplied in kg/s.
     """
-    heat_capacity = fluid_props.get_heat_capacity(
-        (temperature_return + temperature_supply) / 2
-    )
-    return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
+    internal_energy1 = fluid_props.get_ie(temperature_supply)
+    internal_energy2 = fluid_props.get_ie(temperature_return)
+    return mass_flow * (internal_energy1 - internal_energy2)
 
 
 def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> Tuple[List[float], List[float]]:
