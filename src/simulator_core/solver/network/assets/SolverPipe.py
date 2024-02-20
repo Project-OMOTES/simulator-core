@@ -1,7 +1,12 @@
 """module containing pipe class."""
+
 import uuid
-from simulator_core.solver.network.assets.Fall_type import FallType
+
 import numpy as np
+from scipy.optimize import root
+
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.network.assets.Fall_type import FallType
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -24,19 +29,24 @@ class SolverPipe(FallType):
         self.length: float = length
         self.diameter: float = diameter
         self.roughness: float = roughness
-        self.area: float = np.pi * self.diameter ** 2 / 4
+        self.area: float = np.pi * self.diameter**2 / 4
         self.lambda_loss: float = 0.01
         self.loss_coefficient: float = 0.0
         self.reynolds_number: float = 0.0
+        self.alpha_value: float = 0.0
+        self.ambient_temperature: float = 20 + 273.15
 
     def update_loss_coefficient(self) -> None:
         """Method to update the loss coefficient of the pipe."""
-        self.area = np.pi * self.diameter ** 2 / 4
+        self.area = np.pi * self.diameter**2 / 4
         self.calc_lambda_loss()
-        self.loss_coefficient = (self.lambda_loss * self.length
-                                 / (2 * self.diameter * self.area ** 2 * 9.81))
+        self.loss_coefficient = (
+            self.lambda_loss * self.length / (2 * self.diameter * self.area**2 * 9.81)
+        )
 
-    def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0) -> None:
+    def calc_reynolds_number(
+        self, mass_flow_rate: float, temperature: float = 20.0 + 273.15
+    ) -> None:
         """Method to calculate the Reynolds number of the flow in the pipe.
 
         :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
@@ -45,8 +55,7 @@ class SolverPipe(FallType):
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
         velocity = discharge / self.area
-        self.reynolds_number = (density * velocity * self.diameter
-                                / fluid_props.get_viscosity(temperature))
+        self.reynolds_number = velocity * self.diameter / fluid_props.get_viscosity(temperature)
 
     def calc_lambda_loss(self) -> None:
         """Method to calculate the lambda loss of the pipe."""
@@ -64,3 +73,56 @@ class SolverPipe(FallType):
                     break
                 lambda_star = lambda_star_new
             self.lambda_loss = (1 / lambda_star) ** 2
+
+    def _heat_supply_objective(self, internal_energy_x: float) -> float:
+        """Objective function to minimize for the heat supply calculation.
+
+        :param float internal_energy_x: The internal energy at the outlet of the pipe.
+        :return: float
+        """
+        # Define properties
+        pipe_area = self.length * np.pi * self.diameter
+        mass_flow_rate = self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 0]
+        # - Internal energy at the inlet and outlet
+        internal_energy_1 = self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 0]
+        # - Temperature at the outlet from internal_energy_x
+        temperature_x = fluid_props.get_t(internal_energy_x)
+        # Function to minimize
+        return mass_flow_rate * (
+            internal_energy_1 - internal_energy_x
+        ) + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature)
+
+    def update_heat_supplied(self) -> None:
+        """Calculate the heat supplied by the pipe.
+
+        The method calculates the heat supplied from the pipe to the fluid. The method assumes a
+        constant heat transfer coefficient, and all
+        The heat supplied is calculated using the following equation:
+
+
+        Definition: positive if heat is supplied to the fluid, negative if heat is extracted from
+         the fluid.
+
+        """
+        # Calculate the root of the objective function
+        # Initial guess for the root is equal to the internal energy at the outlet
+        x_guess = self.prev_sol[
+            IndexEnum.internal_energy
+            + (self.number_of_connection_point - 1) * NUMBER_CORE_QUANTITIES
+        ]
+        result = root(
+            fun=self._heat_supply_objective,
+            x0=x_guess,
+            method="hybr",
+        )
+        # Return the internal energy at the outlet
+        internal_energy_2 = result.x[0]
+        # Calculate the heat loss
+        self.heat_supplied = -1.0 * (
+            self.alpha_value
+            * self.length
+            * np.pi
+            * self.diameter
+            * (fluid_props.get_t(internal_energy_2) - self.ambient_temperature)
+        )
+        # self.heat_supplied = 0.0

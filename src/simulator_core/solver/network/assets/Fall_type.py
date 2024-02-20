@@ -125,21 +125,23 @@ class FallType(BaseAsset):
             the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge
-                                            + NUMBER_CORE_QUANTITIES * 0,
-                                            self.matrix_index + IndexEnum.internal_energy
-                                            + NUMBER_CORE_QUANTITIES * 0,
-                                            self.matrix_index + IndexEnum.discharge
-                                            + NUMBER_CORE_QUANTITIES * 1,
-                                            self.matrix_index + IndexEnum.internal_energy
-                                            + NUMBER_CORE_QUANTITIES * 1])
-        equation_object.coefficients = np.array([self.prev_sol[2],
-                                                 self.prev_sol[0],
-                                                 self.prev_sol[5],
-                                                 self.prev_sol[3]])
-        equation_object.rhs = (self.prev_sol[0] * self.prev_sol[2]
-                               + self.prev_sol[3] * self.prev_sol[5]
-                               + self.heat_supplied)
+        self.update_heat_supplied()
+        equation_object.indices = np.array(
+            [
+                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 0,
+                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 0,
+                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 1,
+                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 1,
+            ]
+        )
+        equation_object.coefficients = np.array(
+            [self.prev_sol[2], self.prev_sol[0], self.prev_sol[5], self.prev_sol[3]]
+        )
+        equation_object.rhs = (
+            self.prev_sol[0] * self.prev_sol[2]
+            + self.prev_sol[3] * self.prev_sol[5]
+            + self.heat_supplied
+        )
         return equation_object
 
     def add_internal_pressure_loss_equation(self) -> EquationObject:
@@ -171,5 +173,9 @@ class FallType(BaseAsset):
         return equation_object
 
     def update_loss_coefficient(self) -> None:
+        """Basic function which does not do anything, but can be overwritten in derived classes."""
+        pass
+
+    def update_heat_supplied(self) -> None:
         """Basic function which does not do anything, but can be overwritten in derived classes."""
         pass
