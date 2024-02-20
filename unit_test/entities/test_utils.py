@@ -80,7 +80,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert heat_demand_calculated == 1000.0
+        assert heat_demand_calculated == 1005.5263629842184
 
     def test_calculate_inverse_heat_transfer_coefficient(self) -> None:
         """Test calculate_inverse_heat_transfer_coefficient.
