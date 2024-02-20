@@ -16,9 +16,9 @@ class BaseItem(ABC):
         self.name = name
         self.number_of_unknowns = number_of_unknowns
         self.matrix_index = 0
-        self.prev_sol = [0] * self.number_of_unknowns
+        self.prev_sol: list[float] = [0.0] * self.number_of_unknowns
 
-    def set_matrix_index(self, index: int):
+    def set_matrix_index(self, index: int) -> None:
         """Sets the matrix index of the item.
 
         :param int index: The index of the item in the matrix.

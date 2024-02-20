@@ -1,9 +1,9 @@
 """Module containing Based boundary class."""
 import uuid
-
+import numpy as np
 from simulator_core.solver.network.assets.Baseasset import BaseAsset
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
+from simulator_core.solver.matrix.core_enum import IndexEnum
 
 
 class BaseBoundary(BaseAsset):
@@ -27,7 +27,6 @@ class BaseBoundary(BaseAsset):
                                                   Defaults to 3.
         """
         super().__init__(name, number_of_unknowns, number_con_points)
-        self.connected_nodes = [0] * number_con_points
         self.number_of_connection_point = number_con_points
         self.initial_pressure = 10000.0
 
@@ -42,8 +41,8 @@ class BaseBoundary(BaseAsset):
         """
         # self.equations_dict["prescribe pressure"] = equation_id
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.pressure]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.initial_pressure
         return equation_object
 

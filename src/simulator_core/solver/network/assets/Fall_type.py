@@ -1,6 +1,6 @@
 """Module containing the Fall type class."""
 import uuid
-
+import numpy as np
 from simulator_core.solver.network.assets.Baseasset import BaseAsset
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
@@ -105,9 +105,10 @@ class FallType(BaseAsset):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge,
-                                   self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES]
-        equation_object.coefficients = [1.0, 1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
+                                            self.matrix_index + IndexEnum.discharge
+                                            + NUMBER_CORE_QUANTITIES])
+        equation_object.coefficients = np.array([1.0, 1.0])
         equation_object.rhs = 0.0
         return equation_object
 
@@ -124,13 +125,16 @@ class FallType(BaseAsset):
             the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge,
-                                   self.matrix_index + IndexEnum.internal_energy,
-                                   self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
-                                   self.matrix_index + IndexEnum.internal_energy
-                                   + NUMBER_CORE_QUANTITIES]
-        equation_object.coefficients = [self.prev_sol[2], self.prev_sol[0], self.prev_sol[5],
-                                        self.prev_sol[3]]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
+                                            self.matrix_index + IndexEnum.internal_energy,
+                                            self.matrix_index + IndexEnum.discharge
+                                            + NUMBER_CORE_QUANTITIES,
+                                            self.matrix_index + IndexEnum.internal_energy
+                                            + NUMBER_CORE_QUANTITIES])
+        equation_object.coefficients = np.array([self.prev_sol[2],
+                                                 self.prev_sol[0],
+                                                 self.prev_sol[5],
+                                                 self.prev_sol[3]])
         equation_object.rhs = (self.prev_sol[0] * self.prev_sol[2]
                                + self.prev_sol[3] * self.prev_sol[5]
                                + self.heat_supplied)
@@ -148,21 +152,22 @@ class FallType(BaseAsset):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge,
-                                   self.matrix_index + IndexEnum.pressure,
-                                   self.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
+                                            self.matrix_index + IndexEnum.pressure,
+                                            self.matrix_index + IndexEnum.pressure
+                                            + NUMBER_CORE_QUANTITIES])
         self.update_loss_coefficient()
         if self.prev_sol[0] < 1e-5:
-            equation_object.coefficients = [-2.0 * self.loss_coefficient * 1e-5,
-                                            -1.0, 1.0]
+            equation_object.coefficients = np.array([-2.0 * self.loss_coefficient * 1e-5,
+                                                     -1.0, 1.0])
             equation_object.rhs = -self.loss_coefficient * self.prev_sol[0] * 1e-5
         else:
-            equation_object.coefficients = [-2.0 * self.loss_coefficient
-                                            * abs(self.prev_sol[0]), -1.0, 1.0]
+            equation_object.coefficients = np.array([-2.0 * self.loss_coefficient
+                                                     * abs(self.prev_sol[0]), -1.0, 1.0])
             equation_object.rhs = (-self.loss_coefficient * self.prev_sol[0]
                                    * abs(self.prev_sol[0]))
         return equation_object
 
-    def update_loss_coefficient(self):
+    def update_loss_coefficient(self) -> None:
         """Basic function which does not do anything, but can be overwritten in derived classes."""
         pass

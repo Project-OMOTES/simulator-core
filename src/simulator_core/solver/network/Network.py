@@ -19,20 +19,21 @@ class Network:
         "Pipe": SolverPipe
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor of the network class.
 
         Initializes the class properties and loads the fluid properties.
         """
-        self.assets = {}
-        self.nodes = {}
+        self.assets: dict[uuid.UUID, BaseAsset] = {}
+        self.nodes: dict[uuid.UUID, Node] = {}
 
-    def add_asset(self, asset_type: str, name: uuid.UUID = None) -> uuid.UUID:
+    def add_asset(self, asset_type: str, name: uuid.UUID | None = None) -> uuid.UUID:
         """Method to add an asset to the network.
 
         This method creates and asset of the given type.
         If the type does not exist a ValueError is raised.
         The unique id which is created for this asset is returned.
+        :param name: Unique name of the asset, if not given a random uuid is created.
         :param str asset_type: The type of asset to be added
         :return: Unique id of the asset.
         """
@@ -43,7 +44,7 @@ class Network:
         self.assets[name] = self.str_to_class_dict[asset_type](name)
         return name
 
-    def add_existing_asset(self, asset: BaseAsset):
+    def add_existing_asset(self, asset: BaseAsset) -> uuid.UUID:
         """Method to add an existing asset to the network.
 
         This method adds an existing asset to the network. It checks if the asset already exists.
@@ -72,9 +73,9 @@ class Network:
         """
         if not self.exists_asset(asset1):
             raise ValueError(str(asset1) + " does not exists in network")
-        if not self.exists_asset(asset2):
+        elif not self.exists_asset(asset2):
             raise ValueError(str(asset2) + " does not exists in network")
-        if ((not self.assets[asset1].is_connected(connection_point_1))
+        elif ((not self.assets[asset1].is_connected(connection_point_1))
                 and not (self.assets[asset2].is_connected(connection_point_2))):
             # both asset connect points not connected
             id = uuid.uuid4()
@@ -84,24 +85,26 @@ class Network:
             self.nodes[id].connect_asset(self.assets[asset1], connection_point_1)
             self.nodes[id].connect_asset(self.assets[asset2], connection_point_2)
             return id
-        if ((self.assets[asset1].is_connected(connection_point_1))
+        elif ((self.assets[asset1].is_connected(connection_point_1))
                 and not (self.assets[asset2].is_connected(connection_point_2))):
             # asset 1 connected asset 2 not
             node = self.assets[asset1].get_connected_node(connection_point_1)
             self.assets[asset2].connect_node(connection_point_2, node)
             node.connect_asset(self.assets[asset2], connection_point_2)
             return node.name
-        if (not self.assets[asset1].is_connected(connection_point_1)
+        elif (not self.assets[asset1].is_connected(connection_point_1)
                 and self.assets[asset2].is_connected(connection_point_2)):
             # asset 2 connected asset 1 not
             node = self.assets[asset2].get_connected_node(connection_point_2)
             self.assets[asset1].connect_node(connection_point_1, node)
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
-        if (not self.assets[asset1].is_connected(connection_point_1)
+        elif (not self.assets[asset1].is_connected(connection_point_1)
                 and (not self.assets[asset2].is_connected(connection_point_2))):
             # both asset already connected need to delete one node.
-            pass
+            raise NotImplementedError("Assets already connected to assets")
+        else:
+            raise NotImplementedError("Something has gone wrong assets already connected to node")
 
     def exists_asset(self, id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
@@ -119,11 +122,11 @@ class Network:
         """
         return id in self.nodes
 
-    def remove_asset(self):
+    def remove_asset(self) -> None:
         """Method to remove an asset from the network."""
         pass
 
-    def disconnect_asset(self):
+    def disconnect_asset(self) -> None:
         """Method to disconnect an asset from the network."""
         pass
 
@@ -153,7 +156,7 @@ class Network:
             raise ValueError(str(id) + " Not a valid node id")
         return self.nodes[id]
 
-    def check_connectivity_assets(self):
+    def check_connectivity_assets(self) -> bool:
         """Method to check if all assets are connected.
 
         Method returns True when all assets are connected and False when an asset is not connected.
@@ -163,7 +166,7 @@ class Network:
         result = [self.assets[asset].is_all_connected() for asset in self.assets]
         return all(result)
 
-    def check_connectivity_nodes(self):
+    def check_connectivity_nodes(self) -> bool:
         """Method to check if all nodes are connected.
 
         Method returns True when all nodes are connected and False when an node is not connected.
@@ -172,14 +175,14 @@ class Network:
         result = [self.nodes[node].is_connected() for node in self.nodes]
         return all(result)
 
-    def check_connectivity(self):
+    def check_connectivity(self) -> bool:
         """Method to check if all nodes and assets are connected.
 
         :return:True when everything is connected and False when not.
         """
         return self.check_connectivity_assets() and self.check_connectivity_nodes()
 
-    def set_result_asset(self, solution: list[float]):
+    def set_result_asset(self, solution: list[float]) -> None:
         """Method to transfer the solution to the asset in the network.
 
         :param list[float] solution:Solution to be transferred to the assets.
@@ -190,7 +193,7 @@ class Network:
             nou = self.get_asset(asset).number_of_unknowns
             self.get_asset(asset).prev_sol = solution[index:index + nou]
 
-    def set_result_node(self, solution: list[float]):
+    def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
 
         :param list[float] solution:Solution to be transferred to the nodes.
@@ -201,7 +204,7 @@ class Network:
             nou = self.get_node(node).number_of_unknowns
             self.get_node(node).prev_sol = solution[index:index + nou]
 
-    def print_result(self):
+    def print_result(self) -> None:
         """Method to print the result of the network."""
         for asset in self.assets:
             print(type(self.get_asset(asset)))

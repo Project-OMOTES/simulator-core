@@ -9,16 +9,15 @@ from simulator_core.solver.matrix.utility import absolute_difference, relative_d
 class Matrix:
     """Class which stores the matrix and can be used to solve it."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor of matrix class."""
-        self.num_unknowns = 0
-        self.mat = []
-        self.rhs = []
-        self.sol_new = []
-        self.sol_old = []
-        self.equation_handle_dict = {}
-        self.relative_convergence = 1e-6
-        self.absolute_convergence = 1e-6
+        self.num_unknowns: int = 0
+        self.mat: list[list[float]] = []
+        self.rhs: list[float] = []
+        self.sol_new: list[float] = []
+        self.sol_old: list[float] = []
+        self.relative_convergence: float = 1e-6
+        self.absolute_convergence: float = 1e-6
 
     def add_unknowns(self, number_unknowns: int) -> int:
         """Method to add unknowns to the matrix.
@@ -32,7 +31,7 @@ class Matrix:
         self.sol_old += [0.0] * number_unknowns
         return self.num_unknowns - number_unknowns
 
-    def add_equation(self, equation_object: EquationObject):
+    def add_equation(self, equation_object: EquationObject) -> None:
         """Method to add an equation to the matrix.
 
         Add equation to the matrix it returns a unique id to the equation for easy access.
@@ -45,7 +44,7 @@ class Matrix:
         self.mat[row] = equation_object.to_list(self.num_unknowns)
         self.rhs[row] = equation_object.rhs
 
-    def solve(self, equations: list[EquationObject], dumb: bool = False) -> list:
+    def solve(self, equations: list[EquationObject], dumb: bool = False) -> list[float]:
         """Method to solve the system of equation given in the matrix.
 
         Solves the system of equations and returns the solution. The numpy linalg
@@ -63,8 +62,8 @@ class Matrix:
         self.sol_old = self.sol_new
         a = np.array(self.mat)
         b = np.array(self.rhs)
-        self.sol_new = np.linalg.solve(a, b)
-        return self.sol_new.tolist()
+        self.sol_new = np.linalg.solve(a, b).tolist()
+        return self.sol_new
 
     def solve2(self, equations: list[EquationObject], dumb: bool = False) -> list:
         """Method to solve the system of equation given in the matrix.
@@ -75,7 +74,7 @@ class Matrix:
         """
         # TODO add checks if enough equations have been supplied.
         # TODO check if matrix is solvable.
-        self.rhs = np.array([equation.rhs for equation in equations], float)
+        rhs = np.array([equation.rhs for equation in equations], float)
         row = np.array([], int)
         col = np.array([], int)
         data = np.array([], float)
@@ -87,8 +86,8 @@ class Matrix:
             data = np.append(data, equation.coefficients)
         A = scipy.sparse.csc_matrix((data, (row, col)),
                                     shape=(self.num_unknowns, self.num_unknowns))
-        self.sol_new = scipy.sparse.linalg.spsolve(A, self.rhs)
-        return self.sol_new.tolist()
+        self.sol_new = scipy.sparse.linalg.spsolve(A, rhs).tolist()
+        return self.sol_new
 
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
@@ -116,7 +115,7 @@ class Matrix:
         """
         return self.sol_new[index:index + number_of_unknowns]
 
-    def dumb_matrix(self, file_name: str = 'dumb.csv'):
+    def dumb_matrix(self, file_name: str = 'dumb.csv') -> None:
         """Method to dumb the matrix to a csv file.
 
         :param str file_name: File name to dumb the matrix in default=dumb.csv
@@ -126,6 +125,6 @@ class Matrix:
             write = csv.writer(f)
             write.writerows(self.mat)
 
-    def reset_solution(self):
+    def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
         self.sol_new = [1] * len(self.sol_new)

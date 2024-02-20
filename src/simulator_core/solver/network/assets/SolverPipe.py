@@ -26,14 +26,14 @@ class SolverPipe(FallType):
         self.loss_coefficient = 0.0
         self.reynolds_number = 0.0
 
-    def update_loss_coefficient(self):
+    def update_loss_coefficient(self) -> None:
         """Method to update the loss coefficient of the pipe."""
         self.area = np.pi * self.diam ** 2 / 4
         self.calc_lambda_loss()
         self.loss_coefficient = (self.lambda_loss * self.length
                                  / (2 * self.diam * self.area ** 2 * 9.81))
 
-    def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0):
+    def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0) -> None:
         """Method to calculate the Reynolds number of the flow in the pipe.
 
         :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
@@ -45,7 +45,7 @@ class SolverPipe(FallType):
         self.reynolds_number = (density * velocity * self.diam
                                 / fluid_props.get_viscosity(temperature))
 
-    def calc_lambda_loss(self):
+    def calc_lambda_loss(self) -> None:
         """Method to calculate the lambda loss of the pipe."""
         self.calc_reynolds_number(1000.0)
         if self.reynolds_number < 100:

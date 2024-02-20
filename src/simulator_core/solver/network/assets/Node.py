@@ -1,7 +1,8 @@
 """Module containing the node class."""
 import uuid
+import numpy as np
 from simulator_core.solver.network.assets.BaseItem import BaseItem
-from simulator_core.solver.network.assets.Baseasset import BaseAsset
+
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
 from simulator_core.solver.utils.fluid_properties import fluid_props
@@ -52,19 +53,19 @@ class Node(BaseItem):
         The default is 3.
         """
         super().__init__(number_of_unknowns, name)
-        self.connected_assets = []
+        self.connected_assets: list[tuple[BaseItem, int]] = []
         self.height = height
         self.initial_temperature = initial_temperature
         self.set_pressure = set_pressure
 
-    def connect_asset(self, asset: BaseAsset, con_point: int):
+    def connect_asset(self, asset: BaseItem, con_point: int) -> None:
         """Connects an asset object at the given connection point to the node .
 
         :param BaseAsset asset: The asset object that is connected to the node.
         :param int con_point: The connection point for the asset which is connected to this node.
         :return:
         """
-        self.connected_assets.append([asset, con_point])
+        self.connected_assets.append((asset, con_point))
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the node.
@@ -110,13 +111,15 @@ class Node(BaseItem):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         for asset in self.connected_assets:
-            equation_object.indices.append(asset[0].matrix_index + IndexEnum.discharge
-                                           + asset[1] * NUMBER_CORE_QUANTITIES)
-            equation_object.coefficients.append(1.0)
+            equation_object.indices = np.append(equation_object.indices,
+                                                [asset[0].matrix_index
+                                                 + IndexEnum.discharge
+                                                 + asset[1] * NUMBER_CORE_QUANTITIES])
+            equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
         return equation_object
 
     def add_discharge_equation(self) -> EquationObject:
@@ -127,8 +130,8 @@ class Node(BaseItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         return equation_object
 
@@ -140,8 +143,8 @@ class Node(BaseItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.pressure]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.set_pressure
         return equation_object
 
@@ -153,8 +156,8 @@ class Node(BaseItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.internal_energy]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
 
@@ -166,20 +169,30 @@ class Node(BaseItem):
             value of the equation
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.discharge,
-                                   self.matrix_index + IndexEnum.internal_energy]
-        equation_object.coefficients = [self.prev_sol[2], self.prev_sol[0]]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
+                                            self.matrix_index + IndexEnum.internal_energy])
+        equation_object.coefficients = np.array([self.prev_sol[2], self.prev_sol[0]])
         equation_object.rhs = self.prev_sol[0] * self.prev_sol[2]
         for asset in self.connected_assets:
-            equation_object.indices.append(asset[0].matrix_index
-                                           + IndexEnum.discharge
-                                           + asset[1] * NUMBER_CORE_QUANTITIES)
-            equation_object.indices.append(asset[0].matrix_index + IndexEnum.internal_energy
-                                           + asset[1] * NUMBER_CORE_QUANTITIES)
+            equation_object.indices = np.append(equation_object.indices,
+                                                [asset[0].matrix_index
+                                                 + IndexEnum.discharge
+                                                 + asset[1] * NUMBER_CORE_QUANTITIES,
+                                                 asset[0].matrix_index
+                                                 + IndexEnum.internal_energy
+                                                 + asset[1] * NUMBER_CORE_QUANTITIES])
             prev_sol = asset[0].prev_sol
-            equation_object.coefficients.append(prev_sol[asset[1] * 3 + 2])
-            equation_object.coefficients.append(prev_sol[asset[1] * 3])
-            equation_object.rhs += prev_sol[asset[1] * 3] * prev_sol[asset[1] * 3 + 2]
+            equation_object.coefficients = np.append(equation_object.coefficients,
+                                                     [prev_sol[asset[1]
+                                                               * NUMBER_CORE_QUANTITIES
+                                                               + IndexEnum.internal_energy],
+                                                      prev_sol[asset[1]
+                                                               * NUMBER_CORE_QUANTITIES]
+                                                      + IndexEnum.discharge])
+            equation_object.rhs += (prev_sol[asset[1] * NUMBER_CORE_QUANTITIES
+                                             + IndexEnum.discharge]
+                                    * prev_sol[asset[1] * NUMBER_CORE_QUANTITIES
+                                               + IndexEnum.internal_energy])
         return equation_object
 
     def is_connected(self) -> bool:

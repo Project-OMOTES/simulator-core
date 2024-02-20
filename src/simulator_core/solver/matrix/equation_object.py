@@ -9,7 +9,7 @@ class EquationObject:
     rhs is the rhs of the matrix.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor of the EquationObject."""
         self.indices = np.array([], dtype=int)
         self.coefficients = np.array([], dtype=float)
@@ -23,7 +23,7 @@ class EquationObject:
         :param int length: Length of the list to be returned
         :return: a list of the coefficient which can be used in the matrix.
         """
-        coefficient_list = [0] * length
+        coefficient_list: list[float] = [0.0] * length
         for col, coefficient in zip(self.indices, self.coefficients):
             coefficient_list[col] = coefficient
         return coefficient_list

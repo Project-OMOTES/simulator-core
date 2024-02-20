@@ -10,7 +10,7 @@ class FluidProperties:
     and viscosity of the fluid. THe data is loaded from a csv file in the same folder as this file.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor of the fluid properties class.
 
         Initializes the class properties and loads the fluid properties from a csv file.
@@ -64,6 +64,14 @@ class FluidProperties:
         :return: The viscosity of the fluid at the given temperature.
         """
         return float(np.interp(t, self.T, self.visc))
+
+    def get_heat_capacity(self, t: float) -> float:
+        """Returns the heat capacity of the fluid at a given temperature.
+
+        :param t: The temperature of the fluid.
+        :return: The capacity of the fluid at the given temperature.
+        """
+        return float(np.interp(t, self.T, self.cp))
 
 
 fluid_props = FluidProperties()

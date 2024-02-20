@@ -1,13 +1,13 @@
 """Module containing BaseAsset class."""
 import math
 import uuid
+import numpy as np
 from simulator_core.solver.network.assets.BaseItem import BaseItem
+from simulator_core.solver.network.assets.Node import Node
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
-from typing import Dict, TypeVar
+from typing import Dict
 from simulator_core.solver.utils.fluid_properties import fluid_props
-
-Node = TypeVar("Node")
 
 
 class BaseAsset(BaseItem):
@@ -35,7 +35,7 @@ class BaseAsset(BaseItem):
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
 
-    def connect_node(self, connection_point: int, node: Node):
+    def connect_node(self, connection_point: int, node: Node) -> None:
         """Connects a node to a connection point of the asset.
 
         :param connection_point: The index of the connection point to connect.
@@ -75,7 +75,7 @@ class BaseAsset(BaseItem):
             return self.connected_nodes[connection_point]
         raise ValueError(str(connection_point) + " is not connected")
 
-    def is_all_connected(self):
+    def is_all_connected(self) -> bool:
         """Checks if all connection points are connected to nodes.
 
         :return: True if all connection points are connected, False otherwise.
@@ -106,9 +106,9 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.internal_energy
-                                   + connection_point * NUMBER_CORE_QUANTITIES]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy
+                                            + connection_point * NUMBER_CORE_QUANTITIES])
+        equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
         return equation_object
 
@@ -121,11 +121,11 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.internal_energy
-                                   + connection_point * NUMBER_CORE_QUANTITIES,
-                                   self.get_connected_node(connection_point).matrix_index
-                                   + IndexEnum.internal_energy]
-        equation_object.coefficients = [1.0, -1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy
+                                            + connection_point * NUMBER_CORE_QUANTITIES,
+                                            self.get_connected_node(connection_point).matrix_index
+                                            + IndexEnum.internal_energy])
+        equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
         return equation_object
 
@@ -138,11 +138,11 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = [self.matrix_index + IndexEnum.pressure
-                                   + connection_point * NUMBER_CORE_QUANTITIES,
-                                   self.connected_nodes[connection_point].matrix_index
-                                   + IndexEnum.pressure]
-        equation_object.coefficients = [1.0, -1.0]
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure
+                                            + connection_point * NUMBER_CORE_QUANTITIES,
+                                            self.connected_nodes[connection_point].matrix_index
+                                            + IndexEnum.pressure])
+        equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
         return equation_object
 
