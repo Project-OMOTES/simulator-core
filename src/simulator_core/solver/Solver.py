@@ -18,7 +18,7 @@ class Solver:
         self.network = network
         self.set_unknowns_matrix()
 
-    def set_unknowns_matrix(self):
+    def set_unknowns_matrix(self) -> None:
         """Sets the unknowns of the matrix."""
         for asset in self.network.assets:
             self.network.get_asset(asset).set_matrix_index(self.matrix.add_unknowns(
@@ -32,14 +32,14 @@ class Solver:
 
         :return: list[EquationObject] equations: List of equations of the network.
         """
-        equations = []
+        equations: list[EquationObject] = []
         for asset in self.network.assets:
             equations = equations + self.network.assets[asset].get_equations()
         for node in self.network.nodes:
             equations = equations + self.network.nodes[node].get_equations()
         return equations
 
-    def solve(self):
+    def solve(self) -> None:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
@@ -52,11 +52,11 @@ class Solver:
                 print("No converged solution reached")
                 break
 
-    def get_results(self):
+    def get_results(self) -> None:
         """Method to get the results of the network."""
         pass
 
-    def results_to_assets(self):
+    def results_to_assets(self) -> None:
         """Method to transfer the results to the assets from the matrix."""
         self.network.set_result_asset(self.matrix.sol_new)
         self.network.set_result_node(self.matrix.sol_new)
