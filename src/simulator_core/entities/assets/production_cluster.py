@@ -16,8 +16,7 @@
 """ProductionCluster class."""
 import uuid
 from typing import Dict
-from warnings import warn
-from src.simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
+from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -27,17 +26,16 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
     PROPERTY_SET_PRESSURE,
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_PRESSURE_RETURN,
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-    mass_flow_and_temperature_to_heat_demand,
+    heat_demand_and_temperature_to_mass_flow
 )
 
 
@@ -65,9 +63,8 @@ class ProductionCluster(AssetAbstract):
         # Objects of the asset
         self._initialized = False
         # Controlled mass flow
-        self._controlled_mass_flow = None
+        self._controlled_mass_flow: float | None = None
         self.solver_asset = ProductionAsset(uuid.uuid4(), pre_scribe_mass_flow=False)
-
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -85,10 +82,7 @@ class ProductionCluster(AssetAbstract):
         """
         # Set the temperature of the circulation pump mass flow
         self.temperature_supply = temperature_supply
-        # Retrieve the value array of the temperature
-        self.pandapipes_net["circ_pump_pressure"]["t_flow_k"][
-            self._circ_pump.index
-        ] = self.temperature_supply
+        self.solver_asset.supply_temperature = self.temperature_supply
 
     def _set_return_temperature(self, temperature_return: float) -> None:
         """Set the return temperature of the asset.
@@ -109,8 +103,7 @@ class ProductionCluster(AssetAbstract):
         self._controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand,
             temperature_supply=self.temperature_supply,
-            temperature_return=self.temperature_return,
-            pandapipes_net=self.pandapipes_net,
+            temperature_return=self.temperature_return
         )
 
         # Check if the mass flow rate is positive
@@ -121,9 +114,7 @@ class ProductionCluster(AssetAbstract):
             )
         else:
             # Set the mass flow rate of the control valve
-            self.pandapipes_net["flow_control"]["controlled_mdot_kg_per_s"][
-                self._flow_control.index
-            ] = self._controlled_mass_flow
+            self.solver_asset.mass_flow_rate_set_point = self._controlled_mass_flow
 
     def _set_pressure(self, pressure_supply: bool) -> None:
         """Set the asset to predescribe the pressure.
@@ -131,11 +122,9 @@ class ProductionCluster(AssetAbstract):
         :param bool pressure_supply: True when the pressure needs to be set
         """
         if pressure_supply:
-            self.pandapipes_net.flow_control.in_service[self._flow_control.index] = False
-            self.pandapipes_net.circ_pump_pressure.in_service[self._circ_pump.index] = True
+            self.solver_asset.pre_scribe_mass_flow = False
         else:
-            self.pandapipes_net.flow_control.in_service[self._flow_control.index] = True
-            self.pandapipes_net.circ_pump_pressure.in_service[self._circ_pump.index] = False
+            self.solver_asset.pre_scribe_mass_flow = True
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Set the setpoints of the asset.
@@ -152,45 +141,15 @@ class ProductionCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             # Set the setpoints
-            pass
+            self._set_pressure(setpoints[PROPERTY_SET_PRESSURE])
+            self._set_supply_temperature(setpoints[PROPERTY_TEMPERATURE_SUPPLY])
+            self._set_return_temperature(setpoints[PROPERTY_TEMPERATURE_RETURN])
+            self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
         else:
             # Print missing setpoints
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-
-    def simulation_performed(self) -> bool:
-        """Check if the simulation has been performed.
-
-        :return bool simulation_performed: True if the simulation has been performed,
-            False otherwise.
-        """
-        return hasattr(self.pandapipes_net, 'res_circ_pump_pressure')
-
-    def get_setpoints(self) -> Dict[str, float]:
-        """Get the setpoints of the asset.
-
-        :return Dict setpoints: The setpoints of the asset in a dictionary,
-            as "property_name": value pairs.
-        """
-        # Return the setpoints
-        if not self.simulation_performed():
-            raise ValueError("Simulation data not available.")
-        temp_supply = self.pandapipes_net.res_junction["t_k"][self.to_junction.index]
-        temp_return = self.pandapipes_net.res_junction["t_k"][self.from_junction.index]
-        mass_flow = self.pandapipes_net.res_circ_pump_pressure[
-            "mdot_flow_kg_per_s"][self._circ_pump.index]
-        heat_demand = mass_flow_and_temperature_to_heat_demand(
-            temperature_supply=temp_supply,
-            temperature_return=temp_return,
-            mass_flow=mass_flow,
-            pandapipes_net=self.pandapipes_net,
-        )
-        return {
-            PROPERTY_TEMPERATURE_SUPPLY: temp_supply,
-            PROPERTY_TEMPERATURE_RETURN: temp_return,
-            PROPERTY_HEAT_DEMAND: heat_demand,
-        }
 
     def update(self) -> None:
         """Update the asset properties to the results from the previous (timestep) simulation.
@@ -199,17 +158,7 @@ class ProductionCluster(AssetAbstract):
         to the values of the previous simulation. In addition, the mass flow rate is set
         to the value of the previous simulation.
         """
-        if not self.simulation_performed():
-            raise ValueError("Simulation data not available.")
-
-        # Retrieve the setpoints (Ts, Tr, Qh)
-        setpoints = self.get_setpoints()
-        # Set the setpoints (Ts, Tr, Qh)
-        self.set_setpoints(setpoints)
-        # Set massflow
-        self._controlled_mass_flow = self.pandapipes_net.res_circ_pump_mass[
-            "mdot_flow_kg_per_s"
-        ][self._circ_pump.index]
+        pass
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
@@ -225,5 +174,9 @@ class ProductionCluster(AssetAbstract):
         - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
-
-        self.output.append({})
+        output_dict = {PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
+                       PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
+                       PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
+                       PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
+                       PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1)}
+        self.output.append(output_dict)

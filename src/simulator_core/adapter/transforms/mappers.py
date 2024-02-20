@@ -17,7 +17,6 @@
 from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
-from pandapipes import pandapipesNet
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -142,7 +141,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                 network.add_existing_asset(py_assets_list[-1].solver_asset)
 
         py_junction_list = []
-
 
         # loop over assets and create junctions and connect them
         for py_asset in py_assets_list:

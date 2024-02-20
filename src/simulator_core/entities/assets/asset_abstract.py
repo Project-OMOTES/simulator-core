@@ -17,7 +17,6 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, List
-
 from pandas import DataFrame
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
@@ -71,7 +70,6 @@ class AssetAbstract(ABC):
             setpoints and the values are the values.
         """
         return {}
-
 
     @abstractmethod
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:

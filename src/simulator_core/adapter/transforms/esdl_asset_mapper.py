@@ -50,4 +50,3 @@ class EsdlAssetMapper:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
         return self.conversion_dict[type(model.esdl_asset)](
             model.esdl_asset.name, model.esdl_asset.id)
-

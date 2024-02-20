@@ -23,21 +23,17 @@ from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.asset_defaults import (
     PIPE_DEFAULTS,
-    PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_VELOCITY_RETURN,
-    PROPERTY_VELOCITY_SUPPLY,
 )
 from simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
-    mass_flow_and_temperature_to_heat_demand,
 )
-from src.simulator_core.solver.network.assets.SolverPipe import SolverPipe
+from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 
 
 class Pipe(AssetAbstract):
@@ -140,13 +136,6 @@ class Pipe(AssetAbstract):
         self.solver_asset.roughness = self.roughness
         self.solver_asset.diameter = self.diameter
 
-    def simulation_performed(self) -> bool:
-        """Check whether a simulation has been performed.
-
-        :return bool: True if a simulation has been performed, False otherwise.
-        """
-        return hasattr(self.pandapipes_net, 'res_pipe')
-
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
 
@@ -163,12 +152,9 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
-
-        output_dict = {}
-        output_dict[PROPERTY_MASSFLOW] = self.solver_asset.get_mass_flow_rate(1)
-        output_dict[PROPERTY_PRESSURE_SUPPLY] = self.solver_asset.get_pressure(0)
-        output_dict[PROPERTY_PRESSURE_RETURN] = self.solver_asset.get_pressure(1)
-        output_dict[PROPERTY_TEMPERATURE_SUPPLY] = self.solver_asset.get_temperature(0)
-        output_dict[PROPERTY_TEMPERATURE_RETURN] = self.solver_asset.get_temperature(1)
-
+        output_dict = {PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
+                       PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
+                       PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
+                       PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
+                       PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1)}
         self.output.append(output_dict)

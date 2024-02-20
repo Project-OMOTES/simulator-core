@@ -26,20 +26,16 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
     DEFAULT_POWER,
     PROPERTY_MASSFLOW,
-    PROPERTY_VOLUMEFLOW,
     PROPERTY_TEMPERATURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_THERMAL_POWER,
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 from simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-    mass_flow_and_temperature_to_heat_demand,
-    mass_flow_to_volume_flow,
+    heat_demand_and_temperature_to_mass_flow
 )
 from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
 
@@ -77,6 +73,17 @@ class DemandCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
+        # Default keys required
+        necessary_setpoints = {PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN,
+                               PROPERTY_HEAT_DEMAND}
+        # Dict to set
+        setpoints_set = set(setpoints.keys())
+        # Check if all setpoints are in the setpoints
+        if not necessary_setpoints.issubset(setpoints_set):
+            # Print missing setpoints
+            raise ValueError(
+                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
+            )
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
@@ -101,7 +108,9 @@ class DemandCluster(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        outputs = dict()
-        outputs[PROPERTY_MASSFLOW] = self.solver_asset.get_mass_flow_rate(0)
-
-        self.output.append(outputs)
+        output_dict = {PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
+                       PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
+                       PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
+                       PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
+                       PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1)}
+        self.output.append(output_dict)

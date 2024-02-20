@@ -15,11 +15,11 @@
 
 """HeatNetwork entity class."""
 import datetime
-import math
 
 import pandas as pd
-from typing import Callable, List
+from typing import Callable, List, Tuple
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.assets.junction import Junction
 from simulator_core.solver.network.Network import Network
 from simulator_core.solver.Solver import Solver
 
@@ -27,7 +27,8 @@ from simulator_core.solver.Solver import Solver
 class HeatNetwork:
     """Class to store information on the heat network."""
 
-    def __init__(self, conversion_factory: Callable[[Network], List[AssetAbstract]]):
+    def __init__(self, conversion_factory: Callable[[Network], Tuple[List[AssetAbstract],
+                                                                     List[Junction]]]) -> None:
         """Constructor of heat network class.
 
         :param conversion_factory: method to convert the esdl network to pandapipes

@@ -18,20 +18,20 @@ class SolverPipe(FallType):
         :param int, optional number_con_points: The number of connection points for the pipe.
         """
         super().__init__(name, number_of_unknowns, number_con_points)
-        self.length = 1000
-        self.diam = 0.2
-        self.roughness = 0.0001
-        self.area = np.pi * self.diam ** 2 / 4
-        self.lambda_loss = 0.01
-        self.loss_coefficient = 0.0
-        self.reynolds_number = 0.0
+        self.length: float = 1000
+        self.diameter: float = 0.2
+        self.roughness: float = 0.0001
+        self.area: float = np.pi * self.diameter ** 2 / 4
+        self.lambda_loss: float = 0.01
+        self.loss_coefficient: float = 0.0
+        self.reynolds_number: float = 0.0
 
     def update_loss_coefficient(self) -> None:
         """Method to update the loss coefficient of the pipe."""
-        self.area = np.pi * self.diam ** 2 / 4
+        self.area = np.pi * self.diameter ** 2 / 4
         self.calc_lambda_loss()
         self.loss_coefficient = (self.lambda_loss * self.length
-                                 / (2 * self.diam * self.area ** 2 * 9.81))
+                                 / (2 * self.diameter * self.area ** 2 * 9.81))
 
     def calc_reynolds_number(self, mass_flow_rate: float, temperature: float = 20.0) -> None:
         """Method to calculate the Reynolds number of the flow in the pipe.
@@ -42,7 +42,7 @@ class SolverPipe(FallType):
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
         velocity = discharge / self.area
-        self.reynolds_number = (density * velocity * self.diam
+        self.reynolds_number = (density * velocity * self.diameter
                                 / fluid_props.get_viscosity(temperature))
 
     def calc_lambda_loss(self) -> None:
@@ -53,7 +53,7 @@ class SolverPipe(FallType):
         elif self.reynolds_number < 2000:
             self.lambda_loss = 64 / self.reynolds_number
         else:
-            part1 = self.roughness / self.diam / 3.7
+            part1 = self.roughness / self.diameter / 3.7
             lambda_star = 0.001
             while True:
                 lambda_star_new = -2 * np.log10(part1 + 2.51 / (self.reynolds_number * lambda_star))

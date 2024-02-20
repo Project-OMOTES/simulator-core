@@ -125,12 +125,14 @@ class FallType(BaseAsset):
             the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
-                                            self.matrix_index + IndexEnum.internal_energy,
-                                            self.matrix_index + IndexEnum.discharge
-                                            + NUMBER_CORE_QUANTITIES,
+        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge
+                                            + NUMBER_CORE_QUANTITIES * 0,
                                             self.matrix_index + IndexEnum.internal_energy
-                                            + NUMBER_CORE_QUANTITIES])
+                                            + NUMBER_CORE_QUANTITIES * 0,
+                                            self.matrix_index + IndexEnum.discharge
+                                            + NUMBER_CORE_QUANTITIES * 1,
+                                            self.matrix_index + IndexEnum.internal_energy
+                                            + NUMBER_CORE_QUANTITIES * 1])
         equation_object.coefficients = np.array([self.prev_sol[2],
                                                  self.prev_sol[0],
                                                  self.prev_sol[5],
