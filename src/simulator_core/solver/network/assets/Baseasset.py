@@ -1,3 +1,18 @@
+#  Copyright (c) 2023. Deltares & TNO
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """Module containing BaseAsset class."""
 import math
 import uuid
@@ -128,6 +143,13 @@ class BaseAsset(BaseItem):
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
         return equation_object
+
+    def set_physical_properties(self, physical_properties: Dict[str, float]) -> None:
+        """Method to set the physical properties of the asset.
+
+        This method is implemented in the derived classes of this class.
+        """
+        pass
 
     def add_press_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a pressure to node equation for a connection point of the asset.

@@ -1,8 +1,25 @@
+#  Copyright (c) 2023. Deltares & TNO
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """module containing pipe class."""
 import uuid
+from typing import Dict
 from simulator_core.solver.network.assets.Fall_type import FallType
 import numpy as np
 from simulator_core.solver.utils.fluid_properties import fluid_props
+from simulator_core.entities.assets.asset_defaults import (PROPERTY_LENGTH, PROPERTY_DIAMETER,
+                                                           PROPERTY_ROUGHNESS)
 
 
 class SolverPipe(FallType):
@@ -28,6 +45,24 @@ class SolverPipe(FallType):
         self.lambda_loss: float = 0.01
         self.loss_coefficient: float = 0.0
         self.reynolds_number: float = 0.0
+
+    def set_physical_properties(self, physical_properties: Dict[str, float]) -> None:
+        """Method to set the physical properties of the pipe.
+
+        :param physical_properties: dictionary containing the physical properties of the pipe.
+        expected properties are: length [m], diameter [m], roughness [m]
+        """
+        expected_properties = [PROPERTY_LENGTH, PROPERTY_DIAMETER, PROPERTY_ROUGHNESS]
+
+        for expected_property in expected_properties:
+            if expected_property not in physical_properties:
+                raise ValueError(f"Property {expected_property} is missing in physical_properties")
+            if hasattr(self, expected_property):
+                setattr(self, expected_property, physical_properties[expected_property])
+            else:
+                raise ValueError(f"Property {expected_property} is not a valid property "
+                                 f"of the pipe")
+        self.area = np.pi * self.diameter ** 2 / 4
 
     def update_loss_coefficient(self) -> None:
         """Method to update the loss coefficient of the pipe."""

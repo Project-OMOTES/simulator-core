@@ -59,6 +59,9 @@ PROPERTY_THERMAL_POWER = "thermal_power"
 PROPERTY_VELOCITY_SUPPLY = "velocity_supply"
 PROPERTY_VELOCITY_RETURN = "velocity_return"
 PROPERTY_SET_PRESSURE = "set_pressure"
+PROPERTY_LENGTH = "length"
+PROPERTY_DIAMETER = "diameter"
+PROPERTY_ROUGHNESS = "roughness"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()

@@ -131,10 +131,12 @@ class Pipe(AssetAbstract):
             esdl_property_name="roughness", default_value=self.roughness)
         self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
+
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
-        self.solver_asset.length = self.length
-        self.solver_asset.roughness = self.roughness
-        self.solver_asset.diameter = self.diameter
+        prop_dict = {"length": self.length,
+                     "diameter": self.diameter,
+                     "roughness": self.roughness}
+        self.solver_asset.set_physical_properties(physical_properties=prop_dict)
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
