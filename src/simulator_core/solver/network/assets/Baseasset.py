@@ -16,12 +16,14 @@
 """Module containing BaseAsset class."""
 import math
 import uuid
+from typing import Dict
+
 import numpy as np
+
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.BaseItem import BaseItem
 from simulator_core.solver.network.assets.Node import Node
-from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
-from typing import Dict
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -34,9 +36,13 @@ class BaseAsset(BaseItem):
 
     connected_nodes: Dict[int, Node]
 
-    def __init__(self, name: uuid.UUID,
-                 number_of_unknowns: int = 6, number_con_points: int = 2,
-                 supply_temperature: float = 293.15):
+    def __init__(
+        self,
+        name: uuid.UUID,
+        number_of_unknowns: int = 6,
+        number_con_points: int = 2,
+        supply_temperature: float = 293.15,
+    ):
         """Initializes the BaseAsset object with the given parameters.
 
         :param uuid.UUID name: The unique identifier of the node.
@@ -60,11 +66,15 @@ class BaseAsset(BaseItem):
         :raises ValueError: If the connection point is already connected to a node.
         """
         if connection_point > self.number_of_connection_point:
-            raise IndexError(f"Asset {self.name} only has {self.number_of_connection_point}. "
-                             f"{connection_point} is to high")
+            raise IndexError(
+                f"Asset {self.name} only has {self.number_of_connection_point}. "
+                f"{connection_point} is to high"
+            )
         if connection_point in self.connected_nodes:
-            raise ValueError(f" connection point {connection_point}  of asset {self.name} "
-                             f" already connected to a node")
+            raise ValueError(
+                f" connection point {connection_point}  of asset {self.name} "
+                f" already connected to a node"
+            )
 
         self.connected_nodes[connection_point] = node
 
@@ -121,8 +131,13 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy
-                                            + connection_point * NUMBER_CORE_QUANTITIES])
+        equation_object.indices = np.array(
+            [
+                self.matrix_index
+                + IndexEnum.internal_energy
+                + connection_point * NUMBER_CORE_QUANTITIES
+            ]
+        )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
         return equation_object
@@ -136,10 +151,14 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy
-                                            + connection_point * NUMBER_CORE_QUANTITIES,
-                                            self.get_connected_node(connection_point).matrix_index
-                                            + IndexEnum.internal_energy])
+        equation_object.indices = np.array(
+            [
+                self.matrix_index
+                + IndexEnum.internal_energy
+                + connection_point * NUMBER_CORE_QUANTITIES,
+                self.get_connected_node(connection_point).matrix_index + IndexEnum.internal_energy,
+            ]
+        )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -160,10 +179,12 @@ class BaseAsset(BaseItem):
         :rtype: EquationObject
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure
-                                            + connection_point * NUMBER_CORE_QUANTITIES,
-                                            self.connected_nodes[connection_point].matrix_index
-                                            + IndexEnum.pressure])
+        equation_object.indices = np.array(
+            [
+                self.matrix_index + IndexEnum.pressure + connection_point * NUMBER_CORE_QUANTITIES,
+                self.connected_nodes[connection_point].matrix_index + IndexEnum.pressure,
+            ]
+        )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -177,13 +198,25 @@ class BaseAsset(BaseItem):
         for i in range(self.number_of_connection_point):
             for j in range(math.floor(self.number_of_unknowns / self.number_of_connection_point)):
                 if j == 2:
-                    results.append(fluid_props.get_t(
-                        self.prev_sol[i * math.floor(self.number_of_unknowns
-                                                     / self.number_of_connection_point) + j]))
+                    results.append(
+                        fluid_props.get_t(
+                            self.prev_sol[
+                                i
+                                * math.floor(
+                                    self.number_of_unknowns / self.number_of_connection_point
+                                )
+                                + j
+                            ]
+                        )
+                    )
                 else:
-                    results.append(self.prev_sol[i * math.floor(self.number_of_unknowns
-                                                                / self.number_of_connection_point)
-                                                 + j])
+                    results.append(
+                        self.prev_sol[
+                            i
+                            * math.floor(self.number_of_unknowns / self.number_of_connection_point)
+                            + j
+                        ]
+                    )
         return results
 
     def get_equations(self) -> list[EquationObject]:
