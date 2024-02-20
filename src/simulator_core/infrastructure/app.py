@@ -15,29 +15,31 @@
 
 """Entry point for running simulator-core library from cmdline."""
 
-import pandas as pd
-from simulator_core.entities.simulation_configuration import SimulationConfiguration
-from simulator_core.infrastructure.simulation_manager import SimulationManager
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
-import sys
 import logging
+import sys
 import traceback
 import uuid
 from datetime import datetime
+
+import pandas as pd
+
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from simulator_core.infrastructure.simulation_manager import SimulationManager
+from simulator_core.infrastructure.utils import pyesdl_from_file
 
 logger = logging.getLogger(__name__)
 
 
 def run(file_path: str | None = None) -> pd.DataFrame:
     """Main run function for the heatnetwork simulator."""
-    config = SimulationConfiguration(simulation_id=uuid.uuid1(),
-                                     name="test run",
-                                     timestep=3600,
-                                     start=datetime.strptime("2019-01-01T00:00:00",
-                                                             "%Y-%m-%dT%H:%M:%S"),
-                                     stop=datetime.strptime("2019-01-01T01:00:00",
-                                                            "%Y-%m-%dT%H:%M:%S"))
+    config = SimulationConfiguration(
+        simulation_id=uuid.uuid1(),
+        name="test run",
+        timestep=3600,
+        start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+        stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
+    )
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
     try:
@@ -50,4 +52,4 @@ def run(file_path: str | None = None) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    print(run(r'.\testdata\test1.esdl'))
+    print(run(r".\testdata\test1.esdl"))
