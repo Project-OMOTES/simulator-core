@@ -18,9 +18,12 @@ import unittest
 from unittest.mock import Mock
 from uuid import uuid4
 
+import numpy as np
+
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.Node import Node
 from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
+from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class ProductionAssetTest(unittest.TestCase):
@@ -48,17 +51,93 @@ class ProductionAssetTest(unittest.TestCase):
         # Assert
         assert len(equations) == self.asset.number_of_unknowns
 
-    # TODO: Verify why the coefficients are calculated with -1.0 + 2 * connection_point?
     def test_pre_scribe_mass_flow(self) -> None:
         """Test the pre_scribe_mass_flow attribute."""
         # Arrange
         self.asset.pre_scribe_mass_flow = True
-        self.asset.mass_flow_rate_set_point = 20.0
+        self.asset.mass_flow_rate_set_point = 20.0  # kg/s
+        connection_point_id = 1
 
         # Act
-        equation_object = self.asset.add_pre_scribe_equation(connection_point=1)
+        equation_object = self.asset.add_pre_scribe_equation(connection_point=connection_point_id)
 
         # Assert
         assert self.asset.pre_scribe_mass_flow is True
         assert self.asset.mass_flow_rate_set_point == 20.0
         assert equation_object.rhs == 20.0
+        assert all(equation_object.coefficients == [1.0])
+
+    def test_pre_scribe_pressure(self) -> None:
+        """Test the pre_scribe_mass_flow attribute.
+
+        The pressure is prescribed at the connection point.
+        """
+        # Arrange
+        self.asset.pre_scribe_mass_flow = False
+        self.asset.set_pressure = 10000.0  # Pa
+        connection_point_id = 1
+
+        # Act
+        equation_object = self.asset.add_pre_scribe_equation(connection_point=connection_point_id)
+
+        # Assert
+        assert self.asset.pre_scribe_mass_flow is False
+        assert self.asset.set_pressure == 10000.0
+        assert equation_object.rhs == 10000.0
+        assert all(equation_object.coefficients == [1.0])
+
+    def test_pre_scribe_non_existing_connection_point(self) -> None:
+        """Test the pre_scribe_mass_flow attribute.
+
+        Check error handling when the connection point does not exist.
+        """
+        # Arrange
+        connection_point_id = 2
+
+        # Act
+        with self.assertRaises(IndexError) as cm:
+            self.asset.add_pre_scribe_equation(connection_point=connection_point_id)
+
+        # Assert
+        self.assertIsInstance(cm.exception, IndexError)
+        self.assertEqual(cm.exception.args[0], "The connection point is not available.")
+
+    def test_thermal_equation_no_discharge(self) -> None:
+        """Test the thermal equation for a connection point of the asset.
+
+        Check handling of zero mass flow rate (IE1 == IE2).
+        """
+        # Arrange
+        connection_point_id = 0
+
+        # Act
+        equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
+
+        # Assert
+        assert all(
+            equation_object.indices == [IndexEnum.internal_energy, IndexEnum.internal_energy]
+        )
+        assert all(equation_object.coefficients == [1.0, -1.0])
+        assert equation_object.rhs == 0.0
+
+    def test_thermal_equation_with_discharge(self) -> None:
+        """Test the thermal equation for a connection point of the asset.
+
+        Check handling of non-zero mass flow rate (IE1 != IE2).
+        """
+        # Arrange
+        connection_point_id = 1
+        self.asset.prev_sol[IndexEnum.discharge + connection_point_id * NUMBER_CORE_QUANTITIES] = (
+            1.0
+        )
+
+        # Act
+        equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
+
+        # Assert
+        assert all(
+            equation_object.indices
+            == [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES]
+        )
+        assert all(equation_object.coefficients == [1.0])
+        assert equation_object.rhs == fluid_props.get_ie(self.asset.supply_temperature)
