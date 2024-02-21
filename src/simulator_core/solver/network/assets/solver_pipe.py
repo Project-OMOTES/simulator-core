@@ -16,15 +16,18 @@
 
 import uuid
 from typing import Dict
-from simulator_core.solver.network.assets.Fall_type import FallType
+
 import numpy as np
 from scipy.optimize import root
 
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_DIAMETER,
+    PROPERTY_LENGTH,
+    PROPERTY_ROUGHNESS,
+)
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.network.assets.Fall_type import FallType
+from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.utils.fluid_properties import fluid_props
-from simulator_core.entities.assets.asset_defaults import (PROPERTY_LENGTH, PROPERTY_DIAMETER,
-                                                           PROPERTY_ROUGHNESS)
 
 
 class SolverPipe(FallType):
