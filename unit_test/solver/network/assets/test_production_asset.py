@@ -15,10 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-from unittest.mock import Mock
 from uuid import uuid4
-
-import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.Node import Node
@@ -42,7 +39,6 @@ class ProductionAssetTest(unittest.TestCase):
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)
 
-    # TODO: Implement verification of the equation types.
     def test_production_asset_get_equations(self) -> None:
         """Evaluate the get_equations method."""
         # Arrange

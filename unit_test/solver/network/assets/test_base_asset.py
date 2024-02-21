@@ -15,10 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-from unittest.mock import Mock
 from uuid import uuid4
-
-import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.base_asset import BaseAsset
