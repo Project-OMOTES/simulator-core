@@ -15,10 +15,12 @@
 
 """Module containing the Fall type class."""
 import uuid
+
 import numpy as np
-from simulator_core.solver.network.assets.Baseasset import BaseAsset
+
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
+from simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
 class FallType(BaseAsset):
@@ -51,12 +53,15 @@ class FallType(BaseAsset):
         for the asset.
     """
 
-    def __init__(self, name: uuid.UUID,
-                 number_of_unknowns: int = 6,
-                 number_con_points: int = 2,
-                 supply_temperature: float = 293.15,
-                 heat_supplied: float = 0.0,
-                 loss_coefficient: float = 1.0):
+    def __init__(
+        self,
+        name: uuid.UUID,
+        number_of_unknowns: int = 6,
+        number_con_points: int = 2,
+        supply_temperature: float = 293.15,
+        heat_supplied: float = 0.0,
+        loss_coefficient: float = 1.0,
+    ):
         """
         Initializes the FallType object with the given parameters.
 
@@ -71,8 +76,9 @@ class FallType(BaseAsset):
             The number of connection points for the asset. The default is 2, which corresponds to
             the inlet and outlet.
         """
-        super().__init__(name, number_of_unknowns, number_con_points,
-                         supply_temperature=supply_temperature)
+        super().__init__(
+            name, number_of_unknowns, number_con_points, supply_temperature=supply_temperature
+        )
         self.number_of_connection_point = number_con_points
         self.heat_supplied = heat_supplied
         self.loss_coefficient = loss_coefficient
@@ -90,13 +96,14 @@ class FallType(BaseAsset):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        equations = [self.add_press_to_node_equation(0),
-                     self.add_press_to_node_equation(1),
-                     self.add_thermal_equations(0),
-                     self.add_thermal_equations(1),
-                     self.add_internal_cont_equation(),
-                     self.add_internal_pressure_loss_equation()
-                     ]
+        equations = [
+            self.add_press_to_node_equation(0),
+            self.add_press_to_node_equation(1),
+            self.add_thermal_equations(0),
+            self.add_thermal_equations(1),
+            self.add_internal_cont_equation(),
+            self.add_internal_pressure_loss_equation(),
+        ]
         return equations
 
     def add_thermal_equations(self, connection_point: int) -> EquationObject:
@@ -120,9 +127,12 @@ class FallType(BaseAsset):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
-                                            self.matrix_index + IndexEnum.discharge
-                                            + NUMBER_CORE_QUANTITIES])
+        equation_object.indices = np.array(
+            [
+                self.matrix_index + IndexEnum.discharge,
+                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
+            ]
+        )
         equation_object.coefficients = np.array([1.0, 1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -171,20 +181,24 @@ class FallType(BaseAsset):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
-                                            self.matrix_index + IndexEnum.pressure,
-                                            self.matrix_index + IndexEnum.pressure
-                                            + NUMBER_CORE_QUANTITIES])
+        equation_object.indices = np.array(
+            [
+                self.matrix_index + IndexEnum.discharge,
+                self.matrix_index + IndexEnum.pressure,
+                self.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES,
+            ]
+        )
         self.update_loss_coefficient()
         if self.prev_sol[0] < 1e-5:
-            equation_object.coefficients = np.array([-2.0 * self.loss_coefficient * 1e-5,
-                                                     -1.0, 1.0])
+            equation_object.coefficients = np.array(
+                [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
+            )
             equation_object.rhs = -self.loss_coefficient * self.prev_sol[0] * 1e-5
         else:
-            equation_object.coefficients = np.array([-2.0 * self.loss_coefficient
-                                                     * abs(self.prev_sol[0]), -1.0, 1.0])
-            equation_object.rhs = (-self.loss_coefficient * self.prev_sol[0]
-                                   * abs(self.prev_sol[0]))
+            equation_object.coefficients = np.array(
+                [-2.0 * self.loss_coefficient * abs(self.prev_sol[0]), -1.0, 1.0]
+            )
+            equation_object.rhs = -self.loss_coefficient * self.prev_sol[0] * abs(self.prev_sol[0])
         return equation_object
 
     def update_loss_coefficient(self) -> None:

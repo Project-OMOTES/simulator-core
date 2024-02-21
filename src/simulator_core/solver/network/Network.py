@@ -13,13 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the network class."""
-from simulator_core.solver.network.assets.Baseasset import BaseAsset
+import uuid
+
+from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.Boundary import BaseBoundary
 from simulator_core.solver.network.assets.Fall_type import FallType
-from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 from simulator_core.solver.network.assets.Node import Node
 from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
-import uuid
+from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 
 
 class Network:
@@ -30,7 +31,7 @@ class Network:
         "Asset": BaseAsset,
         "Fall": FallType,
         "Production": ProductionAsset,
-        "Pipe": SolverPipe
+        "Pipe": SolverPipe,
     }
 
     def __init__(self) -> None:
@@ -71,8 +72,9 @@ class Network:
         self.assets[asset.name] = asset
         return asset.name
 
-    def connect_assets(self, asset1: uuid.UUID, connection_point_1: int,
-                       asset2: uuid.UUID, connection_point_2: int) -> uuid.UUID:
+    def connect_assets(
+        self, asset1: uuid.UUID, connection_point_1: int, asset2: uuid.UUID, connection_point_2: int
+    ) -> uuid.UUID:
         """Method to connect to assets at the given connection points.
 
         This method connects the two assets if the exists. It checks if they already are connected.
@@ -89,8 +91,9 @@ class Network:
             raise ValueError(str(asset1) + " does not exists in network")
         elif not self.exists_asset(asset2):
             raise ValueError(str(asset2) + " does not exists in network")
-        elif ((not self.assets[asset1].is_connected(connection_point_1))
-                and not (self.assets[asset2].is_connected(connection_point_2))):
+        elif (not self.assets[asset1].is_connected(connection_point_1)) and not (
+            self.assets[asset2].is_connected(connection_point_2)
+        ):
             # both asset connect points not connected
             id = uuid.uuid4()
             self.nodes[id] = Node(id)
@@ -99,22 +102,25 @@ class Network:
             self.nodes[id].connect_asset(self.assets[asset1], connection_point_1)
             self.nodes[id].connect_asset(self.assets[asset2], connection_point_2)
             return id
-        elif ((self.assets[asset1].is_connected(connection_point_1))
-                and not (self.assets[asset2].is_connected(connection_point_2))):
+        elif (self.assets[asset1].is_connected(connection_point_1)) and not (
+            self.assets[asset2].is_connected(connection_point_2)
+        ):
             # asset 1 connected asset 2 not
             node = self.assets[asset1].get_connected_node(connection_point_1)
             self.assets[asset2].connect_node(connection_point_2, node)
             node.connect_asset(self.assets[asset2], connection_point_2)
             return node.name
-        elif (not self.assets[asset1].is_connected(connection_point_1)
-                and self.assets[asset2].is_connected(connection_point_2)):
+        elif not self.assets[asset1].is_connected(connection_point_1) and self.assets[
+            asset2
+        ].is_connected(connection_point_2):
             # asset 2 connected asset 1 not
             node = self.assets[asset2].get_connected_node(connection_point_2)
             self.assets[asset1].connect_node(connection_point_1, node)
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
-        elif (not self.assets[asset1].is_connected(connection_point_1)
-                and (not self.assets[asset2].is_connected(connection_point_2))):
+        elif not self.assets[asset1].is_connected(connection_point_1) and (
+            not self.assets[asset2].is_connected(connection_point_2)
+        ):
             # both asset already connected need to delete one node.
             raise NotImplementedError("Assets already connected to assets")
         else:
@@ -205,7 +211,7 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset).matrix_index
             nou = self.get_asset(asset).number_of_unknowns
-            self.get_asset(asset).prev_sol = solution[index:index + nou]
+            self.get_asset(asset).prev_sol = solution[index : index + nou]
 
     def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -216,7 +222,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node).matrix_index
             nou = self.get_node(node).number_of_unknowns
-            self.get_node(node).prev_sol = solution[index:index + nou]
+            self.get_node(node).prev_sol = solution[index : index + nou]
 
     def print_result(self) -> None:
         """Method to print the result of the network."""

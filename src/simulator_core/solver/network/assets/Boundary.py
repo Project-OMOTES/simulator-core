@@ -15,10 +15,12 @@
 
 """Module containing Based boundary class."""
 import uuid
+
 import numpy as np
-from simulator_core.solver.network.assets.Baseasset import BaseAsset
-from simulator_core.solver.matrix.equation_object import EquationObject
+
 from simulator_core.solver.matrix.core_enum import IndexEnum
+from simulator_core.solver.matrix.equation_object import EquationObject
+from simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
 class BaseBoundary(BaseAsset):
@@ -73,7 +75,9 @@ class BaseBoundary(BaseAsset):
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
         """
-        equations = [self.add_pressure_equation(),
-                     self.add_thermal_equations(0),
-                     self.add_press_to_node_equation(0)]
+        equations = [
+            self.add_pressure_equation(),
+            self.add_thermal_equations(0),
+            self.add_press_to_node_equation(0),
+        ]
         return equations
