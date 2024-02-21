@@ -57,7 +57,7 @@ class Solver:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
-        while not (self.matrix.is_converged()):
+        while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
             self.matrix.solve(equations, dumb=False)
@@ -68,7 +68,6 @@ class Solver:
 
     def get_results(self) -> None:
         """Method to get the results of the network."""
-        pass
 
     def results_to_assets(self) -> None:
         """Method to transfer the results to the assets from the matrix."""

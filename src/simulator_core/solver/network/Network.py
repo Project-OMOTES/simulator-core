@@ -19,7 +19,8 @@ from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.assets.production_asset import ProductionAsset
+from simulator_core.solver.network.assets.production_asset import \
+    ProductionAsset
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
@@ -172,7 +173,7 @@ class Network:
         :type asset_id: uuid.UUID
         :return: Node
         """
-        if not self.exists_node(id):
+        if not self.exists_node(asset_id):
             raise ValueError(str(asset_id) + " Not a valid node id")
         return self.nodes[asset_id]
 
