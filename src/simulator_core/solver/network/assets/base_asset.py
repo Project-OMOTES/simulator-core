@@ -169,7 +169,8 @@ class BaseAsset(BaseItem):
         # Check if the connection point is connected to a node
         if not self.is_connected(connection_point=connection_point):
             raise ValueError(
-                f"Connection point {connection_point} of asset {self.name} is not connected to a node."
+                f"Connection point {connection_point} of asset {self.name} is not connected to a"
+                + " node."
             )
 
         equation_object = EquationObject()
@@ -190,7 +191,6 @@ class BaseAsset(BaseItem):
 
         This method is implemented in the derived classes of this class.
         """
-        pass
 
     def add_press_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a pressure to node equation for a connection point of the asset.
@@ -203,7 +203,8 @@ class BaseAsset(BaseItem):
         # Check if the connection point is connected to a node
         if not self.is_connected(connection_point=connection_point):
             raise ValueError(
-                f"Connection point {connection_point} of asset {self.name} is not connected to a node."
+                f"Connection point {connection_point} of asset {self.name} is not connected to a"
+                + " node."
             )
 
         equation_object = EquationObject()
