@@ -14,10 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the production asset class."""
 import uuid
+
 import numpy as np
+
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.Fall_type import FallType
-from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
 
 
 class ProductionAsset(FallType):
@@ -46,15 +48,18 @@ class ProductionAsset(FallType):
         equation for the asset at the given connection point.
     """
 
-    def __init__(self, name: uuid.UUID,
-                 number_of_unknowns: int = 6,
-                 number_con_points: int = 2,
-                 supply_temperature: float = 293.15,
-                 heat_supplied: float = 0.0,
-                 loss_coefficient: float = 1.0,
-                 pre_scribe_mass_flow: bool = True,
-                 mass_flow_rate_set_point: float = 10.0,
-                 set_pressure: float = 10000.0):
+    def __init__(
+        self,
+        name: uuid.UUID,
+        number_of_unknowns: int = 6,
+        number_con_points: int = 2,
+        supply_temperature: float = 293.15,
+        heat_supplied: float = 0.0,
+        loss_coefficient: float = 1.0,
+        pre_scribe_mass_flow: bool = True,
+        mass_flow_rate_set_point: float = 10.0,
+        set_pressure: float = 10000.0,
+    ):
         """
         Initializes the ProductionAsset object with the given parameters.
 
@@ -68,10 +73,14 @@ class ProductionAsset(FallType):
             The number of connection points for the asset. The default is 2, which corresponds to
             the inlet and outlet.
         """
-        super().__init__(name, number_of_unknowns, number_con_points,
-                         supply_temperature=supply_temperature,
-                         heat_supplied=heat_supplied,
-                         loss_coefficient=loss_coefficient)
+        super().__init__(
+            name,
+            number_of_unknowns,
+            number_con_points,
+            supply_temperature=supply_temperature,
+            heat_supplied=heat_supplied,
+            loss_coefficient=loss_coefficient,
+        )
         self.number_of_connection_point = number_con_points
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
@@ -88,12 +97,14 @@ class ProductionAsset(FallType):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        equations = [super().add_press_to_node_equation(0),
-                     super().add_press_to_node_equation(1),
-                     self.add_thermal_equations(0),
-                     self.add_thermal_equations(1),
-                     self.add_pre_scribe_equation(0),
-                     self.add_pre_scribe_equation(1)]
+        equations = [
+            super().add_press_to_node_equation(0),
+            super().add_press_to_node_equation(1),
+            self.add_thermal_equations(0),
+            self.add_thermal_equations(1),
+            self.add_pre_scribe_equation(0),
+            self.add_pre_scribe_equation(1),
+        ]
         return equations
 
     def add_pre_scribe_equation(self, connection_point: int) -> EquationObject:
