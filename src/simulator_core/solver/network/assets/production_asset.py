@@ -88,7 +88,7 @@ class ProductionAsset(FallType):
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
         self.set_pressure = set_pressure
-        
+
         super().__init__(
             name,
             number_of_unknowns,

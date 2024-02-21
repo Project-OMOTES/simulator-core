@@ -98,12 +98,12 @@ class BaseAsset(BaseItem):
         :type connection_point: int
         :return: True if the connection point is connected, False otherwise.
         :rtype: bool
-        """        
+        """
         if self.check_connection_point_valid(connection_point):
             return connection_point in self.connected_nodes
         else:
             return False
-            
+
     def get_connected_node(self, connection_point: int) -> Node:
         """Checks if a connection point is connected to a node.
 
