@@ -81,11 +81,7 @@ class BaseAsset(BaseItem):
         :type node: Node
         :raises ValueError: If the connection point is already connected to a node.
         """
-        if connection_point > self.number_of_connection_point:
-            raise IndexError(
-                f"Asset {self.name} only has {self.number_of_connection_point}. "
-                f"{connection_point} is to high"
-            )
+        self.check_connection_point_valid(connection_point)
         if connection_point in self.connected_nodes:
             raise ValueError(
                 f" connection point {connection_point}  of asset {self.name} "
@@ -102,7 +98,9 @@ class BaseAsset(BaseItem):
         :return: True if the connection point is connected, False otherwise.
         :rtype: bool
         """
-        return connection_point in self.connected_nodes
+        self.check_connection_point_valid(connection_point)
+        if connection_point <= self.number_of_connection_point - 1:
+            return connection_point in self.connected_nodes
 
     def get_connected_node(self, connection_point: int) -> Node:
         """Checks if a connection point is connected to a node.
@@ -112,6 +110,8 @@ class BaseAsset(BaseItem):
         :return: True if the connection point is connected, False otherwise.
         :rtype: bool
         """
+        self.check_connection_point_valid(connection_point)
+
         if self.is_connected(connection_point):
             return self.connected_nodes[connection_point]
         raise ValueError(str(connection_point) + " is not connected")
@@ -166,6 +166,12 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the temperature to node equation.
         :rtype: EquationObject
         """
+        # Check if the connection point is connected to a node
+        if not self.is_connected(connection_point=connection_point):
+            raise ValueError(
+                f"Connection point {connection_point} of asset {self.name} is not connected to a node."
+            )
+
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
@@ -194,6 +200,12 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the pressure to node equation.
         :rtype: EquationObject
         """
+        # Check if the connection point is connected to a node
+        if not self.is_connected(connection_point=connection_point):
+            raise ValueError(
+                f"Connection point {connection_point} of asset {self.name} is not connected to a node."
+            )
+
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
