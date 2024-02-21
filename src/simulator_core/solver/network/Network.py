@@ -19,7 +19,7 @@ from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.Boundary import BaseBoundary
 from simulator_core.solver.network.assets.Fall_type import FallType
 from simulator_core.solver.network.assets.Node import Node
-from simulator_core.solver.network.assets.ProductionAsset import ProductionAsset
+from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 
 
