@@ -16,6 +16,7 @@
 """Module containing abstract BaseItem class."""
 import uuid
 from abc import ABC, abstractmethod
+
 from simulator_core.solver.matrix.equation_object import EquationObject
 
 
@@ -47,4 +48,3 @@ class BaseItem(ABC):
         :return: The equations for the item.
         :rtype: list[EquationObject]
         """
-        pass

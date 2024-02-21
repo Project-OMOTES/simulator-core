@@ -19,7 +19,7 @@ import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.network.assets.Fall_type import FallType
+from simulator_core.solver.network.assets.fall_type import FallType
 
 
 class ProductionAsset(FallType):

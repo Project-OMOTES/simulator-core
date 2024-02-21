@@ -16,9 +16,9 @@
 import uuid
 
 from simulator_core.solver.network.assets.base_asset import BaseAsset
-from simulator_core.solver.network.assets.Boundary import BaseBoundary
-from simulator_core.solver.network.assets.Fall_type import FallType
-from simulator_core.solver.network.assets.Node import Node
+from simulator_core.solver.network.assets.boundary import BaseBoundary
+from simulator_core.solver.network.assets.fall_type import FallType
+from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.SolverPipe import SolverPipe
 
@@ -95,13 +95,13 @@ class Network:
             self.assets[asset2].is_connected(connection_point_2)
         ):
             # both asset connect points not connected
-            id = uuid.uuid4()
-            self.nodes[id] = Node(id)
-            self.assets[asset1].connect_node(connection_point_1, self.nodes[id])
-            self.assets[asset2].connect_node(connection_point_2, self.nodes[id])
-            self.nodes[id].connect_asset(self.assets[asset1], connection_point_1)
-            self.nodes[id].connect_asset(self.assets[asset2], connection_point_2)
-            return id
+            asset_id = uuid.uuid4()
+            self.nodes[asset_id] = Node(name=asset_id)
+            self.assets[asset1].connect_node(connection_point_1, self.nodes[asset_id])
+            self.assets[asset2].connect_node(connection_point_2, self.nodes[asset_id])
+            self.nodes[asset_id].connect_asset(self.assets[asset1], connection_point_1)
+            self.nodes[asset_id].connect_asset(self.assets[asset2], connection_point_2)
+            return asset_id
         elif (self.assets[asset1].is_connected(connection_point_1)) and not (
             self.assets[asset2].is_connected(connection_point_2)
         ):
@@ -126,55 +126,55 @@ class Network:
         else:
             raise NotImplementedError("Something has gone wrong assets already connected to node")
 
-    def exists_asset(self, id: uuid.UUID) -> bool:
+    def exists_asset(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
 
-        :param uuid.UUID id: unique id of the asset to check.
+        :param uuid.UUID asset_id: unique id of the asset to check.
         :return:True when asset exists and False when not
         """
-        return id in self.assets
+        return asset_id in self.assets
 
-    def exists_node(self, id: uuid.UUID) -> bool:
+    def exists_node(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when a node with the given id exists in the network.
 
-        :param uuid.UUID id: unique id of the node to check.
+        :param uuid.UUID asset_id: unique id of the node to check.
         :return:True when node exists and False when not
         """
-        return id in self.nodes
+        return asset_id in self.nodes
 
     def remove_asset(self) -> None:
         """Method to remove an asset from the network."""
-        pass
 
     def disconnect_asset(self) -> None:
         """Method to disconnect an asset from the network."""
-        pass
 
-    def get_asset(self, id: uuid.UUID) -> BaseAsset:
+    def get_asset(self, asset_id: uuid.UUID) -> BaseAsset:
         """Method to get an asset in the network.
 
         Method returns the asset with the given id, when it exists in the network.
         when it does not exist a ValueError is raised.
 
-        :param id: id of the asset which needs to be retrieved.
+        :param id: asset_id of the asset which needs to be retrieved.
+        :type asset_id: uuid.UUID
         :return: Asset
         """
-        if not self.exists_asset(id):
-            raise ValueError(str(id) + " Not a valid asset id")
-        return self.assets[id]
+        if not self.exists_asset(asset_id):
+            raise ValueError(str(asset_id) + " Not a valid asset id")
+        return self.assets[asset_id]
 
-    def get_node(self, id: uuid.UUID) -> Node:
+    def get_node(self, asset_id: uuid.UUID) -> Node:
         """Method to get a node in the network.
 
         Method returns the node with the given id, when it exists in the network.
         when it does not exist a ValueError is raised.
 
-        :param id: id of the node which needs to be retrieved.
+        :param asset_id: asset_id of the node which needs to be retrieved.
+        :type asset_id: uuid.UUID
         :return: Node
         """
         if not self.exists_node(id):
-            raise ValueError(str(id) + " Not a valid node id")
-        return self.nodes[id]
+            raise ValueError(str(asset_id) + " Not a valid node id")
+        return self.nodes[asset_id]
 
     def check_connectivity_assets(self) -> bool:
         """Method to check if all assets are connected.
@@ -183,7 +183,7 @@ class Network:
         :return: True or False depending on if all assets are connected
         """
         # TODO pass back which assets are not connected.
-        result = [self.assets[asset].is_all_connected() for asset in self.assets]
+        result = [asset.is_all_connected() for _, asset in self.assets.items()]
         return all(result)
 
     def check_connectivity_nodes(self) -> bool:
@@ -192,7 +192,7 @@ class Network:
         Method returns True when all nodes are connected and False when an node is not connected.
         :return: True or False depending on if all nodes are connected
         """
-        result = [self.nodes[node].is_connected() for node in self.nodes]
+        result = [node.is_connected() for _, node in self.nodes.items()]
         return all(result)
 
     def check_connectivity(self) -> bool:

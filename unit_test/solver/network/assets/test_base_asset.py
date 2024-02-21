@@ -19,7 +19,7 @@ from uuid import uuid4
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.base_asset import BaseAsset
-from simulator_core.solver.network.assets.Node import Node
+from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
