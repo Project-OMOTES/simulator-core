@@ -56,6 +56,22 @@ class BaseAsset(BaseItem):
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
 
+    def check_connection_point_valid(self, connection_point: int) -> bool:
+        """Checks if the connection point is valid for the asset.
+
+        :param connection_point: The index of the connection point to check.
+        :type connection_point: int
+        :return: True if the connection point is valid, otherwise raises an IndexError.
+        :rtype: bool
+        """
+        if connection_point > self.number_of_connection_point - 1:
+            raise IndexError(
+                f"Asset {self.name} only has {self.number_of_connection_point - 1}. "
+                f"{connection_point} is too high"
+            )
+        else:
+            return True
+
     def connect_node(self, connection_point: int, node: Node) -> None:
         """Connects a node to a connection point of the asset.
 
