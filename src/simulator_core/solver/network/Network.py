@@ -211,7 +211,7 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset).matrix_index
             nou = self.get_asset(asset).number_of_unknowns
-            self.get_asset(asset).prev_sol = solution[index : index + nou]
+            self.get_asset(asset).prev_sol = solution[index: index + nou]
 
     def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -222,7 +222,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node).matrix_index
             nou = self.get_node(node).number_of_unknowns
-            self.get_node(node).prev_sol = solution[index : index + nou]
+            self.get_node(node).prev_sol = solution[index: index + nou]
 
     def print_result(self) -> None:
         """Method to print the result of the network."""

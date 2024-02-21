@@ -203,8 +203,6 @@ class FallType(BaseAsset):
 
     def update_loss_coefficient(self) -> None:
         """Basic function which does not do anything, but can be overwritten in derived classes."""
-        pass
 
     def update_heat_supplied(self) -> None:
         """Basic function which does not do anything, but can be overwritten in derived classes."""
-        pass

@@ -98,7 +98,6 @@ class DemandCluster(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
          :return:
         """
-        pass
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
