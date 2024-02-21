@@ -15,11 +15,13 @@
 
 """Module containing the node class."""
 import uuid
-import numpy as np
-from simulator_core.solver.network.assets.BaseItem import BaseItem
 
+import numpy as np
+
+from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
+                                                    IndexEnum)
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.core_enum import IndexEnum, NUMBER_CORE_QUANTITIES
+from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 

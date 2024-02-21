@@ -15,12 +15,13 @@
 
 """HeatNetwork entity class."""
 import datetime
+from typing import Callable, List, Tuple
 
 import pandas as pd
-from typing import Callable, List, Tuple
+
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
-from simulator_core.solver.network.Network import Network
+from simulator_core.solver.network.network import Network
 from simulator_core.solver.Solver import Solver
 
 

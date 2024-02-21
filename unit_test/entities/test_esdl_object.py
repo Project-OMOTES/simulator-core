@@ -16,12 +16,12 @@
 """Test esdl object class."""
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
 
 import esdl
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from simulator_core.adapter.transforms.string_to_esdl import \
+    StringEsdlAssetMapper
 from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster
@@ -57,7 +57,7 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(len(consumers), 1)
         self.assertEqual(len(pipes), 2)
 
-    def test_EsdlAssetObject(self):
+    def test_creation_of_esdl_asset_objects(self):
         """Test for creation of objects."""
         # Arrange
         producer = "producer"

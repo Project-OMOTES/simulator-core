@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module for solving the network class."""
-from simulator_core.solver.matrix.matrix import Matrix
-from simulator_core.solver.network.Network import Network
 from simulator_core.solver.matrix.equation_object import EquationObject
+from simulator_core.solver.matrix.matrix import Matrix
+from simulator_core.solver.network.network import Network
 
 
 class Solver:

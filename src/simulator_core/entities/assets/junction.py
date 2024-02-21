@@ -17,12 +17,10 @@
 
 from typing import Any, List, Optional
 
-from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_NODE_HEIGHT,
-    DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE,
-)
-from simulator_core.solver.network.assets.Node import Node
+from simulator_core.entities.assets.asset_defaults import (DEFAULT_NODE_HEIGHT,
+                                                           DEFAULT_PRESSURE,
+                                                           DEFAULT_TEMPERATURE)
+from simulator_core.solver.network.assets.node import Node
 
 
 class Junction:
