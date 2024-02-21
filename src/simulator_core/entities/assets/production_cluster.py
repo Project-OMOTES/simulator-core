@@ -19,27 +19,21 @@ from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_NODE_HEIGHT,
-    DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
-    PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
-)
+    DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE, DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE, PROPERTY_HEAT_DEMAND, PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE_RETURN, PROPERTY_PRESSURE_SUPPLY, PROPERTY_SET_PRESSURE,
+    PROPERTY_TEMPERATURE_RETURN, PROPERTY_TEMPERATURE_SUPPLY)
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
-from simulator_core.solver.network.assets.production_asset import ProductionAsset
+from simulator_core.entities.assets.utils import \
+    heat_demand_and_temperature_to_mass_flow
+from simulator_core.solver.network.assets.production_asset import \
+    ProductionAsset
 
 
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
 
-    thermal_production_required: float
+    thermal_production_required: float | None
     """The thermal production required by the asset [W]."""
 
     temperature_supply: float
@@ -79,7 +73,7 @@ class ProductionCluster(AssetAbstract):
         # Controlled mass flow
         self.controlled_mass_flow = None
         self.solver_asset = ProductionAsset(
-            uuid.uuid4(),
+            name=uuid.uuid4(),
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )

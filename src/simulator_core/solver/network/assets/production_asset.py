@@ -17,7 +17,8 @@ import uuid
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
+                                                    IndexEnum)
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.fall_type import FallType
 
@@ -48,6 +49,16 @@ class ProductionAsset(FallType):
         equation for the asset at the given connection point.
     """
 
+    mass_flow_rate_set_point: float
+    """The mass flow rate set point for the asset."""
+
+    set_pressure: float
+    """The pressure set point for the asset."""
+
+    pre_scribe_mass_flow: bool
+    """A boolean flag that indicates whether the mass flow rate or the pressure is prescribed
+    at the connection points."""
+
     def __init__(
         self,
         name: uuid.UUID,
@@ -73,6 +84,11 @@ class ProductionAsset(FallType):
             The number of connection points for the asset. The default is 2, which corresponds to
             the inlet and outlet.
         """
+        self.number_of_connection_point = number_con_points
+        self.pre_scribe_mass_flow = pre_scribe_mass_flow
+        self.mass_flow_rate_set_point = mass_flow_rate_set_point
+        self.set_pressure = set_pressure
+        
         super().__init__(
             name,
             number_of_unknowns,
@@ -81,10 +97,6 @@ class ProductionAsset(FallType):
             heat_supplied=heat_supplied,
             loss_coefficient=loss_coefficient,
         )
-        self.number_of_connection_point = number_con_points
-        self.pre_scribe_mass_flow = pre_scribe_mass_flow
-        self.mass_flow_rate_set_point = mass_flow_rate_set_point
-        self.set_pressure = set_pressure
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the asset.

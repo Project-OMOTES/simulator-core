@@ -20,12 +20,11 @@ from typing import Dict
 import numpy as np
 from scipy.optimize import root
 
-from simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_DIAMETER,
-    PROPERTY_LENGTH,
-    PROPERTY_ROUGHNESS,
-)
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.entities.assets.asset_defaults import (PROPERTY_DIAMETER,
+                                                           PROPERTY_LENGTH,
+                                                           PROPERTY_ROUGHNESS)
+from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
+                                                    IndexEnum)
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -126,9 +125,9 @@ class SolverPipe(FallType):
         # - Temperature at the outlet from internal_energy_x
         temperature_x = fluid_props.get_t(internal_energy_x)
         # Function to minimize
-        return mass_flow_rate * (
+        return float(mass_flow_rate * (
             internal_energy_1 - internal_energy_x
-        ) + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature)
+        ) + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature))
 
     def update_heat_supplied(self) -> None:
         """Calculate the heat supplied by the pipe.

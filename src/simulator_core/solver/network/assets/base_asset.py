@@ -20,7 +20,8 @@ from typing import Dict
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
+                                                    IndexEnum)
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.node import Node
@@ -97,11 +98,12 @@ class BaseAsset(BaseItem):
         :type connection_point: int
         :return: True if the connection point is connected, False otherwise.
         :rtype: bool
-        """
-        self.check_connection_point_valid(connection_point)
-        if connection_point <= self.number_of_connection_point - 1:
+        """        
+        if self.check_connection_point_valid(connection_point):
             return connection_point in self.connected_nodes
-
+        else:
+            return False
+            
     def get_connected_node(self, connection_point: int) -> Node:
         """Checks if a connection point is connected to a node.
 
