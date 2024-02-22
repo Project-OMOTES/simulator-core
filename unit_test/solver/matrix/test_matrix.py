@@ -112,13 +112,12 @@ class MatrixTest(unittest.TestCase):
 
     def test_solve_large(self):
         """Test the solving of the matrix object."""
-
         # arrange
         matrix = Matrix()
         value = 10.0
         equations = []
         size = 1000
-        for i in range(size):
+        for _ in range(size):
             position = matrix.add_unknowns(1)
             equation_object = EquationObject()
             equation_object.indices = [0]
