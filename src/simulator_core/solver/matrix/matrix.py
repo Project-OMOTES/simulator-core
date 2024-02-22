@@ -144,4 +144,4 @@ class Matrix:
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
-        self.sol_new = [1] * len(self.sol_new)
+        self.sol_new = [1.0] * len(self.sol_new)

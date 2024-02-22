@@ -179,27 +179,29 @@ class MatrixTest(unittest.TestCase):
         """Test the get solution of the matrix object."""
         # arrange
         matrix = Matrix()
-        matrix.add_unknowns(2)
-        matrix.add_equation()
-        matrix.solve()
+        matrix.add_unknowns(10)
 
         # act
-        result = matrix.get_solution()
+        result = matrix.get_solution(0, 2)
 
         # assert
-        self.assertEqual(result, [0.0, 0.0])
+        self.assertEqual(result, [1.0, 1.0])
 
     def test_reset_solution(self):
         """Test the reset solution of the matrix object."""
         # arrange
         matrix = Matrix()
-        matrix.add_unknowns(2)
-        matrix.add_equation()
-        matrix.solve()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = [0]
+        equation.coefficients = [1.0]
+        equation.rhs = 10.0
+        matrix.solve([equation])
+        matrix.solve([equation])
 
         # act
         matrix.reset_solution()
 
         # assert
-        self.assertEqual(matrix.sol_new, [0.0, 0.0])
-        self.assertEqual(matrix.sol_old, [0.0, 0.0])
+        self.assertEqual(matrix.sol_new, [1.0])
+        self.assertEqual(matrix.sol_old, [10.0])
