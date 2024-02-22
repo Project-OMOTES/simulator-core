@@ -110,6 +110,8 @@ class Matrix:
         the solution has converged. If one of them is converged true is returned.
         :return: Bool whether the solution has converged based on the given convergence criteria.
         """
+        if self.num_unknowns == 0:
+            raise ValueError("No unknowns have been added to the matrix.")
         rel_dif = max(
             [relative_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
         abs_dif = max(
@@ -127,6 +129,7 @@ class Matrix:
         be provided
         :return: list with teh solution
         """
+        #  TODO add checks if the index and number of unknowns are within the range of the solution.
         return self.sol_new[index:index + number_of_unknowns]
 
     def dumb_matrix(self, file_name: str = 'dumb.csv') -> None:
