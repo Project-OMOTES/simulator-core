@@ -20,8 +20,7 @@ from pathlib import Path
 import esdl
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.adapter.transforms.string_to_esdl import \
-    StringEsdlAssetMapper
+from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster

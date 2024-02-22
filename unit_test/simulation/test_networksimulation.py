@@ -13,18 +13,21 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
-from simulator_core.simulation.networksimulation import NetworkSimulation
-from simulator_core.entities.simulation_configuration import SimulationConfiguration
-from simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
-from simulator_core.entities.heat_network import HeatNetwork
-from simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 import unittest
 import uuid
-from unittest.mock import Mock
+from datetime import datetime
 from pathlib import Path
+from unittest.mock import Mock
+
+from simulator_core.adapter.transforms.mappers import (
+    EsdlControllerMapper,
+    EsdlEnergySystemMapper,
+)
+from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.simulation_configuration import SimulationConfiguration
+from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.simulation.networksimulation import NetworkSimulation
 
 
 class NetworkSimulationTest(unittest.TestCase):
