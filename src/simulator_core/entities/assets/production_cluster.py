@@ -19,15 +19,23 @@ from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE, DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE, PROPERTY_HEAT_DEMAND, PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN, PROPERTY_PRESSURE_SUPPLY, PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE_RETURN, PROPERTY_TEMPERATURE_SUPPLY)
+    DEFAULT_NODE_HEIGHT,
+    DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE_RETURN,
+    PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_SET_PRESSURE,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
+)
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from simulator_core.entities.assets.utils import \
-    heat_demand_and_temperature_to_mass_flow
-from simulator_core.solver.network.assets.production_asset import \
-    ProductionAsset
+from simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+)
+from simulator_core.solver.network.assets.production_asset import ProductionAsset
 
 
 class ProductionCluster(AssetAbstract):
@@ -125,7 +133,7 @@ class ProductionCluster(AssetAbstract):
             )
         else:
             # Set the mass flow rate of the control valve
-            self.solver_asset.mass_flow_rate_set_point = self.controlled_mass_flow
+            self.solver_asset.mass_flow_rate_set_point = self.controlled_mass_flow  # type: ignore
 
     def _set_pressure_or_mass_flow_control(self, pressure_supply: bool) -> None:
         """Set the asset to predescribe either the pressure or the mass flow rate.
@@ -133,9 +141,9 @@ class ProductionCluster(AssetAbstract):
         :param bool pressure_supply: True when the pressure needs to be set
         """
         if pressure_supply:
-            self.solver_asset.pre_scribe_mass_flow = False
+            self.solver_asset.pre_scribe_mass_flow = False  # type: ignore
         else:
-            self.solver_asset.pre_scribe_mass_flow = True
+            self.solver_asset.pre_scribe_mass_flow = True   # type: ignore
 
     def set_pressure_supply(self, pressure_supply: float) -> None:
         """Set the supply pressure of the asset.
@@ -151,7 +159,7 @@ class ProductionCluster(AssetAbstract):
         # Set the supply pressure of the asset
         self.pressure_supply = pressure_supply
         # Set the pressure of the solver asset
-        self.solver_asset.set_pressure = self.pressure_supply
+        self.solver_asset.set_pressure = self.pressure_supply   # type: ignore
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Set the setpoints of the asset.

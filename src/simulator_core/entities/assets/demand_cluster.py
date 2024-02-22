@@ -32,7 +32,9 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_SUPPLY,
 )
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
+from simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+)
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 
 
@@ -90,7 +92,7 @@ class DemandCluster(AssetAbstract):
             self.thermal_power_allocation, self.temperature_supply, self.temperature_return_target
         )
         self.solver_asset.supply_temperature = self.temperature_return_target
-        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate
+        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
