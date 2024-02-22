@@ -17,10 +17,12 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, List
+
 from pandas import DataFrame
+
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
-from simulator_core.solver.network.assets.Baseasset import BaseAsset
+from simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
 class AssetAbstract(ABC):
@@ -55,13 +57,12 @@ class AssetAbstract(ABC):
         self.asset_id: str = asset_id
         self.output: List[Dict[str, float]] = []
 
-    def set_setpoints(self, setpoints: Dict) -> None:  # noqa: B027
+    def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
-        pass
 
     def get_setpoints(self) -> Dict[str, float]:
         """Placeholder to get the setpoint attributes of an asset.
@@ -74,7 +75,6 @@ class AssetAbstract(ABC):
     @abstractmethod
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
-        pass
 
     def set_from_junction(self, from_junction: Junction) -> None:
         """Method to set the from junction of an asset.
@@ -93,7 +93,6 @@ class AssetAbstract(ABC):
     @abstractmethod
     def write_to_output(self) -> None:
         """Placeholder to get data from pandapipes and store it in the asset."""
-        pass
 
     def get_output(self) -> List[Dict[str, float]]:
         """Returns all the output of the asset.

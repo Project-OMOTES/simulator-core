@@ -20,14 +20,15 @@ from esdl.esdl import Joint as esdl_junction
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.controller_classes import ControllerConsumer, ControllerSource
+from simulator_core.entities.assets.controller_classes import (
+    ControllerConsumer, ControllerSource)
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from simulator_core.solver.network.Network import Network
+from simulator_core.solver.network.network import Network
 
 
 def connect_connected_asset(

@@ -13,10 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """This module contains the fluid properties class."""
+import csv
 from pathlib import Path
 
 import numpy as np
-import csv
 
 
 class FluidProperties:
@@ -25,6 +25,18 @@ class FluidProperties:
     This class contains methods to get the internal energy, temperature, density,
     and viscosity of the fluid. THe data is loaded from a csv file in the same folder as this file.
     """
+
+    T: list[float]
+    """A list of floats that store the temperature of the fluid [K] per temperature."""
+
+    cp: list[float]
+    """A list of floats that store the heat capacity of the fluid [J/kg/K] per temperature."""
+
+    rho: list[float]
+    """A list of floats that store the density of the fluid [kg/m^3] per temperature."""
+
+    visc: list[float]
+    """A list of floats that store the viscosity of the fluid [Pa.s] per temperature."""
 
     def __init__(self) -> None:
         """Constructor of the fluid properties class.
@@ -55,7 +67,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The internal energy of the fluid at the given temperature.
         """
-        return float(np.interp(t, self.T, self.IE))
+        return float(np.interp(np.array([t]), self.T, self.IE)[0])
 
     def get_t(self, ie: float) -> float:
         """Returns the temperature of the fluid at a given internal energy.
@@ -63,7 +75,7 @@ class FluidProperties:
         :param ie: The internal energy of the fluid.
         :return: The temperature of the fluid at the given internal energy.
         """
-        return float(np.interp(ie, self.IE, self.T))
+        return float(np.interp(np.array([ie]), self.IE, self.T)[0])
 
     def get_density(self, t: float) -> float:
         """Returns the density of the fluid at a given temperature.
@@ -71,7 +83,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The density of the fluid at the given temperature.
         """
-        return float(np.interp(t, self.T, self.rho))
+        return float(np.interp(np.array([t]), self.T, self.rho)[0])
 
     def get_viscosity(self, t: float) -> float:
         """Returns the viscosity of the fluid at a given temperature.
@@ -79,7 +91,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The viscosity of the fluid at the given temperature.
         """
-        return float(np.interp(t, self.T, self.visc))
+        return float(np.interp(np.array([t]), self.T, self.visc)[0])
 
     def get_heat_capacity(self, t: float) -> float:
         """Returns the heat capacity of the fluid at a given temperature.
@@ -87,7 +99,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The capacity of the fluid at the given temperature.
         """
-        return float(np.interp(t, self.T, self.cp))
+        return float(np.interp(np.array([t]), self.T, self.cp)[0])
 
 
 fluid_props = FluidProperties()

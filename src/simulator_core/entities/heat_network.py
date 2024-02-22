@@ -15,13 +15,14 @@
 
 """HeatNetwork entity class."""
 import datetime
+from typing import Callable, List, Tuple
 
 import pandas as pd
-from typing import Callable, List, Tuple
+
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
-from simulator_core.solver.network.Network import Network
-from simulator_core.solver.Solver import Solver
+from simulator_core.solver.network.network import Network
+from simulator_core.solver.solver import Solver
 
 
 class HeatNetwork:
@@ -58,8 +59,6 @@ class HeatNetwork:
         plots the network in a simple plot all junctions are translated to a circle.
         :return:
         """
-        pass
-
     def store_output(self) -> None:
         """Method to store the output data.
 

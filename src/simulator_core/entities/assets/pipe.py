@@ -19,7 +19,6 @@ from typing import Dict, List
 import numpy as np
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.asset_defaults import (
     PIPE_DEFAULTS,
     PROPERTY_MASSFLOW,
@@ -28,11 +27,12 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
 )
-from simulator_core.solver.network.assets.SolverPipe import SolverPipe
+from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
 class Pipe(AssetAbstract):

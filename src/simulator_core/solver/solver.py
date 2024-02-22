@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module for solving the network class."""
-from simulator_core.solver.matrix.matrix import Matrix
-from simulator_core.solver.network.Network import Network
 from simulator_core.solver.matrix.equation_object import EquationObject
+from simulator_core.solver.matrix.matrix import Matrix
+from simulator_core.solver.network.network import Network
 
 
 class Solver:
@@ -57,7 +57,7 @@ class Solver:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
-        while not (self.matrix.is_converged()):
+        while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
             self.matrix.solve(equations, dumb=False)
@@ -68,7 +68,6 @@ class Solver:
 
     def get_results(self) -> None:
         """Method to get the results of the network."""
-        pass
 
     def results_to_assets(self) -> None:
         """Method to transfer the results to the assets from the matrix."""

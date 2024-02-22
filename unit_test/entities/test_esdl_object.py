@@ -16,7 +16,6 @@
 """Test esdl object class."""
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
 
 import esdl
 
@@ -57,7 +56,7 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(len(consumers), 1)
         self.assertEqual(len(pipes), 2)
 
-    def test_EsdlAssetObject(self):
+    def test_creation_of_esdl_asset_objects(self):
         """Test for creation of objects."""
         # Arrange
         producer = "producer"

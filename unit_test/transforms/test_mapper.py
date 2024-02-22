@@ -12,22 +12,20 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+"""Test energy system mapper class."""
 import unittest
 from pathlib import Path
 from typing import List, Tuple
 
-
 from simulator_core.adapter.transforms.mappers import (
-    EsdlEnergySystemMapper,
-    replace_joint_in_connected_assets,
-)
+    EsdlEnergySystemMapper, replace_joint_in_connected_assets)
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
-from simulator_core.solver.network.Network import Network
+from simulator_core.solver.network.network import Network
+
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
     """Class to test energy system mapper class."""

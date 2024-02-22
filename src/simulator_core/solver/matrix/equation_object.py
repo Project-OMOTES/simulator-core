@@ -23,6 +23,15 @@ class EquationObject:
     rhs is the rhs of the matrix.
     """
 
+    indices: np.ndarray
+    """Indices of the coefficients in the matrix."""
+
+    coefficients: np.ndarray
+    """Coefficients of the equation."""
+
+    rhs: float
+    """Right hand side of the equation."""
+
     def __init__(self) -> None:
         """Constructor of the EquationObject."""
         self.indices = np.array([], dtype=int)
