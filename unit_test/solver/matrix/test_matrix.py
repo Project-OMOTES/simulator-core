@@ -145,13 +145,29 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, False)
 
+    def test_convergence_raise_error(self):
+        """Test the convergence of the matrix object."""
+        # arrange
+        matrix = Matrix()
+
+        # act
+        matrix.relative_convergence = -1
+
+        # assert
+        with self.assertRaises(ValueError):
+            matrix.is_converged()
+
     def test_is_converged2(self):
         """Test the is converged of the matrix object."""
         # arrange
         matrix = Matrix()
-        matrix.add_unknowns(2)
-        matrix.add_equation()
-        matrix.solve()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = [0]
+        equation.coefficients = [1.0]
+        equation.rhs = 10.0
+        matrix.solve([equation])
+        matrix.solve([equation])
 
         # act
         result = matrix.is_converged()
