@@ -92,7 +92,7 @@ class DemandCluster(AssetAbstract):
             self.thermal_power_allocation, self.temperature_supply, self.temperature_return_target
         )
         self.solver_asset.supply_temperature = self.temperature_return_target
-        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate # type: ignore
+        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
