@@ -62,3 +62,14 @@ class EquationObjectTest(unittest.TestCase):
 
         # assert
         self.assertEqual(result, [0.0, 1.0])
+
+    def test_to_list_error(self):
+        """Test the to list of the equation object."""
+        # arrange
+        equation_object = EquationObject()
+        equation_object.coefficients = np.array([1.0, 2.0])
+        equation_object.indices = np.array([1, 2])
+
+        # act
+        with self.assertRaises(ValueError):
+            equation_object.to_list(1)
