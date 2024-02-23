@@ -24,7 +24,7 @@ from simulator_core.solver.matrix.equation_object import EquationObject
 class EquationObjectTest(unittest.TestCase):
     """Test the equation object."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test the init of the equation object."""
         # arrange
 
@@ -36,7 +36,7 @@ class EquationObjectTest(unittest.TestCase):
         self.assertEqual(equation_object.indices.size, 0)
         self.assertEqual(equation_object.rhs, 0.0)
 
-    def test_set_coefficient(self):
+    def test_set_coefficient(self) -> None:
         """Test the set coefficient of the equation object."""
         # arrange
         equation_object = EquationObject()
@@ -50,7 +50,7 @@ class EquationObjectTest(unittest.TestCase):
         self.assertEqual(equation_object.coefficients.size, 1)
         self.assertEqual(equation_object.coefficients[0], 1.0)
 
-    def test_to_list(self):
+    def test_to_list(self) -> None:
         """Test the to list of the equation object."""
         # arrange
         equation_object = EquationObject()
@@ -63,7 +63,7 @@ class EquationObjectTest(unittest.TestCase):
         # assert
         self.assertEqual(result, [0.0, 1.0])
 
-    def test_to_list_error(self):
+    def test_to_list_error(self) -> None:
         """Test the to list of the equation object."""
         # arrange
         equation_object = EquationObject()
