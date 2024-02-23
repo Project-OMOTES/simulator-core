@@ -26,7 +26,7 @@ from simulator_core.solver.matrix.equation_object import EquationObject
 class MatrixTest(unittest.TestCase):
     """Test the matrix object."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test the init of the matrix object."""
         # arrange
 
@@ -42,7 +42,7 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(matrix.relative_convergence, 1e-6)
         self.assertEqual(matrix.absolute_convergence, 1e-6)
 
-    def test_add_unknowns(self):
+    def test_add_unknowns(self) -> None:
         """Test the add unknowns of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -56,7 +56,7 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(len(matrix.sol_old), 2)
         self.assertEqual(index, 0)
 
-    def test_add_additional_unknowns(self):
+    def test_add_additional_unknowns(self) -> None:
         """Test the add unknowns of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -71,7 +71,7 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(len(matrix.sol_old), 4)
         self.assertEqual(index, 2)
 
-    def test_add_equation(self):
+    def test_add_equation(self) -> None:
         """Test the add equation of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -90,7 +90,7 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(matrix.mat[0], [1.0, 1.0])
         self.assertEqual(matrix.rhs[0], 10.0)
 
-    def test_solve(self):
+    def test_solve(self) -> None:
         """Test the solving of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -110,7 +110,7 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, [-10.0, 10.0])
 
-    def test_solve_large(self):
+    def test_solve_large(self) -> None:
         """Test the solving of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -132,7 +132,7 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(results, [value] * size)
 
-    def test_is_converged(self):
+    def test_is_converged(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -144,7 +144,7 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, False)
 
-    def test_convergence_raise_error(self):
+    def test_convergence_raise_error(self) -> None:
         """Test the convergence of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -156,7 +156,7 @@ class MatrixTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             matrix.is_converged()
 
-    def test_is_converged2(self):
+    def test_is_converged2(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -174,7 +174,7 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, True)
 
-    def test_get_solution(self):
+    def test_get_solution(self) -> None:
         """Test the get solution of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -186,7 +186,7 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, [1.0, 1.0])
 
-    def test_reset_solution(self):
+    def test_reset_solution(self) -> None:
         """Test the reset solution of the matrix object."""
         # arrange
         matrix = Matrix()
