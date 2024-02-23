@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
 import numpy as np
-import scipy
 import csv
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.utility import absolute_difference, relative_difference
