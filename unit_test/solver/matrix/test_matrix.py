@@ -31,7 +31,7 @@ class MatrixTest(unittest.TestCase):
         # arrange
 
         # act
-        matrix = Matrix()
+        matrix = Matrix()  # act
 
         # assert
         self.assertEqual(matrix.num_unknowns, 0)
@@ -49,7 +49,7 @@ class MatrixTest(unittest.TestCase):
         number_of_unknowns = 2
 
         # act
-        index = matrix.add_unknowns(number_unknowns=number_of_unknowns)
+        index = matrix.add_unknowns(number_unknowns=number_of_unknowns)  # act
 
         # assert
         self.assertEqual(matrix.num_unknowns, number_of_unknowns)
@@ -57,22 +57,34 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(matrix.sol_old, [0.0] * number_of_unknowns)
         self.assertEqual(index, 0)
 
-    def test_add_unknows_error(self) -> None:
+    def test_add_unknowns_error(self) -> None:
         """Test the add unknowns of the matrix object."""
         # arrange
         matrix = Matrix()
 
         # act
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as cm:
             matrix.add_unknowns(number_unknowns=0)
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception),
+            "Number of unknowns should be at least 1.",
+        )
 
     def test_add_additional_unknowns(self) -> None:
         """Test the add unknowns of the matrix object."""
         # arrange
         matrix = Matrix()
+        number_of_unknowns = 2
+        matrix.add_unknowns(number_unknowns=number_of_unknowns)
 
         # act
-        self.assertRaises(ValueError, matrix.add_unknowns, -1)
+        index = matrix.add_unknowns(number_unknowns=number_of_unknowns)  # act
+
+        # assert
+        self.assertEqual(index, number_of_unknowns)
 
     def test_add_equation(self) -> None:
         """Test the add equation of the matrix object."""
@@ -85,7 +97,7 @@ class MatrixTest(unittest.TestCase):
         equation.rhs = 10.0
 
         # act
-        matrix.add_equation(equation_object=equation)
+        matrix.add_equation(equation_object=equation)  # act
 
         # assert
         self.assertEqual(len(matrix.mat), 1)
@@ -135,7 +147,7 @@ class MatrixTest(unittest.TestCase):
         equations.append(equation_object)
 
         # act
-        results = matrix.solve(equations)
+        results = matrix.solve(equations)  # act
 
         # assert
         self.assertEqual(results, [5.0] * (size + 1))
@@ -158,11 +170,15 @@ class MatrixTest(unittest.TestCase):
         matrix = Matrix()
 
         # act
-        matrix.relative_convergence = -1
+        with self.assertRaises(ValueError) as cm:
+            matrix.is_converged()
 
         # assert
-        with self.assertRaises(ValueError):
-            matrix.is_converged()
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception),
+            "No unknowns have been added to the matrix.",
+        )
 
     def test_is_converged_true(self) -> None:
         """Test the is converged of the matrix object."""
@@ -200,7 +216,7 @@ class MatrixTest(unittest.TestCase):
         matrix.sol_old = [10.0]
 
         # act
-        matrix.reset_solution()
+        matrix.reset_solution()  # act
 
         # assert
         self.assertEqual(matrix.sol_new, [1.0])
