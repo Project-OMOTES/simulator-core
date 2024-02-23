@@ -83,6 +83,8 @@ class Pipe(AssetAbstract):
         """Retrieve the diameter of the pipe and convert it if necessary."""
         temp_diameter, property_available = esdl_asset.get_property("innerDiameter", self.diameter)
         if property_available:
+            if temp_diameter == 0:
+                return self.diameter
             return float(temp_diameter)
         else:
             # Implement DN-conversion
