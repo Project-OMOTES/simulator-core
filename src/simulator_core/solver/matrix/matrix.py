@@ -74,7 +74,7 @@ class Matrix:
         for equation in equations:
             self.add_equation(equation)
         if dumb:
-            self.dumb_matrix()
+            self.dump_matrix()
         self.sol_old = self.sol_new
         a = np.array(self.mat)
         b = np.array(self.rhs)
@@ -134,15 +134,16 @@ class Matrix:
         #  TODO add checks if the index and number of unknowns are within the range of the solution.
         return self.sol_new[index:index + number_of_unknowns]
 
-    def dumb_matrix(self, file_name: str = 'dumb.csv') -> None:
-        """Method to dumb the matrix to a csv file.
+    def dump_matrix(self, file_name: str = 'dump.csv') -> None:
+        """Method to dump the matrix to a csv file.
 
-        :param str file_name: File name to dumb the matrix in default=dumb.csv
+        :param str file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
-            write.writerows(self.mat)
+            for row, rhs in zip(self.mat, self.rhs):
+                write.writerow(row + [rhs])
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
