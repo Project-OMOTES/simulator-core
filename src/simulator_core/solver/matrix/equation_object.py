@@ -47,7 +47,9 @@ class EquationObject:
         :return: a list of the coefficient which can be used in the matrix.
         """
         if length < len(self.indices):
-            raise ValueError("Length of the list should be at least the length of the indices")
+            IndexError(f"Length of {length} smaller than the available number "
+                       f"of coefficients {len(self.coefficients)}!")
+
         coefficient_list: list[float] = [0.0] * length
         for col, coefficient in zip(self.indices, self.coefficients):
             coefficient_list[col] = coefficient
