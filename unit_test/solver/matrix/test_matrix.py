@@ -182,12 +182,13 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
+        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
 
         # act
-        result = matrix.get_solution(0, 2)
+        result = matrix.get_solution(index=3, number_of_unknowns=4)
 
         # assert
-        self.assertEqual(result, [1.0, 1.0])
+        self.assertEqual(result, [4.0, 5.0, 6.0, 7.0])
 
     def test_reset_solution(self) -> None:
         """Test the reset solution of the matrix object."""
