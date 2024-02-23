@@ -119,23 +119,28 @@ class MatrixTest(unittest.TestCase):
         matrix = Matrix()
         value = 10.0
         equations = []
-        size = 1000
+        size = 100
         for _ in range(size):
             position = matrix.add_unknowns(1)
             equation_object = EquationObject()
-            equation_object.indices = [0]
             equation_object.rhs = value
-            equation_object.indices = [position]
-            equation_object.coefficients = [1.0]
+            equation_object.indices = [position, position + 1]
+            equation_object.coefficients = [1.0, 1.0]
             equations.append(equation_object)
+        position = matrix.add_unknowns(1)
+        equation_object = EquationObject()
+        equation_object.rhs = 5.0
+        equation_object.indices = [position]
+        equation_object.coefficients = [1.0]
+        equations.append(equation_object)
 
         # act
         results = matrix.solve(equations)
 
         # assert
-        self.assertEqual(results, [value] * size)
+        self.assertEqual(results, [5.0] * (size + 1))
 
-    def test_is_converged(self) -> None:
+    def test_is_converged_false(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange
         matrix = Matrix()
@@ -159,17 +164,13 @@ class MatrixTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             matrix.is_converged()
 
-    def test_is_converged2(self) -> None:
+    def test_is_converged_true(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(1)
-        equation = EquationObject()
-        equation.indices = [0]
-        equation.coefficients = [1.0]
-        equation.rhs = 10.0
-        matrix.solve([equation])
-        matrix.solve([equation])
+        matrix.sol_new = [1.0]
+        matrix.sol_old = matrix.sol_new
 
         # act
         result = matrix.is_converged()
@@ -195,12 +196,8 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(1)
-        equation = EquationObject()
-        equation.indices = [0]
-        equation.coefficients = [1.0]
-        equation.rhs = 10.0
-        matrix.solve([equation])
-        matrix.solve([equation])
+        matrix.sol_new = [999.0]
+        matrix.sol_old = [10.0]
 
         # act
         matrix.reset_solution()
