@@ -48,7 +48,7 @@ class EquationObject:
         """
         if length < len(self.indices):
             raise IndexError(f"Length of {length} smaller than the available number "
-                       f"of coefficients {len(self.coefficients)}!")
+                             f"of coefficients {len(self.coefficients)}!")
 
         coefficient_list: list[float] = [0.0] * length
         for col, coefficient in zip(self.indices, self.coefficients):
