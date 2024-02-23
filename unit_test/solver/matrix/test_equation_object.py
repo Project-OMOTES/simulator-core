@@ -69,7 +69,16 @@ class EquationObjectTest(unittest.TestCase):
         equation_object = EquationObject()
         equation_object.coefficients = np.array([1.0, 2.0])
         equation_object.indices = np.array([1, 2])
+        length = 1
 
         # act
-        with self.assertRaises(ValueError):
-            equation_object.to_list(1)
+        with self.assertRaises(IndexError) as cm:
+            equation_object.to_list(length)
+
+        # assert
+        self.assertIsInstance(cm.exception, IndexError)
+        self.assertEqual(
+            str(cm.exception),
+            (f"Length of {length} smaller than the available number "
+             f"of coefficients {len(equation_object.coefficients)}!")
+        )
