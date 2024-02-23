@@ -81,30 +81,6 @@ class Matrix:
         self.sol_new = np.linalg.solve(a, b).tolist()
         return self.sol_new
 
-    def solve2(self, equations: list[EquationObject], dumb: bool = False) -> list:
-        """Method to solve the system of equation given in the matrix.
-
-        Solves the system of equations and returns the solution. The numpy linalg
-        library solve method is used. For this the matrix is converted to np arrays.
-        :return: list containing the solution of the system of equations.
-        """
-        # TODO add checks if enough equations have been supplied.
-        # TODO check if matrix is solvable.
-        rhs = np.array([equation.rhs for equation in equations], float)
-        row = np.array([], int)
-        col = np.array([], int)
-        data = np.array([], float)
-        row_index = 0
-        for equation in equations:
-            row = np.append(row, [row_index] * len(equation.indices))
-            row_index += 1
-            col = np.append(col, equation.indices)
-            data = np.append(data, equation.coefficients)
-        A = scipy.sparse.csc_matrix((data, (row, col)),
-                                    shape=(self.num_unknowns, self.num_unknowns))
-        self.sol_new = scipy.sparse.linalg.spsolve(A, rhs).tolist()
-        return self.sol_new
-
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
 
