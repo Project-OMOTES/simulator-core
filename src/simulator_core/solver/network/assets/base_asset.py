@@ -23,7 +23,7 @@ import numpy as np
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
-from simulator_core.solver.network.assets.node import Node
+from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -34,7 +34,7 @@ class BaseAsset(BaseItem):
     status, and adding thermal and pressure equations.
     """
 
-    connected_nodes: Dict[int, Node]
+    connected_nodes: Dict[int, BaseNodeItem]
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class BaseAsset(BaseItem):
         else:
             return True
 
-    def connect_node(self, connection_point: int, node: Node) -> None:
+    def connect_node(self, connection_point: int, node: BaseNodeItem) -> None:
         """Connects a node to a connection point of the asset.
 
         :param connection_point: The index of the connection point to connect.
@@ -103,7 +103,7 @@ class BaseAsset(BaseItem):
         else:
             return False
 
-    def get_connected_node(self, connection_point: int) -> Node:
+    def get_connected_node(self, connection_point: int) -> BaseNodeItem:
         """Checks if a connection point is connected to a node.
 
         :param connection_point: The index of the connection point to check.

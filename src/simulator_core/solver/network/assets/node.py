@@ -18,14 +18,14 @@ import uuid
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
-                                                    IndexEnum)
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.network.assets.base_item import BaseItem
+from simulator_core.solver.network.assets.base_asset import BaseAsset
+from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
-class Node(BaseItem):
+class Node(BaseNodeItem):
     """
     A class to represent a node in a network.
 
@@ -61,8 +61,14 @@ class Node(BaseItem):
         Returns True if the node is connected to any asset, False otherwise.
     """
 
-    def __init__(self, name: uuid.UUID, number_of_unknowns: int = 3, height: float = 0.0,
-                 initial_temperature: float = 373.15, set_pressure: float = 10000.0):
+    def __init__(
+        self,
+        name: uuid.UUID,
+        number_of_unknowns: int = 3,
+        height: float = 0.0,
+        initial_temperature: float = 273.15,
+        set_pressure: float = 10000.0,
+    ):
         """Initializes the Node object with the given parameters.
 
         :param uuid.UUID name: The unique identifier of the node.
@@ -70,12 +76,12 @@ class Node(BaseItem):
         The default is 3.
         """
         super().__init__(number_of_unknowns, name)
-        self.connected_assets: list[tuple[BaseItem, int]] = []
+        self.connected_assets: list[tuple[BaseAsset, int]] = []
         self.height = height
         self.initial_temperature = initial_temperature
         self.set_pressure = set_pressure
 
-    def connect_asset(self, asset: BaseItem, con_point: int) -> None:
+    def connect_asset(self, asset: BaseAsset, con_point: int) -> None:
         """Connects an asset object at the given connection point to the node .
 
         :param BaseAsset asset: The asset object that is connected to the node.
