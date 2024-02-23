@@ -40,6 +40,8 @@ class Matrix:
         :param int number_unknowns: Number of unknowns to add
         :return: int Starting index of the added unknowns.
         """
+        if number_unknowns < 1:
+            raise ValueError("Number of unknowns should be at least 1.")
         self.num_unknowns += number_unknowns
         self.sol_new += [1.0] * number_unknowns
         self.sol_old += [0.0] * number_unknowns
