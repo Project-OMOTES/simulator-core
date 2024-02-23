@@ -88,6 +88,9 @@ class Node(BaseNodeItem):
         :param int con_point: The connection point for the asset which is connected to this node.
         :return:
         """
+        if con_point > (asset.number_of_connection_point - 1):
+            raise ValueError(f"Connection point {con_point} does not exist on asset {asset.name}.")
+        # Connect the asset to the node
         self.connected_assets.append((asset, con_point))
 
     def get_equations(self) -> list[EquationObject]:
@@ -102,9 +105,15 @@ class Node(BaseNodeItem):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        equations = [self.add_node_cont_equation(),
-                     self.add_energy_equations(),
-                     self.add_discharge_equation()]
+        # Check connection
+        if not self.is_connected():
+            raise ValueError(f"Node {self.name} is not connected to any asset.")
+        # Construct equation object
+        equations = [
+            self.add_node_cont_equation(),
+            self.add_energy_equations(),
+            self.add_discharge_equation(),
+        ]
         return equations
 
     def add_energy_equations(self) -> EquationObject:
@@ -118,10 +127,16 @@ class Node(BaseNodeItem):
         :return: EquationObject An EquationObject that contains the indices, coefficients,
             and right-hand side value of the equation.
         """
-        flows = [asset[0].prev_sol[IndexEnum.discharge
-                                   + asset[1] * NUMBER_CORE_QUANTITIES]
-                 <= 0 for asset in self.connected_assets]
-        if all(flows):
+        flows = np.array(
+            [
+                asset.prev_sol[
+                    IndexEnum.discharge + asset_connection_point * NUMBER_CORE_QUANTITIES
+                ]
+                for asset, asset_connection_point in self.connected_assets
+            ]
+        )
+
+        if all(flows >= 0.0) or all(flows <= 0.0):
             return self.set_temperature_equation()
         else:
             return self.add_energy_equation()
@@ -137,11 +152,15 @@ class Node(BaseNodeItem):
         equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
-        for asset in self.connected_assets:
-            equation_object.indices = np.append(equation_object.indices,
-                                                [asset[0].matrix_index
-                                                 + IndexEnum.discharge
-                                                 + asset[1] * NUMBER_CORE_QUANTITIES])
+        for asset, asset_connection_point in self.connected_assets:
+            equation_object.indices = np.append(
+                equation_object.indices,
+                [
+                    asset.matrix_index
+                    + IndexEnum.discharge
+                    + asset_connection_point * NUMBER_CORE_QUANTITIES
+                ],
+            )
             equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
         return equation_object
 
@@ -192,30 +211,39 @@ class Node(BaseNodeItem):
             value of the equation
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge,
-                                            self.matrix_index + IndexEnum.internal_energy])
-        equation_object.coefficients = np.array([self.prev_sol[2], self.prev_sol[0]])
-        equation_object.rhs = self.prev_sol[0] * self.prev_sol[2]
-        for asset in self.connected_assets:
-            equation_object.indices = np.append(equation_object.indices,
-                                                [asset[0].matrix_index
-                                                 + IndexEnum.discharge
-                                                 + asset[1] * NUMBER_CORE_QUANTITIES,
-                                                 asset[0].matrix_index
-                                                 + IndexEnum.internal_energy
-                                                 + asset[1] * NUMBER_CORE_QUANTITIES])
-            prev_sol = asset[0].prev_sol
-            equation_object.coefficients = np.append(equation_object.coefficients,
-                                                     [prev_sol[asset[1]
-                                                               * NUMBER_CORE_QUANTITIES
-                                                               + IndexEnum.internal_energy],
-                                                      prev_sol[asset[1]
-                                                               * NUMBER_CORE_QUANTITIES]
-                                                      + IndexEnum.discharge])
-            equation_object.rhs += (prev_sol[asset[1] * NUMBER_CORE_QUANTITIES
-                                             + IndexEnum.discharge]
-                                    * prev_sol[asset[1] * NUMBER_CORE_QUANTITIES
-                                               + IndexEnum.internal_energy])
+        equation_object.indices = np.array(
+            [self.matrix_index + IndexEnum.discharge, self.matrix_index + IndexEnum.internal_energy]
+        )
+        equation_object.coefficients = np.array(self.prev_sol)[
+            equation_object.indices - self.matrix_index
+        ]
+        equation_object.rhs = np.prod(equation_object.coefficients)
+        # Extend the equation_object with the indices and coefficients of the connected assets
+        for asset, asset_connection_id in self.connected_assets:
+            # Extended asset indices
+            extra_indices = np.array(
+                [
+                    asset.matrix_index
+                    + IndexEnum.discharge
+                    + asset_connection_id * NUMBER_CORE_QUANTITIES,
+                    asset.matrix_index
+                    + IndexEnum.internal_energy
+                    + asset_connection_id * NUMBER_CORE_QUANTITIES,
+                ]
+            )
+            # Extend the indices and coefficients of the equation object
+            equation_object.indices = np.append(
+                equation_object.indices,
+                extra_indices,
+            )
+            # Extend the coefficients of the equation object
+            prev_sol = np.array(asset.prev_sol)
+            equation_object.coefficients = np.append(
+                equation_object.coefficients,
+                prev_sol[extra_indices - asset.matrix_index],
+            )
+            # Extend the right-hand side of the equation object
+            equation_object.rhs += np.prod(prev_sol[extra_indices - asset.matrix_index])
         return equation_object
 
     def is_connected(self) -> bool:
