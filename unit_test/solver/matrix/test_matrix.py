@@ -46,14 +46,15 @@ class MatrixTest(unittest.TestCase):
         """Test the add unknowns of the matrix object."""
         # arrange
         matrix = Matrix()
+        number_of_unknowns = 2
 
         # act
-        index = matrix.add_unknowns(number_unknowns=2)
+        index = matrix.add_unknowns(number_unknowns=number_of_unknowns)
 
         # assert
-        self.assertEqual(matrix.num_unknowns, 2)
-        self.assertEqual(len(matrix.sol_new), 2)
-        self.assertEqual(len(matrix.sol_old), 2)
+        self.assertEqual(matrix.num_unknowns, number_of_unknowns)
+        self.assertEqual(matrix.sol_new, [1.0] * number_of_unknowns)
+        self.assertEqual(matrix.sol_old, [0.0] * number_of_unknowns)
         self.assertEqual(index, 0)
 
     def test_add_unknows_error(self) -> None:
