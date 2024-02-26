@@ -240,7 +240,7 @@ class Node(BaseNodeItem):
             prev_sol = np.array(asset.prev_sol)
             equation_object.coefficients = np.append(
                 equation_object.coefficients,
-                prev_sol[extra_indices - asset.matrix_index],
+                prev_sol[(extra_indices - asset.matrix_index)[::-1]],
             )
             # Extend the right-hand side of the equation object
             equation_object.rhs += np.prod(prev_sol[extra_indices - asset.matrix_index])
