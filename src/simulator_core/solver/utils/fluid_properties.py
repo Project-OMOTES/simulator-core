@@ -49,7 +49,7 @@ class FluidProperties:
         self.rho = []
         self.visc = []
         with open(file) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=';')
+            csv_reader = csv.reader(csv_file, delimiter=";")
             for row in csv_reader:
                 self.T.append(float(row[0]))
                 self.cp.append(float(row[1]))
@@ -58,8 +58,9 @@ class FluidProperties:
 
         self.IE = [0.0]
         for i in range(1, len(self.T)):
-            self.IE.append(self.IE[-1] + (self.cp[i - 1] + self.cp[i])
-                           / 2 * (self.T[i] - self.T[i - 1]))
+            self.IE.append(
+                self.IE[-1] + (self.cp[i - 1] + self.cp[i]) / 2 * (self.T[i] - self.T[i - 1])
+            )
 
     def get_ie(self, t: float) -> float:
         """Returns the internal energy of the fluid at a given temperature.
@@ -67,7 +68,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The internal energy of the fluid at the given temperature.
         """
-        return float(np.interp(np.array([t]), self.T, self.IE)[0])
+        return float(np.interp(np.array([t]), self.T, self.IE).item())
 
     def get_t(self, ie: float) -> float:
         """Returns the temperature of the fluid at a given internal energy.
@@ -75,7 +76,7 @@ class FluidProperties:
         :param ie: The internal energy of the fluid.
         :return: The temperature of the fluid at the given internal energy.
         """
-        return float(np.interp(np.array([ie]), self.IE, self.T)[0])
+        return float(np.interp(np.array([ie]), self.IE, self.T).item())
 
     def get_density(self, t: float) -> float:
         """Returns the density of the fluid at a given temperature.
@@ -83,7 +84,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The density of the fluid at the given temperature.
         """
-        return float(np.interp(np.array([t]), self.T, self.rho)[0])
+        return float(np.interp(np.array([t]), self.T, self.rho).item())
 
     def get_viscosity(self, t: float) -> float:
         """Returns the viscosity of the fluid at a given temperature.
@@ -91,7 +92,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The viscosity of the fluid at the given temperature.
         """
-        return float(np.interp(np.array([t]), self.T, self.visc)[0])
+        return float(np.interp(np.array([t]), self.T, self.visc).item())
 
     def get_heat_capacity(self, t: float) -> float:
         """Returns the heat capacity of the fluid at a given temperature.
@@ -99,7 +100,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The capacity of the fluid at the given temperature.
         """
-        return float(np.interp(np.array([t]), self.T, self.cp)[0])
+        return float(np.interp(np.array([t]), self.T, self.cp).item())
 
 
 fluid_props = FluidProperties()
