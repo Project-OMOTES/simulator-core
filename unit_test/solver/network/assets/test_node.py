@@ -277,7 +277,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
             ),
         )
         np_test.assert_array_equal(
-            equation_object.coefficients, np.array([self.discharge, self.internal_energy])
+            equation_object.coefficients, np.array([self.internal_energy, self.discharge])
         )
         self.assertEqual(equation_object.rhs, self.internal_energy * self.discharge)
 
@@ -313,8 +313,8 @@ class NodeTestEnergyEquation(unittest.TestCase):
             equation_object.coefficients,
             np.array(
                 [
-                    self.discharge,
                     self.internal_energy,
+                    self.discharge,
                     self.internal_energy,
                     -self.discharge,
                 ]

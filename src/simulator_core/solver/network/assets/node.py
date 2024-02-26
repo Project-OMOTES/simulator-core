@@ -214,8 +214,9 @@ class Node(BaseNodeItem):
         equation_object.indices = np.array(
             [self.matrix_index + IndexEnum.discharge, self.matrix_index + IndexEnum.internal_energy]
         )
+        # Be aware that the coefficients are in reverse order
         equation_object.coefficients = np.array(self.prev_sol)[
-            equation_object.indices - self.matrix_index
+            (equation_object.indices - self.matrix_index)[::-1]
         ]
         equation_object.rhs = np.prod(equation_object.coefficients)
         # Extend the equation_object with the indices and coefficients of the connected assets
