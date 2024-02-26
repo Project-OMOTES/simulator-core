@@ -62,6 +62,45 @@ class FallTypeTest(unittest.TestCase):
         self.assertEqual(press_loss_eq_patch.call_count, 1)
         self.assertEqual(len(equations), 6)
 
+    def test_get_equation_insufficient_nodes(self) -> None:
+        """Evaluate the retrieval of equations from the boundary object with insufficient nodes."""
+        # Arrange
+        self.asset.connected_nodes = []
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.get_equations()
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(str(cm.exception), "The number of connected nodes must be 2!")
+
+    def test_get_equations_more_unknowns(self) -> None:
+        """Evaluate the retrieval of equations from the boundary object with more unknowns."""
+        # Arrange
+        self.asset.number_of_unknowns = 4
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.get_equations()
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(str(cm.exception), "The number of unknowns must be 6!")
+
+    def test_get_equations_less_unknowns(self) -> None:
+        """Evaluate the retrieval of equations from the boundary object with less unknowns."""
+        # Arrange
+        self.asset.number_of_unknowns = 2
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.get_equations()
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(str(cm.exception), "The number of unknowns must be 6!")
+
     def test_add_internal_cont_equation(self) -> None:
         """Evaluate the addition of an internal continuity equation to the boundary object.
 
@@ -218,3 +257,36 @@ class FallTypeTest(unittest.TestCase):
             equation_object.rhs,
             -self.asset.loss_coefficient * 1e-5 * self.asset.prev_sol[IndexEnum.discharge],
         )
+
+    @patch.object(FallType, "add_internal_energy_equation")
+    def test_add_thermal_equations(self, mock_energy_eq) -> None:
+        """Evaluate the addition of thermal equations to the boundary object.
+
+        The equations are:
+        mIE_in - mIE_out = 0
+        """
+        # Arrange
+        connection_point = 0
+        self.asset.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point] = 1.0
+
+        # Act
+        self.asset.add_thermal_equations(connection_point=connection_point)
+
+        # Assert
+        self.assertEqual(mock_energy_eq.call_count, 1)
+
+    @patch.object(FallType, "add_press_to_node_equation")
+    def test_add_press_to_node_equation(self, mock_press_to_node_eq) -> None:
+        """Evaluate the addition of pressure to node equations to the boundary object.
+
+        The equations are:
+        - Pressure at the boundary - Pressure at the node = 0
+        """
+        # Arrange
+        connection_point = 0
+
+        # Act
+        self.asset.add_press_to_node_equation(connection_point=connection_point)
+
+        # Assert
+        self.assertEqual(mock_press_to_node_eq.call_count, 1)
