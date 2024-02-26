@@ -203,8 +203,6 @@ class FallTypeTest(unittest.TestCase):
                 ]
             ),
         )
-
-        # TODO: Why 1e-5?
         np_testing.assert_array_equal(
             equation_object.coefficients,
             np.array(
