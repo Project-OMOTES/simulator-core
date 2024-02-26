@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
 import numpy as np
-import scipy
 import csv
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.utility import absolute_difference, relative_difference
@@ -40,6 +39,8 @@ class Matrix:
         :param int number_unknowns: Number of unknowns to add
         :return: int Starting index of the added unknowns.
         """
+        if number_unknowns < 1:
+            raise ValueError("Number of unknowns should be at least 1.")
         self.num_unknowns += number_unknowns
         self.sol_new += [1.0] * number_unknowns
         self.sol_old += [0.0] * number_unknowns
@@ -72,35 +73,11 @@ class Matrix:
         for equation in equations:
             self.add_equation(equation)
         if dumb:
-            self.dumb_matrix()
+            self.dump_matrix()
         self.sol_old = self.sol_new
         a = np.array(self.mat)
         b = np.array(self.rhs)
         self.sol_new = np.linalg.solve(a, b).tolist()
-        return self.sol_new
-
-    def solve2(self, equations: list[EquationObject], dumb: bool = False) -> list:
-        """Method to solve the system of equation given in the matrix.
-
-        Solves the system of equations and returns the solution. The numpy linalg
-        library solve method is used. For this the matrix is converted to np arrays.
-        :return: list containing the solution of the system of equations.
-        """
-        # TODO add checks if enough equations have been supplied.
-        # TODO check if matrix is solvable.
-        rhs = np.array([equation.rhs for equation in equations], float)
-        row = np.array([], int)
-        col = np.array([], int)
-        data = np.array([], float)
-        row_index = 0
-        for equation in equations:
-            row = np.append(row, [row_index] * len(equation.indices))
-            row_index += 1
-            col = np.append(col, equation.indices)
-            data = np.append(data, equation.coefficients)
-        A = scipy.sparse.csc_matrix((data, (row, col)),
-                                    shape=(self.num_unknowns, self.num_unknowns))
-        self.sol_new = scipy.sparse.linalg.spsolve(A, rhs).tolist()
         return self.sol_new
 
     def is_converged(self) -> bool:
@@ -110,6 +87,8 @@ class Matrix:
         the solution has converged. If one of them is converged true is returned.
         :return: Bool whether the solution has converged based on the given convergence criteria.
         """
+        if self.num_unknowns == 0:
+            raise ValueError("No unknowns have been added to the matrix.")
         rel_dif = max(
             [relative_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
         abs_dif = max(
@@ -127,18 +106,20 @@ class Matrix:
         be provided
         :return: list with teh solution
         """
+        #  TODO add checks if the index and number of unknowns are within the range of the solution.
         return self.sol_new[index:index + number_of_unknowns]
 
-    def dumb_matrix(self, file_name: str = 'dumb.csv') -> None:
-        """Method to dumb the matrix to a csv file.
+    def dump_matrix(self, file_name: str = 'dump.csv') -> None:
+        """Method to dump the matrix to a csv file.
 
-        :param str file_name: File name to dumb the matrix in default=dumb.csv
+        :param str file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
-            write.writerows(self.mat)
+            for row, rhs in zip(self.mat, self.rhs):
+                write.writerow(row + [rhs])
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
-        self.sol_new = [1] * len(self.sol_new)
+        self.sol_new = [1.0] * len(self.sol_new)
