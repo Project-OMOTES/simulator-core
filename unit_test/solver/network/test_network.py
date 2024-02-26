@@ -148,7 +148,7 @@ class NetworkTest(unittest.TestCase):
                                        asset3.name, 0)
 
         # assert
-        self.assertEqual(node1, node2)
+        self.assertFalse(network.exists_node(node2))
         self.assertEqual(node1, node3)
 
     def test_connecting_assets_error(self):
