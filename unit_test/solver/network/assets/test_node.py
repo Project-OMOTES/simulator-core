@@ -89,16 +89,40 @@ class NodeTest(unittest.TestCase):
             f"Connection point {connection_id} does not exist on asset {connected_asset.name}.",
         )
 
-    def test_get_equations(self) -> None:
+    def test_get_equations_not_connected(self) -> None:
         """Test the get_equations method of the Node class."""
         # arrange
         asset_name = uuid4()
         asset = Node(name=asset_name)
 
         # act
-        equations = asset.get_equations()
+        with self.assertRaises(ValueError) as cm:
+            asset.get_equations()
 
         # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(cm.exception.args[0], f"Node {asset.name} is not connected to any asset.")
+
+    @patch.object(Node, "add_node_cont_equation")
+    @patch.object(Node, "add_discharge_equation")
+    @patch.object(Node, "add_energy_equations")
+    def test_get_equations_connected(self, continuity_patch, discharge_patch, energy_patch) -> None:
+        """Test the get_equations method of the Node class when connected."""
+        # arrange
+        asset_name = uuid4()
+        asset = Node(name=asset_name)
+        connected_asset = ProductionAsset(name=uuid4())
+        connection_point = 0
+        asset.connect_asset(asset=connected_asset, con_point=connection_point)
+
+        # act
+        equations = asset.get_equations()  # act
+
+        # assert
+        continuity_patch.assert_called_once()
+        discharge_patch.assert_called_once()
+        energy_patch.assert_called_once()
+        self.assertEqual(len(equations), 3)
 
     def test_add_node_cont_equation(self) -> None:
         """Test the add_node_cont_equation method of the Node class."""

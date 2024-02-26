@@ -50,7 +50,7 @@ class BaseItemTest(unittest.TestCase):
         # arrange
         asset_name = uuid4()
         number_of_unknowns = 2
-        asset = MockBaseItem(name=asset_name, number_of_unknowns=number_of_unknowns)
+        asset = MockBaseNodeItem(name=asset_name, number_of_unknowns=number_of_unknowns)
 
         # act
         asset.set_matrix_index(1)  # act
