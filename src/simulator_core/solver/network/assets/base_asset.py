@@ -40,7 +40,7 @@ class BaseAsset(BaseItem):
         self,
         name: uuid.UUID,
         number_of_unknowns: int = 6,
-        number_con_points: int = 2,
+        number_connection_points: int = 2,
         supply_temperature: float = 293.15,
     ):
         """Initializes the BaseAsset object with the given parameters.
@@ -48,11 +48,14 @@ class BaseAsset(BaseItem):
         :param uuid.UUID name: The unique identifier of the node.
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
         The default is 3.
-        :param int, optional number_con_points: The number of connection points for the asset.
-            The default is 2, which corresponds to the inlet and outlet.
+        :param int, optional number_connection_points: The number of connection points for the
+            asset. The default is 2, which corresponds to the inlet and outlet.
         """
-        super().__init__(number_of_unknowns, name)
-        self.number_of_connection_point = number_con_points
+        super().__init__(
+            name=name,
+            number_of_unknowns=number_of_unknowns,
+            number_connection_points=number_connection_points,
+        )
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
 

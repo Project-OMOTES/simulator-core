@@ -57,6 +57,7 @@ class AssetAbstract(ABC):
         self.asset_id: str = asset_id
         self.output: List[Dict[str, float]] = []
 
+    @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 

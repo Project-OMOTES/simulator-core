@@ -75,8 +75,9 @@ class Pipe(AssetAbstract):
         self.roughness = PIPE_DEFAULTS.k_value
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
-        self.solver_asset = SolverPipe(uuid.uuid4(), length=self.length, diameter=self.diameter,
-                                       roughness=self.roughness)
+        self.solver_asset = SolverPipe(
+            uuid.uuid4(), length=self.length, diameter=self.diameter, roughness=self.roughness
+        )
         self.output = []
 
     def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
@@ -126,17 +127,24 @@ class Pipe(AssetAbstract):
         """
         # Error handling is performed in EsdlAssetObject.get_asset_parameters
         self.length, _ = esdl_asset.get_property(
-            esdl_property_name="length", default_value=self.length)
+            esdl_property_name="length", default_value=self.length
+        )
         self.roughness, _ = esdl_asset.get_property(
-            esdl_property_name="roughness", default_value=self.roughness)
+            esdl_property_name="roughness", default_value=self.roughness
+        )
         self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
 
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
-        prop_dict = {"length": self.length,
-                     "diameter": self.diameter,
-                     "roughness": self.roughness}
+        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness}
         self.solver_asset.set_physical_properties(physical_properties=prop_dict)
+
+    def set_setpoints(self, setpoints: Dict) -> None:
+        """Set the setpoints of the pipe prior to a simulation.
+
+        :param Dict setpoints: The setpoints that should be set for the pipe.
+            The keys of the dictionary are the names of the setpoints and the values are the values
+        """
 
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list.
@@ -154,9 +162,11 @@ class Pipe(AssetAbstract):
         - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
         - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
-        output_dict = {PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-                       PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-                       PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-                       PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-                       PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1)}
+        output_dict = {
+            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
+            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
+            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
+            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
+            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
+        }
         self.output.append(output_dict)

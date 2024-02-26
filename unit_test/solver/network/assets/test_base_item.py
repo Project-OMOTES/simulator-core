@@ -35,11 +35,13 @@ class BaseItemTest(unittest.TestCase):
         # arrange
         asset_name = uuid4()
         number_of_unknowns = 2
+        number_of_connection_points = 2
 
         # act
         asset = MockBaseItem(
             name=asset_name,
-            number_of_unknowns=number_of_unknowns
+            number_of_unknowns=number_of_unknowns,
+            number_connection_points=number_of_connection_points,
         )  # act
 
         # assert
@@ -53,9 +55,11 @@ class BaseItemTest(unittest.TestCase):
         # arrange
         asset_name = uuid4()
         number_of_unknowns = 2
+        number_of_connection_points = 2
         asset = MockBaseItem(
             name=asset_name,
-            number_of_unknowns=number_of_unknowns
+            number_of_unknowns=number_of_unknowns,
+            number_connection_points=number_of_connection_points,
         )
 
         # act

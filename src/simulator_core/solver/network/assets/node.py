@@ -20,7 +20,7 @@ import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.network.assets.base_asset import BaseAsset
+from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -34,13 +34,13 @@ class Node(BaseNodeItem):
 
     Attributes
     ----------
-    connected_assets : list[list[BaseAsset, int]]
+    connected_assets : list[list[BaseItem, int]]
         A list of lists that store the asset objects and the connection point indices that
         are connected to the node.
 
     Methods
     -------
-    connect_asset(asset: BaseAsset, con_point: int)
+    connect_asset(asset: BaseItem, connection_point: int)
         Connects an asset object to the node at the given connection point index.
     get_equations() -> list[EquationObject]
         Returns a list of EquationObjects that represent the equations for the node.
@@ -76,22 +76,25 @@ class Node(BaseNodeItem):
         The default is 3.
         """
         super().__init__(number_of_unknowns, name)
-        self.connected_assets: list[tuple[BaseAsset, int]] = []
+        self.connected_assets: list[tuple[BaseItem, int]] = []
         self.height = height
         self.initial_temperature = initial_temperature
         self.set_pressure = set_pressure
 
-    def connect_asset(self, asset: BaseAsset, con_point: int) -> None:
+    def connect_asset(self, asset: BaseItem, connection_point: int) -> None:
         """Connects an asset object at the given connection point to the node .
 
         :param BaseAsset asset: The asset object that is connected to the node.
-        :param int con_point: The connection point for the asset which is connected to this node.
+        :param int connection_point: The connection point for the asset which is connected to this
+            node.
         :return:
         """
-        if con_point > (asset.number_of_connection_point - 1):
-            raise ValueError(f"Connection point {con_point} does not exist on asset {asset.name}.")
+        if connection_point > (asset.number_of_connection_point - 1):
+            raise ValueError(
+                f"Connection point {connection_point} does not exist on asset {asset.name}."
+            )
         # Connect the asset to the node
-        self.connected_assets.append((asset, con_point))
+        self.connected_assets.append((asset, connection_point))
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the node.

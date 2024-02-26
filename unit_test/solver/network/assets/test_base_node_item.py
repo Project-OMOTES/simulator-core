@@ -26,6 +26,9 @@ class MockBaseNodeItem(BaseNodeItem):
     def get_equations(self) -> None:
         """Dummy implementation of the get_equations method for testing."""
 
+    def connect_asset(self, asset: BaseNodeItem, connection_point: int) -> None:
+        """Dummy implementation of the connect_asset method for testing."""
+
 
 class BaseItemTest(unittest.TestCase):
     """Testcase for BaseNodeItem class."""

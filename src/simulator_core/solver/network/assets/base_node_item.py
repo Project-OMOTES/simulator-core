@@ -18,6 +18,7 @@ import uuid
 from abc import ABC, abstractmethod
 
 from simulator_core.solver.matrix.equation_object import EquationObject
+from simulator_core.solver.network.assets.base_item import BaseItem
 
 
 class BaseNodeItem(ABC):
@@ -47,4 +48,12 @@ class BaseNodeItem(ABC):
 
         :return: The equations for the item.
         :rtype: list[EquationObject]
+        """
+
+    @abstractmethod
+    def connect_asset(self, asset: BaseItem, connection_point: int) -> None:
+        """Connects the asset to the node item.
+
+        :param BaseItem asset: The asset to connect to the node item.
+        :param int connection_point: The connection point of the asset to connect to.
         """

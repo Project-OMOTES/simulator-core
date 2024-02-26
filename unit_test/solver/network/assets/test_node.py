@@ -65,7 +65,7 @@ class NodeTest(unittest.TestCase):
         connection_id = 0
 
         # act
-        main_asset.connect_asset(asset=connected_asset, con_point=connection_id)  # act
+        main_asset.connect_asset(asset=connected_asset, connection_point=connection_id)  # act
 
         # assert
         self.assertEqual(main_asset.connected_assets, [(connected_asset, connection_id)])
@@ -80,7 +80,7 @@ class NodeTest(unittest.TestCase):
 
         # act
         with self.assertRaises(ValueError) as cm:
-            main_asset.connect_asset(asset=connected_asset, con_point=connection_id)
+            main_asset.connect_asset(asset=connected_asset, connection_point=connection_id)
 
         # assert
         self.assertIsInstance(cm.exception, ValueError)
@@ -113,7 +113,7 @@ class NodeTest(unittest.TestCase):
         asset = Node(name=asset_name)
         connected_asset = ProductionAsset(name=uuid4())
         connection_point = 0
-        asset.connect_asset(asset=connected_asset, con_point=connection_point)
+        asset.connect_asset(asset=connected_asset, connection_point=connection_point)
 
         # act
         equations = asset.get_equations()  # act
@@ -145,7 +145,7 @@ class NodeTest(unittest.TestCase):
         asset = Node(name=asset_name)
         connected_asset = ProductionAsset(name=uuid4())
         connection_point = 0
-        asset.connect_asset(asset=connected_asset, con_point=connection_point)
+        asset.connect_asset(asset=connected_asset, connection_point=connection_point)
 
         # act
         equation_object = asset.add_node_cont_equation()  # act
@@ -220,7 +220,7 @@ class NodeTest(unittest.TestCase):
         connection_point = 0
 
         # act
-        asset.connect_asset(asset=connected_asset, con_point=connection_point)
+        asset.connect_asset(asset=connected_asset, connection_point=connection_point)
 
         # assert
         self.assertTrue(asset.is_connected())
@@ -284,7 +284,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
     def test_add_energy_equation_with_additional_asset(self) -> None:
         """Test the add_energy_equation method of the Node class with additional asset."""
         # arrange
-        self.asset.connect_asset(asset=self.connected_asset, con_point=self.connection_point)
+        self.asset.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         self.asset.prev_sol[IndexEnum.discharge] = self.discharge
         self.asset.prev_sol[IndexEnum.internal_energy] = self.internal_energy
         self.connected_asset.prev_sol[IndexEnum.discharge] = -self.discharge
@@ -333,12 +333,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset.prev_sol[
             IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
         ] = +self.discharge
-        self.asset.connect_asset(asset=self.connected_asset, con_point=self.connection_point)
+        self.asset.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
         ] = -self.discharge
-        self.asset.connect_asset(asset=self.connected_asset_2, con_point=self.connection_point_2)
+        self.asset.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
 
         # act
         self.asset.add_energy_equations()
@@ -354,12 +356,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset.prev_sol[
             IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
         ] = +self.discharge
-        self.asset.connect_asset(asset=self.connected_asset, con_point=self.connection_point)
+        self.asset.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
         ] = +self.discharge
-        self.asset.connect_asset(asset=self.connected_asset_2, con_point=self.connection_point_2)
+        self.asset.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
 
         # act
         self.asset.add_energy_equations()
@@ -375,12 +379,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset.prev_sol[
             IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
         ] = -self.discharge
-        self.asset.connect_asset(asset=self.connected_asset, con_point=self.connection_point)
+        self.asset.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
         ] = -self.discharge
-        self.asset.connect_asset(asset=self.connected_asset_2, con_point=self.connection_point_2)
+        self.asset.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
 
         # act
         self.asset.add_energy_equations()
@@ -396,12 +402,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset.prev_sol[
             IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
         ] = 0.0
-        self.asset.connect_asset(asset=self.connected_asset, con_point=self.connection_point)
+        self.asset.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
         ] = 0.0
-        self.asset.connect_asset(asset=self.connected_asset_2, con_point=self.connection_point_2)
+        self.asset.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
 
         # act
         self.asset.add_energy_equations()
