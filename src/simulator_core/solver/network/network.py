@@ -89,13 +89,14 @@ class Network:
         :return: id of node connecting the two assets
         """
         if not self.exists_asset(asset1):
-            raise ValueError(str(asset1) + " does not exists in network")
-        elif not self.exists_asset(asset2):
-            raise ValueError(str(asset2) + " does not exists in network")
-        elif (not self.assets[asset1].is_connected(connection_point_1)) and not (
+            raise ValueError(f"{asset1} +  does not exists in network.")
+        if not self.exists_asset(asset2):
+            raise ValueError(f"{asset2} +  does not exists in network.")
+
+        if (not self.assets[asset1].is_connected(connection_point_1)) and not (
             self.assets[asset2].is_connected(connection_point_2)
         ):
-            # both asset connect points not connected
+            # both assets are not connected. Create a new node and connect everything.
             asset_id = uuid.uuid4()
             self.nodes[asset_id] = Node(name=asset_id)
             self.assets[asset1].connect_node(connection_point_1, self.nodes[asset_id])
@@ -103,29 +104,28 @@ class Network:
             self.nodes[asset_id].connect_asset(self.assets[asset1], connection_point_1)
             self.nodes[asset_id].connect_asset(self.assets[asset2], connection_point_2)
             return asset_id
-        elif (self.assets[asset1].is_connected(connection_point_1)) and not (
+        if (self.assets[asset1].is_connected(connection_point_1)) and not (
             self.assets[asset2].is_connected(connection_point_2)
         ):
-            # asset 1 connected asset 2 not
+            # asset 1 connected asset 2 not, connect the node of asset 1 to asset 2
             node = self.assets[asset1].get_connected_node(connection_point_1)
             self.assets[asset2].connect_node(connection_point_2, node)
             node.connect_asset(self.assets[asset2], connection_point_2)
             return node.name
-        elif not self.assets[asset1].is_connected(connection_point_1) and self.assets[
+        if not self.assets[asset1].is_connected(connection_point_1) and self.assets[
             asset2
         ].is_connected(connection_point_2):
-            # asset 2 connected asset 1 not
+            # asset 2 connected asset 1 not connect the node of asset 2 to asset 1
             node = self.assets[asset2].get_connected_node(connection_point_2)
             self.assets[asset1].connect_node(connection_point_1, node)
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
-        elif not self.assets[asset1].is_connected(connection_point_1) and (
+        if not self.assets[asset1].is_connected(connection_point_1) and (
             not self.assets[asset2].is_connected(connection_point_2)
         ):
             # both asset already connected need to delete one node.
             raise NotImplementedError("Assets already connected to assets")
-        else:
-            raise NotImplementedError("Something has gone wrong assets already connected to node")
+        raise NotImplementedError("Something has gone wrong assets already connected to node")
 
     def exists_asset(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
