@@ -56,8 +56,6 @@ class FallType(BaseAsset):
     def __init__(
         self,
         name: uuid.UUID,
-        number_of_unknowns: int = 6,
-        number_con_points: int = 2,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -77,9 +75,11 @@ class FallType(BaseAsset):
             the inlet and outlet.
         """
         super().__init__(
-            name, number_of_unknowns, number_con_points, supply_temperature=supply_temperature
+            name=name,
+            number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
+            number_con_points=2,
+            supply_temperature=supply_temperature,
         )
-        self.number_of_connection_point = number_con_points
         self.heat_supplied = heat_supplied
         self.loss_coefficient = loss_coefficient
 
@@ -96,6 +96,13 @@ class FallType(BaseAsset):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
+        # Check if there are two nodes connected to the asset
+        if len(self.connected_nodes) != 2:
+            raise ValueError("The number of connected nodes must be 2!")
+        # Check if the number of unknowns is 6
+        if self.number_of_unknowns != 6:
+            raise ValueError("The number of unknowns must be 6!")
+        # Add the equations for the asset
         equations = [
             self.add_press_to_node_equation(0),
             self.add_press_to_node_equation(1),
@@ -160,11 +167,17 @@ class FallType(BaseAsset):
             ]
         )
         equation_object.coefficients = np.array(
-            [self.prev_sol[2], self.prev_sol[0], self.prev_sol[5], self.prev_sol[3]]
+            [
+                self.prev_sol[IndexEnum.internal_energy],
+                self.prev_sol[IndexEnum.discharge],
+                self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES],
+                self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES],
+            ]
         )
         equation_object.rhs = (
-            self.prev_sol[0] * self.prev_sol[2]
-            + self.prev_sol[3] * self.prev_sol[5]
+            self.prev_sol[IndexEnum.discharge] * self.prev_sol[IndexEnum.internal_energy]
+            + self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES]
+            * self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES]
             + self.heat_supplied
         )
         return equation_object
@@ -189,16 +202,20 @@ class FallType(BaseAsset):
             ]
         )
         self.update_loss_coefficient()
-        if self.prev_sol[0] < 1e-5:
+        if self.prev_sol[IndexEnum.discharge] < 1e-5:
             equation_object.coefficients = np.array(
                 [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
             )
-            equation_object.rhs = -self.loss_coefficient * self.prev_sol[0] * 1e-5
+            equation_object.rhs = -self.loss_coefficient * self.prev_sol[IndexEnum.discharge] * 1e-5
         else:
             equation_object.coefficients = np.array(
-                [-2.0 * self.loss_coefficient * abs(self.prev_sol[0]), -1.0, 1.0]
+                [-2.0 * self.loss_coefficient * abs(self.prev_sol[IndexEnum.discharge]), -1.0, 1.0]
             )
-            equation_object.rhs = -self.loss_coefficient * self.prev_sol[0] * abs(self.prev_sol[0])
+            equation_object.rhs = (
+                -self.loss_coefficient
+                * self.prev_sol[IndexEnum.discharge]
+                * abs(self.prev_sol[IndexEnum.discharge])
+            )
         return equation_object
 
     def update_loss_coefficient(self) -> None:
