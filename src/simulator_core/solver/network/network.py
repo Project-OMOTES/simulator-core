@@ -120,11 +120,23 @@ class Network:
             self.assets[asset1].connect_node(connection_point_1, node)
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
-        if not self.assets[asset1].is_connected(connection_point_1) and (
-            not self.assets[asset2].is_connected(connection_point_2)
+        if self.assets[asset1].is_connected(connection_point_1) and (
+           self.assets[asset2].is_connected(connection_point_2)
         ):
-            # both asset already connected need to delete one node.
-            raise NotImplementedError("Assets already connected to assets")
+            # both asset already connected need to delete one node and connect everything
+            # to the same node. First check if the nodes are already the same.
+            node1 = self.assets[asset1].get_connected_node(connection_point_1)
+            node2 = self.assets[asset2].get_connected_node(connection_point_2)
+            if node1 == node2:
+                return node1.name
+            for connected_comp, connection_point in node2.connected_assets:
+                node1.connect_asset(connected_comp, connection_point)
+                connected_comp.disconnect_node(connection_point)
+                connected_comp.connect_node(connection_point, node1)
+            del self.nodes[node2.name]
+            self.assets[asset2].disconnect_node(connection_point_2)
+            self.assets[asset2].connect_node(connection_point_2, node1)
+            return node1.name
         raise NotImplementedError("Something has gone wrong assets already connected to node")
 
     def exists_asset(self, asset_id: uuid.UUID) -> bool:

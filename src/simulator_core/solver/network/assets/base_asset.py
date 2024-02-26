@@ -90,6 +90,16 @@ class BaseAsset(BaseItem):
 
         self.connected_nodes[connection_point] = node
 
+    def disconnect_node(self, connection_point: int) -> None:
+        """Disconnects a node from a connection point of the asset.
+
+        :param connection_point: The index of the connection point to disconnect.
+        :type connection_point: int
+        :raises ValueError: If the connection point is not connected to a node.
+        """
+        self.check_connection_point_valid(connection_point)
+        del self.connected_nodes[connection_point]
+
     def is_connected(self, connection_point: int) -> bool:
         """Checks if a connection point is connected to a node.
 
