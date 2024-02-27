@@ -28,6 +28,7 @@ class MockBaseItem(BaseItem):
     def disconnect_node(self, connection_point: int) -> None:
         """Dummy implementation of the disconnect_node method for testing."""
 
+
 class BaseItemTest(unittest.TestCase):
     """Testcase for BaseItem class."""
 
