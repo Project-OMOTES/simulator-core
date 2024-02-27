@@ -17,6 +17,7 @@
 import unittest
 from uuid import uuid4
 
+from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 
 
@@ -29,6 +30,8 @@ class MockBaseNodeItem(BaseNodeItem):
     def connect_asset(self, asset: BaseNodeItem, connection_point: int) -> None:
         """Dummy implementation of the connect_asset method for testing."""
 
+    def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
+        """Dummy implementation of the get_connected_assets method for testing."""
 
 class BaseItemTest(unittest.TestCase):
     """Testcase for BaseNodeItem class."""
