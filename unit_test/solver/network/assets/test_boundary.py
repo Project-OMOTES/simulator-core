@@ -35,7 +35,6 @@ class BaseBoundaryTest(unittest.TestCase):
         )
         # Create supply, connection_point:0 and return node, connection_point:1
         self.supply_node = Node(name=uuid4())
-        self.return_node = Node(name=uuid4())
         # Connect the nodes to the asset
         self.asset.connect_node(node=self.supply_node, connection_point=0)
 

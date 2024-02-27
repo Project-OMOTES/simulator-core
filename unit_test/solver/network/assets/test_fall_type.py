@@ -75,7 +75,7 @@ class FallTypeTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(str(cm.exception), "The number of connected nodes must be 2!")
 
-    def test_get_equations_more_unknowns(self) -> None:
+    def test_get_equations_invalid_number_of_unknowns(self) -> None:
         """Evaluate the retrieval of equations from the boundary object with more unknowns."""
         # Arrange
         self.asset.number_of_unknowns = 4
