@@ -34,7 +34,7 @@ class BaseItem(ABC):
         self.matrix_index = 0
         self.prev_sol: list[float] = [0.0] * self.number_of_unknowns
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Returns the string representation of the item."""
         return str(self.name)
 
