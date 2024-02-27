@@ -77,7 +77,7 @@ class FallType(BaseAsset):
         super().__init__(
             name=name,
             number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
-            number_con_points=2,
+            number_connection_points=2,
             supply_temperature=supply_temperature,
         )
         self.heat_supplied = heat_supplied

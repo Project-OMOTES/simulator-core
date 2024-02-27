@@ -86,14 +86,11 @@ class SolverPipe(FallType):
             self.lambda_loss * self.length / (2 * self.diameter * self.area**2 * 9.81)
         )
 
-    def calc_reynolds_number(
-        self, mass_flow_rate: float, temperature: float = 20.0 + 273.15
-    ) -> None:
-        """Method to calculate the Reynolds number of the flow in the pipe.
-
-        :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
-        :param float, optional temperature: The temperature of the fluid in the pipe.
-        """
+    def calc_reynolds_number(self) -> None:
+        """Method to calculate the Reynolds number of the flow in the pipe."""
+        # Retrieve properties from previous solution
+        mass_flow_rate = self.prev_sol[IndexEnum.discharge]
+        temperature = fluid_props.get_t(self.prev_sol[IndexEnum.internal_energy])
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
         velocity = discharge / self.area
@@ -101,7 +98,7 @@ class SolverPipe(FallType):
 
     def calc_lambda_loss(self) -> None:
         """Method to calculate the lambda loss of the pipe."""
-        self.calc_reynolds_number(1000.0)
+        self.calc_reynolds_number()
         if self.reynolds_number < 100:
             self.lambda_loss = 0.64
         elif self.reynolds_number < 2000:
@@ -131,9 +128,11 @@ class SolverPipe(FallType):
         temperature_x = fluid_props.get_t(internal_energy_x)
         # Function to minimize
         return float(
-            (
-                mass_flow_rate * (internal_energy_1 - internal_energy_x)
-                + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature)
+            np.array(
+                [
+                    mass_flow_rate * (internal_energy_1 - internal_energy_x)
+                    + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature)
+                ]
             ).item()
         )
 
