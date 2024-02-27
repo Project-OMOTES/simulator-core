@@ -318,9 +318,12 @@ class SolverPipe(FallType):
                 temperature=temperature,
                 mass_flow_rate=mass_flow_rate,
             )
-            total_heat_transfer_coefficient = 1 / (
-                1 / heat_transfer_coefficient_fluid + 1 / self.alpha_value
-            )
+            if self.alpha_value > 0.0:
+                total_heat_transfer_coefficient = 1 / (
+                    1 / heat_transfer_coefficient_fluid + 1 / self.alpha_value
+                )
+            else:
+                total_heat_transfer_coefficient = heat_transfer_coefficient_fluid
         else:
             total_heat_transfer_coefficient = self.alpha_value
 
