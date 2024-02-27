@@ -57,3 +57,11 @@ class BaseNodeItem(ABC):
         :param BaseItem asset: The asset to connect to the node item.
         :param int connection_point: The connection point of the asset to connect to.
         """
+
+    @abstractmethod
+    def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
+        """Returns the connected assets of the node item.
+
+        :return: The connected assets of the node item.
+        :rtype: Tuple[BaseItem, int]
+        """

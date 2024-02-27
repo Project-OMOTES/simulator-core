@@ -257,3 +257,11 @@ class Node(BaseNodeItem):
             A boolean value that indicates whether the node is connected or not.
         """
         return len(self.connected_assets) > 0
+
+    def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
+        """Returns the connected assets of the node.
+
+        :return: Tuple[BaseItem, int]
+            A tuple of the connected asset and the connection point index.
+        """
+        return self.connected_assets

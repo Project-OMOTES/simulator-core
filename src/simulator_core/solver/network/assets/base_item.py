@@ -54,3 +54,10 @@ class BaseItem(ABC):
         :return: The equations for the item.
         :rtype: list[EquationObject]
         """
+
+    @abstractmethod
+    def disconnect_node(self, connection_point: int) -> None:
+        """Disconnects a node from the item.
+
+        :param int connection_point: The connection point to disconnect.
+        """

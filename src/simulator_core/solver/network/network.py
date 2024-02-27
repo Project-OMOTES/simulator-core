@@ -130,10 +130,11 @@ class Network:
             node2 = self.assets[asset2].get_connected_node(connection_point_2)
             if node1 == node2:
                 return node1.name
-            for connected_comp, connection_point in node2.connected_assets:
+            for connected_comp, connection_point in node2.get_connected_assets():
                 node1.connect_asset(connected_comp, connection_point)
                 connected_comp.disconnect_node(connection_point)
-                connected_comp.connect_node(connection_point, node1)
+                self.connect_assets(connected_comp.name, connection_point,
+                                    asset1, connection_point_1)
             del self.nodes[node2.name]
             self.assets[asset2].disconnect_node(connection_point_2)
             self.assets[asset2].connect_node(connection_point_2, node1)
