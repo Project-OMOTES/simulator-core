@@ -48,18 +48,21 @@ class FluidProperties:
         self.cp = []
         self.rho = []
         self.visc = []
+        self.therm_cond = []
         with open(file) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=';')
+            csv_reader = csv.reader(csv_file, delimiter=";")
             for row in csv_reader:
                 self.T.append(float(row[0]))
                 self.cp.append(float(row[1]))
                 self.rho.append(float(row[2]))
                 self.visc.append(float(row[3]))
+                self.therm_cond.append(float(row[4]))
 
         self.IE = [0.0]
         for i in range(1, len(self.T)):
-            self.IE.append(self.IE[-1] + (self.cp[i - 1] + self.cp[i])
-                           / 2 * (self.T[i] - self.T[i - 1]))
+            self.IE.append(
+                self.IE[-1] + (self.cp[i - 1] + self.cp[i]) / 2 * (self.T[i] - self.T[i - 1])
+            )
 
     def get_ie(self, t: float) -> float:
         """Returns the internal energy of the fluid at a given temperature.
@@ -100,6 +103,14 @@ class FluidProperties:
         :return: The capacity of the fluid at the given temperature.
         """
         return float(np.interp(np.array([t]), self.T, self.cp)[0])
+
+    def get_thermal_conductivity(self, t: float) -> float:
+        """Returns the thermal conductivity of the fluid at a given temperature.
+
+        :param t: The temperature of the fluid.
+        :return: The thermal conductivity of the fluid at the given temperature.
+        """
+        return float(np.interp(np.array([t]), self.T, self.therm_cond)[0])
 
 
 fluid_props = FluidProperties()
