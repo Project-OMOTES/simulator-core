@@ -74,7 +74,8 @@ class Network:
         return asset.name
 
     def connect_assets(
-        self, asset1: uuid.UUID, connection_point_1: int, asset2: uuid.UUID, connection_point_2: int
+            self, asset1: uuid.UUID, connection_point_1: int, asset2: uuid.UUID,
+            connection_point_2: int
     ) -> uuid.UUID:
         """Method to connect to assets at the given connection points.
 
@@ -94,7 +95,7 @@ class Network:
             raise ValueError(f"{asset2} +  does not exists in network.")
 
         if (not self.assets[asset1].is_connected(connection_point_1)) and not (
-            self.assets[asset2].is_connected(connection_point_2)
+                self.assets[asset2].is_connected(connection_point_2)
         ):
             # both assets are not connected. Create a new node and connect everything.
             asset_id = uuid.uuid4()
@@ -105,7 +106,7 @@ class Network:
             self.nodes[asset_id].connect_asset(self.assets[asset2], connection_point_2)
             return asset_id
         if (self.assets[asset1].is_connected(connection_point_1)) and not (
-            self.assets[asset2].is_connected(connection_point_2)
+                self.assets[asset2].is_connected(connection_point_2)
         ):
             # asset 1 connected asset 2 not, connect the node of asset 1 to asset 2
             node = self.assets[asset1].get_connected_node(connection_point_1)
@@ -121,7 +122,7 @@ class Network:
             node.connect_asset(self.assets[asset1], connection_point_1)
             return node.name
         if self.assets[asset1].is_connected(connection_point_1) and (
-           self.assets[asset2].is_connected(connection_point_2)
+                self.assets[asset2].is_connected(connection_point_2)
         ):
             # both asset already connected need to delete one node and connect everything
             # to the same node. First check if the nodes are already the same.
@@ -172,10 +173,10 @@ class Network:
         :return: Asset
         """
         if not self.exists_asset(asset_id):
-            raise ValueError(str(asset_id) + " Not a valid asset id")
+            raise ValueError(f"{asset_id} Not a valid asset id")
         return self.assets[asset_id]
 
-    def get_node(self, asset_id: uuid.UUID) -> Node:
+    def get_node(self, node_id: uuid.UUID) -> Node:
         """Method to get a node in the network.
 
         Method returns the node with the given id, when it exists in the network.
@@ -185,9 +186,9 @@ class Network:
         :type asset_id: uuid.UUID
         :return: Node
         """
-        if not self.exists_node(asset_id):
-            raise ValueError(str(asset_id) + " Not a valid node id")
-        return self.nodes[asset_id]
+        if not self.exists_node(node_id):
+            raise ValueError(f"{node_id} Not a valid node id")
+        return self.nodes[node_id]
 
     def check_connectivity_assets(self) -> bool:
         """Method to check if all assets are connected.
