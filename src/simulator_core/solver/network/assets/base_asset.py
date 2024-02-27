@@ -23,7 +23,7 @@ import numpy as np
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
-from simulator_core.solver.network.assets.node import Node
+from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -34,13 +34,13 @@ class BaseAsset(BaseItem):
     status, and adding thermal and pressure equations.
     """
 
-    connected_nodes: Dict[int, Node]
+    connected_nodes: Dict[int, BaseNodeItem]
 
     def __init__(
         self,
         name: uuid.UUID,
         number_of_unknowns: int = 6,
-        number_con_points: int = 2,
+        number_connection_points: int = 2,
         supply_temperature: float = 293.15,
     ):
         """Initializes the BaseAsset object with the given parameters.
@@ -48,11 +48,14 @@ class BaseAsset(BaseItem):
         :param uuid.UUID name: The unique identifier of the node.
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
         The default is 3.
-        :param int, optional number_con_points: The number of connection points for the asset.
-            The default is 2, which corresponds to the inlet and outlet.
+        :param int, optional number_connection_points: The number of connection points for the
+            asset. The default is 2, which corresponds to the inlet and outlet.
         """
-        super().__init__(number_of_unknowns, name)
-        self.number_of_connection_point = number_con_points
+        super().__init__(
+            name=name,
+            number_of_unknowns=number_of_unknowns,
+            number_connection_points=number_connection_points,
+        )
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
 
@@ -72,7 +75,7 @@ class BaseAsset(BaseItem):
         else:
             return True
 
-    def connect_node(self, connection_point: int, node: Node) -> None:
+    def connect_node(self, connection_point: int, node: BaseNodeItem) -> None:
         """Connects a node to a connection point of the asset.
 
         :param connection_point: The index of the connection point to connect.
@@ -103,7 +106,7 @@ class BaseAsset(BaseItem):
         else:
             return False
 
-    def get_connected_node(self, connection_point: int) -> Node:
+    def get_connected_node(self, connection_point: int) -> BaseNodeItem:
         """Checks if a connection point is connected to a node.
 
         :param connection_point: The index of the connection point to check.
