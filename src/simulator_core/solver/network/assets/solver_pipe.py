@@ -274,9 +274,7 @@ class SolverPipe(FallType):
             end_index = 0
             step = 1
             # Set the internal energy grid
-            self._internal_energy_grid[: self._grid_size] = fluid_props.get_ie(
-                self.ambient_temperature
-            )
+            self._internal_energy_grid[:] = fluid_props.get_ie(self.ambient_temperature)
             # Retrieve the mass flow rate
             mass_flow_rate = self.prev_sol[IndexEnum.discharge]
         return mass_flow_rate, start_index, end_index, step

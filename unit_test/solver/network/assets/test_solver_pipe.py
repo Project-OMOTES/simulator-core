@@ -65,6 +65,44 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(self.asset.roughness, physical_properties_dict[PROPERTY_ROUGHNESS])
         self.assertEqual(self.asset.area, 0.19634954084936207)
 
+    def test_set_physical_properties_missing_key(self) -> None:
+        """Test the set_physical_properties method."""
+        # arrange
+        physical_properties_dict = {
+            PROPERTY_DIAMETER: 0.5,
+            PROPERTY_LENGTH: 2000.0,
+        }
+
+        # act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception), f"Property {PROPERTY_ROUGHNESS} is missing in physical_properties"
+        )
+
+    def test_set_physical_properties_additional_key(self) -> None:
+        """Test the set_physical_properties method."""
+        # arrange
+        physical_properties_dict = {
+            PROPERTY_DIAMETER: 0.5,
+            PROPERTY_LENGTH: 2000.0,
+            PROPERTY_ROUGHNESS: 0.002,
+        }
+        delattr(self.asset, PROPERTY_DIAMETER)
+
+        # act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception), f"Property {PROPERTY_DIAMETER} is not a valid property of the pipe"
+        )
+
     def test_calculate_reynolds_number_laminar_low_temp(self) -> None:
         """Test the calculate_reynolds_number method for a laminar flow at low temperature."""
         # arrange
@@ -211,3 +249,27 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(
             np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.12
         )  # pylint: disable=protected-access
+
+    def test_update_heat_supplied_no_flow(self) -> None:
+        """Test the update_heat_supplied method."""
+        # arrange
+        self.asset.prev_sol[IndexEnum.discharge] = 0.0  # kg/s
+        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+            56.8500061035156 + 273.15
+        )
+        self.asset.alpha_value = 0.1  # W/m2K
+        self.asset.length = 3e5  # m
+        self.asset._grid_size = 10  # pylint: disable=protected-access
+        self.asset.diameter = 1.0  # m
+
+        # act
+        self.asset.update_heat_supplied()  # act
+
+        # assert
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), 0.0)
+        self.assertTrue(
+            all(
+                np.apply_along_axis(fluid_props.get_t, axis=1, arr=self.asset._internal_energy_grid)
+                == self.asset.ambient_temperature
+            )  # pylint: disable=protected-access
+        )
