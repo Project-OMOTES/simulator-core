@@ -113,7 +113,7 @@ class NetworkTest(unittest.TestCase):
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=asset2)
         self.network.add_existing_asset(asset=asset3)
-        node1 = self.network.connect_assets(asset1_id= self.asset.name, connection_point_1= 0,
+        node1 = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
                                             asset2_id=asset2.name, connection_point_2=1)
 
         # act

@@ -117,8 +117,8 @@ class Network:
             self.assets[asset2_id].connect_node(connection_point=connection_point_2, node=node)
             node.connect_asset(self.assets[asset2_id], connection_point=connection_point_2)
             return node.name
-        if (not self.assets[asset1_id].is_connected(connection_point=connection_point_1) and
-                self.assets[asset2_id].is_connected(connection_point=connection_point_2)):
+        if (not self.assets[asset1_id].is_connected(connection_point=connection_point_1)
+                and self.assets[asset2_id].is_connected(connection_point=connection_point_2)):
             # asset 2 connected asset 1 not connect the node of asset 2 to asset 1
             node = self.assets[asset2_id].get_connected_node(connection_point=connection_point_2)
             self.assets[asset1_id].connect_node(connection_point=connection_point_1, node=node)
