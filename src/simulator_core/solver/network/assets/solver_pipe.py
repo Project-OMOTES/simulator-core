@@ -20,11 +20,12 @@ from typing import Dict
 import numpy as np
 from scipy.optimize import root
 
-from simulator_core.entities.assets.asset_defaults import (PROPERTY_DIAMETER,
-                                                           PROPERTY_LENGTH,
-                                                           PROPERTY_ROUGHNESS)
-from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
-                                                    IndexEnum)
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_DIAMETER,
+    PROPERTY_LENGTH,
+    PROPERTY_ROUGHNESS,
+)
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -32,12 +33,15 @@ from simulator_core.solver.utils.fluid_properties import fluid_props
 class SolverPipe(FallType):
     """Class to represent a pipe in a network."""
 
-    def __init__(self, name: uuid.UUID,
-                 number_of_unknowns: int = 6,
-                 number_con_points: int = 2,
-                 length: float = 1000,
-                 diameter: float = 0.2,
-                 roughness: float = 0.0001):
+    def __init__(
+        self,
+        name: uuid.UUID,
+        number_of_unknowns: int = 6,
+        number_con_points: int = 2,
+        length: float = 1000,
+        diameter: float = 0.2,
+        roughness: float = 0.0001,
+    ):
         """Constructor of pipe class.
 
         :param uuid.UUID name: The unique identifier of the pipe.
@@ -69,9 +73,10 @@ class SolverPipe(FallType):
             if hasattr(self, expected_property):
                 setattr(self, expected_property, physical_properties[expected_property])
             else:
-                raise ValueError(f"Property {expected_property} is not a valid property "
-                                 f"of the pipe")
-        self.area = np.pi * self.diameter ** 2 / 4
+                raise ValueError(
+                    f"Property {expected_property} is not a valid property " f"of the pipe"
+                )
+        self.area = np.pi * self.diameter**2 / 4
 
     def update_loss_coefficient(self) -> None:
         """Method to update the loss coefficient of the pipe."""
@@ -81,14 +86,11 @@ class SolverPipe(FallType):
             self.lambda_loss * self.length / (2 * self.diameter * self.area**2 * 9.81)
         )
 
-    def calc_reynolds_number(
-        self, mass_flow_rate: float, temperature: float = 20.0 + 273.15
-    ) -> None:
-        """Method to calculate the Reynolds number of the flow in the pipe.
-
-        :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
-        :param float, optional temperature: The temperature of the fluid in the pipe.
-        """
+    def calc_reynolds_number(self) -> None:
+        """Method to calculate the Reynolds number of the flow in the pipe."""
+        # Retrieve properties from previous solution
+        mass_flow_rate = self.prev_sol[IndexEnum.discharge]
+        temperature = fluid_props.get_t(self.prev_sol[IndexEnum.internal_energy])
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
         velocity = discharge / self.area
@@ -96,7 +98,7 @@ class SolverPipe(FallType):
 
     def calc_lambda_loss(self) -> None:
         """Method to calculate the lambda loss of the pipe."""
-        self.calc_reynolds_number(1000.0)
+        self.calc_reynolds_number()
         if self.reynolds_number < 100:
             self.lambda_loss = 0.64
         elif self.reynolds_number < 2000:
@@ -125,9 +127,14 @@ class SolverPipe(FallType):
         # - Temperature at the outlet from internal_energy_x
         temperature_x = fluid_props.get_t(internal_energy_x)
         # Function to minimize
-        return float(mass_flow_rate * (
-            internal_energy_1 - internal_energy_x
-        ) + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature))
+        return float(
+            np.array(
+                [
+                    mass_flow_rate * (internal_energy_1 - internal_energy_x)
+                    + self.alpha_value * pipe_area * (temperature_x - self.ambient_temperature)
+                ]
+            ).item()
+        )
 
     def update_heat_supplied(self) -> None:
         """Calculate the heat supplied by the pipe.

@@ -150,6 +150,11 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the prescribed temperature equation.
         :rtype: EquationObject
         """
+        if not self.is_connected(connection_point=connection_point):
+            raise ValueError(
+                f"Connection point {connection_point} of asset {self.name} is not connected to a"
+                + " node."
+            )
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [

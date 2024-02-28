@@ -17,8 +17,7 @@ import uuid
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import (NUMBER_CORE_QUANTITIES,
-                                                    IndexEnum)
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.fall_type import FallType
 
@@ -62,8 +61,6 @@ class ProductionAsset(FallType):
     def __init__(
         self,
         name: uuid.UUID,
-        number_of_unknowns: int = 6,
-        number_con_points: int = 2,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -84,15 +81,12 @@ class ProductionAsset(FallType):
             The number of connection points for the asset. The default is 2, which corresponds to
             the inlet and outlet.
         """
-        self.number_of_connection_point = number_con_points
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
         self.set_pressure = set_pressure
 
         super().__init__(
-            name,
-            number_of_unknowns,
-            number_con_points,
+            name=name,
             supply_temperature=supply_temperature,
             heat_supplied=heat_supplied,
             loss_coefficient=loss_coefficient,

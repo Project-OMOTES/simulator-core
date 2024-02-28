@@ -21,6 +21,9 @@ from simulator_core.solver.network.network import Network
 class Solver:
     """Class to solve the network."""
 
+    _iteration_limit: int = 100
+    """The maximum number of iterations for the solver."""
+
     def __init__(self, network: Network):
         """Constructor of the solver class.
 
@@ -35,11 +38,13 @@ class Solver:
     def set_unknowns_matrix(self) -> None:
         """Sets the unknowns of the matrix."""
         for asset in self.network.assets:
-            self.network.get_asset(asset).set_matrix_index(self.matrix.add_unknowns(
-                self.network.get_asset(asset).number_of_unknowns))
+            self.network.get_asset(asset).set_matrix_index(
+                self.matrix.add_unknowns(self.network.get_asset(asset).number_of_unknowns)
+            )
         for node in self.network.nodes:
-            self.network.get_node(node).set_matrix_index(self.matrix.add_unknowns(
-                self.network.get_node(node).number_of_unknowns))
+            self.network.get_node(node).set_matrix_index(
+                self.matrix.add_unknowns(self.network.get_node(node).number_of_unknowns)
+            )
 
     def get_equations(self) -> list[EquationObject]:
         """Method to get the equations of the network.
@@ -62,7 +67,7 @@ class Solver:
             equations = self.get_equations()
             self.matrix.solve(equations, dumb=False)
             self.results_to_assets()
-            if iteration > 100:
+            if iteration > self._iteration_limit:
                 print("No converged solution reached")
                 break
 
