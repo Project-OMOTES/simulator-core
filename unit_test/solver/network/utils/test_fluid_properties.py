@@ -16,7 +16,6 @@
 """Test Fluid properties entities."""
 import unittest
 from unittest.mock import patch
-from uuid import uuid4
 
 from simulator_core.solver.utils.fluid_properties import FluidProperties
 
