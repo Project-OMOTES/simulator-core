@@ -64,12 +64,31 @@ class FluidProperties:
                 self.IE[-1] + (self.cp[i - 1] + self.cp[i]) / 2 * (self.T[i] - self.T[i - 1])
             )
 
+    def check_temperature(self, t: float) -> None:
+        """Check if the temperature is within the range of the fluid properties.
+
+        :param float t: The temperature to check.
+        """
+        if t < self.T[0] or t > self.T[-1]:
+            raise ValueError(f"The temperature {t} is outside the range of the fluid properties.")
+
+    def check_internal_energy(self, ie: float) -> None:
+        """Check if the internal energy is within the range of the fluid properties.
+
+        :param float ie: The internal energy to check.
+        """
+        if ie < self.IE[0] or ie > self.IE[-1]:
+            raise ValueError(
+                f"The internal energy {ie} is outside the range of the fluid properties."
+            )
+
     def get_ie(self, t: float) -> float:
         """Returns the internal energy of the fluid at a given temperature.
 
         :param t: The temperature of the fluid.
         :return: The internal energy of the fluid at the given temperature.
         """
+        self.check_temperature(t=t)
         return float(np.interp(np.array([t]), self.T, self.IE).item())
 
     def get_t(self, ie: float) -> float:
@@ -78,6 +97,7 @@ class FluidProperties:
         :param ie: The internal energy of the fluid.
         :return: The temperature of the fluid at the given internal energy.
         """
+        self.check_internal_energy(ie=ie)
         return float(np.interp(np.array([ie]), self.IE, self.T).item())
 
     def get_density(self, t: float) -> float:
@@ -86,6 +106,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The density of the fluid at the given temperature.
         """
+        self.check_temperature(t=t)
         return float(np.interp(np.array([t]), self.T, self.rho).item())
 
     def get_viscosity(self, t: float) -> float:
@@ -94,6 +115,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The viscosity of the fluid at the given temperature.
         """
+        self.check_temperature(t=t)
         return float(np.interp(np.array([t]), self.T, self.visc).item())
 
     def get_heat_capacity(self, t: float) -> float:
@@ -102,6 +124,7 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The capacity of the fluid at the given temperature.
         """
+        self.check_temperature(t=t)
         return float(np.interp(np.array([t]), self.T, self.cp).item())
 
     def get_thermal_conductivity(self, t: float) -> float:
@@ -110,15 +133,8 @@ class FluidProperties:
         :param t: The temperature of the fluid.
         :return: The thermal conductivity of the fluid at the given temperature.
         """
-        return float(np.interp(np.array([t]), self.T, self.therm_cond)[0])
-
-    def get_thermal_conductivity(self, t: float) -> float:
-        """Returns the thermal conductivity of the fluid at a given temperature.
-
-        :param t: The temperature of the fluid.
-        :return: The thermal conductivity of the fluid at the given temperature.
-        """
-        return float(np.interp(np.array([t]), self.T, self.therm_cond)[0])
+        self.check_temperature(t=t)
+        return float(np.interp(np.array([t]), self.T, self.therm_cond).item())
 
 
 fluid_props = FluidProperties()

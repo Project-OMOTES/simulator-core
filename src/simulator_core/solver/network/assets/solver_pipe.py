@@ -69,9 +69,7 @@ class SolverPipe(FallType):
         :param float diameter: The diameter of the pipe [m] with a default value of 0.2 m.
         :param float roughness: The roughness of the pipe [m] with a default value of 1E-3 m.
         """
-        super().__init__(
-            name=name, number_of_unknowns=NUMBER_CORE_QUANTITIES * 2, number_con_points=2
-        )
+        super().__init__(name=name)
         # Set the physical properties of the pipe
         self.length: float = length
         self.diameter: float = diameter
