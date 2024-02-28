@@ -52,6 +52,9 @@ class SolverPipe(FallType):
     _grid_size: int = 10
     """ The number of grid points in the internal grid of the pipe. """
 
+    _use_fluid_capacity: bool = False
+    """ A boolean to determine if the fluid capacity is used in the heat transfer calculation. """
+
     def __init__(
         self,
         name: uuid.UUID,
@@ -300,17 +303,18 @@ class SolverPipe(FallType):
         internal_energy_iteration: float,
         internal_energy: float,
         mass_flow_rate: float,
-        use_fluid_capacity: bool,
     ) -> float:
         """Root function for the internal energy steady state equation.
 
-        :param float internal_energy_guess: The internal energy guess.
-        :return: float, the internal energy.
+        :param float internal_energy_iteration: The internal energy at the current grid point.
+        :param float internal_energy: The internal energy at the previous grid point.
+        :param float mass_flow_rate: The mass flow rate of the fluid.
+
         """
         # Calculate the temperature of the fluid
         temperature = fluid_props.get_t(internal_energy_iteration)
 
-        if use_fluid_capacity:
+        if self._use_fluid_capacity:
             # Determine the heat transfer coefficient including fluid properties
             heat_transfer_coefficient_fluid = self._calculate_heat_transfer_coefficient_fluid(
                 temperature=temperature,
@@ -337,7 +341,7 @@ class SolverPipe(FallType):
     def _update_internal_energy_grid(self) -> float:
         # Retrieve the flow direction
         mass_flow_rate, start_index, end_index, step = self._determine_flow_direction()
-        use_fluid_capacity = True
+
         heat_supplied = 0.0
         # Update the internal energy grid
         for iteration_index in np.arange(start_index, end_index, step):
@@ -347,7 +351,7 @@ class SolverPipe(FallType):
             internal_energy_iteration = root(
                 self._internal_energy_steady_state_objective,
                 previous_internal_energy,
-                args=(previous_internal_energy, mass_flow_rate, use_fluid_capacity),
+                args=(previous_internal_energy, mass_flow_rate),
                 method="hybr",
                 tol=1e-6,
             ).x[0]
