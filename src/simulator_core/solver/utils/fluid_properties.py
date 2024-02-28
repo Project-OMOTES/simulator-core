@@ -112,5 +112,13 @@ class FluidProperties:
         """
         return float(np.interp(np.array([t]), self.T, self.therm_cond)[0])
 
+    def get_thermal_conductivity(self, t: float) -> float:
+        """Returns the thermal conductivity of the fluid at a given temperature.
+
+        :param t: The temperature of the fluid.
+        :return: The thermal conductivity of the fluid at the given temperature.
+        """
+        return float(np.interp(np.array([t]), self.T, self.therm_cond)[0])
+
 
 fluid_props = FluidProperties()
