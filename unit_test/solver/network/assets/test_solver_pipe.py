@@ -198,6 +198,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
         self.asset.update_heat_supplied()  # act
@@ -219,12 +220,13 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.3)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.2)
         self.assertEqual(
             np.round(fluid_props.get_t(self.asset._internal_energy_grid[0][0]) - 273.15, 2), 20.12
         )  # pylint: disable=protected-access
@@ -240,12 +242,13 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.3)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.2)
         self.assertEqual(
             np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.12
         )  # pylint: disable=protected-access
@@ -261,6 +264,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
         self.asset.update_heat_supplied()  # act
@@ -273,3 +277,47 @@ class SolverPipeTest(unittest.TestCase):
                 == self.asset.ambient_temperature
             )  # pylint: disable=protected-access
         )
+
+    def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
+        """Test the update_heat_supplied method."""
+        # arrange
+        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+            56.8500061035156 + 273.15
+        )
+        self.asset.alpha_value = 0.1  # W/m2K
+        self.asset.length = 3e5  # m
+        self.asset._grid_size = 10  # pylint: disable=protected-access
+        self.asset.diameter = 5.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
+
+        # act
+        self.asset.update_heat_supplied()  # act
+
+        # assert
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(
+            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.00
+        )  # pylint: disable=protected-access
+
+    def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
+        """Test the update_heat_supplied method."""
+        # arrange
+        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+            56.8500061035156 + 273.15
+        )
+        self.asset.alpha_value = 10.0  # W/m2K
+        self.asset.length = 3e5  # m
+        self.asset._grid_size = 10  # pylint: disable=protected-access
+        self.asset.diameter = 1.0  # m
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
+
+        # act
+        self.asset.update_heat_supplied()  # act
+
+        # assert
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(
+            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.00
+        )  # pylint: disable=protected-access
