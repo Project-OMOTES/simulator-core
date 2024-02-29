@@ -2,4 +2,4 @@
 
 . .venv/bin/activate
 cd src/
-python -m your_package.main
+python -m simulator_core
