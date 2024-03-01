@@ -211,11 +211,6 @@ class SolverPipeTest(unittest.TestCase):
             1,
         )
 
-        # - Calculate the velocity
-        # TODO: How does WANDA handle varying fluid properties along the pipe?
-        # TODO: WANDA calculates different densities for the same temperature....
-        # - However, both interpolation methods present overlapping curves.
-
     def test_update_heat_supplied_high_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange

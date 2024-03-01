@@ -38,6 +38,24 @@ class FluidProperties:
     visc: list[float]
     """A list of floats that store the viscosity of the fluid [Pa.s] per temperature."""
 
+    get_internal_energy_object: make_interp_spline
+    """An interpolation object to get the internal energy of the fluid at a given temperature."""
+
+    get_temperature_object: make_interp_spline
+    """An interpolation object to get the temperature of the fluid at a given internal energy."""
+
+    get_density_object: make_interp_spline
+    """An interpolation object to get the density of the fluid at a given temperature."""
+
+    get_viscosity_object: make_interp_spline
+    """An interpolation object to get the viscosity of the fluid at a given temperature."""
+
+    get_heat_capacity_object: make_interp_spline
+    """An interpolation object to get the heat capacity of the fluid at a given temperature."""
+
+    get_thermal_conductivity_object: make_interp_spline
+    """An interpolation object to get the thermal conductivity of the fluid at a given temperature."""
+
     def __init__(self) -> None:
         """Constructor of the fluid properties class.
 
