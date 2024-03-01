@@ -54,7 +54,8 @@ class FluidProperties:
     """An interpolation object to get the heat capacity of the fluid at a given temperature."""
 
     get_thermal_conductivity_object: make_interp_spline
-    """An interpolation object to get the thermal conductivity of the fluid at a given temperature."""
+    """An interpolation object to get the thermal conductivity of the fluid at a given 
+    temperature."""
 
     def __init__(self) -> None:
         """Constructor of the fluid properties class.
