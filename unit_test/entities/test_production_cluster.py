@@ -28,7 +28,9 @@ from simulator_core.entities.assets.asset_defaults import (
 )
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.production_cluster import ProductionCluster
-from simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
+from simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+)
 
 
 class ProductionClusterTest(unittest.TestCase):
@@ -64,8 +66,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 80,
-            PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
+            PROPERTY_TEMPERATURE_RETURN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
         self.production_cluster.set_setpoints(setpoints=setpoints)
@@ -78,8 +80,8 @@ class ProductionClusterTest(unittest.TestCase):
         )
 
         # Assert
-        assert self.production_cluster.temperature_supply == 80
-        assert self.production_cluster.temperature_return == 60
+        assert self.production_cluster.temperature_supply == 353.15
+        assert self.production_cluster.temperature_return == 333.15
         assert self.production_cluster.controlled_mass_flow == mass_flow
         assert (
             self.production_cluster.solver_asset.mass_flow_rate_set_point
@@ -97,8 +99,8 @@ class ProductionClusterTest(unittest.TestCase):
             [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN]
         )
         setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY: 80,
-            PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
+            PROPERTY_TEMPERATURE_RETURN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
@@ -118,8 +120,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 80,
-            PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
+            PROPERTY_TEMPERATURE_RETURN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
@@ -146,8 +148,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 80,
-            PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
+            PROPERTY_TEMPERATURE_RETURN: 333.15,
             PROPERTY_SET_PRESSURE: True,
         }
 
@@ -195,7 +197,7 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         self.production_cluster.solver_asset.get_mass_flow_rate = Mock(return_value=1e6)
         self.production_cluster.solver_asset.get_pressure = Mock(return_value=2e5)
-        self.production_cluster.solver_asset.get_temperature = Mock(return_value=60)
+        self.production_cluster.solver_asset.get_temperature = Mock(return_value=333.15)
 
         # Act
         self.production_cluster.write_to_output()
@@ -203,8 +205,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Assert
         assert len(self.production_cluster.output) == 1
         assert self.production_cluster.output[0] == {
-            PROPERTY_TEMPERATURE_SUPPLY: 60,
-            PROPERTY_TEMPERATURE_RETURN: 60,
+            PROPERTY_TEMPERATURE_SUPPLY: 333.15,
+            PROPERTY_TEMPERATURE_RETURN: 333.15,
             PROPERTY_MASSFLOW: 1e6,
             PROPERTY_PRESSURE_SUPPLY: 2e5,
             PROPERTY_PRESSURE_RETURN: 2e5,
