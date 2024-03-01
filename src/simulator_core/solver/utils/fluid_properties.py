@@ -98,7 +98,7 @@ class FluidProperties:
         """
         self.check_temperature(t=t)
         # return float(np.interp(np.array([t]), self.T, self.IE).item())
-        return float(self.get_internal_energy_object(t))
+        return float(self.get_internal_energy_object(t).item())
 
     def get_t(self, ie: float) -> float:
         """Returns the temperature of the fluid at a given internal energy.
@@ -108,7 +108,7 @@ class FluidProperties:
         """
         self.check_internal_energy(ie=ie)
         # return float(np.interp(np.array([ie]), self.IE, self.T).item())
-        return float(self.get_temperature_object(ie))
+        return float(self.get_temperature_object(ie).item())
 
     def get_density(self, t: float) -> float:
         """Returns the density of the fluid at a given temperature.
@@ -118,7 +118,7 @@ class FluidProperties:
         """
         self.check_temperature(t=t)
         # return float(np.interp(np.array([t]), self.T, self.rho).item())
-        return float(self.get_density_object(t))
+        return float(self.get_density_object(t).item())
 
     def get_viscosity(self, t: float) -> float:
         """Returns the viscosity of the fluid at a given temperature.
@@ -128,7 +128,7 @@ class FluidProperties:
         """
         self.check_temperature(t=t)
         # return float(np.interp(np.array([t]), self.T, self.visc).item())
-        return float(self.get_viscosity_object(t))
+        return float(self.get_viscosity_object(t).item())
 
     def get_heat_capacity(self, t: float) -> float:
         """Returns the heat capacity of the fluid at a given temperature.
@@ -138,7 +138,7 @@ class FluidProperties:
         """
         self.check_temperature(t=t)
         # return float(np.interp(np.array([t]), self.T, self.cp).item())
-        return float(self.get_heat_capacity_object(t))
+        return float(self.get_heat_capacity_object(t).item())
 
     def get_thermal_conductivity(self, t: float) -> float:
         """Returns the thermal conductivity of the fluid at a given temperature.
@@ -148,7 +148,7 @@ class FluidProperties:
         """
         self.check_temperature(t=t)
         # return float(np.interp(np.array([t]), self.T, self.therm_cond).item())
-        return float(self.get_thermal_conductivity_object(t))
+        return float(self.get_thermal_conductivity_object(t).item())
 
 
 fluid_props = FluidProperties()
