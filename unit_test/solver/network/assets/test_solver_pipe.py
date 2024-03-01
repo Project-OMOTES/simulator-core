@@ -187,6 +187,35 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(np.round(self.asset.lambda_loss, 4), 0.0426)
         mock_reynolds_number.assert_called_once()
 
+    def test_update_loss_coefficient(self) -> None:
+        """Test the update_loss_coefficient method."""
+        # arrange
+        self.asset.length = 3e5  # m
+        self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
+        self.asset.roughness = 0.001  # m
+        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(330.0)  # J/kg
+        self.asset.prev_sol[IndexEnum.discharge] = 290.6  # kg/s
+
+        # act
+        self.asset.update_loss_coefficient()  # act
+
+        # assert
+        self.assertAlmostEqual(self.asset.lambda_loss, 0.02024, 3)
+        self.assertAlmostEqual(
+            self.asset.loss_coefficient
+            * self.asset.prev_sol[IndexEnum.discharge]
+            * abs(self.asset.prev_sol[IndexEnum.discharge])
+            * 1e-5,
+            4.191,
+            1,
+        )
+
+        # - Calculate the velocity
+        # TODO: How does WANDA handle varying fluid properties along the pipe?
+        # TODO: WANDA calculates different densities for the same temperature....
+        # - However, both interpolation methods present overlapping curves.
+
     def test_update_heat_supplied_high_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
@@ -198,6 +227,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -220,6 +250,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -242,6 +273,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -264,6 +296,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -289,6 +322,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 5.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -311,6 +345,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
+        self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
 
         # act
@@ -369,3 +404,191 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(start_index, 1)
         self.assertEqual(end_index, 0)
         self.assertEqual(step, 1)
+
+    def test_calculate_graetz_number(self) -> None:
+        """Test the calculate_graetz_number method."""
+        # arrange
+        temperature = 273.15  # K
+        mass_flow = 2.906  # kg/s
+
+        # act
+        graetz_number = self.asset._calculate_graetz_number(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )  # act
+
+        # assert
+        self.assertAlmostEqual(graetz_number, 28.27, 2)
+
+    def test_calculate_graetz_number_small_velocity(self) -> None:
+        """Test the calculate_graetz_number method."""
+        # arrange
+        temperature = 273.15  # K
+        mass_flow = 1e-10  # kg/s
+
+        # act
+        graetz_number = self.asset._calculate_graetz_number(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )  # act
+
+        # assert
+        self.assertEqual(graetz_number, 10.0)
+
+    def test_calculate_prandtl_number(self) -> None:
+        """Test the calculate_prandtl_number method."""
+        # arrange
+        temperature = 273.15
+
+        # act
+        prandtl_number = self.asset.calculate_prandtl_number(temperature=temperature)
+
+        # assert
+        self.assertAlmostEqual(prandtl_number, 13.69, 2)
+
+    def test_calculate_prandtl_number_no_temperature(self) -> None:
+        """Test the calculate_prandtl_number method."""
+        # arrange
+        temperature = 273.15
+        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(temperature)
+
+        # act
+        prandtl_number = self.asset.calculate_prandtl_number()
+
+        # assert
+        self.assertAlmostEqual(prandtl_number, 13.69, 2)
+
+    def test_calculate_heat_transfer_coefficient_fluid_large_reynolds(self) -> None:
+        """Test the calculate_heat_transfer_coefficient_fluid method.
+
+        The Reynolds number is larger than 1E4, so the following relation is used:
+
+        Nu = 0.023 * Re^0.8 * Pr^0.4
+        """
+        # arrange
+        temperature = 273.15
+        mass_flow = 2.906
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_heat_transfer_coefficient_fluid(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )
+
+        # assert
+        self.assertAlmostEqual(heat_transfer_coefficient, 244.77, 2)
+
+    def test_calculate_heat_transfer_coefficient_small_reynolds_large_graetz(self) -> None:
+        r"""Test the calculate_heat_transfer_coefficient_fluid method.
+
+        The Reynolds number is smaller than 1E4 and 1/Graetz number is smaller than 0.1,
+        so the following relation is used:
+
+        .. math ::
+
+            Nu = 1.62 Gz^{\frac{1}{3}}
+
+        This equation describes the heat transfer in the laminar flow regime
+        """
+        # arrange
+        temperature = 273.15  # K
+        mass_flow = 2.906 / 2  # kg/s
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_heat_transfer_coefficient_fluid(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )
+
+        # assert
+        self.assertAlmostEqual(heat_transfer_coefficient, 1.85, 2)
+
+    def test_calculate_heat_transfer_coefficient_small_reynolds_small_graetz(self) -> None:
+        r"""Test the calculate_heat_transfer_coefficient_fluid method.
+
+        The Reynolds number is smaller than 1E4 and 1/Graetz number is larger than 0.1,
+        so the following relation is used:
+
+        .. math ::
+
+            Nu = 3.66
+
+        This equation describes the heat transfer in the laminar flow regime
+        """
+        # arrange
+        temperature = 273.15  # K
+        mass_flow = 0.706  # kg/s
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_heat_transfer_coefficient_fluid(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )
+
+        # assert
+        self.assertAlmostEqual(
+            heat_transfer_coefficient
+            / (fluid_props.get_thermal_conductivity(temperature) / self.asset.diameter),
+            3.66,
+            2,
+        )
+
+    def test_calculate_total_heat_transfer_coefficient_no_fluid(self) -> None:
+        """Test the _calculate_total_heat_transfer_coefficient method.
+
+        The fluid capacity is not used, so the alpha value is used.
+        """
+        # arrange
+        self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
+        self.asset.alpha_value = 0.1
+        temperature = 273.15  # K
+        mass_flow = 2.906  # kg/s
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_total_heat_transfer_coefficient(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )  # act
+
+        # assert
+        self.assertEqual(heat_transfer_coefficient, 0.1)
+
+    @patch.object(SolverPipe, "_calculate_heat_transfer_coefficient_fluid", return_value=0.1)
+    def test_calculate_total_heat_transfer_coefficient_fluid_no_alpha(
+        self, mock_heat_transfer_calc
+    ) -> None:
+        """Test the _calculate_total_heat_transfer_coefficient method.
+
+        The fluid capacity is used, and the alpha value == 0; so the alpha value is not used.
+        """
+        # arrange
+        self.asset._use_fluid_capacity = True  # pylint: disable=protected-access
+        self.asset.alpha_value = 0.0
+        temperature = 273.15  # K
+        mass_flow = 2.906  # kg/s
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_total_heat_transfer_coefficient(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )  # act
+
+        # assert
+        self.assertEqual(heat_transfer_coefficient, 0.1)
+        self.assertEqual(mock_heat_transfer_calc.call_count, 1)
+
+    @patch.object(SolverPipe, "_calculate_heat_transfer_coefficient_fluid", return_value=0.1)
+    def test_calculate_total_heat_transfer_coefficient_fluid_and_alpha(
+        self, mock_heat_transfer_calc
+    ) -> None:
+        """Test the _calculate_total_heat_transfer_coefficient method.
+
+        The fluid capacity is used, and the alpha value is used.
+        """
+        # arrange
+        self.asset._use_fluid_capacity = True  # pylint: disable=protected-access
+        self.asset.alpha_value = 0.1
+        temperature = 273.15  # K
+        mass_flow = 2.906  # kg/s
+
+        # act
+        heat_transfer_coefficient = self.asset._calculate_total_heat_transfer_coefficient(
+            temperature=temperature, mass_flow_rate=mass_flow
+        )  # act
+
+        # assert
+        self.assertEqual(heat_transfer_coefficient, 0.05)
+        self.assertEqual(mock_heat_transfer_calc.call_count, 1)
