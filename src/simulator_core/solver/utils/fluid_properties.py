@@ -16,8 +16,7 @@
 import csv
 from pathlib import Path
 
-import numpy as np
-from scipy.interpolate import make_interp_spline, make_lsq_spline
+from scipy.interpolate import make_interp_spline
 
 
 class FluidProperties:
