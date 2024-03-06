@@ -5,7 +5,8 @@ pushd .
 cd /D "%~dp0"
 py -3.11 -m venv ..\..\venv
 call ..\..\venv\Scripts\activate.bat
-python -m pip install pip-tools
-call .\update_dependencies.cmd
+python -m pip install pip-tools setuptools wheel
+REM call .\update_dependencies.cmd
 call .\install_dependencies.cmd
+call .\install_dev.cmd
 popd
