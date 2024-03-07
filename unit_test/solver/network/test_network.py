@@ -413,3 +413,115 @@ class NetworkTest(unittest.TestCase):
         # assert
         self.assertEqual(self.node.prev_sol, solution[:3])
         self.assertEqual(node.prev_sol, solution[9:12])
+
+    def test_connectivity_assets(self) -> None:
+        """Test connectivity assets method."""
+        # arrange
+        node = Node(name=uuid.uuid4())
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.nodes[self.node.name] = self.node
+        self.asset.connect_node(node=self.node, connection_point=0)
+        self.asset2.connect_node(node=self.node, connection_point=1)
+        self.asset.connect_node(node=node, connection_point=1)
+        self.asset2.connect_node(node=node, connection_point=0)
+
+        # act
+        result = self.network.check_connectivity_assets()
+
+        # assert
+        self.assertTrue(result)
+
+    def test_connectivity_assets_false(self) -> None:
+        """Test connectivity assets method."""
+        # arrange
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.asset.connect_node(node=self.node, connection_point=0)
+        self.asset2.connect_node(node=self.node, connection_point=1)
+
+        # act
+        result = self.network.check_connectivity_assets()
+
+        # assert
+        self.assertFalse(result)
+
+    def test_connectivity_nodes(self) -> None:
+        """Test connectivity nodes method."""
+        # arrange
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.nodes[self.node.name] = self.node
+        self.asset.connect_node(node=self.node, connection_point=0)
+        self.asset2.connect_node(node=self.node, connection_point=1)
+        self.node.connect_asset(asset=self.asset, connection_point=0)
+        self.node.connect_asset(asset=self.asset2, connection_point=1)
+
+        # act
+        result = self.network.check_connectivity_nodes()
+
+        # assert
+        self.assertTrue(result)
+
+    def test_connectivity_nodes_false(self) -> None:
+        """Test connectivity nodes method."""
+        # arrange
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.nodes[self.node.name] = self.node
+        self.asset.connect_node(node=self.node, connection_point=0)
+        self.asset2.connect_node(node=self.node, connection_point=1)
+
+        # act
+        result = self.network.check_connectivity_nodes()
+
+        # assert
+        self.assertFalse(result)
+
+    @patch.object(Network, "check_connectivity_nodes")
+    @patch.object(Network, "check_connectivity_assets")
+    def test_check_connectivity(
+        self, mock_check_connectivity_assets, mock_check_connectivity_nodes
+    ) -> None:
+        """Test check connectivity method."""
+        # arrange
+        mock_check_connectivity_assets.return_value = True
+        mock_check_connectivity_nodes.return_value = True
+
+        # act
+        result = self.network.check_connectivity()
+
+        # assert
+        self.assertTrue(result)
+
+    @patch.object(Network, "check_connectivity_nodes")
+    @patch.object(Network, "check_connectivity_assets")
+    def test_check_connectivity_false(
+        self, mock_check_connectivity_assets, mock_check_connectivity_nodes
+    ) -> None:
+        """Test check connectivity method."""
+        # arrange
+        mock_check_connectivity_assets.return_value = False
+        mock_check_connectivity_nodes.return_value = False
+
+        # act
+        result = self.network.check_connectivity()
+
+        # assert
+        self.assertFalse(result)
+
+    @patch.object(Network, "check_connectivity_nodes")
+    @patch.object(Network, "check_connectivity_assets")
+    def test_check_connectivity_false_assets(
+        self, mock_check_connectivity_assets, mock_check_connectivity_nodes
+    ) -> None:
+        """Test check connectivity method."""
+        # arrange
+        mock_check_connectivity_assets.return_value = False
+        mock_check_connectivity_nodes.return_value = True
+
+        # act
+        result = self.network.check_connectivity()
+
+        # assert
+        self.assertFalse(result)

@@ -244,8 +244,8 @@ class Network:
         1. If both assets are not connected, create a new node and connect everything.
         2. If asset 1 is connected and asset 2 is not, connect the node of asset 1 to asset 2.
         3. If asset 2 is connected and asset 1 is not, connect the node of asset 2 to asset 1.
-        4. If both assets are connected, check if they are connected to the same node, otherwise connect the two nodes
-        and remove the second node.
+        4. If both assets are connected, check if they are connected to the same node, otherwise
+        connect the two nodes and remove the second node.
         5. If none of the above is true raise a NotImplementedError.
 
         :param connected_1: Boolean indicating if asset 1 is connected
@@ -280,7 +280,8 @@ class Network:
                 asset_id_unconnected=asset1_id,
                 connection_point_unconnected=connection_point_1,
             )
-        elif all([connected_1, connected_2]):
+        else:
+            # Effectively we call: all([connected_1, connected_2])
             # both assets are connected, check if they are connected to the same node
             # otherwise connect the two nodes and remove the second node.
             return self._connect_both_assets_and_replace_node(
@@ -288,9 +289,7 @@ class Network:
                 connection_point_1=connection_point_1,
                 asset2_id=asset2_id,
                 connection_point_2=connection_point_2,
-            )
-        else:
-            raise NotImplementedError("Something has gone wrong assets already connected to node")
+            )            
 
     def exists_asset(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
@@ -320,7 +319,7 @@ class Network:
     def disconnect_asset(self) -> None:
         """Method to disconnect an asset from the network."""
 
-    def get_asset(self, asset_id: uuid.UUID) -> BaseAsset:
+    def get_asset(self, asset_id: uuid.UUID) -> BaseAsset:  # type: ignore
         """Method to get an asset in the network.
 
         Method returns the asset with the given id, when it exists in the network.
@@ -333,7 +332,7 @@ class Network:
         if self.exists_asset(asset_id):
             return self.assets[asset_id]
 
-    def get_node(self, node_id: uuid.UUID) -> Node:
+    def get_node(self, node_id: uuid.UUID) -> Node:  # type: ignore
         """Method to get a node in the network.
 
         Method returns the node with the given id, when it exists in the network.
@@ -347,7 +346,7 @@ class Network:
             return self.nodes[node_id]
 
     def check_connectivity_assets(self) -> bool:
-        """Method to check if all assets are connected.
+        """Method to check if all assets are connected at all of their connection points.
 
         Method returns True when all assets are connected and False when an asset is not connected.
         :return: True or False depending on if all assets are connected
@@ -381,7 +380,7 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset_id=asset).matrix_index
             nou = self.get_asset(asset_id=asset).number_of_unknowns
-            self.get_asset(asset_id=asset).prev_sol = solution[index : index + nou]
+            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou]
 
     def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -392,7 +391,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node_id=node).matrix_index
             nou = self.get_node(node_id=node).number_of_unknowns
-            self.get_node(node_id=node).prev_sol = solution[index : index + nou]
+            self.get_node(node_id=node).prev_sol = solution[index: index + nou]
 
     def print_result(self) -> None:
         """Method to print the result of the network."""
