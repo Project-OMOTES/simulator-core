@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 from simulator_core.adapter.transforms.mappers import (
-    EsdlEnergySystemMapper, replace_joint_in_connected_assets)
+    EsdlEnergySystemMapper,
+    replace_joint_in_connected_assets,
+)
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
@@ -48,7 +50,7 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         self.assertIsInstance(result[1], List)
         self.assertIsInstance(result[1][0], Junction)
         self.assertEqual(len(result[0]), 4)
-        self.assertEqual(len(result[1]), 4)
+        self.assertEqual(len(result[1]), 6)
 
     def test_replace_joint_in_connected_assets(self):
         """Method to test the replace joint in connected assets method."""
