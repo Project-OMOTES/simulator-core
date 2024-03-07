@@ -16,6 +16,7 @@
 """Test network class."""
 import unittest
 import uuid
+from io import StringIO
 from unittest.mock import patch
 
 from simulator_core.solver.network.assets.node import Node
@@ -144,6 +145,43 @@ class NetworkTest(unittest.TestCase):
         self.network.assets[self.asset.name].connect_node(node=node, connection_point=0)
         self.network.assets[self.asset2.name].connect_node(node=node2, connection_point=1)
         self.network.assets[asset3.name].connect_node(node=node, connection_point=0)
+        node.connect_asset(asset=self.asset, connection_point=0)
+        node.connect_asset(asset=asset3, connection_point=0)
+        node2.connect_asset(asset=self.asset2, connection_point=1)
+
+        # act
+        node_name = self.network._connect_both_assets_and_replace_node(
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )  # act
+
+        # assert
+        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertEqual(node_name, node.name)
+        self.assertEqual(len(self.network.nodes), 1)
+        self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
+        self.assertEqual(self.asset2.get_connected_node(connection_point=1).name, node.name)
+        self.assertEqual(asset3.get_connected_node(connection_point=0).name, node.name)
+
+    def test_connect_both_assets_and_replace_node_with_additional_assets(self) -> None:
+        """Test connecting both assets and replacing the node."""
+        # arrange
+        node = Node(name=uuid.uuid4())
+        node2 = Node(name=uuid.uuid4())
+        asset3 = SolverPipe(name=uuid.uuid4())
+        self.network.nodes[node.name] = node
+        self.network.nodes[node2.name] = node2
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.add_existing_asset(asset=asset3)
+        self.network.assets[self.asset.name].connect_node(node=node, connection_point=0)
+        self.network.assets[self.asset2.name].connect_node(node=node2, connection_point=1)
+        self.network.assets[asset3.name].connect_node(node=node2, connection_point=0)
+        node.connect_asset(asset=self.asset, connection_point=0)
+        node2.connect_asset(asset=asset3, connection_point=0)
+        node2.connect_asset(asset=self.asset2, connection_point=1)
 
         # act
         node_name = self.network._connect_both_assets_and_replace_node(
@@ -170,6 +208,8 @@ class NetworkTest(unittest.TestCase):
         self.network.add_existing_asset(asset=self.asset2)
         self.network.assets[self.asset.name].connect_node(node=node, connection_point=0)
         self.network.assets[self.asset2.name].connect_node(node=node, connection_point=1)
+        node.connect_asset(asset=self.asset, connection_point=0)
+        node.connect_asset(asset=self.asset2, connection_point=1)
 
         # act
         node_name = self.network._connect_both_assets_and_replace_node(
@@ -525,3 +565,19 @@ class NetworkTest(unittest.TestCase):
 
         # assert
         self.assertFalse(result)
+
+    @patch.object(SolverPipe, "get_result")
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_print_result(self, mock_stdout, mock_get_result) -> None:
+        """Test get results method."""
+        # arrange
+        mock_get_result.return_value = [1, 2, 3, 4, 5, 6]
+        self.network.add_existing_asset(asset=self.asset)
+
+        # act
+        self.network.print_result()  # act
+
+        # assert
+        self.assertEqual(
+            mock_stdout.getvalue(), f"{type(self.asset)}\n{mock_get_result.return_value}\n"
+        )
