@@ -289,7 +289,7 @@ class Network:
                 connection_point_1=connection_point_1,
                 asset2_id=asset2_id,
                 connection_point_2=connection_point_2,
-            )            
+            )
 
     def exists_asset(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
