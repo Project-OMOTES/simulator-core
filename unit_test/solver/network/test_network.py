@@ -16,10 +16,11 @@
 """Test network class."""
 import unittest
 import uuid
+from unittest.mock import patch
 
-from simulator_core.solver.network.network import Network
-from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from simulator_core.solver.network.assets.node import Node
+from simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from simulator_core.solver.network.network import Network
 
 
 class NetworkTest(unittest.TestCase):
@@ -29,6 +30,7 @@ class NetworkTest(unittest.TestCase):
         """Set up for the tests."""
         self.network = Network()
         self.asset = SolverPipe(name=uuid.uuid4())
+        self.asset2 = SolverPipe(name=uuid.uuid4())
         self.node = Node(name=uuid.uuid4())
 
     def test_init(self) -> None:
@@ -76,92 +78,234 @@ class NetworkTest(unittest.TestCase):
             self.network.add_asset(asset_type=asset)
 
         self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(str(cm.exception), f"{asset} not recognized")
+        self.assertEqual(str(cm.exception), f"{asset} not recognized.")
 
     def test_add_existing_asset(self) -> None:
         """Test adding an existing asset."""
         # arrange
-
-        # act
-        self.network.add_existing_asset(asset=self.asset)  # act
-
-        # assert
-        self.assertTrue(self.asset.name in self.network.assets)
-        self.assertEqual(self.network.assets[self.asset.name], self.asset)
-
-    def test_connect_assets_not_connected(self) -> None:
-        """Test connecting assets, which are initially both not connected."""
-        # arrange
-        asset2 = SolverPipe(uuid.uuid4())
-        self.network.add_existing_asset(asset=self.asset)
-        self.network.add_existing_asset(asset=asset2)
-
-        # act
-        node = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                           asset2_id=asset2.name, connection_point_2=1)  # act
-
-        # assert
-        self.assertTrue(node in self.network.nodes)
-        self.assertTrue(self.asset.is_connected(0))
-        self.assertTrue(asset2.is_connected(1))
-
-    def test_connect_assets_one_already_connected(self) -> None:
-        """Test connecting assets that are both already connected."""
-        # arrange
-        asset2 = SolverPipe(name=uuid.uuid4())
-        asset3 = SolverPipe(name=uuid.uuid4())
-        self.network.add_existing_asset(asset=self.asset)
-        self.network.add_existing_asset(asset=asset2)
-        self.network.add_existing_asset(asset=asset3)
-        node1 = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                            asset2_id=asset2.name, connection_point_2=1)
-
-        # act
-        node2 = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                            asset2_id=asset3.name, connection_point_2=1)  # act
-
-        # assert
-        self.assertEqual(node1, node2)
-        self.assertTrue(self.asset.is_connected(0))
-        self.assertTrue(asset3.is_connected(1))
-
-    def test_connect_assets_both_already_connected(self) -> None:
-        """Test connecting assets that are both already connected."""
-        # arrange
-        self.network = Network()
-        asset2 = SolverPipe(name=uuid.uuid4())
-        asset3 = SolverPipe(name=uuid.uuid4())
-        asset4 = SolverPipe(name=uuid.uuid4())
-        self.network.add_existing_asset(asset=self.asset)
-        self.network.add_existing_asset(asset=asset2)
-        self.network.add_existing_asset(asset=asset3)
-        self.network.add_existing_asset(asset=asset4)
-        node1 = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                            asset2_id=asset2.name, connection_point_2=1)
-        node2 = self.network.connect_assets(asset1_id=asset3.name, connection_point_1=0,
-                                            asset2_id=asset4.name, connection_point_2=1)
-
-        # act
-        node3 = self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                            asset2_id=asset3.name, connection_point_2=0)  # act
-
-        # assert
-        self.assertFalse(self.network.exists_node(node_id=node2))
-        self.assertEqual(node1, node3)
-
-    def test_connecting_assets_error(self) -> None:
-        """Test connect asset method raise value since asset does not exist in network."""
-        # arrange
-        asset2 = SolverPipe(name=uuid.uuid4())
+        self.network.assets[self.asset.name] = self.asset
 
         # act
         with self.assertRaises(ValueError) as cm:
-            self.network.connect_assets(asset1_id=self.asset.name, connection_point_1=0,
-                                        asset2_id=asset2.name, connection_point_2=1)
+            self.network.add_existing_asset(asset=self.asset)  # act
 
         # assert
         self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(str(cm.exception), f"{self.asset} +  does not exists in network.")
+        self.assertEqual(str(cm.exception), f"{self.asset.name} already exists in network.")
+
+    def test_connect_single_asset_at_node(self) -> None:
+        """Test connecting a single asset at a node."""
+        # arrange
+        self.network.nodes[self.node.name] = self.node
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.assets[self.asset.name].connect_node(node=self.node, connection_point=0)
+
+        # act
+        node_name = self.network._connect_single_asset_at_node(
+            asset_id_connected=self.asset.name,
+            connection_point_connected=0,
+            asset_id_unconnected=self.asset2.name,
+            connection_point_unconnected=1,
+        )
+
+        # assert
+        self.assertEqual(node_name, self.node.name)
+
+    def test_connect_both_assets_at_node(self) -> None:
+        """Test connecting both assets by creating a node."""
+        # arrange
+        self.network.nodes[self.node.name] = self.node
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+
+        # act
+        node_name = self.network._connect_both_assets_at_node(
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )  # act
+
+        # assert
+        self.assertIsInstance(node_name, uuid.UUID)
+
+    def test_connect_both_assets_and_replace_node(self) -> None:
+        """Test connecting both assets and replacing the node."""
+        # arrange
+        node = Node(name=uuid.uuid4())
+        node2 = Node(name=uuid.uuid4())
+        asset3 = SolverPipe(name=uuid.uuid4())
+        self.network.nodes[node.name] = node
+        self.network.nodes[node2.name] = node2
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.add_existing_asset(asset=asset3)
+        self.network.assets[self.asset.name].connect_node(node=node, connection_point=0)
+        self.network.assets[self.asset2.name].connect_node(node=node2, connection_point=1)
+        self.network.assets[asset3.name].connect_node(node=node, connection_point=0)
+
+        # act
+        node_name = self.network._connect_both_assets_and_replace_node(
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )  # act
+
+        # assert
+        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertEqual(node_name, node.name)
+        self.assertEqual(len(self.network.nodes), 1)
+        self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
+        self.assertEqual(self.asset2.get_connected_node(connection_point=1).name, node.name)
+        self.assertEqual(asset3.get_connected_node(connection_point=0).name, node.name)
+
+    def test_connect_both_assets_and_replace_node_same_node(self) -> None:
+        """Test connecting both assets and replacing the node with the same node."""
+        # arrange
+        node = Node(name=uuid.uuid4())
+        self.network.nodes[node.name] = node
+        self.network.add_existing_asset(asset=self.asset)
+        self.network.add_existing_asset(asset=self.asset2)
+        self.network.assets[self.asset.name].connect_node(node=node, connection_point=0)
+        self.network.assets[self.asset2.name].connect_node(node=node, connection_point=1)
+
+        # act
+        node_name = self.network._connect_both_assets_and_replace_node(
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )  # act
+
+        # assert
+        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertEqual(node_name, node.name)
+
+    @patch.object(Network, "_connect_both_assets_and_replace_node")
+    @patch.object(Network, "_connect_single_asset_at_node")
+    @patch.object(Network, "_connect_both_assets_at_node")
+    def test_decision_tree_both_not_connected(
+        self,
+        mock_connect_both_assets_at_node,
+        mock_connect_single_asset_at_node,
+        mock_connect_both_assets_and_replace_node,
+    ) -> None:
+        """Test connecting assets that are not connected."""
+        # arrange
+
+        # act
+        self.network.connect_assets_decision_tree(
+            connected_1=False,
+            connected_2=False,
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )
+
+        # assert
+        self.assertEqual(mock_connect_both_assets_at_node.call_count, 1)
+        self.assertEqual(mock_connect_single_asset_at_node.call_count, 0)
+        self.assertEqual(mock_connect_both_assets_and_replace_node.call_count, 0)
+        self.assertEqual(
+            list(mock_connect_both_assets_at_node.call_args[1].values()),
+            [self.asset.name, 0, self.asset2.name, 1],
+        )
+
+    @patch.object(Network, "_connect_both_assets_and_replace_node")
+    @patch.object(Network, "_connect_single_asset_at_node")
+    @patch.object(Network, "_connect_both_assets_at_node")
+    def test_decision_tree_both_connected(
+        self,
+        mock_connect_both_assets_at_node,
+        mock_connect_single_asset_at_node,
+        mock_connect_both_assets_and_replace_node,
+    ) -> None:
+        """Test connecting assets that are connected."""
+        # arrange
+
+        # act
+        self.network.connect_assets_decision_tree(
+            connected_1=True,
+            connected_2=True,
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )
+
+        # assert
+        self.assertEqual(mock_connect_both_assets_at_node.call_count, 0)
+        self.assertEqual(mock_connect_single_asset_at_node.call_count, 0)
+        self.assertEqual(mock_connect_both_assets_and_replace_node.call_count, 1)
+        self.assertEqual(
+            list(mock_connect_both_assets_and_replace_node.call_args[1].values()),
+            [self.asset.name, 0, self.asset2.name, 1],
+        )
+
+    @patch.object(Network, "_connect_both_assets_and_replace_node")
+    @patch.object(Network, "_connect_single_asset_at_node")
+    @patch.object(Network, "_connect_both_assets_at_node")
+    def test_decision_tree_asset1_connected_asset2_not_connected(
+        self,
+        mock_connect_both_assets_at_node,
+        mock_connect_single_asset_at_node,
+        mock_connect_both_assets_and_replace_node,
+    ) -> None:
+        """Test connecting assets where asset 1 is connected and asset 2 is not connected."""
+        # arrange
+
+        # act
+        self.network.connect_assets_decision_tree(
+            connected_1=True,
+            connected_2=False,
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )
+
+        # assert
+        self.assertEqual(mock_connect_both_assets_at_node.call_count, 0)
+        self.assertEqual(mock_connect_single_asset_at_node.call_count, 1)
+        self.assertEqual(mock_connect_both_assets_and_replace_node.call_count, 0)
+        self.assertEqual(
+            list(mock_connect_single_asset_at_node.call_args[1].values()),
+            [self.asset.name, 0, self.asset2.name, 1],
+        )
+
+    @patch.object(Network, "_connect_both_assets_and_replace_node")
+    @patch.object(Network, "_connect_single_asset_at_node")
+    @patch.object(Network, "_connect_both_assets_at_node")
+    def test_decision_tree_asset1_not_connected_asset2_connected(
+        self,
+        mock_connect_both_assets_at_node,
+        mock_connect_single_asset_at_node,
+        mock_connect_both_assets_and_replace_node,
+    ) -> None:
+        """Test connecting assets where asset 1 is not connected and asset 2 is connected."""
+        # arrange
+
+        # act
+        self.network.connect_assets_decision_tree(
+            connected_1=False,
+            connected_2=True,
+            asset1_id=self.asset.name,
+            connection_point_1=0,
+            asset2_id=self.asset2.name,
+            connection_point_2=1,
+        )
+
+        # assert
+        self.assertEqual(mock_connect_both_assets_at_node.call_count, 0)
+        self.assertEqual(mock_connect_single_asset_at_node.call_count, 1)
+        self.assertEqual(mock_connect_both_assets_and_replace_node.call_count, 0)
+        self.assertEqual(
+            list(mock_connect_single_asset_at_node.call_args[1].values()),
+            [self.asset2.name, 1, self.asset.name, 0],
+        )
 
     def test_exists_asset(self) -> None:
         """Test exists asset method."""
@@ -174,6 +318,20 @@ class NetworkTest(unittest.TestCase):
         # assert
         self.assertTrue(result)
 
+    def test_exist_asset_raise_error(self) -> None:
+        """Test exist asset method raise value error."""
+        # arrange
+
+        # act
+        with self.assertRaises(ValueError) as cm:
+            self.network.exists_asset(asset_id=self.asset.name)
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception), f"Asset with id:{self.asset.name} does not exist in network."
+        )
+
     def test_exists_node(self) -> None:
         """Test exist node method."""
         # arrange
@@ -185,6 +343,20 @@ class NetworkTest(unittest.TestCase):
 
         # assert
         self.assertTrue(result)
+
+    def test_exists_node_raise_error(self) -> None:
+        """Test exist node method raise value error."""
+        # arrange
+
+        # act
+        with self.assertRaises(ValueError) as cm:
+            self.network.exists_node(node_id=self.node.name)
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception), f"Node with id:{self.node.name} does not exist in network."
+        )
 
     def test_get_asset(self) -> None:
         """Test get asset method."""
@@ -207,31 +379,6 @@ class NetworkTest(unittest.TestCase):
 
         # assert
         self.assertEqual(result, self.node)
-
-    def test_get_asset_error(self) -> None:
-        """Test get asset method raise value error."""
-        # arrange
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.network.get_asset(asset_id=self.asset.name)
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(str(cm.exception), f"{self.asset.name} Not a valid asset id")
-
-    def test_get_node_error(self) -> None:
-        """Test get node method raise value error."""
-        # arrange
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.network.get_node(node_id=self.node.name)
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(str(cm.exception), f"{self.node.name} Not a valid node id")
-        pass
 
     def test_set_result_asset(self) -> None:
         """Test set result asset method."""

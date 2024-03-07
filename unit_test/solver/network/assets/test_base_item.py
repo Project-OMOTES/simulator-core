@@ -25,6 +25,7 @@ class MockBaseItem(BaseItem):
 
     def get_equations(self) -> None:
         """Dummy implementation of the get_equations method for testing."""
+
     def disconnect_node(self, connection_point: int) -> None:
         """Dummy implementation of the disconnect_node method for testing."""
 
