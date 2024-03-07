@@ -32,6 +32,7 @@ class MockBaseNodeItem(BaseNodeItem):
 
     def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
         """Dummy implementation of the get_connected_assets method for testing."""
+        return []
 
 
 class BaseItemTest(unittest.TestCase):
