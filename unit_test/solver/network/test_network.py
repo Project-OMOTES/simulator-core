@@ -115,7 +115,7 @@ class NetworkTest(unittest.TestCase):
 
     def test_connect_both_assets_at_node(self) -> None:
         """Test connecting both assets by creating a node."""
-        # arrange        
+        # arrange
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=self.asset2)
 
