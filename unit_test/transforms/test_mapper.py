@@ -50,7 +50,7 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         self.assertIsInstance(result[1], List)
         self.assertIsInstance(result[1][0], Junction)
         self.assertEqual(len(result[0]), 4)
-        self.assertEqual(len(result[1]), 6)
+        self.assertEqual(len(result[1]), 4)
 
     def test_replace_joint_in_connected_assets(self):
         """Method to test the replace joint in connected assets method."""

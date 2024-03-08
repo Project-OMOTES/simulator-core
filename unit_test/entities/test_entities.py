@@ -39,4 +39,4 @@ class HeatNetworkTest(unittest.TestCase):
         # Assert
         self.assertIsInstance(network, HeatNetwork)
         self.assertEqual(len(network.assets), 4)
-        self.assertEqual(len(network.junctions), 6)
+        self.assertEqual(len(network.junctions), 4)

@@ -138,7 +138,7 @@ class Network:
             (asset2_id, connection_point_2),
         ]:
             self.assets[asset_id].connect_node(
-                connection_point=connection_point_1, node=self.nodes[node_id]
+                connection_point=connection_point, node=self.nodes[node_id]
             )
             self.nodes[node_id].connect_asset(
                 asset=self.assets[asset_id], connection_point=connection_point
