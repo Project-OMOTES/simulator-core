@@ -115,8 +115,7 @@ class NetworkTest(unittest.TestCase):
 
     def test_connect_both_assets_at_node(self) -> None:
         """Test connecting both assets by creating a node."""
-        # arrange
-        self.network.nodes[self.node.name] = self.node
+        # arrange        
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=self.asset2)
 
@@ -130,6 +129,19 @@ class NetworkTest(unittest.TestCase):
 
         # assert
         self.assertIsInstance(node_name, uuid.UUID)
+        self.assertEqual(
+            self.network.assets[self.asset.name].get_connected_node(connection_point=0).name,
+            node_name,
+        )
+        self.assertEqual(
+            self.network.assets[self.asset2.name].get_connected_node(connection_point=1).name,
+            node_name,
+        )
+        self.assertEqual(len(self.network.nodes), 1)
+        self.assertEqual(
+            self.network.nodes[node_name].connected_assets,
+            [(self.asset, 0), (self.asset2, 1)],
+        )
 
     def test_connect_both_assets_and_replace_node(self) -> None:
         """Test connecting both assets and replacing the node."""
@@ -164,6 +176,10 @@ class NetworkTest(unittest.TestCase):
         self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
         self.assertEqual(self.asset2.get_connected_node(connection_point=1).name, node.name)
         self.assertEqual(asset3.get_connected_node(connection_point=0).name, node.name)
+        self.assertEqual(
+            self.network.nodes[node_name].connected_assets,
+            [(self.asset, 0), (asset3, 0), (self.asset2, 1)],
+        )
 
     def test_connect_both_assets_and_replace_node_with_additional_assets(self) -> None:
         """Test connecting both assets and replacing the node."""
@@ -198,6 +214,10 @@ class NetworkTest(unittest.TestCase):
         self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
         self.assertEqual(self.asset2.get_connected_node(connection_point=1).name, node.name)
         self.assertEqual(asset3.get_connected_node(connection_point=0).name, node.name)
+        self.assertEqual(
+            self.network.nodes[node_name].connected_assets,
+            [(self.asset, 0), (asset3, 0), (self.asset2, 1)]
+        )
 
     def test_connect_both_assets_and_replace_node_same_node(self) -> None:
         """Test connecting both assets and replacing the node with the same node."""
@@ -222,6 +242,13 @@ class NetworkTest(unittest.TestCase):
         # assert
         self.assertIsInstance(node_name, uuid.UUID)
         self.assertEqual(node_name, node.name)
+        self.assertEqual(len(self.network.nodes), 1)
+        self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
+        self.assertEqual(self.asset2.get_connected_node(connection_point=1).name, node.name)
+        self.assertEqual(
+            self.network.nodes[node_name].connected_assets,
+            [(self.asset, 0), (self.asset2, 1)],
+        )
 
     @patch.object(Network, "_connect_both_assets_and_replace_node")
     @patch.object(Network, "_connect_single_asset_at_node")

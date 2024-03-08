@@ -176,8 +176,6 @@ class Network:
             # Both nodes are different, connect the two nodes and remove the second node.
             # First connect all assets connected to the second node to the first node.
             for connected_comp, connection_point in node2.get_connected_assets():
-                # Connect the connected component to the first node
-                node1.connect_asset(asset=connected_comp, connection_point=connection_point)
                 # Disconnect the connected component from the second node
                 connected_comp.disconnect_node(connection_point=connection_point)
                 # Connect the connected component to the first node
