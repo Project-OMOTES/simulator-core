@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 from simulator_core.adapter.transforms.mappers import (
-    EsdlEnergySystemMapper, replace_joint_in_connected_assets)
+    EsdlEnergySystemMapper,
+    replace_joint_in_connected_assets,
+)
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port

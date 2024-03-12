@@ -93,8 +93,15 @@ class Node(BaseNodeItem):
             raise ValueError(
                 f"Connection point {connection_point} does not exist on asset {asset.name}."
             )
-        # Connect the asset to the node
-        self.connected_assets.append((asset, connection_point))
+        # Check if the asset is already connected to the node at the given connection point
+        if set((asset, connection_point)) in set(self.connected_assets):
+            raise ValueError(
+                f"Asset {asset.name} is already connected to node {self.name} at connection"
+                + f" point {connection_point}."
+            )
+        else:
+            # Connect the asset to the node
+            self.connected_assets.append((asset, connection_point))
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the node.
@@ -257,3 +264,11 @@ class Node(BaseNodeItem):
             A boolean value that indicates whether the node is connected or not.
         """
         return len(self.connected_assets) > 0
+
+    def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
+        """Returns the connected assets of the node.
+
+        :return: Tuple[BaseItem, int]
+            A tuple of the connected asset and the connection point index.
+        """
+        return self.connected_assets

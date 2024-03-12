@@ -19,8 +19,7 @@ from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.assets.production_asset import \
-    ProductionAsset
+from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
@@ -54,7 +53,7 @@ class Network:
         :return: Unique id of the asset.
         """
         if asset_type not in self.str_to_class_dict:
-            raise ValueError(asset_type + " not recognized")
+            raise ValueError(asset_type + " not recognized.")
         if name is None:
             name = uuid.uuid4()
         self.assets[name] = self.str_to_class_dict[asset_type](name)
@@ -69,12 +68,136 @@ class Network:
         :return: Unique id of the asset.
         """
         if asset.name in self.assets:
-            raise ValueError(f"{asset.name} already exists in network")
+            raise ValueError(f"{asset.name} already exists in network.")
         self.assets[asset.name] = asset
         return asset.name
 
+    def _connect_single_asset_at_node(
+        self,
+        asset_id_connected: uuid.UUID,
+        connection_point_connected: int,
+        asset_id_unconnected: uuid.UUID,
+        connection_point_unconnected: int,
+    ) -> uuid.UUID:
+        """Method to connect a single asset to a node.
+
+        This method connects the unconnected asset to the node of the connected asset.
+        The id of the node is returned.
+
+        :param asset_id_connected: id of the connected asset
+        :type asset_id_connected: uuid.UUID
+        :param connection_point_connected: Connection point of the connected asset
+        :type connection_point_connected: int
+        :param asset_id_unconnected: id of the unconnected asset
+        :type asset_id_unconnected: uuid.UUID
+        :param connection_point_unconnected: Connection point of the unconnected asset
+        :type connection_point_unconnected: int
+        :return: id of node connecting the two assets
+        """
+        # Get the node of the connected asset
+        node = self.assets[asset_id_connected].get_connected_node(
+            connection_point=connection_point_connected
+        )
+        # Connect the asset to the node
+        self.assets[asset_id_unconnected].connect_node(
+            connection_point=connection_point_unconnected, node=node
+        )
+        # Connect the node to the asset
+        node.connect_asset(
+            self.assets[asset_id_unconnected], connection_point=connection_point_unconnected
+        )
+        return node.name
+
+    def _connect_both_assets_at_node(
+        self,
+        asset1_id: uuid.UUID,
+        connection_point_1: int,
+        asset2_id: uuid.UUID,
+        connection_point_2: int,
+    ) -> uuid.UUID:
+        """Method to connect to assets at the given connection points.
+
+        Connects the two assets to a new node and returns the id of the node.
+
+        :param asset1_id: id of first asset to be connected
+        :type asset1_id: uuid.UUID
+        :param connection_point_1: Connection point of first asset to be connected
+        :type connection_point_1: int
+        :param asset2_id: id of second asset to be connected
+        :type asset2_id: uuid.UUID
+        :param connection_point_2: Connection point of second asset to be connected
+        :type connection_point_2: int
+        :return: id of node connecting the two assets
+        """
+        # Create a new node
+        node_id = uuid.uuid4()
+        self.nodes[node_id] = Node(name=node_id)
+        # Connect the assets to the node
+        for asset_id, connection_point in [
+            (asset1_id, connection_point_1),
+            (asset2_id, connection_point_2),
+        ]:
+            self.assets[asset_id].connect_node(
+                connection_point=connection_point, node=self.nodes[node_id]
+            )
+            self.nodes[node_id].connect_asset(
+                asset=self.assets[asset_id], connection_point=connection_point
+            )
+        return node_id
+
+    def _connect_both_assets_and_replace_node(
+        self,
+        asset1_id: uuid.UUID,
+        connection_point_1: int,
+        asset2_id: uuid.UUID,
+        connection_point_2: int,
+    ) -> uuid.UUID:
+        """Method to connect to assets at the given connection points.
+
+        Connects the two assets to a new node and returns the id of the node.
+
+        :param asset1_id: id of first asset to be connected
+        :type asset1_id: uuid.UUID
+        :param connection_point_1: Connection point of first asset to be connected
+        :type connection_point_1: int
+        :param asset2_id: id of second asset to be connected
+        :type asset2_id: uuid.UUID
+        :param connection_point_2: Connection point of second asset to be connected
+        :type connection_point_2: int
+        :return: id of node connecting the two assets
+        """
+        # Retrieve the nodes of the assets
+        node1 = self.assets[asset1_id].get_connected_node(connection_point=connection_point_1)
+        node2 = self.assets[asset2_id].get_connected_node(connection_point=connection_point_2)
+        # Check if the nodes are the same, if so return the name of the node.
+        if node1 == node2:
+            return node1.name
+        else:
+            # Both nodes are different, connect the two nodes and remove the second node.
+            # First connect all assets connected to the second node to the first node.
+            for connected_comp, connection_point in node2.get_connected_assets():
+                # Disconnect the connected component from the second node
+                connected_comp.disconnect_node(connection_point=connection_point)
+                # Connect the connected component to the first node
+                self.connect_assets(
+                    asset1_id=connected_comp.name,
+                    connection_point_1=connection_point,
+                    asset2_id=asset1_id,
+                    connection_point_2=connection_point_1,
+                )
+            # Remove the second node from the network
+            del self.nodes[node2.name]
+            # Finally connect the first asset to the second asset
+            self.assets[asset2_id].disconnect_node(connection_point=connection_point_2)
+            self.assets[asset2_id].connect_node(connection_point=connection_point_2, node=node1)
+            return node1.name
+
     def connect_assets(
-        self, asset1: uuid.UUID, connection_point_1: int, asset2: uuid.UUID, connection_point_2: int
+        self,
+        asset1_id: uuid.UUID,
+        connection_point_1: int,
+        asset2_id: uuid.UUID,
+        connection_point_2: int,
     ) -> uuid.UUID:
         """Method to connect to assets at the given connection points.
 
@@ -82,50 +205,89 @@ class Network:
         If not a new node is created. Otherwise, both are connected to the existing node.
         The id of the node connecting the two is returned
 
-        :param asset1: id of first asset to be connected
+        :param asset1_id: id of first asset to be connected
         :param connection_point_1: Connection point of first asset to be connected
-        :param asset2: id of second asset to be connected
+        :param asset2_id: id of second asset to be connected
         :param connection_point_2: Connection point of second asset to be connected
         :return: id of node connecting the two assets
         """
-        if not self.exists_asset(asset1):
-            raise ValueError(str(asset1) + " does not exists in network")
-        elif not self.exists_asset(asset2):
-            raise ValueError(str(asset2) + " does not exists in network")
-        elif (not self.assets[asset1].is_connected(connection_point_1)) and not (
-            self.assets[asset2].is_connected(connection_point_2)
-        ):
-            # both asset connect points not connected
-            asset_id = uuid.uuid4()
-            self.nodes[asset_id] = Node(name=asset_id)
-            self.assets[asset1].connect_node(connection_point_1, self.nodes[asset_id])
-            self.assets[asset2].connect_node(connection_point_2, self.nodes[asset_id])
-            self.nodes[asset_id].connect_asset(self.assets[asset1], connection_point_1)
-            self.nodes[asset_id].connect_asset(self.assets[asset2], connection_point_2)
-            return asset_id
-        elif (self.assets[asset1].is_connected(connection_point_1)) and not (
-            self.assets[asset2].is_connected(connection_point_2)
-        ):
-            # asset 1 connected asset 2 not
-            node = self.assets[asset1].get_connected_node(connection_point_1)
-            self.assets[asset2].connect_node(connection_point_2, node)
-            node.connect_asset(self.assets[asset2], connection_point_2)
-            return node.name
-        elif not self.assets[asset1].is_connected(connection_point_1) and self.assets[
-            asset2
-        ].is_connected(connection_point_2):
-            # asset 2 connected asset 1 not
-            node = self.assets[asset2].get_connected_node(connection_point_2)
-            self.assets[asset1].connect_node(connection_point_1, node)
-            node.connect_asset(self.assets[asset1], connection_point_1)
-            return node.name
-        elif not self.assets[asset1].is_connected(connection_point_1) and (
-            not self.assets[asset2].is_connected(connection_point_2)
-        ):
-            # both asset already connected need to delete one node.
-            raise NotImplementedError("Assets already connected to assets")
+        # Check if both assets exist; if not raise a ValueError
+        for asset_id in [asset1_id, asset2_id]:
+            self.exists_asset(asset_id=asset_id)
+        # Create boolean list with for each asset wether the connection point is connected
+        connected_1 = self.assets[asset1_id].is_connected(connection_point=connection_point_1)
+        connected_2 = self.assets[asset2_id].is_connected(connection_point=connection_point_2)
+        # Use the connect_assets_decision_tree to connect the assets
+        return self.connect_assets_decision_tree(
+            connected_1=connected_1,
+            connected_2=connected_2,
+            asset1_id=asset1_id,
+            connection_point_1=connection_point_1,
+            asset2_id=asset2_id,
+            connection_point_2=connection_point_2,
+        )
+
+    def connect_assets_decision_tree(
+        self,
+        connected_1: bool,
+        connected_2: bool,
+        asset1_id: uuid.UUID,
+        connection_point_1: int,
+        asset2_id: uuid.UUID,
+        connection_point_2: int,
+    ) -> uuid.UUID:
+        """Method to connect to assets at the given connection points.
+
+        The method uses a decision tree to connect the assets. The decision tree is as follows:
+        1. If both assets are not connected, create a new node and connect everything.
+        2. If asset 1 is connected and asset 2 is not, connect the node of asset 1 to asset 2.
+        3. If asset 2 is connected and asset 1 is not, connect the node of asset 2 to asset 1.
+        4. If both assets are connected, check if they are connected to the same node, otherwise
+        connect the two nodes and remove the second node.
+        5. If none of the above is true raise a NotImplementedError.
+
+        :param connected_1: Boolean indicating if asset 1 is connected
+        :param connected_2: Boolean indicating if asset 2 is connected
+        :param asset1_id: id of first asset to be connected
+        :param connection_point_1: Connection point of first asset to be connected
+        :param asset2_id: id of second asset to be connected
+        :param connection_point_2: Connection point of second asset to be connected
+        :return: id of node connecting the two assets
+        """
+        if not any([connected_1, connected_2]):
+            # both assets are not connected. Create a new node and connect everything.
+            return self._connect_both_assets_at_node(
+                asset1_id=asset1_id,
+                connection_point_1=connection_point_1,
+                asset2_id=asset2_id,
+                connection_point_2=connection_point_2,
+            )
+        elif connected_1 and (not connected_2):
+            # asset 1 connected asset 2 not, connect the node of asset 1 to asset 2
+            return self._connect_single_asset_at_node(
+                asset_id_connected=asset1_id,
+                connection_point_connected=connection_point_1,
+                asset_id_unconnected=asset2_id,
+                connection_point_unconnected=connection_point_2,
+            )
+        elif (not connected_1) and connected_2:
+            # asset 2 connected asset 1 not connect the node of asset 2 to asset 1
+            return self._connect_single_asset_at_node(
+                asset_id_connected=asset2_id,
+                connection_point_connected=connection_point_2,
+                asset_id_unconnected=asset1_id,
+                connection_point_unconnected=connection_point_1,
+            )
         else:
-            raise NotImplementedError("Something has gone wrong assets already connected to node")
+            # Effectively we call: all([connected_1, connected_2])
+            # both assets are connected, check if they are connected to the same node
+            # otherwise connect the two nodes and remove the second node.
+            return self._connect_both_assets_and_replace_node(
+                asset1_id=asset1_id,
+                connection_point_1=connection_point_1,
+                asset2_id=asset2_id,
+                connection_point_2=connection_point_2,
+            )
 
     def exists_asset(self, asset_id: uuid.UUID) -> bool:
         """Method returns true when an asset with the given id exists in the network.
@@ -133,15 +295,21 @@ class Network:
         :param uuid.UUID asset_id: unique id of the asset to check.
         :return:True when asset exists and False when not
         """
-        return asset_id in self.assets
+        if not (asset_id in self.assets):
+            raise ValueError(f"Asset with id:{asset_id} does not exist in network.")
+        else:
+            return True
 
-    def exists_node(self, asset_id: uuid.UUID) -> bool:
+    def exists_node(self, node_id: uuid.UUID) -> bool:
         """Method returns true when a node with the given id exists in the network.
 
-        :param uuid.UUID asset_id: unique id of the node to check.
+        :param uuid.UUID node_id: unique id of the node to check.
         :return:True when node exists and False when not
         """
-        return asset_id in self.nodes
+        if not (node_id in self.nodes):
+            raise ValueError(f"Node with id:{node_id} does not exist in network.")
+        else:
+            return True
 
     def remove_asset(self) -> None:
         """Method to remove an asset from the network."""
@@ -149,7 +317,7 @@ class Network:
     def disconnect_asset(self) -> None:
         """Method to disconnect an asset from the network."""
 
-    def get_asset(self, asset_id: uuid.UUID) -> BaseAsset:
+    def get_asset(self, asset_id: uuid.UUID) -> BaseAsset:  # type: ignore
         """Method to get an asset in the network.
 
         Method returns the asset with the given id, when it exists in the network.
@@ -159,26 +327,24 @@ class Network:
         :type asset_id: uuid.UUID
         :return: Asset
         """
-        if not self.exists_asset(asset_id):
-            raise ValueError(str(asset_id) + " Not a valid asset id")
-        return self.assets[asset_id]
+        if self.exists_asset(asset_id):
+            return self.assets[asset_id]
 
-    def get_node(self, asset_id: uuid.UUID) -> Node:
+    def get_node(self, node_id: uuid.UUID) -> Node:  # type: ignore
         """Method to get a node in the network.
 
         Method returns the node with the given id, when it exists in the network.
         when it does not exist a ValueError is raised.
 
-        :param asset_id: asset_id of the node which needs to be retrieved.
-        :type asset_id: uuid.UUID
+        :param node_id: node_id of the node which needs to be retrieved.
+        :type node_id: uuid.UUID
         :return: Node
         """
-        if not self.exists_node(asset_id):
-            raise ValueError(str(asset_id) + " Not a valid node id")
-        return self.nodes[asset_id]
+        if self.exists_node(node_id=node_id):
+            return self.nodes[node_id]
 
     def check_connectivity_assets(self) -> bool:
-        """Method to check if all assets are connected.
+        """Method to check if all assets are connected at all of their connection points.
 
         Method returns True when all assets are connected and False when an asset is not connected.
         :return: True or False depending on if all assets are connected
@@ -210,9 +376,9 @@ class Network:
         :return: None
         """
         for asset in self.assets:
-            index = self.get_asset(asset).matrix_index
-            nou = self.get_asset(asset).number_of_unknowns
-            self.get_asset(asset).prev_sol = solution[index: index + nou]
+            index = self.get_asset(asset_id=asset).matrix_index
+            nou = self.get_asset(asset_id=asset).number_of_unknowns
+            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou]
 
     def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -221,12 +387,12 @@ class Network:
         :return: None
         """
         for node in self.nodes:
-            index = self.get_node(node).matrix_index
-            nou = self.get_node(node).number_of_unknowns
-            self.get_node(node).prev_sol = solution[index: index + nou]
+            index = self.get_node(node_id=node).matrix_index
+            nou = self.get_node(node_id=node).number_of_unknowns
+            self.get_node(node_id=node).prev_sol = solution[index: index + nou]
 
     def print_result(self) -> None:
         """Method to print the result of the network."""
         for asset in self.assets:
-            print(type(self.get_asset(asset)))
-            print(self.get_asset(asset).get_result())
+            print(type(self.get_asset(asset_id=asset)))
+            print(self.get_asset(asset_id=asset).get_result())
