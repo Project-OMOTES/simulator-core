@@ -20,13 +20,13 @@ from pandapipes import pandapipesNet
 import numpy as np
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from typing import List, Tuple
+from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 def heat_demand_and_temperature_to_mass_flow(
         thermal_demand: float,
         temperature_supply: float,
-        temperature_return: float,
-        pandapipes_net: pandapipesNet,
+        temperature_return: float
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
@@ -37,11 +37,9 @@ def heat_demand_and_temperature_to_mass_flow(
         the specific heat capacity of the fluid.
     :param float temperature_return: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
-    :param pandapipesNet net: The pandapipes network used to calculate the specific heat capacity.
     """
-    heat_capacity = pandapipes_net.fluid.get_heat_capacity(
-        (temperature_return + temperature_supply) / 2
-    )
+    heat_capacity = fluid_props.get_heat_capacity(
+        (temperature_return + temperature_supply) / 2)
     return thermal_demand / ((temperature_supply - temperature_return) * float(heat_capacity))
 
 
@@ -49,23 +47,20 @@ def mass_flow_and_temperature_to_heat_demand(
         temperature_supply: float,
         temperature_return: float,
         mass_flow: float,
-        pandapipes_net: pandapipesNet,
 ) -> float:
     """Calculate the thermal demand that is met by the mass flow rate.
 
     :param float temperature_supply: The temperature that the asset delivers to the "to_junction".
         The temperature should be supplied in Kelvin. The supply temperature is used to calculate
         the specific heat capacity of the fluid.
-    :param float temeprature_return: The temperature that the asset receives from the
+    :param float temperature_return: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     :param float mass_flow: The mass flow rate that is used to meet the thermal demand. The mass
         flow rate should be supplied in kg/s.
-    :param pandapipesNet net: The pandapipes network used to calculate the specific heat capacity.
     """
-    heat_capacity = pandapipes_net.fluid.get_heat_capacity(
-        (temperature_return + temperature_supply) / 2
-    )
-    return mass_flow * (temperature_supply - temperature_return) * float(heat_capacity)
+    internal_energy1 = fluid_props.get_ie(temperature_supply)
+    internal_energy2 = fluid_props.get_ie(temperature_return)
+    return mass_flow * (internal_energy1 - internal_energy2)
 
 
 def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> Tuple[List[float], List[float]]:

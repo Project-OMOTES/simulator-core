@@ -12,12 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+"""Test energy system mapper class."""
 import unittest
 from pathlib import Path
 from typing import List, Tuple
-
-from pandapipes import create_empty_network
 
 from simulator_core.adapter.transforms.mappers import (
     EsdlEnergySystemMapper,
@@ -28,6 +26,7 @@ from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.infrastructure.utils import pyesdl_from_file
+from simulator_core.solver.network.network import Network
 
 
 class EsdlEnergySystemMapperTest(unittest.TestCase):
@@ -39,10 +38,10 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        pandapipes_net = create_empty_network(fluid="water")
+        network = Network()
 
         # arrange
-        result = EsdlEnergySystemMapper(esdl_object).to_entity(pandapipes_net)
+        result = EsdlEnergySystemMapper(esdl_object).to_entity(network)
 
         # assert
         self.assertIsInstance(result, Tuple)

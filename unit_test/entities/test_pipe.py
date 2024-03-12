@@ -18,8 +18,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-import pandapipes as pp
-
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.esdl_object import EsdlObject
@@ -32,54 +30,47 @@ class PipeTest(unittest.TestCase):
     def setUp(self):
         """Set up test case."""
         # Create empty pandapipes network
-        self.network = pp.create_empty_network()
         # Create two junctions
-        self.from_junction = Junction(name="from_junction", pandapipes_net=self.network)
-        self.to_junction = Junction(name="to_junction", pandapipes_net=self.network)
+        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
+        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
 
     def test_pipe_create(self):
         """Evaluate the creation of a pipe object."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
 
         # Act
-        pipe.create()  # act
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe.from_junction = self.from_junction
+        pipe.to_junction = self.to_junction
 
         # Assert
         assert isinstance(pipe, Pipe)
         assert pipe.name == "pipe"
         assert pipe.asset_id == "pipe_id"
-        assert pipe.pandapipes_net == self.network
-        assert any(self.network.pipe.name == "Pipe_pipe")
 
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
-        pipe.create()
 
         # Act
-        pp_pipe_dataframe = self.network.pipe.iloc[pipe._pipe_index]  # act
 
         # Assert
-        assert pp_pipe_dataframe["length_km"] == pipe.length * 1e-3
-        assert pp_pipe_dataframe["k_mm"] == pipe.roughness * 1e3
+        assert pipe.solver_asset.length, pipe.length
+        assert pipe.solver_asset.roughness == pipe.roughness
 
     def test_pipe_get_property_diameter(self):
         """Evaluate the get property diameter method to retrieve diameters."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
         esdl_asset_mock.get_property.return_value = (1.0, True)
 
         # Act
-        pipe.create()  # act
 
         # Assert
         assert pipe._get_diameter(esdl_asset=esdl_asset_mock) == 1.0
@@ -87,14 +78,13 @@ class PipeTest(unittest.TestCase):
     def test_pipe_get_property_diameter_failed(self):
         """Evaluate failure to retrieve diameter from ESDL asset."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
-        pipe.create()  # act
 
         # Assert
         with self.assertRaises(NotImplementedError):
@@ -112,10 +102,9 @@ class PipeTest(unittest.TestCase):
         esdl_pipes = esdl_object.get_all_assets_of_type("pipe")
         esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
         # - Create pipe object
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", pandapipe_net=self.network)
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
-        pipe.create()
 
         # Act
         alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)  # act

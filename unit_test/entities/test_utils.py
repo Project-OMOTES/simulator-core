@@ -16,6 +16,7 @@
 """Test utility functions."""
 import unittest
 from pathlib import Path
+import numpy as np
 from unittest.mock import Mock
 
 from simulator_core.entities.assets.utils import (
@@ -34,9 +35,6 @@ class UtilFunctionTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test case."""
         # Mock pandapipes net
-        pandapipes_net = Mock()
-        pandapipes_net.fluid.get_heat_capacity.return_value = 4182  # [J/(kg K)]
-        self.pandapipes_net = pandapipes_net
         # Load esdl pipe asset
         esdl_file_path = (
             Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
@@ -63,11 +61,11 @@ class UtilFunctionTest(unittest.TestCase):
 
         # act
         mass_flow_calculated = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand, temperature_supply, temperature_return, self.pandapipes_net
+            thermal_demand, temperature_supply, temperature_return
         )  # act
 
         # Assert
-        assert mass_flow_calculated == 0.011956001912960305
+        assert mass_flow_calculated == 0.011891030595621722
 
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
@@ -78,11 +76,11 @@ class UtilFunctionTest(unittest.TestCase):
 
         # Act
         heat_demand_calculated = mass_flow_and_temperature_to_heat_demand(
-            temperature_supply, temperature_return, mass_flow, self.pandapipes_net
+            temperature_supply, temperature_return, mass_flow
         )  # act
 
         # Assert
-        assert heat_demand_calculated == 1000.0
+        assert heat_demand_calculated == 1005.5263629842184
 
     def test_calculate_inverse_heat_transfer_coefficient(self) -> None:
         """Test calculate_inverse_heat_transfer_coefficient.
@@ -90,9 +88,9 @@ class UtilFunctionTest(unittest.TestCase):
         The method returns the inverse of the heat transfer coefficient.
         """
         # Arrange
-        inner_diameter = 0.1
-        outer_diameter = 0.2
-        thermal_conductivity = 0.5
+        inner_diameter = np.array([0.1])
+        outer_diameter = np.array([0.2])
+        thermal_conductivity = np.array([0.5])
 
         # Act
         heat_transfer_coefficient = calculate_inverse_heat_transfer_coefficient(

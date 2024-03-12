@@ -15,8 +15,7 @@
 
 """Test Pipe entities."""
 import unittest
-
-import pandapipes as pp
+from unittest.mock import Mock
 
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.asset_defaults import DEFAULT_NODE_HEIGHT, DEFAULT_PRESSURE
@@ -25,21 +24,15 @@ from simulator_core.entities.assets.asset_defaults import DEFAULT_NODE_HEIGHT, D
 class JunctionTest(unittest.TestCase):
     """Testcase for HeatNetwork class."""
 
-    def setUp(self):
-        """Set up test case."""
-        # Create empty pandapipes network
-        self.network = pp.create_empty_network()
-
     def test_junction_create(self):
         """Generic/template test for Junction."""
         # Arrange
-
+        node = Mock()
         # Act
-        from_junction = Junction(name="from_junction", pandapipes_net=self.network)  # act
+        from_junction = Junction(node, name="from_junction")  # act
 
         # Assert
         assert isinstance(from_junction, Junction)
-        assert from_junction._initialized
         assert from_junction.name == "from_junction"
         assert from_junction.height_m == DEFAULT_NODE_HEIGHT
         assert from_junction.pn_bar == DEFAULT_PRESSURE
