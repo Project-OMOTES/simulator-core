@@ -70,7 +70,7 @@ enabled = true
 version_file = "VERSION"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
-dirty_template = "{tag}.dirty{ccount}"
+dirty_template = "{tag}.dev{ccount}"
 
 
 # [tool.setuptools]
