@@ -221,3 +221,10 @@ fabric.properties
 unit_test_coverage/
 test-results.xml
 .env.*
+
+# requirements.txt files are ignored
+# otherwise, the release-workflow may fail due to 
+# changes in these files
+# requirements.txt files are updated as part of the build
+requirements.txt
+dev-requirements.txt
