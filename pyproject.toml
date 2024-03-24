@@ -1,5 +1,5 @@
 [project]
-name = "simulator-core"
+name = "omotes-simulator-core"
 dynamic = ["version"]
 authors = [{ name = "Michiel Tukker", email = "michiel.tukker@deltares.nl" }]
 description = "Core library of the NWN simulator"
