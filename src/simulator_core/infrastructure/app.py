@@ -38,7 +38,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
         name="test run",
         timestep=3600,
         start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
-        stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
+        stop=datetime.strptime("2019-01-01T10:00:00", "%Y-%m-%dT%H:%M:%S"),
     )
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
@@ -52,4 +52,9 @@ def run(file_path: str | None = None) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    print(run(r".\testdata\test1.esdl"))
+    df = run(r".\testdata\test1.esdl")
+    # print(df.head())
+    # print(df.shape)
+    df.to_pickle(r".\testdata\test1.pkl")
+    for series_name, series in df.items():
+        print(f"Name={series_name[0]}, property{series_name[1]}, shape={series.shape}")
