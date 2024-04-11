@@ -26,11 +26,11 @@ this seems to be a manual step.
 after fixing the environment, i could run pytest.  all tests pass, 92% code coverage (!)
 
 ## Develoment process
-Main development is done by 2 persons: Sam & Mike.  Ryvo has contributed on parts of the assets and with internal discussions (and review?)
+Main development is done by Sam & Mike.  Ryvo has contributed on parts of the assets and with internal discussions (and review?),  I was involved in the start of development
 
 development is done in branches which are merged via PRs. Code review is done for (almost) every PR,  the comments seem reasonable. Most comments seem very compact/short, I assume a lot of offline discussion takes place? 
 
-Github Issues are used (currently 39 open, 26 closed).  Issues seem relevant and descriptive titles are used. However,  most issues contain no description or content,  no criteria for succes, documentation, etc. No (online) discussion takes place on the issues,  so documentation of the issue-solving process is missing. 
+Github Issues are used (currently 39 open, 26 closed).  Issues seem relevant and descriptive titles are used. However,  most issues contain no description or content,  no criteria for succes, documentation, etc. No (online) discussion takes place on the issues,  so documentation of the issue-solving process is missing.  discussion via issues may also be an opportunity to involve Ryvo more?
 
 
 
@@ -54,13 +54,17 @@ The docstring says "NetworkSimulation connects the controller and HeatNetwork (i
 
 NetworkSimulation.gather_output docstring says " ... return a dict with output". However, it returns a dataframe!
 
+# Tooling checks
 
-# unit tests
-All tests run & pass.
+## unit tests
+All tests run & pass. 92% coverage! 
+
+Test quality is decent,  however: 
+ - some tests are pointless (
 Test quality?  useless tests? 
 Overcomplicated tests? 
 
-# Linting & type hints
+## Linting & type hints
 Running mypy reports 0 errors, indicating that typehinting is implemented correctly.  
 I couldn't find any significant usage of Typing.Any (only for abstract classes/lists) 
 
@@ -72,16 +76,21 @@ gather results from object model and return output in a certain format.
 However, at some point the development overtook the architecture? E.g. I see two "Asset"  folders. 
 
 The "late" switch from pandapipes to an internal solver is very visible in the code. The "pandapipes" 
-objects such as ProductionCluster, DemandCluster are now wrappers around the internal solver. 
-It seems illogical to have this two-layer setup? why not integrate the Production_asset functionality in the ProductionCluster class (for example)???
+objects such as ProductionCluster, DemandCluster are now wrappers around the internal solver. This made sense as an abstraction layer around PandaPipes, but it is not logical when the solver is integrated in the same repository (we have full control over the code)
+Why not integrate the Production_asset functionality in the ProductionCluster class (for example)???
+
+InfluxDb communication is done through a utils module in Entities/assets. The layered architecture would suggest to have this code in the infrastructure layer and pass some abstract repository-type to the assets. 
+
+Some object interactions seem out of place / inconsistent,  but then these functions are currently unused in the code.  This may just be a result of the code-base being in ongoing development. 
 
 ## run stack trace
-run()
-	HeatNetwork.__init__()
-		EsdlEnergySystemMapper
-			EsdlAssetMapper
-			[create list of Junction Objects]
-	NetworkController (returned from EsdlControllerMapper().to_entity(self.esdl) )
+Infrastructure.app.run()
+	Infrastructure.SimulationManager()
+		HeatNetwork.__init__()
+			EsdlEnergySystemMapper
+				EsdlAssetMapper
+				(create list of Junction Objects)
+		NetworkController (returned from EsdlControllerMapper().to_entity(self.esdl) )
 	SimulationManager.execute()
 		NetworkSimulation.run()
 			Loop over all timesteps:
