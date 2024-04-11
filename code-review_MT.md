@@ -20,21 +20,20 @@ TODO
 ## Accessibility
 Setting up the dev environment is not fully automatic and requires some manual steps
 I got an install issue with ~ip-tools (?),  pytest-cov was not installed (missing dev-depencency).  
-Are the requirements*.txt filesup to date?   (Note: I probably didn't install the dev-depencencies, 
+Are the requirements.txt filesup to date?   (Note: I probably didn't install the dev-depencencies, 
 this seems to be a manual step. 
 
 after fixing the environment, i could run pytest.  all tests pass, 92% code coverage (!)
 
 ## Develoment process
-Main development is done by Sam & Mike.  Ryvo has contributed on parts of the assets and with internal discussions (and review?),  I was involved in the start of development
+Main development is done by Sam & Mike.  Ryvo has contributed on parts of the assets and with internal discussions (and review?),  I was involved only in the start of development
 
-development is done in branches which are merged via PRs. Code review is done for (almost) every PR,  the comments seem reasonable. Most comments seem very compact/short, I assume a lot of offline discussion takes place? 
+development is done in branches which are merged via PRs. Code review is done for (almost) every PR,  the comments seem reasonable. Most comments seem very compact/short, I assume offline discussion takes place? 
 
 Github Issues are used (currently 39 open, 26 closed).  Issues seem relevant and descriptive titles are used. However,  most issues contain no description or content,  no criteria for succes, documentation, etc. No (online) discussion takes place on the issues,  so documentation of the issue-solving process is missing.  discussion via issues may also be an opportunity to involve Ryvo more?
 
-
-
 # Documentation
+
 ## readme's 
 The README.MD is basically empty, doesn't provide any info
 The CONTROBUTING.md lists general code quality requirements,  but is missing details.  For example: 
@@ -58,20 +57,20 @@ NetworkSimulation.gather_output docstring says " ... return a dict with output".
 
 ## unit tests
 All tests run & pass. 92% coverage! 
+Test quality looks good.  some tests seem pointless but it's an artifact of keeping tests small/single-purpose.  No overly long / complicated tests found.
+Error handling / data validation is being tested (Tests check if exception is raised)
+Complicated dependencies are mocked in some tests. Is this the case everywhere?
 
-Test quality is decent,  however: 
- - some tests are pointless (
-Test quality?  useless tests? 
-Overcomplicated tests? 
 
 ## Linting & type hints
 Running mypy reports 0 errors, indicating that typehinting is implemented correctly.  
 I couldn't find any significant usage of Typing.Any (only for abstract classes/lists) 
+Flake8 finds a load of errors,  but I think this is an environment error on my side? 
 
 # Code Architecture
 Basic architecture follows a layered model (Infrastructure -> Adapter -> logic -> Entities/assets),  which
 is a logical choice for an application like this (converting ESDL to an object-model, run simulation, 
-gather results from object model and return output in a certain format. 
+gather results from object model and return output in a certain format (which may differ from the internal format). 
   
 However, at some point the development overtook the architecture? E.g. I see two "Asset"  folders. 
 
@@ -83,12 +82,14 @@ InfluxDb communication is done through a utils module in Entities/assets. The la
 
 Some object interactions seem out of place / inconsistent,  but then these functions are currently unused in the code.  This may just be a result of the code-base being in ongoing development. 
 
+Suggestion:  clarify / document the desired code architecture,  then implement (and refractor!) accoordingly
+
 ## run stack trace
 Infrastructure.app.run()
 	Infrastructure.SimulationManager()
 		HeatNetwork.__init__()
 			EsdlEnergySystemMapper
-				EsdlAssetMapper
+				EsdlAssetMapper -> (list of Asset Objects)
 				(create list of Junction Objects)
 		NetworkController (returned from EsdlControllerMapper().to_entity(self.esdl) )
 	SimulationManager.execute()
@@ -96,6 +97,7 @@ Infrastructure.app.run()
 			Loop over all timesteps:
 				NetworkController.run_time_step()
 				HeatNetwork.run_time_step()
+					solver??
 				HeatNetwork.store_output()
 		NetworkSimulation.gather_output()
 return pd.Dataframe
