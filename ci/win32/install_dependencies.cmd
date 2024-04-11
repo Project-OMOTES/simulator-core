@@ -2,5 +2,5 @@
 pushd .
 cd /D "%~dp0"
 cd ..\..\
-pip-sync
+pip-sync .\dev-requirements.txt .\requirements.txt
 popd
