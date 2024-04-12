@@ -85,6 +85,8 @@ Some object interactions seem out of place / inconsistent,  but then these funct
 Suggestion:  clarify / document the desired code architecture,  then implement (and refractor!) accoordingly
 
 ## run stack trace
+
+```
 Infrastructure.app.run()
 	Infrastructure.SimulationManager()
 		HeatNetwork.__init__()
@@ -101,6 +103,7 @@ Infrastructure.app.run()
 				HeatNetwork.store_output()
 		NetworkSimulation.gather_output()
 return pd.Dataframe
+```
 				 
 ## Inconsistencies
 SimulationManager, line 47-48:  HeatNetworkconstructor takes a mapper as an argument and does the mapping itself NetworkController needs two lists of internal asset objects,  so the simulation manager calls the EsdlControllerMapper to do the conversion, which resutls in a constructed NetworkController object.   Both approaches are fine,  but choose one and follow that!
