@@ -5,6 +5,16 @@ The main goal of the assets classes is to take the physical input of the
 assets (e.g. inner diameter wall roughness) and translate this into
 linearized equations.
 
-
-
+.. autoclass:: src.simulator_core.solver.network.assets.base_item.BaseItem
+   :members:
+   :show-inheritance:
+.. autoclass:: src.simulator_core.solver.network.assets.base_asset.BaseAsset
+   :members:
+   :show-inheritance:
+.. autoclass:: src.simulator_core.solver.network.assets.fall_type.FallType
+   :members:
+   :show-inheritance:
+.. autoclass:: src.simulator_core.solver.network.assets.solver_pipe.SolverPipe
+   :members:
+   :show-inheritance:
 
