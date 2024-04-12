@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Simulator-simulation documentation'
-copyright = '2023, NieuweWarmteNu Design Toolkit'
-author = 'Michiel Tukker'
+copyright = '2024, NieuweWarmteNu Design Toolkit'
+author = 'Michiel Tukker, Sam van der Zwan, Ryvo Octaviano, Mike van Meerkerk'
 
 
 # -- General configuration ---------------------------------------------------
@@ -27,7 +27,7 @@ author = 'Michiel Tukker'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
+extensions = ['python_docs_theme'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,7 +44,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-
+html_theme = 'furo'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
