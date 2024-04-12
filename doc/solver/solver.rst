@@ -1,6 +1,6 @@
 Solver architecture
 =========================
-To solve one time step of the simualtion the solver is used.
+To solve one time step of the simulation the solver is used.
 This solver is solving both the hydraulic and thermo dynamic equations.
 As unknown the following quantities are solved:
 
@@ -21,11 +21,12 @@ This has been implemented in een object oriented way. We have the following clas
 #. Equation object class: This class is used to store the equations.
 #. Network class: This class stores the different assets which are in the network and the connecting nodes.
 #. Asset classes: this comprises of different classes to simulate the physics of different assets.
-#. Solver class: main class, which stores the network and the matrix and is
-responsible for the communication between the two.
+#. Solver class: main class, which stores the network and the matrix and is responsible for the communication between the two.
 
 Next to this there are several utility modules and class, which are use to support all the classes.
 
+.. include:: matrix.rst
+.. include:: equation_object.rst
 
 
 

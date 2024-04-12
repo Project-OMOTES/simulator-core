@@ -16,8 +16,8 @@ This documentation is divided in the following sections:
 
    architecture/architecture
    solver/solver
-   components/components
-   Controller/controller
+   assets/assets
+   controller/controller
 
 
 Indices and tables
