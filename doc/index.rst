@@ -10,18 +10,14 @@ The simulator is complete  written in Python.
 As input it use the `ESDL`_ format. The results are passed back as a pandas pipes dataFrame.
 This documentation is divided in the following sections:
 
-#. General architecture
-#. Solver architecture
-#. Components
-#. Controller
-
-.. _NWN website: https://www.nwn.nu/
-.. _ESDL: https://www.esdl.nl/
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   architecture/architecture
+   solver/solver
+   components/components
+   Controller/controller
 
 
 Indices and tables
@@ -30,3 +26,7 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+.. _NWN website: https://www.nwn.nu/
+.. _ESDL: https://www.esdl.nl/
