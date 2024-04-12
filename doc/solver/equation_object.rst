@@ -1,6 +1,7 @@
 Equation object class
 +++++++++++++++++++++++++++++++++++++++++++++
 An equation object consists of three parts:
+
 #. A list of the index in the matrix of the coefficients of the equation
 #. A list of the coefficients of the equation
 #. The right hand side of the equation
