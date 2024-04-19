@@ -1,3 +1,5 @@
+.. _matrix-class:
+
 Matrix class
 +++++++++++++++++++++++++++++++++++++++++++++
 The matrix class stores the matrix of the system of equations. It is used to solve the system of equations.
