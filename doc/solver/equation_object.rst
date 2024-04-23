@@ -14,4 +14,3 @@ The coefficients are the coefficients which are obtained by linearizing the equa
 
 .. autoclass:: simulator_core.solver.matrix.equation_object.EquationObject
    :members:
-   :show-inheritance:

@@ -17,13 +17,13 @@ To solve them these equations are linearized via the Newton-Raphson method.
 The resulting matrix is solved with the numpy matrix solver.
 This has been implemented in een object oriented way. We have the following classes:
 
+#. :ref:`solver-class`: main class, which stores the network and the matrix and is responsible for the communication between the two.
 #. :ref:`matrix-class`: This class houses the matrix and methods to solve it.
 #. :ref:`equation-object-class`: This class is used to store the equations.
 #. :ref:`network-class`: This class stores the different assets which are in the network and the connecting nodes.
 #. :ref:`main-assets`: this comprises of different classes to simulate the physics of different assets.
-#. :ref:`solver-class`: main class, which stores the network and the matrix and is responsible for the communication between the two.
+#. :ref:`solver-utility`: module with utility functions used by the solver.
 
-Next to this there are several utility modules and class, which are use to support all the classes.
 
 **Contents**
 
@@ -31,11 +31,13 @@ Next to this there are several utility modules and class, which are use to suppo
     :maxdepth: 1
     :glob:
 
-    equation_object.rst
+    solver.rst
     matrix.rst
+    equation_object.rst
     network.rst
     asset_main.rst
-    solver.rst
+    solver_utility.rst
+
 
 
 
