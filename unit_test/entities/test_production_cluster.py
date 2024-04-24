@@ -46,6 +46,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
+            geometry=None
         )
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
@@ -84,12 +85,12 @@ class ProductionClusterTest(unittest.TestCase):
         assert self.production_cluster.temperature_return == 333.15
         assert self.production_cluster.controlled_mass_flow == mass_flow
         assert (
-            self.production_cluster.solver_asset.mass_flow_rate_set_point
-            == self.production_cluster.controlled_mass_flow
+                self.production_cluster.solver_asset.mass_flow_rate_set_point
+                == self.production_cluster.controlled_mass_flow
         )
         assert (
-            self.production_cluster.solver_asset.pre_scribe_mass_flow
-            is not setpoints[PROPERTY_SET_PRESSURE]
+                self.production_cluster.solver_asset.pre_scribe_mass_flow
+                is not setpoints[PROPERTY_SET_PRESSURE]
         )
 
     def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
@@ -159,8 +160,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Assert
         assert self.production_cluster.control_mass_flow is not setpoints[PROPERTY_SET_PRESSURE]
         assert (
-            self.production_cluster.solver_asset.pre_scribe_mass_flow
-            is not setpoints[PROPERTY_SET_PRESSURE]
+                self.production_cluster.solver_asset.pre_scribe_mass_flow
+                is not setpoints[PROPERTY_SET_PRESSURE]
         )
 
     def test_production_cluster_set_pressure_supply(self) -> None:
