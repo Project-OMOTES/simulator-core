@@ -63,6 +63,6 @@ class NetworkSimulation:
         result = self.network.gather_output()
         return result
 
-    def plot_output(self):
+    def plot_output(self) -> None:
         """Plot the result for inspections."""
         Plotting.plot_map(self.network.assets)

@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing pipe class."""
 import uuid
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import numpy as np
 
@@ -57,7 +57,7 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str, geometry: any):
+    def __init__(self, asset_name: str, asset_id: str, geometry: Any):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.

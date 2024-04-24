@@ -15,7 +15,7 @@
 
 """ProductionCluster class."""
 import uuid
-from typing import Dict
+from typing import Dict, Any
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -62,7 +62,7 @@ class ProductionCluster(AssetAbstract):
     controlled_mass_flow: float | None
     """The controlled mass flow of the asset [kg/s]."""
 
-    def __init__(self, asset_name: str, asset_id: str, geometry: any,):
+    def __init__(self, asset_name: str, asset_id: str, geometry: Any,):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.

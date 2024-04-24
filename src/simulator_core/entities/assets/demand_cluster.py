@@ -15,7 +15,7 @@
 
 """demandCluster class."""
 import uuid
-from typing import Dict
+from typing import Dict, Any
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -45,7 +45,7 @@ class DemandCluster(AssetAbstract):
         self,
         asset_name: str,
         asset_id: str,
-        geometry: any,
+        geometry: Any,
     ):
         """Initialize a DemandCluster object.
 

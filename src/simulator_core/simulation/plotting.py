@@ -18,13 +18,14 @@ import plotly.express as px
 import geopandas as gpd
 import numpy as np
 from shapely.geometry import LineString
+from numpy.typing import NDArray
 
 
 class Plotting:
     """Plotting plot the results of asset (currently pipe) for inspection."""
 
     @staticmethod
-    def plot_map(assets: list):
+    def plot_map(assets: list) -> None:
         """Static function to plot the simulation results to the map.
 
         :param assets: list collection of assets
@@ -68,9 +69,9 @@ class Plotting:
         geo_df = gpd.GeoDataFrame(data, crs="EPSG:4326")
 
         # plotting pipe properties
-        lats = []
-        lons = []
-        names = []
+        lats: NDArray = np.array(None)
+        lons: NDArray = np.array(None)
+        names: NDArray = np.array(None)
         for ii in range(len(geo_df)):
             if isinstance(geo_df['geometry'][ii], LineString):
                 linestrings = [geo_df['geometry'][ii]]
@@ -89,9 +90,9 @@ class Plotting:
                     ", Tout: " + "{:.2f}".format(geo_df['temperature_out'][ii] - 273) + " C"
 
                 names = np.append(names, [text] * len(y))
-                lats = np.append(lats, None)
-                lons = np.append(lons, None)
-                names = np.append(names, None)
+                lats = np.append(lats, np.array(None))
+                lons = np.append(lons, np.array(None))
+                names = np.append(names, np.array(None))
 
         fig = px.line_mapbox(lat=lats, lon=lons,
                              hover_name=names, zoom=14, mapbox_style="carto-positron")
