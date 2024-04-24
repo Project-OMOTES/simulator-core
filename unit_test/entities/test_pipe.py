@@ -95,7 +95,7 @@ class PipeTest(unittest.TestCase):
         # Arrange
         # - Load esdl pipe asset
         esdl_file_path = (
-                Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
+            Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
         )
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
