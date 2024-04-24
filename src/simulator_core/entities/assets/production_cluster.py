@@ -62,14 +62,14 @@ class ProductionCluster(AssetAbstract):
     controlled_mass_flow: float | None
     """The controlled mass flow of the asset [kg/s]."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, geometry: any,):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
+        :param any geometry: ESDL geometry
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, geometry=geometry)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None

@@ -45,14 +45,15 @@ class DemandCluster(AssetAbstract):
         self,
         asset_name: str,
         asset_id: str,
+        geometry: any,
     ):
         """Initialize a DemandCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
+        :param any geometry: ESDL geometry
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, geometry=geometry)
 
         self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE

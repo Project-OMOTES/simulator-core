@@ -31,6 +31,7 @@ class EsdlAssetMapper:
     conversion_dict = {
         esdl.Producer: ProductionCluster,
         esdl.GenericProducer: ProductionCluster,
+        esdl.GeothermalSource: ProductionCluster,
         esdl.Consumer: DemandCluster,
         esdl.HeatingDemand: DemandCluster,
         esdl.Pipe: Pipe,
@@ -50,4 +51,4 @@ class EsdlAssetMapper:
         if not type(model.esdl_asset) in self.conversion_dict:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
         return self.conversion_dict[type(model.esdl_asset)](
-            model.esdl_asset.name, model.esdl_asset.id)
+            model.esdl_asset.name, model.esdl_asset.id, model.esdl_asset.geometry)

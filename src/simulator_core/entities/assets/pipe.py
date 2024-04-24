@@ -57,14 +57,14 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, geometry: any):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
+        :param any geometry: ESDL geometry
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, geometry=geometry)
         # Initialize the default values of the pipe
         self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient
         self._external_temperature = PIPE_DEFAULTS.external_temperature
