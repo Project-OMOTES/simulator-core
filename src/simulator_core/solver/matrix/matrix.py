@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
 import numpy as np
+import scipy as sp
 import csv
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.matrix.utility import absolute_difference, relative_difference
@@ -78,6 +79,22 @@ class Matrix:
         a = np.array(self.mat)
         b = np.array(self.rhs)
         self.sol_new = np.linalg.solve(a, b).tolist()
+        return self.sol_new
+
+    def solve_sparse(self, equations: list[EquationObject]) -> list[float]:
+        """Method to solve the system of equation given in the matrix using sparse matrix solver.
+
+        :param equations: list with the equations to solve.
+        :return: list containing the solution of the system of equations.
+        """
+
+        self.sol_old = self.sol_new
+        data = np.concatenate([equation.coefficients for equation in equations])
+        col = np.concatenate([equation.indices for equation in equations])
+        row = np.array(sum([[i]*len(equations[i].coefficients) for i in range(len(equations))],[]))
+        result = sp.sparse.csc_matrix((data, (row, col)), shape=(self.num_unknowns, self.num_unknowns))
+        rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
+        self.sol_new = sp.sparse.linalg.spsolve(result, rhs)
         return self.sol_new
 
     def is_converged(self) -> bool:
