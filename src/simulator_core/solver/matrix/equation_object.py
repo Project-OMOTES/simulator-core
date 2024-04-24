@@ -38,6 +38,9 @@ class EquationObject:
         self.coefficients = np.array([], dtype=float)
         self.rhs = 0.0
 
+    def __len__(self) -> int:
+        return len(self.coefficients)
+
     def to_list(self, length: int) -> list[float]:
         """Method to change the equation object to list which can be stored in the matrix.
 

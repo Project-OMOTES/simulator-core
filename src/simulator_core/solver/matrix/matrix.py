@@ -87,14 +87,14 @@ class Matrix:
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
-
         self.sol_old = self.sol_new
         data = np.concatenate([equation.coefficients for equation in equations])
         col = np.concatenate([equation.indices for equation in equations])
-        row = np.array(sum([[i]*len(equations[i].coefficients) for i in range(len(equations))],[]))
-        result = sp.sparse.csc_matrix((data, (row, col)), shape=(self.num_unknowns, self.num_unknowns))
+        row = np.concatenate([np.full((len(equations[i])), i) for i in range(len(equations))])
+        matrix = sp.sparse.csc_matrix((data, (row, col)),
+                                      shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
-        self.sol_new = sp.sparse.linalg.spsolve(result, rhs)
+        self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
         return self.sol_new
 
     def is_converged(self) -> bool:
