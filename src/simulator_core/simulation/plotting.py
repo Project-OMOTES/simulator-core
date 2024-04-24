@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+"""Plot result on the map for debugging."""
 import esdl
 import plotly.express as px
 import geopandas as gpd
@@ -22,13 +22,13 @@ from shapely.geometry import LineString
 
 class Plotting:
     """Plotting plot the results of asset (currently pipe) for inspection."""
+
     @staticmethod
     def plot_map(assets: list):
-        """static function to plot the simulation results to the map
+        """Static function to plot the simulation results to the map.
 
         :param assets: list collection of assets
         """
-
         # prepare list
         geometry = []
         asset_id = []
@@ -82,11 +82,11 @@ class Plotting:
                 lons = np.append(lons, x)
 
                 text = geo_df['asset_name'][ii] + \
-                       ", mass_flow: " + "{:.2f}".format(geo_df['mass_flow'][ii]) + " kg/s" + \
-                       ", Pin: " + "{:.2f}".format(geo_df['pressure_in'][ii] / 1e5) + " bar" + \
-                       ", Pout: " + "{:.2f}".format(geo_df['pressure_out'][ii] / 1e5) + " bar" + \
-                       ", Tin: " + "{:.2f}".format(geo_df['temperature_in'][ii] - 273) + " C" + \
-                       ", Tout: " + "{:.2f}".format(geo_df['temperature_out'][ii] - 273) + " C"
+                    ", mass_flow: " + "{:.2f}".format(geo_df['mass_flow'][ii]) + " kg/s" + \
+                    ", Pin: " + "{:.2f}".format(geo_df['pressure_in'][ii] / 1e5) + " bar" + \
+                    ", Pout: " + "{:.2f}".format(geo_df['pressure_out'][ii] / 1e5) + " bar" + \
+                    ", Tin: " + "{:.2f}".format(geo_df['temperature_in'][ii] - 273) + " C" + \
+                    ", Tout: " + "{:.2f}".format(geo_df['temperature_out'][ii] - 273) + " C"
 
                 names = np.append(names, [text] * len(y))
                 lats = np.append(lats, None)
