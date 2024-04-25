@@ -19,26 +19,27 @@ import geopandas as gpd
 import numpy as np
 from shapely.geometry import LineString
 from numpy.typing import NDArray
+from simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 
 class Plotting:
     """Plotting plot the results of asset (currently pipe) for inspection."""
 
     @staticmethod
-    def plot_map(assets: list) -> None:
+    def plot_map(assets: list[AssetAbstract]) -> None:
         """Static function to plot the simulation results to the map.
 
         :param assets: list collection of assets
         """
-        # prepare list
-        geometry = []
-        asset_id = []
-        asset_name = []
-        mass_flow = []
-        pressure_in = []
-        pressure_out = []
-        temperature_in = []
-        temperature_out = []
+        geo_df = Plotting.prepare_data(assets)
+        Plotting.plot_line_mapbox(geo_df)
+
+    @staticmethod
+    def prepare_data(assets: list[AssetAbstract]) -> gpd.GeoDataFrame:
+        """Function to prepare geopandas dataframe."""
+        geo_df = gpd.GeoDataFrame(
+            columns=['asset_id', 'asset_name', 'geometry', 'mass_flow', 'pressure_in',
+                     'pressure_out', 'temperature_in', 'temperature_out'], crs="EPSG:4326")
 
         for asset in assets:
             if isinstance(asset.geometry, esdl.esdl.Line):
@@ -46,35 +47,29 @@ class Plotting:
                 for point in asset.geometry.point:
                     coor_pipe.append([point.lon, point.lat])
 
-                geometry.append(LineString(coor_pipe))
+                data = {'asset_id': asset.asset_id,
+                        'asset_name': asset.name,
+                        'geometry': LineString(coor_pipe),
+                        'mass_flow': asset.output[-1]['mass_flow'],
+                        'pressure_in': asset.output[-1]['pressure_supply'],
+                        'pressure_out': asset.output[-1]['pressure_return'],
+                        'temperature_in': asset.output[-1]['temperature_supply'],
+                        'temperature_out': asset.output[-1]['temperature_return'],
+                        }
 
-                asset_name.append(asset.name)
-                asset_id.append(asset.asset_id)
-                mass_flow.append(asset.output[-1]['mass_flow'])
-                temperature_in.append(asset.output[-1]['temperature_supply'])
-                temperature_out.append(asset.output[-1]['temperature_return'])
-                pressure_in.append(asset.output[-1]['pressure_supply'])
-                pressure_out.append(asset.output[-1]['pressure_return'])
+                geo_df.loc[len(geo_df)] = data
 
-        # create geopanda instance
-        data = {'asset_id': asset_id,
-                'asset_name': asset_name,
-                'geometry': geometry,
-                'mass_flow': mass_flow,
-                'pressure_in': pressure_in,
-                'pressure_out': pressure_out,
-                'temperature_in': temperature_in,
-                'temperature_out': temperature_out,
-                }
-        geo_df = gpd.GeoDataFrame(data, crs="EPSG:4326")
+        return geo_df
 
-        # plotting pipe properties
+    @staticmethod
+    def plot_line_mapbox(geo_df: gpd.GeoDataFrame) -> None:
+        """Function to plot using plotly express line mapbox."""
         lats: NDArray = np.array(None)
         lons: NDArray = np.array(None)
         names: NDArray = np.array(None)
-        for ii in range(len(geo_df)):
-            if isinstance(geo_df['geometry'][ii], LineString):
-                linestrings = [geo_df['geometry'][ii]]
+        for _, row in geo_df.iterrows():
+            if isinstance(row['geometry'], LineString):
+                linestrings = [row['geometry']]
             else:
                 continue
             for linestring in linestrings:
@@ -82,12 +77,12 @@ class Plotting:
                 lats = np.append(lats, y)
                 lons = np.append(lons, x)
 
-                text = geo_df['asset_name'][ii] + \
-                    ", mass_flow: " + "{:.2f}".format(geo_df['mass_flow'][ii]) + " kg/s" + \
-                    ", Pin: " + "{:.2f}".format(geo_df['pressure_in'][ii] / 1e5) + " bar" + \
-                    ", Pout: " + "{:.2f}".format(geo_df['pressure_out'][ii] / 1e5) + " bar" + \
-                    ", Tin: " + "{:.2f}".format(geo_df['temperature_in'][ii] - 273) + " C" + \
-                    ", Tout: " + "{:.2f}".format(geo_df['temperature_out'][ii] - 273) + " C"
+                text = row['asset_name'] + \
+                    ", mass_flow: " + "{:.2f}".format(row['mass_flow']) + " kg/s" + \
+                    ", Pin: " + "{:.2f}".format(row['pressure_in'] / 1e5) + " bar" + \
+                    ", Pout: " + "{:.2f}".format(row['pressure_out'] / 1e5) + " bar" + \
+                    ", Tin: " + "{:.2f}".format(row['temperature_in'] - 273) + " C" + \
+                    ", Tout: " + "{:.2f}".format(row['temperature_out'] - 273) + " C"
 
                 names = np.append(names, [text] * len(y))
                 lats = np.append(lats, np.array(None))

@@ -31,7 +31,6 @@ class EsdlAssetMapper:
     conversion_dict = {
         esdl.Producer: ProductionCluster,
         esdl.GenericProducer: ProductionCluster,
-        esdl.GeothermalSource: ProductionCluster,
         esdl.Consumer: DemandCluster,
         esdl.HeatingDemand: DemandCluster,
         esdl.Pipe: Pipe,
