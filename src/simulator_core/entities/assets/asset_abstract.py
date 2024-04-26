@@ -16,7 +16,7 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
+from typing import Dict, List
 
 from pandas import DataFrame
 
@@ -44,18 +44,16 @@ class AssetAbstract(ABC):
     """The output of the asset as a list with a dictionary per timestep."""
     solver_asset: BaseAsset
 
-    def __init__(self, asset_name: str, asset_id: str, geometry: Any):
+    def __init__(self, asset_name: str, asset_id: str):
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param any geometry: ESDL geometry
         """
         self.from_junction = None
         self.to_junction: Junction = None
         self.name: str = asset_name
         self.asset_id: str = asset_id
-        self.geometry: Any = geometry
         self.output: List[Dict[str, float]] = []
 
     @abstractmethod

@@ -20,7 +20,6 @@ from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from datetime import timedelta, timezone
-from simulator_core.simulation.plotting import Plotting
 
 import logging
 
@@ -62,7 +61,3 @@ class NetworkSimulation:
         """
         result = self.network.gather_output()
         return result
-
-    def plot_output(self) -> None:
-        """Plot the result for inspections."""
-        Plotting.plot_map(self.network.assets)

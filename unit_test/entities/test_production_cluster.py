@@ -46,7 +46,6 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
-            geometry=None
         )
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)

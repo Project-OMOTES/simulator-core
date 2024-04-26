@@ -15,7 +15,7 @@
 
 """demandCluster class."""
 import uuid
-from typing import Dict, Any
+from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
@@ -45,15 +45,13 @@ class DemandCluster(AssetAbstract):
         self,
         asset_name: str,
         asset_id: str,
-        geometry: Any,
     ):
         """Initialize a DemandCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param any geometry: ESDL geometry
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id, geometry=geometry)
+        super().__init__(asset_name=asset_name, asset_id=asset_id)
 
         self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE

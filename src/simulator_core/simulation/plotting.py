@@ -16,30 +16,38 @@
 import esdl
 import plotly.express as px
 import geopandas as gpd
+from pandas import DataFrame
 import numpy as np
 from shapely.geometry import LineString
 from numpy.typing import NDArray
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
+from simulator_core.entities.esdl_object import EsdlObject
 
 
 class Plotting:
     """Plotting plot the results of asset (currently pipe) for inspection."""
 
-    @staticmethod
-    def plot_map(assets: list[AssetAbstract]) -> None:
+    def __init__(self, esdl_object: EsdlObject) -> None:
+        """Initialize plotting instance.
+
+        :param EsdlObject esdl_object: esdl object of the network
+        """
+        self.esdl_object = esdl_object
+
+    def plot_map(self, result: DataFrame) -> None:
         """Static function to plot the simulation results to the map.
 
-        :param assets: list collection of assets
+        :param DataFrame result: simulation result in dataframe format
         """
-        geo_df = Plotting.prepare_data(assets)
+        geo_df = self.prepare_data(result)
         Plotting.plot_line_mapbox(geo_df)
 
-    @staticmethod
-    def prepare_data(assets: list[AssetAbstract]) -> gpd.GeoDataFrame:
+    def prepare_data(self, result: DataFrame) -> gpd.GeoDataFrame:
         """Function to prepare geopandas dataframe."""
         geo_df = gpd.GeoDataFrame(
             columns=['asset_id', 'asset_name', 'geometry', 'mass_flow', 'pressure_in',
                      'pressure_out', 'temperature_in', 'temperature_out'], crs="EPSG:4326")
+
+        assets = self.get_assets_by_asset_type(esdl.Pipe)
 
         for asset in assets:
             if isinstance(asset.geometry, esdl.esdl.Line):
@@ -47,14 +55,16 @@ class Plotting:
                 for point in asset.geometry.point:
                     coor_pipe.append([point.lon, point.lat])
 
-                data = {'asset_id': asset.asset_id,
+                last_data_index = len(result) - 1
+                data = {'asset_id': asset.id,
                         'asset_name': asset.name,
                         'geometry': LineString(coor_pipe),
-                        'mass_flow': asset.output[-1]['mass_flow'],
-                        'pressure_in': asset.output[-1]['pressure_supply'],
-                        'pressure_out': asset.output[-1]['pressure_return'],
-                        'temperature_in': asset.output[-1]['temperature_supply'],
-                        'temperature_out': asset.output[-1]['temperature_return'],
+                        'mass_flow': result[(asset.id, 'mass_flow')][last_data_index],
+                        'pressure_in': result[(asset.id, 'pressure_supply')][last_data_index],
+                        'pressure_out': result[(asset.id, 'pressure_return')][last_data_index],
+                        'temperature_in': result[(asset.id, 'temperature_supply')][last_data_index],
+                        'temperature_out': result[(asset.id, 'temperature_return')][
+                            last_data_index],
                         }
 
                 geo_df.loc[len(geo_df)] = data
@@ -92,3 +102,11 @@ class Plotting:
         fig = px.line_mapbox(lat=lats, lon=lons,
                              hover_name=names, zoom=14, mapbox_style="carto-positron")
         fig.show()
+
+    def get_assets_by_asset_type(self, asset_type: esdl) -> list[esdl.Asset]:
+        """Function to get list of esdl assets based on asset type."""
+        assets = []
+        for item in self.esdl_object.energy_system_handler.energy_system.eAllContents():
+            if isinstance(item, asset_type):
+                assets.append(item)
+        return assets
