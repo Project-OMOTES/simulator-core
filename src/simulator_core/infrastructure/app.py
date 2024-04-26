@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Entry point for running simulator-core library from cmdline."""
-
+import cProfile
 import logging
 import sys
 import traceback
@@ -43,7 +43,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
         name="test run",
         timestep=3600,
         start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
-        stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
+        stop=datetime.strptime("2019-01-02T01:00:00", "%Y-%m-%dT%H:%M:%S"),
     )
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
@@ -56,8 +56,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
         logger.debug(traceback.format_exc())
         raise error
 
-
-if __name__ == "__main__":
+def main():
     # Set loglevel to logging.DEBUG for more verbose output
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s")
@@ -68,3 +67,9 @@ if __name__ == "__main__":
     logger.info(f"Results dataframe shape=({result.shape})")
     logger.info(f"Execution time: {t2-t1}")
     logger.debug(result.head())
+
+
+if __name__ == "__main__":
+
+    main()
+
