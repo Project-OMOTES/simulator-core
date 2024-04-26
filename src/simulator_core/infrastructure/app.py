@@ -35,8 +35,8 @@ def progressLogger(progress: float, message: str) -> None:
     logger.info(f"{message} ({progress*100:.2f}%)")
 
 
-def run(file_path: str | None = None) -> pd.DataFrame:
-    """Main run function for the heatnetwork simulator."""
+def run_simulator(file_path: str | None = None) -> pd.DataFrame:
+    """Main run function for the heat network simulator."""
     config = SimulationConfiguration(
         simulation_id=uuid.uuid1(),
         name="test run",
@@ -67,7 +67,11 @@ def main():
     logger.info(f"Execution time: {t2-t1}")
     logger.debug(result.head())
 
+def main():
+    #run_simulator(r".\testdata\nijmegen\cluster2merged_pipes.esdl").to_csv("test2.csv")
+    run_simulator(r".\testdata\test1.esdl")
+
 
 if __name__ == "__main__":
-
     main()
+
