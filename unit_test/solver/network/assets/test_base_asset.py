@@ -235,13 +235,11 @@ class BaseAssetTest(unittest.TestCase):
         # Assert
         assert equation_object.rhs == 0.0
         assert all(equation_object.coefficients == [1.0, -1.0])
-        assert all( equation_object.indices == [
-                IndexCoreQuantity.pressure
-                + connection_point_id * IndexCoreQuantity.number_core_quantities,
-                self.asset.connected_nodes[connection_point_id].matrix_index
-                + IndexCoreQuantity.pressure,
-            ])
-
+        assert all(equation_object.indices == [
+            IndexCoreQuantity.pressure
+            + connection_point_id * IndexCoreQuantity.number_core_quantities,
+            self.asset.connected_nodes[connection_point_id].matrix_index
+            + IndexCoreQuantity.pressure])
 
     def test_base_add_press_to_node_equation_not_connected(self) -> None:
         """Test the add_press_to_node_equations method."""
@@ -297,10 +295,9 @@ class BaseAssetTest(unittest.TestCase):
         # Arrange
         connection_point_id = 0
         temperature = 300.0
-        self.asset.prev_sol[
-            IndexCoreQuantity.internal_energy
-            + connection_point_id * IndexCoreQuantity.number_core_quantities
-            ] = fluid_props.get_ie(temperature)
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy
+                            + connection_point_id * IndexCoreQuantity.number_core_quantities] \
+            = fluid_props.get_ie(temperature)
 
         # Act
         result = self.asset.get_temperature(connection_point=connection_point_id)
