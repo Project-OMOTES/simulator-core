@@ -17,7 +17,7 @@
 import unittest
 from uuid import uuid4
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.utils.fluid_properties import fluid_props
@@ -111,7 +111,7 @@ class ProductionAssetTest(unittest.TestCase):
 
         # Assert
         assert all(
-            equation_object.indices == [IndexEnum.internal_energy, IndexEnum.internal_energy]
+            equation_object.indices == [IndexCoreQuantity.internal_energy, IndexCoreQuantity.internal_energy]
         )
         assert all(equation_object.coefficients == [1.0, -1.0])
         assert equation_object.rhs == 0.0
@@ -123,7 +123,8 @@ class ProductionAssetTest(unittest.TestCase):
         """
         # Arrange
         connection_point_id = 1
-        self.asset.prev_sol[IndexEnum.discharge + connection_point_id * NUMBER_CORE_QUANTITIES] = (
+        self.asset.prev_sol[IndexCoreQuantity.discharge
+                            + connection_point_id * IndexCoreQuantity.number_core_quantities] = (
             1.0
         )
 
@@ -133,7 +134,8 @@ class ProductionAssetTest(unittest.TestCase):
         # Assert
         assert all(
             equation_object.indices
-            == [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES]
+            == [IndexCoreQuantity.internal_energy
+                + connection_point_id * IndexCoreQuantity.number_core_quantities]
         )
         assert all(equation_object.coefficients == [1.0])
         assert equation_object.rhs == fluid_props.get_ie(self.asset.supply_temperature)

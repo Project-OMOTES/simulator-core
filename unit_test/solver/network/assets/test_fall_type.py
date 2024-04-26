@@ -21,7 +21,7 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_testing
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import  IndexCoreQuantity
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.network.assets.node import Node
 
@@ -117,8 +117,9 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + IndexEnum.discharge,
-                    self.asset.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge
+                    + IndexCoreQuantity.number_core_quantities,
                 ]
             ),
         )
@@ -151,10 +152,12 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + IndexEnum.discharge,
-                    self.asset.matrix_index + IndexEnum.internal_energy,
-                    self.asset.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
-                    self.asset.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge,
+                    self.asset.matrix_index + IndexCoreQuantity.internal_energy,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge
+                    + IndexCoreQuantity.number_core_quantities,
+                    self.asset.matrix_index + IndexCoreQuantity.internal_energy
+                    + IndexCoreQuantity.number_core_quantities,
                 ]
             ),
         )
@@ -162,19 +165,23 @@ class FallTypeTest(unittest.TestCase):
             equation_object.coefficients,
             np.array(
                 [
-                    self.asset.prev_sol[IndexEnum.internal_energy],
-                    self.asset.prev_sol[IndexEnum.discharge],
-                    self.asset.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES],
-                    self.asset.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES],
+                    self.asset.prev_sol[IndexCoreQuantity.internal_energy],
+                    self.asset.prev_sol[IndexCoreQuantity.discharge],
+                    self.asset.prev_sol[IndexCoreQuantity.internal_energy
+                                        + IndexCoreQuantity.number_core_quantities],
+                    self.asset.prev_sol[IndexCoreQuantity.discharge
+                                        + IndexCoreQuantity.number_core_quantities],
                 ]
             ),
         )
         self.assertEqual(
             equation_object.rhs,
-            self.asset.prev_sol[IndexEnum.discharge]
-            * self.asset.prev_sol[IndexEnum.internal_energy]
-            + self.asset.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES]
-            * self.asset.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES]
+            self.asset.prev_sol[IndexCoreQuantity.discharge]
+            * self.asset.prev_sol[IndexCoreQuantity.internal_energy]
+            + self.asset.prev_sol[IndexCoreQuantity.discharge
+                                  + IndexCoreQuantity.number_core_quantities]
+            * self.asset.prev_sol[IndexCoreQuantity.internal_energy
+                                  + IndexCoreQuantity.number_core_quantities]
             + self.asset.heat_supplied,
         )
 
@@ -197,9 +204,10 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + IndexEnum.discharge,
-                    self.asset.matrix_index + IndexEnum.pressure,
-                    self.asset.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge,
+                    self.asset.matrix_index + IndexCoreQuantity.pressure,
+                    self.asset.matrix_index + IndexCoreQuantity.pressure
+                    + IndexCoreQuantity.number_core_quantities,
                 ]
             ),
         )
@@ -209,7 +217,7 @@ class FallTypeTest(unittest.TestCase):
                 [
                     -2.0
                     * self.asset.loss_coefficient
-                    * abs(self.asset.prev_sol[IndexEnum.discharge]),
+                    * abs(self.asset.prev_sol[IndexCoreQuantity.discharge]),
                     -1.0,
                     1.0,
                 ]
@@ -218,8 +226,8 @@ class FallTypeTest(unittest.TestCase):
         self.assertEqual(
             equation_object.rhs,
             -self.asset.loss_coefficient
-            * self.asset.prev_sol[IndexEnum.discharge]
-            * abs(self.asset.prev_sol[IndexEnum.discharge]),
+            * self.asset.prev_sol[IndexCoreQuantity.discharge]
+            * abs(self.asset.prev_sol[IndexCoreQuantity.discharge]),
         )
 
     def test_add_internal_pressure_loss_equation_linearized_discharge(self) -> None:
@@ -241,9 +249,10 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + IndexEnum.discharge,
-                    self.asset.matrix_index + IndexEnum.pressure,
-                    self.asset.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES,
+                    self.asset.matrix_index + IndexCoreQuantity.discharge,
+                    self.asset.matrix_index + IndexCoreQuantity.pressure,
+                    self.asset.matrix_index + IndexCoreQuantity.pressure
+                    + IndexCoreQuantity.number_core_quantities,
                 ]
             ),
         )
@@ -253,7 +262,7 @@ class FallTypeTest(unittest.TestCase):
         )
         self.assertEqual(
             equation_object.rhs,
-            -self.asset.loss_coefficient * 1e-5 * self.asset.prev_sol[IndexEnum.discharge],
+            -self.asset.loss_coefficient * 1e-5 * self.asset.prev_sol[IndexCoreQuantity.discharge],
         )
 
     @patch.object(FallType, "add_internal_energy_equation")
@@ -265,7 +274,8 @@ class FallTypeTest(unittest.TestCase):
         """
         # Arrange
         connection_point = 0
-        self.asset.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point] = 1.0
+        self.asset.prev_sol[IndexCoreQuantity.discharge
+                            + IndexCoreQuantity.number_core_quantities * connection_point] = 1.0
 
         # Act
         self.asset.add_thermal_equations(connection_point=connection_point)

@@ -17,7 +17,7 @@ import uuid
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.fall_type import FallType
 
@@ -140,15 +140,16 @@ class ProductionAsset(FallType):
             equation_object.indices = np.array(
                 [
                     self.matrix_index
-                    + IndexEnum.discharge
-                    + connection_point * NUMBER_CORE_QUANTITIES
+                    + IndexCoreQuantity.discharge
+                    + connection_point * IndexCoreQuantity.number_core_quantities
                 ]
             )
             equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
             equation_object.rhs = self.mass_flow_rate_set_point
         else:
             equation_object.indices = np.array(
-                [self.matrix_index + IndexEnum.pressure + connection_point * NUMBER_CORE_QUANTITIES]
+                [self.matrix_index + IndexCoreQuantity.pressure
+                 + connection_point * IndexCoreQuantity.number_core_quantities]
             )
             equation_object.coefficients = np.array([1.0])
             if connection_point == 0:
@@ -165,7 +166,8 @@ class ProductionAsset(FallType):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
+        if self.prev_sol[IndexCoreQuantity.discharge
+                         + connection_point * IndexCoreQuantity.number_core_quantities] > 0:
             return self.add_prescribe_temp(connection_point)
         else:
             return self.add_temp_to_node_equation(connection_point)
