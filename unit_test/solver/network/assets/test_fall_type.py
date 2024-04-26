@@ -21,7 +21,7 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_testing
 
-from simulator_core.solver.matrix.index_core_quantity import  IndexCoreQuantity
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.network.assets.node import Node
 
