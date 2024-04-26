@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Entry point for running simulator-core library from cmdline."""
-import cProfile
 import logging
 import sys
 import traceback
@@ -50,11 +49,11 @@ def run_simulator(file_path: str | None = None) -> pd.DataFrame:
         logger.error(f"Error occured: {error} at: {traceback.format_exc(limit=-1)}")
         logger.debug(traceback.format_exc())
 
-def main():
-    #run_simulator(r".\testdata\nijmegen\cluster2merged_pipes.esdl").to_csv("test2.csv")
+
+def main() -> None:
+    """Main function for simulator core."""
     run_simulator(r".\testdata\test1.esdl")
 
 
 if __name__ == "__main__":
     main()
-
