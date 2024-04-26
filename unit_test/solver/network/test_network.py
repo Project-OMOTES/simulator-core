@@ -452,7 +452,7 @@ class NetworkTest(unittest.TestCase):
     def test_set_result_asset(self) -> None:
         """Test set result asset method."""
         # arrange
-        solution = np.array( [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        solution = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
         asset2 = SolverPipe(name=uuid.uuid4())
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=asset2)

@@ -187,8 +187,7 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(result, [4.0, 5.0, 6.0, 7.0])
 
     def test_get_solution_error_index(self) -> None:
-        """Test the get solution of the matrix object to raise an error when
-         index is out of bound."""
+        """Test the get solution to raise an error when index is out of bound."""
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
@@ -196,7 +195,7 @@ class MatrixTest(unittest.TestCase):
 
         # act
         with self.assertRaises(IndexError) as cm:
-            result = matrix.get_solution(index=11, number_of_unknowns=4)
+            matrix.get_solution(index=11, number_of_unknowns=4)
 
         # assert
         self.assertIsInstance(cm.exception, IndexError)
@@ -206,8 +205,7 @@ class MatrixTest(unittest.TestCase):
             f"of unknowns ({10})")
 
     def test_get_solution_error_number(self) -> None:
-        """Test the get solution of the matrix object to raise an error when
-         index is out of bound."""
+        """Test the get solution to raise an error when index is out of bound."""
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
@@ -215,7 +213,7 @@ class MatrixTest(unittest.TestCase):
 
         # act
         with self.assertRaises(IndexError) as cm:
-            result = matrix.get_solution(index=5, number_of_unknowns=10)
+            matrix.get_solution(index=5, number_of_unknowns=10)
 
         # assert
         self.assertIsInstance(cm.exception, IndexError)
