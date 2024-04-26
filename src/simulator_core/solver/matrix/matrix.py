@@ -26,8 +26,6 @@ class Matrix:
     def __init__(self) -> None:
         """Constructor of matrix class."""
         self.num_unknowns: int = 0
-        self.mat: list[list[float]] = []
-        self.rhs: list[float] = []
         self.sol_new: list[float] = []
         self.sol_old: list[float] = []
         self.relative_convergence: float = 1e-6
@@ -47,46 +45,19 @@ class Matrix:
         self.sol_old += [0.0] * number_unknowns
         return self.num_unknowns - number_unknowns
 
-    def add_equation(self, equation_object: EquationObject) -> None:
-        """Method to add an equation to the matrix.
-
-        Add equation to the matrix it returns a unique id to the equation for easy access.
-        :param EquationObject equation_object: Object containing all information of the equation
-        :return:
-        """
-        row = len(self.rhs)
-        self.rhs.append(0.0)
-        self.mat.append([])
-        self.mat[row] = equation_object.to_list(self.num_unknowns)
-        self.rhs[row] = equation_object.rhs
-
     def solve(self, equations: list[EquationObject], dumb: bool = False) -> list[float]:
-        """Method to solve the system of equation given in the matrix.
-
-        Solves the system of equations and returns the solution. The numpy linalg
-        library solve method is used. For this the matrix is converted to np arrays.
-        :return: list containing the solution of the system of equations.
-        """
-        # TODO add checks if enough equations have been supplied.
-        # TODO check if matrix is solvable.
-        self.rhs = []
-        self.mat = []
-        for equation in equations:
-            self.add_equation(equation)
-        if dumb:
-            self.dump_matrix()
-        self.sol_old = self.sol_new
-        a = np.array(self.mat)
-        b = np.array(self.rhs)
-        self.sol_new = np.linalg.solve(a, b).tolist()
-        return self.sol_new
-
-    def solve_sparse(self, equations: list[EquationObject]) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
 
+        :param dumb:
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
+        if len(equations) > self.num_unknowns:
+            raise RuntimeError(f"Too many equations supplied. Got {len(equations)} equations, "
+                               f"but number of unknowns is {self.num_unknowns}")
+        if len(equations) < self.num_unknowns:
+            raise RuntimeError(f"Not enough equation supplied. Got {len(equations)} equations, "
+                               f"but number of unknowns is {self.num_unknowns}")
         self.sol_old = self.sol_new
         data = np.concatenate([equation.coefficients for equation in equations])
         col = np.concatenate([equation.indices for equation in equations])
@@ -94,8 +65,10 @@ class Matrix:
         matrix = sp.sparse.csc_matrix((data, (row, col)),
                                       shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
+        if dumb:
+            self.dump_matrix(matrix=matrix, rhs=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
-        return self.sol_new
+        return self.sol_new.tolist()
 
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
@@ -123,10 +96,18 @@ class Matrix:
         be provided
         :return: list with teh solution
         """
-        #  TODO add checks if the index and number of unknowns are within the range of the solution.
+        if index > self.num_unknowns:
+            raise IndexError(f"Index ({index}) greater than number "
+                             f"of unknowns ({self.num_unknowns})")
+        if (index + number_of_unknowns) > self.num_unknowns:
+            raise IndexError(f"Index ({index}) plus request number of elements "
+                             f"({number_of_unknowns}) greater than "
+                             f"number of unknowns {self.num_unknowns}")
         return self.sol_new[index:index + number_of_unknowns]
 
-    def dump_matrix(self, file_name: str = 'dump.csv') -> None:
+    @staticmethod
+    def dump_matrix(matrix: sp.sparse.csc_matrix, rhs: sp.sparse.csc_matrix,
+                    file_name: str = 'dump.csv') -> None:
         """Method to dump the matrix to a csv file.
 
         :param str file_name: File name to dump the matrix in default=dump.csv
@@ -134,7 +115,7 @@ class Matrix:
         """
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
-            for row, rhs in zip(self.mat, self.rhs):
+            for row, rhs in zip(matrix, rhs):
                 write.writerow(row + [rhs])
 
     def reset_solution(self) -> None:
