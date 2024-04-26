@@ -131,6 +131,29 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(results, [5.0] * (size + 1))
 
+    def test_solve_singular(self) -> None:
+        """Test the solving of the matrix object."""
+        # arrange
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+        equation1 = EquationObject()
+        equation1.indices = np.array([index, index + 1])
+        equation1.coefficients = np.array([0.0, 0.0])
+        equation1.rhs = 0.0
+        equation2 = EquationObject()
+        equation2.indices = np.array([index, index + 1])
+        equation2.coefficients = np.array([0.0, 1.0])
+        equation2.rhs = 10.0
+
+        # act
+        with self.assertRaises(RuntimeError) as cm:
+            matrix.solve([equation1, equation2])
+
+        # assert
+        self.assertIsInstance(cm.exception, RuntimeError)
+        self.assertEqual(str(cm.exception), "Matrix is singular")
+        # assert
+
     def test_is_converged_false(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange

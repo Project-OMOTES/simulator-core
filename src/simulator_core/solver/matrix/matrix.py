@@ -69,6 +69,8 @@ class Matrix:
         if dumb:
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
+        if np.isnan(self.sol_new).any():
+            raise RuntimeError("Matrix is singular")
         result: list[float] = self.sol_new.tolist()
         return result
 
