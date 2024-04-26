@@ -202,7 +202,8 @@ class NodeTest(unittest.TestCase):
 
         # assert
         np_test.assert_array_equal(
-            equation_object.indices, np.array([node.matrix_index + IndexCoreQuantity.internal_energy])
+            equation_object.indices, np.array([node.matrix_index
+                                               + IndexCoreQuantity.internal_energy])
         )
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(node.initial_temperature))
@@ -329,17 +330,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # - Outflow
         self.connected_asset.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point * IndexCoreQuantity.number_core_quantities
-            ] = +self.discharge
+            + self.connection_point * IndexCoreQuantity.number_core_quantities] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities
-            ] = -self.discharge
+            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities] = -self.discharge
         self.node.connect_asset(
-            asset=self.connected_asset_2, connection_point=self.connection_point_2
-        )
+            asset=self.connected_asset_2, connection_point=self.connection_point_2)
 
         # act
         self.node.add_energy_equations()
@@ -358,14 +356,12 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # - Outflow
         self.connected_asset.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point * IndexCoreQuantity.number_core_quantities
-            ] = +self.discharge
+            + self.connection_point * IndexCoreQuantity.number_core_quantities] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities
-            ] = +self.discharge
+            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities] = +self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -387,14 +383,12 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # - Outflow
         self.connected_asset.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point * IndexCoreQuantity.number_core_quantities
-            ] = -self.discharge
+            + self.connection_point * IndexCoreQuantity.number_core_quantities] = -self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities
-            ] = -self.discharge
+            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities] = -self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -414,14 +408,12 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # - Outflow
         self.connected_asset.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point * IndexCoreQuantity.number_core_quantities
-            ] = 0.0
+            + self.connection_point * IndexCoreQuantity.number_core_quantities] = 0.0
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
         self.connected_asset_2.prev_sol[
             IndexCoreQuantity.discharge
-            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities
-            ] = 0.0
+            + self.connection_point_2 * IndexCoreQuantity.number_core_quantities] = 0.0
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )

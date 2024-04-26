@@ -59,7 +59,8 @@ class BaseBoundaryTest(unittest.TestCase):
         equation_object = self.asset.add_pressure_equation()
 
         # Assert
-        self.assertEqual(equation_object.indices, [self.asset.matrix_index + IndexCoreQuantity.pressure])
+        self.assertEqual(equation_object.indices, [self.asset.matrix_index
+                                                   + IndexCoreQuantity.pressure])
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 50000.0)
 
