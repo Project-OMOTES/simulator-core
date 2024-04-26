@@ -16,7 +16,7 @@
 """Module containing the node class."""
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
@@ -138,9 +138,8 @@ class Node(BaseNodeItem):
         """
         flows = np.array(
             [
-                asset.prev_sol[
-                    IndexEnum.discharge + asset_connection_point * NUMBER_CORE_QUANTITIES
-                ]
+                asset.prev_sol[IndexCoreQuantity.discharge
+                               + asset_connection_point * IndexCoreQuantity.number_core_quantities]
                 for asset, asset_connection_point in self.connected_assets
             ]
         )
@@ -158,7 +157,7 @@ class Node(BaseNodeItem):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+        equation_object.indices = np.array([self.matrix_index + IndexCoreQuantity.discharge])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         for asset, asset_connection_point in self.connected_assets:
@@ -166,8 +165,8 @@ class Node(BaseNodeItem):
                 equation_object.indices,
                 [
                     asset.matrix_index
-                    + IndexEnum.discharge
-                    + asset_connection_point * NUMBER_CORE_QUANTITIES
+                    + IndexCoreQuantity.discharge
+                    + asset_connection_point * IndexCoreQuantity.number_core_quantities
                 ],
             )
             equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
@@ -181,7 +180,7 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+        equation_object.indices = np.array([self.matrix_index + IndexCoreQuantity.discharge])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -194,7 +193,7 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.indices = np.array([self.matrix_index + IndexCoreQuantity.pressure])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.set_pressure
         return equation_object
@@ -207,7 +206,7 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.internal_energy])
+        equation_object.indices = np.array([self.matrix_index + IndexCoreQuantity.internal_energy])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
@@ -221,7 +220,8 @@ class Node(BaseNodeItem):
         """
         equation_object = EquationObject()
         equation_object.indices = np.array(
-            [self.matrix_index + IndexEnum.discharge, self.matrix_index + IndexEnum.internal_energy]
+            [self.matrix_index + IndexCoreQuantity.discharge, self.matrix_index
+             + IndexCoreQuantity.internal_energy]
         )
         # Be aware that the coefficients are in reverse order
         equation_object.coefficients = np.array(self.prev_sol)[
@@ -234,11 +234,11 @@ class Node(BaseNodeItem):
             extra_indices = np.array(
                 [
                     asset.matrix_index
-                    + IndexEnum.discharge
-                    + asset_connection_id * NUMBER_CORE_QUANTITIES,
+                    + IndexCoreQuantity.discharge
+                    + asset_connection_id * IndexCoreQuantity.number_core_quantities,
                     asset.matrix_index
-                    + IndexEnum.internal_energy
-                    + asset_connection_id * NUMBER_CORE_QUANTITIES,
+                    + IndexCoreQuantity.internal_energy
+                    + asset_connection_id * IndexCoreQuantity.number_core_quantities,
                 ]
             )
             # Extend the indices and coefficients of the equation object

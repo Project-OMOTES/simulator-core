@@ -18,7 +18,7 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from simulator_core.solver.matrix.core_enum import IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.node import Node
@@ -59,7 +59,7 @@ class BaseBoundaryTest(unittest.TestCase):
         equation_object = self.asset.add_pressure_equation()
 
         # Assert
-        self.assertEqual(equation_object.indices, [self.asset.matrix_index + IndexEnum.pressure])
+        self.assertEqual(equation_object.indices, [self.asset.matrix_index + IndexCoreQuantity.pressure])
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 50000.0)
 

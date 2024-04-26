@@ -16,7 +16,7 @@
 """Module containing Based boundary class."""
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 
@@ -59,7 +59,7 @@ class BaseBoundary(BaseAsset):
         """
         # self.equations_dict["prescribe pressure"] = equation_id
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.indices = np.array([self.matrix_index + IndexCoreQuantity.pressure])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.initial_pressure
         return equation_object

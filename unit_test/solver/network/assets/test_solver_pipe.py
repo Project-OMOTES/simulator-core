@@ -25,7 +25,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
 )
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from simulator_core.solver.utils.fluid_properties import fluid_props
@@ -112,8 +112,10 @@ class SolverPipeTest(unittest.TestCase):
         fluid_viscosity = fluid_props.get_viscosity(fluid_temperature)
         fluid_density = fluid_props.get_density(fluid_temperature)
         velocity = input_reynolds_number * fluid_viscosity / self.asset.diameter
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(fluid_temperature)
-        self.asset.prev_sol[IndexEnum.discharge] = velocity * self.asset.area * fluid_density
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] \
+            = fluid_props.get_ie(fluid_temperature)
+        self.asset.prev_sol[IndexCoreQuantity.discharge] \
+            = velocity * self.asset.area * fluid_density
 
         # act
         calculated_reynolds_number = self.asset.calculate_reynolds_number()  # act
@@ -129,8 +131,10 @@ class SolverPipeTest(unittest.TestCase):
         fluid_viscosity = fluid_props.get_viscosity(fluid_temperature)
         fluid_density = fluid_props.get_density(fluid_temperature)
         velocity = input_reynolds_number * fluid_viscosity / self.asset.diameter
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(fluid_temperature)
-        self.asset.prev_sol[IndexEnum.discharge] = velocity * self.asset.area * fluid_density
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] \
+            = fluid_props.get_ie(fluid_temperature)
+        self.asset.prev_sol[IndexCoreQuantity.discharge] \
+            = velocity * self.asset.area * fluid_density
 
         # act
         calculated_reynolds_number = self.asset.calculate_reynolds_number()  # act
@@ -195,8 +199,8 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset.roughness = 0.001  # m
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(330.0)  # J/kg
-        self.asset.prev_sol[IndexEnum.discharge] = 290.6  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(330.0)  # J/kg
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 290.6  # kg/s
 
         # act
         self.asset.update_loss_coefficient()  # act
@@ -205,8 +209,8 @@ class SolverPipeTest(unittest.TestCase):
         self.assertAlmostEqual(self.asset.lambda_loss, 0.02024, 3)
         self.assertAlmostEqual(
             self.asset.loss_coefficient
-            * self.asset.prev_sol[IndexEnum.discharge]
-            * abs(self.asset.prev_sol[IndexEnum.discharge])
+            * self.asset.prev_sol[IndexCoreQuantity.discharge]
+            * abs(self.asset.prev_sol[IndexCoreQuantity.discharge])
             * 1e-5,
             4.191,
             1,
@@ -215,8 +219,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_high_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = 290.6  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 290.6  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(
             56.8500061035156 + 273.15
         )
         self.asset.alpha_value = 0.1  # W/m2K
@@ -238,8 +242,9 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = -2.906  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES] = (
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = -2.906  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy
+                            + IndexCoreQuantity.number_core_quantities] = (
             fluid_props.get_ie(56.8500061035156 + 273.15)
         )
         self.asset.alpha_value = 0.1  # W/m2K
@@ -261,8 +266,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(
             56.8500061035156 + 273.15
         )
         self.asset.alpha_value = 0.1  # W/m2K
@@ -284,8 +289,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = 0.0  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 0.0  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(
             56.8500061035156 + 273.15
         )
         self.asset.alpha_value = 0.1  # W/m2K
@@ -310,8 +315,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(
             56.8500061035156 + 273.15
         )
         self.asset.alpha_value = 0.1  # W/m2K
@@ -333,8 +338,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(
             56.8500061035156 + 273.15
         )
         self.asset.alpha_value = 10.0  # W/m2K
@@ -357,7 +362,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[IndexEnum.discharge] = 2.906  # kg/s
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 2.906  # kg/s
         self.asset._grid_size = grid_size  # pylint: disable=protected-access
 
         # act
@@ -373,7 +378,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[IndexEnum.discharge] = -2.906
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = -2.906
         self.asset._grid_size = grid_size
 
         # act
@@ -389,7 +394,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[IndexEnum.discharge] = 0.0
+        self.asset.prev_sol[IndexCoreQuantity.discharge] = 0.0
         self.asset._grid_size = grid_size
 
         # act
@@ -444,7 +449,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the calculate_prandtl_number method."""
         # arrange
         temperature = 273.15
-        self.asset.prev_sol[IndexEnum.internal_energy] = fluid_props.get_ie(temperature)
+        self.asset.prev_sol[IndexCoreQuantity.internal_energy] = fluid_props.get_ie(temperature)
 
         # act
         prandtl_number = self.asset.calculate_prandtl_number()
