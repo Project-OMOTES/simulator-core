@@ -19,6 +19,7 @@ from typing import Dict
 
 import numpy as np
 
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
