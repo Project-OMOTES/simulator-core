@@ -18,7 +18,7 @@ import uuid
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 
@@ -54,11 +54,11 @@ class FallType(BaseAsset):
     """
 
     def __init__(
-        self,
-        name: uuid.UUID,
-        supply_temperature: float = 293.15,
-        heat_supplied: float = 0.0,
-        loss_coefficient: float = 1.0,
+            self,
+            name: uuid.UUID,
+            supply_temperature: float = 293.15,
+            heat_supplied: float = 0.0,
+            loss_coefficient: float = 1.0,
     ):
         """
         Initializes the FallType object with the given parameters.
@@ -76,7 +76,7 @@ class FallType(BaseAsset):
         """
         super().__init__(
             name=name,
-            number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
+            number_of_unknowns=IndexCoreQuantity.number_core_quantities * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,
         )
@@ -121,7 +121,8 @@ class FallType(BaseAsset):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
+        if self.prev_sol[IndexCoreQuantity.discharge
+                         + connection_point * IndexCoreQuantity.number_core_quantities] > 0:
             return self.add_internal_energy_equation()
         else:
             return self.add_temp_to_node_equation(connection_point=connection_point)
@@ -136,8 +137,9 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge,
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
+                self.matrix_index + IndexCoreQuantity.discharge,
+                self.matrix_index + IndexCoreQuantity.discharge
+                + IndexCoreQuantity.number_core_quantities,
             ]
         )
         equation_object.coefficients = np.array([1.0, 1.0])
@@ -160,26 +162,34 @@ class FallType(BaseAsset):
         self.update_heat_supplied()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 0,
-                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 0,
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 1,
-                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 1,
+                self.matrix_index + IndexCoreQuantity.discharge
+                + IndexCoreQuantity.number_core_quantities * 0,
+                self.matrix_index + IndexCoreQuantity.internal_energy
+                + IndexCoreQuantity.number_core_quantities * 0,
+                self.matrix_index + IndexCoreQuantity.discharge
+                + IndexCoreQuantity.number_core_quantities * 1,
+                self.matrix_index + IndexCoreQuantity.internal_energy
+                + IndexCoreQuantity.number_core_quantities * 1,
             ]
         )
         equation_object.coefficients = np.array(
             [
-                self.prev_sol[IndexEnum.internal_energy],
-                self.prev_sol[IndexEnum.discharge],
-                self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES],
-                self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES],
+                self.prev_sol[IndexCoreQuantity.internal_energy],
+                self.prev_sol[IndexCoreQuantity.discharge],
+                self.prev_sol[IndexCoreQuantity.internal_energy
+                              + IndexCoreQuantity.number_core_quantities],
+                self.prev_sol[IndexCoreQuantity.discharge
+                              + IndexCoreQuantity.number_core_quantities],
             ]
         )
-        equation_object.rhs = (
-            self.prev_sol[IndexEnum.discharge] * self.prev_sol[IndexEnum.internal_energy]
-            + self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES]
-            * self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES]
-            + self.heat_supplied
-        )
+        equation_object.rhs = (self.prev_sol[IndexCoreQuantity.discharge]
+                               * self.prev_sol[IndexCoreQuantity.internal_energy]
+                               + self.prev_sol[IndexCoreQuantity.discharge
+                                               + IndexCoreQuantity.number_core_quantities]
+                               * self.prev_sol[IndexCoreQuantity.internal_energy
+                                               + IndexCoreQuantity.number_core_quantities]
+                               + self.heat_supplied
+                               )
         return equation_object
 
     def add_internal_pressure_loss_equation(self) -> EquationObject:
@@ -196,26 +206,28 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge,
-                self.matrix_index + IndexEnum.pressure,
-                self.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES,
+                self.matrix_index + IndexCoreQuantity.discharge,
+                self.matrix_index + IndexCoreQuantity.pressure,
+                self.matrix_index + IndexCoreQuantity.pressure
+                + IndexCoreQuantity.number_core_quantities,
             ]
         )
         self.update_loss_coefficient()
-        if self.prev_sol[IndexEnum.discharge] < 1e-5:
+        if self.prev_sol[IndexCoreQuantity.discharge] < 1e-5:
             equation_object.coefficients = np.array(
                 [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
             )
-            equation_object.rhs = -self.loss_coefficient * self.prev_sol[IndexEnum.discharge] * 1e-5
+            equation_object.rhs = (-self.loss_coefficient
+                                   * self.prev_sol[IndexCoreQuantity.discharge] * 1e-5)
         else:
             equation_object.coefficients = np.array(
-                [-2.0 * self.loss_coefficient * abs(self.prev_sol[IndexEnum.discharge]), -1.0, 1.0]
+                [-2.0 * self.loss_coefficient * abs(self.prev_sol[IndexCoreQuantity.discharge]),
+                 -1.0, 1.0]
             )
-            equation_object.rhs = (
-                -self.loss_coefficient
-                * self.prev_sol[IndexEnum.discharge]
-                * abs(self.prev_sol[IndexEnum.discharge])
-            )
+            equation_object.rhs = (-self.loss_coefficient
+                                   * self.prev_sol[IndexCoreQuantity.discharge]
+                                   * abs(self.prev_sol[IndexCoreQuantity.discharge])
+                                   )
         return equation_object
 
     def update_loss_coefficient(self) -> None:
