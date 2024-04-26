@@ -371,8 +371,7 @@ class SolverPipe(FallType):
             step = -1
             # Set the internal energy at the connection point
             self._internal_energy_grid[-1] = self.prev_sol[
-                IndexCoreQuantity.internal_energy + IndexCoreQuantity.number_core_quantities
-                ]
+                IndexCoreQuantity.internal_energy + IndexCoreQuantity.number_core_quantities]
             # Retrieve the mass flow rate
             mass_flow_rate = abs(self.prev_sol[IndexCoreQuantity.discharge])
         elif self.prev_sol[IndexCoreQuantity.discharge] > 0:
