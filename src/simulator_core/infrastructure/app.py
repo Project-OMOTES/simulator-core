@@ -67,11 +67,11 @@ def main():
     logger.info(f"Execution time: {t2-t1}")
     logger.debug(result.head())
 
-def main():
-    #run_simulator(r".\testdata\nijmegen\cluster2merged_pipes.esdl").to_csv("test2.csv")
+
+def main() -> None:
+    """Main function for simulator core."""
     run_simulator(r".\testdata\test1.esdl")
 
 
 if __name__ == "__main__":
     main()
-
