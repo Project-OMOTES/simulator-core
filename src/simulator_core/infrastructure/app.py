@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Entry point for running simulator-core library from cmdline."""
-import cProfile
 import logging
 import sys
 import traceback
@@ -72,4 +71,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
