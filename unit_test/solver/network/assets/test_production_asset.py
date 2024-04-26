@@ -111,7 +111,8 @@ class ProductionAssetTest(unittest.TestCase):
 
         # Assert
         assert all(
-            equation_object.indices == [IndexCoreQuantity.internal_energy, IndexCoreQuantity.internal_energy]
+            equation_object.indices == [IndexCoreQuantity.internal_energy,
+                                        IndexCoreQuantity.internal_energy]
         )
         assert all(equation_object.coefficients == [1.0, -1.0])
         assert equation_object.rhs == 0.0
