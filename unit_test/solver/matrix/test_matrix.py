@@ -35,8 +35,6 @@ class MatrixTest(unittest.TestCase):
 
         # assert
         self.assertEqual(matrix.num_unknowns, 0)
-        self.assertEqual(len(matrix.mat), 0)
-        self.assertEqual(len(matrix.rhs), 0)
         self.assertEqual(len(matrix.sol_new), 0)
         self.assertEqual(len(matrix.sol_old), 0)
         self.assertEqual(matrix.relative_convergence, 1e-6)
@@ -53,8 +51,8 @@ class MatrixTest(unittest.TestCase):
 
         # assert
         self.assertEqual(matrix.num_unknowns, number_of_unknowns)
-        self.assertEqual(matrix.sol_new, [1.0] * number_of_unknowns)
-        self.assertEqual(matrix.sol_old, [0.0] * number_of_unknowns)
+        self.assertEqual(matrix.sol_new.tolist(), [1.0] * number_of_unknowns)
+        self.assertEqual(matrix.sol_old.tolist(), [0.0] * number_of_unknowns)
         self.assertEqual(index, 0)
 
     def test_add_unknowns_error(self) -> None:
@@ -85,25 +83,6 @@ class MatrixTest(unittest.TestCase):
 
         # assert
         self.assertEqual(index, number_of_unknowns)
-
-    def test_add_equation(self) -> None:
-        """Test the add equation of the matrix object."""
-        # arrange
-        matrix = Matrix()
-        index = matrix.add_unknowns(2)
-        equation = EquationObject()
-        equation.indices = np.array([index, index + 1])
-        equation.coefficients = np.array([1.0, 1.0])
-        equation.rhs = 10.0
-
-        # act
-        matrix.add_equation(equation_object=equation)  # act
-
-        # assert
-        self.assertEqual(len(matrix.mat), 1)
-        self.assertEqual(len(matrix.rhs), 1)
-        self.assertEqual(matrix.mat[0], [1.0, 1.0])
-        self.assertEqual(matrix.rhs[0], 10.0)
 
     def test_solve(self) -> None:
         """Test the solving of the matrix object."""
@@ -199,13 +178,52 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
-        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+        matrix.sol_new = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 
         # act
         result = matrix.get_solution(index=3, number_of_unknowns=4)
 
         # assert
         self.assertEqual(result, [4.0, 5.0, 6.0, 7.0])
+
+    def test_get_solution_error_index(self) -> None:
+        """Test the get solution of the matrix object to raise an error when
+         index is out of bound."""
+        # arrange
+        matrix = Matrix()
+        matrix.add_unknowns(10)
+        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+
+        # act
+        with self.assertRaises(IndexError) as cm:
+            result = matrix.get_solution(index=11, number_of_unknowns=4)
+
+        # assert
+        self.assertIsInstance(cm.exception, IndexError)
+        self.assertEqual(
+            str(cm.exception),
+            f"Index ({11}) greater than number "
+            f"of unknowns ({10})")
+
+    def test_get_solution_error_number(self) -> None:
+        """Test the get solution of the matrix object to raise an error when
+         index is out of bound."""
+        # arrange
+        matrix = Matrix()
+        matrix.add_unknowns(10)
+        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+
+        # act
+        with self.assertRaises(IndexError) as cm:
+            result = matrix.get_solution(index=5, number_of_unknowns=10)
+
+        # assert
+        self.assertIsInstance(cm.exception, IndexError)
+        self.assertEqual(
+            str(cm.exception),
+            f"Index ({5}) plus request number of elements "
+            f"({10}) greater than "
+            f"number of unknowns {10}")
 
     def test_reset_solution(self) -> None:
         """Test the reset solution of the matrix object."""

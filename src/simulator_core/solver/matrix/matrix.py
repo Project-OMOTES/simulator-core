@@ -14,10 +14,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
 import numpy as np
+import numpy.typing as npt
 import scipy as sp
 import csv
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.utility import absolute_difference, relative_difference
+from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
 
 
 class Matrix:
@@ -26,8 +27,8 @@ class Matrix:
     def __init__(self) -> None:
         """Constructor of matrix class."""
         self.num_unknowns: int = 0
-        self.sol_new: list[float] = []
-        self.sol_old: list[float] = []
+        self.sol_new: npt.NDArray = np.array([])
+        self.sol_old: npt.NDArray = np.array([])
         self.relative_convergence: float = 1e-6
         self.absolute_convergence: float = 1e-6
 
@@ -41,8 +42,8 @@ class Matrix:
         if number_unknowns < 1:
             raise ValueError("Number of unknowns should be at least 1.")
         self.num_unknowns += number_unknowns
-        self.sol_new += [1.0] * number_unknowns
-        self.sol_old += [0.0] * number_unknowns
+        self.sol_new = np.concatenate([self.sol_new, np.array([1.0] * number_unknowns)])
+        self.sol_old = np.concatenate([self.sol_old, np.array([0.0] * number_unknowns)])
         return self.num_unknowns - number_unknowns
 
     def solve(self, equations: list[EquationObject], dumb: bool = False) -> list[float]:
@@ -66,24 +67,21 @@ class Matrix:
                                       shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
         if dumb:
-            self.dump_matrix(matrix=matrix, rhs=rhs)
+            self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
-        return self.sol_new.tolist()
+        result: list[float] = self.sol_new.tolist()
+        return result
 
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
 
-        This method uses both the absolute difference and the relative difference to determine if
-        the solution has converged. If one of them is converged true is returned.
+        This method uses the np.allclose method to calculate if the solution is converged
         :return: Bool whether the solution has converged based on the given convergence criteria.
         """
         if self.num_unknowns == 0:
             raise ValueError("No unknowns have been added to the matrix.")
-        rel_dif = max(
-            [relative_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
-        abs_dif = max(
-            [absolute_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
-        return rel_dif < self.relative_convergence or abs_dif < self.absolute_convergence
+        return np.allclose(self.sol_new, self.sol_old,
+                           atol=self.absolute_convergence, rtol=self.relative_convergence)
 
     def get_solution(self, index: int, number_of_unknowns: int) -> list[float]:
         """Method to get the solution of an asset.
@@ -103,21 +101,25 @@ class Matrix:
             raise IndexError(f"Index ({index}) plus request number of elements "
                              f"({number_of_unknowns}) greater than "
                              f"number of unknowns {self.num_unknowns}")
-        return self.sol_new[index:index + number_of_unknowns]
+        result: list[float] = self.sol_new[index:index + number_of_unknowns].tolist()
+        return result
 
-    @staticmethod
-    def dump_matrix(matrix: sp.sparse.csc_matrix, rhs: sp.sparse.csc_matrix,
+    def dump_matrix(self, matrix: sp.sparse.csc_matrix, rhs_array: sp.sparse.csc_matrix,
                     file_name: str = 'dump.csv') -> None:
         """Method to dump the matrix to a csv file.
 
-        :param str file_name: File name to dump the matrix in default=dump.csv
+        :param matrix: Matrix to be printed to the file
+        :param rhs_array: Right hand side to be printed to the file
+        :param file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
-            for row, rhs in zip(matrix, rhs):
-                write.writerow(row + [rhs])
+            write.writerow(
+                ['m', 'P', 'u'] * int(self.num_unknowns / NUMBER_CORE_QUANTITIES) + ['rhs'])
+            for row, rhs in zip(matrix.todense(), rhs_array.todense()):
+                write.writerow(row.tolist()[0] + rhs.tolist()[0])
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
-        self.sol_new = [1.0] * len(self.sol_new)
+        self.sol_new = np.array([1.0] * len(self.sol_new))
