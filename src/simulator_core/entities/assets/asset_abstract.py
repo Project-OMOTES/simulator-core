@@ -44,6 +44,8 @@ class AssetAbstract(ABC):
     """The output of the asset as a list with a dictionary per timestep."""
     solver_asset: BaseAsset
 
+    asset_type = "asset_abstract"
+
     def __init__(self, asset_name: str, asset_id: str):
         """Basic constructor for asset objects.
 
@@ -56,6 +58,10 @@ class AssetAbstract(ABC):
         self.name: str = asset_name
         self.asset_id: str = asset_id
         self.output: List[Dict[str, float]] = []
+
+    def __repr__(self) -> str:
+        """Method to print string with the name of the asset"""
+        return self.__class__.__name__ + " " + self.name
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:

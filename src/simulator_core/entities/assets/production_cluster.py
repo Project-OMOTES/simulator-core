@@ -81,7 +81,8 @@ class ProductionCluster(AssetAbstract):
         # Controlled mass flow
         self.controlled_mass_flow = None
         self.solver_asset = ProductionAsset(
-            name=uuid.uuid4(),
+            name=self.name,
+            identifier=self.asset_id,
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
