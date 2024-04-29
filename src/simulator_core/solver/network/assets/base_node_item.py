@@ -24,13 +24,15 @@ from simulator_core.solver.network.assets.base_item import BaseItem
 class BaseNodeItem(ABC):
     """A base class for node items in a network."""
 
-    def __init__(self, number_of_unknowns: int, name: uuid.UUID):
+    def __init__(self, name: str, identifier: str, number_of_unknowns: int):
         """Initializes the BaseNodeItem object with the given parameters.
 
         :param int number_of_unknowns: The number of unknown variables for the item.
-        :param uuid.UUID name: The unique identifier of the item.
+        :param str name: The name of the node.
+        :param str identifier: The unique identifier of the node.
         """
         self.name = name
+        self.id = identifier
         self.number_of_unknowns = number_of_unknowns
         self.matrix_index = 0
         self.prev_sol: list[float] = [0.0] * self.number_of_unknowns

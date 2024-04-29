@@ -76,7 +76,8 @@ class Pipe(AssetAbstract):
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
         self.solver_asset = SolverPipe(
-            uuid.uuid4(), length=self.length, diameter=self.diameter, roughness=self.roughness
+            name=self.name, identifier=self.asset_id, length=self.length,
+            diameter=self.diameter, roughness=self.roughness
         )
         self.output = []
 

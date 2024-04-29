@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing Based boundary class."""
-import uuid
-
 import numpy as np
 
 from simulator_core.solver.matrix.core_enum import IndexEnum
@@ -35,7 +33,8 @@ class BaseBoundary(BaseAsset):
         equations_dict (dict): A dictionary that maps equation ids to equation indices in the
     """
 
-    def __init__(self, name: uuid.UUID, number_of_unknowns: int = 3, number_con_points: int = 1):
+    def __init__(self, name: str, identifier: str, number_of_unknowns: int = 3,
+                 number_con_points: int = 1):
         """Initialize the boundary condition.
 
         :param int number_con_points:The number of connection points for this boundary.
@@ -43,8 +42,10 @@ class BaseBoundary(BaseAsset):
         :param int number_of_unknowns (optional): The number of unknowns for this boundary.
                                                   Defaults to 3.
         """
-        super().__init__(name, number_of_unknowns, number_con_points)
-        self.number_of_connection_point = number_con_points
+        super().__init__(name=name,
+                         identifier=identifier,
+                         number_of_unknowns=number_of_unknowns,
+                         number_connection_points=number_con_points)
         self.initial_pressure = 10000.0
 
     def add_pressure_equation(self) -> EquationObject:

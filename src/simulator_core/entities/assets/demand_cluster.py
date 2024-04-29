@@ -61,9 +61,10 @@ class DemandCluster(AssetAbstract):
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0
-        self.solver_asset = ProductionAsset(uuid.uuid4())
+        self.solver_asset = ProductionAsset(name=self.name, identifier=self.asset_id)
         # Output list
         self.output: list = []
+
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
