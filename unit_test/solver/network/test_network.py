@@ -51,7 +51,7 @@ class NetworkTest(unittest.TestCase):
         """Test adding an asset with a name."""
         # arrange
         asset = "Pipe"
-        asset_name = uuid.uuid4()
+        asset_name = str(uuid.uuid4())
 
         # act
         name = self.network.add_asset(asset_type=asset, name=asset_name)  # act
