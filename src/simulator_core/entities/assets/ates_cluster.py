@@ -156,12 +156,12 @@ class AtesCluster(AssetAbstract):
 
         ates_flow = [volume_flow, -1 * volume_flow]
         if volume_flow > 0:
-            T = [temperature_supply - 273, -1]  # Celcius
+            T = [temperature_supply - 273.15, -1]  # Celcius
         elif volume_flow < 0:
-            T = [-1, temperature_return - 273]  # Celcius
+            T = [-1, temperature_return - 273.15]  # Celcius
         else:
             T = [-1, -1]
 
         Tstorage = self.rosimObj.getTempsNextTimeStep(ates_flow, T, timestep)
 
-        return Tstorage[0] + 273, Tstorage[1] + 273
+        return Tstorage[0] + 273.15, Tstorage[1] + 273.15
