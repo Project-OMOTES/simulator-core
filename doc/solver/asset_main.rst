@@ -17,12 +17,22 @@ These equations are asset specific and detailed in there respective sections. At
 #. :ref:`solver-pipe`: Class representing a pipe in a heating network.
 #. :ref:`solver-producer`: Class representing a producer and also a consumer in a heating network.
 
+All these assets have been derived from three base classes:
+
+#. :ref:`base-item`: Base class for all items in the network.
+#. :ref:`base-asset`: Base class for all assets in the network.
+#. :ref:`fall-type`: Base class for components implementing a pressure loss equation.
+
+
 **Contents**
 
 .. toctree::
     :maxdepth: 1
     :glob:
 
+    assets/base_item.rst
+    assets/base_asset.rst
+    assets/fall_type.rst
     assets/solver_pipe.rst
     assets/solver_producer.rst
     assets/solver_node.rst
