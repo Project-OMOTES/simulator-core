@@ -29,6 +29,7 @@ from simulator_core.entities.assets.asset_defaults import (
 class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
+    @unittest.skip("conflicting pyjnius with pytest")
     def setUp(self) -> None:
         """Set up test case."""
         # Create empty pandapipes network
@@ -43,6 +44,7 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_from_junction(from_junction=self.from_junction)
         self.ates_cluster.set_to_junction(to_junction=self.to_junction)
 
+    @unittest.skip("conflicting pyjnius with pytest")
     def test_injection(self) -> None:
         """Test injection to ATES."""
 
@@ -60,6 +62,7 @@ class AtesClusterTest(unittest.TestCase):
         assert self.ates_cluster.temperature_supply == 353.15
         self.assertAlmostEqual(self.ates_cluster.temperature_return, 285.95, delta=0.01)
 
+    @unittest.skip("conflicting pyjnius with pytest")
     def test_production(self) -> None:
         """Test production from ATES."""
 
