@@ -79,3 +79,35 @@ class ControllerSource(AssetControllerAbstract):
         self.temperature_return: float = DEFAULT_TEMPERATURE
         self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         self.power: float = 5000000000
+
+
+class ControllerStorage(AssetControllerAbstract):
+    """Class to store and to produce the storage for the controller asset."""
+
+    def __init__(self, name: str, identifier: str):
+        """Constructor for the storage.
+
+        :param str name: Name of the storage.
+        :param str identifier: Unique identifier of the storage.
+        """
+        super().__init__(name, identifier)
+        self.temperature_return = DEFAULT_TEMPERATURE
+        self.temperature_supply = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+        self.profile: pd.DataFrame = pd.DataFrame()
+        self.start_index = 0
+
+    def get_heat_demand(self, time: datetime.datetime) -> float:
+        """Method to get the power of the storage. Positive is injection and negative is production.
+
+        :param datetime.datetime time: Time for which to get the heat demand.
+        :return: float with the heat demand.
+        """
+        for index in range(self.start_index, len(self.profile)):
+            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
+                self.start_index = index
+                return float(self.profile["values"][index])
+        return 0
+
+    def add_profile(self, profile: pd.DataFrame) -> None:
+        """Method to add a profile to the consumer."""
+        self.profile = profile

@@ -12,33 +12,33 @@ colorama==0.4.6
     # via tqdm
 coloredlogs==15.0.1
     # via simulator-core (..\..\pyproject.toml)
-contourpy==1.2.0
+contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
 dataclass-wizard==0.22.2
     # via simulator-core (..\..\pyproject.toml)
-deepdiff==6.7.1
+deepdiff==7.0.1
     # via pandapower
-fonttools==4.49.0
+fonttools==4.51.0
     # via matplotlib
 future-fstrings==1.2.0
     # via pyecore
 humanfriendly==10.0
     # via coloredlogs
-idna==3.6
+idna==3.7
     # via requests
 influxdb==5.3.1
     # via simulator-core (..\..\pyproject.toml)
 kiwisolver==1.4.5
     # via matplotlib
-lxml==5.1.0
+lxml==5.2.1
     # via pyecore
-matplotlib==3.8.3
+matplotlib==3.8.4
     # via pandapipes
-msgpack==1.0.7
+msgpack==1.0.8
     # via influxdb
-networkx==3.2.1
+networkx==3.3
     # via pandapower
 numpy==1.26.0
     # via
@@ -53,29 +53,31 @@ ordered-set==4.1.0
     # via
     #   deepdiff
     #   pyecore
-packaging==23.2
+packaging==24.0
     # via
     #   matplotlib
     #   pandapower
 pandapipes==0.8.4
     # via simulator-core (..\..\pyproject.toml)
-pandapower==2.13.1
+pandapower==2.14.6
     # via pandapipes
 pandas==2.1.1
     # via
     #   pandapower
     #   simulator-core (..\..\pyproject.toml)
-pillow==10.2.0
+pillow==10.3.0
     # via matplotlib
 pyecore==0.12.1
     # via pyesdl
 pyesdl==24.2
     # via simulator-core (..\..\pyproject.toml)
-pyparsing==3.1.1
+pyjnius==1.5.0
+    # via simulator-core (..\..\pyproject.toml)
+pyparsing==3.1.2
     # via matplotlib
 pyreadline3==3.4.1
     # via humanfriendly
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   influxdb
     #   matplotlib
@@ -86,17 +88,17 @@ pytz==2024.1
     #   pandas
 requests==2.31.0
     # via influxdb
-restrictedpython==7.0
+restrictedpython==7.2a1.dev0
     # via pyecore
-scipy==1.12.0
+scipy==1.13.0
     # via pandapower
-shapely==2.0.3
+shapely==2.0.4
     # via pandapipes
 six==1.16.0
     # via
     #   influxdb
     #   python-dateutil
-tqdm==4.66.2
+tqdm==4.66.4
     # via pandapower
 tzdata==2024.1
     # via pandas
