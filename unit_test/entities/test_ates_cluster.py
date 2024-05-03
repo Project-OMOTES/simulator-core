@@ -47,7 +47,6 @@ class AtesClusterTest(unittest.TestCase):
     @unittest.skip("conflicting pyjnius with pytest")
     def test_injection(self) -> None:
         """Test injection to ATES."""
-
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
@@ -65,7 +64,6 @@ class AtesClusterTest(unittest.TestCase):
     @unittest.skip("conflicting pyjnius with pytest")
     def test_production(self) -> None:
         """Test production from ATES."""
-
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
