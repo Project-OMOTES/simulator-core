@@ -18,12 +18,8 @@ import uuid
 from typing import Dict
 import os
 
-
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_DIAMETER,
-    DEFAULT_POWER,
-    DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
@@ -40,17 +36,21 @@ from simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
 
-path = os.path.dirname(__file__)
-import jnius_config # noqa
-jnius_config.add_classpath(os.path.join(path, 'bin/rosim-batch-0.4.2.jar'))
-from jnius import autoclass # noqa
-javaioFile = autoclass('java.io.File')
-xmlfile = os.path.join(path, 'bin/sequentialTemplate_v0.4.2_template.xml')
-xmlfilejava = javaioFile(xmlfile)
-
 
 class AtesCluster(AssetAbstract):
     """A AtesCluster represents an asset that consumes heat and produces heat."""
+
+    temperature_supply: float
+    """The supply temperature of the asset [K]."""
+
+    temperature_return: float
+    """The return temperature of the asset [K]."""
+
+    thermal_power_allocation: float
+    """The thermal for injection (positive) or production (negative) by the asset [W]."""
+
+    mass_flowrate: float
+    """The flow rate going in or out by the asset [kg/s]."""
 
     def __init__(
             self,
@@ -61,21 +61,32 @@ class AtesCluster(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id)
 
-        self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE
         self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
-        self.pressure_input = DEFAULT_PRESSURE
-        self.thermal_power_allocation = DEFAULT_POWER
+        self.thermal_power_allocation = 0
         self.mass_flowrate = 0
         self.solver_asset = ProductionAsset(uuid.uuid4())
         # Output list
         self.output: list = []
 
-        self.init_rosim()
+        self._init_rosim()
+
+    def _calculate_massflowrate(self) -> None:
+        """Calculate mass flowrate of the asset."""
+        self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
+            self.thermal_power_allocation, self.temperature_supply, self.temperature_return
+        )
+
+    def _set_solver_asset_setpoint(self) -> None:
+        """Set the setpoint of solver asset."""
+        if self.mass_flowrate > 0:
+            self.solver_asset.supply_temperature = self.temperature_return
+        else:
+            self.solver_asset.supply_temperature = self.temperature_supply
+        self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate # type: ignore
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -92,27 +103,19 @@ class AtesCluster(AssetAbstract):
         # Dict to set
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
-        if not necessary_setpoints.issubset(setpoints_set):
+        if necessary_setpoints.issubset(setpoints_set):
+            self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
+            self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
+            self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
+
+            self._calculate_massflowrate()
+            self._run_rosim()
+            self._set_solver_asset_setpoint()
+        else:
             # Print missing setpoints
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-        self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-        self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
-        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
-        adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_supply, self.temperature_return
-        )
-
-        [self.temperature_supply, self.temperature_return] = self.run_rosim(adjusted_mass_flowrate,
-                                                                            self.temperature_supply,
-                                                                            self.temperature_return)
-
-        if adjusted_mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_return
-        else:
-            self.solver_asset.supply_temperature = self.temperature_supply
-        self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -136,32 +139,38 @@ class AtesCluster(AssetAbstract):
         }
         self.output.append(output_dict)
 
-    def init_rosim(self) -> None:
+    def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
+        path = os.path.dirname(__file__)
+        import jnius_config  # noqa
+        jnius_config.add_classpath(os.path.join(path, 'bin/rosim-batch-0.4.2.jar'))
+        from jnius import autoclass  # noqa
+        javaioFile = autoclass('java.io.File')
+        xmlfile = os.path.join(path, 'bin/sequentialTemplate_v0.4.2_template.xml')
+        xmlfilejava = javaioFile(xmlfile)
         RosimSequential = autoclass('tno.calc.RosimSequential')
 
-        self.rosimObj = RosimSequential(xmlfilejava, False, 2)
+        self.rosim = RosimSequential(xmlfilejava, False, 2)
 
-    def run_rosim(self, mass_flow_rate: float, temperature_supply: float,
-                  temperature_return: float) -> tuple[float, float]:
-        """Function to calculate storage temperature after injection and production.
-
-        :param float mass_flow_rate: mass flow rate going to (positive) / going out (negative)
-        to ATES [kg/s]
-        :param float temperature_supply: temperature in the hot pipe of ATES [K]
-        :param float temperature_return: temperature in the cold pipe of ATES [K]
-        """
-        volume_flow = mass_flow_rate * 3600 / 1000
+    def _run_rosim(self) -> None:
+        """Function to calculate storage temperature after injection and production."""
+        volume_flow = self.mass_flowrate * 3600 / 1000
         timestep = 1  # HARDCODED to 1 hour
 
-        ates_flow = [volume_flow, -1 * volume_flow]
+        rosim_input__flow = [volume_flow, -1 * volume_flow]
         if volume_flow > 0:
-            T = [temperature_supply - 273.15, -1]  # Celcius
+            rosim_input_temperature = [self.temperature_supply - 273.15, -1]  # Celcius
         elif volume_flow < 0:
-            T = [-1, temperature_return - 273.15]  # Celcius
+            rosim_input_temperature = [-1, self.temperature_return - 273.15]  # Celcius
         else:
-            T = [-1, -1]
+            rosim_input_temperature = [-1, -1]
 
-        Tstorage = self.rosimObj.getTempsNextTimeStep(ates_flow, T, timestep)
+        ates_temperature = self.rosim.getTempsNextTimeStep(rosim_input__flow,
+                                                           rosim_input_temperature, timestep)
 
-        return Tstorage[0] + 273.15, Tstorage[1] + 273.15
+        hot_well_temperature = ates_temperature[0] + 273.15
+        cold_well_temperature = ates_temperature[1] + 273.15
+
+        # update supply return temperature from ATES
+        self.temperature_supply = hot_well_temperature
+        self.temperature_return = cold_well_temperature

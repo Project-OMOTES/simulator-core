@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project>
-   <output__results__directory>C:\Users\octavianor\Documents\GITLAB\CHESS_MMIP\CHESS_COMMON\Common\ROSIM</output__results__directory>
+   <output__results__directory>%Temp%</output__results__directory>
    <select_output_scenario>seqScen</select_output_scenario>
    <silent_overwrite_scenario_output>0.0</silent_overwrite_scenario_output>
    <auto_show_static_model_in_resinsight>0.0</auto_show_static_model_in_resinsight>
