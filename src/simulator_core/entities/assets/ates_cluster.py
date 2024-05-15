@@ -86,7 +86,7 @@ class AtesCluster(AssetAbstract):
             self.solver_asset.supply_temperature = self.temperature_return
         else:
             self.solver_asset.supply_temperature = self.temperature_supply
-        self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate # type: ignore
+        self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
