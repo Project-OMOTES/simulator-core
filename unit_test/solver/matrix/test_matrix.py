@@ -18,6 +18,7 @@
 import unittest
 
 import numpy as np
+import numpy.testing as npt
 
 from simulator_core.solver.matrix.matrix import Matrix
 from simulator_core.solver.matrix.equation_object import EquationObject
@@ -50,9 +51,10 @@ class MatrixTest(unittest.TestCase):
         index = matrix.add_unknowns(number_unknowns=number_of_unknowns)  # act
 
         # assert
+
         self.assertEqual(matrix.num_unknowns, number_of_unknowns)
-        self.assertEqual(matrix.sol_new.tolist(), [1.0] * number_of_unknowns)
-        self.assertEqual(matrix.sol_old.tolist(), [0.0] * number_of_unknowns)
+        npt.assert_array_equal(matrix.sol_new, np.array([1.0] * number_of_unknowns))
+        npt.assert_array_equal(matrix.sol_old, np.array([0.0] * number_of_unknowns))
         self.assertEqual(index, 0)
 
     def test_add_unknowns_error(self) -> None:
