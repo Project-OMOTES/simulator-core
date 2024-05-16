@@ -53,12 +53,7 @@ class Matrix:
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
-        if len(equations) > self.num_unknowns:
-            raise RuntimeError(f"Too many equations supplied. Got {len(equations)} equations, "
-                               f"but number of unknowns is {self.num_unknowns}")
-        if len(equations) < self.num_unknowns:
-            raise RuntimeError(f"Not enough equation supplied. Got {len(equations)} equations, "
-                               f"but number of unknowns is {self.num_unknowns}")
+        self.verify_equations(equations)
         self.sol_old = self.sol_new
         data = np.concatenate([equation.coefficients for equation in equations])
         col = np.concatenate([equation.indices for equation in equations])
@@ -73,6 +68,19 @@ class Matrix:
             raise RuntimeError("Matrix is singular")
         result: list[float] = self.sol_new.tolist()
         return result
+
+    def verify_equations(self, equations: list[EquationObject]) -> None:
+        """Method to verify if the system of equations can be solved.
+
+        This method checks if the number of equations supplied is equal to the number of unknowns.
+        :param equations: list with the equations to verify.
+        :return: None"""
+        if len(equations) > self.num_unknowns:
+            raise RuntimeError(f"Too many equations supplied. Got {len(equations)} equations, "
+                               f"but number of unknowns is {self.num_unknowns}")
+        if len(equations) < self.num_unknowns:
+            raise RuntimeError(f"Not enough equation supplied. Got {len(equations)} equations, "
+                               f"but number of unknowns is {self.num_unknowns}")
 
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
