@@ -187,7 +187,7 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(1)
-        matrix.sol_new = [1.0]
+        matrix.sol_new = np.array([1.0])
         matrix.sol_old = matrix.sol_new
 
         # act
@@ -214,7 +214,7 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
-        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+        matrix.sol_new = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 
         # act
         with self.assertRaises(IndexError) as cm:
@@ -232,7 +232,7 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(10)
-        matrix.sol_new = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+        matrix.sol_new = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 
         # act
         with self.assertRaises(IndexError) as cm:
@@ -251,8 +251,8 @@ class MatrixTest(unittest.TestCase):
         # arrange
         matrix = Matrix()
         matrix.add_unknowns(1)
-        matrix.sol_new = [999.0]
-        matrix.sol_old = [10.0]
+        matrix.sol_new = np.array([999.0])
+        matrix.sol_old = np.array([10.0])
 
         # act
         matrix.reset_solution()  # act
