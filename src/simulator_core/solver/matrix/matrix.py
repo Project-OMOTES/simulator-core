@@ -49,16 +49,21 @@ class Matrix:
     def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
 
+        A sparse matrix solver is used, for this the coefficients, indices in the matrix are
+        converted to numpy arrays. These arrays are then used to create a csc_matrix which can
+        be solved by the sparse matrix solver of scipy.
         :param dump: if true it will dump the matrix to a csv file
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
         self.verify_equations(equations)
         self.sol_old = self.sol_new
-        data = np.concatenate([equation.coefficients for equation in equations])
-        col = np.concatenate([equation.indices for equation in equations])
-        row = np.concatenate([np.full((len(equations[i])), i) for i in range(len(equations))])
-        matrix = sp.sparse.csc_matrix((data, (row, col)),
+        coefficient_array = np.concatenate([equation.coefficients for equation in equations])
+        column_index_array = np.concatenate([equation.indices for equation in equations])
+        row_index_array = np.concatenate([np.full((len(equations[i])), i)
+                                          for i in range(len(equations))])
+        matrix = sp.sparse.csc_matrix((coefficient_array,
+                                       (row_index_array , column_index_array)),
                                       shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
         if dump:
