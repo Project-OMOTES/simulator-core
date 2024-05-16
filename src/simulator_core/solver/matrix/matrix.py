@@ -46,10 +46,10 @@ class Matrix:
         self.sol_old = np.concatenate([self.sol_old, np.array([0.0] * number_unknowns)])
         return self.num_unknowns - number_unknowns
 
-    def solve(self, equations: list[EquationObject], dumb: bool = False) -> list[float]:
+    def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
 
-        :param dumb:
+        :param dump:
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
@@ -66,7 +66,7 @@ class Matrix:
         matrix = sp.sparse.csc_matrix((data, (row, col)),
                                       shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
-        if dumb:
+        if dump:
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
         if np.isnan(self.sol_new).any():
