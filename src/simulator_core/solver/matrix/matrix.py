@@ -49,7 +49,7 @@ class Matrix:
     def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
 
-        :param dump:
+        :param dump: if true it will dump the matrix to a csv file
         :param equations: list with the equations to solve.
         :return: list containing the solution of the system of equations.
         """
