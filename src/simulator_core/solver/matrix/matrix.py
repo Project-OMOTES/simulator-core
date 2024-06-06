@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
+import typing
+
 import numpy as np
 import numpy.typing as npt
 import scipy as sp
@@ -24,13 +26,15 @@ from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
 class Matrix:
     """Class which stores the matrix and can be used to solve it."""
 
+    num_unknowns: int = 0
+    sol_new: npt.NDArray = np.array([], dtype=float),
+    sol_old: npt.NDArray = np.array([], dtype=float)
+    relative_convergence: float = 1e-6
+    absolute_convergence: float = 1e-6
+
     def __init__(self) -> None:
         """Constructor of matrix class."""
-        self.num_unknowns: int = 0
-        self.sol_new: npt.NDArray = np.array([])
-        self.sol_old: npt.NDArray = np.array([])
-        self.relative_convergence: float = 1e-6
-        self.absolute_convergence: float = 1e-6
+        pass
 
     def add_unknowns(self, number_unknowns: int) -> int:
         """Method to add unknowns to the matrix.
