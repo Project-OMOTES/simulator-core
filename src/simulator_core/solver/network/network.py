@@ -34,14 +34,14 @@ class Network:
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
     }
-
+    assets: dict[uuid.UUID, BaseAsset]
+    nodes: dict[uuid.UUID, Node]
     def __init__(self) -> None:
         """Constructor of the network class.
 
         Initializes the class properties and loads the fluid properties.
         """
-        self.assets: dict[uuid.UUID, BaseAsset] = {}
-        self.nodes: dict[uuid.UUID, Node] = {}
+        self.assets = {}
 
     def add_asset(self, asset_type: str, name: uuid.UUID | None = None) -> uuid.UUID:
         """Method to add an asset to the network.
