@@ -36,6 +36,7 @@ class Network:
     }
     assets: dict[uuid.UUID, BaseAsset]
     nodes: dict[uuid.UUID, Node]
+
     def __init__(self) -> None:
         """Constructor of the network class.
 

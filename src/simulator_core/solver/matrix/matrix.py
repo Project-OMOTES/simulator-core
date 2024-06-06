@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
-import typing
-
 import numpy as np
 import numpy.typing as npt
 import scipy as sp
@@ -84,7 +82,8 @@ class Matrix:
 
         This method checks if the number of equations supplied is equal to the number of unknowns.
         :param equations: list with the equations to verify.
-        :return: None"""
+        :return: None
+        """
         if len(equations) > self.num_unknowns:
             raise RuntimeError(f"Too many equations supplied. Got {len(equations)} equations, "
                                f"but number of unknowns is {self.num_unknowns}")
