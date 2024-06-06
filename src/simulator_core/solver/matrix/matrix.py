@@ -27,7 +27,7 @@ class Matrix:
     """Class which stores the matrix and can be used to solve it."""
 
     num_unknowns: int = 0
-    sol_new: npt.NDArray = np.array([], dtype=float),
+    sol_new: npt.NDArray = np.array([], dtype=float)
     sol_old: npt.NDArray = np.array([], dtype=float)
     relative_convergence: float = 1e-6
     absolute_convergence: float = 1e-6
@@ -46,8 +46,9 @@ class Matrix:
         if number_unknowns < 1:
             raise ValueError("Number of unknowns should be at least 1.")
         self.num_unknowns += number_unknowns
-        self.sol_new = np.concatenate([self.sol_new, np.array([1.0] * number_unknowns)])
-        self.sol_old = np.concatenate([self.sol_old, np.array([0.0] * number_unknowns)])
+        self.sol_new = np.concatenate([self.sol_new, np.ones(number_unknowns)])
+        self.sol_old = np.concatenate([self.sol_old, np.zeros(number_unknowns)])
+
         return self.num_unknowns - number_unknowns
 
     def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
@@ -141,4 +142,4 @@ class Matrix:
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
-        self.sol_new = np.array([1.0] * len(self.sol_new))
+        self.sol_new = np.ones(self.num_unknowns)
