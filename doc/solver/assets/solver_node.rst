@@ -2,7 +2,12 @@
 
 Solver node class
 ++++++++++++++++++++++++
-To be filled later
+The node class is split into two to avoid circular import errors. The node is the item conected
+different assets. The node has no physical meaning, but is a pure modelling aspect to make it more
+easy to connect different assets together. The node is responsible for adding equations for the
+mass and energy continuity.
 
+.. autoclass:: simulator_core.solver.network.assets.node.base_node_item
+    :members:
 .. autoclass:: simulator_core.solver.network.assets.node.Node
     :members:
