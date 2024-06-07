@@ -43,8 +43,10 @@ class Network:
         Initializes the class properties and loads the fluid properties.
         """
         self.assets = {}
+        self.nodes = {}
 
-    def add_asset(self, asset_type: str, name: str | None = None) -> str:
+    def add_asset(self, asset_type: str, name: str | None = None,
+                  identifier: str | None = None) -> str:
         """Method to add an asset to the network.
 
         This method creates and asset of the given type.
@@ -52,13 +54,16 @@ class Network:
         The unique id which is created for this asset is returned.
         :param name: Unique name of the asset, if not given a random uuid is created.
         :param str asset_type: The type of asset to be added
+        :param str identifier: Unique identifier of the asset, if not given a random uuid is created.
         :return: Unique id of the asset.
         """
         if asset_type not in self.str_to_class_dict:
             raise ValueError(asset_type + " not recognized.")
         if name is None:
             name = str(uuid.uuid4())
-        self.assets[name] = self.str_to_class_dict[asset_type](name)
+        if identifier is None:
+            identifier = str(uuid.uuid4())
+        self.assets[name] = self.str_to_class_dict[asset_type](name=name, identifier=identifier)
         return name
 
     def add_existing_asset(self, asset: BaseAsset) -> str:
