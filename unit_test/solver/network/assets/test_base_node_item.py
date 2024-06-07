@@ -57,9 +57,11 @@ class BaseItemTest(unittest.TestCase):
     def test_set_matrix_index(self) -> None:
         """Test the set_matrix_index method of the BaseNodeItem class."""
         # arrange
-        asset_name = uuid4()
+        asset_name = str(uuid4())
         number_of_unknowns = 2
-        asset = MockBaseNodeItem(name=asset_name, number_of_unknowns=number_of_unknowns)
+        asset = MockBaseNodeItem(name=asset_name,
+                                 identifier=asset_name,
+                                 number_of_unknowns=number_of_unknowns)
 
         # act
         asset.set_matrix_index(1)  # act

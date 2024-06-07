@@ -239,13 +239,15 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.internal_energy = fluid_props.get_ie(self.initial_temperature)
         self.discharge = 1.0
         # Create base asset
-        self.node = Node(name=uuid4(), initial_temperature=self.initial_temperature)
+        self.node = Node(name=str(uuid4()),
+                         identifier=str(uuid4()),
+                         initial_temperature=self.initial_temperature)
         # Create connected asset
-        self.connected_asset = ProductionAsset(name=uuid4())
+        self.connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
         self.connected_asset.set_matrix_index(NUMBER_CORE_QUANTITIES)
         self.connection_point = 0
         # Create connected asset on other connection point
-        self.connected_asset_2 = ProductionAsset(name=uuid4())
+        self.connected_asset_2 = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
         self.connected_asset_2.set_matrix_index(NUMBER_CORE_QUANTITIES * 2)
         self.connection_point_2 = 1
 

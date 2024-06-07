@@ -130,7 +130,7 @@ class NetworkTest(unittest.TestCase):
         )  # act
 
         # assert
-        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertIsInstance(node_name, str)
         self.assertEqual(
             self.network.assets[self.asset.name].get_connected_node(connection_point=0).name,
             node_name,
@@ -172,7 +172,7 @@ class NetworkTest(unittest.TestCase):
         )  # act
 
         # assert
-        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertIsInstance(node_name, str)
         self.assertEqual(node_name, node.name)
         self.assertEqual(len(self.network.nodes), 1)
         self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
@@ -188,7 +188,7 @@ class NetworkTest(unittest.TestCase):
         # arrange
         node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
         node2 = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        asset3 = SolverPipe(name=uuid.uuid4())
+        asset3 = SolverPipe(name=str(uuid.uuid4()),identifier=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
         self.network.nodes[node2.name] = node2
         self.network.add_existing_asset(asset=self.asset)
@@ -210,7 +210,7 @@ class NetworkTest(unittest.TestCase):
         )  # act
 
         # assert
-        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertIsInstance(node_name, str)
         self.assertEqual(node_name, node.name)
         self.assertEqual(len(self.network.nodes), 1)
         self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
@@ -242,7 +242,7 @@ class NetworkTest(unittest.TestCase):
         )  # act
 
         # assert
-        self.assertIsInstance(node_name, uuid.UUID)
+        self.assertIsInstance(node_name, str)
         self.assertEqual(node_name, node.name)
         self.assertEqual(len(self.network.nodes), 1)
         self.assertEqual(self.asset.get_connected_node(connection_point=0).name, node.name)
