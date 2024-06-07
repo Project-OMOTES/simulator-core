@@ -30,11 +30,12 @@ class BaseAssetTest(unittest.TestCase):
         """Set up the test case."""
         # Create a BaseAsset object
         self.asset = BaseAsset(
-            name=uuid4(),
+            name=str(uuid4()),
+            identifier=str(uuid4())
         )
         # Create supply, connection_point:0 and return node, connection_point:1
-        self.supply_node = Node(name=uuid4())
-        self.return_node = Node(name=uuid4())
+        self.supply_node = Node(name=uuid4(), identifier=str(uuid4()))
+        self.return_node = Node(name=uuid4(), identifier=str(uuid4()))
 
     def test_base_asset_connect_node(self) -> None:
         """Test the connect_node method."""
