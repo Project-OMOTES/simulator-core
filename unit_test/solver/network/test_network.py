@@ -188,7 +188,7 @@ class NetworkTest(unittest.TestCase):
         # arrange
         node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
         node2 = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        asset3 = SolverPipe(name=str(uuid.uuid4()),identifier=str(uuid.uuid4()))
+        asset3 = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
         self.network.nodes[node2.name] = node2
         self.network.add_existing_asset(asset=self.asset)

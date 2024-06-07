@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """demandCluster class."""
-import uuid
 from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -64,7 +63,6 @@ class DemandCluster(AssetAbstract):
         self.solver_asset = ProductionAsset(name=self.name, identifier=self.asset_id)
         # Output list
         self.output: list = []
-
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.

@@ -15,7 +15,6 @@
 
 """Module containing BaseAsset class."""
 import math
-import uuid
 from typing import Dict
 
 import numpy as np

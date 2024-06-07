@@ -29,6 +29,7 @@ from simulator_core.solver.utils.fluid_properties import fluid_props
 
 class NodeTest(unittest.TestCase):
     """Testcase for Node class."""
+
     def setUp(self):
         """Set up the test case."""
         self.node_name = str(uuid4())
@@ -133,8 +134,8 @@ class NodeTest(unittest.TestCase):
         equation_object = self.node.add_node_cont_equation()
 
         # assert
-        self.assertEqual(equation_object.indices, [self.node.matrix_index +
-                                                   IndexEnum.discharge])
+        self.assertEqual(equation_object.indices, [self.node.matrix_index
+                                                  + IndexEnum.discharge])
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 0.0)
 

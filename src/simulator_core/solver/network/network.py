@@ -54,7 +54,8 @@ class Network:
         The unique id which is created for this asset is returned.
         :param name: Unique name of the asset, if not given a random uuid is created.
         :param str asset_type: The type of asset to be added
-        :param str identifier: Unique identifier of the asset, if not given a random uuid is created.
+        :param str identifier: Unique identifier of the asset, if not given a random uuid is
+        created.
         :return: Unique id of the asset.
         """
         if asset_type not in self.str_to_class_dict:

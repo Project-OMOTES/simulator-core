@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-import uuid
 from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract

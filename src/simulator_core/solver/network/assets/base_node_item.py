@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing abstract BaseNodeItem class."""
-import uuid
 from abc import ABC, abstractmethod
 
 from simulator_core.solver.matrix.equation_object import EquationObject
