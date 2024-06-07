@@ -328,14 +328,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[
-            IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
-            ] = +self.discharge
+        self.connected_asset.prev_sol[IndexEnum.discharge
+                                      + self.connection_point
+                                      * NUMBER_CORE_QUANTITIES] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[
-            IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
-            ] = -self.discharge
+        self.connected_asset_2.prev_sol[IndexEnum.discharge
+                                        + self.connection_point_2
+                                        * NUMBER_CORE_QUANTITIES] = -self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -355,14 +355,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[
-            IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
-            ] = +self.discharge
+        self.connected_asset.prev_sol[IndexEnum.discharge
+                                      + self.connection_point
+                                      * NUMBER_CORE_QUANTITIES] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[
-            IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
-            ] = +self.discharge
+        self.connected_asset_2.prev_sol[IndexEnum.discharge
+                                        + self.connection_point_2
+                                        * NUMBER_CORE_QUANTITIES] = +self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -382,14 +382,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[
-            IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
-            ] = -self.discharge
+        self.connected_asset.prev_sol[IndexEnum.discharge
+                                      + self.connection_point
+                                      * NUMBER_CORE_QUANTITIES] = -self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[
-            IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
-            ] = -self.discharge
+        self.connected_asset_2.prev_sol[IndexEnum.discharge
+                                        + self.connection_point_2
+                                        * NUMBER_CORE_QUANTITIES] = -self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -407,14 +407,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[
-            IndexEnum.discharge + self.connection_point * NUMBER_CORE_QUANTITIES
-            ] = 0.0
+        self.connected_asset.prev_sol[IndexEnum.discharge
+                                      + self.connection_point
+                                      * NUMBER_CORE_QUANTITIES] = 0.0
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[
-            IndexEnum.discharge + self.connection_point_2 * NUMBER_CORE_QUANTITIES
-            ] = 0.0
+        self.connected_asset_2.prev_sol[IndexEnum.discharge
+                                        + self.connection_point_2
+                                        * NUMBER_CORE_QUANTITIES] = 0.0
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )

@@ -60,7 +60,7 @@ class AssetAbstract(ABC):
         self.output: List[Dict[str, float]] = []
 
     def __repr__(self) -> str:
-        """Method to print string with the name of the asset"""
+        """Method to print string with the name of the asset."""
         return self.__class__.__name__ + " " + self.name
 
     @abstractmethod
