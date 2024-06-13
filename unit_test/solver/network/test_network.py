@@ -19,6 +19,8 @@ import uuid
 from io import StringIO
 from unittest.mock import patch
 
+import numpy as np
+
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from simulator_core.solver.network.network import Network
@@ -450,7 +452,7 @@ class NetworkTest(unittest.TestCase):
     def test_set_result_asset(self) -> None:
         """Test set result asset method."""
         # arrange
-        solution = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        solution = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
         asset2 = SolverPipe(name=uuid.uuid4())
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=asset2)
@@ -461,13 +463,13 @@ class NetworkTest(unittest.TestCase):
         self.network.set_result_asset(solution=solution)  # act
 
         # assert
-        self.assertEqual(self.asset.prev_sol, solution[:6])
-        self.assertEqual(asset2.prev_sol, solution[6:])
+        self.assertEqual(self.asset.prev_sol, solution[:6].tolist())
+        self.assertEqual(asset2.prev_sol, solution[6:].tolist())
 
     def test_set_results_node(self) -> None:
         """Test set result node method."""
         # arrange
-        solution = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        solution = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
         node = Node(name=uuid.uuid4())
         self.network.nodes[self.node.name] = self.node
         self.network.nodes[node.name] = node
@@ -478,8 +480,8 @@ class NetworkTest(unittest.TestCase):
         self.network.set_result_node(solution=solution)  # act
 
         # assert
-        self.assertEqual(self.node.prev_sol, solution[:3])
-        self.assertEqual(node.prev_sol, solution[9:12])
+        self.assertEqual(self.node.prev_sol, solution[:3].tolist())
+        self.assertEqual(node.prev_sol, solution[9:12].tolist())
 
     def test_connectivity_assets(self) -> None:
         """Test connectivity assets method."""

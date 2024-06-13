@@ -65,7 +65,7 @@ class Solver:
         while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
-            self.matrix.solve(equations, dumb=False)
+            self.matrix.solve(equations, dump=False)
             self.results_to_assets()
             if iteration > self._iteration_limit:
                 print("No converged solution reached")

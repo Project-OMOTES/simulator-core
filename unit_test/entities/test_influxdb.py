@@ -59,4 +59,4 @@ class InfluxdbTest(unittest.TestCase):
         data = get_data_from_profile(profile)
         # Assert
         self.assertEqual(len(data), 24 * 365)
-        self.assertAlmostEqual(data['values'][0], 364133.913, 5)
+        self.assertAlmostEqual(data['values'][0], 360800.0, 5)

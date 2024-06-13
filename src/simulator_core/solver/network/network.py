@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the network class."""
 import uuid
+import numpy.typing as npt
 
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
@@ -33,14 +34,15 @@ class Network:
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
     }
+    assets: dict[uuid.UUID, BaseAsset]
+    nodes: dict[uuid.UUID, Node]
 
     def __init__(self) -> None:
         """Constructor of the network class.
 
         Initializes the class properties and loads the fluid properties.
         """
-        self.assets: dict[uuid.UUID, BaseAsset] = {}
-        self.nodes: dict[uuid.UUID, Node] = {}
+        self.assets = {}
 
     def add_asset(self, asset_type: str, name: uuid.UUID | None = None) -> uuid.UUID:
         """Method to add an asset to the network.
@@ -369,7 +371,7 @@ class Network:
         """
         return self.check_connectivity_assets() and self.check_connectivity_nodes()
 
-    def set_result_asset(self, solution: list[float]) -> None:
+    def set_result_asset(self, solution: npt.NDArray) -> None:
         """Method to transfer the solution to the asset in the network.
 
         :param list[float] solution:Solution to be transferred to the assets.
@@ -378,9 +380,9 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset_id=asset).matrix_index
             nou = self.get_asset(asset_id=asset).number_of_unknowns
-            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou]
+            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou].tolist()
 
-    def set_result_node(self, solution: list[float]) -> None:
+    def set_result_node(self, solution: npt.NDArray) -> None:
         """Method to transfer the solution to the nodes in the network.
 
         :param list[float] solution:Solution to be transferred to the nodes.
@@ -389,7 +391,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node_id=node).matrix_index
             nou = self.get_node(node_id=node).number_of_unknowns
-            self.get_node(node_id=node).prev_sol = solution[index: index + nou]
+            self.get_node(node_id=node).prev_sol = solution[index: index + nou].tolist()
 
     def print_result(self) -> None:
         """Method to print the result of the network."""
