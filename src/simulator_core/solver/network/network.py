@@ -43,6 +43,7 @@ class Network:
         Initializes the class properties and loads the fluid properties.
         """
         self.assets = {}
+        self.nodes = {}
 
     def add_asset(self, asset_type: str, name: uuid.UUID | None = None) -> uuid.UUID:
         """Method to add an asset to the network.

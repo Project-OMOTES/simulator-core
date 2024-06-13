@@ -41,8 +41,7 @@ class AssetAbstract(ABC):
     """The unique identifier of the asset."""
 
     output: List[Dict[str, float]]
-    output_supply: List[Dict[str, float]]
-    output_return: List[Dict[str, float]]
+    outputs: List[List[Dict[str, float]]]
     """The output of the asset as a list with a dictionary per timestep."""
 
     connected_ports: List[str]
@@ -61,8 +60,7 @@ class AssetAbstract(ABC):
         self.name = asset_name
         self.asset_id = asset_id
         self.output = []
-        self.output_supply = []
-        self.output_return = []
+        self.outputs = []
         self.connected_ports = []
 
     @abstractmethod
@@ -106,25 +104,15 @@ class AssetAbstract(ABC):
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
 
-        The header is a tuple of the asset id and the property name.
+        The header is a tuple of the port id and the property name.
         """
         # Create dataframe
-        temp_dataframe = DataFrame(self.output)
 
-        temp_dataframe_supply = DataFrame(self.output_supply)
-        temp_dataframe_return = DataFrame(self.output_return)
-
-        # Set header
-        temp_dataframe.columns = [
-            (self.asset_id, column_name) for column_name in temp_dataframe.columns
-        ]
-        temp_dataframe_supply.columns = [
-            (self.asset_id, column_name) for column_name in temp_dataframe_supply.columns
-        ]
-        temp_dataframe_return.columns = [
-            (self.asset_id, column_name) for column_name in temp_dataframe_return.columns
-        ]
-        result = concat([temp_dataframe_supply, temp_dataframe_return],
-                        ignore_index=True,
-                        sort=False)
-        return temp_dataframe
+        temp_data = DataFrame()
+        for i in range(len(self.connected_ports)):
+            temp_frame = DataFrame(self.outputs[i])
+            temp_frame.columns = [
+                (self.connected_ports[i], column_name) for column_name in temp_frame.columns
+            ]
+            temp_data = concat([temp_data, temp_frame], axis=1)
+        return temp_data

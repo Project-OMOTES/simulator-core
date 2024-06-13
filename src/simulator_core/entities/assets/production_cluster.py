@@ -85,6 +85,8 @@ class ProductionCluster(AssetAbstract):
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
+        self.connected_ports = ['piet','klaas']
+        self.outputs = [[]] * 2
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -219,16 +221,14 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
             PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
         }
-        output_dict_supply = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(0),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-        }
-        output_dict_return = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
-        }
+
         self.output.append(output_dict)
-        self.output_return.append(output_dict_return)
-        self.output_supply.append(output_dict_supply)
+
+        for i in range(len(self.connected_ports)):
+            output_dict_temp = {
+                PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
+                PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(i),
+                PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(i),
+            }
+            self.outputs[i].append(output_dict_temp)
+
