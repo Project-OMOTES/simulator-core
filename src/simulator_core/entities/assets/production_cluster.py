@@ -219,4 +219,16 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
             PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
         }
+        output_dict_supply = {
+            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(0),
+            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
+            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
+        }
+        output_dict_return = {
+            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
+            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
+            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
+        }
         self.output.append(output_dict)
+        self.output_return.append(output_dict_return)
+        self.output_supply.append(output_dict_supply)

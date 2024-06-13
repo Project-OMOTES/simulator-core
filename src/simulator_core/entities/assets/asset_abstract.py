@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from pandas import DataFrame
+from pandas import DataFrame, concat
 
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
@@ -41,7 +41,12 @@ class AssetAbstract(ABC):
     """The unique identifier of the asset."""
 
     output: List[Dict[str, float]]
+    output_supply: List[Dict[str, float]]
+    output_return: List[Dict[str, float]]
     """The output of the asset as a list with a dictionary per timestep."""
+
+    connected_ports: List[str]
+    """List of ids of the connected ports."""
     solver_asset: BaseAsset
 
     def __init__(self, asset_name: str, asset_id: str):
@@ -49,13 +54,16 @@ class AssetAbstract(ABC):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
+        :param List[str] connected_ports: List of ids of the connected ports.
         """
         self.from_junction = None
-        self.to_junction: Junction = None
-        self.name: str = asset_name
-        self.asset_id: str = asset_id
-        self.output: List[Dict[str, float]] = []
+        self.to_junction = None
+        self.name = asset_name
+        self.asset_id = asset_id
+        self.output = []
+        self.output_supply = []
+        self.output_return = []
+        self.connected_ports = []
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -95,13 +103,6 @@ class AssetAbstract(ABC):
     def write_to_output(self) -> None:
         """Placeholder to get data from pandapipes and store it in the asset."""
 
-    def get_output(self) -> List[Dict[str, float]]:
-        """Returns all the output of the asset.
-
-        :return: A dict of property name and list of values.
-        """
-        return self.output
-
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
 
@@ -109,8 +110,21 @@ class AssetAbstract(ABC):
         """
         # Create dataframe
         temp_dataframe = DataFrame(self.output)
+
+        temp_dataframe_supply = DataFrame(self.output_supply)
+        temp_dataframe_return = DataFrame(self.output_return)
+
         # Set header
         temp_dataframe.columns = [
             (self.asset_id, column_name) for column_name in temp_dataframe.columns
         ]
+        temp_dataframe_supply.columns = [
+            (self.asset_id, column_name) for column_name in temp_dataframe_supply.columns
+        ]
+        temp_dataframe_return.columns = [
+            (self.asset_id, column_name) for column_name in temp_dataframe_return.columns
+        ]
+        result = concat([temp_dataframe_supply, temp_dataframe_return],
+                        ignore_index=True,
+                        sort=False)
         return temp_dataframe
