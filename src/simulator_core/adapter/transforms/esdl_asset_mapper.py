@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-from typing import Any
+from typing import Any, Type
 
 import esdl
 
@@ -29,7 +29,7 @@ from simulator_core.entities.assets.ates_cluster import AtesCluster
 class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
-    conversion_dict = {
+    conversion_dict: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
         esdl.Producer: ProductionCluster,
         esdl.GenericProducer: ProductionCluster,
         esdl.Consumer: DemandCluster,
