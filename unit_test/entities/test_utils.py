@@ -65,7 +65,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert mass_flow_calculated == 0.011891030595621722
+        self.assertEqual(mass_flow_calculated, 0.011891030595621722)
 
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
@@ -80,7 +80,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert heat_demand_calculated == 1005.5263629842184
+        self.assertEqual(heat_demand_calculated, 1005.5263629842184)
 
     def test_calculate_inverse_heat_transfer_coefficient(self) -> None:
         """Test calculate_inverse_heat_transfer_coefficient.
@@ -98,7 +98,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert heat_transfer_coefficient == 0.06931471805599453
+        self.assertEqual(heat_transfer_coefficient, 0.06931471805599453)
 
     def test_get_thermal_conductivity_table_component(self) -> None:
         """Test get_thermal_conductivity_table."""
@@ -110,8 +110,8 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert diameters == [0.1071, 0.1143, 0.1936, 0.2]
-        assert heat_coefficients == [52.15, 0.027, 0.4]
+        self.assertEqual(diameters, [0.1071, 0.1143, 0.1936, 0.2])
+        self.assertEqual(heat_coefficients, [52.15, 0.027, 0.4])
 
     def test_get_thermal_conductivity_table_no_material(self) -> None:
         """Test get_thermal_conductivity_table."""
@@ -123,8 +123,8 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        assert diameters == []
-        assert heat_coefficients == []
+        self.assertEqual(diameters, [])
+        self.assertEqual(heat_coefficients, [])
 
     def test_get_thermal_conductivity_table_error(self) -> None:
         """Test get_thermal_conductivity_table."""
