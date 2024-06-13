@@ -62,7 +62,6 @@ class Pipe(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param any geometry: ESDL geometry
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id)
         # Initialize the default values of the pipe

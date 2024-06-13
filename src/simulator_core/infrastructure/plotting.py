@@ -33,8 +33,8 @@ class Plotting:
         """
         self.esdl_object = esdl_object
 
-    def plot_map(self, result: DataFrame) -> None:
-        """Static function to plot the simulation results to the map.
+    def simulation_output(self, result: DataFrame) -> None:
+        """Function to plot the simulation results to the map.
 
         :param DataFrame result: simulation result in dataframe format
         """
