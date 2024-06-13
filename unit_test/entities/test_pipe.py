@@ -44,9 +44,9 @@ class PipeTest(unittest.TestCase):
         pipe.to_junction = self.to_junction
 
         # Assert
-        self.assertIsInstance( pipe, Pipe)
-        self.assertEqual( pipe.name, "pipe")
-        self.assertEqual( pipe.asset_id, "pipe_id")
+        self.assertIsInstance(pipe, Pipe)
+        self.assertEqual(pipe.name, "pipe")
+        self.assertEqual(pipe.asset_id, "pipe_id")
 
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
@@ -95,7 +95,7 @@ class PipeTest(unittest.TestCase):
         # Arrange
         # - Load esdl pipe asset
         esdl_file_path = (
-            Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
+                Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
         )
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
@@ -111,4 +111,3 @@ class PipeTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(alpha_value, 0.8901927763663371)
-

@@ -80,17 +80,13 @@ class ProductionClusterTest(unittest.TestCase):
         )
 
         # Assert
-        self.assertEqual( self.production_cluster.temperature_supply, 353.15)
-        self.assertEqual( self.production_cluster.temperature_return, 333.15)
-        self.assertEqual( self.production_cluster.controlled_mass_flow, mass_flow)
-        self.assertEqual(
-            self.production_cluster.solver_asset.mass_flow_rate_set_point,
-            self.production_cluster.controlled_mass_flow
-        )
-        self.assertNotEquals(
-            self.production_cluster.solver_asset.pre_scribe_mass_flow,
-             setpoints[PROPERTY_SET_PRESSURE]
-        )
+        self.assertEqual(self.production_cluster.temperature_supply, 353.15)
+        self.assertEqual(self.production_cluster.temperature_return, 333.15)
+        self.assertEqual(self.production_cluster.controlled_mass_flow, mass_flow)
+        self.assertEqual(self.production_cluster.solver_asset.mass_flow_rate_set_point,
+                         self.production_cluster.controlled_mass_flow)
+        self.assertNotEquals(self.production_cluster.solver_asset.pre_scribe_mass_flow,
+                             setpoints[PROPERTY_SET_PRESSURE])
 
     def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
@@ -157,11 +153,11 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertNotEqual( self.production_cluster.control_mass_flow,
-                             setpoints[PROPERTY_SET_PRESSURE])
+        self.assertNotEqual(self.production_cluster.control_mass_flow,
+                            setpoints[PROPERTY_SET_PRESSURE])
         self.assertNotEqual(
             self.production_cluster.solver_asset.pre_scribe_mass_flow,
-             setpoints[PROPERTY_SET_PRESSURE]
+            setpoints[PROPERTY_SET_PRESSURE]
         )
 
     def test_production_cluster_set_pressure_supply(self) -> None:
@@ -204,7 +200,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.write_to_output()
 
         # Assert
-        self.assertEqual(len(self.production_cluster.output),1)
+        self.assertEqual(len(self.production_cluster.output), 1)
         self.assertEqual(self.production_cluster.output[0], {
             PROPERTY_TEMPERATURE_SUPPLY: 333.15,
             PROPERTY_TEMPERATURE_RETURN: 333.15,
