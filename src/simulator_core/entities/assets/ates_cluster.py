@@ -80,18 +80,18 @@ class AtesCluster(AssetAbstract):
         self.mass_flowrate = 0
         self.solver_asset = ProductionAsset(uuid.uuid4())
         # ATES default properties
-        self.aquifer_depth = 300
-        self.aquifer_thickness = 45
-        self.aquifer_mid_temperature = 17
-        self.aquifer_net_to_gross = 1
+        self.aquifer_depth = 300.0
+        self.aquifer_thickness = 45.0
+        self.aquifer_mid_temperature = 17.0
+        self.aquifer_net_to_gross = 1.0
         self.aquifer_porosity = 0.3
-        self.aquifer_permeability = 10000
-        self.aquifer_anisotropy = 4
-        self.salinity = 10000
-        self.well_casing_size = 13
-        self.well_distance = 150
-        self.maximum_flow_charge = 200
-        self.maximum_flow_discharge = 200
+        self.aquifer_permeability = 10000.0
+        self.aquifer_anisotropy = 4.0
+        self.salinity = 10000.0
+        self.well_casing_size = 13.0
+        self.well_distance = 150.0
+        self.maximum_flow_charge = 200.0
+        self.maximum_flow_discharge = 200.0
 
         # Output list
         self.output: list = []
@@ -220,7 +220,7 @@ class AtesCluster(AssetAbstract):
         AQUIFER_TOP = self.aquifer_depth
         AQUIFER_BASE = self.aquifer_depth + self.aquifer_thickness
         SURFACE_TEMPERATURE = self.aquifer_mid_temperature - 0.034 * (
-                self.aquifer_depth + self.aquifer_thickness / 2)
+            self.aquifer_depth + self.aquifer_thickness / 2)
         AQUIFER_NTG = self.aquifer_net_to_gross
         AQUIFER_PORO = self.aquifer_porosity
         AQUIFER_PERM_XY = self.aquifer_permeability
