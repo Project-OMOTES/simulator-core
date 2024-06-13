@@ -59,14 +59,14 @@ class ProductionCluster(AssetAbstract):
     controlled_mass_flow: float | None
     """The controlled mass flow of the asset [kg/s]."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
+        :param List[str] port_ids: List of ids of the connected ports.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
@@ -82,8 +82,6 @@ class ProductionCluster(AssetAbstract):
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
-        self.connected_ports = ['piet','klaas']
-        self.outputs = [[]] * 2
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.

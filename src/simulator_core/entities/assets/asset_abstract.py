@@ -30,6 +30,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE,
 )
 
+
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
@@ -52,7 +53,7 @@ class AssetAbstract(ABC):
     """List of ids of the connected ports."""
     solver_asset: BaseAsset
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
@@ -63,8 +64,8 @@ class AssetAbstract(ABC):
         self.to_junction = None
         self.name = asset_name
         self.asset_id = asset_id
-        self.outputs = []
-        self.connected_ports = []
+        self.connected_ports = connected_ports
+        self.outputs = [[]] * len(self.connected_ports)
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:

@@ -25,9 +25,6 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
@@ -45,14 +42,15 @@ class DemandCluster(AssetAbstract):
         self,
         asset_name: str,
         asset_id: str,
+        port_ids: list[str]
     ):
         """Initialize a DemandCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
+        :param List[str] port_ids: List of ids of the connected ports.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         self._internal_diameter = DEFAULT_DIAMETER
         self.temperature_supply = DEFAULT_TEMPERATURE
