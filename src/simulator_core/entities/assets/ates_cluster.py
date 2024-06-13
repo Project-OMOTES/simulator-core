@@ -38,6 +38,7 @@ from simulator_core.entities.assets.utils import (
 )
 
 path = os.path.dirname(__file__)
+os.environ['CLASSPATH'] = os.path.join(path, 'bin/jfxrt.jar')
 import jnius_config  # noqa
 
 jnius_config.add_classpath(os.path.join(path, 'bin/rosim-batch-0.4.2.jar'))
