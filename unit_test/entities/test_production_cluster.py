@@ -20,8 +20,8 @@ from unittest.mock import Mock
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_PRESSURE,
+    PROPERTY_TEMPERATURE,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -46,6 +46,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
+            port_ids=["test1", "test2"],
         )
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
@@ -200,14 +201,13 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.solver_asset.get_temperature = Mock(return_value=333.15)
 
         # Act
-        self.production_cluster.write_to_output()
+        self.production_cluster.write_standard_output()
 
         # Assert
-        assert len(self.production_cluster.output) == 1
-        assert self.production_cluster.output[0] == {
-            PROPERTY_TEMPERATURE_SUPPLY: 333.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
+        assert len(self.production_cluster.outputs) == len(self.production_cluster.connected_ports)
+        assert (len(self.production_cluster.outputs[0]) == 1)
+        assert self.production_cluster.outputs[0][0] == {
+            PROPERTY_TEMPERATURE: 333.15,
             PROPERTY_MASSFLOW: 1e6,
-            PROPERTY_PRESSURE_SUPPLY: 2e5,
-            PROPERTY_PRESSURE_RETURN: 2e5,
+            PROPERTY_PRESSURE: 2e5,
         }

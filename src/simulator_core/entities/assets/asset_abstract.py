@@ -65,7 +65,9 @@ class AssetAbstract(ABC):
         self.name = asset_name
         self.asset_id = asset_id
         self.connected_ports = connected_ports
-        self.outputs = [[]] * len(self.connected_ports)
+        self.outputs = []
+        for i in range(len(self.connected_ports)):
+            self.outputs.append([])
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -106,14 +108,12 @@ class AssetAbstract(ABC):
 
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
-
         The output of the asset is a list with a dictionary for each port
         with the following keys:
         - PROPERTY_TEMPERATURE: The temperature of the asset.
         - PROPERTY_PRESSURE: The pressure of the asset.
         - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
-
         for i in range(len(self.connected_ports)):
             output_dict_temp = {
                 PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
