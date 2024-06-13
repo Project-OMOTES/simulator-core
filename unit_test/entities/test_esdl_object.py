@@ -123,12 +123,13 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        port_ids = asset.get_port_ids()
+        port_ids = asset.get_port_ids()  # act
 
         # Assert
         self.assertEqual(port_ids, ["a9793a5e-df4f-4795-8079-015dfaf57f82",
                                     "3f2dc09a-0cee-44bd-a337-cea55461a334"])
         self.assertEqual(len(port_ids), 2)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
