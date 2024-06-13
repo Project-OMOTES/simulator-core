@@ -102,8 +102,8 @@ class EsdlObjectTest(unittest.TestCase):
         length, property_available = asset.get_property("length", 0.0)  # act
 
         # Assert
-        assert length == asset.esdl_asset.length
-        assert property_available
+        self.assertEqual(length, asset.esdl_asset.length)
+        self.assertTrue(property_available)
 
     def test_get_property_not_found(self):
         """Test get_property when the property is not found."""
@@ -114,8 +114,8 @@ class EsdlObjectTest(unittest.TestCase):
         length, property_available = asset.get_property("length_not_found", 0.0)  # act
 
         # Assert
-        assert length == 0.0
-        assert property_available is False
+        self.assertEqual(length, 0.0)
+        self.assertFalse(property_available)
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
