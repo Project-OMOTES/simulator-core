@@ -107,11 +107,4 @@ class DemandCluster(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        output_dict = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
-        }
-        self.output.append(output_dict)
+        pass

@@ -24,6 +24,11 @@ from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE,
+    PROPERTY_TEMPERATURE,
+)
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
@@ -40,7 +45,6 @@ class AssetAbstract(ABC):
     asset_id: str
     """The unique identifier of the asset."""
 
-    output: List[Dict[str, float]]
     outputs: List[List[Dict[str, float]]]
     """The output of the asset as a list with a dictionary per timestep."""
 
@@ -59,7 +63,6 @@ class AssetAbstract(ABC):
         self.to_junction = None
         self.name = asset_name
         self.asset_id = asset_id
-        self.output = []
         self.outputs = []
         self.connected_ports = []
 
@@ -97,9 +100,30 @@ class AssetAbstract(ABC):
         """
         self.to_junction = to_junction
 
+    def write_standard_output(self) -> None:
+        """Write the output of the asset to the output list.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+
+        The output of the asset is a list with a dictionary for each port
+        with the following keys:
+        - PROPERTY_TEMPERATURE: The temperature of the asset.
+        - PROPERTY_PRESSURE: The pressure of the asset.
+        - PROPERTY_MASSFLOW: The mass flow rate of the asset.
+        """
+
+        for i in range(len(self.connected_ports)):
+            output_dict_temp = {
+                PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
+                PROPERTY_PRESSURE: self.solver_asset.get_pressure(i),
+                PROPERTY_TEMPERATURE: self.solver_asset.get_temperature(i),
+            }
+            self.outputs[i].append(output_dict_temp)
+
     @abstractmethod
     def write_to_output(self) -> None:
-        """Placeholder to get data from pandapipes and store it in the asset."""
+        """Placeholder to get data and store it in the asset."""
 
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a pandapipes asset.
