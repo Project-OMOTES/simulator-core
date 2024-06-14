@@ -68,6 +68,7 @@ class HeatNetwork:
         :return: None
         """
         for py_asset in self.assets:
+            py_asset.write_standard_output()
             py_asset.write_to_output()
 
     def gather_output(self) -> pd.DataFrame:

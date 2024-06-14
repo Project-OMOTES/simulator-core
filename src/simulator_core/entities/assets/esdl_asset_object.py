@@ -58,3 +58,7 @@ class EsdlAssetObject:
             if esdl_port.profile:
                 return get_data_from_profile(esdl_port.profile[0])
         raise ValueError("No profile found for asset: " + self.esdl_asset.name)
+
+    def get_port_ids(self) -> list[str]:
+        """Get the port ids of the asset."""
+        return [port.id for port in self.esdl_asset.port]
