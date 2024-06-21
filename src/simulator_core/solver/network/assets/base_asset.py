@@ -299,7 +299,7 @@ class BaseAsset(BaseItem):
         :return: The temperature of the connection point.
         """
         return fluid_props.get_t(
-            self.prev_sol[self.get_index_matrix(property_name="internal energy",
+            self.prev_sol[self.get_index_matrix(property_name="internal_energy",
                                                 connection_point=connection_point,
                                                 matrix=False)]
         )
