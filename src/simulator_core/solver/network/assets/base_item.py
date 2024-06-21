@@ -59,7 +59,7 @@ class BaseItem(ABC):
         """
         return (index_core_quantity.get_index_property(property_name=property_name,
                                                        connection_point=connection_point)
-                + self.matrix_index if matrix else 0)
+                + (self.matrix_index if matrix else 0))
 
     @abstractmethod
     def get_equations(self) -> list[EquationObject]:
