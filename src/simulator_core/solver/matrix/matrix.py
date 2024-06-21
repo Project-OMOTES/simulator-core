@@ -18,7 +18,7 @@ import numpy.typing as npt
 import scipy as sp
 import csv
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class Matrix:
@@ -66,7 +66,7 @@ class Matrix:
         row_index_array = np.concatenate([np.full((len(equations[i])), i)
                                           for i in range(len(equations))])
         matrix = sp.sparse.csc_matrix((coefficient_array,
-                                       (row_index_array , column_index_array)),
+                                       (row_index_array, column_index_array)),
                                       shape=(self.num_unknowns, self.num_unknowns))
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
         if dump:
@@ -134,8 +134,9 @@ class Matrix:
         """
         with open(file_name, 'w', newline='') as f:
             write = csv.writer(f)
-            write.writerow(
-                ['m', 'P', 'u'] * int(self.num_unknowns / NUMBER_CORE_QUANTITIES) + ['rhs'])
+            write.writerow(['m', 'P', 'u'] * int(self.num_unknowns
+                                                 / index_core_quantity.number_core_quantities)
+                           + ['rhs'])
             for row, rhs in zip(matrix.todense(), rhs_array.todense()):
                 write.writerow(row.tolist()[0] + rhs.tolist()[0])
 

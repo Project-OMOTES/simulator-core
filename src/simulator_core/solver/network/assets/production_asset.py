@@ -15,7 +15,6 @@
 """Module containing the production asset class."""
 import numpy as np
 
-from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.fall_type import FallType
 
@@ -140,17 +139,16 @@ class ProductionAsset(FallType):
         if self.pre_scribe_mass_flow:
             equation_object.indices = np.array(
                 [
-                    self.matrix_index
-                    + IndexCoreQuantity.discharge
-                    + connection_point * IndexCoreQuantity.number_core_quantities
+                    self.get_index_matrix(property_name="mass_flow_rate",
+                                          connection_point=connection_point)
                 ]
             )
             equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
             equation_object.rhs = self.mass_flow_rate_set_point
         else:
             equation_object.indices = np.array(
-                [self.matrix_index + IndexCoreQuantity.pressure
-                 + connection_point * IndexCoreQuantity.number_core_quantities]
+                self.get_index_matrix(property_name="pressure",
+                                      connection_point=connection_point)
             )
             equation_object.coefficients = np.array([1.0])
             if connection_point == 0:
@@ -167,8 +165,9 @@ class ProductionAsset(FallType):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[IndexCoreQuantity.discharge
-                         + connection_point * IndexCoreQuantity.number_core_quantities] > 0:
+        if self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
+                                               connection_point=connection_point,
+                                               matrix=False)] > 0:
             return self.add_prescribe_temp(connection_point)
         else:
             return self.add_temp_to_node_equation(connection_point)

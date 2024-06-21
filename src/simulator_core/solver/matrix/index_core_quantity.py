@@ -26,6 +26,18 @@ class IndexCoreQuantity:
     """
 
     number_core_quantities = 3
+    mass_flow_rate = 0
     discharge = 0
     pressure = 1
     internal_energy = 2
+
+    def get_index_property(self, property_name: str, connection_point: int) -> int:
+        """Method to get the property of the index."""
+        return self.get_index(property_name) + connection_point * self.number_core_quantities
+
+    def get_index(self, property_name: str) -> int:
+        """Method to get the index of the property."""
+        return getattr(self, property_name)
+
+
+index_core_quantity = IndexCoreQuantity()
