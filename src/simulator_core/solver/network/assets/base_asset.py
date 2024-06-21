@@ -15,7 +15,6 @@
 
 """Module containing BaseAsset class."""
 import math
-import uuid
 from typing import Dict
 
 import numpy as np
@@ -38,14 +37,16 @@ class BaseAsset(BaseItem):
 
     def __init__(
         self,
-        name: uuid.UUID,
+        name: str,
+        _id: str,
         number_of_unknowns: int = 6,
         number_connection_points: int = 2,
         supply_temperature: float = 293.15,
     ):
         """Initializes the BaseAsset object with the given parameters.
 
-        :param uuid.UUID name: The unique identifier of the node.
+        :param str name: The name of the asset.
+        :param str _id: The unique identifier of the asset.
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
         The default is 3.
         :param int, optional number_connection_points: The number of connection points for the
@@ -53,6 +54,7 @@ class BaseAsset(BaseItem):
         """
         super().__init__(
             name=name,
+            _id=_id,
             number_of_unknowns=number_of_unknowns,
             number_connection_points=number_connection_points,
         )

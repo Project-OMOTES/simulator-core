@@ -41,11 +41,12 @@ class BaseItemTest(unittest.TestCase):
     def test_init(self) -> None:
         """Test the __init__ method of the BaseNodeItem class."""
         # arrange
-        asset_name = uuid4()
+        asset_name = str(uuid4())
         number_of_unknowns = 2
 
         # act
-        asset = MockBaseNodeItem(name=asset_name, number_of_unknowns=number_of_unknowns)  # act
+        asset = MockBaseNodeItem(name=asset_name, _id=str(asset_name),
+                                 number_of_unknowns=number_of_unknowns)  # act
 
         # assert
         self.assertEqual(asset.name, asset_name)
@@ -56,9 +57,11 @@ class BaseItemTest(unittest.TestCase):
     def test_set_matrix_index(self) -> None:
         """Test the set_matrix_index method of the BaseNodeItem class."""
         # arrange
-        asset_name = uuid4()
+        asset_name = str(uuid4())
         number_of_unknowns = 2
-        asset = MockBaseNodeItem(name=asset_name, number_of_unknowns=number_of_unknowns)
+        asset = MockBaseNodeItem(name=asset_name,
+                                 _id=asset_name,
+                                 number_of_unknowns=number_of_unknowns)
 
         # act
         asset.set_matrix_index(1)  # act

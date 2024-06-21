@@ -33,11 +33,12 @@ class FallTypeTest(unittest.TestCase):
         """Set up the test case."""
         # Create a BaseBoundary object
         self.asset = FallType(
-            name=uuid4(),
+            name=str(uuid4()),
+            _id=str(uuid4()),
         )
         # Create supply, connection_point:0 and return node, connection_point:1
-        self.supply_node = Node(name=uuid4())
-        self.return_node = Node(name=uuid4())
+        self.supply_node = Node(name=uuid4(), _id=str(uuid4()))
+        self.return_node = Node(name=uuid4(), _id=str(uuid4()))
         # Connect the nodes to the asset
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)

@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the node class."""
-import uuid
-
 import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
@@ -63,7 +61,8 @@ class Node(BaseNodeItem):
 
     def __init__(
         self,
-        name: uuid.UUID,
+        name: str,
+        _id: str,
         number_of_unknowns: int = 3,
         height: float = 0.0,
         initial_temperature: float = 273.15,
@@ -75,7 +74,7 @@ class Node(BaseNodeItem):
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
         The default is 3.
         """
-        super().__init__(number_of_unknowns, name)
+        super().__init__(name=name, _id=_id, number_of_unknowns=number_of_unknowns)
         self.connected_assets: list[tuple[BaseItem, int]] = []
         self.height = height
         self.initial_temperature = initial_temperature
