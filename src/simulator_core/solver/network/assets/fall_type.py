@@ -54,7 +54,7 @@ class FallType(BaseAsset):
     def __init__(
         self,
         name: str,
-        identifier: str,
+        _id: str,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -65,7 +65,7 @@ class FallType(BaseAsset):
         Parameters
         ----------
         name : str The name of the asset.
-        identifier : str The unique identifier of the asset.
+        _id : str The unique identifier of the asset.
         number_of_unknowns : int, optional
             The number of unknown variables for the asset. The default is 6, which corresponds
             to the mass flow rate, pressure, and temperature at each connection point.
@@ -75,7 +75,7 @@ class FallType(BaseAsset):
         """
         super().__init__(
             name=name,
-            identifier=identifier,
+            _id=_id,
             number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,

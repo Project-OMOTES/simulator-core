@@ -32,9 +32,9 @@ class NetworkTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up for the tests."""
         self.network = Network()
-        self.asset = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        self.asset2 = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        self.node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        self.asset = SolverPipe(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        self.asset2 = SolverPipe(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        self.node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
 
     def test_init(self) -> None:
         """Test the constructor of the network class."""
@@ -148,9 +148,9 @@ class NetworkTest(unittest.TestCase):
     def test_connect_both_assets_and_replace_node(self) -> None:
         """Test connecting both assets and replacing the node."""
         # arrange
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        node2 = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        asset3 = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        node2 = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        asset3 = SolverPipe(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
         self.network.nodes[node2.name] = node2
         self.network.add_existing_asset(asset=self.asset)
@@ -186,9 +186,9 @@ class NetworkTest(unittest.TestCase):
     def test_connect_both_assets_and_replace_node_with_additional_assets(self) -> None:
         """Test connecting both assets and replacing the node."""
         # arrange
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        node2 = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
-        asset3 = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        node2 = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
+        asset3 = SolverPipe(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
         self.network.nodes[node2.name] = node2
         self.network.add_existing_asset(asset=self.asset)
@@ -224,7 +224,7 @@ class NetworkTest(unittest.TestCase):
     def test_connect_both_assets_and_replace_node_same_node(self) -> None:
         """Test connecting both assets and replacing the node with the same node."""
         # arrange
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=self.asset2)
@@ -404,7 +404,7 @@ class NetworkTest(unittest.TestCase):
     def test_exists_node(self) -> None:
         """Test exist node method."""
         # arrange
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.nodes[node.name] = node
 
         # act
@@ -453,7 +453,7 @@ class NetworkTest(unittest.TestCase):
         """Test set result asset method."""
         # arrange
         solution = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        asset2 = SolverPipe(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        asset2 = SolverPipe(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=asset2)
         self.asset.matrix_index = 0
@@ -470,7 +470,7 @@ class NetworkTest(unittest.TestCase):
         """Test set result node method."""
         # arrange
         solution = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.nodes[self.node.name] = self.node
         self.network.nodes[node.name] = node
         self.node.matrix_index = 0
@@ -486,7 +486,7 @@ class NetworkTest(unittest.TestCase):
     def test_connectivity_assets(self) -> None:
         """Test connectivity assets method."""
         # arrange
-        node = Node(name=str(uuid.uuid4()), identifier=str(uuid.uuid4()))
+        node = Node(name=str(uuid.uuid4()), _id=str(uuid.uuid4()))
         self.network.add_existing_asset(asset=self.asset)
         self.network.add_existing_asset(asset=self.asset2)
         self.network.nodes[self.node.name] = self.node

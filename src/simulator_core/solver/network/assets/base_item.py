@@ -21,17 +21,17 @@ from simulator_core.solver.matrix.equation_object import EquationObject
 class BaseItem(ABC):
     """A base class for items in a network."""
 
-    def __init__(self, number_of_unknowns: int, name: str, identifier: str,
+    def __init__(self, number_of_unknowns: int, name: str, _id: str,
                  number_connection_points: int):
         """Initializes the BaseItem object with the given parameters.
 
         :param int number_of_unknowns: The number of unknown variables for the item.
         :param str name: The name of the item.
-        :param str identifier: The unique identifier of the item.
+        :param str _id: The unique identifier of the item.
         :param int number_connection_points: The number of connection points of the item.
         """
         self.name = name
-        self.id = identifier
+        self.id = _id
         self.number_of_unknowns = number_of_unknowns
         self.number_of_connection_point = number_connection_points
         self.matrix_index = 0

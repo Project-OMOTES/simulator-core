@@ -33,7 +33,7 @@ class BaseBoundary(BaseAsset):
         equations_dict (dict): A dictionary that maps equation ids to equation indices in the
     """
 
-    def __init__(self, name: str, identifier: str, number_of_unknowns: int = 3,
+    def __init__(self, name: str, _id: str, number_of_unknowns: int = 3,
                  number_con_points: int = 1):
         """Initialize the boundary condition.
 
@@ -43,7 +43,7 @@ class BaseBoundary(BaseAsset):
                                                   Defaults to 3.
         """
         super().__init__(name=name,
-                         identifier=identifier,
+                         _id=_id,
                          number_of_unknowns=number_of_unknowns,
                          number_connection_points=number_con_points)
         self.initial_pressure = 10000.0

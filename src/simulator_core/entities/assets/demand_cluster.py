@@ -60,7 +60,7 @@ class DemandCluster(AssetAbstract):
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0
-        self.solver_asset = ProductionAsset(name=self.name, identifier=self.asset_id)
+        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         # Output list
         self.output: list = []
 

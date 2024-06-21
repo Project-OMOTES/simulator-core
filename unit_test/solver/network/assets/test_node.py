@@ -33,7 +33,7 @@ class NodeTest(unittest.TestCase):
     def setUp(self):
         """Set up the test case."""
         self.node_name = str(uuid4())
-        self.node = Node(name=self.node_name, identifier=self.node_name)
+        self.node = Node(name=self.node_name, _id=self.node_name)
 
     def test_init(self) -> None:
         """Test the __init__ method of the Node class."""
@@ -46,7 +46,7 @@ class NodeTest(unittest.TestCase):
         # act
         node = Node(
             name=self.node_name,
-            identifier=self.node_name,
+            _id=self.node_name,
             number_of_unknowns=number_of_unknowns,
             height=height,
             initial_temperature=initial_temperature,
@@ -64,7 +64,7 @@ class NodeTest(unittest.TestCase):
     def test_connect_asset(self) -> None:
         """Test the connect_asset method of the Node class."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_id = 0
 
         # act
@@ -76,7 +76,7 @@ class NodeTest(unittest.TestCase):
     def test_connect_asset_with_invalid_connection_id(self) -> None:
         """Test the connect_asset method of the Node class with invalid connection_id."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_id = 2
 
         # act
@@ -112,7 +112,7 @@ class NodeTest(unittest.TestCase):
     ) -> None:
         """Test the get_equations method of the Node class when connected."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
         self.node.connect_asset(asset=connected_asset, connection_point=connection_point)
 
@@ -142,7 +142,7 @@ class NodeTest(unittest.TestCase):
     def test_add_node_cont_equation_with_additional_asset(self) -> None:
         """Test the add_node_cont_equation method of the Node class with additional asset."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
         self.node.connect_asset(asset=connected_asset, connection_point=connection_point)
 
@@ -180,7 +180,7 @@ class NodeTest(unittest.TestCase):
         """Test the add_pressure_set_equation method of the Node class."""
         # arrange
         node_name = str(uuid4())
-        node = Node(name=node_name, identifier=node_name, set_pressure=5.0)
+        node = Node(name=node_name, _id=node_name, set_pressure=5.0)
 
         # act
         equation_object = node.add_pressure_set_equation()
@@ -196,7 +196,7 @@ class NodeTest(unittest.TestCase):
         """Test the set_temperature_equation method of the Node class."""
         # arrange
         node_name = str(uuid4())
-        node = Node(name=node_name, identifier=node_name, initial_temperature=275.0)
+        node = Node(name=node_name, _id=node_name, initial_temperature=275.0)
 
         # act
         equation_object = node.set_temperature_equation()
@@ -211,7 +211,7 @@ class NodeTest(unittest.TestCase):
     def test_is_connected_true(self) -> None:
         """Test the is_connected method of the Node class."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
 
         # act
@@ -241,14 +241,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.discharge = 1.0
         # Create base asset
         self.node = Node(name=str(uuid4()),
-                         identifier=str(uuid4()),
+                         _id=str(uuid4()),
                          initial_temperature=self.initial_temperature)
         # Create connected asset
-        self.connected_asset = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        self.connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         self.connected_asset.set_matrix_index(NUMBER_CORE_QUANTITIES)
         self.connection_point = 0
         # Create connected asset on other connection point
-        self.connected_asset_2 = ProductionAsset(name=str(uuid4()), identifier=str(uuid4()))
+        self.connected_asset_2 = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         self.connected_asset_2.set_matrix_index(NUMBER_CORE_QUANTITIES * 2)
         self.connection_point_2 = 1
 

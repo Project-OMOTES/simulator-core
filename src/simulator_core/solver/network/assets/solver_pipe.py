@@ -57,7 +57,7 @@ class SolverPipe(FallType):
     def __init__(
         self,
         name: str,
-        identifier: str,
+        _id: str,
         length: float = 1000.0,
         diameter: float = 0.2,
         roughness: float = 0.001,
@@ -65,12 +65,12 @@ class SolverPipe(FallType):
         """Constructor of pipe class.
 
         :param str name: The name of the pipe.
-        :param str identifier: The unique identifier of the pipe.
+        :param str _id: The unique identifier of the pipe.
         :param float length: The length of the pip [m] with a default value of 1000.0 m.
         :param float diameter: The diameter of the pipe [m] with a default value of 0.2 m.
         :param float roughness: The roughness of the pipe [m] with a default value of 1E-3 m.
         """
-        super().__init__(name=name, identifier=identifier)
+        super().__init__(name=name, _id=_id)
         # Set the physical properties of the pipe
         self.length: float = length
         self.diameter: float = diameter

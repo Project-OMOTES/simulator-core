@@ -62,7 +62,7 @@ class Node(BaseNodeItem):
     def __init__(
         self,
         name: str,
-        identifier: str,
+        _id: str,
         number_of_unknowns: int = 3,
         height: float = 0.0,
         initial_temperature: float = 273.15,
@@ -74,7 +74,7 @@ class Node(BaseNodeItem):
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
         The default is 3.
         """
-        super().__init__(name=name, identifier=identifier, number_of_unknowns=number_of_unknowns)
+        super().__init__(name=name, _id=_id, number_of_unknowns=number_of_unknowns)
         self.connected_assets: list[tuple[BaseItem, int]] = []
         self.height = height
         self.initial_temperature = initial_temperature

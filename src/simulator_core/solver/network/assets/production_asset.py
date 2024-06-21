@@ -59,7 +59,7 @@ class ProductionAsset(FallType):
     def __init__(
         self,
         name: str,
-        identifier: str,
+        _id: str,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -73,7 +73,7 @@ class ProductionAsset(FallType):
         Parameters
         ----------
         name : str The name of the asset.
-        identifier : str The unique identifier of the asset.
+        _id : str The unique identifier of the asset.
         number_of_unknowns : int, optional
             The number of unknown variables for the asset. The default is 6, which corresponds to
             the mass flow rate, pressure, and temperature at each connection point.
@@ -87,7 +87,7 @@ class ProductionAsset(FallType):
 
         super().__init__(
             name=name,
-            identifier=identifier,
+            _id=_id,
             supply_temperature=supply_temperature,
             heat_supplied=heat_supplied,
             loss_coefficient=loss_coefficient,

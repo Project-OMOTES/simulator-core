@@ -64,7 +64,7 @@ class Network:
             name = str(uuid.uuid4())
         if identifier is None:
             identifier = str(uuid.uuid4())
-        self.assets[name] = self.str_to_class_dict[asset_type](name=name, identifier=identifier)
+        self.assets[name] = self.str_to_class_dict[asset_type](name=name, _id=identifier)
         return name
 
     def add_existing_asset(self, asset: BaseAsset) -> str:
@@ -139,7 +139,7 @@ class Network:
         """
         # Create a new node
         node_id = str(uuid.uuid4())
-        self.nodes[node_id] = Node(name=node_id, identifier=node_id)
+        self.nodes[node_id] = Node(name=node_id, _id=node_id)
         # Connect the assets to the node
         for asset_id, connection_point in [
             (asset1_id, connection_point_1),

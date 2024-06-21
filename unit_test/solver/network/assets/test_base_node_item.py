@@ -45,7 +45,7 @@ class BaseItemTest(unittest.TestCase):
         number_of_unknowns = 2
 
         # act
-        asset = MockBaseNodeItem(name=asset_name, identifier=str(asset_name),
+        asset = MockBaseNodeItem(name=asset_name, _id=str(asset_name),
                                  number_of_unknowns=number_of_unknowns)  # act
 
         # assert
@@ -60,7 +60,7 @@ class BaseItemTest(unittest.TestCase):
         asset_name = str(uuid4())
         number_of_unknowns = 2
         asset = MockBaseNodeItem(name=asset_name,
-                                 identifier=asset_name,
+                                 _id=asset_name,
                                  number_of_unknowns=number_of_unknowns)
 
         # act
