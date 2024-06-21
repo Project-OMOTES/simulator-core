@@ -26,7 +26,6 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
 )
-from simulator_core.solver.matrix.index_core_quantity import IndexCoreQuantity
 from simulator_core.solver.network.assets.fall_type import FallType
 from simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -114,7 +113,9 @@ class SolverPipe(FallType):
         """
         self.calc_lambda_loss()
         density = fluid_props.get_density(
-            fluid_props.get_t(self.prev_sol[IndexCoreQuantity.internal_energy])
+            fluid_props.get_t(self.prev_sol[self.get_index_matrix(property_name="internal_energy",
+                                                                  connection_point=0,
+                                                                  matrix=False)])
         )
         self.loss_coefficient = (
             self.lambda_loss
@@ -145,9 +146,15 @@ class SolverPipe(FallType):
         """
         # Retrieve properties from previous solution
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
-            mass_flow_rate = self.prev_sol[IndexCoreQuantity.discharge]
+            mass_flow_rate = self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
+                                                                 connection_point=0,
+                                                                    matrix=False)]
         if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(self.prev_sol[IndexCoreQuantity.internal_energy])
+            temperature = fluid_props.get_t(self.prev_sol[self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=0,
+                matrix=False)])
+
         # Calculate the Reynolds number
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
@@ -287,7 +294,10 @@ class SolverPipe(FallType):
         """
         # Check the temperature
         if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(self.prev_sol[IndexCoreQuantity.internal_energy])
+            temperature = fluid_props.get_t(self.prev_sol[self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=0,
+                matrix=False)])
 
         # Calculate the thermal diffusivity
         thermal_diffusivity = fluid_props.get_thermal_conductivity(temperature) / (
