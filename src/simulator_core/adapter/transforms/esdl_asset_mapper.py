@@ -23,6 +23,7 @@ from simulator_core.entities.assets.demand_cluster import DemandCluster
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster
+from simulator_core.entities.assets.ates_cluster import AtesCluster
 
 
 class EsdlAssetMapper:
@@ -34,6 +35,7 @@ class EsdlAssetMapper:
         esdl.Consumer: DemandCluster,
         esdl.HeatingDemand: DemandCluster,
         esdl.Pipe: Pipe,
+        esdl.ATES: AtesCluster,
     }
 
     def to_esdl(self, entity: AssetAbstract) -> Any:

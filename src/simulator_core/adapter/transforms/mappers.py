@@ -23,6 +23,7 @@ from simulator_core.entities.assets.asset_abstract import AssetAbstract
 from simulator_core.entities.assets.controller_classes import (
     ControllerConsumer,
     ControllerSource,
+    ControllerStorage,
 )
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
@@ -34,9 +35,9 @@ from simulator_core.solver.network.network import Network
 
 
 def connect_connected_asset(
-    connected_py_assets: List[Tuple[str, Port]],
-    junction: Junction,
-    py_assets_list: List[AssetAbstract],
+        connected_py_assets: List[Tuple[str, Port]],
+        junction: Junction,
+        py_assets_list: List[AssetAbstract],
 ) -> None:
     """Method to connect assets connected to one asset to the same junction.
 
@@ -56,10 +57,10 @@ def connect_connected_asset(
 
 
 def replace_joint_in_connected_assets(
-    connected_py_assets: List[Tuple[str, Port]],
-    py_joint_dict: Dict[str, List[Tuple[str, Port]]],
-    py_asset_id: str,
-    iteration_limit: int = 10,
+        connected_py_assets: List[Tuple[str, Port]],
+        py_joint_dict: Dict[str, List[Tuple[str, Port]]],
+        py_asset_id: str,
+        iteration_limit: int = 10,
 ) -> List[Tuple[str, Port]]:
     """Replace joint with assets connected to the elements.
 
@@ -223,4 +224,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
             sources.append(ControllerSource(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
-        return NetworkController(consumers, sources)
+
+        storages = []
+        for esdl_asset in model.get_all_assets_of_type("storage"):
+            storages.append(
+                ControllerStorage(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
+            )
+            storages[-1].add_profile(esdl_asset.get_profile())
+
+        return NetworkController(consumers, sources, storages)
