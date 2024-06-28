@@ -138,7 +138,7 @@ class Node(BaseNodeItem):
         """
         flows = np.array(
             [
-                asset.prev_sol[asset.get_index_matrix("discharge",
+                asset.prev_sol[asset.get_index_matrix("mass_flow_rate",
                                                       asset_connection_point,
                                                       matrix=False)]
                 for asset, asset_connection_point in self.connected_assets
@@ -158,13 +158,13 @@ class Node(BaseNodeItem):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="discharge")])
+        equation_object.indices = np.array([self.get_index_matrix(property_name="mass_flow_rate")])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         for asset, asset_connection_point in self.connected_assets:
             equation_object.indices = np.append(
                 equation_object.indices,
-                [asset.get_index_matrix(property_name="discharge",
+                [asset.get_index_matrix(property_name="mass_flow_rate",
                                         connection_point=asset_connection_point)],
             )
             equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
@@ -178,7 +178,7 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="discharge")])
+        equation_object.indices = np.array([self.get_index_matrix(property_name="mass_flow_rate")])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -217,7 +217,7 @@ class Node(BaseNodeItem):
             value of the equation
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="discharge"),
+        equation_object.indices = np.array([self.get_index_matrix(property_name="mass_flow_rate"),
                                             self.get_index_matrix(property_name="internal_energy")])
         # Be aware that the coefficients are in reverse order
         equation_object.coefficients = np.array(self.prev_sol)[
@@ -229,7 +229,7 @@ class Node(BaseNodeItem):
             # Extended asset indices
             extra_indices = np.array(
                 [
-                    asset.get_index_matrix("discharge", asset_connection_id),
+                    asset.get_index_matrix("mass_flow_rate", asset_connection_id),
                     asset.get_index_matrix("internal_energy", asset_connection_id),
                 ]
             )

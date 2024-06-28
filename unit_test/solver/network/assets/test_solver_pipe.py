@@ -113,7 +113,7 @@ class SolverPipeTest(unittest.TestCase):
         velocity = input_reynolds_number * fluid_viscosity / self.asset.diameter
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(fluid_temperature)
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] \
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
             = velocity * self.asset.area * fluid_density
 
         # act
@@ -132,7 +132,7 @@ class SolverPipeTest(unittest.TestCase):
         velocity = input_reynolds_number * fluid_viscosity / self.asset.diameter
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(fluid_temperature)
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] \
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
             = velocity * self.asset.area * fluid_density
 
         # act
@@ -200,7 +200,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.roughness = 0.001  # m
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(330.0)  # J/kg
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 290.6  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 290.6  # kg/s
 
         # act
         self.asset.update_loss_coefficient()  # act
@@ -209,8 +209,8 @@ class SolverPipeTest(unittest.TestCase):
         self.assertAlmostEqual(self.asset.lambda_loss, 0.02024, 3)
         self.assertAlmostEqual(
             self.asset.loss_coefficient
-            * self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)]
-            * abs(self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)])
+            * self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)]
+            * abs(self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)])
             * 1e-5,
             4.191,
             1,
@@ -219,10 +219,9 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_high_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 290.6  # kg/s
-        self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] = fluid_props.get_ie(
-            56.8500061035156 + 273.15
-        )
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 290.6  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
+            = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
@@ -242,7 +241,7 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = -2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = -2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 1)] = (
             fluid_props.get_ie(56.8500061035156 + 273.15)
         )
@@ -265,10 +264,9 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 2.906  # kg/s
-        self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] = fluid_props.get_ie(
-            56.8500061035156 + 273.15
-        )
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
+            = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
         self.asset._grid_size = 10  # pylint: disable=protected-access
@@ -288,7 +286,7 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 0.0  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 0.0  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -313,7 +311,7 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -335,7 +333,7 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 10.0  # W/m2K
@@ -358,7 +356,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
         self.asset._grid_size = grid_size  # pylint: disable=protected-access
 
         # act
@@ -374,7 +372,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = -2.906
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = -2.906
         self.asset._grid_size = grid_size
 
         # act
@@ -390,7 +388,7 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[index_core_quantity.get_index_property("discharge", 0)] = 0.0
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 0.0
         self.asset._grid_size = grid_size
 
         # act

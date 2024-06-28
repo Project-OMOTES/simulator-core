@@ -161,7 +161,7 @@ class BaseAssetTest(unittest.TestCase):
         # Arrange
         connection_point_id = 0
         self.asset.connect_node(node=self.supply_node, connection_point=connection_point_id)
-        self.asset.prev_sol[IndexCoreQuantity.discharge
+        self.asset.prev_sol[IndexCoreQuantity.mass_flow_rate
                             + connection_point_id * IndexCoreQuantity.number_core_quantities] = (
             1.0
         )
@@ -278,7 +278,7 @@ class BaseAssetTest(unittest.TestCase):
         """Test the get_mass_flow_rate method."""
         # Arrange
         connection_point_id = 0
-        self.asset.prev_sol[IndexCoreQuantity.discharge
+        self.asset.prev_sol[IndexCoreQuantity.mass_flow_rate
                             + connection_point_id * IndexCoreQuantity.number_core_quantities] = (
             1.0
         )

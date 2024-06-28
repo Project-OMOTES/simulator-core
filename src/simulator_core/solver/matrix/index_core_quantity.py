@@ -27,7 +27,6 @@ class IndexCoreQuantity:
 
     number_core_quantities = 3
     mass_flow_rate = 0
-    discharge = 0
     pressure = 1
     internal_energy = 2
 

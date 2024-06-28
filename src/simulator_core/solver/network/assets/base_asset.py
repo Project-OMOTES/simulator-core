@@ -146,7 +146,7 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[self.get_index_matrix(property_name="discharge",
+        if self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
                                                connection_point=connection_point,
                                                matrix=False)] > 0:
             return self.add_prescribe_temp(connection_point)
@@ -275,7 +275,7 @@ class BaseAsset(BaseItem):
         :param int connection_point: The connection point for which to get the mass flow rate.
         :return: The mass flow rate of the connection point.
         """
-        return self.prev_sol[self.get_index_matrix(property_name="discharge",
+        return self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
                                                    connection_point=connection_point,
                                                    matrix=False)]
 
