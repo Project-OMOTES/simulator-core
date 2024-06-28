@@ -384,7 +384,7 @@ class SolverPipe(FallType):
             # Set the internal energy at the connection point
             self._internal_energy_grid[-1] = self.prev_sol[self.get_index_matrix(
                 property_name="internal_energy",
-                connection_point=0,
+                connection_point=1,
                 matrix=False)]
             # Retrieve the mass flow rate
             mass_flow_rate = abs(mass_flow_rate)

@@ -145,9 +145,9 @@ class ProductionAsset(FallType):
             equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
             equation_object.rhs = self.mass_flow_rate_set_point
         else:
-            equation_object.indices = np.array(
+            equation_object.indices = np.array([
                 self.get_index_matrix(property_name="pressure",
-                                      connection_point=connection_point)
+                                      connection_point=connection_point)]
             )
             equation_object.coefficients = np.array([1.0])
             if connection_point == 0:
