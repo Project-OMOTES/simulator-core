@@ -125,7 +125,7 @@ class ProductionAssetTest(unittest.TestCase):
         """
         # Arrange
         connection_point_id = 1
-        self.asset.prev_sol[IndexCoreQuantity.discharge
+        self.asset.prev_sol[IndexCoreQuantity.mass_flow_rate
                             + connection_point_id * IndexCoreQuantity.number_core_quantities] = (
             1.0
         )
