@@ -37,7 +37,7 @@ class IndexCoreQuantity:
 
     def get_index(self, property_name: str) -> int:
         """Method to get the index of the property."""
-        return getattr(self, property_name)
+        return int(getattr(self, property_name))
 
 
 index_core_quantity = IndexCoreQuantity()
