@@ -201,7 +201,8 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.roughness = 0.001  # m
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(330.0)  # J/kg
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 290.6  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 290.6  # kg/s
 
         # act
         self.asset.update_loss_coefficient()  # act
@@ -220,7 +221,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_high_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 290.6  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 290.6  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -242,7 +244,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = -2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = -2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 1)] = (
             fluid_props.get_ie(56.8500061035156 + 273.15)
         )
@@ -265,7 +268,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -287,7 +291,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 0.0  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 0.0  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -312,7 +317,8 @@ class SolverPipeTest(unittest.TestCase):
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
@@ -328,13 +334,15 @@ class SolverPipeTest(unittest.TestCase):
         # assert
         self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
         self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.00
+            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0])
+                     - 273.15, 2), 20.00
         )  # pylint: disable=protected-access
 
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
         # arrange
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 2.906  # kg/s
         self.asset.prev_sol[index_core_quantity.get_index_property("internal_energy", 0)] \
             = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 10.0  # W/m2K
@@ -357,7 +365,8 @@ class SolverPipeTest(unittest.TestCase):
         """Test the determine_flow_direction method."""
         # arrange
         grid_size = 10
-        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] = 2.906  # kg/s
+        self.asset.prev_sol[index_core_quantity.get_index_property("mass_flow_rate", 0)] \
+            = 2.906  # kg/s
         self.asset._grid_size = grid_size  # pylint: disable=protected-access
 
         # act
