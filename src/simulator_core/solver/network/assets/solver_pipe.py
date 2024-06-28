@@ -75,7 +75,7 @@ class SolverPipe(FallType):
         self.diameter: float = diameter
         self.roughness: float = roughness
         # Calculate the area of the pipe
-        self.area: float = np.pi * self.diameter**2 / 4
+        self.area: float = np.pi * self.diameter ** 2 / 4
         # Create internal grid
         self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
 
@@ -97,7 +97,7 @@ class SolverPipe(FallType):
                     f"Property {expected_property} is not a valid property " f"of the pipe"
                 )
         # Update the area of the pipe
-        self.area = np.pi * self.diameter**2 / 4
+        self.area = np.pi * self.diameter ** 2 / 4
 
     def update_loss_coefficient(self) -> None:
         r"""Method to update the loss coefficient of the pipe.
@@ -118,18 +118,17 @@ class SolverPipe(FallType):
                                                                   connection_point=0,
                                                                   matrix=False)])
         )
-        self.loss_coefficient = (
-            self.lambda_loss
-            * (self.length / self.diameter)
-            * (1 / 2)
-            * (1 / (self.area**2 * density))
-        )
+        self.loss_coefficient = (self.lambda_loss
+                                 * (self.length / self.diameter)
+                                 * (1 / 2)
+                                 * (1 / (self.area ** 2 * density))
+                                 )
 
     # TODO: Do we want to implement a dependency on the connection point?
     def calculate_reynolds_number(
-        self,
-        mass_flow_rate: float = DEFAULT_MISSING_VALUE,
-        temperature: float = DEFAULT_MISSING_VALUE,
+            self,
+            mass_flow_rate: float = DEFAULT_MISSING_VALUE,
+            temperature: float = DEFAULT_MISSING_VALUE,
     ) -> float:
         r"""Method to calculate the Reynolds number of the flow in the pipe.
 
@@ -149,7 +148,7 @@ class SolverPipe(FallType):
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
             mass_flow_rate = self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
                                                                  connection_point=0,
-                                                                    matrix=False)]
+                                                                 matrix=False)]
         if temperature == DEFAULT_MISSING_VALUE:
             temperature = fluid_props.get_t(self.prev_sol[self.get_index_matrix(
                 property_name="internal_energy",
@@ -221,10 +220,10 @@ class SolverPipe(FallType):
         )
 
     def _colebrook_white(
-        self,
-        lambda_guess: float = 0.001,
-        convergence_limit: float = 1e-4,
-        reynolds_number: float = DEFAULT_MISSING_VALUE,
+            self,
+            lambda_guess: float = 0.001,
+            convergence_limit: float = 1e-4,
+            reynolds_number: float = DEFAULT_MISSING_VALUE,
     ) -> float:
         r"""Method to iteratively calculate the Colebrook-White friction factor.
 
@@ -243,7 +242,7 @@ class SolverPipe(FallType):
         )
 
     def _calculate_graetz_number(
-        self, temperature: float, mass_flow_rate: float = DEFAULT_MISSING_VALUE
+            self, temperature: float, mass_flow_rate: float = DEFAULT_MISSING_VALUE
     ) -> float:
         r"""Calculate the Graetz number of the flow in the pipe.
 
@@ -308,7 +307,7 @@ class SolverPipe(FallType):
         return fluid_props.get_viscosity(temperature) / thermal_diffusivity
 
     def _calculate_heat_transfer_coefficient_fluid(
-        self, temperature: float, mass_flow_rate: float
+            self, temperature: float, mass_flow_rate: float
     ) -> float:
         r"""Calculate the heat transfer coefficient of the fluid.
 
@@ -356,7 +355,7 @@ class SolverPipe(FallType):
                 nusselt_number = 1.62 * graetz_number ** (-1 / 3)
         else:
             prandtl_number = self.calculate_prandtl_number(temperature=temperature)
-            nusselt_number = 0.023 * reynolds_number**0.8 * prandtl_number**0.33
+            nusselt_number = 0.023 * reynolds_number ** 0.8 * prandtl_number ** 0.33
         # Calculate the heat transfer coefficient
         return nusselt_number * fluid_props.get_thermal_conductivity(temperature) / self.diameter
 
@@ -374,8 +373,8 @@ class SolverPipe(FallType):
         # Reset the internal energy grid
         self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
         mass_flow_rate = self.prev_sol[self.get_index_matrix(property_name="mass_flow_rate",
-                                                                 connection_point=0,
-                                                                 matrix=False)]
+                                                             connection_point=0,
+                                                             matrix=False)]
         # Determine the flow direction
         if mass_flow_rate < 0:
             # Flow from connection point 1 to connection point 0
@@ -395,7 +394,7 @@ class SolverPipe(FallType):
             end_index = self._grid_size + 1
             step = 1
             # Set the internal energy at the connection point
-            self._internal_energy_grid[0] =  self.prev_sol[self.get_index_matrix(
+            self._internal_energy_grid[0] = self.prev_sol[self.get_index_matrix(
                 property_name="internal_energy",
                 connection_point=0,
                 matrix=False)]
@@ -430,17 +429,16 @@ class SolverPipe(FallType):
         # Retrieve the temperature of the fluid
         temperature_current = fluid_props.get_t(internal_energy_current)
         # Calculate the heat loss
-        return -(
-            self.alpha_value
-            * np.pi
-            * self.diameter
-            * self.length
-            / self._grid_size
-            * (temperature_current - self.ambient_temperature)
-        )
+        return -(self.alpha_value
+                 * np.pi
+                 * self.diameter
+                 * self.length
+                 / self._grid_size
+                 * (temperature_current - self.ambient_temperature)
+                 )
 
     def _calculate_total_heat_transfer_coefficient(
-        self, temperature: float, mass_flow_rate: float
+            self, temperature: float, mass_flow_rate: float
     ) -> float:
         r"""Calculate the total heat transfer coefficient of the pipe.
 
@@ -473,10 +471,10 @@ class SolverPipe(FallType):
             return self.alpha_value
 
     def _internal_energy_steady_state_objective(
-        self,
-        internal_energy_iteration: float,
-        internal_energy: float,
-        mass_flow_rate: float,
+            self,
+            internal_energy_iteration: float,
+            internal_energy: float,
+            mass_flow_rate: float,
     ) -> float:
         r"""Root function for the internal energy steady state equation.
 
@@ -500,11 +498,9 @@ class SolverPipe(FallType):
         )
         # Return the objective function
         element_size = self.length / self._grid_size
-        objective = mass_flow_rate * (
-            internal_energy - internal_energy_iteration
-        ) - total_heat_transfer_coefficient * np.pi * self.diameter * element_size * (
-            temperature - self.ambient_temperature
-        )
+        objective = (mass_flow_rate * (internal_energy - internal_energy_iteration)
+                     - total_heat_transfer_coefficient * np.pi * self.diameter * element_size
+                     * (temperature - self.ambient_temperature))
         return float(np.array(objective).item())
 
     def _update_internal_energy_grid(self) -> float:
