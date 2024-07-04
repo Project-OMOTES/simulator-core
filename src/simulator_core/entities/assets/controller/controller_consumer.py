@@ -56,4 +56,5 @@ class ControllerConsumer(AssetControllerAbstract):
 
     def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to get the controller data for esdl object."""
-        pass
+        self.temperature_supply = esdl_asset.get_return_temperature("Out")
+        self.temperature_return = esdl_asset.get_supply_temperature("In")

@@ -218,8 +218,10 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                 ControllerConsumer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
             )
             consumers[-1].add_profile(esdl_asset.get_profile())
+            consumers[-1].set_controller_data(esdl_asset)
 
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
             sources.append(ControllerProducer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
+            sources[-1].set_controller_data(esdl_asset)
         return NetworkController(consumers, sources)
