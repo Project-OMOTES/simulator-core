@@ -1,4 +1,4 @@
-#  Copyright (c) 2023. Deltares & TNO
+#  Copyright (c) 2024. Deltares & TNO
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -19,19 +19,7 @@ import datetime
 import pandas as pd
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
-
-
-class AssetControllerAbstract:
-    """Abstract class for the asset controller."""
-
-    def __init__(self, name: str, identifier: str):
-        """Constructor for the asset controller.
-
-        :param str name: Name of the controller object.
-        :param str identifier: Unique identifier of the controller asset.
-        """
-        self.name = name
-        self.id = identifier
+from simulator_core.entities.assets.controller.controller_classes import AssetControllerAbstract
 
 
 class ControllerConsumer(AssetControllerAbstract):
@@ -64,18 +52,3 @@ class ControllerConsumer(AssetControllerAbstract):
     def add_profile(self, profile: pd.DataFrame) -> None:
         """Method to add a profile to the consumer."""
         self.profile = profile
-
-
-class ControllerSource(AssetControllerAbstract):
-    """Class to store the source for the controller."""
-
-    def __init__(self, name: str, identifier: str):
-        """Constructor for the source.
-
-        :param str name: Name of the source.
-        :param str identifier: Unique identifier of the source.
-        """
-        super().__init__(name, identifier)
-        self.temperature_return: float = DEFAULT_TEMPERATURE
-        self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
-        self.power: float = 5000000000
