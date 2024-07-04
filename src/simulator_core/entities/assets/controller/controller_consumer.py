@@ -20,6 +20,7 @@ import pandas as pd
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
 from simulator_core.entities.assets.controller.controller_classes import AssetControllerAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
 class ControllerConsumer(AssetControllerAbstract):
@@ -52,3 +53,7 @@ class ControllerConsumer(AssetControllerAbstract):
     def add_profile(self, profile: pd.DataFrame) -> None:
         """Method to add a profile to the consumer."""
         self.profile = profile
+
+    def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
+        """Method to get the controller data for esdl object."""
+        pass

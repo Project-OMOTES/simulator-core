@@ -20,17 +20,18 @@ from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_
                                                            PROPERTY_TEMPERATURE_RETURN,
                                                            PROPERTY_HEAT_DEMAND,
                                                            PROPERTY_SET_PRESSURE)
-from simulator_core.entities.assets.controller_classes import ControllerSource, ControllerConsumer
+from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from typing import List
 
 
 class NetworkController:
     """Class to store the network controller."""
 
-    def __init__(self, consumers: List[ControllerConsumer], sources: List[ControllerSource]) \
+    def __init__(self, consumers: List[ControllerConsumer], producers: List[ControllerProducer]) \
             -> None:
         """Constructor for controller for a heat network."""
-        self.sources = sources
+        self.producers = producers
         self.consumers = consumers
 
     def run_time_step(self, time: datetime.datetime) -> dict:
@@ -48,14 +49,14 @@ class NetworkController:
                                                  consumer.temperature_return,
                                              PROPERTY_TEMPERATURE_SUPPLY:
                                                  consumer.temperature_supply}
-        for source in self.sources:
+        for source in self.producers:
             controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time)
-                                           / len(self.sources),
+                                           / len(self.producers),
                                            PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
                                            PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
                                            PROPERTY_SET_PRESSURE: False}
             # setting the first source to set the pressure for now.
-            controller_input[self.sources[0].id][PROPERTY_SET_PRESSURE] = True
+            controller_input[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return controller_input
 
     def get_total_demand(self, time: datetime.datetime) -> float:
@@ -64,4 +65,4 @@ class NetworkController:
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network."""
-        return float(sum([source.power for source in self.sources]))
+        return float(sum([producer.power for producer in self.producers]))
