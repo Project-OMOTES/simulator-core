@@ -39,3 +39,9 @@ class ControllerProducer(AssetControllerAbstract):
         result = esdl_asset.get_property(
             esdl_property_name="power", default_value=self.power
         )
+        if result[1]:
+            self.power = result[0]
+        else:
+            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+        self.temperature_supply = esdl_asset.get_supply_temperature("Out")
+        self.temperature_return = esdl_asset.get_return_temperature("In")
