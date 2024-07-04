@@ -20,10 +20,9 @@ from esdl.esdl import Joint as esdl_junction
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.controller_classes import (
-    ControllerConsumer,
-    ControllerSource,
-)
+from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
@@ -222,5 +221,5 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
         sources = []
         for esdl_asset in model.get_all_assets_of_type("producer"):
-            sources.append(ControllerSource(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
+            sources.append(ControllerProducer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
         return NetworkController(consumers, sources)
