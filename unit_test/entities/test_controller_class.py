@@ -18,7 +18,8 @@ import unittest
 import pandas as pd
 from datetime import datetime
 
-from simulator_core.entities.assets.controller_classes import ControllerConsumer, ControllerSource
+from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 
 
 class ControllerTest(unittest.TestCase):
@@ -27,7 +28,7 @@ class ControllerTest(unittest.TestCase):
     def test_controller_producer(self) -> None:
         """Generic/template test for Controller."""
         # Arrange
-        producer = ControllerSource("consumer", "id")
+        producer = ControllerProducer("consumer", "id")
         # Act
 
         # Assert

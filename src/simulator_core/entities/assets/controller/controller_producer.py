@@ -17,6 +17,7 @@
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
 from simulator_core.entities.assets.controller.controller_classes import AssetControllerAbstract
+from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
 class ControllerProducer(AssetControllerAbstract):
@@ -32,3 +33,9 @@ class ControllerProducer(AssetControllerAbstract):
         self.temperature_return: float = DEFAULT_TEMPERATURE
         self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         self.power: float = 5000000000
+
+    def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
+        """Method to get the controller data for esdl object."""
+        result = esdl_asset.get_property(
+            esdl_property_name="power", default_value=self.power
+        )
