@@ -14,12 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Ates Cluster entities."""
+import faulthandler
 import unittest
 from unittest.mock import Mock
 
 from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.ates_cluster import AtesCluster
-from simulator_core.entities.assets.asset_defaults import (
+faulthandler.disable()
+from simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
+faulthandler.enable()
+from simulator_core.entities.assets.asset_defaults import (  # noqa: E402
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -29,9 +32,8 @@ from simulator_core.entities.assets.asset_defaults import (
 class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
-    # @unittest.skip("conflicting pyjnius with pytest")
     def setUp(self) -> None:
-        """Set up test case."""
+        """Set up before each test case."""
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
@@ -42,10 +44,13 @@ class AtesClusterTest(unittest.TestCase):
         )
         self.ates_cluster.set_from_junction(from_junction=self.from_junction)
         self.ates_cluster.set_to_junction(to_junction=self.to_junction)
-
+        faulthandler.disable()
         self.ates_cluster._init_rosim()
 
-    # @unittest.skip("conflicting pyjnius with pytest")
+    def tearDown(self):
+        """Clean up after each test case."""
+        faulthandler.enable()
+
     def test_injection(self) -> None:
         """Test injection to ATES."""
         # Arrange
@@ -62,7 +67,6 @@ class AtesClusterTest(unittest.TestCase):
         self.assertAlmostEqual(self.ates_cluster.temperature_supply, 353.15, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.temperature_return, 290.15, delta=0.1)
 
-    # @unittest.skip("conflicting pyjnius with pytest")
     def test_production(self) -> None:
         """Test production from ATES."""
         # Arrange
