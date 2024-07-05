@@ -117,6 +117,85 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(length, 0.0)
         self.assertFalse(property_available)
 
+    def test_get_supply_temperature_in(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("In")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_supply_temperature_out(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("Out")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_return_temperature_in(self):
+        """Test get_return_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
+
+        # Act
+        return_temperature = asset.get_return_temperature("In")
+
+        # Assert
+        self.assertEqual(return_temperature, 313.15)
+
+    def test_get_return_temperature_out(self):
+        """Test get_return_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
+
+        # Act
+        return_temperature = asset.get_return_temperature("Out")
+
+        # Assert
+        self.assertEqual(return_temperature, 313.15)
+
+    def test_get_port_type_in(self):
+        """Test get_port_type method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        port_type = asset.get_port_type("In")
+
+        # Assert
+        self.assertEqual(port_type, esdl.InPort)
+
+    def test_get_port_type_out(self):
+        """Test get_port_type method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        port_type = asset.get_port_type("Out")
+
+        # Assert
+        self.assertEqual(port_type, esdl.OutPort)
+
+    def test_get_port_type_error(self):
+        """Test get_port_type method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            asset.get_port_type("Error")
+
+        # assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception),"Port type not recognized: Error",)
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
