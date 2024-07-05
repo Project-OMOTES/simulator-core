@@ -15,7 +15,7 @@
 
 """Module containing classes to be able to interact with esdl objects."""
 import logging
-from typing import Any, Tuple
+from typing import Any, Tuple, Type
 
 import pandas as pd
 from esdl import esdl
@@ -63,7 +63,7 @@ class EsdlAssetObject:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
-                return esdl_port.carrier.supplyTemperature + 273.15
+                return get_supply_temperature(esdl_port)
         raise ValueError("No port found with type: " + port_type
                          + " for asset: " + self.esdl_asset.name)
 
@@ -71,11 +71,11 @@ class EsdlAssetObject:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
-                return esdl_port.carrier.returnTemperature + 273.15
+                return get_return_temperature(esdl_port)
         raise ValueError("No port found with type: " + port_type
                          + " for asset: " + self.esdl_asset.name)
 
-    def get_port_type(self, port_type:str) -> type:
+    def get_port_type(self, port_type: str) -> Type[esdl.Port]:
         """Get the port type of the port."""
         if port_type == "In":
             return esdl.InPort
@@ -83,3 +83,13 @@ class EsdlAssetObject:
             return esdl.OutPort
         else:
             raise ValueError("Port type not recognized: " + port_type)
+
+
+def get_return_temperature(esdl_port: esdl.Port) -> float:
+    """Get the temperature of the port."""
+    return float(esdl_port.carrier.returnTemperature) + 273.15
+
+
+def get_supply_temperature(esdl_port: esdl.Port) -> float:
+    """Get the temperature of the port."""
+    return float(esdl_port.carrier.supplyTemperature) + 273.15

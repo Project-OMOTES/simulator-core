@@ -41,23 +41,17 @@ class NetworkController:
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-
-        controller_input = {}
-        for consumer in self.consumers:
-            controller_input[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time),
-                                             PROPERTY_TEMPERATURE_RETURN:
-                                                 consumer.temperature_return,
-                                             PROPERTY_TEMPERATURE_SUPPLY:
-                                                 consumer.temperature_supply}
-        for source in self.producers:
-            controller_input[source.id] = {PROPERTY_HEAT_DEMAND: self.get_total_demand(time)
-                                           / len(self.producers),
-                                           PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                                           PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
-                                           PROPERTY_SET_PRESSURE: False}
-            # setting the first source to set the pressure for now.
-            controller_input[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
-        return controller_input
+        if self.get_total_supply() <= self.get_total_demand(time):
+            # TODO need to pass a message that power is insufficient and
+            #  is capped to the max power available
+            producers = self._set_producers_to_max()
+            consumers = self._set_consumer_capped(time)
+        else:
+            # need to cap the power of the source based on priority. Consumers can meet their demand
+            consumers = self._set_consumer_to_demand(time)
+            producers = self._set_producers_based_on_priority(time)
+        producers.update(consumers)
+        return producers
 
     def get_total_demand(self, time: datetime.datetime) -> float:
         """Method to get the total heat demand of the network."""
@@ -66,3 +60,74 @@ class NetworkController:
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network."""
         return float(sum([producer.power for producer in self.producers]))
+
+    def get_total_supply_priority(self, priority: int) -> float:
+        """Method to get the total  supply of the network for all sources with a certain priority.
+
+        :param int priority: The priority of the sources.
+        """
+        return float(sum([producer.power for producer in self.producers
+                          if producer.priority == priority]))
+
+    def _set_producers_to_max(self) -> dict:
+        """Method to set the producers to the max power."""
+        producers = {}
+        for source in self.producers:
+            producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power,
+                                    PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
+                                    PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                                    PROPERTY_SET_PRESSURE: False}
+        # setting the first producer to set the pressure.
+        producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
+        return producers
+
+    def _set_consumer_capped(self, time: datetime.datetime) -> dict:
+        """Method to set the consumer to the capped to the max avaialbl power of the producers."""
+        consumers = {}
+        factor = self.get_total_supply() / self.get_total_demand(time)
+        for consumer in self.consumers:
+            consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
+                                      PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
+                                      PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
+        return consumers
+
+    def _set_consumer_to_demand(self, time: datetime.datetime) -> dict:
+        """Method to set the consumer to the demand."""
+        consumers = {}
+        for consumer in self.consumers:
+            consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time),
+                                      PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
+                                      PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
+        return consumers
+
+    def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
+        """Method to set the producers based on priority."""
+        producers = {}
+        total_demand = self.get_total_demand(time)
+        if total_demand > self.get_total_supply():
+            raise ValueError("Total demand is higher than total supply. "
+                             "Cannot set producers based on priority.")
+        priority = 0
+        while total_demand > 0:
+            priority += 1
+            total_supply = self.get_total_supply_priority(priority)
+            if total_supply > total_demand:
+                factor = total_demand / total_supply
+                for source in self.producers:
+                    if source.priority == priority:
+                        producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power * factor,
+                                                PROPERTY_TEMPERATURE_RETURN:
+                                                    source.temperature_return,
+                                                PROPERTY_TEMPERATURE_SUPPLY:
+                                                    source.temperature_supply}
+                total_demand = 0
+            else:
+                for source in self.producers:
+                    if source.priority == priority:
+                        producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power,
+                                                PROPERTY_TEMPERATURE_RETURN:
+                                                    source.temperature_return,
+                                                PROPERTY_TEMPERATURE_SUPPLY:
+                                                    source.temperature_supply}
+                total_demand -= total_supply
+        return producers
