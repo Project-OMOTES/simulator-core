@@ -51,7 +51,6 @@ class AssetAbstract(ABC):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pnadapipes network object to register asset to.
         """
         self.from_junction = None
         self.to_junction: Junction = None
