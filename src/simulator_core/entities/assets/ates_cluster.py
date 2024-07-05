@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """atesCluster class."""
-import uuid
 from typing import Dict
 import os
 import math
@@ -79,7 +78,7 @@ class AtesCluster(AssetAbstract):
         self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.thermal_power_allocation = 0
         self.mass_flowrate = 0
-        self.solver_asset = ProductionAsset(uuid.uuid4())
+        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         # ATES default properties
         self.aquifer_depth = 300.0
         self.aquifer_thickness = 45.0
