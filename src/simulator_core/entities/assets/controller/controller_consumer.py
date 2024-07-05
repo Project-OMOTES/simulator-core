@@ -16,6 +16,7 @@
 
 import datetime
 
+import numpy as np
 import pandas as pd
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
@@ -37,6 +38,7 @@ class ControllerConsumer(AssetControllerAbstract):
         self.temperature_supply = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         self.profile: pd.DataFrame = pd.DataFrame()
         self.start_index = 0
+        self.max_power: float = np.inf
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -47,7 +49,12 @@ class ControllerConsumer(AssetControllerAbstract):
         for index in range(self.start_index, len(self.profile)):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
                 self.start_index = index
-                return float(self.profile["values"][index])
+                if self.profile["values"][index] > self.max_power:
+                    # TODO need to pass a message that power is insufficient and is
+                    #  capped to the max power available
+                    return self.max_power
+                else:
+                    return float(self.profile["values"][index])
         return 0
 
     def add_profile(self, profile: pd.DataFrame) -> None:
@@ -58,3 +65,6 @@ class ControllerConsumer(AssetControllerAbstract):
         """Method to get the controller data for esdl object."""
         self.temperature_supply = esdl_asset.get_return_temperature("Out")
         self.temperature_return = esdl_asset.get_supply_temperature("In")
+        result = esdl_asset.get_property("power", np.inf)
+        self.max_power = result[0]
+
