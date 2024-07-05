@@ -47,9 +47,10 @@ class Plotting:
             columns=['asset_id', 'asset_name', 'geometry', 'mass_flow', 'pressure_in',
                      'pressure_out', 'temperature_in', 'temperature_out'], crs="EPSG:4326")
 
-        assets = self.get_assets_by_asset_type(esdl.Pipe)
+        assets = self.esdl_object.get_all_assets_of_type('pipe')
 
-        for asset in assets:
+        for asset_object in assets:
+            asset = asset_object.esdl_asset
             if isinstance(asset.geometry, esdl.esdl.Line):
                 coor_pipe = []
                 for point in asset.geometry.point:
@@ -102,11 +103,3 @@ class Plotting:
         fig = px.line_mapbox(lat=lats, lon=lons,
                              hover_name=names, zoom=14, mapbox_style="carto-positron")
         fig.show()
-
-    def get_assets_by_asset_type(self, asset_type: esdl) -> list[esdl.Asset]:
-        """Function to get list of esdl assets based on asset type."""
-        assets = []
-        for item in self.esdl_object.energy_system_handler.energy_system.eAllContents():
-            if isinstance(item, asset_type):
-                assets.append(item)
-        return assets
