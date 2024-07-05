@@ -20,9 +20,9 @@ from unittest.mock import Mock
 
 from simulator_core.entities.assets.junction import Junction
 faulthandler.disable()
-from simulator_core.entities.assets.ates_cluster import AtesCluster
+from simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
 faulthandler.enable()
-from simulator_core.entities.assets.asset_defaults import (
+from simulator_core.entities.assets.asset_defaults import (  # noqa: E402
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -33,7 +33,7 @@ class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
     def setUp(self) -> None:
-        """Set up test case."""
+        """Set up before each test case."""
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
@@ -48,6 +48,7 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster._init_rosim()
 
     def tearDown(self):
+        """Clean up after each test case."""
         faulthandler.enable()
 
     def test_injection(self) -> None:
