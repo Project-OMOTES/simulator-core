@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the production asset class."""
-import uuid
-
 import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
@@ -60,7 +58,8 @@ class ProductionAsset(FallType):
 
     def __init__(
         self,
-        name: uuid.UUID,
+        name: str,
+        _id: str,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -73,7 +72,8 @@ class ProductionAsset(FallType):
 
         Parameters
         ----------
-        name : uuid.UUID The unique identifier of the asset.
+        name : str The name of the asset.
+        _id : str The unique identifier of the asset.
         number_of_unknowns : int, optional
             The number of unknown variables for the asset. The default is 6, which corresponds to
             the mass flow rate, pressure, and temperature at each connection point.
@@ -87,6 +87,7 @@ class ProductionAsset(FallType):
 
         super().__init__(
             name=name,
+            _id=_id,
             supply_temperature=supply_temperature,
             heat_supplied=heat_supplied,
             loss_coefficient=loss_coefficient,
