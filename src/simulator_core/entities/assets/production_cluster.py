@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-import uuid
 from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -67,7 +66,6 @@ class ProductionCluster(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id)
         self.height_m = DEFAULT_NODE_HEIGHT
@@ -81,7 +79,8 @@ class ProductionCluster(AssetAbstract):
         # Controlled mass flow
         self.controlled_mass_flow = None
         self.solver_asset = ProductionAsset(
-            name=uuid.uuid4(),
+            name=self.name,
+            _id=self.asset_id,
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )

@@ -50,6 +50,9 @@ dev = [
     "build ~= 1.0.3",
     "sphinx==7.2.6",
     "furo==2023.9.10",
+    "geopandas==0.14.3",
+    "plotly==5.21.0",
+    "shapely==2.0.4"
 ]
 
 [project.urls]

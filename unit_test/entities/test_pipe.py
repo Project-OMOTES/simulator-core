@@ -44,9 +44,9 @@ class PipeTest(unittest.TestCase):
         pipe.to_junction = self.to_junction
 
         # Assert
-        assert isinstance(pipe, Pipe)
-        assert pipe.name == "pipe"
-        assert pipe.asset_id == "pipe_id"
+        self.assertIsInstance(pipe, Pipe)
+        self.assertEqual(pipe.name, "pipe")
+        self.assertEqual(pipe.asset_id, "pipe_id")
 
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
@@ -58,8 +58,8 @@ class PipeTest(unittest.TestCase):
         # Act
 
         # Assert
-        assert pipe.solver_asset.length, pipe.length
-        assert pipe.solver_asset.roughness == pipe.roughness
+        self.assertEqual(pipe.solver_asset.length, pipe.length)
+        self.assertEqual(pipe.solver_asset.roughness, pipe.roughness)
 
     def test_pipe_get_property_diameter(self):
         """Evaluate the get property diameter method to retrieve diameters."""
@@ -73,7 +73,7 @@ class PipeTest(unittest.TestCase):
         # Act
 
         # Assert
-        assert pipe._get_diameter(esdl_asset=esdl_asset_mock) == 1.0
+        self.assertEqual(pipe._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
 
     def test_pipe_get_property_diameter_failed(self):
         """Evaluate failure to retrieve diameter from ESDL asset."""
@@ -110,4 +110,4 @@ class PipeTest(unittest.TestCase):
         alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)  # act
 
         # Assert
-        assert alpha_value == 0.8901927763663371
+        self.assertEqual(alpha_value, 0.8901927763663371)

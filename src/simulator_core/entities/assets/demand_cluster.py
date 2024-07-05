@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """demandCluster class."""
-import uuid
 from typing import Dict
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -50,7 +49,6 @@ class DemandCluster(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id)
 
@@ -61,7 +59,7 @@ class DemandCluster(AssetAbstract):
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0
-        self.solver_asset = ProductionAsset(uuid.uuid4())
+        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         # Output list
         self.output: list = []
 

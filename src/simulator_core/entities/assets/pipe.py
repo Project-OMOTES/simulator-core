@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing pipe class."""
-import uuid
 from typing import Dict, List
 
 import numpy as np
@@ -62,7 +61,6 @@ class Pipe(AssetAbstract):
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
-        :param PandapipesNet pandapipe_net: Pandapipes network object to register asset to.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id)
         # Initialize the default values of the pipe
@@ -76,7 +74,8 @@ class Pipe(AssetAbstract):
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
         self.solver_asset = SolverPipe(
-            uuid.uuid4(), length=self.length, diameter=self.diameter, roughness=self.roughness
+            name=self.name, _id=self.asset_id, length=self.length,
+            diameter=self.diameter, roughness=self.roughness
         )
         self.output = []
 
