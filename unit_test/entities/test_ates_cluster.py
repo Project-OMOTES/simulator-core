@@ -14,11 +14,14 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Ates Cluster entities."""
+import faulthandler
 import unittest
 from unittest.mock import Mock
 
 from simulator_core.entities.assets.junction import Junction
+faulthandler.disable()
 from simulator_core.entities.assets.ates_cluster import AtesCluster
+faulthandler.enable()
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
@@ -29,7 +32,6 @@ from simulator_core.entities.assets.asset_defaults import (
 class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
-    # @unittest.skip("conflicting pyjnius with pytest")
     def setUp(self) -> None:
         """Set up test case."""
         # Create two junctions
@@ -42,10 +44,12 @@ class AtesClusterTest(unittest.TestCase):
         )
         self.ates_cluster.set_from_junction(from_junction=self.from_junction)
         self.ates_cluster.set_to_junction(to_junction=self.to_junction)
-
+        faulthandler.disable()
         self.ates_cluster._init_rosim()
 
-    # @unittest.skip("conflicting pyjnius with pytest")
+    def tearDown(self):
+        faulthandler.enable()
+
     def test_injection(self) -> None:
         """Test injection to ATES."""
         # Arrange
@@ -62,7 +66,6 @@ class AtesClusterTest(unittest.TestCase):
         self.assertAlmostEqual(self.ates_cluster.temperature_supply, 353.15, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.temperature_return, 290.15, delta=0.1)
 
-    # @unittest.skip("conflicting pyjnius with pytest")
     def test_production(self) -> None:
         """Test production from ATES."""
         # Arrange
