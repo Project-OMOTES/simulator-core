@@ -103,11 +103,19 @@ class NetworkController:
     def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
         """Method to set the producers based on priority."""
         producers = {}
+        for producer in self.producers:
+            producers[producer.id] = {PROPERTY_HEAT_DEMAND: 0.0,
+                                      PROPERTY_TEMPERATURE_RETURN:
+                                          producer.temperature_return,
+                                      PROPERTY_TEMPERATURE_SUPPLY:
+                                          producer.temperature_supply,
+                                      PROPERTY_SET_PRESSURE: False}
         total_demand = self.get_total_demand(time)
         if total_demand > self.get_total_supply():
             raise ValueError("Total demand is higher than total supply. "
                              "Cannot set producers based on priority.")
         priority = 0
+        set_pressure = True
         while total_demand > 0:
             priority += 1
             total_supply = self.get_total_supply_priority(priority)
@@ -115,19 +123,14 @@ class NetworkController:
                 factor = total_demand / total_supply
                 for source in self.producers:
                     if source.priority == priority:
-                        producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power * factor,
-                                                PROPERTY_TEMPERATURE_RETURN:
-                                                    source.temperature_return,
-                                                PROPERTY_TEMPERATURE_SUPPLY:
-                                                    source.temperature_supply}
+                        producers[source.id][PROPERTY_HEAT_DEMAND] = source.power * factor
+                        if set_pressure:
+                            producers[source.id][PROPERTY_SET_PRESSURE] = True
+                            set_pressure = False
                 total_demand = 0
             else:
                 for source in self.producers:
                     if source.priority == priority:
-                        producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power,
-                                                PROPERTY_TEMPERATURE_RETURN:
-                                                    source.temperature_return,
-                                                PROPERTY_TEMPERATURE_SUPPLY:
-                                                    source.temperature_supply}
+                        producers[source.id][PROPERTY_HEAT_DEMAND] = source.power
                 total_demand -= total_supply
         return producers
