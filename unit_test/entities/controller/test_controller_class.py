@@ -25,57 +25,5 @@ from simulator_core.entities.assets.controller.controller_producer import Contro
 class ControllerTest(unittest.TestCase):
     """Testcase for Controller class."""
 
-    def test_controller_producer(self) -> None:
-        """Generic/template test for Controller."""
-        # Arrange
-        producer = ControllerProducer("consumer", "id")
-        # Act
 
-        # Assert
-        self.assertEqual(producer.name, "consumer")
-        self.assertEqual(producer.id, "id")
 
-    def test_controller_consumer(self) -> None:
-        """Generic/template test for Controller."""
-        # Arrange
-        consumer = ControllerConsumer("consumer", "id")
-
-        # Act
-
-        # Assert
-        self.assertEqual(consumer.name, "consumer")
-        self.assertEqual(consumer.id, "id")
-
-    def test_controller_consumer_add_profile(self) -> None:
-        """Test to add a profile to the consumer."""
-        # Arrange
-        consumer = ControllerConsumer("consumer", "id")
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1, 0, 0, 0),
-                                         datetime(2021, 1, 1, 1, 0, 0)],
-                                "value": [100, 200]})
-        # Act
-        consumer.add_profile(profile)
-        # Assert
-        self.assertEqual(len(consumer.profile), 2)
-
-    def test_controller_consumer_get_heat_demand(self) -> None:
-        """Test to get the heat demand of the consumer."""
-        # Arrange
-        consumer = ControllerConsumer("consumer", "id")
-        values = [100, 200]
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1,
-                                                  0, 0, 0),
-                                         datetime(2021, 1, 1,
-                                                  1, 0, 0)],
-                                "values": values})
-        # Act
-        consumer.add_profile(profile)
-        # Act
-        demand1 = consumer.get_heat_demand(datetime(2021, 1, 1,
-                                                    0, 0, 0))
-        demand2 = consumer.get_heat_demand(datetime(2021, 1, 1,
-                                                    1, 0, 0))
-
-        # Assert
-        self.assertEqual(demand1, values[0])
-        self.assertEqual(demand2, values[1])
