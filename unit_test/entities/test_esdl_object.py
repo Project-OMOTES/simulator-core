@@ -195,7 +195,8 @@ class EsdlObjectTest(unittest.TestCase):
         # assert
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(
-            str(cm.exception),"Port type not recognized: Error",)
+            str(cm.exception), "Port type not recognized: Error",)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
