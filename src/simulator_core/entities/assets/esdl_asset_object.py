@@ -78,9 +78,9 @@ class EsdlAssetObject:
     def get_port_type(self, port_type: str) -> Type[esdl.Port]:
         """Get the port type of the port."""
         if port_type == "In":
-            return esdl.InPort
+            return esdl.InPort  # type: ignore [no-any-return]
         elif port_type == "Out":
-            return esdl.OutPort
+            return esdl.OutPort  # type: ignore [no-any-return]
         else:
             raise ValueError("Port type not recognized: " + port_type)
 
