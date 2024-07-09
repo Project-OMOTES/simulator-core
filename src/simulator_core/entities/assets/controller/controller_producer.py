@@ -32,8 +32,8 @@ class ControllerProducer(AssetControllerAbstract):
         super().__init__(name, identifier)
         self.temperature_return: float = DEFAULT_TEMPERATURE
         self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
-        self.power: float = 5000000000
-        self.priority: int = 0
+        self.power: float = 1000
+        self.priority: int = 1
 
     def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to get the controller data for esdl object."""

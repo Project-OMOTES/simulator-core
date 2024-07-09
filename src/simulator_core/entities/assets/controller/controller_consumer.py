@@ -66,5 +66,8 @@ class ControllerConsumer(AssetControllerAbstract):
         self.temperature_supply = esdl_asset.get_return_temperature("Out")
         self.temperature_return = esdl_asset.get_supply_temperature("In")
         result = esdl_asset.get_property("power", np.inf)
-        self.max_power = result[0]
+        if result[0] == 0:
+            self.max_power = np.inf
+        elif result[1]:
+            self.max_power = result[0]
 
