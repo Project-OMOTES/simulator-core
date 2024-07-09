@@ -70,4 +70,3 @@ class ControllerConsumer(AssetControllerAbstract):
             self.max_power = np.inf
         elif result[1]:
             self.max_power = result[0]
-
