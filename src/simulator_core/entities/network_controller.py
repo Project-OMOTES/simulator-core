@@ -83,33 +83,21 @@ class NetworkController:
 
     def _set_consumer_capped(self, time: datetime.datetime) -> dict:
         """Method to set the consumer to the capped to the max avaialbl power of the producers."""
-        consumers = {}
         factor = self.get_total_supply() / self.get_total_demand(time)
+        return self._set_consumer_to_demand(time=time, factor=factor)
+
+    def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:
+        """Method to set the consumer to the demand."""
+        consumers = {}
         for consumer in self.consumers:
             consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
                                       PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
                                       PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
         return consumers
 
-    def _set_consumer_to_demand(self, time: datetime.datetime) -> dict:
-        """Method to set the consumer to the demand."""
-        consumers = {}
-        for consumer in self.consumers:
-            consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time),
-                                      PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
-                                      PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
-        return consumers
-
     def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
         """Method to set the producers based on priority."""
-        producers = {}
-        for producer in self.producers:
-            producers[producer.id] = {PROPERTY_HEAT_DEMAND: 0.0,
-                                      PROPERTY_TEMPERATURE_RETURN:
-                                          producer.temperature_return,
-                                      PROPERTY_TEMPERATURE_SUPPLY:
-                                          producer.temperature_supply,
-                                      PROPERTY_SET_PRESSURE: False}
+        producers = self._set_producers_to_max()
         total_demand = self.get_total_demand(time)
         if total_demand > self.get_total_supply():
             raise ValueError("Total demand is higher than total supply. "
