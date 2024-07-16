@@ -8,7 +8,7 @@ As unknown the following quantities are solved:
 #. Total pressure [Pa]
 #. Specific internal energy [J/kg]
 
-The later is depending on the temperature and specifies the amount of energy needed to change the
+The latter is depending on the temperature and specifies the amount of energy needed to change the
 temperature from one temperature to another. Basically it is the specific heat of a fluid integrated
 over temperature.
 These quantities are solved for all the connect point of components, but also for all the nodes
