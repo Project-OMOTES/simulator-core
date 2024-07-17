@@ -109,10 +109,8 @@ class AssetAbstract(ABC):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         The output of the asset is a list with a dictionary for each port
-        with the following keys:
-        - PROPERTY_TEMPERATURE: The temperature of the asset.
-        - PROPERTY_PRESSURE: The pressure of the asset.
-        - PROPERTY_MASSFLOW: The mass flow rate of the asset.
+        of the asset. Teh basic properties mass flow rate, pressure and temperature are stored.
+        All assets can add their own properties to the dictionary.
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {
