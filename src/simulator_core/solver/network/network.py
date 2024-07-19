@@ -18,6 +18,7 @@ import uuid
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.fall_type import FallType
+from simulator_core.solver.network.assets.heat_pump import HeatPumpAsset
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
@@ -32,6 +33,7 @@ class Network:
         "Fall": FallType,
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
+        "HeatPump": HeatPumpAsset,
     }
 
     def __init__(self) -> None:
@@ -378,7 +380,7 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset_id=asset).matrix_index
             nou = self.get_asset(asset_id=asset).number_of_unknowns
-            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou]
+            self.get_asset(asset_id=asset).prev_sol = solution[index : index + nou]
 
     def set_result_node(self, solution: list[float]) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -389,7 +391,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node_id=node).matrix_index
             nou = self.get_node(node_id=node).number_of_unknowns
-            self.get_node(node_id=node).prev_sol = solution[index: index + nou]
+            self.get_node(node_id=node).prev_sol = solution[index : index + nou]
 
     def print_result(self) -> None:
         """Method to print the result of the network."""
