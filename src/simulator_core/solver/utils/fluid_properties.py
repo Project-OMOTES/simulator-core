@@ -77,7 +77,7 @@ class FluidProperties:
                 self.visc.append(float(row[3]))
                 self.therm_cond.append(float(row[4]))
 
-        self.IE = [0.0]
+        self.IE = [10.0]
         for i in range(1, len(self.T)):
             self.IE.append(
                 self.IE[-1] + (self.cp[i - 1] + self.cp[i]) / 2 * (self.T[i] - self.T[i - 1])
