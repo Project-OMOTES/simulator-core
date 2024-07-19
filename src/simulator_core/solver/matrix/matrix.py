@@ -13,10 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
-import numpy as np
 import csv
+
+import numpy as np
+
 from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.matrix.utility import absolute_difference, relative_difference
+from simulator_core.solver.matrix.utility import (
+    absolute_difference,
+    relative_difference,
+)
 
 
 class Matrix:
@@ -59,7 +64,9 @@ class Matrix:
         self.mat[row] = equation_object.to_list(self.num_unknowns)
         self.rhs[row] = equation_object.rhs
 
-    def solve(self, equations: list[EquationObject], dumb: bool = False) -> list[float]:
+    def solve(
+        self, equations: list[EquationObject], dumb: bool = False, file_name: str = "dump.csv"
+    ) -> list[float]:
         """Method to solve the system of equation given in the matrix.
 
         Solves the system of equations and returns the solution. The numpy linalg
@@ -73,7 +80,7 @@ class Matrix:
         for equation in equations:
             self.add_equation(equation)
         if dumb:
-            self.dump_matrix()
+            self.dump_matrix(file_name=file_name)
         self.sol_old = self.sol_new
         a = np.array(self.mat)
         b = np.array(self.rhs)
@@ -90,9 +97,11 @@ class Matrix:
         if self.num_unknowns == 0:
             raise ValueError("No unknowns have been added to the matrix.")
         rel_dif = max(
-            [relative_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
+            [relative_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)]
+        )
         abs_dif = max(
-            [absolute_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)])
+            [absolute_difference(old, new) for old, new in zip(self.sol_old, self.sol_new)]
+        )
         return rel_dif < self.relative_convergence or abs_dif < self.absolute_convergence
 
     def get_solution(self, index: int, number_of_unknowns: int) -> list[float]:
@@ -107,15 +116,15 @@ class Matrix:
         :return: list with teh solution
         """
         #  TODO add checks if the index and number of unknowns are within the range of the solution.
-        return self.sol_new[index:index + number_of_unknowns]
+        return self.sol_new[index : index + number_of_unknowns]
 
-    def dump_matrix(self, file_name: str = 'dump.csv') -> None:
+    def dump_matrix(self, file_name: str = "dump.csv") -> None:
         """Method to dump the matrix to a csv file.
 
         :param str file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
-        with open(file_name, 'w', newline='') as f:
+        with open(file_name, "w", newline="") as f:
             write = csv.writer(f)
             for row, rhs in zip(self.mat, self.rhs):
                 write.writerow(row + [rhs])
