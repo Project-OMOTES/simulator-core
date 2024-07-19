@@ -52,7 +52,9 @@ class AssetAbstract(ABC):
     connected_ports: List[str]
     """List of ids of the connected ports."""
     solver_asset: BaseAsset
+    asset_type = "asset_abstract"
 
+ 
     def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.
 
@@ -68,6 +70,10 @@ class AssetAbstract(ABC):
         self.outputs = []
         for i in range(len(self.connected_ports)):
             self.outputs.append([])
+
+    def __repr__(self) -> str:
+        """Method to print string with the name of the asset."""
+        return self.__class__.__name__ + " " + self.name
 
     @abstractmethod
     def set_setpoints(self, setpoints: Dict) -> None:

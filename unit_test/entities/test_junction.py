@@ -32,7 +32,7 @@ class JunctionTest(unittest.TestCase):
         from_junction = Junction(node, name="from_junction")  # act
 
         # Assert
-        assert isinstance(from_junction, Junction)
-        assert from_junction.name == "from_junction"
-        assert from_junction.height_m == DEFAULT_NODE_HEIGHT
-        assert from_junction.pn_bar == DEFAULT_PRESSURE
+        self.assertIsInstance(from_junction, Junction)
+        self.assertEqual(from_junction.name, "from_junction")
+        self.assertEqual(from_junction.height_m, DEFAULT_NODE_HEIGHT)
+        self.assertEqual(from_junction.pn_bar, DEFAULT_PRESSURE)

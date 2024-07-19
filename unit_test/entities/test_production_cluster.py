@@ -58,9 +58,9 @@ class ProductionClusterTest(unittest.TestCase):
         # Act
 
         # Assert
-        assert isinstance(self.production_cluster, ProductionCluster)
-        assert self.production_cluster.name == "production_cluster"
-        assert self.production_cluster.asset_id == "production_cluster_id"
+        self.assertIsInstance(self.production_cluster, ProductionCluster)
+        self.assertEqual(self.production_cluster.name, "production_cluster")
+        self.assertEqual(self.production_cluster.asset_id, "production_cluster_id")
 
     def test_production_cluster_set_setpoints(self) -> None:
         """Test setting setpoints of a production cluster."""
@@ -81,17 +81,13 @@ class ProductionClusterTest(unittest.TestCase):
         )
 
         # Assert
-        assert self.production_cluster.temperature_supply == 353.15
-        assert self.production_cluster.temperature_return == 333.15
-        assert self.production_cluster.controlled_mass_flow == mass_flow
-        assert (
-            self.production_cluster.solver_asset.mass_flow_rate_set_point
-            == self.production_cluster.controlled_mass_flow
-        )
-        assert (
-            self.production_cluster.solver_asset.pre_scribe_mass_flow
-            is not setpoints[PROPERTY_SET_PRESSURE]
-        )
+        self.assertEqual(self.production_cluster.temperature_supply, 353.15)
+        self.assertEqual(self.production_cluster.temperature_return, 333.15)
+        self.assertEqual(self.production_cluster.controlled_mass_flow, mass_flow)
+        self.assertEqual(self.production_cluster.solver_asset.mass_flow_rate_set_point,
+                         self.production_cluster.controlled_mass_flow)
+        self.assertNotEquals(self.production_cluster.solver_asset.pre_scribe_mass_flow,
+                             setpoints[PROPERTY_SET_PRESSURE])
 
     def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
@@ -158,10 +154,11 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        assert self.production_cluster.control_mass_flow is not setpoints[PROPERTY_SET_PRESSURE]
-        assert (
-            self.production_cluster.solver_asset.pre_scribe_mass_flow
-            is not setpoints[PROPERTY_SET_PRESSURE]
+        self.assertNotEqual(self.production_cluster.control_mass_flow,
+                            setpoints[PROPERTY_SET_PRESSURE])
+        self.assertNotEqual(
+            self.production_cluster.solver_asset.pre_scribe_mass_flow,
+            setpoints[PROPERTY_SET_PRESSURE]
         )
 
     def test_production_cluster_set_pressure_supply(self) -> None:
@@ -173,8 +170,8 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_pressure_supply(pressure_supply=pressure_supply)
 
         # Assert
-        assert self.production_cluster.pressure_supply == pressure_supply
-        assert self.production_cluster.solver_asset.set_pressure == pressure_supply
+        self.assertEqual(self.production_cluster.pressure_supply, pressure_supply)
+        self.assertEqual(self.production_cluster.solver_asset.set_pressure, pressure_supply)
 
     def test_production_cluster_set_pressure_supply_negative(self) -> None:
         """Test raise ValueError with negative pressure."""
@@ -204,10 +201,10 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.write_standard_output()
 
         # Assert
-        assert len(self.production_cluster.outputs) == len(self.production_cluster.connected_ports)
-        assert (len(self.production_cluster.outputs[0]) == 1)
-        assert self.production_cluster.outputs[0][0] == {
+        self.assertEqual(len(self.production_cluster.outputs), len(self.production_cluster.connected_ports))
+        self.assertEqual(len(self.production_cluster.outputs[0]), 1)
+        self.assertEqual(self.production_cluster.outputs[0][0], {
             PROPERTY_TEMPERATURE: 333.15,
             PROPERTY_MASSFLOW: 1e6,
             PROPERTY_PRESSURE: 2e5,
-        }
+        })

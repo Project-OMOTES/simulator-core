@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Fall type class."""
-import uuid
-
 import numpy as np
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
@@ -55,7 +53,8 @@ class FallType(BaseAsset):
 
     def __init__(
         self,
-        name: uuid.UUID,
+        name: str,
+        _id: str,
         supply_temperature: float = 293.15,
         heat_supplied: float = 0.0,
         loss_coefficient: float = 1.0,
@@ -65,8 +64,8 @@ class FallType(BaseAsset):
 
         Parameters
         ----------
-        name : uuid.UUID
-            The unique identifier of the asset.
+        name : str The name of the asset.
+        _id : str The unique identifier of the asset.
         number_of_unknowns : int, optional
             The number of unknown variables for the asset. The default is 6, which corresponds
             to the mass flow rate, pressure, and temperature at each connection point.
@@ -76,6 +75,7 @@ class FallType(BaseAsset):
         """
         super().__init__(
             name=name,
+            _id=_id,
             number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,
@@ -185,13 +185,12 @@ class FallType(BaseAsset):
     def add_internal_pressure_loss_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the pressure loss equation for the asset.
 
-         The equation is:
-
+        The equation is:
         - Pressure at inlet - Pressure at outlet - 2 * Loss coefficient * Mass flow rate *
         abs(Mass flow rate) = 0
         :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side value
-            of the equation.
+        An EquationObject that contains the indices, coefficients, and right-hand side value
+        of the equation.
         """
         equation_object = EquationObject()
         equation_object.indices = np.array(
