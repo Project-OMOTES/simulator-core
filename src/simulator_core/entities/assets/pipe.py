@@ -49,13 +49,14 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
+
     def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param List[str] port_ids: List of ids of the connected ports.
-       """
+        """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         # Initialize the default values of the pipe
         self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient

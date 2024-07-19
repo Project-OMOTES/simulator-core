@@ -201,7 +201,8 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.write_standard_output()
 
         # Assert
-        self.assertEqual(len(self.production_cluster.outputs), len(self.production_cluster.connected_ports))
+        self.assertEqual(len(self.production_cluster.outputs), 
+                         len(self.production_cluster.connected_ports))
         self.assertEqual(len(self.production_cluster.outputs[0]), 1)
         self.assertEqual(self.production_cluster.outputs[0][0], {
             PROPERTY_TEMPERATURE: 333.15,

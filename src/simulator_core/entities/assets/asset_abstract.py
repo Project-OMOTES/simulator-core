@@ -54,7 +54,7 @@ class AssetAbstract(ABC):
     solver_asset: BaseAsset
     asset_type = "asset_abstract"
 
- 
+
     def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.
 
