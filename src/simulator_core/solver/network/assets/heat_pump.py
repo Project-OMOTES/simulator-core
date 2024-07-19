@@ -140,6 +140,8 @@ class HeatPumpAsset(BaseAsset):
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
         # Define the pressure set point for the asset
         self.pressure_set_point = pressure_set_point
+        # Define the direction boolean
+        self._direction_boolean = None
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the asset.
@@ -160,6 +162,8 @@ class HeatPumpAsset(BaseAsset):
         # Check if the number of unknowns is 12
         if self.number_of_unknowns != 12:
             raise ValueError("The number of unknowns must be 12!")
+        # Set the direction boolean
+        self._direction_boolean = self._set_direction_boolean()
         # Add the equations for the asset
         equations = [
             *[self.add_press_to_node_equation(connection_point=i) for i in range(4)],  # 4 equations
@@ -170,6 +174,33 @@ class HeatPumpAsset(BaseAsset):
             self.add_heat_pump_energy_equation(),  # 1 equation
         ]
         return equations
+
+    def _set_direction_boolean(self) -> bool | None:
+        """Returns a boolean that indicates the direction of the flow.
+
+        The flow is positive when the mass flow rate at connection point 0 is positive.
+
+        :return: bool
+            A boolean that indicates the direction of the flow.
+        """
+        # if self.prev_sol[IndexEnum.discharge] < 0:
+        #     return True
+        # elif self.prev_sol[IndexEnum.discharge] > 0:
+        #     return False
+        # else:
+        #     return None
+        if self.supply_temperature_primary < self.supply_temperature_secondary:
+            if self.prev_sol[IndexEnum.discharge + 0 * NUMBER_CORE_QUANTITIES] != 0:
+                return True
+            else:
+                return None
+        elif self.supply_temperature_primary > self.supply_temperature_secondary:
+            if self.prev_sol[IndexEnum.discharge + 3 * NUMBER_CORE_QUANTITIES] != 0:
+                return False
+            else:
+                return None
+        else:
+            return None
 
     def add_internal_energy_equations(self) -> List[EquationObject]:
         """Adds the internal energy equations for the asset.
@@ -189,15 +220,21 @@ class HeatPumpAsset(BaseAsset):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        if self.prev_sol[IndexEnum.discharge] < 0:
-            connection_point_1 = 0
-            connection_point_2 = 2
-        elif self.prev_sol[IndexEnum.discharge] > 0:
-            connection_point_1 = 1
-            connection_point_2 = 3
-        else:
-            connection_point_1 = 0
-            connection_point_2 = 2
+        connection_point_1 = 0
+        connection_point_2 = 2
+        # if self._direction_boolean is True:  # self.prev_sol[IndexEnum.discharge] < 0:
+        #     connection_point_1 = 0
+        #     connection_point_2 = 2
+        # elif self._direction_boolean is False:  # self.prev_sol[IndexEnum.discharge] > 0:
+        #     connection_point_1 = 1
+        #     connection_point_2 = 3
+        # else:
+        #     if self.supply_temperature_primary < self.supply_temperature_secondary:
+        #         connection_point_1 = 0
+        #         connection_point_2 = 2
+        #     else:
+        #         connection_point_1 = 1
+        #         connection_point_2 = 3
         return [
             self.add_temp_to_node_equation(connection_point=connection_point_1),
             self.add_temp_to_node_equation(connection_point=connection_point_2),
@@ -224,15 +261,21 @@ class HeatPumpAsset(BaseAsset):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        if self.prev_sol[IndexEnum.discharge] < 0:
-            connection_point_1 = 1
-            connection_point_2 = 3
-        elif self.prev_sol[IndexEnum.discharge] > 0:
-            connection_point_1 = 0
-            connection_point_2 = 2
-        else:
-            connection_point_1 = 1
-            connection_point_2 = 3
+        connection_point_1 = 1
+        connection_point_2 = 3
+        # if self._direction_boolean is True:  # self.prev_sol[IndexEnum.discharge] < 0:
+        #     connection_point_1 = 1
+        #     connection_point_2 = 3
+        # elif self._direction_boolean is False:  # self.prev_sol[IndexEnum.discharge] > 0:
+        #     connection_point_1 = 1
+        #     connection_point_2 = 3
+        # else:
+        #     if self.supply_temperature_primary < self.supply_temperature_secondary:
+        #         connection_point_1 = 1
+        #         connection_point_2 = 3
+        #     else:
+        #         connection_point_1 = 1
+        #         connection_point_2 = 3
         return [
             self.prescribe_temperature_at_connection_point(
                 connection_point=connection_point_1,
@@ -295,15 +338,19 @@ class HeatPumpAsset(BaseAsset):
             of the equation.
         """
         # Determine flow direction
-        if self.prev_sol[IndexEnum.discharge] < 0:
+        if self._direction_boolean is True:  # self.prev_sol[IndexEnum.discharge] < 0:
             connection_point_1 = 0
             connection_point_2 = 1
-        elif self.prev_sol[IndexEnum.discharge] > 0:
+        elif self._direction_boolean is False:  # self.prev_sol[IndexEnum.discharge] > 0:
             connection_point_1 = 2
             connection_point_2 = 3
         else:
-            connection_point_1 = 0
-            connection_point_2 = 1
+            if self.supply_temperature_primary < self.supply_temperature_secondary:
+                connection_point_1 = 0
+                connection_point_2 = 1
+            else:
+                connection_point_1 = 2
+                connection_point_2 = 3
 
         equation_object = EquationObject()
         equation_object.indices = np.array(
@@ -390,15 +437,19 @@ class HeatPumpAsset(BaseAsset):
             values of the equations.
         """
         # Determine flow direction
-        if self.prev_sol[IndexEnum.discharge] < 0:
+        if self._direction_boolean is True:  # self.prev_sol[IndexEnum.discharge] < 0:
             connection_point_1 = 2
             connection_point_2 = 3
-        elif self.prev_sol[IndexEnum.discharge] > 0:
+        elif self._direction_boolean is False:  # self.prev_sol[IndexEnum.discharge] > 0:
             connection_point_1 = 0
             connection_point_2 = 1
         else:
-            connection_point_1 = 2
-            connection_point_2 = 3
+            if self.supply_temperature_primary < self.supply_temperature_secondary:
+                connection_point_1 = 2
+                connection_point_2 = 3
+            else:
+                connection_point_1 = 0
+                connection_point_2 = 1
 
         if self.pre_scribe_mass_flow:
             return [
@@ -535,16 +586,27 @@ class HeatPumpAsset(BaseAsset):
 
         # Check if the mass flow rate at connection point 0 is greater than 0
         # TODO: switch around 0
-        if self.prev_sol[IndexEnum.discharge] < 0:
+        if self._direction_boolean is True:  # self.prev_sol[IndexEnum.discharge] < 0:
             # Mass flow rate at connection point 0 is greater than 0; the flow direction is positive
             equation_object.coefficients = self._heat_pump_coefficients(direction=True)
             equation_object.rhs = self._heat_pump_rhs(direction=True)
-        elif self.prev_sol[IndexEnum.discharge] > 0:
+        elif self._direction_boolean is False:  # self.prev_sol[IndexEnum.discharge] > 0:
             # Mass flow rate at connection point 0 is less than 0; the flow direction is negative
             equation_object.coefficients = self._heat_pump_coefficients(direction=False)
             equation_object.rhs = self._heat_pump_rhs(direction=False)
         else:
-            equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+            # equation_object.indices = np.array([self.matrix_index + IndexEnum.discharge])
+            # equation_object.coefficients = np.array([1])
+            # equation_object.rhs = -1.0
+            if self.supply_temperature_primary < self.supply_temperature_secondary:
+                equation_object.indices = np.array(
+                    [self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 0]
+                )
+            else:
+                equation_object.indices = np.array(
+                    [self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 2]
+                )
+
             equation_object.coefficients = np.array([1])
             equation_object.rhs = -1.0
             # Mass flow rate at connection point 0 is greater than 0; the flow direction is positive

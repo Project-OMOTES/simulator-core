@@ -120,4 +120,10 @@ class HeatPumpIntegrationTest(unittest.TestCase):
         # Act
         self.solver.solve()
         # Assert
-        assert True
+        self.assertAlmostEqual(abs(self.heatpump_asset.prev_sol[6]), 85.15, 2)
+        self.assertAlmostEqual(self.heatpump_asset.prev_sol[8], 125699.50, 2)
+        self.assertAlmostEqual(self.heatpump_asset.prev_sol[2], 167482.00, 2)
+
+
+# TODO: COP variation test
+# TODO: Flow direction reversal test; what does it mean?
