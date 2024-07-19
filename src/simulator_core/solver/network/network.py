@@ -19,6 +19,7 @@ import numpy.typing as npt
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.fall_type import FallType
+from simulator_core.solver.network.assets.heat_pump import HeatPumpAsset
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
@@ -33,6 +34,7 @@ class Network:
         "Fall": FallType,
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
+        "HeatPump": HeatPumpAsset,
     }
     assets: dict[str, BaseAsset]
     nodes: dict[str, Node]
@@ -397,6 +399,7 @@ class Network:
         for node in self.nodes:
             index = self.get_node(node_id=node).matrix_index
             nou = self.get_node(node_id=node).number_of_unknowns
+            self.get_node(node_id=node).prev_sol = solution[index : index + nou]
             self.get_node(node_id=node).prev_sol = solution[index: index + nou].tolist()
 
     def print_result(self) -> None:
