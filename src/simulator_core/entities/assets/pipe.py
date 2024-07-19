@@ -49,7 +49,6 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-
     def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a Pipe object.
 
@@ -69,8 +68,11 @@ class Pipe(AssetAbstract):
         self.alpha_value = PIPE_DEFAULTS.alpha_value
         # Objects of the pandapipes network
         self.solver_asset = SolverPipe(
-            name=self.name, _id=self.asset_id, length=self.length,
-            diameter=self.diameter, roughness=self.roughness
+            name=self.name,
+            _id=self.asset_id,
+            length=self.length,
+            diameter=self.diameter,
+            roughness=self.roughness,
         )
         self.output = []
 
