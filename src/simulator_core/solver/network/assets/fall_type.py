@@ -75,6 +75,7 @@ class FallType(BaseAsset):
         """
         super().__init__(
             name=name,
+            _id=_id,
             number_of_unknowns=index_core_quantity.number_core_quantities * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,

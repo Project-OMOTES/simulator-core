@@ -134,7 +134,7 @@ class NodeTest(unittest.TestCase):
         equation_object = self.node.add_node_cont_equation()
 
         # assert
-        self.assertEqual(equation_object.indices, [node.matrix_index
+        self.assertEqual(equation_object.indices, [self.node.matrix_index
                                                    + IndexCoreQuantity.mass_flow_rate])
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 0.0)
@@ -154,7 +154,7 @@ class NodeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    node.matrix_index + IndexCoreQuantity.mass_flow_rate,
+                    self.node.matrix_index + IndexCoreQuantity.mass_flow_rate,
                     connected_asset.matrix_index + IndexCoreQuantity.mass_flow_rate,
                 ]
             ),
@@ -171,7 +171,7 @@ class NodeTest(unittest.TestCase):
 
         # assert
         np_test.assert_array_equal(
-            equation_object.indices, np.array([node.matrix_index
+            equation_object.indices, np.array([self.node.matrix_index
                                                + IndexCoreQuantity.mass_flow_rate])
         )
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
