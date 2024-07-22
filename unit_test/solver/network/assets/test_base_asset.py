@@ -242,7 +242,6 @@ class BaseAssetTest(unittest.TestCase):
             ],
         )
 
-
     def test_base_add_press_to_node_equation_not_connected(self) -> None:
         """Test the add_press_to_node_equations method."""
         # Arrange
