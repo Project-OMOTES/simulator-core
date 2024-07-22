@@ -59,7 +59,6 @@ class EsdlAssetObject:
                 return get_data_from_profile(esdl_port.profile[0])
         raise ValueError("No profile found for asset: " + self.esdl_asset.name)
 
-
     def get_supply_temperature(self, port_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
@@ -75,6 +74,10 @@ class EsdlAssetObject:
                 return get_return_temperature(esdl_port)
         raise ValueError("No port found with type: " + port_type
                          + " for asset: " + self.esdl_asset.name)
+
+    def get_port_ids(self) -> list[str]:
+        """Get the port ids of the asset."""
+        return [port.id for port in self.esdl_asset.port]
 
     def get_port_type(self, port_type: str) -> Type[esdl.Port]:
         """Get the port type of the port."""
@@ -94,8 +97,3 @@ def get_return_temperature(esdl_port: esdl.Port) -> float:
 def get_supply_temperature(esdl_port: esdl.Port) -> float:
     """Get the temperature of the port."""
     return float(esdl_port.carrier.supplyTemperature) + 273.15
-
-def get_port_ids(self) -> list[str]:
-    """Get the port ids of the asset."""
-    return [port.id for port in self.esdl_asset.port]
-

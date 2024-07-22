@@ -67,7 +67,7 @@ class AssetAbstract(ABC):
         self.asset_id = asset_id
         self.connected_ports = connected_ports
         self.outputs = []
-        for i in range(len(self.connected_ports)):
+        for _ in range(len(self.connected_ports)):
             self.outputs.append([])
 
     def __repr__(self) -> str:

@@ -133,6 +133,7 @@ class EsdlObjectTest(unittest.TestCase):
 
     def test_get_supply_temperature_in(self):
         """Test get_supply_temperature method."""
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
         supply_temperature = asset.get_supply_temperature("In")
 
