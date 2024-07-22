@@ -20,8 +20,8 @@ from unittest.mock import Mock
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_PRESSURE,
+    PROPERTY_TEMPERATURE,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -46,6 +46,7 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
+            port_ids=["test1", "test2"],
         )
         self.production_cluster.set_from_junction(from_junction=self.from_junction)
         self.production_cluster.set_to_junction(to_junction=self.to_junction)
@@ -83,10 +84,14 @@ class ProductionClusterTest(unittest.TestCase):
         self.assertEqual(self.production_cluster.temperature_supply, 353.15)
         self.assertEqual(self.production_cluster.temperature_return, 333.15)
         self.assertEqual(self.production_cluster.controlled_mass_flow, mass_flow)
-        self.assertEqual(self.production_cluster.solver_asset.mass_flow_rate_set_point,
-                         self.production_cluster.controlled_mass_flow)
-        self.assertNotEquals(self.production_cluster.solver_asset.pre_scribe_mass_flow,
-                             setpoints[PROPERTY_SET_PRESSURE])
+        self.assertEqual(
+            self.production_cluster.solver_asset.mass_flow_rate_set_point,
+            self.production_cluster.controlled_mass_flow,
+        )
+        self.assertNotEquals(
+            self.production_cluster.solver_asset.pre_scribe_mass_flow,
+            setpoints[PROPERTY_SET_PRESSURE],
+        )
 
     def test_production_cluster_set_setpoints_missing_setpoint(self) -> None:
         """Test raise ValueError with missing setpoint."""
@@ -153,11 +158,12 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertNotEqual(self.production_cluster.control_mass_flow,
-                            setpoints[PROPERTY_SET_PRESSURE])
+        self.assertNotEqual(
+            self.production_cluster.control_mass_flow, setpoints[PROPERTY_SET_PRESSURE]
+        )
         self.assertNotEqual(
             self.production_cluster.solver_asset.pre_scribe_mass_flow,
-            setpoints[PROPERTY_SET_PRESSURE]
+            setpoints[PROPERTY_SET_PRESSURE],
         )
 
     def test_production_cluster_set_pressure_supply(self) -> None:
@@ -197,14 +203,18 @@ class ProductionClusterTest(unittest.TestCase):
         self.production_cluster.solver_asset.get_temperature = Mock(return_value=333.15)
 
         # Act
-        self.production_cluster.write_to_output()
+        self.production_cluster.write_standard_output()
 
         # Assert
-        self.assertEqual(len(self.production_cluster.output), 1)
-        self.assertEqual(self.production_cluster.output[0], {
-            PROPERTY_TEMPERATURE_SUPPLY: 333.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
-            PROPERTY_MASSFLOW: 1e6,
-            PROPERTY_PRESSURE_SUPPLY: 2e5,
-            PROPERTY_PRESSURE_RETURN: 2e5,
-        })
+        self.assertEqual(
+            len(self.production_cluster.outputs), len(self.production_cluster.connected_ports)
+        )
+        self.assertEqual(len(self.production_cluster.outputs[0]), 1)
+        self.assertEqual(
+            self.production_cluster.outputs[0][0],
+            {
+                PROPERTY_TEMPERATURE: 333.15,
+                PROPERTY_MASSFLOW: 1e6,
+                PROPERTY_PRESSURE: 2e5,
+            },
+        )

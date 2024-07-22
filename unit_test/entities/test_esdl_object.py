@@ -117,11 +117,22 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(length, 0.0)
         self.assertFalse(property_available)
 
-    def test_get_supply_temperature_in(self):
-        """Test get_supply_temperature method."""
+
+    def test_get_port_ids(self):
+        """Test get_port_ids method."""
+
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+        port_ids = asset.get_port_ids()  # act
 
+        # Assert
+        self.assertEqual(port_ids, ["a9793a5e-df4f-4795-8079-015dfaf57f82",
+                                    "3f2dc09a-0cee-44bd-a337-cea55461a334"])
+        self.assertEqual(len(port_ids), 2)
+
+
+    def test_get_supply_temperature_in(self):
+        """Test get_supply_temperature method."""
         # Act
         supply_temperature = asset.get_supply_temperature("In")
 
@@ -196,6 +207,7 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(
             str(cm.exception), "Port type not recognized: Error",)
+
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):

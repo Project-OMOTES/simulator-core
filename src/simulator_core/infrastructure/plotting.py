@@ -21,6 +21,8 @@ import numpy as np
 from shapely.geometry import LineString
 from numpy.typing import NDArray
 from simulator_core.entities.esdl_object import EsdlObject
+from simulator_core.entities.assets.asset_defaults import (PROPERTY_MASSFLOW, PROPERTY_PRESSURE,
+                                                           PROPERTY_TEMPERATURE)
 
 
 class Plotting:
@@ -60,11 +62,16 @@ class Plotting:
                 data = {'asset_id': asset.id,
                         'asset_name': asset.name,
                         'geometry': LineString(coor_pipe),
-                        'mass_flow': result[(asset.id, 'mass_flow')][last_data_index],
-                        'pressure_in': result[(asset.id, 'pressure_supply')][last_data_index],
-                        'pressure_out': result[(asset.id, 'pressure_return')][last_data_index],
-                        'temperature_in': result[(asset.id, 'temperature_supply')][last_data_index],
-                        'temperature_out': result[(asset.id, 'temperature_return')][
+                        'mass_flow': result[(asset_object.get_port_ids()[0],
+                                             PROPERTY_MASSFLOW)][last_data_index],
+                        'pressure_in': result[(asset_object.get_port_ids()[0],
+                                               PROPERTY_PRESSURE)][last_data_index],
+                        'pressure_out': result[(asset_object.get_port_ids()[1],
+                                                PROPERTY_PRESSURE)][last_data_index],
+                        'temperature_in': result[(asset_object.get_port_ids()[0],
+                                                  PROPERTY_TEMPERATURE)][last_data_index],
+                        'temperature_out': result[(asset_object.get_port_ids()[1],
+                                                   PROPERTY_TEMPERATURE)][
                             last_data_index],
                         }
 
