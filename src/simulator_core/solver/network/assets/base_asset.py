@@ -152,7 +152,7 @@ class BaseAsset(BaseItem):
         if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
             return self.add_prescribe_temp(connection_point)
         else:
-            return self.add_temp_to_node_equation(connection_point)
+            return self.add_internal_energy_to_node_equation(connection_point)
 
     def add_prescribe_temp(self, connection_point: int) -> EquationObject:
         """Adds a prescribed temperature equation for a connection point of the asset.
@@ -179,7 +179,7 @@ class BaseAsset(BaseItem):
         equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
         return equation_object
 
-    def add_temp_to_node_equation(self, connection_point: int) -> EquationObject:
+    def add_internal_energy_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a temperature to node equation for a connection point of the asset.
 
         :param connection_point: The index of the connection point to add the equation for.
