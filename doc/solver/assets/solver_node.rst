@@ -7,7 +7,7 @@ different assets. The node has no physical meaning, but is a pure modelling aspe
 easy to connect different assets together. The node is responsible for adding equations for the
 mass and energy continuity.
 
-.. autoclass:: simulator_core.solver.network.assets.node.base_node_item
+.. autoclass:: simulator_core.solver.network.assets.base_node_item.BaseNodeItem
     :members:
 .. autoclass:: simulator_core.solver.network.assets.node.Node
     :members:

@@ -92,6 +92,7 @@ class FallType(BaseAsset):
         - Thermal balance at each connection point
         - Internal continuity equation
         - Internal pressure loss equation
+
         :return: list[EquationObject]
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
