@@ -194,6 +194,13 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 class EsdlControllerMapper(EsdlMapperAbstract):
     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
+    def __init__(self, esdl_object: EsdlObject):
+        """Constructor for esdl to heat network mapper.
+
+        :param esdl_object: Esdl object to be converted to a Heatnetwork
+        """
+        self.esdl_object = esdl_object
+
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
         """Method to convert a NetworkController object to an esdlobject.
 
@@ -203,17 +210,18 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlObject) -> NetworkController:
+    def to_entity(self, model: int = 1) -> tuple[list[ControllerProducer], list[ControllerConsumer]]:
         """Method to convert esdl to NetworkController object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the NetworkController object.
-        :param EsdlObject model: EsdlObject object to be converted to NetworkController object
+        :param EsdlObject model: not used only implemented for compatibility.
+
         :return: NetworkController, which is the converted EsdlObject object.
         """
         consumers = []
-        for esdl_asset in model.get_all_assets_of_type("consumer"):
+        for esdl_asset in self.esdl_object.get_all_assets_of_type("consumer"):
             consumers.append(
                 ControllerConsumer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
             )
@@ -221,7 +229,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             consumers[-1].set_controller_data(esdl_asset)
 
         sources = []
-        for esdl_asset in model.get_all_assets_of_type("producer"):
+        for esdl_asset in self.esdl_object.get_all_assets_of_type("producer"):
             sources.append(ControllerProducer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
             sources[-1].set_controller_data(esdl_asset)
-        return NetworkController(consumers, sources)
+        return sources, consumers

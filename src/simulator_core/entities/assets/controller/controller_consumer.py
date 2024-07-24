@@ -27,6 +27,7 @@ from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 logger = logging.getLogger(__name__)
 
+
 class ControllerConsumer(AssetControllerAbstract):
     """Class to store the consumer for the controller asset."""
 
