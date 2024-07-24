@@ -15,15 +15,18 @@
 """Test controller class."""
 import unittest
 from unittest.mock import Mock
-from datetime import datetime
+from datetime import datetime, timezone
 
+from simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_HEAT_DEMAND,
                                                            PROPERTY_TEMPERATURE_RETURN,
                                                            PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_SET_PRESSURE)
+from simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class ControllerTest(unittest.TestCase):
@@ -142,3 +145,25 @@ class ControllerTest(unittest.TestCase):
         self.assertIn(self.producer2.id, result)
         self.assertIn(self.consumer1.id, result)
         self.assertIn(self.consumer2.id, result)
+
+    def test_esdl_loading(self):
+        """Test to load the controller data from the esdl object."""
+        # Arrange
+        esdl_file = r".\testdata\test1.esdl"
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
+        controller = EsdlControllerMapper().to_entity(esdl_object)
+        start = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+
+        # Act
+        results = controller.run_time_step(start)
+        
+        # Assert
+        self.assertIn("cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4", results)
+        self.assertIn("48f3e425-2143-4dcd-9101-c7e22559e82b", results)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_HEAT_DEMAND], 360800.0)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_RETURN], 313.15)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_SUPPLY], 353.15)
+        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_SET_PRESSURE])
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_HEAT_DEMAND], 360800.0)
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_RETURN], 353.15)
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_SUPPLY], 313.15)
