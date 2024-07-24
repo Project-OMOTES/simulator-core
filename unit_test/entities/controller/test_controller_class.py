@@ -55,16 +55,17 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.get_heat_demand.return_value = 2.0
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
-        conversion_factory = lambda: ([self.producer1, self.producer2],
-                                      [self.consumer1, self.consumer2])
+        conversion_factory = Mock()
+        conversion_factory.return_value =([self.producer1, self.producer2],
+                                          [self.consumer1, self.consumer2])
         self.controller = NetworkController(conversion_factory=conversion_factory)
 
     def test_controller_init(self):
         """Test to initialize the controller."""
         consumer = ControllerConsumer("consumer", "id")
         producer = ControllerProducer("producer", "id")
-        conversion_factory = lambda: ([producer],
-                                      [consumer])
+        conversion_factory = Mock()
+        conversion_factory.return_value = ([producer], [consumer])
         controller = NetworkController(conversion_factory=conversion_factory)
         # Act
 
