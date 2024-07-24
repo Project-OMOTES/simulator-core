@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller class."""
 import unittest
+from pathlib import Path
 from unittest.mock import Mock
 from datetime import datetime, timezone
 
@@ -70,8 +71,10 @@ class ControllerTest(unittest.TestCase):
 
     def test_get_total_demand(self):
         """Test to get the total demand of the network."""
+        # Arrange
         # Act
         total_demand = self.controller.get_total_demand(datetime.now())
+
         # Assert
         self.assertEqual(total_demand, 3.0)
 
@@ -149,8 +152,8 @@ class ControllerTest(unittest.TestCase):
     def test_esdl_loading(self):
         """Test to load the controller data from the esdl object."""
         # Arrange
-        esdl_file = r".\testdata\test1.esdl"
-        esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
+        esdl_file = Path(__file__).parent / r"..\..\..\testdata\test1.esdl"
+        esdl_object = EsdlObject(pyesdl_from_file(str(esdl_file)))
         controller = EsdlControllerMapper().to_entity(esdl_object)
         start = datetime.strptime("2019-01-01T00:00:00",
                                   "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
