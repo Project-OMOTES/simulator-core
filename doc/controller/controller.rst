@@ -7,10 +7,9 @@ for the controllable assets in the network. The key of this dict is the id of th
 The value is another dict. The key of this dict is the property which needs to be set
 (e.g. supply temperature, heat demand). The value is the set point for this property.
 The controller works based on the priority of the source. The controller will first allocate
-The controller will also  if the sources with priority 1 have enough capacity to provide the demand.
-if more capacity is required, the sources with priority 2 will be used etc. If the demand is lower
-then the available capacity of the observed sources, the remaining demand will be equally distributed
-over the source at the observed priority.
+capacity of the source with the priority of 1. If more capacity is required, the sources with
+priority 2 will be used etc. If the demand is lower then the available capacity of the observed
+sources, the remaining demand will be equally distributed over the source at the observed priority.
 In the case the demand is higher then the available source capacity, a message is passed to the user
 and the demand is downscaled to match the available capacity.
 The controller consists of the following classes:
