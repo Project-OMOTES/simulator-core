@@ -210,7 +210,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, model: int = 1) -> tuple[list[ControllerProducer], list[ControllerConsumer]]:
+    def to_entity(self, model: int = 1) -> tuple[list[ControllerProducer],
+                                                 list[ControllerConsumer]]:
         """Method to convert esdl to NetworkController object.
 
         This method first converts all assets into a list of assets.

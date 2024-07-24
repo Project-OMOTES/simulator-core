@@ -15,24 +15,26 @@
 
 """NetworkController entity."""
 import datetime
-
+import logging
+from typing import Callable, List, Tuple
+from simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_TEMPERATURE_RETURN,
                                                            PROPERTY_HEAT_DEMAND,
                                                            PROPERTY_SET_PRESSURE)
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from typing import List
+
+logger = logging.getLogger(__name__)
 
 
-class NetworkController:
+class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
-    def __init__(self, consumers: List[ControllerConsumer], producers: List[ControllerProducer]) \
-            -> None:
+    def __init__(self, conversion_factory: Callable[[], Tuple[List[ControllerProducer],
+                                                              List[ControllerConsumer]]]) -> None:
         """Constructor for controller for a heat network."""
-        self.producers = producers
-        self.consumers = consumers
+        self.producers, self.consumers = conversion_factory()
 
     def run_time_step(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
@@ -42,8 +44,7 @@ class NetworkController:
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
         if self.get_total_supply() <= self.get_total_demand(time):
-            # TODO need to pass a message that power is insufficient and
-            #  is capped to the max power available
+            logger.warning(f"Total supply is lower than total demand at time: {time}")
             producers = self._set_producers_to_max()
             consumers = self._set_consumer_capped(time)
         else:
