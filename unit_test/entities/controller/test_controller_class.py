@@ -152,8 +152,9 @@ class ControllerTest(unittest.TestCase):
     def test_esdl_loading(self):
         """Test to load the controller data from the esdl object."""
         # Arrange
-        esdl_file = Path(__file__).parent / r"..\..\..\testdata\test1.esdl"
-        esdl_object = EsdlObject(pyesdl_from_file(str(esdl_file)))
+        esdl_file = Path(__file__).parent / ".." / ".." / ".." / "testdata" / "test1.esdl"
+        esdl_file = str(esdl_file)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
         controller = EsdlControllerMapper().to_entity(esdl_object)
         start = datetime.strptime("2019-01-01T00:00:00",
                                   "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
