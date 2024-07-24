@@ -56,8 +56,8 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
         conversion_factory = Mock()
-        conversion_factory.return_value =([self.producer1, self.producer2],
-                                          [self.consumer1, self.consumer2])
+        conversion_factory.return_value = ([self.producer1, self.producer2],
+                                           [self.consumer1, self.consumer2])
         self.controller = NetworkController(conversion_factory=conversion_factory)
 
     def test_controller_init(self):
