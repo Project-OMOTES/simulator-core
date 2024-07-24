@@ -20,7 +20,8 @@ import numpy as np
 import pandas as pd
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
-from simulator_core.entities.assets.controller.controller_classes import AssetControllerAbstract
+from simulator_core.entities.assets.controller.controller_abstract_clas import (
+    AssetControllerAbstract)
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
