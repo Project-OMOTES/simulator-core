@@ -97,6 +97,8 @@ ignore = [
     'W503',  # Starting lines with operators.
     'PT009', # use a regular assert instead of unittest-style '{assertion}'
     'AAA06', # Comment in Act block
+    'PT027',  # Use pytest.raises() instead of unittest-style 'assertRaises'
+    'AAA03'  # No act block found. '
 ]
 exclude = ['.venv/*', 'venv/*', 'doc/*']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100']
