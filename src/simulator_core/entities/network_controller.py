@@ -82,12 +82,26 @@ class NetworkController:
         return producers
 
     def _set_consumer_capped(self, time: datetime.datetime) -> dict:
-        """Method to set the consumer to the capped to the max avaialbl power of the producers."""
+        """Method to set the consumer to the capped to the max available power of the producers.
+
+        :param datetime.datetime time: Time for which to cap the heat demand based on available
+        power.
+
+        :return: dict with the key the asset id and the value a dict with the set points for the
+        consumers.
+        """
         factor = self.get_total_supply() / self.get_total_demand(time)
         return self._set_consumer_to_demand(time=time, factor=factor)
 
     def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:
-        """Method to set the consumer to the demand."""
+        """Method to set the consumer to the demand.
+
+        :param datetime.datetime time: Time for which to set the consumer to the demand.
+        :param float factor: Factor to multiply the heat demand with.
+
+        :return: dict with the key the asset id and the value a dict with the set points for the
+        consumers.
+        """
         consumers = {}
         for consumer in self.consumers:
             consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
@@ -96,7 +110,13 @@ class NetworkController:
         return consumers
 
     def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
-        """Method to set the producers based on priority."""
+        """Method to set the producers based on priority.
+
+        :param datetime.datetime time: Time for which to set the producers based on priority.
+
+        :return: dict with the key the asset id and the value a dict with the set points for the
+        producers.
+        """
         producers = self._set_producers_to_max()
         total_demand = self.get_total_demand(time)
         if total_demand > self.get_total_supply():
