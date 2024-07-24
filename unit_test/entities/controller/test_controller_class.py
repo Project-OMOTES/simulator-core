@@ -152,18 +152,26 @@ class ControllerTest(unittest.TestCase):
         esdl_file = r".\testdata\test1.esdl"
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
         controller = EsdlControllerMapper().to_entity(esdl_object)
-        start = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        start = datetime.strptime("2019-01-01T00:00:00",
+                                  "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
 
         # Act
         results = controller.run_time_step(start)
-        
+
         # Assert
         self.assertIn("cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4", results)
         self.assertIn("48f3e425-2143-4dcd-9101-c7e22559e82b", results)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_HEAT_DEMAND], 360800.0)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_RETURN], 313.15)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_SUPPLY], 353.15)
-        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_SET_PRESSURE])
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_HEAT_DEMAND], 360800.0)
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_RETURN], 353.15)
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_SUPPLY], 313.15)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
+                         [PROPERTY_HEAT_DEMAND], 360800.0)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
+                         [PROPERTY_TEMPERATURE_RETURN], 313.15)
+        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
+                         [PROPERTY_TEMPERATURE_SUPPLY], 353.15)
+        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
+                        [PROPERTY_SET_PRESSURE])
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
+                         [PROPERTY_HEAT_DEMAND], 360800.0)
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
+                         [PROPERTY_TEMPERATURE_RETURN], 353.15)
+        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
+                         [PROPERTY_TEMPERATURE_SUPPLY], 313.15)
