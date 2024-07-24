@@ -18,12 +18,14 @@ import datetime
 
 import numpy as np
 import pandas as pd
+import logging
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
 from simulator_core.entities.assets.controller.controller_abstract_clas import (
     AssetControllerAbstract)
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
+logger = logging.getLogger(__name__)
 
 class ControllerConsumer(AssetControllerAbstract):
     """Class to store the consumer for the controller asset."""
@@ -51,8 +53,8 @@ class ControllerConsumer(AssetControllerAbstract):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
                 self.start_index = index
                 if self.profile["values"][index] > self.max_power:
-                    # TODO need to pass a message that power is insufficient and is
-                    #  capped to the max power available
+                    logging.warning(f"Demand of {self.name} is higher than maximum power of asset"
+                                    f"at time {time}.")
                     return self.max_power
                 else:
                     return float(self.profile["values"][index])
