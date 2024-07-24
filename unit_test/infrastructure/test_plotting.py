@@ -25,6 +25,7 @@ from simulator_core.adapter.transforms.mappers import (
 )
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
+from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from simulator_core.infrastructure.utils import pyesdl_from_file
 from simulator_core.simulation.networksimulation import NetworkSimulation
@@ -41,7 +42,7 @@ class PlottingTest(unittest.TestCase):
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
-        controller = EsdlControllerMapper().to_entity(esdl_object)
+        controller = NetworkController( EsdlControllerMapper(esdl_object).to_entity)
         network_simulation = NetworkSimulation(network, controller)
         config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                          name="test run",
