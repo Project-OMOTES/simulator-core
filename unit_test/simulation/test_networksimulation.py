@@ -61,8 +61,9 @@ class NetworkSimulationTest(unittest.TestCase):
                                                                  "%Y-%m-%dT%H:%M:%S"),
                                          stop=datetime.strptime("2019-01-01T01:00:00",
                                                                 "%Y-%m-%dT%H:%M:%S"))
+
         # Act
-        network_simulation.run(config)  # act
+        network_simulation.run(config, lambda fraction, msg: None)  # act
 
         # Assert
         # this does not work since the network is mocked, since we cannot simulate yet

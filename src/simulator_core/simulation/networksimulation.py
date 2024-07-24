@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simulates an heat network for the specified duration."""
-
+from typing import Callable
 from pandas import DataFrame
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
@@ -34,13 +34,16 @@ class NetworkSimulation:
         self.network = network
         self.controller = controller
 
-    def run(self, config: SimulationConfiguration) -> None:
+    def run(self, config: SimulationConfiguration,
+            progress_calback: Callable[[float, str], None]) -> None:
         """Run the simulation.
 
         :param SimulationConfiguration config: Configuration to run the simulation with.
+        :param Callable[[float, str], None] progress_calback: Callback function to report progress.
         """
         # time loop
         number_of_time_steps = int((config.stop - config.start).total_seconds() / config.timestep)
+        progress_interval = round(number_of_time_steps / 10)
         for time_step in range(number_of_time_steps):
             not_converged = True
             time = (config.start + timedelta(seconds=time_step * config.timestep)
@@ -53,6 +56,15 @@ class NetworkSimulation:
                 logger.debug("Simulating for timestep " + str(time))
                 self.network.run_time_step(time, controller_input)
             self.network.store_output()
+
+            if progress_interval == 0:
+                res = 0
+            else:
+                res = time_step % progress_interval
+
+            if res == 0:
+                progress = float(time_step) / float(number_of_time_steps)
+                progress_calback(progress, "calculating")
 
     def gather_output(self) -> DataFrame:
         """Gathers all output and return a dict with this output.
