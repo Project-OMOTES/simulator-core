@@ -55,10 +55,8 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.get_heat_demand.return_value = 2.0
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
-        conversion_factory = Mock()
-        conversion_factory.return_value = ([self.producer1, self.producer2],
+        self.controller = NetworkController([self.producer1, self.producer2],
                                            [self.consumer1, self.consumer2])
-        self.controller = NetworkController(conversion_factory=conversion_factory)
 
     def test_controller_init(self):
         """Test to initialize the controller."""
@@ -66,9 +64,7 @@ class ControllerTest(unittest.TestCase):
                                       temperature_return=30.0, max_power=1.0, profile=Mock())
         producer = ControllerProducer("producer", "id", temperature_return=20.0,
                                       temperature_supply=30.0, power=1.0, priority=1)
-        conversion_factory = Mock()
-        conversion_factory.return_value = ([producer], [consumer])
-        controller = NetworkController(conversion_factory=conversion_factory)
+        controller = NetworkController([producer], [consumer])
         # Act
 
         # Assert
@@ -161,10 +157,9 @@ class ControllerTest(unittest.TestCase):
         esdl_file = Path(__file__).parent / ".." / ".." / ".." / "testdata" / "test1.esdl"
         esdl_file = str(esdl_file)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
-        controller = NetworkController(EsdlControllerMapper(esdl_object).to_entity)
+        controller = EsdlControllerMapper().to_entity(esdl_object)
         start = datetime.strptime("2019-01-01T00:00:00",
                                   "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
-
         # Act
         results = controller.run_time_step(start)
 

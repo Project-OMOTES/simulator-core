@@ -16,7 +16,7 @@
 """NetworkController entity."""
 import datetime
 import logging
-from typing import Callable, List, Tuple
+from typing import List
 from simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
                                                            PROPERTY_TEMPERATURE_RETURN,
@@ -31,10 +31,11 @@ logger = logging.getLogger(__name__)
 class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
-    def __init__(self, conversion_factory: Callable[[], Tuple[List[ControllerProducer],
-                                                              List[ControllerConsumer]]]) -> None:
+    def __init__(self, producers: List[ControllerProducer], consumers: List[ControllerConsumer]) \
+            -> None:
         """Constructor for controller for a heat network."""
-        self.producers, self.consumers = conversion_factory()
+        self.producers = producers
+        self.consumers = consumers
 
     def run_time_step(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.

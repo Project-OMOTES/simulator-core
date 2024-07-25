@@ -53,7 +53,7 @@ class NetworkSimulationTest(unittest.TestCase):
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
-        controller = NetworkController(EsdlControllerMapper(esdl_object).to_entity)
+        controller = EsdlControllerMapper().to_entity(esdl_object)
         network_simulation = NetworkSimulation(network, controller)
         config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                          name="test run",

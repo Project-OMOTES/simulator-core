@@ -26,6 +26,7 @@ from simulator_core.entities.assets.pipe import Pipe
 from simulator_core.entities.assets.production_cluster import ProductionCluster
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
 
 
 class EsdlAssetMapper:
@@ -56,8 +57,12 @@ class EsdlAssetMapper:
             model.esdl_asset.name, model.esdl_asset.id, model.get_port_ids())
 
 
-class EsdlAssetControllerProducerMapper:
+class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a producer entity class."""
+
+    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
     def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerProducer :
         """Method to map an esdl asset to a producer entity class.
@@ -81,8 +86,12 @@ class EsdlAssetControllerProducerMapper:
         return contr_producer
 
 
-class EsdlAssetControllerConsumerMapper:
+class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a consumer entity class."""
+
+    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
     def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerConsumer:
         """Method to map an esdl asset to a consumer entity class.

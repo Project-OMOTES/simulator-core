@@ -20,8 +20,6 @@ from esdl.esdl import Joint as esdl_junction
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
@@ -35,9 +33,9 @@ from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControl
 
 
 def connect_connected_asset(
-    connected_py_assets: List[Tuple[str, Port]],
-    junction: Junction,
-    py_assets_list: List[AssetAbstract],
+        connected_py_assets: List[Tuple[str, Port]],
+        junction: Junction,
+        py_assets_list: List[AssetAbstract],
 ) -> None:
     """Method to connect assets connected to one asset to the same junction.
 
@@ -57,10 +55,10 @@ def connect_connected_asset(
 
 
 def replace_joint_in_connected_assets(
-    connected_py_assets: List[Tuple[str, Port]],
-    py_joint_dict: Dict[str, List[Tuple[str, Port]]],
-    py_asset_id: str,
-    iteration_limit: int = 10,
+        connected_py_assets: List[Tuple[str, Port]],
+        py_joint_dict: Dict[str, List[Tuple[str, Port]]],
+        py_asset_id: str,
+        iteration_limit: int = 10,
 ) -> List[Tuple[str, Port]]:
     """Replace joint with assets connected to the elements.
 
@@ -196,12 +194,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 class EsdlControllerMapper(EsdlMapperAbstract):
     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
-    def __init__(self, esdl_object: EsdlObject):
-        """Constructor for esdl to heat network mapper.
-
-        :param esdl_object: Esdl object to be converted to a Heatnetwork
-        """
-        self.esdl_object = esdl_object
+    def __init__(self) -> None:
+        """Constructor for esdl to heat network mapper."""
 
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
         """Method to convert a NetworkController object to an esdlobject.
@@ -212,19 +206,18 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, model: int = 1) -> tuple[list[ControllerProducer],
-                                                 list[ControllerConsumer]]:
+    def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
         """Method to convert esdl to NetworkController object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the NetworkController object.
-        :param EsdlObject model: not used only implemented for compatibility.
+        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
 
         :return: NetworkController, which is the converted EsdlObject object.
         """
         consumers = [EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset) for
-                     esdl_asset in self.esdl_object.get_all_assets_of_type("consumer")]
+                     esdl_asset in esdl_object.get_all_assets_of_type("consumer")]
         producers = [EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset) for
-                     esdl_asset in self.esdl_object.get_all_assets_of_type("producer")]
-        return producers, consumers
+                     esdl_asset in esdl_object.get_all_assets_of_type("producer")]
+        return NetworkController(producers, consumers)
