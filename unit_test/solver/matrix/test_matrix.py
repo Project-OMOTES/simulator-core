@@ -51,7 +51,6 @@ class MatrixTest(unittest.TestCase):
         index = matrix.add_unknowns(number_unknowns=number_of_unknowns)  # act
 
         # assert
-
         self.assertEqual(matrix.num_unknowns, number_of_unknowns)
         npt.assert_array_equal(matrix.sol_new, np.array([1.0] * number_of_unknowns))
         npt.assert_array_equal(matrix.sol_old, np.array([0.0] * number_of_unknowns))
@@ -117,14 +116,14 @@ class MatrixTest(unittest.TestCase):
             position = matrix.add_unknowns(1)
             equation_object = EquationObject()
             equation_object.rhs = value
-            equation_object.indices = [position, position + 1]
-            equation_object.coefficients = [1.0, 1.0]
+            equation_object.indices = np.array([position, position + 1])
+            equation_object.coefficients = np.array([1.0, 1.0])
             equations.append(equation_object)
         position = matrix.add_unknowns(1)
         equation_object = EquationObject()
         equation_object.rhs = 5.0
-        equation_object.indices = [position]
-        equation_object.coefficients = [1.0]
+        equation_object.indices = np.array([position])
+        equation_object.coefficients = np.array([1.0])
         equations.append(equation_object)
 
         # act

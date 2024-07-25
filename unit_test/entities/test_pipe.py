@@ -85,6 +85,7 @@ class PipeTest(unittest.TestCase):
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
+        pass
 
         # Assert
         with self.assertRaises(NotImplementedError):

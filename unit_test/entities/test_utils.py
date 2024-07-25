@@ -36,10 +36,9 @@ class UtilFunctionTest(unittest.TestCase):
         """Set up test case."""
         # Mock pandapipes net
         # Load esdl pipe asset
-        esdl_file_path = (
+        esdl_file_path = str(
             Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
         )
-        esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         pipes = esdl_object.get_all_assets_of_type("pipe")
         self.pipe_with_material = [

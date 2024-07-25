@@ -37,8 +37,8 @@ class FallTypeTest(unittest.TestCase):
             _id=str(uuid4()),
         )
         # Create supply, connection_point:0 and return node, connection_point:1
-        self.supply_node = Node(name=uuid4(), _id=str(uuid4()))
-        self.return_node = Node(name=uuid4(), _id=str(uuid4()))
+        self.supply_node = Node(name=str(uuid4()), _id=str(uuid4()))
+        self.return_node = Node(name=str(uuid4()), _id=str(uuid4()))
         # Connect the nodes to the asset
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)
@@ -66,7 +66,7 @@ class FallTypeTest(unittest.TestCase):
     def test_get_equation_insufficient_nodes(self) -> None:
         """Evaluate the retrieval of equations from the boundary object with insufficient nodes."""
         # Arrange
-        self.asset.connected_nodes = []
+        self.asset.connected_nodes = {}
 
         # Act
         with self.assertRaises(ValueError) as cm:
@@ -133,16 +133,14 @@ class FallTypeTest(unittest.TestCase):
         -m_in * EI_in + m_out * EI_out - Q_supplied = 0
         """
         # Arrange
-        self.asset.prev_sol = np.array(
-            [
-                1.0,  # discharge 0
-                2.0,  # pressure 0
-                3.0,  # internal energy 0
-                4.0,  # discharge 1
-                5.0,  # pressure 1
-                6.0,  # internal energy 1
-            ]
-        )
+        self.asset.prev_sol = [
+            1.0,  # discharge 0
+            2.0,  # pressure 0
+            3.0,  # internal energy 0
+            4.0,  # discharge 1
+            5.0,  # pressure 1
+            6.0,  # internal energy 1
+        ]
 
         # Act
         equation_object = self.asset.add_internal_energy_equation()
@@ -187,7 +185,7 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        self.asset.prev_sol = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
         self.asset.update_loss_coefficient()
 
         # Act
@@ -231,7 +229,7 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = np.array([0.0, 2.0, 3.0, 0.0, 5.0, 6.0])
+        self.asset.prev_sol = [0.0, 2.0, 3.0, 0.0, 5.0, 6.0]
         self.asset.update_loss_coefficient()
 
         # Act

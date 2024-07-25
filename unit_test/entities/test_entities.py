@@ -29,8 +29,7 @@ class HeatNetworkTest(unittest.TestCase):
     def test_heat_network(self) -> None:
         """Generic/template test for Heatnetwork."""
         # Arrange
-        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
-        esdl_file_path = str(esdl_file_path)
+        esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl")
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
 
         # Act
