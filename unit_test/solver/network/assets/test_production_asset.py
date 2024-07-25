@@ -16,11 +16,12 @@
 """Test Junction entities."""
 import unittest
 from uuid import uuid4
+import numpy.testing as npt
 
+from simulator_core.solver.utils.fluid_properties import fluid_props
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
-from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class ProductionAssetTest(unittest.TestCase):
@@ -46,7 +47,7 @@ class ProductionAssetTest(unittest.TestCase):
         # Act
         equations = self.asset.get_equations()
         # Assert
-        assert len(equations) == self.asset.number_of_unknowns
+        self.assertEqual(len(equations), self.asset.number_of_unknowns)
 
     def test_pre_scribe_mass_flow(self) -> None:
         """Test the pre_scribe_mass_flow attribute."""
@@ -59,10 +60,10 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_pre_scribe_equation(connection_point=connection_point_id)
 
         # Assert
-        assert self.asset.pre_scribe_mass_flow is True
-        assert self.asset.mass_flow_rate_set_point == 20.0
-        assert equation_object.rhs == 20.0
-        assert all(equation_object.coefficients == [1.0])
+        self.assertTrue(self.asset.pre_scribe_mass_flow)
+        self.assertEqual(self.asset.mass_flow_rate_set_point, 20.0)
+        self.assertEqual(equation_object.rhs, 20.0)
+        self.assertTrue(all(equation_object.coefficients == [1.0]))
 
     def test_pre_scribe_pressure(self) -> None:
         """Test the pre_scribe_mass_flow attribute.
@@ -78,10 +79,10 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_pre_scribe_equation(connection_point=connection_point_id)
 
         # Assert
-        assert self.asset.pre_scribe_mass_flow is False
-        assert self.asset.set_pressure == 10000.0
-        assert equation_object.rhs == 10000.0
-        assert all(equation_object.coefficients == [1.0])
+        self.assertFalse(self.asset.pre_scribe_mass_flow)
+        self.assertEqual(self.asset.set_pressure, 10000.0)
+        self.assertEqual(equation_object.rhs, 10000.0)
+        self.assertTrue(all(equation_object.coefficients == [1.0]))
 
     def test_pre_scribe_non_existing_connection_point(self) -> None:
         """Test the pre_scribe_mass_flow attribute.
@@ -111,11 +112,10 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        assert all(
-            equation_object.indices == [IndexEnum.internal_energy, IndexEnum.internal_energy]
-        )
-        assert all(equation_object.coefficients == [1.0, -1.0])
-        assert equation_object.rhs == 0.0
+        npt.assert_array_equal(equation_object.indices, [IndexEnum.internal_energy,
+                                                         IndexEnum.internal_energy])
+        npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
+        self.assertEqual(equation_object.rhs, 0.0)
 
     def test_thermal_equation_with_discharge(self) -> None:
         """Test the thermal equation for a connection point of the asset.
@@ -132,9 +132,8 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        assert all(
-            equation_object.indices
-            == [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES]
-        )
-        assert all(equation_object.coefficients == [1.0])
-        assert equation_object.rhs == fluid_props.get_ie(self.asset.supply_temperature)
+        npt.assert_array_equal(equation_object.indices, [IndexEnum.internal_energy
+                                                         + connection_point_id
+                                                         * NUMBER_CORE_QUANTITIES])
+        npt.assert_array_equal(equation_object.coefficients, [1.0])
+        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))

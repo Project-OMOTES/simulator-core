@@ -16,6 +16,7 @@
 """Test Junction entities."""
 import unittest
 from uuid import uuid4
+import numpy.testing as npt
 
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.network.assets.base_asset import BaseAsset
@@ -46,8 +47,8 @@ class BaseAssetTest(unittest.TestCase):
         self.asset.connect_node(node=self.return_node, connection_point=1)
 
         # Assert
-        assert self.asset.connected_nodes[0] == self.supply_node
-        assert self.asset.connected_nodes[1] == self.return_node
+        self.assertEqual(self.asset.connected_nodes[0], self.supply_node)
+        self.assertEqual(self.asset.connected_nodes[1], self.return_node)
 
     def test_base_asset_connect_node_already_connected(self) -> None:
         """Test the connect_node method with already connected node."""
@@ -78,7 +79,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.check_connection_point_valid(connection_point=connection_point_id)
 
         # Assert
-        assert result is True
+        self.assertTrue(result)
 
     def test_base_asset_check_connection_point_not_valid(self) -> None:
         """Test the check_connection_point_valid method."""
@@ -108,7 +109,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.is_connected(connection_point=0)
 
         # Assert
-        assert result is True
+        self.assertTrue(result)
 
     def test_base_is_not_connected(self) -> None:
         """Test the is_connected method."""
@@ -118,7 +119,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.is_connected(connection_point=0)
 
         # Assert
-        assert result is False
+        self.assertFalse(result)
 
     def test_base_get_connected_node(self) -> None:
         """Test the get_connected_node method."""
@@ -129,7 +130,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_connected_node(connection_point=0)
 
         # Assert
-        assert result is self.supply_node
+        self.assertEqual(result, self.supply_node)
 
     def test_base_is_all_connected(self) -> None:
         """Test the is_all_connected method."""
@@ -141,7 +142,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.is_all_connected()
 
         # Assert
-        assert result is True
+        self.assertTrue(result)
 
     def test_base_is_not_all_connected(self) -> None:
         """Test the is_all_connected method."""
@@ -152,7 +153,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.is_all_connected()
 
         # Assert
-        assert result is False
+        self.assertFalse(result)
 
     def test_base_add_thermal_equations_with_discharge(self) -> None:
         """Test the add_thermal_equations method.
@@ -170,11 +171,11 @@ class BaseAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        assert equation_object.rhs == fluid_props.get_ie(self.asset.supply_temperature)
-        assert all(equation_object.coefficients == [1.0])
-        assert all(
-            equation_object.indices
-            == [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES]
+        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
+        npt.assert_array_equal(equation_object.coefficients, [1.0])
+        npt.assert_array_equal(
+            equation_object.indices,
+            [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES],
         )
 
     def test_base_add_thermal_equations_no_discharge(self) -> None:
@@ -190,10 +191,11 @@ class BaseAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        assert equation_object.rhs == 0.0
-        assert all(equation_object.coefficients == [1.0, -1.0])
-        assert all(
-            equation_object.indices == [IndexEnum.internal_energy, IndexEnum.internal_energy]
+        self.assertEqual(equation_object.rhs, 0.0)
+        npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
+        npt.assert_array_equal(
+            equation_object.indices,
+            [IndexEnum.internal_energy, IndexEnum.internal_energy],
         )
 
     def test_base_add_thermal_equations_no_discharge_not_connected(self) -> None:
@@ -230,14 +232,14 @@ class BaseAssetTest(unittest.TestCase):
         )
 
         # Assert
-        assert equation_object.rhs == 0.0
-        assert all(equation_object.coefficients == [1.0, -1.0])
-        assert all(
-            equation_object.indices
-            == [
+        self.assertEqual(equation_object.rhs, 0.0)
+        npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
+        npt.assert_array_equal(
+            equation_object.indices,
+            [
                 IndexEnum.pressure + connection_point_id * NUMBER_CORE_QUANTITIES,
                 self.asset.connected_nodes[connection_point_id].matrix_index + IndexEnum.pressure,
-            ]
+            ],
         )
 
     def test_base_add_press_to_node_equation_not_connected(self) -> None:
@@ -271,7 +273,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_pressure(connection_point=connection_point_id)
 
         # Assert
-        assert result == 10000.0
+        self.assertEqual(result, 10000.0)
 
     def test_base_get_mass_flow_rate(self) -> None:
         """Test the get_mass_flow_rate method."""
@@ -285,7 +287,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_mass_flow_rate(connection_point=connection_point_id)
 
         # Assert
-        assert result == 1.0
+        self.assertEqual(result, 1.0)
 
     def test_base_get_temperature(self) -> None:
         """Test the get_temperature method."""
@@ -300,4 +302,4 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_temperature(connection_point=connection_point_id)
 
         # Assert
-        assert result == temperature
+        self.assertEqual(result, temperature)
