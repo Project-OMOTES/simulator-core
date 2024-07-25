@@ -51,7 +51,7 @@ class PlottingTest(unittest.TestCase):
                                          stop=datetime.strptime("2019-01-01T01:00:00",
                                                                 "%Y-%m-%dT%H:%M:%S"))
         # Act
-        network_simulation.run(config)
+        network_simulation.run(config, lambda fraction, msg: None)
 
         result = network_simulation.gather_output()
 
