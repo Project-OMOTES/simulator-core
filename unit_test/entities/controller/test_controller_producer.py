@@ -26,7 +26,12 @@ class ControllerProducerTest(unittest.TestCase):
     def test_controller_producer_init(self) -> None:
         """Init test for ControllerProducer."""
         # Arrange
-        producer = ControllerProducer("producer", "id")
+        producer = ControllerProducer("producer", "id",
+                                      temperature_supply=DEFAULT_TEMPERATURE
+                                                         + DEFAULT_TEMPERATURE_DIFFERENCE,
+                                      temperature_return=DEFAULT_TEMPERATURE,
+                                      power=1000,
+                                      priority=1)
         # Act
 
         # Assert
@@ -37,34 +42,3 @@ class ControllerProducerTest(unittest.TestCase):
                          + DEFAULT_TEMPERATURE_DIFFERENCE)
         self.assertEqual(producer.power, 1000)
         self.assertEqual(producer.priority, 1)
-
-    def test_add_controller_data(self):
-        """Test to add physical data to the controller."""
-        # Arrange
-        producer = ControllerProducer("producer", "id")
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, True)
-        esdl_asset_mock.get_supply_temperature.return_value = 2.0
-        esdl_asset_mock.get_return_temperature.return_value = 3.0
-        # Act
-        producer.set_controller_data(esdl_asset=esdl_asset_mock)
-        # Assert
-        self.assertEqual(producer.power, 1.0)
-        self.assertEqual(producer.temperature_supply, 2.0)
-        self.assertEqual(producer.temperature_return, 3.0)
-
-    def test_add_power_error(self):
-        """Test to add physical data to the controller resulting in error."""
-        # Arrange
-        producer = ControllerProducer("producer", "id")
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.esdl_asset.name = "asset"
-        esdl_asset_mock.get_property.return_value = (1.0, False)
-
-        # Act
-        with self.assertRaises(ValueError) as e:
-            producer.set_controller_data(esdl_asset=esdl_asset_mock)
-
-        # Assert
-        self.assertEqual(str(e.exception), "No power found for asset: "
-                         + esdl_asset_mock.esdl_asset.name)

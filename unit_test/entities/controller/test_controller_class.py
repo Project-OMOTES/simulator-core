@@ -62,8 +62,10 @@ class ControllerTest(unittest.TestCase):
 
     def test_controller_init(self):
         """Test to initialize the controller."""
-        consumer = ControllerConsumer("consumer", "id")
-        producer = ControllerProducer("producer", "id")
+        consumer = ControllerConsumer(name="consumer", identifier="id", temperature_supply=20.0,
+                                      temperature_return=30.0, max_power=1.0, profile=Mock())
+        producer = ControllerProducer("producer", "id", temperature_return=20.0,
+                                      temperature_supply=30.0, power=1.0, priority=1)
         conversion_factory = Mock()
         conversion_factory.return_value = ([producer], [consumer])
         controller = NetworkController(conversion_factory=conversion_factory)
@@ -180,6 +182,6 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
                          [PROPERTY_HEAT_DEMAND], 360800.0)
         self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
-                         [PROPERTY_TEMPERATURE_RETURN], 353.15)
+                         [PROPERTY_TEMPERATURE_RETURN], 313.15)
         self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
-                         [PROPERTY_TEMPERATURE_SUPPLY], 313.15)
+                         [PROPERTY_TEMPERATURE_SUPPLY], 353.15)

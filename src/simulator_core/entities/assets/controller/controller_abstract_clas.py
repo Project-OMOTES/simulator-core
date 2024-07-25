@@ -14,11 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
-from abc import ABC, abstractmethod
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
-
-class AssetControllerAbstract(ABC):
+class AssetControllerAbstract:
     """Abstract class for the asset controller."""
 
     def __init__(self, name: str, identifier: str):
@@ -29,7 +26,3 @@ class AssetControllerAbstract(ABC):
         """
         self.name = name
         self.id = identifier
-
-    @abstractmethod
-    def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to get the controller data for esdl object."""

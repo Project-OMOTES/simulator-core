@@ -28,7 +28,16 @@ class ConsumerControllerTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.consumer = ControllerConsumer("consumer", "id")
+        self.values = [100, 200]
+        self.profile = pd.DataFrame({"date": [datetime(2021, 1, 1, 0, 0, 0),
+                                              datetime(2021, 1, 1, 1, 0, 0)],
+                                     "values": self.values})
+        self.consumer = ControllerConsumer("consumer", "id",
+                                           temperature_supply=DEFAULT_TEMPERATURE
+                                                              + DEFAULT_TEMPERATURE_DIFFERENCE,
+                                           temperature_return=DEFAULT_TEMPERATURE,
+                                           max_power=20000,
+                                           profile=self.profile)
 
     def test_consumer_init(self):
         """Test to initialize the consumer."""
@@ -41,61 +50,13 @@ class ConsumerControllerTest(unittest.TestCase):
         self.assertEqual(self.consumer.temperature_supply, DEFAULT_TEMPERATURE
                          + DEFAULT_TEMPERATURE_DIFFERENCE)
         self.assertEqual(self.consumer.start_index, 0)
-        self.assertEqual(self.consumer.max_power, np.inf)
-
-    def test_set_controller_data(self):
-        """Test to set the controller data."""
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, True)
-        esdl_asset_mock.get_supply_temperature.return_value = 2.0
-        esdl_asset_mock.get_return_temperature.return_value = 3.0
-        # Act
-        self.consumer.set_controller_data(esdl_asset=esdl_asset_mock)
-        # Assert
-        self.assertEqual(self.consumer.max_power, 1.0)
-        self.assertEqual(self.consumer.temperature_supply, 3.0)
-        self.assertEqual(self.consumer.temperature_return, 2.0)
-
-    def test_set_power_error(self):
-        """Test to set the power to infinite when no power attribute is in the esdl asset."""
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, False)
-        # Act
-        self.consumer.set_controller_data(esdl_asset=esdl_asset_mock)
-        # Assert
-        self.assertEqual(self.consumer.max_power, np.inf)
-
-    def test_set_power_zero(self):
-        """Test to set the power to infinite when the power attribute is 0."""
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (0, True)
-        # Act
-        self.consumer.set_controller_data(esdl_asset=esdl_asset_mock)
-        # Assert
-        self.assertEqual(self.consumer.max_power, np.inf)
-
-    def test_add_profile(self) -> None:
-        """Test to add a profile to the consumer."""
-        # Arrange
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1, 0, 0, 0),
-                                         datetime(2021, 1, 1, 1, 0, 0)],
-                                "value": [100, 200]})
-        # Act
-        self.consumer.add_profile(profile)
-        # Assert
-        pd.testing.assert_frame_equal(self.consumer.profile, profile)
+        self.assertEqual(self.consumer.max_power, 20000)
+        pd.testing.assert_frame_equal(self.consumer.profile, self.profile)
 
     def test_controller_consumer_get_heat_demand(self) -> None:
         """Test to get the heat demand of the consumer."""
         # Arrange
-        values = [100, 200]
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1,
-                                                  0, 0, 0),
-                                         datetime(2021, 1, 1,
-                                                  1, 0, 0)],
-                                "values": values})
-        # Act
-        self.consumer.add_profile(profile)
+
         # Act
         demand1 = self.consumer.get_heat_demand(datetime(2021, 1, 1,
                                                          0, 0, 0))
@@ -103,20 +64,13 @@ class ConsumerControllerTest(unittest.TestCase):
                                                          1, 0, 0))
 
         # Assert
-        self.assertEqual(demand1, values[0])
-        self.assertEqual(demand2, values[1])
+        self.assertEqual(demand1, self.values[0])
+        self.assertEqual(demand2, self.values[1])
 
     def test_consumer_set_to_max_power(self):
         """Test to set the consumer to the max power."""
         # Arrange
         self.consumer.max_power = 1.0
-        values = [100, 200]
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1,
-                                                  0, 0, 0),
-                                         datetime(2021, 1, 1,
-                                                  1, 0, 0)],
-                                "values": values})
-        self.consumer.add_profile(profile)
         # Act
         demand = self.consumer.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
         # Assert
@@ -124,13 +78,7 @@ class ConsumerControllerTest(unittest.TestCase):
 
     def test_date_not_in_profile_consumer(self):
         """Test to get the heat demand when the date is not in the profile."""
-        values = [100, 200]
-        profile = pd.DataFrame({"date": [datetime(2021, 1, 1,
-                                                  0, 0, 0),
-                                         datetime(2021, 1, 1,
-                                                  1, 0, 0)],
-                                "values": values})
-        self.consumer.add_profile(profile)
+
         # Act
         demand = self.consumer.get_heat_demand(datetime(2021, 3, 2, 0, 0))
         # Assert

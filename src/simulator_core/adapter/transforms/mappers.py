@@ -30,6 +30,8 @@ from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from simulator_core.solver.network.network import Network
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerProducerMapper
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerConsumerMapper
 
 
 def connect_connected_asset(
@@ -124,7 +126,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
-        :param Network network: netowrk to add the compenents to.
+        :param Network network: network to add the compenents to.
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         # TODO: This method requires a clean-up!
@@ -221,16 +223,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
         :return: NetworkController, which is the converted EsdlObject object.
         """
-        consumers = []
-        for esdl_asset in self.esdl_object.get_all_assets_of_type("consumer"):
-            consumers.append(
-                ControllerConsumer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
-            )
-            consumers[-1].add_profile(esdl_asset.get_profile())
-            consumers[-1].set_controller_data(esdl_asset)
-
-        sources = []
-        for esdl_asset in self.esdl_object.get_all_assets_of_type("producer"):
-            sources.append(ControllerProducer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
-            sources[-1].set_controller_data(esdl_asset)
-        return sources, consumers
+        consumers = [EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset) for
+                     esdl_asset in self.esdl_object.get_all_assets_of_type("consumer")]
+        producers = [EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset) for
+                     esdl_asset in self.esdl_object.get_all_assets_of_type("producer")]
+        return producers, consumers

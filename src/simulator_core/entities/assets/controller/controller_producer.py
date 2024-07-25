@@ -14,36 +14,27 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
-from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
-                                                           DEFAULT_TEMPERATURE_DIFFERENCE)
 from simulator_core.entities.assets.controller.controller_abstract_clas import (
     AssetControllerAbstract)
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
 class ControllerProducer(AssetControllerAbstract):
     """Class to store the source for the controller."""
 
-    def __init__(self, name: str, identifier: str):
+    def __init__(self, name: str, identifier: str,
+                 temperature_supply: float, temperature_return: float,
+                 power: float, priority: int = 1):
         """Constructor for the source.
 
         :param str name: Name of the source.
         :param str identifier: Unique identifier of the source.
+        :param float temperature_supply: Supply temperature of the source.
+        :param float temperature_return: Return temperature of the source.
+        :param float power: Power of the source.
+        :param int priority: Priority of the source.
         """
         super().__init__(name, identifier)
-        self.temperature_return: float = DEFAULT_TEMPERATURE
-        self.temperature_supply: float = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
-        self.power: float = 1000
-        self.priority: int = 1
-
-    def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to get the controller data for esdl object."""
-        result = esdl_asset.get_property(
-            esdl_property_name="power", default_value=self.power
-        )
-        if result[1]:
-            self.power = result[0]
-        else:
-            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
-        self.temperature_supply = esdl_asset.get_supply_temperature("Out")
-        self.temperature_return = esdl_asset.get_return_temperature("In")
+        self.temperature_return: float = temperature_return
+        self.temperature_supply: float = temperature_supply
+        self.power: float = power
+        self.priority: int = priority

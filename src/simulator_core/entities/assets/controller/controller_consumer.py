@@ -16,14 +16,10 @@
 
 import datetime
 
-import numpy as np
 import pandas as pd
 import logging
-from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
-                                                           DEFAULT_TEMPERATURE_DIFFERENCE)
 from simulator_core.entities.assets.controller.controller_abstract_clas import (
     AssetControllerAbstract)
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 logger = logging.getLogger(__name__)
 
@@ -31,18 +27,19 @@ logger = logging.getLogger(__name__)
 class ControllerConsumer(AssetControllerAbstract):
     """Class to store the consumer for the controller asset."""
 
-    def __init__(self, name: str, identifier: str):
+    def __init__(self, name: str, identifier: str, temperature_supply: float,
+                 temperature_return: float, max_power: float, profile: pd.DataFrame):
         """Constructor for the consumer.
 
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
         """
         super().__init__(name, identifier)
-        self.temperature_return = DEFAULT_TEMPERATURE
-        self.temperature_supply = DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
-        self.profile: pd.DataFrame = pd.DataFrame()
+        self.temperature_return = temperature_return
+        self.temperature_supply = temperature_supply
+        self.profile: pd.DataFrame = profile
         self.start_index = 0
-        self.max_power: float = np.inf
+        self.max_power: float = max_power
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -55,22 +52,8 @@ class ControllerConsumer(AssetControllerAbstract):
                 self.start_index = index
                 if self.profile["values"][index] > self.max_power:
                     logging.warning(f"Demand of {self.name} is higher than maximum power of asset"
-                                    f"at time {time}.")
+                                    f" at time {time}.")
                     return self.max_power
                 else:
                     return float(self.profile["values"][index])
         return 0
-
-    def add_profile(self, profile: pd.DataFrame) -> None:
-        """Method to add a profile to the consumer."""
-        self.profile = profile
-
-    def set_controller_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to get the controller data for esdl object."""
-        self.temperature_supply = esdl_asset.get_return_temperature("Out")
-        self.temperature_return = esdl_asset.get_supply_temperature("In")
-        result = esdl_asset.get_property("power", np.inf)
-        if result[0] == 0:
-            self.max_power = np.inf
-        elif result[1]:
-            self.max_power = result[0]
