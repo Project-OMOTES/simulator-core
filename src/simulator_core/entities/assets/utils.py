@@ -16,7 +16,6 @@
 """Utility functions for assets."""
 from enum import IntEnum
 
-from pandapipes import pandapipesNet
 import numpy as np
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from typing import List, Tuple
@@ -24,9 +23,7 @@ from simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 def heat_demand_and_temperature_to_mass_flow(
-        thermal_demand: float,
-        temperature_supply: float,
-        temperature_return: float
+    thermal_demand: float, temperature_supply: float, temperature_return: float
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
@@ -38,15 +35,14 @@ def heat_demand_and_temperature_to_mass_flow(
     :param float temperature_return: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     """
-    heat_capacity = fluid_props.get_heat_capacity(
-        (temperature_return + temperature_supply) / 2)
+    heat_capacity = fluid_props.get_heat_capacity((temperature_return + temperature_supply) / 2)
     return thermal_demand / ((temperature_supply - temperature_return) * float(heat_capacity))
 
 
 def mass_flow_and_temperature_to_heat_demand(
-        temperature_supply: float,
-        temperature_return: float,
-        mass_flow: float,
+    temperature_supply: float,
+    temperature_return: float,
+    mass_flow: float,
 ) -> float:
     """Calculate the thermal demand that is met by the mass flow rate.
 
@@ -94,7 +90,7 @@ def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> Tuple[List[fl
 
 
 def calculate_inverse_heat_transfer_coefficient(
-        inner_diameter: np.ndarray, outer_diameter: np.ndarray, thermal_conductivity: np.ndarray
+    inner_diameter: np.ndarray, outer_diameter: np.ndarray, thermal_conductivity: np.ndarray
 ) -> np.ndarray:
     """Calculate the inverse heat transfer coefficient of a pipe.
 
@@ -103,48 +99,9 @@ def calculate_inverse_heat_transfer_coefficient(
     :param thermal_conductivity: Thermal conductivity of the pipe material in W/(m K)
     :return: Inverse heat transfer coefficient in W/(m^2 K)
     """
-    return np.array((inner_diameter * np.log(outer_diameter / inner_diameter))
-                    / (2.0 * thermal_conductivity))
-
-
-def mass_flow_to_volume_flow(
-        mass_flow_rate: float,
-        temperature_fluid: float,
-        pandapipes_net: pandapipesNet,
-) -> float:
-    """Calculate the volume flow rate from mass flow rate.
-
-    :param float mass_flow_rate: the mass flow rate in kg/s
-    :param float temperature_fluid: the fluid temperature in K
-    :param pandapipesNet pandapipes_net: The pandapipes network used to calculate
-    the specific density.
-
-    :return float volume_flow rate: the volume flow rate in m3/s
-    """
-    density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
-    if (density_fluid == 0) | (density_fluid is None):
-        raise ValueError("The density of the fluid is zero or None.")
-    volume_flowrate = mass_flow_rate / density_fluid
-    return float(volume_flowrate)
-
-
-def volume_flow_to_mass_flow(
-        volume_flowrate: float,
-        temperature_fluid: float,
-        pandapipes_net: pandapipesNet,
-) -> float:
-    """Calculate the mass flowrate from volume flowrate.
-
-    :param float volume_flowrate: the volume flowrate in m3/s
-    :param float temperature_fluid: the fluid temperature in K
-    :param pandapipesNet net: The pandapipes network used to calculate the specific density.
-
-    :return float mass_flowrate: the mass flowrate in kg/s
-    """
-    density_fluid = pandapipes_net.fluid.get_density(temperature_fluid)
-    mass_flowrate = volume_flowrate * density_fluid
-
-    return float(mass_flowrate)
+    return np.array(
+        (inner_diameter * np.log(outer_diameter / inner_diameter)) / (2.0 * thermal_conductivity)
+    )
 
 
 class Port(IntEnum):
