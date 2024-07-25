@@ -56,7 +56,7 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
         self.controller = NetworkController([self.producer1, self.producer2],
-                                           [self.consumer1, self.consumer2])
+                                            [self.consumer1, self.consumer2])
 
     def test_controller_init(self):
         """Test to initialize the controller."""

@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
-from unittest.mock import Mock
-import numpy as np
 import pandas as pd
 from datetime import datetime
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
@@ -34,7 +32,7 @@ class ConsumerControllerTest(unittest.TestCase):
                                      "values": self.values})
         self.consumer = ControllerConsumer("consumer", "id",
                                            temperature_supply=DEFAULT_TEMPERATURE
-                                                              + DEFAULT_TEMPERATURE_DIFFERENCE,
+                                           + DEFAULT_TEMPERATURE_DIFFERENCE,
                                            temperature_return=DEFAULT_TEMPERATURE,
                                            max_power=20000,
                                            profile=self.profile)
@@ -78,7 +76,6 @@ class ConsumerControllerTest(unittest.TestCase):
 
     def test_date_not_in_profile_consumer(self):
         """Test to get the heat demand when the date is not in the profile."""
-
         # Act
         demand = self.consumer.get_heat_demand(datetime(2021, 3, 2, 0, 0))
         # Assert

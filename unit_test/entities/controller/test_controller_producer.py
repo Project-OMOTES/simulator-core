@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
-from unittest.mock import Mock
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
                                                            DEFAULT_TEMPERATURE_DIFFERENCE)
@@ -28,7 +27,7 @@ class ControllerProducerTest(unittest.TestCase):
         # Arrange
         producer = ControllerProducer("producer", "id",
                                       temperature_supply=DEFAULT_TEMPERATURE
-                                                         + DEFAULT_TEMPERATURE_DIFFERENCE,
+                                      + DEFAULT_TEMPERATURE_DIFFERENCE,
                                       temperature_return=DEFAULT_TEMPERATURE,
                                       power=1000,
                                       priority=1)
