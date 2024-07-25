@@ -25,7 +25,6 @@ from simulator_core.adapter.transforms.mappers import (
 )
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
-from simulator_core.entities.network_controller import NetworkController
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from simulator_core.infrastructure.utils import pyesdl_from_file
 from simulator_core.simulation.networksimulation import NetworkSimulation
