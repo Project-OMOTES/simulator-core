@@ -128,7 +128,7 @@ class AssetAbstract(ABC):
         """Placeholder to get data and store it in the asset."""
 
     def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
+        """Get timeseries as a dataframe from a asset.
 
         The header is a tuple of the port id and the property name.
         """

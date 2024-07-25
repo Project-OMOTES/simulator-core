@@ -46,7 +46,7 @@ class SimulationManager:
     def execute(self, progress_calback: Callable[[float, str], None]) -> pd.DataFrame:
         """Method to simulate the network.
 
-        First the network is converted to pandapipes and then the simulation is run.
+        First the network is converted to an internal object model and then the simulation is run.
 
         :return: DataFrame with the result of the simulations
         """

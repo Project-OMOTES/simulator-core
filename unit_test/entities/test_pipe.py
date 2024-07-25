@@ -29,7 +29,6 @@ class PipeTest(unittest.TestCase):
 
     def setUp(self):
         """Set up test case."""
-        # Create empty pandapipes network
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")

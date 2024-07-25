@@ -34,7 +34,6 @@ class UtilFunctionTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test case."""
-        # Mock pandapipes net
         # Load esdl pipe asset
         esdl_file_path = str(
             Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
