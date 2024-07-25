@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 MAX_NUMBER_MESSAGES = 15
 
+
 class NetworkSimulation:
     """NetworkSimulation connects the controller and HeatNetwork (incl. assets)."""
 
@@ -36,8 +37,8 @@ class NetworkSimulation:
         self.controller = controller
 
     def run(self, config: SimulationConfiguration,
-            progress_calback: Callable[[float, str], None], 
-            max_number_messages:int = MAX_NUMBER_MESSAGES) -> None:
+            progress_calback: Callable[[float, str], None],
+            max_number_messages: int = MAX_NUMBER_MESSAGES) -> None:
         """Run the simulation.
 
         :param SimulationConfiguration config: Configuration parameters for simulation.
@@ -47,7 +48,7 @@ class NetworkSimulation:
         # time loop
         number_of_time_steps = int((config.stop - config.start).total_seconds() / config.timestep)
         logger.info("Number of time steps: " + str(number_of_time_steps))
-        progress_interval = max( round(number_of_time_steps / max_number_messages), 1)
+        progress_interval = max(round(number_of_time_steps / max_number_messages), 1)
         for time_step in range(number_of_time_steps):
             not_converged = True
             time = (config.start + timedelta(seconds=time_step * config.timestep)
