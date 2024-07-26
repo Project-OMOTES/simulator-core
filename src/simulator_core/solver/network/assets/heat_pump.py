@@ -473,26 +473,24 @@ class HeatPumpAsset(BaseAsset):
         coefficient_array = np.array(
             [
                 [
-                    self.prev_sol[
-                        IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point
-                    ],
-                    self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point],
+                    IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point,
+                    IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point,
                 ]
                 for connection_point in range(4)
             ]
         )
         # Reshape array
-        coefficient_array = coefficient_array.reshape((8,))
+        coefficient_array = coefficient_array.reshape((8,)).astype(int)
         if direction:
             return typing.cast(
                 np.ndarray,
-                coefficient_array
+                np.take(self.prev_sol, coefficient_array)
                 * np.array([-1, -1, +1, +1, +(1 - 1 / self.cop_h), +1, -(1 - 1 / self.cop_h), -1]),
             )
         else:
             return typing.cast(
                 np.ndarray,
-                coefficient_array
+                np.take(self.prev_sol, coefficient_array)
                 * np.array(
                     [
                         +(1 - 1 / self.cop_h),
