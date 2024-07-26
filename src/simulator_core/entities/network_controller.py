@@ -18,10 +18,12 @@ import datetime
 import logging
 from typing import List
 from simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
-from simulator_core.entities.assets.asset_defaults import (PROPERTY_TEMPERATURE_SUPPLY,
-                                                           PROPERTY_TEMPERATURE_RETURN,
-                                                           PROPERTY_HEAT_DEMAND,
-                                                           PROPERTY_SET_PRESSURE)
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
+)
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 
@@ -31,8 +33,9 @@ logger = logging.getLogger(__name__)
 class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
-    def __init__(self, producers: List[ControllerProducer], consumers: List[ControllerConsumer]) \
-            -> None:
+    def __init__(
+        self, producers: List[ControllerProducer], consumers: List[ControllerConsumer]
+    ) -> None:
         """Constructor for controller for a heat network."""
         self.producers = producers
         self.consumers = consumers
@@ -56,29 +59,43 @@ class NetworkController(NetworkControllerAbstract):
         return producers
 
     def get_total_demand(self, time: datetime.datetime) -> float:
-        """Method to get the total heat demand of the network."""
+        """Method to get the total heat demand of the network.
+
+        :param datetime.datetime time: Time for which to get the total heat demand.
+        :return float: Total heat demand of all consumers.
+        """
         return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
 
     def get_total_supply(self) -> float:
-        """Method to get the total heat supply of the network."""
+        """Method to get the total heat supply of the network.
+
+        :return float: Total heat supply of all producers.
+        """
         return float(sum([producer.power for producer in self.producers]))
 
     def get_total_supply_priority(self, priority: int) -> float:
-        """Method to get the total  supply of the network for all sources with a certain priority.
+        """Method to get the total supply of the network for all sources with a certain priority.
 
         :param int priority: The priority of the sources.
+        :return float: Total heat supply of all producers with a certain priority.
         """
-        return float(sum([producer.power for producer in self.producers
-                          if producer.priority == priority]))
+        return float(
+            sum([producer.power for producer in self.producers if producer.priority == priority])
+        )
 
     def _set_producers_to_max(self) -> dict:
-        """Method to set the producers to the max power."""
+        """Method to set the producers to the max power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the producers.
+        """
         producers = {}
         for source in self.producers:
-            producers[source.id] = {PROPERTY_HEAT_DEMAND: source.power,
-                                    PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                                    PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
-                                    PROPERTY_SET_PRESSURE: False}
+            producers[source.id] = {
+                PROPERTY_HEAT_DEMAND: source.power,
+                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                PROPERTY_SET_PRESSURE: False,
+            }
         # setting the first producer to set the pressure.
         producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return producers
@@ -106,9 +123,11 @@ class NetworkController(NetworkControllerAbstract):
         """
         consumers = {}
         for consumer in self.consumers:
-            consumers[consumer.id] = {PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
-                                      PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
-                                      PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply}
+            consumers[consumer.id] = {
+                PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
+                PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply,
+            }
         return consumers
 
     def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
@@ -122,8 +141,10 @@ class NetworkController(NetworkControllerAbstract):
         producers = self._set_producers_to_max()
         total_demand = self.get_total_demand(time)
         if total_demand > self.get_total_supply():
-            raise ValueError("Total demand is higher than total supply. "
-                             "Cannot set producers based on priority.")
+            raise ValueError(
+                "Total demand is higher than total supply. "
+                "Cannot set producers based on priority."
+            )
         priority = 0
         set_pressure = True
         while total_demand > 0:
