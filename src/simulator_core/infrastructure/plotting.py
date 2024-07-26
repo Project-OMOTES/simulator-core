@@ -21,8 +21,11 @@ import numpy as np
 from shapely.geometry import LineString
 from numpy.typing import NDArray
 from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.entities.assets.asset_defaults import (PROPERTY_MASSFLOW, PROPERTY_PRESSURE,
-                                                           PROPERTY_TEMPERATURE)
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE,
+    PROPERTY_TEMPERATURE,
+)
 
 
 class Plotting:
@@ -46,10 +49,21 @@ class Plotting:
     def prepare_data(self, result: DataFrame) -> gpd.GeoDataFrame:
         """Function to prepare geopandas dataframe."""
         geo_df = gpd.GeoDataFrame(
-            columns=['asset_id', 'asset_name', 'geometry', 'mass_flow', 'pressure_in',
-                     'pressure_out', 'temperature_in', 'temperature_out'], crs="EPSG:4326")
+            {},
+            columns=[
+                "asset_id",
+                "asset_name",
+                "geometry",
+                "mass_flow",
+                "pressure_in",
+                "pressure_out",
+                "temperature_in",
+                "temperature_out",
+            ],
+            crs="EPSG:4326",
+        )
 
-        assets = self.esdl_object.get_all_assets_of_type('pipe')
+        assets = self.esdl_object.get_all_assets_of_type("pipe")
 
         for asset_object in assets:
             asset = asset_object.esdl_asset
@@ -59,35 +73,40 @@ class Plotting:
                     coor_pipe.append([point.lon, point.lat])
 
                 last_data_index = len(result) - 1
-                data = {'asset_id': asset.id,
-                        'asset_name': asset.name,
-                        'geometry': LineString(coor_pipe),
-                        'mass_flow': result[(asset_object.get_port_ids()[0],
-                                             PROPERTY_MASSFLOW)][last_data_index],
-                        'pressure_in': result[(asset_object.get_port_ids()[0],
-                                               PROPERTY_PRESSURE)][last_data_index],
-                        'pressure_out': result[(asset_object.get_port_ids()[1],
-                                                PROPERTY_PRESSURE)][last_data_index],
-                        'temperature_in': result[(asset_object.get_port_ids()[0],
-                                                  PROPERTY_TEMPERATURE)][last_data_index],
-                        'temperature_out': result[(asset_object.get_port_ids()[1],
-                                                   PROPERTY_TEMPERATURE)][
-                            last_data_index],
-                        }
+                data = {
+                    "asset_id": asset.id,
+                    "asset_name": asset.name,
+                    "geometry": LineString(coor_pipe),
+                    "mass_flow": result[(asset_object.get_port_ids()[0], PROPERTY_MASSFLOW)][
+                        last_data_index
+                    ],
+                    "pressure_in": result[(asset_object.get_port_ids()[0], PROPERTY_PRESSURE)][
+                        last_data_index
+                    ],
+                    "pressure_out": result[(asset_object.get_port_ids()[1], PROPERTY_PRESSURE)][
+                        last_data_index
+                    ],
+                    "temperature_in": result[
+                        (asset_object.get_port_ids()[0], PROPERTY_TEMPERATURE)
+                    ][last_data_index],
+                    "temperature_out": result[
+                        (asset_object.get_port_ids()[1], PROPERTY_TEMPERATURE)
+                    ][last_data_index],
+                }
 
                 geo_df.loc[len(geo_df)] = data
 
         return geo_df
 
     @staticmethod
-    def plot_line_mapbox(geo_df: gpd.GeoDataFrame) -> None:
+    def plot_line_mapbox(geo_df: gpd.GeoDataFrame, output_filename: str = "map.html") -> None:
         """Function to plot using plotly express line mapbox."""
         lats: NDArray = np.array(None)
         lons: NDArray = np.array(None)
         names: NDArray = np.array(None)
         for _, row in geo_df.iterrows():
-            if isinstance(row['geometry'], LineString):
-                linestrings = [row['geometry']]
+            if isinstance(row["geometry"], LineString):
+                linestrings = [row["geometry"]]
             else:
                 continue
             for linestring in linestrings:
@@ -95,18 +114,31 @@ class Plotting:
                 lats = np.append(lats, y)
                 lons = np.append(lons, x)
 
-                text = row['asset_name'] + \
-                    ", mass_flow: " + "{:.2f}".format(row['mass_flow']) + " kg/s" + \
-                    ", Pin: " + "{:.2f}".format(row['pressure_in'] / 1e5) + " bar" + \
-                    ", Pout: " + "{:.2f}".format(row['pressure_out'] / 1e5) + " bar" + \
-                    ", Tin: " + "{:.2f}".format(row['temperature_in'] - 273) + " C" + \
-                    ", Tout: " + "{:.2f}".format(row['temperature_out'] - 273) + " C"
+                text = (
+                    row["asset_name"]
+                    + ", mass_flow: "
+                    + "{:.2f}".format(row["mass_flow"])
+                    + " kg/s"
+                    + ", Pin: "
+                    + "{:.2f}".format(row["pressure_in"] / 1e5)
+                    + " bar"
+                    + ", Pout: "
+                    + "{:.2f}".format(row["pressure_out"] / 1e5)
+                    + " bar"
+                    + ", Tin: "
+                    + "{:.2f}".format(row["temperature_in"] - 273)
+                    + " C"
+                    + ", Tout: "
+                    + "{:.2f}".format(row["temperature_out"] - 273)
+                    + " C"
+                )
 
                 names = np.append(names, [text] * len(y))
                 lats = np.append(lats, np.array(None))
                 lons = np.append(lons, np.array(None))
                 names = np.append(names, np.array(None))
 
-        fig = px.line_mapbox(lat=lats, lon=lons,
-                             hover_name=names, zoom=14, mapbox_style="carto-positron")
-        fig.show()
+        fig = px.line_mapbox(
+            lat=lats, lon=lons, hover_name=names, zoom=14, mapbox_style="carto-positron"
+        )
+        fig.write_html(output_filename)

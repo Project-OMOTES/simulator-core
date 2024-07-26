@@ -66,9 +66,7 @@ class AssetAbstract(ABC):
         self.name = asset_name
         self.asset_id = asset_id
         self.connected_ports = connected_ports
-        self.outputs = []
-        for i in range(len(self.connected_ports)):
-            self.outputs.append([])
+        self.outputs = [[] for _ in range(len(self.connected_ports))]
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""
@@ -130,7 +128,7 @@ class AssetAbstract(ABC):
         """Placeholder to get data and store it in the asset."""
 
     def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
+        """Get timeseries as a dataframe from a asset.
 
         The header is a tuple of the port id and the property name.
         """

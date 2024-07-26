@@ -28,12 +28,13 @@ from simulator_core.solver.solver import Solver
 class HeatNetwork:
     """Class to store information on the heat network."""
 
-    def __init__(self, conversion_factory: Callable[[Network], Tuple[List[AssetAbstract],
-                                                                     List[Junction]]]) -> None:
+    def __init__(
+        self, conversion_factory: Callable[[Network], Tuple[List[AssetAbstract], List[Junction]]]
+    ) -> None:
         """Constructor of heat network class.
 
-        :param conversion_factory: method to convert the esdl network to pandapipes
-        assets and junctions and returns list of both
+        :param conversion_factory: method to convert the esdl network to lists of assets&junctions
+        and returns list of both
         """
         self.network = Network()
         self.assets, self.junctions = conversion_factory(self.network)
@@ -59,10 +60,11 @@ class HeatNetwork:
         plots the network in a simple plot all junctions are translated to a circle.
         :return:
         """
+
     def store_output(self) -> None:
         """Method to store the output data.
 
-        This method takes the data from the pandapipes dataframe and stores it into our own
+        This method takes the data from the assets and stores it into our own
         dataframe. This is needed since we have the possibility to redo a timestep when results are
         not converged for the input of the controller.
         :return: None

@@ -54,6 +54,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
     except Exception as error:
         logger.error(f"Error occured: {error} at: {traceback.format_exc(limit=-1)}")
         logger.debug(traceback.format_exc())
+        raise error
 
 
 if __name__ == "__main__":

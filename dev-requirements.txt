@@ -12,7 +12,7 @@ attrs==23.2.0
     # via
     #   fiona
     #   flake8-bugbear
-babel==2.14.0
+babel==2.15.0
     # via sphinx
 beautifulsoup4==4.12.3
     # via furo
@@ -24,7 +24,7 @@ build==1.0.3
     #   simulator-core (..\..\pyproject.toml)
 bump2version==1.0.1
     # via simulator-core (..\..\pyproject.toml)
-certifi==2024.2.2
+certifi==2024.7.4
     # via
     #   -c ..\..\requirements.txt
     #   fiona
@@ -47,36 +47,18 @@ cligj==0.7.2
     # via fiona
 colorama==0.4.6
     # via
-    #   -c ..\..\requirements.txt
     #   build
     #   click
     #   pytest
     #   sphinx
-    #   tqdm
-coloredlogs==15.0.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   simulator-core (..\..\pyproject.toml)
-contourpy==1.2.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
-coverage[toml]==7.5.0
+coverage[toml]==7.6.0
     # via
     #   coverage
     #   pytest-cov
-cycler==0.12.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
 dataclass-wizard==0.22.2
     # via
     #   -c ..\..\requirements.txt
     #   simulator-core (..\..\pyproject.toml)
-deepdiff==7.0.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   pandapower
 docutils==0.20.1
     # via sphinx
 fiona==1.9.6
@@ -107,10 +89,6 @@ flake8-quotes==3.3.2
     # via simulator-core (..\..\pyproject.toml)
 flake8-tuple==0.4.1
     # via simulator-core (..\..\pyproject.toml)
-fonttools==4.51.0
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
 furo==2023.9.10
     # via simulator-core (..\..\pyproject.toml)
 future-fstrings==1.2.0
@@ -119,10 +97,6 @@ future-fstrings==1.2.0
     #   pyecore
 geopandas==0.14.3
     # via simulator-core (..\..\pyproject.toml)
-humanfriendly==10.0
-    # via
-    #   -c ..\..\requirements.txt
-    #   coloredlogs
 idna==3.7
     # via
     #   -c ..\..\requirements.txt
@@ -135,22 +109,14 @@ influxdb==5.3.1
     #   simulator-core (..\..\pyproject.toml)
 iniconfig==2.0.0
     # via pytest
-jinja2==3.1.3
+jinja2==3.1.4
     # via sphinx
-kiwisolver==1.4.5
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
-lxml==5.2.1
+lxml==5.2.2
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
 markupsafe==2.1.5
     # via jinja2
-matplotlib==3.8.4
-    # via
-    #   -c ..\..\requirements.txt
-    #   pandapipes
 mccabe==0.7.0
     # via flake8
 msgpack==1.0.8
@@ -163,16 +129,9 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-networkx==3.3
-    # via
-    #   -c ..\..\requirements.txt
-    #   pandapower
 numpy==1.26.0
     # via
     #   -c ..\..\requirements.txt
-    #   contourpy
-    #   matplotlib
-    #   pandapower
     #   pandas
     #   scipy
     #   shapely
@@ -180,42 +139,25 @@ numpy==1.26.0
 ordered-set==4.1.0
     # via
     #   -c ..\..\requirements.txt
-    #   deepdiff
     #   pyecore
-packaging==24.0
+packaging==24.1
     # via
-    #   -c ..\..\requirements.txt
     #   build
     #   geopandas
-    #   matplotlib
-    #   pandapower
     #   plotly
     #   pytest
     #   setuptools-git-versioning
     #   sphinx
-pandapipes==0.8.4
-    # via
-    #   -c ..\..\requirements.txt
-    #   simulator-core (..\..\pyproject.toml)
-pandapower==2.14.6
-    # via
-    #   -c ..\..\requirements.txt
-    #   pandapipes
 pandas==2.1.1
     # via
     #   -c ..\..\requirements.txt
     #   geopandas
-    #   pandapower
     #   simulator-core (..\..\pyproject.toml)
 pathspec==0.12.1
     # via black
-pillow==10.3.0
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
 pip-tools==7.3.0
     # via simulator-core (..\..\pyproject.toml)
-platformdirs==4.2.1
+platformdirs==4.2.2
     # via black
 plotly==5.21.0
     # via simulator-core (..\..\pyproject.toml)
@@ -235,22 +177,14 @@ pyesdl==24.2
     #   simulator-core (..\..\pyproject.toml)
 pyflakes==3.0.1
     # via flake8
-pygments==2.17.2
+pygments==2.18.0
     # via
     #   furo
     #   sphinx
-pyparsing==3.1.2
-    # via
-    #   -c ..\..\requirements.txt
-    #   matplotlib
 pyproj==3.6.1
     # via geopandas
-pyproject-hooks==1.0.0
+pyproject-hooks==1.1.0
     # via build
-pyreadline3==3.4.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   humanfriendly
 pytest==7.3.2
     # via
     #   pytest-cov
@@ -261,14 +195,13 @@ python-dateutil==2.9.0.post0
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
-    #   matplotlib
     #   pandas
 pytz==2024.1
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
     #   pandas
-requests==2.31.0
+requests==2.32.3
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
@@ -277,17 +210,15 @@ restrictedpython==7.2a1.dev0
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
-scipy==1.13.0
+scipy==1.14.0
     # via
     #   -c ..\..\requirements.txt
-    #   pandapower
+    #   simulator-core (..\..\pyproject.toml)
 setuptools-git-versioning==1.13.6
     # via simulator-core (..\..\pyproject.toml)
 shapely==2.0.4
     # via
-    #   -c ..\..\requirements.txt
     #   geopandas
-    #   pandapipes
     #   simulator-core (..\..\pyproject.toml)
 six==1.16.0
     # via
@@ -314,29 +245,25 @@ sphinxcontrib-applehelp==1.0.8
     # via sphinx
 sphinxcontrib-devhelp==1.0.6
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.5
+sphinxcontrib-htmlhelp==2.0.6
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-qthelp==1.0.7
+sphinxcontrib-qthelp==1.0.8
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
-tenacity==8.2.3
+tenacity==8.5.0
     # via plotly
 tomli==2.0.1
     # via black
-tqdm==4.66.2
-    # via
-    #   -c ..\..\requirements.txt
-    #   pandapower
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via mypy
 tzdata==2024.1
     # via
     #   -c ..\..\requirements.txt
     #   pandas
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   -c ..\..\requirements.txt
     #   requests

@@ -28,6 +28,7 @@ class JunctionTest(unittest.TestCase):
         """Generic/template test for Junction."""
         # Arrange
         node = Mock()
+
         # Act
         from_junction = Junction(node, name="from_junction")  # act
 

@@ -29,7 +29,6 @@ class PipeTest(unittest.TestCase):
 
     def setUp(self):
         """Set up test case."""
-        # Create empty pandapipes network
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
@@ -85,6 +84,7 @@ class PipeTest(unittest.TestCase):
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
+        pass
 
         # Assert
         with self.assertRaises(NotImplementedError):

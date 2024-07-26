@@ -19,15 +19,17 @@ from uuid import uuid4
 
 from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
+from simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class MockBaseNodeItem(BaseNodeItem):
     """Mock BaseItem class for testing."""
 
-    def get_equations(self) -> None:
+    def get_equations(self) -> list[EquationObject]:
         """Dummy implementation of the get_equations method for testing."""
+        return []
 
-    def connect_asset(self, asset: BaseNodeItem, connection_point: int) -> None:
+    def connect_asset(self, asset: BaseItem, connection_point: int) -> None:
         """Dummy implementation of the connect_asset method for testing."""
 
     def get_connected_assets(self) -> list[tuple[BaseItem, int]]:
@@ -45,8 +47,9 @@ class BaseItemTest(unittest.TestCase):
         number_of_unknowns = 2
 
         # act
-        asset = MockBaseNodeItem(name=asset_name, _id=str(asset_name),
-                                 number_of_unknowns=number_of_unknowns)  # act
+        asset = MockBaseNodeItem(
+            name=asset_name, _id=str(asset_name), number_of_unknowns=number_of_unknowns
+        )  # act
 
         # assert
         self.assertEqual(asset.name, asset_name)
@@ -59,9 +62,9 @@ class BaseItemTest(unittest.TestCase):
         # arrange
         asset_name = str(uuid4())
         number_of_unknowns = 2
-        asset = MockBaseNodeItem(name=asset_name,
-                                 _id=asset_name,
-                                 number_of_unknowns=number_of_unknowns)
+        asset = MockBaseNodeItem(
+            name=asset_name, _id=asset_name, number_of_unknowns=number_of_unknowns
+        )
 
         # act
         asset.set_matrix_index(1)  # act

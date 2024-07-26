@@ -15,7 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -38,7 +38,6 @@ class ProductionClusterTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test case."""
-        # Create empty pandapipes network
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
@@ -85,11 +84,11 @@ class ProductionClusterTest(unittest.TestCase):
         self.assertEqual(self.production_cluster.temperature_return, 333.15)
         self.assertEqual(self.production_cluster.controlled_mass_flow, mass_flow)
         self.assertEqual(
-            self.production_cluster.solver_asset.mass_flow_rate_set_point,
+            self.production_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
             self.production_cluster.controlled_mass_flow,
         )
-        self.assertNotEquals(
-            self.production_cluster.solver_asset.pre_scribe_mass_flow,
+        self.assertNotEqual(
+            self.production_cluster.solver_asset.pre_scribe_mass_flow,  # type: ignore
             setpoints[PROPERTY_SET_PRESSURE],
         )
 
@@ -162,7 +161,7 @@ class ProductionClusterTest(unittest.TestCase):
             self.production_cluster.control_mass_flow, setpoints[PROPERTY_SET_PRESSURE]
         )
         self.assertNotEqual(
-            self.production_cluster.solver_asset.pre_scribe_mass_flow,
+            self.production_cluster.solver_asset.pre_scribe_mass_flow,  # type: ignore
             setpoints[PROPERTY_SET_PRESSURE],
         )
 
@@ -176,7 +175,9 @@ class ProductionClusterTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.production_cluster.pressure_supply, pressure_supply)
-        self.assertEqual(self.production_cluster.solver_asset.set_pressure, pressure_supply)
+        self.assertEqual(
+            self.production_cluster.solver_asset.set_pressure, pressure_supply  # type: ignore
+        )
 
     def test_production_cluster_set_pressure_supply_negative(self) -> None:
         """Test raise ValueError with negative pressure."""
@@ -198,12 +199,21 @@ class ProductionClusterTest(unittest.TestCase):
     def test_production_cluster_write_to_output(self) -> None:
         """Test writing the output of a production cluster."""
         # Arrange
-        self.production_cluster.solver_asset.get_mass_flow_rate = Mock(return_value=1e6)
-        self.production_cluster.solver_asset.get_pressure = Mock(return_value=2e5)
-        self.production_cluster.solver_asset.get_temperature = Mock(return_value=333.15)
+        with (
+            patch.object(
+                self.production_cluster.solver_asset, "get_mass_flow_rate"
+            ) as get_mass_flow_rate,
+            patch.object(self.production_cluster.solver_asset, "get_pressure") as get_pressure,
+            patch.object(
+                self.production_cluster.solver_asset, "get_temperature"
+            ) as get_temperature,
+        ):
+            get_mass_flow_rate.return_value = 1e6
+            get_pressure.return_value = 2e5
+            get_temperature.return_value = 333.15
 
-        # Act
-        self.production_cluster.write_standard_output()
+            # Act
+            self.production_cluster.write_standard_output()
 
         # Assert
         self.assertEqual(
