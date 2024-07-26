@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
-from simulator_core.entities.assets.controller.controller_abstract_clas import (
+from simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract)
 
 

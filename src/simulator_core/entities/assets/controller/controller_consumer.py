@@ -18,7 +18,7 @@ import datetime
 
 import pandas as pd
 import logging
-from simulator_core.entities.assets.controller.controller_abstract_clas import (
+from simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract)
 
 logger = logging.getLogger(__name__)
