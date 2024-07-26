@@ -61,9 +61,11 @@ class NetworkSimulationTest(unittest.TestCase):
                                                                  "%Y-%m-%dT%H:%M:%S"),
                                          stop=datetime.strptime("2019-01-01T01:00:00",
                                                                 "%Y-%m-%dT%H:%M:%S"))
+        callback = Mock()
+
         # Act
-        network_simulation.run(config)  # act
+        network_simulation.run(config, callback)  # act
 
         # Assert
-        # this does not work since the network is mocked, since we cannot simulate yet
-        # self.assertEqual(len(network_simulation.gather_output()), config.stop / config.timestep)
+        self.assertTrue(callback.called)
+        self.assertEqual(len(network_simulation.gather_output()), 1)

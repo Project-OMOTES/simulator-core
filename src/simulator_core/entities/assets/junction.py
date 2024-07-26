@@ -24,7 +24,7 @@ from simulator_core.solver.network.assets.node import Node
 
 
 class Junction:
-    """Wrapper class for pandapipes junctions."""
+    """Juntion connects two or more assets."""
 
     def __init__(
         self,

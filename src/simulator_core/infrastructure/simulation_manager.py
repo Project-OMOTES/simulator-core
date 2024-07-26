@@ -14,14 +14,21 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simulation manager creates and controls the simulation objects."""
+import logging
+from typing import Callable
 
 import pandas as pd
 
-from simulator_core.adapter.transforms.mappers import EsdlControllerMapper, EsdlEnergySystemMapper
+from simulator_core.adapter.transforms.mappers import (
+    EsdlControllerMapper,
+    EsdlEnergySystemMapper,
+)
 from simulator_core.entities.esdl_object import EsdlObject
 from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.simulation_configuration import SimulationConfiguration
 from simulator_core.simulation import NetworkSimulation
+
+logger = logging.getLogger(__name__)
 
 
 class SimulationManager:
@@ -36,10 +43,10 @@ class SimulationManager:
         self.esdl = esdl
         self.config = config
 
-    def execute(self) -> pd.DataFrame:
+    def execute(self, progress_calback: Callable[[float, str], None]) -> pd.DataFrame:
         """Method to simulate the network.
 
-        First the network is converted to pandapipes and then the simulation is run.
+        First the network is converted to an internal object model and then the simulation is run.
 
         :return: DataFrame with the result of the simulations
         """
@@ -48,7 +55,7 @@ class SimulationManager:
         controller = EsdlControllerMapper().to_entity(self.esdl)
 
         worker = NetworkSimulation(network, controller)
-        worker.run(self.config)
+        worker.run(self.config, progress_calback)
 
         # Run output presenter that iterates over het network (/controller?) and
         # gathers the output into a single data object

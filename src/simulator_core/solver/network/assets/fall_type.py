@@ -125,7 +125,7 @@ class FallType(BaseAsset):
         if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
             return self.add_internal_energy_equation()
         else:
-            return self.add_temp_to_node_equation(connection_point=connection_point)
+            return self.add_internal_energy_to_node_equation(connection_point=connection_point)
 
     def add_internal_cont_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the internal continuity equation for the asset.

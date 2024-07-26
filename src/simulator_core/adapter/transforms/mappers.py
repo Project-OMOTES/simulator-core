@@ -131,7 +131,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         py_assets_list = []
         py_joint_dict = {}
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
-            # Junctions need to be skipped, as they are replaced by merged pandapipes junctions.
+            # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 py_joint_dict[esdl_asset.esdl_asset.id] = [
                     *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.In),

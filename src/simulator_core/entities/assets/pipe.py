@@ -44,8 +44,6 @@ class Pipe(AssetAbstract):
     """The wall roughness of the pipe [m]."""
     alpha_value: float
     """The alpha value of the pipe [W/(m2 K)]."""
-    _initialized: bool
-    """Flag to indicate whether the pipe has been initialized in pandapipes."""
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
@@ -66,7 +64,6 @@ class Pipe(AssetAbstract):
         self.diameter = PIPE_DEFAULTS.diameter
         self.roughness = PIPE_DEFAULTS.k_value
         self.alpha_value = PIPE_DEFAULTS.alpha_value
-        # Objects of the pandapipes network
         self.solver_asset = SolverPipe(
             name=self.name,
             _id=self.asset_id,
