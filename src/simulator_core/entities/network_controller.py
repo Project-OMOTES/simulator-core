@@ -101,7 +101,7 @@ class NetworkController(NetworkControllerAbstract):
         return producers
 
     def _set_consumer_capped(self, time: datetime.datetime) -> dict:
-        """Method to set the consumer to the capped to the max available power of the producers.
+        """Method to set the consumer to the max available power of the producers.
 
         :param datetime.datetime time: Time for which to cap the heat demand based on available
         power.
