@@ -33,7 +33,8 @@ class HeatNetwork:
     ) -> None:
         """Constructor of heat network class.
 
-        :param conversion_factory: method to convert the esdl network to assets and junctions and returns list of both
+        :param conversion_factory: method to convert the esdl network to lists of assets&junctions
+        and returns list of both
         """
         self.network = Network()
         self.assets, self.junctions = conversion_factory(self.network)
