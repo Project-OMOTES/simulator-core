@@ -143,7 +143,7 @@ class ControllerTest(unittest.TestCase):
     def test_run_time_step(self):
         """Test to run the time step."""
         # Act
-        result = self.controller.run_time_step(datetime.now())
+        result = self.controller.update_setpoints(datetime.now())
 
         # Assert
         self.assertIn(self.producer1.id, result)
@@ -161,7 +161,7 @@ class ControllerTest(unittest.TestCase):
         start = datetime.strptime("2019-01-01T00:00:00",
                                   "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
         # Act
-        results = controller.run_time_step(start)
+        results = controller.update_setpoints(start)
 
         # Assert
         self.assertIn("cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4", results)

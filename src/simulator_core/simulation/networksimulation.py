@@ -45,7 +45,7 @@ class NetworkSimulation:
             not_converged = True
             time = (config.start + timedelta(seconds=time_step * config.timestep)
                     ).replace(tzinfo=timezone.utc)
-            controller_input = self.controller.run_time_step(time)
+            controller_input = self.controller.update_setpoints(time)
 
             while not_converged:
                 not_converged = False  # for the moment we do not check on convergence,

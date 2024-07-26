@@ -23,7 +23,7 @@ class NetworkControllerAbstract(ABC):
     """Abstract class for the network controller."""
 
     @abstractmethod
-    def run_time_step(self, time: datetime.datetime) -> dict:
+    def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
 
         :param float time: Time step for which to run the controller.
