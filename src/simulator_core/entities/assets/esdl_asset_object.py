@@ -57,23 +57,21 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return get_data_from_profile(esdl_port.profile[0])
-        raise ValueError("No profile found for asset: " + self.esdl_asset.name)
+        raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
 
     def get_supply_temperature(self, port_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
                 return get_supply_temperature(esdl_port)
-        raise ValueError("No port found with type: " + port_type
-                         + " for asset: " + self.esdl_asset.name)
+        raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_return_temperature(self, port_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
                 return get_return_temperature(esdl_port)
-        raise ValueError("No port found with type: " + port_type
-                         + " for asset: " + self.esdl_asset.name)
+        raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_port_ids(self) -> list[str]:
         """Get the port ids of the asset."""
@@ -86,7 +84,7 @@ class EsdlAssetObject:
         elif port_type == "Out":
             return esdl.OutPort  # type: ignore [no-any-return]
         else:
-            raise ValueError("Port type not recognized: " + port_type)
+            raise ValueError(f"Port type not recognized: {port_type}")
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:
