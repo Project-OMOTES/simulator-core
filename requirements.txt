@@ -8,14 +8,10 @@ certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coloredlogs==15.0.1
-    # via simulator-core (..\..\pyproject.toml)
 dataclass-wizard==0.22.2
     # via simulator-core (..\..\pyproject.toml)
 future-fstrings==1.2.0
     # via pyecore
-humanfriendly==10.0
-    # via coloredlogs
 idna==3.7
     # via requests
 influxdb==5.3.1
@@ -27,6 +23,7 @@ msgpack==1.0.8
 numpy==1.26.0
     # via
     #   pandas
+    #   scipy
     #   simulator-core (..\..\pyproject.toml)
 ordered-set==4.1.0
     # via pyecore
@@ -36,8 +33,6 @@ pyecore==0.12.1
     # via pyesdl
 pyesdl==24.2
     # via simulator-core (..\..\pyproject.toml)
-pyreadline3==3.4.1
-    # via humanfriendly
 python-dateutil==2.9.0.post0
     # via
     #   influxdb
@@ -50,6 +45,8 @@ requests==2.32.3
     # via influxdb
 restrictedpython==7.2a1.dev0
     # via pyecore
+scipy==1.14.0
+    # via simulator-core (..\..\pyproject.toml)
 six==1.16.0
     # via
     #   influxdb

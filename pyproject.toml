@@ -21,6 +21,7 @@ classifiers = [
 dependencies = [
     "numpy==1.26.0",
     "pandas==2.1.1",
+    "scipy==1.14.0",
     "pyesdl==24.2.0",
     "dataclass-wizard==0.22.2",
     "influxdb==5.3.1",

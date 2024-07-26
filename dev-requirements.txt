@@ -51,10 +51,6 @@ colorama==0.4.6
     #   click
     #   pytest
     #   sphinx
-coloredlogs==15.0.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   simulator-core (..\..\pyproject.toml)
 coverage[toml]==7.6.0
     # via
     #   coverage
@@ -101,10 +97,6 @@ future-fstrings==1.2.0
     #   pyecore
 geopandas==0.14.3
     # via simulator-core (..\..\pyproject.toml)
-humanfriendly==10.0
-    # via
-    #   -c ..\..\requirements.txt
-    #   coloredlogs
 idna==3.7
     # via
     #   -c ..\..\requirements.txt
@@ -141,6 +133,7 @@ numpy==1.26.0
     # via
     #   -c ..\..\requirements.txt
     #   pandas
+    #   scipy
     #   shapely
     #   simulator-core (..\..\pyproject.toml)
 ordered-set==4.1.0
@@ -192,10 +185,6 @@ pyproj==3.6.1
     # via geopandas
 pyproject-hooks==1.1.0
     # via build
-pyreadline3==3.4.1
-    # via
-    #   -c ..\..\requirements.txt
-    #   humanfriendly
 pytest==7.3.2
     # via
     #   pytest-cov
@@ -221,6 +210,10 @@ restrictedpython==7.2a1.dev0
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
+scipy==1.14.0
+    # via
+    #   -c ..\..\requirements.txt
+    #   simulator-core (..\..\pyproject.toml)
 setuptools-git-versioning==1.13.6
     # via simulator-core (..\..\pyproject.toml)
 shapely==2.0.4
