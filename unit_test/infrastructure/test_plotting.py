@@ -18,7 +18,6 @@ import unittest
 from pathlib import Path
 import uuid
 from datetime import datetime
-import os
 from simulator_core.adapter.transforms.mappers import (
     EsdlControllerMapper,
     EsdlEnergySystemMapper,
@@ -58,4 +57,4 @@ class PlottingTest(unittest.TestCase):
         plotting.simulation_output(result)
 
         # Assert
-        self.assertTrue(os.path.exists("map.html"))
+        self.assertTrue(Path("./map.html").is_file())

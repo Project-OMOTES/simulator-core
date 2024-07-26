@@ -87,7 +87,7 @@ class ProductionClusterTest(unittest.TestCase):
             self.production_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
             self.production_cluster.controlled_mass_flow,
         )
-        self.assertNotEquals(
+        self.assertNotEqual(
             self.production_cluster.solver_asset.pre_scribe_mass_flow,  # type: ignore
             setpoints[PROPERTY_SET_PRESSURE],
         )

@@ -94,8 +94,8 @@ ignore = [
     'E203',  # Space before colon (not PEP-8 compliant, and conflicts with black)
     'C408',  # Suggestion to use dict() over {}
     'W503',  # Starting lines with operators.
-    'PT009', # use a regular assert instead of unittest-style '{assertion}'
-    'PT027', # pytest.raises() should be used instead of assertRaises()'
+    'PT009', # use a regular assert instead of unittest-style assertion
+    'PT027', # pytest.raises() should be used instead of assertRaises()
     'AAA01', # no Act block found in test
     'AAA03', # No act block found. '
     'AAA06', # Comment in Act block
