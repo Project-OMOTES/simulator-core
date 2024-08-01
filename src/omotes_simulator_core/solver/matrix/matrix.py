@@ -87,12 +87,12 @@ class Matrix:
         :return: None
         """
         if len(equations) > self.num_unknowns:
-            raise RuntimeError(
+            raise ValueError(
                 f"Too many equations supplied. Got {len(equations)} equations, "
                 f"but number of unknowns is {self.num_unknowns}"
             )
         if len(equations) < self.num_unknowns:
-            raise RuntimeError(
+            raise ValueError(
                 f"Not enough equation supplied. Got {len(equations)} equations, "
                 f"but number of unknowns is {self.num_unknowns}"
             )
@@ -152,7 +152,9 @@ class Matrix:
         with open(file_name, "w", newline="") as f:
             write = csv.writer(f)
             write.writerow(
-                ["m", "P", "u"] * int(self.num_unknowns / NUMBER_CORE_QUANTITIES) + ["rhs"]
+                ["m", "P", "u"]
+                * int(self.num_unknowns / index_core_quantity.number_core_quantities)
+                + ["rhs"]
             )
             for row, rhs in zip(matrix.todense(), rhs_array.todense()):
                 write.writerow(row.tolist()[0] + rhs.tolist()[0])

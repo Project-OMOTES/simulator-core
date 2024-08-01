@@ -115,7 +115,13 @@ class SolverPipe(FallType):
         """
         self.calc_lambda_loss()
         density = fluid_props.get_density(
-            fluid_props.get_t(self.prev_sol[IndexEnum.internal_energy])
+            fluid_props.get_t(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy", connection_point=0, matrix=False
+                    )
+                ]
+            )
         )
         self.loss_coefficient = (
             self.lambda_loss
@@ -146,9 +152,19 @@ class SolverPipe(FallType):
         """
         # Retrieve properties from previous solution
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
-            mass_flow_rate = self.prev_sol[IndexEnum.discharge]
+            mass_flow_rate = self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, matrix=False
+                )
+            ]
         if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(self.prev_sol[IndexEnum.internal_energy])
+            temperature = fluid_props.get_t(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy", connection_point=0, matrix=False
+                    )
+                ]
+            )
         # Calculate the Reynolds number
         density = fluid_props.get_density(temperature)
         discharge = mass_flow_rate / density
@@ -288,7 +304,13 @@ class SolverPipe(FallType):
         """
         # Check the temperature
         if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(self.prev_sol[IndexEnum.internal_energy])
+            temperature = fluid_props.get_t(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy", connection_point=0, matrix=False
+                    )
+                ]
+            )
 
         # Calculate the thermal diffusivity
         thermal_diffusivity = fluid_props.get_thermal_conductivity(temperature) / (
@@ -363,27 +385,35 @@ class SolverPipe(FallType):
         """
         # Reset the internal energy grid
         self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
+        mass_flow_rate = self.prev_sol[
+            self.get_index_matrix(property_name="mass_flow_rate", connection_point=0, matrix=False)
+        ]
         # Determine the flow direction
-        if self.prev_sol[IndexEnum.discharge] < 0:
+        if mass_flow_rate < 0:
             # Flow from connection point 1 to connection point 0
             start_index = self._grid_size - 1
             end_index = -1
             step = -1
             # Set the internal energy at the connection point
             self._internal_energy_grid[-1] = self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=1, matrix=False
+                )
             ]
             # Retrieve the mass flow rate
-            mass_flow_rate = abs(self.prev_sol[IndexEnum.discharge])
-        elif self.prev_sol[IndexEnum.discharge] > 0:
+            mass_flow_rate = abs(mass_flow_rate)
+        elif mass_flow_rate > 0:
             # Flow from connection point 0 to connection point 1
             start_index = 1
             end_index = self._grid_size + 1
             step = 1
             # Set the internal energy at the connection point
-            self._internal_energy_grid[0] = self.prev_sol[IndexEnum.internal_energy]
+            self._internal_energy_grid[0] = self.prev_sol[
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=0, matrix=False
+                )
+            ]
             # Retrieve the mass flow rate
-            mass_flow_rate = self.prev_sol[IndexEnum.discharge]
         else:
             # No flow
             start_index = 1
@@ -392,7 +422,6 @@ class SolverPipe(FallType):
             # Set the internal energy grid
             self._internal_energy_grid[:] = fluid_props.get_ie(self.ambient_temperature)
             # Retrieve the mass flow rate
-            mass_flow_rate = self.prev_sol[IndexEnum.discharge]
         return mass_flow_rate, start_index, end_index, step
 
     def _calculate_heat_loss_grid_point(self, iteration_index: int) -> float:

@@ -62,7 +62,7 @@ class BaseBoundary(BaseAsset):
         """
         # self.equations_dict["prescribe pressure"] = equation_id
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.indices = np.array([self.matrix_index + index_core_quantity.pressure])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.initial_pressure
         return equation_object
