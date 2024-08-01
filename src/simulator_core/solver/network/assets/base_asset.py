@@ -19,7 +19,6 @@ from typing import Dict
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
 from simulator_core.solver.network.assets.base_node_item import BaseNodeItem
@@ -149,7 +148,14 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
+        if (
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=connection_point, matrix=False
+                )
+            ]
+            > 0
+        ):
             return self.add_prescribe_temp(connection_point)
         else:
             return self.add_internal_energy_to_node_equation(connection_point)
@@ -170,9 +176,9 @@ class BaseAsset(BaseItem):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index
-                + IndexEnum.internal_energy
-                + connection_point * NUMBER_CORE_QUANTITIES
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=connection_point
+                )
             ]
         )
         equation_object.coefficients = np.array([1.0])
@@ -197,10 +203,12 @@ class BaseAsset(BaseItem):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index
-                + IndexEnum.internal_energy
-                + connection_point * NUMBER_CORE_QUANTITIES,
-                self.get_connected_node(connection_point).matrix_index + IndexEnum.internal_energy,
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=connection_point
+                ),
+                self.get_connected_node(connection_point).get_index_matrix(
+                    property_name="internal_energy"
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, -1.0])
@@ -231,8 +239,10 @@ class BaseAsset(BaseItem):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.pressure + connection_point * NUMBER_CORE_QUANTITIES,
-                self.connected_nodes[connection_point].matrix_index + IndexEnum.pressure,
+                self.get_index_matrix(property_name="pressure", connection_point=connection_point),
+                self.get_connected_node(connection_point).get_index_matrix(
+                    property_name="pressure"
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, -1.0])
@@ -284,7 +294,11 @@ class BaseAsset(BaseItem):
         :param int connection_point: The connection point for which to get the mass flow rate.
         :return: The mass flow rate of the connection point.
         """
-        return self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES]
+        return self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=connection_point, matrix=False
+            )
+        ]
 
     def get_pressure(self, connection_point: int) -> float:
         """Method to get the pressure of a connection point.
@@ -292,7 +306,11 @@ class BaseAsset(BaseItem):
         :param int connection_point: The connection point for which to get the pressure.
         :return: The pressure of the connection point.
         """
-        return self.prev_sol[IndexEnum.pressure + connection_point * NUMBER_CORE_QUANTITIES]
+        return self.prev_sol[
+            self.get_index_matrix(
+                property_name="pressure", connection_point=connection_point, matrix=False
+            )
+        ]
 
     def get_temperature(self, connection_point: int) -> float:
         """Method to get the temperature of a connection point.
@@ -301,5 +319,9 @@ class BaseAsset(BaseItem):
         :return: The temperature of the connection point.
         """
         return fluid_props.get_t(
-            self.prev_sol[IndexEnum.internal_energy + connection_point * NUMBER_CORE_QUANTITIES]
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=connection_point, matrix=False
+                )
+            ]
         )

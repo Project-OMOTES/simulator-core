@@ -21,7 +21,7 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_test
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.utils.fluid_properties import fluid_props
@@ -100,15 +100,16 @@ class NodeTest(unittest.TestCase):
 
         # assert
         self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(cm.exception.args[0], f"Node {self.node.name} "
-                                               f"is not connected to any asset.")
+        self.assertEqual(
+            cm.exception.args[0], f"Node {self.node.name} " f"is not connected to any asset."
+        )
 
     @patch.object(Node, "add_node_cont_equation")
     @patch.object(Node, "add_discharge_equation")
     @patch.object(Node, "add_energy_equations")
     @patch.object(Node, "set_temperature_equation")
     def test_get_equations_connected(
-            self, temperature_patch, energy_patch, discharge_patch, continuity_patch
+        self, temperature_patch, energy_patch, discharge_patch, continuity_patch
     ) -> None:
         """Test the get_equations method of the Node class when connected."""
         # arrange
@@ -134,8 +135,9 @@ class NodeTest(unittest.TestCase):
         equation_object = self.node.add_node_cont_equation()
 
         # assert
-        self.assertEqual(equation_object.indices, [self.node.matrix_index
-                                                   + IndexEnum.discharge])
+        self.assertEqual(
+            equation_object.indices, [self.node.matrix_index + index_core_quantity.mass_flow_rate]
+        )
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 0.0)
 
@@ -154,8 +156,8 @@ class NodeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.node.matrix_index + IndexEnum.discharge,
-                    connected_asset.matrix_index + IndexEnum.discharge,
+                    self.node.matrix_index + index_core_quantity.mass_flow_rate,
+                    connected_asset.matrix_index + index_core_quantity.mass_flow_rate,
                 ]
             ),
         )
@@ -171,7 +173,8 @@ class NodeTest(unittest.TestCase):
 
         # assert
         np_test.assert_array_equal(
-            equation_object.indices, np.array([self.node.matrix_index + IndexEnum.discharge])
+            equation_object.indices,
+            np.array([self.node.matrix_index + index_core_quantity.mass_flow_rate]),
         )
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
         self.assertEqual(equation_object.rhs, 0.0)
@@ -187,7 +190,7 @@ class NodeTest(unittest.TestCase):
 
         # assert
         np_test.assert_array_equal(
-            equation_object.indices, np.array([node.matrix_index + IndexEnum.pressure])
+            equation_object.indices, np.array([node.matrix_index + index_core_quantity.pressure])
         )
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
         self.assertEqual(equation_object.rhs, node.set_pressure)
@@ -203,7 +206,8 @@ class NodeTest(unittest.TestCase):
 
         # assert
         np_test.assert_array_equal(
-            equation_object.indices, np.array([node.matrix_index + IndexEnum.internal_energy])
+            equation_object.indices,
+            np.array([node.matrix_index + index_core_quantity.internal_energy]),
         )
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(node.initial_temperature))
@@ -240,23 +244,23 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.internal_energy = fluid_props.get_ie(self.initial_temperature)
         self.discharge = 1.0
         # Create base asset
-        self.node = Node(name=str(uuid4()),
-                         _id=str(uuid4()),
-                         initial_temperature=self.initial_temperature)
+        self.node = Node(
+            name=str(uuid4()), _id=str(uuid4()), initial_temperature=self.initial_temperature
+        )
         # Create connected asset
         self.connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
-        self.connected_asset.set_matrix_index(NUMBER_CORE_QUANTITIES)
+        self.connected_asset.set_matrix_index(index_core_quantity.number_core_quantities)
         self.connection_point = 0
         # Create connected asset on other connection point
         self.connected_asset_2 = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
-        self.connected_asset_2.set_matrix_index(NUMBER_CORE_QUANTITIES * 2)
+        self.connected_asset_2.set_matrix_index(index_core_quantity.number_core_quantities * 2)
         self.connection_point_2 = 1
 
     def test_add_energy_equation(self) -> None:
         """Test the add_energy_equation method of the Node class."""
         # arrange
-        self.node.prev_sol[IndexEnum.discharge] = self.discharge
-        self.node.prev_sol[IndexEnum.internal_energy] = self.internal_energy
+        self.node.prev_sol[index_core_quantity.mass_flow_rate] = self.discharge
+        self.node.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
 
         # act
         equation_object = self.node.add_energy_equation()
@@ -266,8 +270,8 @@ class NodeTestEnergyEquation(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.node.matrix_index + IndexEnum.discharge,
-                    self.node.matrix_index + IndexEnum.internal_energy,
+                    self.node.matrix_index + index_core_quantity.mass_flow_rate,
+                    self.node.matrix_index + index_core_quantity.internal_energy,
                 ]
             ),
         )
@@ -280,10 +284,10 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equation method of the Node class with additional node."""
         # arrange
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
-        self.node.prev_sol[IndexEnum.discharge] = self.discharge
-        self.node.prev_sol[IndexEnum.internal_energy] = self.internal_energy
-        self.connected_asset.prev_sol[IndexEnum.discharge] = -self.discharge
-        self.connected_asset.prev_sol[IndexEnum.internal_energy] = self.internal_energy
+        self.node.prev_sol[index_core_quantity.mass_flow_rate] = self.discharge
+        self.node.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
+        self.connected_asset.prev_sol[index_core_quantity.mass_flow_rate] = -self.discharge
+        self.connected_asset.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
 
         # act
         equation_object = self.node.add_energy_equation()
@@ -293,14 +297,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.node.matrix_index + IndexEnum.discharge,
-                    self.node.matrix_index + IndexEnum.internal_energy,
+                    self.node.matrix_index + index_core_quantity.mass_flow_rate,
+                    self.node.matrix_index + index_core_quantity.internal_energy,
                     self.connected_asset.matrix_index
-                    + IndexEnum.discharge
-                    + NUMBER_CORE_QUANTITIES * self.connection_point,
+                    + index_core_quantity.mass_flow_rate
+                    + index_core_quantity.number_core_quantities * self.connection_point,
                     self.connected_asset.matrix_index
-                    + IndexEnum.internal_energy
-                    + NUMBER_CORE_QUANTITIES * self.connection_point,
+                    + index_core_quantity.internal_energy
+                    + index_core_quantity.number_core_quantities * self.connection_point,
                 ]
             ),
         )
@@ -323,19 +327,21 @@ class NodeTestEnergyEquation(unittest.TestCase):
     @patch.object(Node, "add_energy_equation")
     @patch.object(Node, "set_temperature_equation")
     def test_add_energy_equations_with_positive_negative_flow(
-            self, mock_set_temperature, mock_set_energy
+        self, mock_set_temperature, mock_set_energy
     ) -> None:
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[IndexEnum.discharge
-                                      + self.connection_point
-                                      * NUMBER_CORE_QUANTITIES] = +self.discharge
+        self.connected_asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point * index_core_quantity.number_core_quantities
+        ] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[IndexEnum.discharge
-                                        + self.connection_point_2
-                                        * NUMBER_CORE_QUANTITIES] = -self.discharge
+        self.connected_asset_2.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point_2 * index_core_quantity.number_core_quantities
+        ] = -self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -350,19 +356,21 @@ class NodeTestEnergyEquation(unittest.TestCase):
     @patch.object(Node, "add_energy_equation")
     @patch.object(Node, "set_temperature_equation")
     def test_add_energy_equations_with_all_positive_flow(
-            self, mock_set_temperature, mock_set_energy
+        self, mock_set_temperature, mock_set_energy
     ) -> None:
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[IndexEnum.discharge
-                                      + self.connection_point
-                                      * NUMBER_CORE_QUANTITIES] = +self.discharge
+        self.connected_asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point * index_core_quantity.number_core_quantities
+        ] = +self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[IndexEnum.discharge
-                                        + self.connection_point_2
-                                        * NUMBER_CORE_QUANTITIES] = +self.discharge
+        self.connected_asset_2.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point_2 * index_core_quantity.number_core_quantities
+        ] = +self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -377,19 +385,21 @@ class NodeTestEnergyEquation(unittest.TestCase):
     @patch.object(Node, "add_energy_equation")
     @patch.object(Node, "set_temperature_equation")
     def test_add_energy_equations_with_all_negative_flow(
-            self, mock_set_temperature, mock_set_energy
+        self, mock_set_temperature, mock_set_energy
     ) -> None:
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[IndexEnum.discharge
-                                      + self.connection_point
-                                      * NUMBER_CORE_QUANTITIES] = -self.discharge
+        self.connected_asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point * index_core_quantity.number_core_quantities
+        ] = -self.discharge
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[IndexEnum.discharge
-                                        + self.connection_point_2
-                                        * NUMBER_CORE_QUANTITIES] = -self.discharge
+        self.connected_asset_2.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point_2 * index_core_quantity.number_core_quantities
+        ] = -self.discharge
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
@@ -407,14 +417,16 @@ class NodeTestEnergyEquation(unittest.TestCase):
         """Test the add_energy_equations method of the Node class."""
         # arrange
         # - Outflow
-        self.connected_asset.prev_sol[IndexEnum.discharge
-                                      + self.connection_point
-                                      * NUMBER_CORE_QUANTITIES] = 0.0
+        self.connected_asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point * index_core_quantity.number_core_quantities
+        ] = 0.0
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         # - Inflow
-        self.connected_asset_2.prev_sol[IndexEnum.discharge
-                                        + self.connection_point_2
-                                        * NUMBER_CORE_QUANTITIES] = 0.0
+        self.connected_asset_2.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point_2 * index_core_quantity.number_core_quantities
+        ] = 0.0
         self.node.connect_asset(
             asset=self.connected_asset_2, connection_point=self.connection_point_2
         )
