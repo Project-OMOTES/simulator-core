@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_item import BaseItem
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class BaseNodeItem(ABC):
@@ -42,6 +43,20 @@ class BaseNodeItem(ABC):
         :param int index: The index of the item in the matrix.
         """
         self.matrix_index = index
+
+    def get_index_matrix(self, property_name: str, matrix: bool = True) -> int:
+        """Method to get matrix index of a certain property for a connection point.
+
+        :param str property_name: The property name for which the matrix index is needed.
+        :param bool matrix: Whether the index in the matrix should be included.
+        :return: The matrix index for the property and connection point.
+        """
+        return (
+            index_core_quantity.get_index_property(property_name=property_name, connection_point=0)
+            + self.matrix_index
+            if matrix
+            else 0
+        )
 
     @abstractmethod
     def get_equations(self) -> list[EquationObject]:

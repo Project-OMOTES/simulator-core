@@ -16,9 +16,9 @@
 """Module containing Based boundary class."""
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import IndexEnum
 from simulator_core.solver.matrix.equation_object import EquationObject
 from simulator_core.solver.network.assets.base_asset import BaseAsset
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class BaseBoundary(BaseAsset):
@@ -33,8 +33,9 @@ class BaseBoundary(BaseAsset):
         equations_dict (dict): A dictionary that maps equation ids to equation indices in the
     """
 
-    def __init__(self, name: str, _id: str, number_of_unknowns: int = 3,
-                 number_con_points: int = 1):
+    def __init__(
+        self, name: str, _id: str, number_of_unknowns: int = 3, number_con_points: int = 1
+    ):
         """Initialize the boundary condition.
 
         :param int number_con_points:The number of connection points for this boundary.
@@ -42,10 +43,12 @@ class BaseBoundary(BaseAsset):
         :param int number_of_unknowns (optional): The number of unknowns for this boundary.
                                                   Defaults to 3.
         """
-        super().__init__(name=name,
-                         _id=_id,
-                         number_of_unknowns=number_of_unknowns,
-                         number_connection_points=number_con_points)
+        super().__init__(
+            name=name,
+            _id=_id,
+            number_of_unknowns=number_of_unknowns,
+            number_connection_points=number_con_points,
+        )
         self.initial_pressure = 10000.0
 
     def add_pressure_equation(self) -> EquationObject:
@@ -59,7 +62,7 @@ class BaseBoundary(BaseAsset):
         """
         # self.equations_dict["prescribe pressure"] = equation_id
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + IndexEnum.pressure])
+        equation_object.indices = np.array([self.matrix_index + index_core_quantity.pressure])
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.initial_pressure
         return equation_object

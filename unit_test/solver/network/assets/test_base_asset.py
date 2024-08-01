@@ -18,7 +18,7 @@ import unittest
 from uuid import uuid4
 import numpy.testing as npt
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.utils.fluid_properties import fluid_props
@@ -30,10 +30,7 @@ class BaseAssetTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test case."""
         # Create a BaseAsset object
-        self.asset = BaseAsset(
-            name=str(uuid4()),
-            _id=str(uuid4())
-        )
+        self.asset = BaseAsset(name=str(uuid4()), _id=str(uuid4()))
         # Create supply, connection_point:0 and return node, connection_point:1
         self.supply_node = Node(name=str(uuid4()), _id=str(uuid4()))
         self.return_node = Node(name=str(uuid4()), _id=str(uuid4()))
@@ -163,9 +160,10 @@ class BaseAssetTest(unittest.TestCase):
         # Arrange
         connection_point_id = 0
         self.asset.connect_node(node=self.supply_node, connection_point=connection_point_id)
-        self.asset.prev_sol[IndexEnum.discharge + connection_point_id * NUMBER_CORE_QUANTITIES] = (
-            1.0
-        )
+        self.asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + connection_point_id * index_core_quantity.number_core_quantities
+        ] = 1.0
 
         # Act
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
@@ -175,7 +173,10 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         npt.assert_array_equal(
             equation_object.indices,
-            [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES],
+            [
+                index_core_quantity.internal_energy
+                + connection_point_id * index_core_quantity.number_core_quantities
+            ],
         )
 
     def test_base_add_thermal_equations_no_discharge(self) -> None:
@@ -195,7 +196,7 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
         npt.assert_array_equal(
             equation_object.indices,
-            [IndexEnum.internal_energy, IndexEnum.internal_energy],
+            [index_core_quantity.internal_energy, index_core_quantity.internal_energy],
         )
 
     def test_base_add_thermal_equations_no_discharge_not_connected(self) -> None:
@@ -237,8 +238,10 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(
             equation_object.indices,
             [
-                IndexEnum.pressure + connection_point_id * NUMBER_CORE_QUANTITIES,
-                self.asset.connected_nodes[connection_point_id].matrix_index + IndexEnum.pressure,
+                index_core_quantity.pressure
+                + connection_point_id * index_core_quantity.number_core_quantities,
+                self.asset.connected_nodes[connection_point_id].matrix_index
+                + index_core_quantity.pressure,
             ],
         )
 
@@ -265,9 +268,10 @@ class BaseAssetTest(unittest.TestCase):
         """Test the get_pressure method."""
         # Arrange
         connection_point_id = 0
-        self.asset.prev_sol[IndexEnum.pressure + connection_point_id * NUMBER_CORE_QUANTITIES] = (
-            10000.0
-        )
+        self.asset.prev_sol[
+            index_core_quantity.pressure
+            + connection_point_id * index_core_quantity.number_core_quantities
+        ] = 10000.0
 
         # Act
         result = self.asset.get_pressure(connection_point=connection_point_id)
@@ -279,9 +283,10 @@ class BaseAssetTest(unittest.TestCase):
         """Test the get_mass_flow_rate method."""
         # Arrange
         connection_point_id = 0
-        self.asset.prev_sol[IndexEnum.discharge + connection_point_id * NUMBER_CORE_QUANTITIES] = (
-            1.0
-        )
+        self.asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + connection_point_id * index_core_quantity.number_core_quantities
+        ] = 1.0
 
         # Act
         result = self.asset.get_mass_flow_rate(connection_point=connection_point_id)
@@ -295,7 +300,8 @@ class BaseAssetTest(unittest.TestCase):
         connection_point_id = 0
         temperature = 300.0
         self.asset.prev_sol[
-            IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES
+            index_core_quantity.internal_energy
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = fluid_props.get_ie(temperature)
 
         # Act

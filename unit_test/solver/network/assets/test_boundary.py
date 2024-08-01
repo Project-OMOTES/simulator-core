@@ -18,7 +18,7 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from simulator_core.solver.matrix.core_enum import IndexEnum
+from simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.node import Node
@@ -30,10 +30,7 @@ class BaseBoundaryTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test case."""
         # Create a BaseBoundary object
-        self.asset = BaseBoundary(
-            name=str(uuid4()),
-            _id=str(uuid4())
-        )
+        self.asset = BaseBoundary(name=str(uuid4()), _id=str(uuid4()))
         # Create supply, connection_point:0 and return node, connection_point:1
         self.supply_node = Node(name=str(uuid4()), _id=str(uuid4()))
         # Connect the nodes to the asset
@@ -59,7 +56,9 @@ class BaseBoundaryTest(unittest.TestCase):
         equation_object = self.asset.add_pressure_equation()
 
         # Assert
-        self.assertEqual(equation_object.indices, [self.asset.matrix_index + IndexEnum.pressure])
+        self.assertEqual(
+            equation_object.indices, [self.asset.matrix_index + index_core_quantity.pressure]
+        )
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 50000.0)
 
