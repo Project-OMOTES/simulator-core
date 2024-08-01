@@ -13,23 +13,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Module containing the abstract class for the mappers."""
+"""NetworkController abstrac."""
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+import datetime
 
 
-Entity = TypeVar("Entity")
-EsdlAssetObject = TypeVar("EsdlAssetObject")
-
-
-class EsdlMapperAbstract(ABC, Generic[Entity, EsdlAssetObject]):
-    """Abstract class to be used for deriving mapper classes from esdl to our own classes."""
+class NetworkControllerAbstract(ABC):
+    """Abstract class for the network controller."""
 
     @abstractmethod
-    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
-        """Map an Entity to a EsdlAsset."""
+    def update_setpoints(self, time: datetime.datetime) -> dict:
+        """Method to get the controller inputs for the network.
 
-    @abstractmethod
-    def to_entity(self, model: EsdlAssetObject) -> Entity:
-        """Map an esdl asset  to an Entity."""
+        :param float time: Time step for which to run the controller.
+        :return: dict with the key the asset id and the heat demand for that asset.
+        """
+        pass

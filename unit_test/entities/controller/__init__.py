@@ -12,24 +12,4 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-"""Module containing the abstract class for the mappers."""
-
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
-
-
-Entity = TypeVar("Entity")
-EsdlAssetObject = TypeVar("EsdlAssetObject")
-
-
-class EsdlMapperAbstract(ABC, Generic[Entity, EsdlAssetObject]):
-    """Abstract class to be used for deriving mapper classes from esdl to our own classes."""
-
-    @abstractmethod
-    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
-        """Map an Entity to a EsdlAsset."""
-
-    @abstractmethod
-    def to_entity(self, model: EsdlAssetObject) -> Entity:
-        """Map an esdl asset  to an Entity."""
+"""__init__.py file for initialization code."""
