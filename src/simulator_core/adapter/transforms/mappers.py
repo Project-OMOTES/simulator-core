@@ -32,6 +32,7 @@ from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControl
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerConsumerMapper
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerStorageMapper
 
+
 def connect_connected_asset(
         connected_py_assets: List[Tuple[str, Port]],
         junction: Junction,
@@ -221,5 +222,5 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         producers = [EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset) for
                      esdl_asset in esdl_object.get_all_assets_of_type("producer")]
         storages = [EsdlAssetControllerStorageMapper().to_entity(esdl_asset=esdl_asset) for
-                     esdl_asset in esdl_object.get_all_assets_of_type("storage")]
+                    esdl_asset in esdl_object.get_all_assets_of_type("storage")]
         return NetworkController(producers, consumers, storages)

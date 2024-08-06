@@ -221,7 +221,7 @@ class AtesCluster(AssetAbstract):
         AQUIFER_TOP = self.aquifer_depth
         AQUIFER_BASE = self.aquifer_depth + self.aquifer_thickness
         SURFACE_TEMPERATURE = self.aquifer_mid_temperature - 0.034 * (
-                self.aquifer_depth + self.aquifer_thickness / 2)
+            self.aquifer_depth + self.aquifer_thickness / 2)
         AQUIFER_NTG = self.aquifer_net_to_gross
         AQUIFER_PORO = self.aquifer_porosity
         AQUIFER_PERM_XY = self.aquifer_permeability

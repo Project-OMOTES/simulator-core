@@ -68,7 +68,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerProducer :
+    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerProducer:
         """Method to map an esdl asset to a producer entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
@@ -121,7 +121,8 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
                                             max_power=power,
                                             profile=profile)
         return contr_consumer
-        
+
+
 class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a storage entity class."""
 
@@ -147,9 +148,9 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
         temperature_return = esdl_asset.get_return_temperature("Out")
         profile = esdl_asset.get_profile()
         contr_storage = ControllerStorage(name=esdl_asset.esdl_asset.name,
-                                            identifier=esdl_asset.esdl_asset.id,
-                                            temperature_supply=temperature_supply,
-                                            temperature_return=temperature_return,
-                                            max_power=power,
-                                            profile=profile)
-        return contr_storage        
+                                          identifier=esdl_asset.esdl_asset.id,
+                                          temperature_supply=temperature_supply,
+                                          temperature_return=temperature_return,
+                                          max_power=power,
+                                          profile=profile)
+        return contr_storage

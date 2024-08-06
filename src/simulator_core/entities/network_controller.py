@@ -35,7 +35,8 @@ class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
     def __init__(
-        self, producers: List[ControllerProducer], consumers: List[ControllerConsumer], storages: List[ControllerStorage]
+            self, producers: List[ControllerProducer], consumers: List[ControllerConsumer],
+            storages: List[ControllerStorage]
     ) -> None:
         """Constructor for controller for a heat network."""
         self.producers = producers
