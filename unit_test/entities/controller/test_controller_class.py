@@ -67,7 +67,7 @@ class ControllerTest(unittest.TestCase):
         producer = ControllerProducer("producer", "id", temperature_return=20.0,
                                       temperature_supply=30.0, power=1.0, priority=1)
         storage = ControllerConsumer(name="storage", identifier="id", temperature_supply=80.0,
-                                      temperature_return=30.0, max_power=1.0, profile=Mock())
+                                     temperature_return=30.0, max_power=1.0, profile=Mock())
         controller = NetworkController([producer], [consumer], [storage])
         # Act
 
