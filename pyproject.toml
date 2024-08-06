@@ -25,6 +25,7 @@ dependencies = [
     "pyesdl==24.2.0",
     "dataclass-wizard==0.22.2",
     "influxdb==5.3.1",
+    "pyjnius==1.5.0"
 ]
 
 [project.optional-dependencies]

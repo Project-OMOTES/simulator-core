@@ -9,4 +9,5 @@ python -m pip install pip-tools setuptools wheel
 REM call .\update_dependencies.cmd
 call .\install_dependencies.cmd
 call .\install_dev.cmd
+call .\check_java_jdk.cmd
 popd

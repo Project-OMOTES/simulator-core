@@ -26,6 +26,7 @@ from simulator_core.entities.assets.asset_defaults import (
 )
 from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +35,13 @@ class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
     def __init__(
-        self, producers: List[ControllerProducer], consumers: List[ControllerConsumer]
+            self, producers: List[ControllerProducer], consumers: List[ControllerConsumer],
+            storages: List[ControllerStorage]
     ) -> None:
         """Constructor for controller for a heat network."""
         self.producers = producers
         self.consumers = consumers
+        self.storages = storages
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.

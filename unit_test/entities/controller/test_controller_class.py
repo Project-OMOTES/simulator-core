@@ -55,8 +55,10 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.get_heat_demand.return_value = 2.0
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
+        self.storage1 = Mock()
         self.controller = NetworkController([self.producer1, self.producer2],
-                                            [self.consumer1, self.consumer2])
+                                            [self.consumer1, self.consumer2],
+                                            [self.storage1])
 
     def test_controller_init(self):
         """Test to initialize the controller."""
@@ -64,12 +66,15 @@ class ControllerTest(unittest.TestCase):
                                       temperature_return=30.0, max_power=1.0, profile=Mock())
         producer = ControllerProducer("producer", "id", temperature_return=20.0,
                                       temperature_supply=30.0, power=1.0, priority=1)
-        controller = NetworkController([producer], [consumer])
+        storage = ControllerConsumer(name="storage", identifier="id", temperature_supply=80.0,
+                                     temperature_return=30.0, max_power=1.0, profile=Mock())
+        controller = NetworkController([producer], [consumer], [storage])
         # Act
 
         # Assert
         self.assertEqual(controller.consumers, [consumer])
         self.assertEqual(controller.producers, [producer])
+        self.assertEqual(controller.storages, [storage])
 
     def test_get_total_demand(self):
         """Test to get the total demand of the network."""

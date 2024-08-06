@@ -37,6 +37,7 @@ class StringEsdlAssetMapper:
         esdl.Pipe: "pipe",
         esdl.Transport: "transport",
         esdl.Joint: "junction",
+        esdl.ATES: "storage",
     }
 
     str_to_type_dict = reverse_dict(original_dict=type_to_str_dict)
