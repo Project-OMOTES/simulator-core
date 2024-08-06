@@ -41,6 +41,7 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
             asset_id="ates_cluster_id",
+            port_ids=["test1", "test2"]
         )
         self.ates_cluster.set_from_junction(from_junction=self.from_junction)
         self.ates_cluster.set_to_junction(to_junction=self.to_junction)
