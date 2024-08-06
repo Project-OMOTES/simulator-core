@@ -32,4 +32,4 @@ class EsdlMapperAbstract(ABC, Generic[Entity, EsdlAssetObject]):
 
     @abstractmethod
     def to_entity(self, model: EsdlAssetObject) -> Entity:
-        """Map am esdl asset  to an Entity."""
+        """Map an esdl asset  to an Entity."""

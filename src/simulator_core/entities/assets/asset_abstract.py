@@ -18,11 +18,17 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from pandas import DataFrame
+from pandas import DataFrame, concat
 
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.solver.network.assets.base_asset import BaseAsset
+
+from simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_MASSFLOW,
+    PROPERTY_PRESSURE,
+    PROPERTY_TEMPERATURE,
+)
 
 
 class AssetAbstract(ABC):
@@ -40,23 +46,27 @@ class AssetAbstract(ABC):
     asset_id: str
     """The unique identifier of the asset."""
 
-    output: List[Dict[str, float]]
+    outputs: List[List[Dict[str, float]]]
     """The output of the asset as a list with a dictionary per timestep."""
-    solver_asset: BaseAsset
 
+    connected_ports: List[str]
+    """List of ids of the connected ports."""
+    solver_asset: BaseAsset
     asset_type = "asset_abstract"
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param List[str] connected_ports: List of ids of the connected ports.
         """
         self.from_junction = None
-        self.to_junction: Junction = None
-        self.name: str = asset_name
-        self.asset_id: str = asset_id
-        self.output: List[Dict[str, float]] = []
+        self.to_junction = None
+        self.name = asset_name
+        self.asset_id = asset_id
+        self.connected_ports = connected_ports
+        self.outputs = [[] for _ in range(len(self.connected_ports))]
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""
@@ -96,26 +106,39 @@ class AssetAbstract(ABC):
         """
         self.to_junction = to_junction
 
+    def write_standard_output(self) -> None:
+        """Write the output of the asset to the output list.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep.
+        The output of the asset is a list with a dictionary for each port
+        of the asset. Teh basic properties mass flow rate, pressure and temperature are stored.
+        All assets can add their own properties to the dictionary.
+        """
+        for i in range(len(self.connected_ports)):
+            output_dict_temp = {
+                PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
+                PROPERTY_PRESSURE: self.solver_asset.get_pressure(i),
+                PROPERTY_TEMPERATURE: self.solver_asset.get_temperature(i),
+            }
+            self.outputs[i].append(output_dict_temp)
+
     @abstractmethod
     def write_to_output(self) -> None:
-        """Placeholder to get data from pandapipes and store it in the asset."""
-
-    def get_output(self) -> List[Dict[str, float]]:
-        """Returns all the output of the asset.
-
-        :return: A dict of property name and list of values.
-        """
-        return self.output
+        """Placeholder to get data and store it in the asset."""
 
     def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a pandapipes asset.
+        """Get timeseries as a dataframe from a asset.
 
-        The header is a tuple of the asset id and the property name.
+        The header is a tuple of the port id and the property name.
         """
         # Create dataframe
-        temp_dataframe = DataFrame(self.output)
-        # Set header
-        temp_dataframe.columns = [
-            (self.asset_id, column_name) for column_name in temp_dataframe.columns
-        ]
-        return temp_dataframe
+
+        temp_data = DataFrame()
+        for i in range(len(self.connected_ports)):
+            temp_frame = DataFrame(self.outputs[i])
+            temp_frame.columns = [
+                (self.connected_ports[i], column_name) for column_name in temp_frame.columns
+            ]
+            temp_data = concat([temp_data, temp_frame], axis=1)
+        return temp_data

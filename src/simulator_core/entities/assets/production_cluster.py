@@ -23,9 +23,6 @@ from simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -61,13 +58,14 @@ class ProductionCluster(AssetAbstract):
     controlled_mass_flow: float | None
     """The controlled mass flow of the asset [kg/s]."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a ProductionCluster object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param List[str] port_ids: List of ids of the connected ports.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
@@ -198,24 +196,9 @@ class ProductionCluster(AssetAbstract):
         """
 
     def write_to_output(self) -> None:
-        """Write the output of the asset to the output list.
+        """Placeholder to write the asset to the output.
 
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
-
-        The output of the asset is a dictionary with the following keys:
-        - PROPERTY_HEAT_DEMAND: The heat demand of the asset.
-        - PROPERTY_TEMPERATURE_SUPPLY: The supply temperature of the asset.
-        - PROPERTY_TEMPERATURE_RETURN: The return temperature of the asset.
-        - PROPERTY_PRESSURE_SUPPLY: The supply pressure of the asset.
-        - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
-        - PROPERTY_MASSFLOW: The mass flow rate of the asset.
         """
-        output_dict = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
-        }
-        self.output.append(output_dict)
+        pass

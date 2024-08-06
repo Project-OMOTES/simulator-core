@@ -20,11 +20,7 @@ from esdl.esdl import Joint as esdl_junction
 
 from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.controller_classes import (
-    ControllerConsumer,
-    ControllerSource,
-    ControllerStorage,
-)
+
 from simulator_core.entities.assets.junction import Junction
 from simulator_core.entities.assets.utils import Port
 from simulator_core.entities.esdl_object import EsdlObject
@@ -32,7 +28,9 @@ from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from simulator_core.solver.network.network import Network
-
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerProducerMapper
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerConsumerMapper
+from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerStorageMapper
 
 def connect_connected_asset(
         connected_py_assets: List[Tuple[str, Port]],
@@ -126,14 +124,14 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
-        :param Network network: netowrk to add the compenents to.
+        :param Network network: network to add the compenents to.
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         # TODO: This method requires a clean-up!
         py_assets_list = []
         py_joint_dict = {}
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
-            # Junctions need to be skipped, as they are replaced by merged pandapipes junctions.
+            # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 py_joint_dict[esdl_asset.esdl_asset.id] = [
                     *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.In),
@@ -196,6 +194,9 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 class EsdlControllerMapper(EsdlMapperAbstract):
     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
+    def __init__(self) -> None:
+        """Constructor for esdl to heat network mapper."""
+
     def to_esdl(self, entity: NetworkController) -> EsdlObject:
         """Method to convert a NetworkController object to an esdlobject.
 
@@ -205,31 +206,20 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlObject) -> NetworkController:
+    def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
         """Method to convert esdl to NetworkController object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the NetworkController object.
-        :param EsdlObject model: EsdlObject object to be converted to NetworkController object
+        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
+
         :return: NetworkController, which is the converted EsdlObject object.
         """
-        consumers = []
-        for esdl_asset in model.get_all_assets_of_type("consumer"):
-            consumers.append(
-                ControllerConsumer(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
-            )
-            consumers[-1].add_profile(esdl_asset.get_profile())
-
-        sources = []
-        for esdl_asset in model.get_all_assets_of_type("producer"):
-            sources.append(ControllerSource(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id))
-
-        storages = []
-        for esdl_asset in model.get_all_assets_of_type("storage"):
-            storages.append(
-                ControllerStorage(esdl_asset.esdl_asset.name, esdl_asset.esdl_asset.id)
-            )
-            storages[-1].add_profile(esdl_asset.get_profile())
-
-        return NetworkController(consumers, sources, storages)
+        consumers = [EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset) for
+                     esdl_asset in esdl_object.get_all_assets_of_type("consumer")]
+        producers = [EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset) for
+                     esdl_asset in esdl_object.get_all_assets_of_type("producer")]
+        storages = [EsdlAssetControllerStorageMapper().to_entity(esdl_asset=esdl_asset) for
+                     esdl_asset in esdl_object.get_all_assets_of_type("storage")]
+        return NetworkController(producers, consumers, storages)

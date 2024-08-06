@@ -49,8 +49,7 @@ class InfluxdbTest(unittest.TestCase):
     def test_get_data_from_profile(self) -> None:
         """Test get_data_from_profile."""
         # Arrange
-        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
-        esdl_file_path = str(esdl_file_path)
+        esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl")
         es = EnergySystemHandler()
         es.load_file(esdl_file_path)
         asset = es.get_all_instances_of_type(esdl.HeatingDemand)[0]

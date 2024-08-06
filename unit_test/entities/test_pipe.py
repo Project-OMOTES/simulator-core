@@ -29,7 +29,6 @@ class PipeTest(unittest.TestCase):
 
     def setUp(self):
         """Set up test case."""
-        # Create empty pandapipes network
         # Create two junctions
         self.from_junction = Junction(solver_node=Mock(), name="from_junction")
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
@@ -39,7 +38,7 @@ class PipeTest(unittest.TestCase):
         # Arrange
 
         # Act
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
 
@@ -51,7 +50,7 @@ class PipeTest(unittest.TestCase):
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
 
@@ -64,7 +63,7 @@ class PipeTest(unittest.TestCase):
     def test_pipe_get_property_diameter(self):
         """Evaluate the get property diameter method to retrieve diameters."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
@@ -78,13 +77,14 @@ class PipeTest(unittest.TestCase):
     def test_pipe_get_property_diameter_failed(self):
         """Evaluate failure to retrieve diameter from ESDL asset."""
         # Arrange
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
+        pass
 
         # Assert
         with self.assertRaises(NotImplementedError):
@@ -102,7 +102,7 @@ class PipeTest(unittest.TestCase):
         esdl_pipes = esdl_object.get_all_assets_of_type("pipe")
         esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
         # - Create pipe object
-        pipe = Pipe(asset_name="pipe", asset_id="pipe_id")
+        pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
         pipe.from_junction = self.from_junction
         pipe.to_junction = self.to_junction
 

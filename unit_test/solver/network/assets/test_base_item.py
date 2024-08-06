@@ -18,13 +18,15 @@ import unittest
 from uuid import uuid4
 
 from simulator_core.solver.network.assets.base_item import BaseItem
+from simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class MockBaseItem(BaseItem):
     """Mock BaseItem class for testing."""
 
-    def get_equations(self) -> None:
+    def get_equations(self) -> list[EquationObject]:
         """Dummy implementation of the get_equations method for testing."""
+        return []
 
     def disconnect_node(self, connection_point: int) -> None:
         """Dummy implementation of the disconnect_node method for testing."""

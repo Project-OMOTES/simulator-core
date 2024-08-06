@@ -302,7 +302,9 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), 0.0)
         self.assertTrue(
             all(
-                np.apply_along_axis(fluid_props.get_t, axis=1, arr=self.asset._internal_energy_grid)
+                np.apply_along_axis(
+                    lambda x: fluid_props.get_t(x[0]), axis=1, arr=self.asset._internal_energy_grid
+                )
                 == self.asset.ambient_temperature
             )  # pylint: disable=protected-access
         )

@@ -92,6 +92,7 @@ class FallType(BaseAsset):
         - Thermal balance at each connection point
         - Internal continuity equation
         - Internal pressure loss equation
+
         :return: list[EquationObject]
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
@@ -124,7 +125,7 @@ class FallType(BaseAsset):
         if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
             return self.add_internal_energy_equation()
         else:
-            return self.add_temp_to_node_equation(connection_point=connection_point)
+            return self.add_internal_energy_to_node_equation(connection_point=connection_point)
 
     def add_internal_cont_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the internal continuity equation for the asset.
@@ -185,13 +186,12 @@ class FallType(BaseAsset):
     def add_internal_pressure_loss_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the pressure loss equation for the asset.
 
-         The equation is:
-
+        The equation is:
         - Pressure at inlet - Pressure at outlet - 2 * Loss coefficient * Mass flow rate *
         abs(Mass flow rate) = 0
         :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side value
-            of the equation.
+        An EquationObject that contains the indices, coefficients, and right-hand side value
+        of the equation.
         """
         equation_object = EquationObject()
         equation_object.indices = np.array(

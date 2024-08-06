@@ -169,4 +169,4 @@ class ProductionAsset(FallType):
         if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
             return self.add_prescribe_temp(connection_point)
         else:
-            return self.add_temp_to_node_equation(connection_point)
+            return self.add_internal_energy_to_node_equation(connection_point)

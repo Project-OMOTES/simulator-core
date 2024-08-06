@@ -21,10 +21,9 @@ classifiers = [
 dependencies = [
     "numpy==1.26.0",
     "pandas==2.1.1",
-    "pandapipes==0.8.4",
+    "scipy==1.14.0",
     "pyesdl==24.2.0",
     "dataclass-wizard==0.22.2",
-    "coloredlogs==15.0.1",
     "influxdb==5.3.1",
     "pyjnius==1.5.0"
 ]
@@ -52,7 +51,7 @@ dev = [
     "furo==2023.9.10",
     "geopandas==0.14.3",
     "plotly==5.21.0",
-    "shapely==2.0.4"
+    "shapely==2.0.4",
 ]
 
 [project.urls]
@@ -96,11 +95,14 @@ ignore = [
     'E203',  # Space before colon (not PEP-8 compliant, and conflicts with black)
     'C408',  # Suggestion to use dict() over {}
     'W503',  # Starting lines with operators.
-    'PT009', # use a regular assert instead of unittest-style '{assertion}'
+    'PT009', # use a regular assert instead of unittest-style assertion
+    'PT027', # pytest.raises() should be used instead of assertRaises()
+    'AAA01', # no Act block found in test
+    'AAA03', # No act block found. '
     'AAA06', # Comment in Act block
 ]
 exclude = ['.venv/*', 'venv/*', 'doc/*']
-per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100']
+per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
 
 [tool.black]
 line-length = 100
@@ -120,6 +122,8 @@ exclude = ['.venv/*', 'venv/*', 'doc/*', 'ci/*']
 
 # mypy per-module options:
 [[tool.mypy.overrides]]
-module = "unit_test.*"
-check_untyped_defs = true
-ignore_missing_imports = true
+module = ["unit_test.*"]
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+check_untyped_defs = false
+ignore_missing_imports = false

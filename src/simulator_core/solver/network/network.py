@@ -301,6 +301,7 @@ class Network:
         """Method returns true when an asset with the given id exists in the network.
 
         :param str asset_id: unique id of the asset to check.
+
         :return:True when asset exists and False when not
         """
         if not (asset_id in self.assets):
@@ -312,6 +313,7 @@ class Network:
         """Method returns true when a node with the given id exists in the network.
 
         :param str node_id: unique id of the node to check.
+
         :return:True when node exists and False when not
         """
         if not (node_id in self.nodes):

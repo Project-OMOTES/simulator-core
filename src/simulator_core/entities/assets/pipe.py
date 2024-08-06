@@ -18,14 +18,7 @@ from typing import Dict, List
 import numpy as np
 
 from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.asset_defaults import (
-    PIPE_DEFAULTS,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
-)
+from simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
@@ -51,18 +44,17 @@ class Pipe(AssetAbstract):
     """The wall roughness of the pipe [m]."""
     alpha_value: float
     """The alpha value of the pipe [W/(m2 K)]."""
-    _initialized: bool
-    """Flag to indicate whether the pipe has been initialized in pandapipes."""
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str):
+    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
+        :param List[str] port_ids: List of ids of the connected ports.
         """
-        super().__init__(asset_name=asset_name, asset_id=asset_id)
+        super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         # Initialize the default values of the pipe
         self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient
         self._external_temperature = PIPE_DEFAULTS.external_temperature
@@ -72,10 +64,12 @@ class Pipe(AssetAbstract):
         self.diameter = PIPE_DEFAULTS.diameter
         self.roughness = PIPE_DEFAULTS.k_value
         self.alpha_value = PIPE_DEFAULTS.alpha_value
-        # Objects of the pandapipes network
         self.solver_asset = SolverPipe(
-            name=self.name, _id=self.asset_id, length=self.length,
-            diameter=self.diameter, roughness=self.roughness
+            name=self.name,
+            _id=self.asset_id,
+            length=self.length,
+            diameter=self.diameter,
+            roughness=self.roughness,
         )
         self.output = []
 
@@ -152,22 +146,5 @@ class Pipe(AssetAbstract):
 
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
-
-        The output of the asset is a dictionary with the following keys:
-        - PROPERTY_HEAT_DEMAND: The heat demand of the asset.
-        - PROPERTY_TEMPERATURE_SUPPLY: The supply temperature of the asset.
-        - PROPERTY_TEMPERATURE_RETURN: The return temperature of the asset.
-        - PROPERTY_PRESSURE_SUPPLY: The supply pressure of the asset.
-        - PROPERTY_PRESSURE_RETURN: The return pressure of the asset.
-        - PROPERTY_MASSFLOW: The mass flow rate of the asset.
-        - PROPERTY_VELOCITY_SUPPLY: The supply velocity of the asset.
-        - PROPERTY_VELOCITY_RETURN: The return velocity of the asset.
         """
-        output_dict = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
-        }
-        self.output.append(output_dict)
+        pass
