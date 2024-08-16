@@ -29,6 +29,7 @@ from simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
+from simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
 
 from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
@@ -81,18 +82,18 @@ class AtesCluster(AssetAbstract):
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         # ATES default properties
-        self.aquifer_depth = 300.0  # meters
-        self.aquifer_thickness = 45.0  # meters
-        self.aquifer_mid_temperature = 17.0  # celcius
-        self.aquifer_net_to_gross = 1.0  # percentage
-        self.aquifer_porosity = 0.3  # percentage
-        self.aquifer_permeability = 10000.0  # mD
-        self.aquifer_anisotropy = 4.0  # -
-        self.salinity = 10000.0  # ppm
-        self.well_casing_size = 13.0  # inch
-        self.well_distance = 150.0  # meters
-        self.maximum_flow_charge = 200.0  # m3/h
-        self.maximum_flow_discharge = 200.0  # m3/h
+        self.aquifer_depth = ATES_DEFAULTS.aquifer_depth  # meters
+        self.aquifer_thickness = ATES_DEFAULTS.aquifer_thickness  # meters
+        self.aquifer_mid_temperature = ATES_DEFAULTS.aquifer_mid_temperature  # Celcius
+        self.aquifer_net_to_gross = ATES_DEFAULTS.aquifer_net_to_gross  # percentage
+        self.aquifer_porosity = ATES_DEFAULTS.aquifer_porosity  # percentage
+        self.aquifer_permeability = ATES_DEFAULTS.aquifer_permeability  # mD
+        self.aquifer_anisotropy = ATES_DEFAULTS.aquifer_anisotropy  # -
+        self.salinity = ATES_DEFAULTS.salinity  # ppm
+        self.well_casing_size = ATES_DEFAULTS.well_casing_size  # inch
+        self.well_distance = ATES_DEFAULTS.well_distance  # meters
+        self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge  # m3/h
+        self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
 
         # Output list
         self.output: list = []
