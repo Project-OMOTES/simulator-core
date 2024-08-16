@@ -48,6 +48,24 @@ class PipeDefaults:
     diameter: float = DEFAULT_DIAMETER
 
 
+@dataclass
+class AtesDefaults:
+    """Class containing the default values for ATES."""
+
+    aquifer_depth: float = 300.0  # meters
+    aquifer_thickness: float = 45.0  # meters
+    aquifer_mid_temperature: float = 17.0  # Celcius
+    aquifer_net_to_gross: float = 1.0  # percentage
+    aquifer_porosity: float = 0.3  # percentage
+    aquifer_permeability: float = 10000.0  # mD
+    aquifer_anisotropy: float = 4.0  # -
+    salinity: float = 10000.0  # ppm
+    well_casing_size: float = 13.0  # inch
+    well_distance: float = 150.0  # meters
+    maximum_flow_charge: float = 200.0  # m3/h
+    maximum_flow_discharge: float = 200.0  # m3/h
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_TEMPERATURE_SUPPLY = "temperature_supply"
@@ -68,3 +86,4 @@ PROPERTY_ROUGHNESS = "roughness"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
+ATES_DEFAULTS = AtesDefaults()
