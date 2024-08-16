@@ -76,7 +76,7 @@ class AtesCluster(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
@@ -212,7 +212,7 @@ class AtesCluster(AssetAbstract):
         with open(xmlfile, 'r') as fd:
             xml_str = fd.read()
 
-        # overwrite template value with ESDL properties
+        # overwrite template value with ESDL properties for ROSIM input
 
         MODEL_TOP = self.aquifer_depth - 100
         AQUIFER_THICKNESS = self.aquifer_thickness
@@ -255,22 +255,29 @@ class AtesCluster(AssetAbstract):
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
-        volume_flow = self.mass_flowrate * 3600 / 1000
+        volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline
+        # density needs to change with PVT calculation
         timestep = 1  # HARDCODED to 1 hour
 
-        rosim_input__flow = [volume_flow, -1 * volume_flow]
+        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
+        # and second element is for injection well, positive flow is going upward and negative flow
+        # is downward
+
         if volume_flow > 0:
-            rosim_input_temperature = [self.temperature_supply - 273.15, -1]  # Celcius
+            rosim_input_temperature = [self.temperature_supply - 273.15, -1]  # Celcius, -1 in
+            # injection well to make sure it is not used
         elif volume_flow < 0:
-            rosim_input_temperature = [-1, self.temperature_return - 273.15]  # Celcius
+            rosim_input_temperature = [-1, self.temperature_return - 273.15]  # Celcius, -1 in
+            # producer well to make sure it is not used
         else:
-            rosim_input_temperature = [-1, -1]
+            rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
+            # sure it is not used
 
         ates_temperature = self.rosim.getTempsNextTimeStep(rosim_input__flow,
                                                            rosim_input_temperature, timestep)
 
-        hot_well_temperature = ates_temperature[0] + 273.15
-        cold_well_temperature = ates_temperature[1] + 273.15
+        hot_well_temperature = ates_temperature[0] + 273.15  # convert to K
+        cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
 
         # update supply return temperature from ATES
         self.temperature_supply = hot_well_temperature
