@@ -140,7 +140,9 @@ class ProductionAsset(FallType):
             equation_object.indices = np.array(
                 [
                     self.get_index_matrix(
-                        property_name="mass_flow_rate", connection_point=connection_point
+                        property_name="mass_flow_rate",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
                     )
                 ]
             )
@@ -148,7 +150,13 @@ class ProductionAsset(FallType):
             equation_object.rhs = self.mass_flow_rate_set_point
         else:
             equation_object.indices = np.array(
-                [self.get_index_matrix(property_name="pressure", connection_point=connection_point)]
+                [
+                    self.get_index_matrix(
+                        property_name="pressure",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
+                    )
+                ]
             )
             equation_object.coefficients = np.array([1.0])
             if connection_point == 0:
@@ -168,7 +176,9 @@ class ProductionAsset(FallType):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=connection_point, matrix=False
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
                 )
             ]
             > 0

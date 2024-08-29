@@ -138,7 +138,9 @@ class Node(BaseNodeItem):
         flows = np.array(
             [
                 asset.prev_sol[
-                    asset.get_index_matrix("mass_flow_rate", asset_connection_point, matrix=False)
+                    asset.get_index_matrix(
+                        "mass_flow_rate", asset_connection_point, use_relative_indexing=True
+                    )
                 ]
                 for asset, asset_connection_point in self.connected_assets
             ]
@@ -157,7 +159,9 @@ class Node(BaseNodeItem):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="mass_flow_rate")])
+        equation_object.indices = np.array(
+            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
+        )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         for asset, asset_connection_point in self.connected_assets:
@@ -165,7 +169,9 @@ class Node(BaseNodeItem):
                 equation_object.indices,
                 [
                     asset.get_index_matrix(
-                        property_name="mass_flow_rate", connection_point=asset_connection_point
+                        property_name="mass_flow_rate",
+                        connection_point=asset_connection_point,
+                        use_relative_indexing=False,
                     )
                 ],
             )
@@ -180,7 +186,9 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="mass_flow_rate")])
+        equation_object.indices = np.array(
+            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
+        )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = 0.0
         return equation_object
@@ -193,7 +201,9 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="pressure")])
+        equation_object.indices = np.array(
+            [self.get_index_matrix(property_name="pressure", use_relative_indexing=False)]
+        )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.set_pressure
         return equation_object
@@ -206,7 +216,9 @@ class Node(BaseNodeItem):
             value of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array([self.get_index_matrix(property_name="internal_energy")])
+        equation_object.indices = np.array(
+            [self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False)]
+        )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
@@ -221,8 +233,8 @@ class Node(BaseNodeItem):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.get_index_matrix(property_name="mass_flow_rate"),
-                self.get_index_matrix(property_name="internal_energy"),
+                self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False),
+                self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False),
             ]
         )
         # Be aware that the coefficients are in reverse order
@@ -235,8 +247,12 @@ class Node(BaseNodeItem):
             # Extended asset indices
             extra_indices = np.array(
                 [
-                    asset.get_index_matrix("mass_flow_rate", asset_connection_id),
-                    asset.get_index_matrix("internal_energy", asset_connection_id),
+                    asset.get_index_matrix(
+                        "mass_flow_rate", asset_connection_id, use_relative_indexing=False
+                    ),
+                    asset.get_index_matrix(
+                        "internal_energy", asset_connection_id, use_relative_indexing=False
+                    ),
                 ]
             )
             # Extend the indices and coefficients of the equation object
