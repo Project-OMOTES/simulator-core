@@ -21,9 +21,9 @@ from unittest.mock import patch
 
 import numpy as np
 
-from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.assets.solver_pipe import SolverPipe
-from simulator_core.solver.network.network import Network
+from omotes_simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.solver.network.network import Network
 
 
 class NetworkTest(unittest.TestCase):
@@ -218,7 +218,7 @@ class NetworkTest(unittest.TestCase):
         self.assertEqual(asset3.get_connected_node(connection_point=0).name, node.name)
         self.assertEqual(
             self.network.nodes[node_name].connected_assets,
-            [(self.asset, 0), (asset3, 0), (self.asset2, 1)]
+            [(self.asset, 0), (asset3, 0), (self.asset2, 1)],
         )
 
     def test_connect_both_assets_and_replace_node_same_node(self) -> None:

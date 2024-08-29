@@ -18,7 +18,7 @@ import unittest
 
 import numpy as np
 
-from simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class EquationObjectTest(unittest.TestCase):
@@ -79,6 +79,8 @@ class EquationObjectTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, IndexError)
         self.assertEqual(
             str(cm.exception),
-            (f"Length of {length} smaller than the available number "
-             f"of coefficients {len(equation_object.coefficients)}!")
+            (
+                f"Length of {length} smaller than the available number "
+                f"of coefficients {len(equation_object.coefficients)}!"
+            ),
         )

@@ -18,16 +18,18 @@ from pathlib import Path
 from unittest.mock import Mock
 from datetime import datetime, timezone
 
-from simulator_core.adapter.transforms.mappers import EsdlControllerMapper
-from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.entities.network_controller import NetworkController
-from simulator_core.entities.assets.asset_defaults import (PROPERTY_HEAT_DEMAND,
-                                                           PROPERTY_TEMPERATURE_RETURN,
-                                                           PROPERTY_TEMPERATURE_SUPPLY,
-                                                           PROPERTY_SET_PRESSURE)
-from simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
+from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.entities.network_controller import NetworkController
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_SET_PRESSURE,
+)
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class ControllerTest(unittest.TestCase):
@@ -56,18 +58,36 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
         self.storage1 = Mock()
-        self.controller = NetworkController([self.producer1, self.producer2],
-                                            [self.consumer1, self.consumer2],
-                                            [self.storage1])
+        self.controller = NetworkController(
+            [self.producer1, self.producer2], [self.consumer1, self.consumer2], [self.storage1]
+        )
 
     def test_controller_init(self):
         """Test to initialize the controller."""
-        consumer = ControllerConsumer(name="consumer", identifier="id", temperature_supply=20.0,
-                                      temperature_return=30.0, max_power=1.0, profile=Mock())
-        producer = ControllerProducer("producer", "id", temperature_return=20.0,
-                                      temperature_supply=30.0, power=1.0, priority=1)
-        storage = ControllerConsumer(name="storage", identifier="id", temperature_supply=80.0,
-                                     temperature_return=30.0, max_power=1.0, profile=Mock())
+        consumer = ControllerConsumer(
+            name="consumer",
+            identifier="id",
+            temperature_supply=20.0,
+            temperature_return=30.0,
+            max_power=1.0,
+            profile=Mock(),
+        )
+        producer = ControllerProducer(
+            "producer",
+            "id",
+            temperature_return=20.0,
+            temperature_supply=30.0,
+            power=1.0,
+            priority=1,
+        )
+        storage = ControllerConsumer(
+            name="storage",
+            identifier="id",
+            temperature_supply=80.0,
+            temperature_return=30.0,
+            max_power=1.0,
+            profile=Mock(),
+        )
         controller = NetworkController([producer], [consumer], [storage])
         # Act
 
@@ -163,25 +183,31 @@ class ControllerTest(unittest.TestCase):
         esdl_file = str(esdl_file)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
         controller = EsdlControllerMapper().to_entity(esdl_object)
-        start = datetime.strptime("2019-01-01T00:00:00",
-                                  "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        start = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S").replace(
+            tzinfo=timezone.utc
+        )
         # Act
         results = controller.update_setpoints(start)
 
         # Assert
         self.assertIn("cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4", results)
         self.assertIn("48f3e425-2143-4dcd-9101-c7e22559e82b", results)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
-                         [PROPERTY_HEAT_DEMAND], 360800.0)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
-                         [PROPERTY_TEMPERATURE_RETURN], 313.15)
-        self.assertEqual(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
-                         [PROPERTY_TEMPERATURE_SUPPLY], 353.15)
-        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"]
-                        [PROPERTY_SET_PRESSURE])
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
-                         [PROPERTY_HEAT_DEMAND], 360800.0)
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
-                         [PROPERTY_TEMPERATURE_RETURN], 313.15)
-        self.assertEqual(results["48f3e425-2143-4dcd-9101-c7e22559e82b"]
-                         [PROPERTY_TEMPERATURE_SUPPLY], 353.15)
+        self.assertEqual(
+            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_HEAT_DEMAND], 360800.0
+        )
+        self.assertEqual(
+            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_RETURN], 313.15
+        )
+        self.assertEqual(
+            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_SUPPLY], 353.15
+        )
+        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_SET_PRESSURE])
+        self.assertEqual(
+            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_HEAT_DEMAND], 360800.0
+        )
+        self.assertEqual(
+            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_RETURN], 313.15
+        )
+        self.assertEqual(
+            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_SUPPLY], 353.15
+        )

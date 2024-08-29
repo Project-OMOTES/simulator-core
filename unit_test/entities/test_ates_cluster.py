@@ -18,11 +18,13 @@ import faulthandler
 import unittest
 from unittest.mock import Mock
 
-from simulator_core.entities.assets.junction import Junction
+from omotes_simulator_core.entities.assets.junction import Junction
+
 faulthandler.disable()
-from simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
+
 faulthandler.enable()
-from simulator_core.entities.assets.asset_defaults import (  # noqa: E402
+from omotes_simulator_core.entities.assets.asset_defaults import (  # noqa: E402
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -39,9 +41,7 @@ class AtesClusterTest(unittest.TestCase):
         self.to_junction = Junction(solver_node=Mock(), name="to_junction")
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
-            asset_name="ates_cluster",
-            asset_id="ates_cluster_id",
-            port_ids=["test1", "test2"]
+            asset_name="ates_cluster", asset_id="ates_cluster_id", port_ids=["test1", "test2"]
         )
         self.ates_cluster.set_from_junction(from_junction=self.from_junction)
         self.ates_cluster.set_to_junction(to_junction=self.to_junction)

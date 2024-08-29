@@ -14,9 +14,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
-from simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
-                                                           DEFAULT_TEMPERATURE_DIFFERENCE)
+from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+)
 
 
 class ControllerProducerTest(unittest.TestCase):
@@ -25,19 +27,22 @@ class ControllerProducerTest(unittest.TestCase):
     def test_controller_producer_init(self) -> None:
         """Init test for ControllerProducer."""
         # Arrange
-        producer = ControllerProducer("producer", "id",
-                                      temperature_supply=DEFAULT_TEMPERATURE
-                                      + DEFAULT_TEMPERATURE_DIFFERENCE,
-                                      temperature_return=DEFAULT_TEMPERATURE,
-                                      power=1000,
-                                      priority=1)
+        producer = ControllerProducer(
+            "producer",
+            "id",
+            temperature_supply=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_return=DEFAULT_TEMPERATURE,
+            power=1000,
+            priority=1,
+        )
         # Act
 
         # Assert
         self.assertEqual(producer.name, "producer")
         self.assertEqual(producer.id, "id")
         self.assertEqual(producer.temperature_return, DEFAULT_TEMPERATURE)
-        self.assertEqual(producer.temperature_supply, DEFAULT_TEMPERATURE
-                         + DEFAULT_TEMPERATURE_DIFFERENCE)
+        self.assertEqual(
+            producer.temperature_supply, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+        )
         self.assertEqual(producer.power, 1000)
         self.assertEqual(producer.priority, 1)

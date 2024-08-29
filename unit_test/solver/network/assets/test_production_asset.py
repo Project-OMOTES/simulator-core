@@ -18,10 +18,10 @@ import unittest
 from uuid import uuid4
 import numpy.testing as npt
 
-from simulator_core.solver.utils.fluid_properties import fluid_props
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from omotes_simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 
 
 class ProductionAssetTest(unittest.TestCase):
@@ -112,8 +112,9 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        npt.assert_array_equal(equation_object.indices, [IndexEnum.internal_energy,
-                                                         IndexEnum.internal_energy])
+        npt.assert_array_equal(
+            equation_object.indices, [IndexEnum.internal_energy, IndexEnum.internal_energy]
+        )
         npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
         self.assertEqual(equation_object.rhs, 0.0)
 
@@ -132,8 +133,9 @@ class ProductionAssetTest(unittest.TestCase):
         equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        npt.assert_array_equal(equation_object.indices, [IndexEnum.internal_energy
-                                                         + connection_point_id
-                                                         * NUMBER_CORE_QUANTITIES])
+        npt.assert_array_equal(
+            equation_object.indices,
+            [IndexEnum.internal_energy + connection_point_id * NUMBER_CORE_QUANTITIES],
+        )
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))

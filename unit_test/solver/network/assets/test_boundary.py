@@ -18,10 +18,10 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from simulator_core.solver.matrix.core_enum import IndexEnum
-from simulator_core.solver.network.assets.base_asset import BaseAsset
-from simulator_core.solver.network.assets.boundary import BaseBoundary
-from simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.matrix.core_enum import IndexEnum
+from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.network.assets.boundary import BaseBoundary
+from omotes_simulator_core.solver.network.assets.node import Node
 
 
 class BaseBoundaryTest(unittest.TestCase):
@@ -30,10 +30,7 @@ class BaseBoundaryTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test case."""
         # Create a BaseBoundary object
-        self.asset = BaseBoundary(
-            name=str(uuid4()),
-            _id=str(uuid4())
-        )
+        self.asset = BaseBoundary(name=str(uuid4()), _id=str(uuid4()))
         # Create supply, connection_point:0 and return node, connection_point:1
         self.supply_node = Node(name=str(uuid4()), _id=str(uuid4()))
         # Connect the nodes to the asset

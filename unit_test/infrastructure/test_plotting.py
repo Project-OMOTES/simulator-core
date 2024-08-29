@@ -18,16 +18,16 @@ import unittest
 from pathlib import Path
 import uuid
 from datetime import datetime
-from simulator_core.adapter.transforms.mappers import (
+from omotes_simulator_core.adapter.transforms.mappers import (
     EsdlControllerMapper,
     EsdlEnergySystemMapper,
 )
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.entities.heat_network import HeatNetwork
-from simulator_core.entities.simulation_configuration import SimulationConfiguration
-from simulator_core.infrastructure.utils import pyesdl_from_file
-from simulator_core.simulation.networksimulation import NetworkSimulation
-from simulator_core.infrastructure.plotting import Plotting
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.entities.heat_network import HeatNetwork
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.simulation.networksimulation import NetworkSimulation
+from omotes_simulator_core.infrastructure.plotting import Plotting
 
 
 class PlottingTest(unittest.TestCase):
@@ -42,13 +42,13 @@ class PlottingTest(unittest.TestCase):
         network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
         controller = EsdlControllerMapper().to_entity(esdl_object)
         network_simulation = NetworkSimulation(network, controller)
-        config = SimulationConfiguration(simulation_id=uuid.uuid1(),
-                                         name="test run",
-                                         timestep=3600,
-                                         start=datetime.strptime("2019-01-01T00:00:00",
-                                                                 "%Y-%m-%dT%H:%M:%S"),
-                                         stop=datetime.strptime("2019-01-01T01:00:00",
-                                                                "%Y-%m-%dT%H:%M:%S"))
+        config = SimulationConfiguration(
+            simulation_id=uuid.uuid1(),
+            name="test run",
+            timestep=3600,
+            start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+            stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
+        )
         network_simulation.run(config, lambda fraction, msg: None)
         result = network_simulation.gather_output()
 
