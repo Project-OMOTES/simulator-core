@@ -41,7 +41,6 @@ dev = [
     "flake8-bugbear==23.9.16",
     "flake8-mock==0.4",
     "flake8-tuple==0.4.1",
-    "flake8-aaa==0.16.0",
     "pytest ~=7.3.1",
     "pytest-cov ~=4.0.0",
     "bump2version==1.0.1",
@@ -97,9 +96,6 @@ ignore = [
     'W503',  # Starting lines with operators.
     'PT009', # use a regular assert instead of unittest-style assertion
     'PT027', # pytest.raises() should be used instead of assertRaises()
-    'AAA01', # no Act block found in test
-    'AAA03', # No act block found. '
-    'AAA06', # Comment in Act block
 ]
 exclude = ['.venv/*', 'venv/*', 'doc/*']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
