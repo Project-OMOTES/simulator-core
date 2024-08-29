@@ -118,7 +118,9 @@ class SolverPipe(FallType):
             fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy", connection_point=0, matrix=False
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -154,14 +156,16 @@ class SolverPipe(FallType):
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
             mass_flow_rate = self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, matrix=False
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
                 )
             ]
         if temperature == DEFAULT_MISSING_VALUE:
             temperature = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy", connection_point=0, matrix=False
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -307,7 +311,9 @@ class SolverPipe(FallType):
             temperature = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy", connection_point=0, matrix=False
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -386,7 +392,9 @@ class SolverPipe(FallType):
         # Reset the internal energy grid
         self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
         mass_flow_rate = self.prev_sol[
-            self.get_index_matrix(property_name="mass_flow_rate", connection_point=0, matrix=False)
+            self.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+            )
         ]
         # Determine the flow direction
         if mass_flow_rate < 0:
@@ -397,7 +405,7 @@ class SolverPipe(FallType):
             # Set the internal energy at the connection point
             self._internal_energy_grid[-1] = self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, matrix=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=True
                 )
             ]
             # Retrieve the mass flow rate
@@ -410,7 +418,7 @@ class SolverPipe(FallType):
             # Set the internal energy at the connection point
             self._internal_energy_grid[0] = self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, matrix=False
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
                 )
             ]
             # Retrieve the mass flow rate

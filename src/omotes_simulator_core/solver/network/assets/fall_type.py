@@ -125,7 +125,7 @@ class FallType(BaseAsset):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    "mass_flow_rate", connection_point=connection_point, matrix=False
+                    "mass_flow_rate", connection_point=connection_point, use_relative_indexing=True
                 )
             ]
             > 0
@@ -144,8 +144,12 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.get_index_matrix("mass_flow_rate", connection_point=0),
-                self.get_index_matrix("mass_flow_rate", connection_point=1),
+                self.get_index_matrix(
+                    "mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    "mass_flow_rate", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, 1.0])
@@ -168,32 +172,48 @@ class FallType(BaseAsset):
         self.update_heat_supplied()
         equation_object.indices = np.array(
             [
-                self.get_index_matrix(property_name="mass_flow_rate", connection_point=0),
-                self.get_index_matrix(property_name="internal_energy", connection_point=0),
-                self.get_index_matrix(property_name="mass_flow_rate", connection_point=1),
-                self.get_index_matrix(property_name="internal_energy", connection_point=1),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         equation_object.coefficients = np.array(
             [
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy", connection_point=0, matrix=False
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
                     )
                 ],
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="mass_flow_rate", connection_point=0, matrix=False
+                        property_name="mass_flow_rate",
+                        connection_point=0,
+                        use_relative_indexing=True,
                     )
                 ],
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy", connection_point=1, matrix=False
+                        property_name="internal_energy",
+                        connection_point=1,
+                        use_relative_indexing=True,
                     )
                 ],
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="mass_flow_rate", connection_point=1, matrix=False
+                        property_name="mass_flow_rate",
+                        connection_point=1,
+                        use_relative_indexing=True,
                     )
                 ],
             ]
@@ -201,22 +221,22 @@ class FallType(BaseAsset):
         equation_object.rhs = (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, matrix=False
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, matrix=False
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
                 )
             ]
             + self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=1, matrix=False
+                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=True
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, matrix=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=True
                 )
             ]
             + self.heat_supplied
@@ -236,14 +256,22 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.get_index_matrix(property_name="mass_flow_rate", connection_point=0),
-                self.get_index_matrix(property_name="pressure", connection_point=0),
-                self.get_index_matrix(property_name="pressure", connection_point=1),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="pressure", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="pressure", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         self.update_loss_coefficient()
         mass_flow_rate = self.prev_sol[
-            self.get_index_matrix(property_name="mass_flow_rate", connection_point=0, matrix=False)
+            self.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+            )
         ]
         if mass_flow_rate < 1e-5:
             equation_object.coefficients = np.array(

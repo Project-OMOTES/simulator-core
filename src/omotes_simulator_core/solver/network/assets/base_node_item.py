@@ -43,19 +43,16 @@ class BaseNodeItem(ABC):
         """
         self.matrix_index = index
 
-    def get_index_matrix(self, property_name: str, matrix: bool = True) -> int:
+    def get_index_matrix(self, property_name: str, use_relative_indexing: bool) -> int:
         """Method to get matrix index of a certain property for a connection point.
 
         :param str property_name: The property name for which the matrix index is needed.
         :param bool matrix: Whether the index in the matrix should be included.
         :return: The matrix index for the property and connection point.
         """
-        return (
-            index_core_quantity.get_index_property(property_name=property_name, connection_point=0)
-            + self.matrix_index
-            if matrix
-            else 0
-        )
+        return index_core_quantity.get_index_property(
+            property_name=property_name, connection_point=0
+        ) + (0 if use_relative_indexing else self.matrix_index)
 
     @abstractmethod
     def get_equations(self) -> list[EquationObject]:
