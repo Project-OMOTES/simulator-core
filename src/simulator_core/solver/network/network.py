@@ -14,12 +14,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the network class."""
 import uuid
+
 import numpy.typing as npt
 
 from simulator_core.solver.network.assets.base_asset import BaseAsset
 from simulator_core.solver.network.assets.boundary import BaseBoundary
 from simulator_core.solver.network.assets.fall_type import FallType
-from simulator_core.solver.network.assets.heat_pump import HeatPumpAsset
+from simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
 from simulator_core.solver.network.assets.node import Node
 from simulator_core.solver.network.assets.production_asset import ProductionAsset
 from simulator_core.solver.network.assets.solver_pipe import SolverPipe
@@ -34,7 +35,7 @@ class Network:
         "Fall": FallType,
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
-        "HeatPump": HeatPumpAsset,
+        "HeatTransferAsset": HeatTransferAsset,
     }
     assets: dict[str, BaseAsset]
     nodes: dict[str, Node]
@@ -47,8 +48,9 @@ class Network:
         self.assets = {}
         self.nodes = {}
 
-    def add_asset(self, asset_type: str, name: str | None = None,
-                  identifier: str | None = None) -> str:
+    def add_asset(
+        self, asset_type: str, name: str | None = None, identifier: str | None = None
+    ) -> str:
         """Method to add an asset to the network.
 
         This method creates and asset of the given type.
@@ -388,7 +390,7 @@ class Network:
         for asset in self.assets:
             index = self.get_asset(asset_id=asset).matrix_index
             nou = self.get_asset(asset_id=asset).number_of_unknowns
-            self.get_asset(asset_id=asset).prev_sol = solution[index: index + nou].tolist()
+            self.get_asset(asset_id=asset).prev_sol = solution[index : index + nou].tolist()
 
     def set_result_node(self, solution: npt.NDArray) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -400,7 +402,7 @@ class Network:
             index = self.get_node(node_id=node).matrix_index
             nou = self.get_node(node_id=node).number_of_unknowns
             self.get_node(node_id=node).prev_sol = solution[index : index + nou]
-            self.get_node(node_id=node).prev_sol = solution[index: index + nou].tolist()
+            self.get_node(node_id=node).prev_sol = solution[index : index + nou].tolist()
 
     def print_result(self) -> None:
         """Method to print the result of the network."""

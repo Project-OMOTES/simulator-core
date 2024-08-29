@@ -76,8 +76,11 @@ class Matrix:
 
         # Dump the matrix to a file
         if filename:
-            self.dump_matrix(matrix=matrix, rhs_array=rhs, filename=filename)
-
+            self.dump_matrix(
+                matrix=matrix,
+                rhs_array=rhs,
+                filename=filename,
+            )
         # Solve the matrix
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs, use_umfpack=False)
 

@@ -44,8 +44,8 @@ class HeatTransferAsset(BaseAsset):
         supply_temperature_primary: float = 293.15,
         supply_temperature_secondary: float = 293.15,
         heat_transfer_coefficient: float = 1.0,
-        pre_scribe_mass_flow: bool = True,
-        mass_flow_rate_set_point: float = 10.0,
+        pre_scribe_mass_flow: bool = False,
+        mass_flow_rate_set_point: float = 80.0,
         pressure_set_point: float = 10000.0,
         primary_side: Optional[List[int]] = None,
     ):
@@ -172,12 +172,12 @@ class HeatTransferAsset(BaseAsset):
         """
         # Determine the connection points based on the flow direction
         if (
-            flow_direction_primary == FlowDirection.POSITIVE
+            flow_direction_primary == FlowDirection.NEGATIVE
             and flow_direction_secondary == FlowDirection.POSITIVE
         ):
             return [0, 1, 2, 3]
         elif (
-            flow_direction_primary == FlowDirection.NEGATIVE
+            flow_direction_primary == FlowDirection.POSITIVE
             and flow_direction_secondary == FlowDirection.POSITIVE
         ):
             return [1, 0, 2, 3]
@@ -185,12 +185,12 @@ class HeatTransferAsset(BaseAsset):
             flow_direction_primary == FlowDirection.POSITIVE
             and flow_direction_secondary == FlowDirection.NEGATIVE
         ):
-            return [0, 1, 3, 2]
+            return [1, 0, 3, 2]
         elif (
             flow_direction_primary == FlowDirection.NEGATIVE
             and flow_direction_secondary == FlowDirection.NEGATIVE
         ):
-            return [1, 0, 3, 2]
+            return [0, 1, 3, 2]
         else:
             return [0, 1, 2, 3]
 
@@ -317,7 +317,7 @@ class HeatTransferAsset(BaseAsset):
         # Defines the energy balance between the primary and secondary side of the
         # heat transfer asset.
         # If the mass flow at the inflow node of the primary and secondary side is not zero,
-        if (flow_direction_primary != FlowDirection.ZERO) and (
+        if (flow_direction_primary != FlowDirection.ZERO) or (
             flow_direction_secondary != FlowDirection.ZERO
         ):
             equations.append(
@@ -330,9 +330,11 @@ class HeatTransferAsset(BaseAsset):
             )
         # If the mass flow at the inflow node of the primary and secondary side is zero,
         else:
+            # TODO: Fix when mass flow rate is zero.
+            # TODO: Fix when controller prescribes mass flow rate is zero.
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
-                    connection_point=primary_side_inflow, mass_flow_value=10.0
+                    connection_point=primary_side_inflow, mass_flow_value=-20.0
                 )
             )
         # Return the equations

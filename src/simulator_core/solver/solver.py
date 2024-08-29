@@ -62,14 +62,15 @@ class Solver:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
-        while not self.matrix.is_converged():
+        while iteration < self._iteration_limit:
             iteration += 1
             equations = self.get_equations()
             self.matrix.solve(equations, filename=filename)
             self.results_to_assets()
-            if iteration > self._iteration_limit:
-                print("No converged solution reached")
+            if self.matrix.is_converged():
                 break
+        if iteration == self._iteration_limit:
+            print("Solver did not converge.")
 
     def get_results(self) -> None:
         """Method to get the results of the network."""
