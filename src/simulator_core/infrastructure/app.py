@@ -55,6 +55,7 @@ def run(file_path: str | None = None) -> pd.DataFrame:
         logger.debug(traceback.format_exc())
         raise error
 
+
 def main():
     # Set loglevel to logging.DEBUG for more verbose output
     logging.basicConfig(level=logging.INFO,
@@ -69,5 +70,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
