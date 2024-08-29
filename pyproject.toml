@@ -81,7 +81,7 @@ dirty_template = "{tag}.dev{ccount}"
 # packages = ["src/simulator_core"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
