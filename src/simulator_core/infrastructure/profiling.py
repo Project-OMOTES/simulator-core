@@ -1,6 +1,6 @@
 """Module for profiling of the simulator core."""
 import cProfile
-from simulator_core.infrastructure.app import run_simulator
+from simulator_core.infrastructure.app import run
 import argparse
 
 
@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 def profiler_main() -> None:
     """Main function to be called from the profiler."""
-    run_simulator(args.esdl_file)
+    run(args.esdl_file)
 
 
 cProfile.run("profiler_main()", args.profiling_output_file)
