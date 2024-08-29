@@ -13,12 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
+import csv
+
 import numpy as np
 import numpy.typing as npt
 import scipy as sp
-import csv
-from simulator_core.solver.matrix.equation_object import EquationObject
+
 from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
+from simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class Matrix:
@@ -49,7 +51,7 @@ class Matrix:
 
         return self.num_unknowns - number_unknowns
 
-    def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
+    def solve(self, equations: list[EquationObject], filename: str | None = None) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
 
         A sparse matrix solver is used, for this the coefficients, indices in the matrix are
@@ -63,17 +65,25 @@ class Matrix:
         self.sol_old = self.sol_new
         coefficient_array = np.concatenate([equation.coefficients for equation in equations])
         column_index_array = np.concatenate([equation.indices for equation in equations])
-        row_index_array = np.concatenate([np.full((len(equations[i])), i)
-                                          for i in range(len(equations))])
-        matrix = sp.sparse.csc_matrix((coefficient_array,
-                                       (row_index_array , column_index_array)),
-                                      shape=(self.num_unknowns, self.num_unknowns))
+        row_index_array = np.concatenate(
+            [np.full((len(equations[i])), i) for i in range(len(equations))]
+        )
+        matrix = sp.sparse.csc_matrix(
+            (coefficient_array, (row_index_array, column_index_array)),
+            shape=(self.num_unknowns, self.num_unknowns),
+        )
         rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
-        if dump:
-            self.dump_matrix(matrix=matrix, rhs_array=rhs)
-        self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
+
+        # Dump the matrix to a file
+        if filename:
+            self.dump_matrix(matrix=matrix, rhs_array=rhs, filename=filename)
+
+        # Solve the matrix
+        self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs, use_umfpack=False)
+
         if np.isnan(self.sol_new).any():
             raise RuntimeError("Matrix is singular")
+
         result: list[float] = self.sol_new.tolist()
         return result
 
@@ -85,11 +95,15 @@ class Matrix:
         :return: None
         """
         if len(equations) > self.num_unknowns:
-            raise RuntimeError(f"Too many equations supplied. Got {len(equations)} equations, "
-                               f"but number of unknowns is {self.num_unknowns}")
+            raise RuntimeError(
+                f"Too many equations supplied. Got {len(equations)} equations, "
+                f"but number of unknowns is {self.num_unknowns}"
+            )
         if len(equations) < self.num_unknowns:
-            raise RuntimeError(f"Not enough equation supplied. Got {len(equations)} equations, "
-                               f"but number of unknowns is {self.num_unknowns}")
+            raise RuntimeError(
+                f"Not enough equation supplied. Got {len(equations)} equations, "
+                f"but number of unknowns is {self.num_unknowns}"
+            )
 
     def is_converged(self) -> bool:
         """Returns true when the solution has converged and false when not.
@@ -99,8 +113,12 @@ class Matrix:
         """
         if self.num_unknowns == 0:
             raise ValueError("No unknowns have been added to the matrix.")
-        return np.allclose(self.sol_new, self.sol_old,
-                           atol=self.absolute_convergence, rtol=self.relative_convergence)
+        return np.allclose(
+            self.sol_new,
+            self.sol_old,
+            atol=self.absolute_convergence,
+            rtol=self.relative_convergence,
+        )
 
     def get_solution(self, index: int, number_of_unknowns: int) -> list[float]:
         """Method to get the solution of an asset.
@@ -114,17 +132,24 @@ class Matrix:
         :return: list with teh solution
         """
         if index > self.num_unknowns:
-            raise IndexError(f"Index ({index}) greater than number "
-                             f"of unknowns ({self.num_unknowns})")
+            raise IndexError(
+                f"Index ({index}) greater than number " f"of unknowns ({self.num_unknowns})"
+            )
         if (index + number_of_unknowns) > self.num_unknowns:
-            raise IndexError(f"Index ({index}) plus request number of elements "
-                             f"({number_of_unknowns}) greater than "
-                             f"number of unknowns {self.num_unknowns}")
-        result: list[float] = self.sol_new[index:index + number_of_unknowns].tolist()
+            raise IndexError(
+                f"Index ({index}) plus request number of elements "
+                f"({number_of_unknowns}) greater than "
+                f"number of unknowns {self.num_unknowns}"
+            )
+        result: list[float] = self.sol_new[index : index + number_of_unknowns].tolist()
         return result
 
-    def dump_matrix(self, matrix: sp.sparse.csc_matrix, rhs_array: sp.sparse.csc_matrix,
-                    file_name: str = 'dump.csv') -> None:
+    def dump_matrix(
+        self,
+        matrix: sp.sparse.csc_matrix,
+        rhs_array: sp.sparse.csc_matrix,
+        filename: str = "dump.csv",
+    ) -> None:
         """Method to dump the matrix to a csv file.
 
         :param matrix: Matrix to be printed to the file
@@ -132,10 +157,11 @@ class Matrix:
         :param file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
-        with open(file_name, 'w', newline='') as f:
+        with open(filename, "w", newline="") as f:
             write = csv.writer(f)
             write.writerow(
-                ['m', 'P', 'u'] * int(self.num_unknowns / NUMBER_CORE_QUANTITIES) + ['rhs'])
+                ["m", "P", "u"] * int(self.num_unknowns / NUMBER_CORE_QUANTITIES) + ["rhs"]
+            )
             for row, rhs in zip(matrix.todense(), rhs_array.todense()):
                 write.writerow(row.tolist()[0] + rhs.tolist()[0])
 

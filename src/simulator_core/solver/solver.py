@@ -58,14 +58,16 @@ class Solver:
             equations = equations + self.network.nodes[node].get_equations()
         return equations
 
-    def solve(self) -> None:
+    def solve(self, filename: str | None = None) -> None:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
         while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
-            self.matrix.solve(equations, dump=False)
+            self.matrix.solve(
+                equations, filename=filename.split(".csv")[0] + f"_{iteration:03d}.csv"
+            )
             self.results_to_assets()
             if iteration > self._iteration_limit:
                 print("No converged solution reached")
