@@ -30,7 +30,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pip-tools~=7.3.0",
     "setuptools-git-versioning<2",
     "black~=22.1.0",
     "flake8==6.0.0",
@@ -52,6 +51,7 @@ dev = [
     "geopandas==0.14.3",
     "plotly==5.21.0",
     "shapely==2.0.4",
+    "snakeviz==2.2.0"
 ]
 
 [project.urls]
