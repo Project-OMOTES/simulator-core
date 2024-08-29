@@ -65,9 +65,7 @@ class Solver:
         while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
-            self.matrix.solve(
-                equations, filename=filename.split(".csv")[0] + f"_{iteration:03d}.csv"
-            )
+            self.matrix.solve(equations, filename=filename)
             self.results_to_assets()
             if iteration > self._iteration_limit:
                 print("No converged solution reached")

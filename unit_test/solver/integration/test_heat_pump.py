@@ -36,15 +36,18 @@ class HeatPumpIntegrationTest(unittest.TestCase):
         """Set up the test case."""
         # Create a HeatPump object
         self.heatpump_asset = HeatPumpAsset(
-            name=uuid4(),
+            name=str(uuid4()),
+            _id=str(uuid4()),
         )
         # Create ProductionAsset object
         self.production_asset = ProductionAsset(
-            name=uuid4(),
+            name=str(uuid4()),
+            _id=str(uuid4()),
         )
         # Create DemandAsset object
         self.demand_asset = ProductionAsset(
-            name=uuid4(),
+            name=str(uuid4()),
+            _id=str(uuid4()),
         )
         # Create a Network object
         self.network = Network()
@@ -83,12 +86,14 @@ class HeatPumpIntegrationTest(unittest.TestCase):
     def test_heat_pump_positive_flow(self) -> None:
         """Test the heat pump equations for a positive flow state."""
         # Arrange
-        self.heatpump_asset.pre_scribe_mass_flow = False
         self.production_asset.pre_scribe_mass_flow = False
         # Set the temperatures and cop for HP
         self.heatpump_asset.supply_temperature_primary = 20 + 273.15
         self.heatpump_asset.supply_temperature_secondary = 70 + 273.15
         self.heatpump_asset.cop_h = 3.0
+        self.heatpump_asset._cop_heat_pump = 1 - 1 / self.heatpump_asset.cop_h
+        self.heatpump_asset.pre_scribe_mass_flow = False
+        self.heatpump_asset.mass_flow_rate_set_point = 85.15
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
         self.demand_asset.mass_flow_rate_set_point = 38.76
@@ -98,7 +103,7 @@ class HeatPumpIntegrationTest(unittest.TestCase):
         # Act
         self.solver.solve()
         # Assert
-        self.assertAlmostEqual(abs(self.heatpump_asset.prev_sol[0]), 85.15, 2)
+        self.assertAlmostEqual(abs(self.heatpump_asset.prev_sol[0]), 77.59, 2)
         self.assertAlmostEqual(self.heatpump_asset.prev_sol[2], 125699.50, 2)
         self.assertAlmostEqual(self.heatpump_asset.prev_sol[8], 167482.00, 2)
 
@@ -118,11 +123,35 @@ class HeatPumpIntegrationTest(unittest.TestCase):
         # Set the temperature of the production
         self.demand_asset.supply_temperature = 30 + 273.15
         # Act
-        self.solver.solve()
+        self.solver.solve(
+            filename=r"c:\Users\meerkerk\OneDrive - Stichting Deltares\Desktop\matrix_dump.csv"
+        )
         # Assert
         self.assertAlmostEqual(abs(self.heatpump_asset.prev_sol[6]), 85.15, 2)
         self.assertAlmostEqual(self.heatpump_asset.prev_sol[8], 125699.50, 2)
         self.assertAlmostEqual(self.heatpump_asset.prev_sol[2], 167482.00, 2)
+
+    def test_heat_pump_cop_higher(self) -> None:
+        """Test the heat pump equations for a higher COP in a positive flow state."""
+        # Arrange
+        self.heatpump_asset.pre_scribe_mass_flow = False
+        self.production_asset.pre_scribe_mass_flow = False
+        # Set the temperatures and cop for HP
+        self.heatpump_asset.supply_temperature_primary = 20 + 273.15
+        self.heatpump_asset.supply_temperature_secondary = 70 + 273.15
+        self.heatpump_asset.cop_h = 6.0
+        # Set the temperature of the demand
+        self.demand_asset.supply_temperature = 40 + 273.15
+        self.demand_asset.mass_flow_rate_set_point = 38.76
+        self.demand_asset.pre_scribe_mass_flow = True
+        # Set the temperature of the production
+        self.production_asset.supply_temperature = 30 + 273.15
+        # Act
+        self.solver.solve()
+        # Assert
+        self.assertAlmostEqual(abs(self.heatpump_asset.prev_sol[0]), 85.15, 2)
+        self.assertAlmostEqual(self.heatpump_asset.prev_sol[2], 125699.50, 2)
+        self.assertAlmostEqual(self.heatpump_asset.prev_sol[8], 167482.00, 2)
 
 
 # TODO: COP variation test

@@ -92,7 +92,8 @@ class HeatPumpAsset(BaseAsset):
 
     def __init__(
         self,
-        name: uuid.UUID,
+        name: str,
+        _id: str,
         supply_temperature_primary: float = 293.15,
         supply_temperature_secondary: float = 293.15,
         cop_h: float = 1.0,
@@ -124,6 +125,7 @@ class HeatPumpAsset(BaseAsset):
         """
         super().__init__(
             name=name,
+            _id=_id,
             number_of_unknowns=NUMBER_CORE_QUANTITIES * 4,
             number_connection_points=4,
         )
@@ -133,6 +135,8 @@ class HeatPumpAsset(BaseAsset):
         self.supply_temperature_secondary = supply_temperature_secondary
         # Define the coefficient of performance of the heat pump
         self.cop_h = cop_h
+        self._cop_heat_pump = 1.0 - 1.0 / self.cop_h
+        # self._cop_heat_pump = cop_h
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
         # at the hot side of the heat pump
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
@@ -164,16 +168,133 @@ class HeatPumpAsset(BaseAsset):
             raise ValueError("The number of unknowns must be 12!")
         # Set the direction boolean
         self._direction_boolean = self._set_direction_boolean()
+        print(f"Direction boolean: {self._direction_boolean}")
+        # Redefine the _cop_heat_pump
+        # self._cop_heat_pump = 1.0 - 1.0 / self.cop_h
         # Add the equations for the asset
-        equations = [
-            *[self.add_press_to_node_equation(connection_point=i) for i in range(4)],  # 4 equations
-            *self.add_internal_energy_equations(),  # 2 equations
-            *self.add_temperature_equations(),  # 2 equations
-            *self.add_prescribed_mass_flow_or_pressure(),  # 2 equations
-            self.add_internal_cont_equation(),  # 1 equation
-            self.add_heat_pump_energy_equation(),  # 1 equation
-        ]
+        # TODO: Depends on whether mass flow is set or pressure at secondary
+        # equations = [
+        #     *[self.add_press_to_node_equation(connection_point=i) for i in range(4)],  # 4 equations
+        #     *self.add_internal_energy_equations(),  # 2 equations
+        #     *self.add_temperature_equations(),  # 2 equations
+        #     *self.add_prescribed_mass_flow_or_pressure(),  # 2 equations
+        #     self.add_internal_cont_equation(),  # 1 equation
+        #     # self._mass_flow_equations(connection_point=1, direction=1.0),
+        #     self.add_heat_pump_energy_equation(),  # 1 equation
+        #     # *self.add_internal_energy_equations(),  # 2 equations
+        #     # *self.add_temperature_equations(),  # 2 equations
+        #     # *self.add_prescribed_mass_flow_or_pressure(),  # 4 equations
+        #     # self.add_internal_cont_equation(),  # 2 equations
+        #     # self.add_heat_pump_energy_equation(),  # 1 equation
+        # ]
+        equations = self._equations_option_1()
         return equations
+
+    def _equations_option_1(self) -> List[EquationObject]:
+        r"""Returns a list of EquationObjects that represent the equations for the asset,
+        when the $m_0 < 0$ and $T_{prim} < T_{sec}$. In addtion, the pressure at the
+        secondary side is prescribed.
+        """
+        equations = []
+        # -- Internal energy (4x) --
+        # Add the internal energy equations at connection points 0, and 2 to define
+        # the connection with the nodes.
+        equations.append(self.add_internal_energy_to_node_equation(connection_point=0))
+        equations.append(self.add_internal_energy_to_node_equation(connection_point=2))
+        # Add the internal energy equations at connection points 1, and 3 to set
+        # the temperature through internal energy at the outlet of the HP asset.
+        equations.append(
+            self.prescribe_temperature_at_connection_point(
+                connection_point=1,
+                supply_temperature=self.supply_temperature_primary,
+            )
+        )
+        equations.append(
+            self.prescribe_temperature_at_connection_point(
+                connection_point=3,
+                supply_temperature=self.supply_temperature_secondary,
+            )
+        )
+        # -- Pressure (6x) --
+        # Prescribe the pressure at the secondary side of the HP asset.
+        equations.append(self._pressure_equations(connection_point=3, pressure_side=True))
+        equations.append(self._pressure_equations(connection_point=2, pressure_side=False))
+        # Connect the pressure to the nodes at connection points 0, and 1.
+        equations.append(self.add_press_to_node_equation(connection_point=0))
+        equations.append(self.add_press_to_node_equation(connection_point=1))
+        equations.append(self.add_press_to_node_equation(connection_point=2))
+        equations.append(self.add_press_to_node_equation(connection_point=3))
+        # -- Internal continuity (2x) --
+        # Add the internal continuity equation at the primary side.
+        equations.append(self.add_continuity_equation(connection_point_1=0, connection_point_2=1))
+        # Add the internal continuity equation at the secondary side.
+        # equations.append(self.add_continuity_equation(connection_point_1=2, connection_point_2=3))
+        # -- Mass flow equation (1x) --
+        # Set the mass flow rate at connection point 1 to be equal to the set point.
+        # equations.append(self._mass_flow_equations(connection_point=1, direction=+1.0))
+        # Define mass flow rate at connection point 0 to be equal to the node.
+        # equations.append(self.add_mass_flow_to_node_equation(connection_point=0))
+        # -- Heat pump energy equation (1x) --
+        # Heat pump energy equation that defines the energy balance of the HP asset.
+        equations.append(self.add_heat_pump_energy_equation())
+        # Return the equations
+        return equations
+
+    def add_mass_flow_to_node_equation(self, connection_point: int) -> EquationObject:
+        r"""Links the mass flow rate at the connection point to the node.
+
+        :param int connection_point: The index of the connection point.
+        :return: EquationObject
+            An EquationObject that contains the indices, coefficients, and right-hand side value
+            of the equation.
+        """
+        # Add the equations
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.matrix_index + IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES,
+                self.connected_nodes[connection_point].matrix_index + IndexEnum.discharge,
+            ]
+        )
+        equation_object.coefficients = np.array([1, -1])
+        equation_object.rhs = 0.0
+        return equation_object
+
+    def add_continuity_equation(
+        self, connection_point_1: int, connection_point_2: int
+    ) -> EquationObject:
+        r"""Returns an EquationObject that represents the continuity equation for the asset.
+
+        The continuity equation is given by:
+
+        .. math::
+
+            \dot{m}_1 + \dot{m}_2 = 0
+
+        where :math:`\dot{m}_1` is the mass flow rate at connection point 1, and
+        :math:`\dot{m}_2` is the mass flow rate at connection point 2.
+
+        :param int connection_point_1: The index of the first connection point.
+        :param int connection_point_2: The index of the second connection point.
+        :return: EquationObject
+            An EquationObject that contains the indices, coefficients, and right-hand side value of
+            the equation.
+        """
+        # Add the equations
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.matrix_index
+                + IndexEnum.discharge
+                + connection_point_1 * NUMBER_CORE_QUANTITIES,
+                self.matrix_index
+                + IndexEnum.discharge
+                + connection_point_2 * NUMBER_CORE_QUANTITIES,
+            ]
+        )
+        equation_object.coefficients = np.array([1.0, 1.0])
+        equation_object.rhs = 0.0
+        return equation_object
 
     def _set_direction_boolean(self) -> bool | None:
         """Returns a boolean that indicates the direction of the flow.
@@ -236,8 +357,8 @@ class HeatPumpAsset(BaseAsset):
         #         connection_point_1 = 1
         #         connection_point_2 = 3
         return [
-            self.add_temp_to_node_equation(connection_point=connection_point_1),
-            self.add_temp_to_node_equation(connection_point=connection_point_2),
+            self.add_internal_energy_to_node_equation(connection_point=connection_point_1),
+            self.add_internal_energy_to_node_equation(connection_point=connection_point_2),
         ]
 
     def add_temperature_equations(self) -> List[EquationObject]:
@@ -383,9 +504,9 @@ class HeatPumpAsset(BaseAsset):
         equation_object.indices = np.array(
             [self.matrix_index + IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES]
         )
-        equation_object.coefficients = np.array([direction])
+        equation_object.coefficients = np.array([1])
         # TODO: Check if the correct sign is used for the mass flow rate set point
-        equation_object.rhs = self.mass_flow_rate_set_point
+        equation_object.rhs = direction * self.mass_flow_rate_set_point
         return equation_object
 
     def _pressure_equations(self, connection_point: int, pressure_side: bool) -> EquationObject:
@@ -453,13 +574,17 @@ class HeatPumpAsset(BaseAsset):
 
         if self.pre_scribe_mass_flow:
             return [
-                self._mass_flow_equations(connection_point=connection_point_1, direction=+1.0),
-                self._mass_flow_equations(connection_point=connection_point_2, direction=-1.0),
+                self._mass_flow_equations(connection_point=connection_point_1, direction=-1.0),
+                self._mass_flow_equations(connection_point=connection_point_2, direction=+1.0),
             ]
         else:
             return [
                 self._pressure_equations(connection_point=connection_point_1, pressure_side=False),
                 self._pressure_equations(connection_point=connection_point_2, pressure_side=True),
+                # *[
+                #     self.add_press_to_node_equation(connection_point=i)
+                #     for i in set(range(4)).difference({connection_point_1, connection_point_2})
+                # ],  # 4 equations
             ]
 
     def _heat_pump_coefficients(self, direction: bool = True) -> np.ndarray:
@@ -470,33 +595,60 @@ class HeatPumpAsset(BaseAsset):
         :return: np.ndarray
             The coefficients for the heat pump equation.
         """
+        # cpT = cp * T
+        # temp_array = np.array(
+        #     [
+        #         fluid_props.get_t(
+        #             self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * i]
+        #         )
+        #         for i in range(4)
+        #     ]
+        # )
+        # cp_array = [fluid_props.get_heat_capacity(T) for T in temp_array]
+        # cp_t_array = cp_array * temp_array
+        # Determine coefficients
         coefficient_array = np.array(
             [
                 [
-                    IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point,
-                    IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point,
+                    self.prev_sol[
+                        IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point
+                    ],  # cp_t_array[connection_point],
+                    self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point],
                 ]
                 for connection_point in range(4)
             ]
         )
         # Reshape array
-        coefficient_array = coefficient_array.reshape((8,)).astype(int)
+        coefficient_array = coefficient_array.reshape((8,))  # .astype(int)
         if direction:
+            temp_array = coefficient_array * np.array(
+                [
+                    +1,
+                    +1,
+                    +0,
+                    +0,
+                    +self._cop_heat_pump,
+                    +self._cop_heat_pump,
+                    +self._cop_heat_pump,
+                    +self._cop_heat_pump,
+                ]
+            )
+            temp_array[3] = -temp_array[1]
+            temp_array[0] = temp_array[0] - coefficient_array[2]
             return typing.cast(
                 np.ndarray,
-                np.take(self.prev_sol, coefficient_array)
-                * np.array([-1, -1, +1, +1, +(1 - 1 / self.cop_h), +1, -(1 - 1 / self.cop_h), -1]),
+                temp_array,
             )
         else:
             return typing.cast(
                 np.ndarray,
-                np.take(self.prev_sol, coefficient_array)
+                coefficient_array
                 * np.array(
                     [
-                        +(1 - 1 / self.cop_h),
-                        +1,
-                        -(1 - 1 / self.cop_h),
-                        -1,
+                        -self._cop_heat_pump,
+                        -self._cop_heat_pump,
+                        +self._cop_heat_pump,
+                        +self._cop_heat_pump,
                         -1,
                         -1,
                         +1,
@@ -514,22 +666,44 @@ class HeatPumpAsset(BaseAsset):
             the heat pump equation.
         :return: float
         """
+        # temp_array = np.array(
+        #     [
+        #         fluid_props.get_t(
+        #             self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * i]
+        #         )
+        #         for i in range(4)
+        #     ]
+        # )
+        # cp_array = [fluid_props.get_heat_capacity(T) for T in temp_array]
+        # discharge_array = np.array(
+        #     [self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * i] for i in range(4)]
+        # )
+        # coefficient_array = cp_array * discharge_array * temp_array
         if direction:
             connection_point_array = np.array([0, 1, 2, 3])
         else:
             connection_point_array = np.array([2, 3, 0, 1])
+        # return float(
+        #     np.sum(coefficient_array[connection_point_array[:2]])
+        #     + self._cop_heat_pump * np.sum(coefficient_array[connection_point_array[2:]])
+        # )
+
         return float(
-            -self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[0]]
-            * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_array[0]
-            ]
-            + self.prev_sol[
-                IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[1]
-            ]
-            * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_array[1]
-            ]
-            + (1 - 1 / self.cop_h)
+            (
+                self.prev_sol[
+                    IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[0]
+                ]
+                * self.prev_sol[
+                    IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_array[0]
+                ]
+                - self.prev_sol[
+                    IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[0]
+                ]
+                * self.prev_sol[
+                    IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_array[1]
+                ]
+            )
+            + self._cop_heat_pump
             * (
                 self.prev_sol[
                     IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[2]
@@ -537,7 +711,7 @@ class HeatPumpAsset(BaseAsset):
                 * self.prev_sol[
                     IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_array[2]
                 ]
-                - self.prev_sol[
+                + self.prev_sol[
                     IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_array[3]
                 ]
                 * self.prev_sol[
@@ -606,7 +780,7 @@ class HeatPumpAsset(BaseAsset):
                 )
 
             equation_object.coefficients = np.array([1])
-            equation_object.rhs = -1.0
+            equation_object.rhs = -self.mass_flow_rate_set_point
             # Mass flow rate at connection point 0 is greater than 0; the flow direction is positive
             # equation_object.coefficients = self._heat_pump_coefficients(direction=True)
             # equation_object.rhs = self._heat_pump_rhs(direction=True)
