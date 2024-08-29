@@ -13,3 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """__init__.py file for initialization code."""
+from pathlib import Path
+
+__version__ = Path(__file__).parent.joinpath("VERSION").read_text()

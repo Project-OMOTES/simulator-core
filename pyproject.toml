@@ -31,7 +31,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pip-tools~=7.3.0",
-    "setuptools-git-versioning<2",
+    "setuptools-git-versioning>=2.0, <3",
     "black~=22.1.0",
     "flake8==6.0.0",
     "Flake8-pyproject==1.2.3",
@@ -70,7 +70,8 @@ requires = [
 
 [tool.setuptools-git-versioning]
 enabled = true
-version_file = "VERSION"
+starting_version = "0.0.1"
+version_file = "src/omotes_simulator_core/VERSION"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
