@@ -7,6 +7,6 @@ assets. The method run_time_step is used to get the controller settings for the 
 For developers if you want to implement a new controller a class can be created with its own logic
 as long as there is a method run_time_step that returns the controller settings.
 
-.. autoclass:: simulator_core.entities.network_controller.NetworkController
+.. autoclass:: omotes_simulator_core.entities.network_controller.NetworkController
     :members:
     :no-index:

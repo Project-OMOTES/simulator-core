@@ -2,4 +2,4 @@
 
 . .venv/bin/activate
 cd src/
-python -m simulator_core
+python -m omotes_simulator_core

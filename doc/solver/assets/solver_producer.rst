@@ -7,6 +7,5 @@ This has been chosen since a consumer is the same as an producer only the heat f
 direction. In this way the network is very flexible to solve and the user can chose to set certain
 parameters (pressures, mass flow rate) in the producers as well as in the consumers.
 
-.. autoclass:: simulator_core.solver.network.assets.production.ProductionAsset
+.. autoclass:: omotes_simulator_core.solver.network.assets.production_asset.ProductionAsset
     :members:
-   :members:
