@@ -56,7 +56,8 @@ def run(file_path: str | None = None) -> pd.DataFrame:
         raise error
 
 
-def main():
+def main() -> None:
+    """Main function for the OMOTES simulator."""
     # Set loglevel to logging.DEBUG for more verbose output
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s")
