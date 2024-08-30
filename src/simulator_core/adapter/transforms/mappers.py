@@ -28,15 +28,21 @@ from simulator_core.entities.heat_network import HeatNetwork
 from simulator_core.entities.network_controller import NetworkController
 from simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from simulator_core.solver.network.network import Network
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerProducerMapper
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerConsumerMapper
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetControllerStorageMapper
+from simulator_core.adapter.transforms.esdl_controller_asset_mapper import (
+    EsdlAssetControllerProducerMapper,
+)
+from simulator_core.adapter.transforms.esdl_controller_asset_mapper import (
+    EsdlAssetControllerConsumerMapper,
+)
+from simulator_core.adapter.transforms.esdl_controller_asset_mapper import (
+    EsdlAssetControllerStorageMapper,
+)
 
 
 def connect_connected_asset(
-        connected_py_assets: List[Tuple[str, Port]],
-        junction: Junction,
-        py_assets_list: List[AssetAbstract],
+    connected_py_assets: List[Tuple[str, Port]],
+    junction: Junction,
+    py_assets_list: List[AssetAbstract],
 ) -> None:
     """Method to connect assets connected to one asset to the same junction.
 
@@ -56,10 +62,10 @@ def connect_connected_asset(
 
 
 def replace_joint_in_connected_assets(
-        connected_py_assets: List[Tuple[str, Port]],
-        py_joint_dict: Dict[str, List[Tuple[str, Port]]],
-        py_asset_id: str,
-        iteration_limit: int = 10,
+    connected_py_assets: List[Tuple[str, Port]],
+    py_joint_dict: Dict[str, List[Tuple[str, Port]]],
+    py_asset_id: str,
+    iteration_limit: int = 10,
 ) -> List[Tuple[str, Port]]:
     """Replace joint with assets connected to the elements.
 
@@ -217,10 +223,16 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
         :return: NetworkController, which is the converted EsdlObject object.
         """
-        consumers = [EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset) for
-                     esdl_asset in esdl_object.get_all_assets_of_type("consumer")]
-        producers = [EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset) for
-                     esdl_asset in esdl_object.get_all_assets_of_type("producer")]
-        storages = [EsdlAssetControllerStorageMapper().to_entity(esdl_asset=esdl_asset) for
-                    esdl_asset in esdl_object.get_all_assets_of_type("storage")]
+        consumers = [
+            EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+        ]
+        producers = [
+            EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+        ]
+        storages = [
+            EsdlAssetControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+        ]
         return NetworkController(producers, consumers, storages)
