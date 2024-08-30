@@ -11,7 +11,7 @@
     "./unit_test",
     "-p",
     "test*.py",
-    "--cov=simulator_core",
+    "--cov=omotes_simulator_core",
     "--cov-report html",
     "--cov-report term-missing",
     "--cov-fail-under 80"
