@@ -19,14 +19,14 @@ from pathlib import Path
 
 import esdl
 
-from simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
-from simulator_core.entities.assets.demand_cluster import DemandCluster
-from simulator_core.entities.assets.pipe import Pipe
-from simulator_core.entities.assets.production_cluster import ProductionCluster
-from simulator_core.entities.assets.utils import Port
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+from omotes_simulator_core.entities.assets.pipe import Pipe
+from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
+from omotes_simulator_core.entities.assets.utils import Port
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class EsdlObjectTest(unittest.TestCase):
@@ -125,8 +125,10 @@ class EsdlObjectTest(unittest.TestCase):
         port_ids = asset.get_port_ids()  # act
 
         # Assert
-        self.assertEqual(port_ids, ["a9793a5e-df4f-4795-8079-015dfaf57f82",
-                                    "3f2dc09a-0cee-44bd-a337-cea55461a334"])
+        self.assertEqual(
+            port_ids,
+            ["a9793a5e-df4f-4795-8079-015dfaf57f82", "3f2dc09a-0cee-44bd-a337-cea55461a334"],
+        )
         self.assertEqual(len(port_ids), 2)
 
     def test_get_supply_temperature_in(self):
@@ -205,7 +207,9 @@ class EsdlObjectTest(unittest.TestCase):
         # assert
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(
-            str(cm.exception), "Port type not recognized: Error", )
+            str(cm.exception),
+            "Port type not recognized: Error",
+        )
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):

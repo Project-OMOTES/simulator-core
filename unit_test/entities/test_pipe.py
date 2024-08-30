@@ -18,10 +18,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.pipe import Pipe
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.entities.assets.junction import Junction
+from omotes_simulator_core.entities.assets.pipe import Pipe
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class PipeTest(unittest.TestCase):

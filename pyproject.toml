@@ -1,8 +1,8 @@
 [project]
-name = "simulator-core"
+name = "omotes-simulator-core"
 dynamic = ["version"]
 authors = [{ name = "Michiel Tukker", email = "michiel.tukker@deltares.nl" }]
-description = "Core library of the NWN simulator"
+description = "Core library of the OMOTES simulator"
 readme = "README.md"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -25,13 +25,13 @@ dependencies = [
     "pyesdl==24.2.0",
     "dataclass-wizard==0.22.2",
     "influxdb==5.3.1",
-    "pyjnius==1.5.0"
+    "pyjnius==1.5.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pip-tools~=7.3.0",
-    "setuptools-git-versioning<2",
+    "setuptools-git-versioning>=2.0, <3",
     "black~=22.1.0",
     "flake8==6.0.0",
     "Flake8-pyproject==1.2.3",
@@ -69,17 +69,18 @@ requires = [
 
 [tool.setuptools-git-versioning]
 enabled = true
-version_file = "VERSION"
+starting_version = "0.0.1"
+version_file = "src/omotes_simulator_core/VERSION"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
 
 # [tool.setuptools]
-# packages = ["src/simulator_core"]
+# packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]

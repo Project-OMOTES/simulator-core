@@ -15,7 +15,7 @@
 
 """Test influxdb reader."""
 import unittest
-from simulator_core.entities.utility.influxdb_reader import get_data_from_profile, get_unit
+from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile, get_unit
 from pathlib import Path
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
@@ -36,7 +36,8 @@ class InfluxdbTest(unittest.TestCase):
         unit_energy.profileQuantityAndUnit.physicalQuantity = esdl.PhysicalQuantityEnum.ENERGY
         unit_pressure_mock = Mock()
         unit_pressure_mock.profileQuantityAndUnit.reference.physicalQuantity = (
-            esdl.PhysicalQuantityEnum.PRESSURE)
+            esdl.PhysicalQuantityEnum.PRESSURE
+        )
         # Act
         unit = get_unit(unit)
         unit_energy = get_unit(unit_energy)
@@ -58,4 +59,4 @@ class InfluxdbTest(unittest.TestCase):
         data = get_data_from_profile(profile)
         # Assert
         self.assertEqual(len(data), 24 * 365)
-        self.assertAlmostEqual(data['values'][0], 360800.0, 5)
+        self.assertAlmostEqual(data["values"][0], 360800.0, 5)

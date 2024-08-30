@@ -17,7 +17,7 @@
 import unittest
 from unittest.mock import patch
 
-from simulator_core.solver.utils.fluid_properties import FluidProperties
+from omotes_simulator_core.solver.utils.fluid_properties import FluidProperties
 
 
 class FluidPropertiesInitializationTest(unittest.TestCase):

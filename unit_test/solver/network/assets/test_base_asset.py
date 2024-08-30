@@ -18,10 +18,10 @@ import unittest
 from uuid import uuid4
 import numpy.testing as npt
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.network.assets.base_asset import BaseAsset
-from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class BaseAssetTest(unittest.TestCase):
@@ -30,10 +30,7 @@ class BaseAssetTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test case."""
         # Create a BaseAsset object
-        self.asset = BaseAsset(
-            name=str(uuid4()),
-            _id=str(uuid4())
-        )
+        self.asset = BaseAsset(name=str(uuid4()), _id=str(uuid4()))
         # Create supply, connection_point:0 and return node, connection_point:1
         self.supply_node = Node(name=str(uuid4()), _id=str(uuid4()))
         self.return_node = Node(name=str(uuid4()), _id=str(uuid4()))

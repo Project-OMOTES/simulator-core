@@ -19,14 +19,14 @@ from pathlib import Path
 import numpy as np
 from unittest.mock import Mock
 
-from simulator_core.entities.assets.utils import (
+from omotes_simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
     heat_demand_and_temperature_to_mass_flow,
     mass_flow_and_temperature_to_heat_demand,
 )
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class UtilFunctionTest(unittest.TestCase):

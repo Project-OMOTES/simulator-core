@@ -16,9 +16,11 @@
 import unittest
 import pandas as pd
 from datetime import datetime
-from simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from simulator_core.entities.assets.asset_defaults import (DEFAULT_TEMPERATURE,
-                                                           DEFAULT_TEMPERATURE_DIFFERENCE)
+from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+)
 
 
 class ConsumerControllerTest(unittest.TestCase):
@@ -27,15 +29,20 @@ class ConsumerControllerTest(unittest.TestCase):
     def setUp(self):
         """Set up the test case."""
         self.values = [100, 200]
-        self.profile = pd.DataFrame({"date": [datetime(2021, 1, 1, 0, 0, 0),
-                                              datetime(2021, 1, 1, 1, 0, 0)],
-                                     "values": self.values})
-        self.consumer = ControllerConsumer("consumer", "id",
-                                           temperature_supply=DEFAULT_TEMPERATURE
-                                           + DEFAULT_TEMPERATURE_DIFFERENCE,
-                                           temperature_return=DEFAULT_TEMPERATURE,
-                                           max_power=20000,
-                                           profile=self.profile)
+        self.profile = pd.DataFrame(
+            {
+                "date": [datetime(2021, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 1, 0, 0)],
+                "values": self.values,
+            }
+        )
+        self.consumer = ControllerConsumer(
+            "consumer",
+            "id",
+            temperature_supply=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_return=DEFAULT_TEMPERATURE,
+            max_power=20000,
+            profile=self.profile,
+        )
 
     def test_consumer_init(self):
         """Test to initialize the consumer."""
@@ -45,8 +52,9 @@ class ConsumerControllerTest(unittest.TestCase):
         self.assertEqual(self.consumer.name, "consumer")
         self.assertEqual(self.consumer.id, "id")
         self.assertEqual(self.consumer.temperature_return, DEFAULT_TEMPERATURE)
-        self.assertEqual(self.consumer.temperature_supply, DEFAULT_TEMPERATURE
-                         + DEFAULT_TEMPERATURE_DIFFERENCE)
+        self.assertEqual(
+            self.consumer.temperature_supply, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+        )
         self.assertEqual(self.consumer.start_index, 0)
         self.assertEqual(self.consumer.max_power, 20000)
         pd.testing.assert_frame_equal(self.consumer.profile, self.profile)
@@ -56,10 +64,8 @@ class ConsumerControllerTest(unittest.TestCase):
         # Arrange
 
         # Act
-        demand1 = self.consumer.get_heat_demand(datetime(2021, 1, 1,
-                                                         0, 0, 0))
-        demand2 = self.consumer.get_heat_demand(datetime(2021, 1, 1,
-                                                         1, 0, 0))
+        demand1 = self.consumer.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
+        demand2 = self.consumer.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
 
         # Assert
         self.assertEqual(demand1, self.values[0])

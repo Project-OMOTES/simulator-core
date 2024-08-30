@@ -8,5 +8,5 @@ Furthermore it is responsible for the communication between the two.
 The solver will get the equations from the network and pass them to the matrix to be solved.
 The solution is passed back to the network.
 
-.. autoclass:: simulator_core.solver.solver.Solver
+.. autoclass:: omotes_simulator_core.solver.solver.Solver
    :members:

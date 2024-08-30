@@ -20,15 +20,15 @@ from uuid import uuid4
 
 import numpy as np
 
-from simulator_core.entities.assets.asset_defaults import (
+from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
 )
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.assets.solver_pipe import SolverPipe
-from simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from omotes_simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class SolverPipeTest(unittest.TestCase):

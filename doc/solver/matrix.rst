@@ -6,7 +6,7 @@ The matrix class stores the matrix of the system of equations. It is used to sol
 The user can add unknowns to the matrix, the matrix solver will then pass the index in the matrix back.
 This index should be used in creating equation objects. For solving the standard matrix solver as available in `numpy`_ is used.
 
-.. autoclass:: simulator_core.solver.matrix.matrix.Matrix
+.. autoclass:: omotes_simulator_core.solver.matrix.matrix.Matrix
    :members:
 
 .. _numpy: https://numpy.org/
