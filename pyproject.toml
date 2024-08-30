@@ -30,8 +30,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pip-tools~=7.3.0",
-    "setuptools-git-versioning<2",
+    "pip-tools~=7.4.1",
+    "setuptools-git-versioning>=2.0, <3",
     "black~=22.1.0",
     "flake8==6.0.0",
     "Flake8-pyproject==1.2.3",
@@ -42,7 +42,7 @@ dev = [
     "flake8-mock==0.4",
     "flake8-tuple==0.4.1",
     "flake8-aaa==0.16.0",
-    "pytest ~=7.3.1",
+    "pytest ~=8.3.2",
     "pytest-cov ~=4.0.0",
     "bump2version==1.0.1",
     "mypy ~= 1.5.1",
@@ -65,7 +65,7 @@ build-backend = "setuptools.build_meta"
 requires = [
     "setuptools ~= 69.0.3",
     "wheel ~= 0.40.0",
-    "setuptools-git-versioning<2",
+    "setuptools-git-versioning>=2.0,<3",
 ]
 
 [tool.setuptools-git-versioning]
