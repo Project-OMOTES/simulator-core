@@ -4,35 +4,37 @@
 #
 #    pip-compile --output-file='..\..\requirements.txt' '..\..\pyproject.toml'
 #
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
-dataclass-wizard==0.22.2
-    # via simulator-core (..\..\pyproject.toml)
+dataclass-wizard==0.22.3
+    # via omotes-simulator-core (..\..\pyproject.toml)
 future-fstrings==1.2.0
     # via pyecore
-idna==3.7
+idna==3.8
     # via requests
-influxdb==5.3.1
-    # via simulator-core (..\..\pyproject.toml)
-lxml==5.2.2
+influxdb==5.3.2
+    # via omotes-simulator-core (..\..\pyproject.toml)
+lxml==5.3.0
     # via pyecore
 msgpack==1.0.8
     # via influxdb
-numpy==1.26.0
+numpy==2.1.0
     # via
+    #   omotes-simulator-core (..\..\pyproject.toml)
     #   pandas
     #   scipy
-    #   simulator-core (..\..\pyproject.toml)
 ordered-set==4.1.0
     # via pyecore
-pandas==2.1.1
-    # via simulator-core (..\..\pyproject.toml)
+pandas==2.2.2
+    # via omotes-simulator-core (..\..\pyproject.toml)
 pyecore==0.12.1
     # via pyesdl
 pyesdl==24.2
-    # via simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (..\..\pyproject.toml)
+pyjnius==1.6.1
+    # via omotes-simulator-core (..\..\pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
     #   influxdb
@@ -43,10 +45,10 @@ pytz==2024.1
     #   pandas
 requests==2.32.3
     # via influxdb
-restrictedpython==7.2a1.dev0
+restrictedpython==7.2
     # via pyecore
-scipy==1.14.0
-    # via simulator-core (..\..\pyproject.toml)
+scipy==1.14.1
+    # via omotes-simulator-core (..\..\pyproject.toml)
 six==1.16.0
     # via
     #   influxdb
