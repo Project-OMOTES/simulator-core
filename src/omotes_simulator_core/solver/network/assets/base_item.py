@@ -16,6 +16,7 @@
 """Module containing abstract BaseItem class."""
 from abc import ABC, abstractmethod
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class BaseItem(ABC):
@@ -46,6 +47,21 @@ class BaseItem(ABC):
         :param int index: The index of the item in the matrix.
         """
         self.matrix_index = index
+
+    def get_index_matrix(
+        self, property_name: str, connection_point: int, use_relative_indexing: bool
+    ) -> int:
+        """Returns the index of the property&connection point in the coefficient array or matrix.
+
+        :param str property_name: The property name for which the matrix index is needed.
+        :param int connection_point: The connection point for which the matrix index is needed.
+        :param bool use_relative_indexing: returns the index into coefficient array for the current
+        componentthe matrix if true, otherwise return the index in the complete matrix if false.
+        :return: The matrix index for the property and connection point.
+        """
+        return index_core_quantity.get_index_property(
+            property_name=property_name, connection_point=connection_point
+        ) + (0 if use_relative_indexing else self.matrix_index)
 
     @abstractmethod
     def get_equations(self) -> list[EquationObject]:

@@ -16,9 +16,9 @@
 """Module containing the Fall type class."""
 import numpy as np
 
-from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class FallType(BaseAsset):
@@ -76,7 +76,7 @@ class FallType(BaseAsset):
         super().__init__(
             name=name,
             _id=_id,
-            number_of_unknowns=NUMBER_CORE_QUANTITIES * 2,
+            number_of_unknowns=index_core_quantity.number_core_quantities * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,
         )
@@ -122,7 +122,14 @@ class FallType(BaseAsset):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
+        if (
+            self.prev_sol[
+                self.get_index_matrix(
+                    "mass_flow_rate", connection_point=connection_point, use_relative_indexing=True
+                )
+            ]
+            > 0
+        ):
             return self.add_internal_energy_equation()
         else:
             return self.add_internal_energy_to_node_equation(connection_point=connection_point)
@@ -137,8 +144,12 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge,
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES,
+                self.get_index_matrix(
+                    "mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    "mass_flow_rate", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, 1.0])
@@ -150,8 +161,8 @@ class FallType(BaseAsset):
 
          The equation is:
 
-        - Mass flow rate at inlet * Specific internal energy at inlet
-        + Mass flow rate at outlet * Specific internal energy at outlet - Heat supplied = 0
+        - Mass flow rate at inlet * Specific internal energy at inlet +
+            Mass flow rate at outlet * Specific internal energy at outlet - Heat supplied = 0
 
         :return:EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side value of
@@ -161,24 +172,73 @@ class FallType(BaseAsset):
         self.update_heat_supplied()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 0,
-                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 0,
-                self.matrix_index + IndexEnum.discharge + NUMBER_CORE_QUANTITIES * 1,
-                self.matrix_index + IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * 1,
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         equation_object.coefficients = np.array(
             [
-                self.prev_sol[IndexEnum.internal_energy],
-                self.prev_sol[IndexEnum.discharge],
-                self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES],
-                self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES],
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
+                    )
+                ],
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=0,
+                        use_relative_indexing=True,
+                    )
+                ],
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=1,
+                        use_relative_indexing=True,
+                    )
+                ],
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=1,
+                        use_relative_indexing=True,
+                    )
+                ],
             ]
         )
         equation_object.rhs = (
-            self.prev_sol[IndexEnum.discharge] * self.prev_sol[IndexEnum.internal_energy]
-            + self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES]
-            * self.prev_sol[IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES]
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+                )
+            ]
+            * self.prev_sol[
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                )
+            ]
+            + self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=True
+                )
+            ]
+            * self.prev_sol[
+                self.get_index_matrix(
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=True
+                )
+            ]
             + self.heat_supplied
         )
         return equation_object
@@ -196,26 +256,33 @@ class FallType(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge,
-                self.matrix_index + IndexEnum.pressure,
-                self.matrix_index + IndexEnum.pressure + NUMBER_CORE_QUANTITIES,
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="pressure", connection_point=0, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    property_name="pressure", connection_point=1, use_relative_indexing=False
+                ),
             ]
         )
         self.update_loss_coefficient()
-        if self.prev_sol[IndexEnum.discharge] < 1e-5:
+        mass_flow_rate = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+            )
+        ]
+        if mass_flow_rate < 1e-5:
             equation_object.coefficients = np.array(
                 [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
             )
-            equation_object.rhs = -self.loss_coefficient * self.prev_sol[IndexEnum.discharge] * 1e-5
+            equation_object.rhs = -self.loss_coefficient * mass_flow_rate * 1e-5
         else:
             equation_object.coefficients = np.array(
-                [-2.0 * self.loss_coefficient * abs(self.prev_sol[IndexEnum.discharge]), -1.0, 1.0]
+                [-2.0 * self.loss_coefficient * abs(mass_flow_rate), -1.0, 1.0]
             )
-            equation_object.rhs = (
-                -self.loss_coefficient
-                * self.prev_sol[IndexEnum.discharge]
-                * abs(self.prev_sol[IndexEnum.discharge])
-            )
+            equation_object.rhs = -self.loss_coefficient * mass_flow_rate * abs(mass_flow_rate)
         return equation_object
 
     def update_loss_coefficient(self) -> None:
