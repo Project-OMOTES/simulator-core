@@ -16,6 +16,7 @@
 """Module containing abstract BaseItem class."""
 from abc import ABC, abstractmethod
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class BaseItem(ABC):

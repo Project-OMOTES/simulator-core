@@ -25,7 +25,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
 )
-from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 

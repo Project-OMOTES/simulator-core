@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class BaseNodeItem(ABC):

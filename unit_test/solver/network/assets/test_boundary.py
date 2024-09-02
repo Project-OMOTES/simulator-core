@@ -18,7 +18,7 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from omotes_simulator_core.solver.matrix.core_enum import IndexEnum
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.boundary import BaseBoundary
 from omotes_simulator_core.solver.network.assets.node import Node

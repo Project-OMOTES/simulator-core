@@ -18,7 +18,7 @@ import numpy.typing as npt
 import scipy as sp
 import csv
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class Matrix:

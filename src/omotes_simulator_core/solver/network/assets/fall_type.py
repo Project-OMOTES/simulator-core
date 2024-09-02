@@ -16,9 +16,9 @@
 """Module containing the Fall type class."""
 import numpy as np
 
-from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class FallType(BaseAsset):

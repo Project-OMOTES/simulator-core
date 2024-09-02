@@ -21,7 +21,7 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_test
 
-from omotes_simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
