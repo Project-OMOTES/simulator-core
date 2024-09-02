@@ -17,7 +17,6 @@ import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 
 
 class ProductionAsset(FallType):
