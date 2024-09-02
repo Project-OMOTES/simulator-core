@@ -53,6 +53,8 @@ class AssetAbstract(ABC):
     """List of ids of the connected ports."""
     solver_asset: BaseAsset
     asset_type = "asset_abstract"
+    number_of_con_points: int = 2
+    """The number of connection points of the asset."""
 
     def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.

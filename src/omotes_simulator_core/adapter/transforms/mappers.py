@@ -131,7 +131,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
-        :param Network network: network to add the compenents to.
+        :param Network network: network to add the components to.
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         # TODO: This method requires a clean-up!
@@ -140,9 +140,14 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
             # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
+                # need to check if indixing is ok, what if junction has more than 2 ports?
                 py_joint_dict[esdl_asset.esdl_asset.id] = [
-                    *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.In),
-                    *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.Out),
+                    *self.esdl_object.get_connected_assets(
+                        esdl_asset.esdl_asset.id, esdl_asset.get_port_ids()[0]
+                    ),
+                    *self.esdl_object.get_connected_assets(
+                        esdl_asset.esdl_asset.id, esdl_asset.get_port_ids()[1]
+                    ),
                 ]
             else:
                 py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset))
@@ -153,10 +158,10 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         # loop over assets and create junctions and connect them
         for py_asset in py_assets_list:
-            for con_point in range(0, 2):
+            for con_point in range(0, py_asset.number_of_con_points):
                 if not py_asset.solver_asset.is_connected(con_point):
                     connected_py_assets = self.esdl_object.get_connected_assets(
-                        py_asset.asset_id, Port.In if con_point == 0 else Port.Out
+                        py_asset.asset_id, py_asset.connected_ports[con_point]
                     )
                     # Replace items in the connected_py_assets list that are connected to a Joint
                     # with the items that are connected to the Joint, except for the current asset.
