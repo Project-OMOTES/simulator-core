@@ -55,8 +55,8 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
     def test_replace_joint_in_connected_assets(self):
         """Method to test the replace joint in connected assets method."""
         # act
-        connected_py_assets = [("joint1", Port.In), ("asset2", Port.Out)]
-        py_joint_dict = {"joint1": [("asset1", Port.In), ("asset3", Port.Out)]}
+        connected_py_assets = [("joint1", "Port1.In"), ("asset2", "Port2.Out")]
+        py_joint_dict = {"joint1": [("asset1", "Port1.In"), ("asset3", "Port3.Out")]}
         py_asset_id = "joint1"
 
         # arrange
@@ -67,17 +67,18 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
 
         # assert
         self.assertEqual(
-            new_py_assets, [("asset1", Port.In), ("asset2", Port.Out), ("asset3", Port.Out)]
+            new_py_assets,
+            [("asset1", "Port1.In"), ("asset2", "Port2.Out"), ("asset3", "Port3.Out")],
         )
 
     def test_replace_joint_in_connected_assets_error(self):
         """Method to test error handling of the replace."""
         # act
-        connected_py_assets = [("joint1", Port.In), ("asset1", Port.Out)]
+        connected_py_assets = [("joint1", "Port1.In"), ("asset1", "Port1.Out")]
         py_joint_dict = {
-            "joint1": [("joint2", Port.In), ("asset2", Port.Out)],
-            "joint2": [("joint3", Port.In), ("asset3", Port.Out)],
-            "joint3": [("asset4", Port.In), ("asset5", Port.Out)],
+            "joint1": [("joint2", "Port2.In"), ("asset2", "Port2.Out")],
+            "joint2": [("joint3", "Port3.In"), ("asset3", "Port3.Out")],
+            "joint3": [("asset4", "Port4.In"), ("asset5", "Port5.Out")],
         }
         py_asset_id = "joint1"
 
@@ -94,3 +95,20 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         # assert
         self.assertIsInstance(cm.exception, RuntimeError)
         self.assertEqual(cm.exception.args[0], "Error in replacing joint in connected assets.")
+
+    def test_component_with_4_connection_points(self):
+        """Method to test the to entity mapper class with 4 connection points in a asset."""
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        network = Network()
+
+        # arrange
+        result = EsdlEnergySystemMapper(esdl_object).to_entity(network)
+
+        # assert
+        self.assertIsInstance(result[0][0], AssetAbstract)
+        self.assertIsInstance(result[1], List)
+        self.assertIsInstance(result[1][0], Junction)
+        self.assertEqual(len(result[0]), 3)
+        self.assertEqual(len(result[1]), 4)

@@ -22,7 +22,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAsset
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 from omotes_simulator_core.entities.assets.junction import Junction
-from omotes_simulator_core.entities.assets.utils import Port
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
@@ -37,28 +36,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
     EsdlAssetControllerStorageMapper,
 )
-
-
-def connect_connected_asset(
-    connected_py_assets: List[Tuple[str, Port]],
-    junction: Junction,
-    py_assets_list: List[AssetAbstract],
-) -> None:
-    """Method to connect assets connected to one asset to the same junction.
-
-    :param connected_py_assets: List of connected assets
-    :param junction: Junction to connect the assets to
-    :param py_assets_list: List of assets
-    :return: None
-    """
-    for connected_py_asset in connected_py_assets:
-        index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
-            connected_py_asset[0]
-        )
-        if connected_py_asset[1] == Port.In:  # from
-            py_assets_list[index].set_from_junction(from_junction=junction)
-        else:  # to
-            py_assets_list[index].set_to_junction(to_junction=junction)
 
 
 def replace_joint_in_connected_assets(

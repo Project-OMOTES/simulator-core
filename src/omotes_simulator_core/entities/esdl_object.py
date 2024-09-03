@@ -18,12 +18,10 @@
 import logging
 from typing import List, Tuple
 
-from esdl import InPort, OutPort
 from esdl.esdl_handler import EnergySystemHandler
 
 from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.utils import Port
 
 logger = logging.getLogger(__name__)
 
