@@ -16,9 +16,6 @@
 """Test Ates Cluster entities."""
 import faulthandler
 import unittest
-from unittest.mock import Mock
-
-from omotes_simulator_core.entities.assets.junction import Junction
 
 faulthandler.disable()
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402

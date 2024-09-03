@@ -24,7 +24,6 @@ from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAs
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.entities.assets.utils import Port
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 

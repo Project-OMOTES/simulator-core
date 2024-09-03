@@ -23,7 +23,6 @@ from omotes_simulator_core.adapter.transforms.mappers import (
 )
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.junction import Junction
-from omotes_simulator_core.entities.assets.utils import Port
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.solver.network.network import Network
