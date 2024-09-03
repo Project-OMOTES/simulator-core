@@ -60,7 +60,7 @@ class EsdlObject:
             ]
         return output_list
 
-    def get_connected_assets(self, asset_id: str, port_id: str) -> List[Tuple[str, Port]]:
+    def get_connected_assets(self, asset_id: str, port_id: str) -> List[Tuple[str, str]]:
         """Method to get the id's of connected assets from the esdl.
 
         This returns a list of list with the connected asset id and the port to which it is
@@ -71,7 +71,7 @@ class EsdlObject:
 
         :param str id: id of the asset for which we want to know the connected assets
         :param str port: port for which the connected assets need to be returned.
-        :return: List of list which the id of the connected assets and the connected port.
+        :return: List of list which the id of the connected assets and the connected port id.
         """
         # TODO 2. What if it is connected to a joint?
         connected_assets = []
@@ -82,7 +82,5 @@ class EsdlObject:
             if esdl_port.id == port_id:
                 connected_port_ids = esdl_port.connectedTo
                 break
-        for connected_port_id in connected_port_ids:
-            connected_port_type = Port.Out if isinstance(connected_port_id, OutPort) else Port.In
-            connected_assets.append((connected_port_id.energyasset.id, connected_port_type))
+        connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets

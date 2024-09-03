@@ -62,11 +62,11 @@ def connect_connected_asset(
 
 
 def replace_joint_in_connected_assets(
-    connected_py_assets: List[Tuple[str, Port]],
-    py_joint_dict: Dict[str, List[Tuple[str, Port]]],
+    connected_py_assets: List[Tuple[str, str]],
+    py_joint_dict: Dict[str, List[Tuple[str, str]]],
     py_asset_id: str,
     iteration_limit: int = 10,
-) -> List[Tuple[str, Port]]:
+) -> List[Tuple[str, str]]:
     """Replace joint with assets connected to the elements.
 
     Replace items in the connected_py_assets list that are connected to a Joint
@@ -172,33 +172,17 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                         index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                             connected_py_asset
                         )
-                        if connected_py_port == Port.In:
-                            node_id = network.connect_assets(
-                                asset1_id=py_asset.solver_asset.name,
-                                connection_point_1=con_point,
-                                asset2_id=py_assets_list[index].solver_asset.name,
-                                connection_point_2=0,
-                            )
-                            py_junction_list.append(
-                                Junction(network.get_node(node_id), name=str(node_id))
-                            )
-                            py_assets_list[index].set_to_junction(py_junction_list[-1])
-                        else:
-                            node_id = network.connect_assets(
-                                asset1_id=py_asset.solver_asset.name,
-                                connection_point_1=con_point,
-                                asset2_id=py_assets_list[index].solver_asset.name,
-                                connection_point_2=1,
-                            )
-                            py_junction_list.append(
-                                Junction(network.get_node(node_id), name=str(node_id))
-                            )
-                            py_assets_list[index].set_from_junction(py_junction_list[-1])
-                        # connect the connected assets to the junction
-                        if con_point == 0:
-                            py_asset.set_to_junction(py_junction_list[-1])
-                        else:
-                            py_asset.set_from_junction(py_junction_list[-1])
+                        con_point_2 = py_assets_list[index].connected_ports.index(connected_py_port)
+
+                        node_id = network.connect_assets(
+                            asset1_id=py_asset.solver_asset.name,
+                            connection_point_1=con_point,
+                            asset2_id=py_assets_list[index].solver_asset.name,
+                            connection_point_2=con_point_2,
+                        )
+                        py_junction_list.append(
+                            Junction(network.get_node(node_id), name=str(node_id))
+                        )
 
         return py_assets_list, py_junction_list
 

@@ -36,15 +36,10 @@ class AtesClusterTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up before each test case."""
-        # Create two junctions
-        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
-        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster", asset_id="ates_cluster_id", port_ids=["test1", "test2"]
         )
-        self.ates_cluster.set_from_junction(from_junction=self.from_junction)
-        self.ates_cluster.set_to_junction(to_junction=self.to_junction)
         faulthandler.disable()
         self.ates_cluster._init_rosim()
 

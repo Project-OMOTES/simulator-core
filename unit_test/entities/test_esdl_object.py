@@ -81,13 +81,13 @@ class EsdlObjectTest(unittest.TestCase):
         """Test for connection of two assets."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0].esdl_asset
-        test_list1 = [("Pipe1_ret", Port.Out)]
-        test_list2 = [("Pipe1", Port.In)]
+        test_list1 = [("Pipe1_ret", "935fb733-9f76-4a8d-8899-1ad8689a4b12")]
+        test_list2 = [("Pipe1", "a9793a5e-df4f-4795-8079-015dfaf57f82")]
 
         # Act
-        connected_assets1 = self.esdl_object.get_connected_assets(asset.id, Port.In)
+        connected_assets1 = self.esdl_object.get_connected_assets(asset.id, asset.port[1].id)
 
-        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)  # act
+        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, asset.port[0].id)  # act
 
         # Assert
         self.assertEqual(connected_assets1, test_list1)

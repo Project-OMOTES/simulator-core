@@ -34,12 +34,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
 
-    from_junction: Junction | None
-    """The junction where the asset starts."""
-
-    to_junction: Junction | None
-    """The junction where the asset ends."""
-
     name: str
     """The name of the asset."""
 
@@ -93,20 +87,6 @@ class AssetAbstract(ABC):
     @abstractmethod
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
-
-    def set_from_junction(self, from_junction: Junction) -> None:
-        """Method to set the from junction of an asset.
-
-        :param Junction from_junction: The junction where the asset starts.
-        """
-        self.from_junction = from_junction
-
-    def set_to_junction(self, to_junction: Junction) -> None:
-        """Method to set the to junction of an asset.
-
-        :param Junction to_junction: The junction where the asset ends.
-        """
-        self.to_junction = to_junction
 
     def write_standard_output(self) -> None:
         """Write the output of the asset to the output list.

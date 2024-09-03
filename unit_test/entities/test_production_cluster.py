@@ -38,17 +38,12 @@ class ProductionClusterTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test case."""
-        # Create two junctions
-        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
-        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
         # Create a production cluster object
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
             port_ids=["test1", "test2"],
         )
-        self.production_cluster.set_from_junction(from_junction=self.from_junction)
-        self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
     def test_production_cluster_create(self) -> None:
         """Evaluate the creation of a production_cluster object."""
