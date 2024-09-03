@@ -15,7 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
