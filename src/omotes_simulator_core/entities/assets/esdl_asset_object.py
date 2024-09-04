@@ -41,6 +41,10 @@ class EsdlAssetObject:
         """
         self.esdl_asset = asset
 
+    def get_id(self) -> str:
+        """Get the id of the asset."""
+        return self.esdl_asset.id
+
     def get_property(self, esdl_property_name: str, default_value: Any) -> Tuple[Any, bool]:
         """Get property value from the esdl_asset based on the "ESDL" name.
 
