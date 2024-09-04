@@ -212,6 +212,7 @@ class EsdlObjectTest(unittest.TestCase):
         )
 
     def test_multiple_connection(self):
+        """Test for multiple connections to one asset."""
         # Arrange
         esdl_file_path = (
             Path(__file__).parent / ".." / ".." / "testdata" / "test_multiple_connection.esdl"
@@ -229,6 +230,7 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(connected_assets, test_list)
 
     def test_no_connected_assets_error(self):
+        """Test for error when no connected assets are found."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
         pipe = self.esdl_object.get_all_assets_of_type("pipe")[0]

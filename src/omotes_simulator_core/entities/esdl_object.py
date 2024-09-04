@@ -75,5 +75,7 @@ class EsdlObject:
             if esdl_port.id == port_id:
                 connected_port_ids = esdl_port.connectedTo
                 break
+        if not connected_port_ids:
+            raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
         connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets
