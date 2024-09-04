@@ -61,18 +61,13 @@ class EsdlObject:
     def get_connected_assets(self, asset_id: str, port_id: str) -> List[Tuple[str, str]]:
         """Method to get the id's of connected assets from the esdl.
 
-        This returns a list of list with the connected asset id and the port to which it is
-        connected to the asset.
-        First it is set if the request is an in or outport. Then the connected ports to the asset
-        are added to a list. In the final step all assets elong to the ports are listed together
-        with the type of port they are connected to.
+        This returns a list of a tuple with the id of the connected asset and the id of the port
+        to which the original asset is connected.
 
-        :param str id: id of the asset for which we want to know the connected assets
-        :param str port: port for which the connected assets need to be returned.
-        :return: List of list which the id of the connected assets and the connected port id.
+        :param str asset_id: id of the asset for which to return the connected assets.
+        :param str port_id: id of the port for which to return the connected assets.
+        :return: List of tuple with the id of the connected assets and the connected port ids.
         """
-        # TODO 2. What if it is connected to a joint?
-        connected_assets = []
         esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
         connected_port_ids = []
