@@ -97,17 +97,21 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
 
     def test_component_with_4_connection_points(self):
         """Method to test the to entity mapper class with 4 connection points in a asset."""
+        # arrange
         esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
         esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         network = Network()
 
-        # arrange
-        result = EsdlEnergySystemMapper(esdl_object).to_entity(network)
+        # act
+        asset_list, junction_list = EsdlEnergySystemMapper(esdl_object).to_entity(network)
 
         # assert
-        self.assertIsInstance(result[0][0], AssetAbstract)
-        self.assertIsInstance(result[1], List)
-        self.assertIsInstance(result[1][0], Junction)
-        self.assertEqual(len(result[0]), 3)
-        self.assertEqual(len(result[1]), 4)
+        self.assertIsInstance(asset_list, list)
+        self.assertTrue(all(isinstance(item, AssetAbstract) for item in asset_list))
+
+        self.assertIsInstance(junction_list, list)
+        self.assertTrue(all(isinstance(item, Junction) for item in junction_list))
+
+        self.assertEqual(len(asset_list), 3)
+        self.assertEqual(len(junction_list), 4)
