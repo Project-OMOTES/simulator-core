@@ -117,14 +117,11 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
             # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
-                # need to check if indixing is ok, what if junction has more than 2 ports?
                 py_joint_dict[esdl_asset.esdl_asset.id] = [
-                    *self.esdl_object.get_connected_assets(
-                        esdl_asset.esdl_asset.id, esdl_asset.get_port_ids()[0]
-                    ),
-                    *self.esdl_object.get_connected_assets(
-                        esdl_asset.esdl_asset.id, esdl_asset.get_port_ids()[1]
-                    ),
+                    self.esdl_object.get_connected_assets(
+                        asset_id=esdl_asset.esdl_asset.id, port_id=port
+                    )
+                    for port in esdl_asset.get_port_ids()
                 ]
             else:
                 py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset))
