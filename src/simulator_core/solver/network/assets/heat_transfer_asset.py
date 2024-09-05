@@ -343,14 +343,6 @@ class HeatTransferAsset(BaseAsset):
         if (flow_direction_primary != FlowDirection.ZERO) or (
             flow_direction_secondary != FlowDirection.ZERO
         ):
-            # equations.append(
-            #     self.add_heat_transfer_equation(
-            #         primary_side_inflow=primary_side_inflow,
-            #         primary_side_outflow=primary_side_outflow,
-            #         secondary_side_inflow=secondary_side_inflow,
-            #         secondary_side_outflow=secondary_side_outflow,
-            #     )
-            # )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=primary_side_inflow,
@@ -371,6 +363,19 @@ class HeatTransferAsset(BaseAsset):
         return equations
 
     def get_mass_flow_setpoint_from_prev_solution(self) -> float:
+        r"""Determine the mass flow rate set point from the previous solution.
+
+        Method uses the following equation to determine the mass flow rate set point:
+
+        .. math::
+
+            \dot{m}_{primary, inflow} = - \left| \frac{u_{primary, inflow} - u_{primary, outflow}}{c \left( \dot{m}_{secondary, inflow}u_{secondary, inflow} - \dot{m}_{secondary, outflow}u_{secondary, outflow} \right)} \right|
+
+        with :math:`c` as the heat transfer coefficient.
+
+        :return: float, :math:`\dot{m}_{primary, inflow}`
+
+        """
         internal_energy_difference_primary = (
             self.prev_sol[
                 IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.primary_side_inflow
@@ -524,164 +529,6 @@ class HeatTransferAsset(BaseAsset):
         )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = pressure_value
-        return equation_object
-
-    def get_heat_transfer_equation_coefficients(
-        self, connection_point_list: List[int]
-    ) -> np.ndarray:
-        r"""Determine the coefficients of the heat transfer equation.
-
-        The heat transfer coefficients are given by:
-
-        .. math::
-
-            \frac{\partial F}{\partial \vec{x}}  & = \left[ u_0 - u_1, \dot{m}_0, \\\\
-            & 0, -\dot{m}_0, \\\\
-            & +C u_2, +C \dot{m}_2, \\\\
-            & +C u_3, +C \dot{m}_3 \right]
-
-        with :math:'\vec{x}' as :math:\sum_0^3 \left[\dot{m}_0, u_0\right].
-
-        :param connection_point_list: List of connection points as
-            [primary_side_inflow, primary_side_outflow,
-            secondary_side_inflow, secondary_side_outflow]
-        :return: np.ndarray
-            The coefficients for the heat pump equation.
-        """
-        # Determine coefficients
-        coefficient_array = np.array(
-            [
-                [
-                    self.prev_sol[
-                        IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point
-                    ],
-                    self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point],
-                ]
-                for connection_point in connection_point_list
-            ]
-        )
-        # Reshape array to a 1D array of size (8,)
-        coefficient_array = coefficient_array.reshape((8,))
-        # Multiply the coefficients with the heat transfer coefficient
-        temp_array = coefficient_array * np.array(
-            [
-                +1,
-                +1,
-                +0,
-                +0,
-                +self.heat_transfer_coefficient,
-                +self.heat_transfer_coefficient,
-                +self.heat_transfer_coefficient,
-                +self.heat_transfer_coefficient,
-            ]
-        )
-        temp_array[3] = -temp_array[1]
-        temp_array[0] = temp_array[0] - coefficient_array[2]
-        return typing.cast(
-            np.ndarray,
-            temp_array,
-        )
-
-    def get_heat_transfer_equation_rhs(self, connection_point_list: List[int]) -> float:
-        r"""RHS for the heat transfer equation.
-
-        The right-hand side of the heat transfer equation is given by:
-
-        .. math::
-
-            \mathrm{RHS} = \dot{m}_0 \left( u_0 - u_1 \right) + \\\\
-            C \left( u_2 \dot{m}_2 + u_3 \dot{m}_3 \right)
-
-        :param connection_point_list: The list of connection points to determine the
-            right-hand side
-        :return: float
-            The right-hand side value of the heat transfer
-        """
-        # Define the energy on the primary side
-        energy_primary_side = self.prev_sol[
-            IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_list[0]
-        ] * (
-            self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_list[0]
-            ]
-            - self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_list[1]
-            ]
-        )
-        # Define the energy on the secondary side
-        energy_secondary_side = self.heat_transfer_coefficient * (
-            self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_list[2]]
-            * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_list[2]
-            ]
-            + self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * connection_point_list[3]]
-            * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * connection_point_list[3]
-            ]
-        )
-        # Return the sum of the energy on the primary and secondary side
-        return float(energy_primary_side + energy_secondary_side)
-
-    def add_heat_transfer_equation(
-        self,
-        primary_side_inflow: int,
-        primary_side_outflow: int,
-        secondary_side_inflow: int,
-        secondary_side_outflow: int,
-    ) -> EquationObject:
-        r"""Returns an EquationObject of the energy balance equation for the HeatPump model.
-
-        The equation is given by:
-
-        .. math::
-
-            \dot{m}_1 u_1 + \dot{m}_2 u_2 + \left( 1 + \frac{1}{\\mathrm{COP}_h} \right) \\
-            \left[ \dot{m}_3 u_3 - \dot{m}_4 u_4 \right] = 0
-
-        The coefficients depend on the flow direction, which is determined by the mass flow rate at
-        connection point 0. If the mass flow rate at connection point 0 is greater than 0, the flow
-        direction is positive; otherwise, the flow direction is negative.
-
-
-        :param: None
-        :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side value of
-            the equation.
-        """
-        # Create a connection point list
-        connection_point_list = [
-            primary_side_inflow,
-            primary_side_outflow,
-            secondary_side_inflow,
-            secondary_side_outflow,
-        ]
-        # Initialize the EquationObject
-        equation_object = EquationObject()
-        # Define indices for the equation
-        equation_object.indices = (
-            np.tile(
-                np.array(
-                    [
-                        self.matrix_index + IndexEnum.discharge,
-                        self.matrix_index + IndexEnum.internal_energy,
-                    ]
-                ),
-                NUMBER_CORE_QUANTITIES + 1,
-            )
-            + np.repeat(connection_point_list, 2, axis=0) * NUMBER_CORE_QUANTITIES
-        )
-        index_sort = np.argsort(equation_object.indices)
-        equation_object.indices = equation_object.indices[index_sort]
-        # Define the coefficients for the equation
-        coefficients = self.get_heat_transfer_equation_coefficients(
-            connection_point_list=connection_point_list
-        )
-        equation_object.coefficients = coefficients[index_sort]
-        # Define the right-hand side value for the equation
-        equation_object.rhs = self.get_heat_transfer_equation_rhs(
-            connection_point_list=connection_point_list
-        )
-
         return equation_object
 
     def update_loss_coefficient(self) -> None:
