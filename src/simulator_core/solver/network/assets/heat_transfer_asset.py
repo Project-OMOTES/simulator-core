@@ -351,12 +351,18 @@ class HeatTransferAsset(BaseAsset):
         if (flow_direction_primary != FlowDirection.ZERO) or (
             flow_direction_secondary != FlowDirection.ZERO
         ):
+            # equations.append(
+            #     self.add_heat_transfer_equation(
+            #         primary_side_inflow=primary_side_inflow,
+            #         primary_side_outflow=primary_side_outflow,
+            #         secondary_side_inflow=secondary_side_inflow,
+            #         secondary_side_outflow=secondary_side_outflow,
+            #     )
+            # )
             equations.append(
-                self.add_heat_transfer_equation(
-                    primary_side_inflow=primary_side_inflow,
-                    primary_side_outflow=primary_side_outflow,
-                    secondary_side_inflow=secondary_side_inflow,
-                    secondary_side_outflow=secondary_side_outflow,
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=primary_side_inflow,
+                    mass_flow_value=self.get_mass_flow_setpoint_from_prev_solution(),
                 )
             )
         # If the mass flow at the inflow node of the primary and secondary side is zero,
@@ -371,6 +377,30 @@ class HeatTransferAsset(BaseAsset):
             )
         # Return the equations
         return equations
+
+    def get_mass_flow_setpoint_from_prev_solution(self) -> float:
+        internal_energy_difference_primary = (
+            self.prev_sol[
+                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.primary_side_inflow
+            ]
+            - self.prev_sol[
+                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.primary_side_outflow
+            ]
+        )
+        # Define the energy on the secondary side
+        energy_secondary_side = self.heat_transfer_coefficient * (
+            self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * self.secondary_side_inflow]
+            * self.prev_sol[
+                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.secondary_side_inflow
+            ]
+            + self.prev_sol[
+                IndexEnum.discharge + NUMBER_CORE_QUANTITIES * self.secondary_side_outflow
+            ]
+            * self.prev_sol[
+                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.secondary_side_outflow
+            ]
+        )
+        return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
 
     def add_mass_flow_to_node_equation(self, connection_point: int) -> EquationObject:
         r"""Links the mass flow rate at the connection point to the node.
