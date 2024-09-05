@@ -41,34 +41,44 @@ class HeatTransferAsset(BaseAsset):
         self,
         name: str,
         _id: str,
-        supply_temperature_primary: float = 293.15,
-        supply_temperature_secondary: float = 293.15,
-        heat_transfer_coefficient: float = 1.0,
-        pre_scribe_mass_flow: bool = False,
-        mass_flow_rate_set_point: float = 80.0,
-        pressure_set_point: float = 10000.0,
         primary_side: Optional[List[int]] = None,
+        supply_temperature_primary: float = 293.15,
+        mass_flow_rate_set_point_primary: float = -20.0,
+        heat_transfer_coefficient: float = 1.0,
+        pre_scribe_mass_flow_secondary: bool = False,
+        supply_temperature_secondary: float = 293.15,
+        mass_flow_rate_set_point_secondary: float = 80.0,
+        pressure_set_point_secondary: float = 10000.0,
+        primary_side_inflow: int = 0,
+        primary_side_outflow: int = 1,
+        secondary_side_inflow: int = 2,
+        secondary_side_outflow: int = 3,
     ):
         """
-        Initializes the HeatPump object with the given parameters.
+        Initializes the Heat Transfer Asset with the given parameters.
 
         Parameters
         ----------
         name : str
             The unique identifier of the asset.
         supply_temperature_primary: float, optional
-            The supply temperature of the asset on the hot side. The default is 293.15 K.
-        supply_temperature_secondary: float, optional
-            The supply temperature of the asset on the cold side. The default is 293.15 K.
+            The supply temperature of the asset on the primary side (i.e., hot side).
+            The default value is 293.15 K.
+        mass_flow_rate_set_point_primary: float, optional
+            The mass flow rate set point for the asset on the primary side.
+            The default is -20.0 kg/s.
         heat_transfer_coefficient : float, optional
             The heat transfer coefficient between the primary and secondary side.
-            The default is 1.0.
-        pre_scribe_mass_flow : bool
+            The default value is 1.0.
+        supply_temperature_secondary: float, optional
+            The supply temperature of the asset on the secondary side (i.e., cold side).
+            The default value is 293.15 K.
+        pre_scribe_mass_flow_secondary : bool
             A boolean flag that indicates whether the mass flow rate or the pressure is prescribed
-            at the hot side of the heat pump.
-        mass_flow_rate_set_point : float, optional
+            at the secondary side of the heat transfer asset.
+        mass_flow_rate_set_point_secondary : float, optional
             The mass flow rate set point for the asset. The default is 10.0 kg/s.
-        pressure_set_point : float, optional
+        pressure_set_point_secondary : float, optional
             The pressure set point for the asset. The default is 10000.0 Pa.
         primary_side : List[int], optional
             The connection points on the primary side of the heat transfer asset.
@@ -88,16 +98,24 @@ class HeatTransferAsset(BaseAsset):
         self.heat_transfer_coefficient = heat_transfer_coefficient
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
         # at the hot side of the heat pump
-        self.pre_scribe_mass_flow = pre_scribe_mass_flow
-        # Define the mass flow rate set point for the asset
-        self.mass_flow_rate_set_point = mass_flow_rate_set_point
+        self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
+        # Define the mass flow rate set point for the asset on the secondary side
+        self.mass_flow_rate_set_point_secondary = mass_flow_rate_set_point_secondary
+        # Define the mass flow rate set point for the asset on the primary side
+        self.mass_flow_rate_set_point_primary = mass_flow_rate_set_point_primary
         # Define the pressure set point for the asset
-        self.pressure_set_point = pressure_set_point
+        self.pressure_set_point_secondary = pressure_set_point_secondary
         # Define the primary side of the heat transfer asset
         if primary_side is None:
             primary_side = [0, 1]
         self.primary_side = primary_side
+        # Define the secondary side of the heat transfer asset
         self.secondary_side = list(set(range(4)).difference(set(primary_side)))
+        # Define the connection points
+        self.primary_side_inflow = primary_side_inflow
+        self.primary_side_outflow = primary_side_outflow
+        self.secondary_side_inflow = secondary_side_inflow
+        self.secondary_side_outflow = secondary_side_outflow
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the asset.
@@ -192,7 +210,12 @@ class HeatTransferAsset(BaseAsset):
         ):
             return [0, 1, 3, 2]
         else:
-            return [0, 1, 2, 3]
+            return [
+                self.primary_side_inflow,
+                self.primary_side_outflow,
+                self.secondary_side_inflow,
+                self.secondary_side_outflow,
+            ]
 
     def get_equations_from_connection_point_list(self) -> List[EquationObject]:
         r"""Return the heat transfer equations.
@@ -249,6 +272,14 @@ class HeatTransferAsset(BaseAsset):
                 flow_direction_secondary=flow_direction_secondary,
             )
         )
+        # primary_side_inflow = self.primary_side_inflow
+        # primary_side_outflow = self.primary_side_outflow
+        # secondary_side_inflow = self.secondary_side_inflow
+        # secondary_side_outflow = self.secondary_side_outflow
+
+        print(
+            primary_side_inflow, primary_side_outflow, secondary_side_inflow, secondary_side_outflow
+        )
         # -- Internal energy (4x) --
         # Add the internal energy equations at connection points 0, and 2 to define
         # the connection with the nodes.
@@ -274,30 +305,30 @@ class HeatTransferAsset(BaseAsset):
         )
         # -- Mass flow rate or pressure on secnodary side (2x) --
         # Prescribe the pressure at the secondary side of the heat transfer asset.
-        if self.pre_scribe_mass_flow:
+        if self.pre_scribe_mass_flow_secondary:
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_inflow,
-                    mass_flow_value=-self.mass_flow_rate_set_point,
+                    mass_flow_value=-self.mass_flow_rate_set_point_secondary,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    mass_flow_value=+self.mass_flow_rate_set_point,
+                    mass_flow_value=+self.mass_flow_rate_set_point_secondary,
                 )
             )
         else:
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=secondary_side_inflow,
-                    pressure_value=self.pressure_set_point / 2,
+                    pressure_value=self.pressure_set_point_secondary / 2,
                 )
             )
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    pressure_value=self.pressure_set_point / 1,
+                    pressure_value=self.pressure_set_point_secondary / 1,
                 )
             )
         # -- Pressure (4x) --
@@ -334,7 +365,8 @@ class HeatTransferAsset(BaseAsset):
             # TODO: Fix when controller prescribes mass flow rate is zero.
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
-                    connection_point=primary_side_inflow, mass_flow_value=-20.0
+                    connection_point=primary_side_inflow,
+                    mass_flow_value=self.mass_flow_rate_set_point_primary,
                 )
             )
         # Return the equations
@@ -616,10 +648,13 @@ class HeatTransferAsset(BaseAsset):
             )
             + np.repeat(connection_point_list, 2, axis=0) * NUMBER_CORE_QUANTITIES
         )
+        index_sort = np.argsort(equation_object.indices)
+        equation_object.indices = equation_object.indices[index_sort]
         # Define the coefficients for the equation
-        equation_object.coefficients = self.get_heat_transfer_equation_coefficients(
+        coefficients = self.get_heat_transfer_equation_coefficients(
             connection_point_list=connection_point_list
         )
+        equation_object.coefficients = coefficients[index_sort]
         # Define the right-hand side value for the equation
         equation_object.rhs = self.get_heat_transfer_equation_rhs(
             connection_point_list=connection_point_list
