@@ -272,14 +272,6 @@ class HeatTransferAsset(BaseAsset):
                 flow_direction_secondary=flow_direction_secondary,
             )
         )
-        # primary_side_inflow = self.primary_side_inflow
-        # primary_side_outflow = self.primary_side_outflow
-        # secondary_side_inflow = self.secondary_side_inflow
-        # secondary_side_outflow = self.secondary_side_outflow
-
-        print(
-            primary_side_inflow, primary_side_outflow, secondary_side_inflow, secondary_side_outflow
-        )
         # -- Internal energy (4x) --
         # Add the internal energy equations at connection points 0, and 2 to define
         # the connection with the nodes.

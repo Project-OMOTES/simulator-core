@@ -267,3 +267,116 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[6], -38.76, 2)
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[2], fluid_props.get_ie(303.15), 2)
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[8], fluid_props.get_ie(313.15), 2)
+
+    def test_heat_transfer_asset_heat_transfer_coefficient_of_one(self) -> None:
+        """Test a heat transfer coefficient equal to one.
+
+        The primary side is defined as [0, 1] and the secondary side is defined as [2, 3].
+        Primary (index=0) positive and secondary (index=2) positive flow state.
+        """
+        # Arrange
+        # Connect assets
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=0,
+            asset2_id=self.production_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=1,
+            asset2_id=self.production_asset.name,
+            connection_point_2=0,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=2,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=3,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=0,
+        )
+        # Create a Solver Object
+        self.solver = Solver(network=self.network)
+        # Set the temperatures and cop for HP
+        self.heat_transfer_asset.supply_temperature_primary = 70 + 273.15
+        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.heat_transfer_coefficient = 1.0  # - 1.0 / 5.0
+        # Set the temperature of the demand
+        self.demand_asset.supply_temperature = 40 + 273.15
+        self.demand_asset.mass_flow_rate_set_point = 38.76
+        self.demand_asset.pre_scribe_mass_flow = True
+        # Set the temperature of the production
+        self.production_asset.pre_scribe_mass_flow = False
+        self.production_asset.supply_temperature = 40 + 273.15
+        # Act
+        self.solver.solve()
+        # Assert
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[0], -38.76, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[6], -38.76, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[2], fluid_props.get_ie(313.15), 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[8], fluid_props.get_ie(313.15), 2)
+
+    def test_heat_transfer_asset_negative_heat_transfer_coefficient(self) -> None:
+        """Test a negative heat transfer coefficient.
+
+        The primary side is defined as [0, 1] and the secondary side is defined as [2, 3].
+        Primary (index=0) positive and secondary (index=2) positive flow state.
+        """
+        # Arrange
+        # Connect assets
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=0,
+            asset2_id=self.production_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=1,
+            asset2_id=self.production_asset.name,
+            connection_point_2=0,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=2,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=3,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=0,
+        )
+        # Create a Solver Object
+        self.solver = Solver(network=self.network)
+        # Set the temperatures and cop for HP
+        self.heat_transfer_asset.supply_temperature_primary = 30 + 273.15
+        self.heat_transfer_asset.supply_temperature_secondary = 40 + 273.15
+        self.heat_transfer_asset.heat_transfer_coefficient = -1 * (1.0 - 1.0 / 5.0)
+        # Set the temperature of the demand
+        self.demand_asset.supply_temperature = 70 + 273.15
+        self.demand_asset.mass_flow_rate_set_point = 38.76
+        self.demand_asset.pre_scribe_mass_flow = True
+        # Set the temperature of the production
+        self.production_asset.pre_scribe_mass_flow = False
+        self.production_asset.supply_temperature = 20 + 273.15
+        # Act
+        self.solver.solve()
+        # Assert
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[0], -93.10, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[6], -38.76, 2)
+        # u_0 < u_1 on the primary side
+        self.assertTrue(self.heat_transfer_asset.prev_sol[2] < self.heat_transfer_asset.prev_sol[5])
+        # u_2 > u_3 on the secondary side
+        self.assertTrue(
+            self.heat_transfer_asset.prev_sol[8] > self.heat_transfer_asset.prev_sol[11]
+        )
+        # verify temperature
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[2], fluid_props.get_ie(293.15), 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[8], fluid_props.get_ie(343.15), 2)
