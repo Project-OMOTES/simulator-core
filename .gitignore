@@ -222,3 +222,7 @@ unit_test_coverage/
 test-results.xml
 .env.*
 doc/_build
+
+# test output
+map.html
+ates_sequential_temp.xml
