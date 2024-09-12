@@ -130,7 +130,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         :return: List of junctions that are created and connected to the assets.
         """
-        py_joint_dict = self._get_junction(network)
+        py_joint_dict = self._get_junction()
         py_junction_list = []
         # loop over assets and create junctions and connect them
         for py_asset in py_assets_list:
@@ -179,13 +179,12 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             network.add_existing_asset(py_assets_list[-1].solver_asset)
         return py_assets_list
 
-    def _get_junction(self, network: Network) -> dict[str, list[tuple[str, str]]]:
+    def _get_junction(self) -> dict[str, list[tuple[str, str]]]:
         """Method to create an overview of all assets connected to a joint in the esdl.
 
         This method creates a dictionary with the joint id as key.
         The value is a list of all connected assets and the id of the port it is connected to.
 
-        :param Network network: network to get the junctions from.
         :return: dict[Any, list[list[tuple[str, str]]], which is the dictionary with the connected
         assets.
         """
