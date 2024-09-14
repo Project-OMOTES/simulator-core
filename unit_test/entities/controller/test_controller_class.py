@@ -14,15 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller class."""
 import unittest
-from pathlib import Path
 from unittest.mock import Mock
-from datetime import datetime, timezone
+from datetime import datetime
 
-from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -30,7 +27,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_SUPPLY,
     PROPERTY_SET_PRESSURE,
 )
-from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class ControllerTest(unittest.TestCase):
