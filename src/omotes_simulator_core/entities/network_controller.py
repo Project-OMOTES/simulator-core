@@ -166,7 +166,7 @@ class NetworkController(NetworkControllerAbstract):
             }
         return storages
 
-    def _set_storages_to_demand(self, power) -> dict:
+    def _set_storages_to_demand(self, power: float = 0) -> dict:
         """Method to set the storages to power. discharge (-), charge (+).
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.
