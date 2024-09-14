@@ -123,14 +123,14 @@ class ControllerTest(unittest.TestCase):
         total_supply = self.controller.get_total_supply_priority(1)
         # Assert
         self.assertEqual(total_supply, 1.0)
-        
+
     def test_get_total_charge_storage(self):
         """Test to get the total charge storage of the network."""
         # Act
         total_charge = self.controller.get_total_charge_storage()
         # Assert
         self.assertEqual(total_charge, 1.0)
-        
+
     def test_get_total_discharge_storage(self):
         """Test to get the total discharge storage of the network."""
         # Act
@@ -197,7 +197,7 @@ class ControllerTest(unittest.TestCase):
         self.assertIn(self.consumer2.id, result)
 
     def test_controller_capped_demand(self):
-        """Test total supply and storage > demand"""
+        """Test total supply and storage > demand."""
         # Arrange
         self.controller.consumers[0].get_heat_demand.return_value = 5
         self.controller.consumers[1].get_heat_demand.return_value = 5
@@ -210,7 +210,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result['consumer2']['heat_demand'], 2.5)
 
     def test_controller_charge_storage_max(self):
-        """Test total supply able to charge storage to max"""
+        """Test total supply able to charge storage to max."""
         # Arrange
 
         # Act
@@ -220,7 +220,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result['storage1']['heat_demand'], 1)
 
     def test_controller_charge_storage_based_on_surplus(self):
-        """Test total supply able to charge storage based on surplus"""
+        """Test total supply able to charge storage based on surplus."""
         # Arrange
         self.controller.producers[1].power = 2.7
 
@@ -231,7 +231,7 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEqual(result['storage1']['heat_demand'], 0.7, delta=0.01)
 
     def test_controller_discharge_storage_based_on_deficit(self):
-        """Test total supply able to discharge storage based on deficit"""
+        """Test total supply able to discharge storage based on deficit."""
         # Arrange
         self.controller.producers[1].power = 1.7
 
@@ -240,5 +240,3 @@ class ControllerTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEqual(result['storage1']['heat_demand'], -0.3, delta=0.01)
-
-
