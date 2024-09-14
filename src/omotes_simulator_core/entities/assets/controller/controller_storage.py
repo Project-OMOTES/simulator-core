@@ -29,13 +29,14 @@ class ControllerStorage(AssetControllerAbstract):
     """Class to store the storage for the controller asset."""
 
     def __init__(
-        self,
-        name: str,
-        identifier: str,
-        temperature_supply: float,
-        temperature_return: float,
-        max_power: float,
-        profile: pd.DataFrame,
+            self,
+            name: str,
+            identifier: str,
+            temperature_supply: float,
+            temperature_return: float,
+            max_charge_power: float,
+            max_discharge_power: float,
+            profile: pd.DataFrame,
     ):
         """Constructor for the storage.
 
@@ -47,10 +48,11 @@ class ControllerStorage(AssetControllerAbstract):
         self.temperature_supply = temperature_supply
         self.profile: pd.DataFrame = profile
         self.start_index = 0
-        self.max_power: float = max_power
+        self.max_charge_power: float = max_charge_power
+        self.max_discharge_power: float = max_discharge_power
 
-    def get_heat_demand(self, time: datetime.datetime) -> float:
-        """Method to get the heat demand of the storage.
+    def get_heat_power(self, time: datetime.datetime) -> float:
+        """Method to get the heat power of the storage. + is injection and - is production.
 
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
@@ -58,12 +60,18 @@ class ControllerStorage(AssetControllerAbstract):
         for index in range(self.start_index, len(self.profile)):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
                 self.start_index = index
-                if self.profile["values"][index] > self.max_power:
+                if self.profile["values"][index] > self.max_charge_power:
                     logging.warning(
-                        f"Demand of {self.name} is higher than maximum power of asset"
+                        f"Storage of {self.name} is higher than maximum charge power of asset"
                         f" at time {time}."
                     )
-                    return self.max_power
+                    return self.max_charge_power
+                elif self.profile["values"][index] < self.max_discharge_power:
+                    logging.warning(
+                        f"Storage of {self.name} is higher than maximum discharge power of asset"
+                        f" at time {time}."
+                    )
+                    return self.max_discharge_power
                 else:
                     return float(self.profile["values"][index])
         return 0

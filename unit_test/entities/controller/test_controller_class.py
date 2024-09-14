@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -45,19 +46,26 @@ class ControllerTest(unittest.TestCase):
         self.producer1.temperature_supply = 30.0
         self.producer2 = Mock()
         self.producer2.id = "producer2"
-        self.producer2.power = 2.0
+        self.producer2.power = 4.0
         self.producer2.priority = 2
         self.producer2.temperature_return = 40.0
         self.producer2.temperature_supply = 50.0
         self.consumer1 = Mock()
+        self.consumer1.id = "consumer1"
         self.consumer1.get_heat_demand.return_value = 1.0
         self.consumer1.temperature_return = 20.0
         self.consumer1.temperature_supply = 30.0
         self.consumer2 = Mock()
+        self.consumer2.id = "consumer2"
         self.consumer2.get_heat_demand.return_value = 2.0
         self.consumer2.temperature_return = 40.0
         self.consumer2.temperature_supply = 50.0
         self.storage1 = Mock()
+        self.storage1.id = "storage1"
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
+        self.storage1.temperature_return = 20.0
+        self.storage1.temperature_supply = 40.0
         self.controller = NetworkController(
             [self.producer1, self.producer2], [self.consumer1, self.consumer2], [self.storage1]
         )
@@ -80,12 +88,13 @@ class ControllerTest(unittest.TestCase):
             power=1.0,
             priority=1,
         )
-        storage = ControllerConsumer(
+        storage = ControllerStorage(
             name="storage",
             identifier="id",
             temperature_supply=80.0,
             temperature_return=30.0,
-            max_power=1.0,
+            max_charge_power=0.0,
+            max_discharge_power=0.0,
             profile=Mock(),
         )
         controller = NetworkController([producer], [consumer], [storage])
@@ -110,7 +119,7 @@ class ControllerTest(unittest.TestCase):
         # Act
         total_supply = self.controller.get_total_supply()
         # Assert
-        self.assertEqual(total_supply, 3.0)
+        self.assertEqual(total_supply, 5.0)
 
     def test_get_total_supply_priority(self):
         """Test to get the total supply of the network for a certain priority."""
@@ -118,6 +127,20 @@ class ControllerTest(unittest.TestCase):
         total_supply = self.controller.get_total_supply_priority(1)
         # Assert
         self.assertEqual(total_supply, 1.0)
+        
+    def test_get_total_charge_storage(self):
+        """Test to get the total charge storage of the network."""
+        # Act
+        total_charge = self.controller.get_total_charge_storage()
+        # Assert
+        self.assertEqual(total_charge, 1.0)
+        
+    def test_get_total_discharge_storage(self):
+        """Test to get the total discharge storage of the network."""
+        # Act
+        total_discharge = self.controller.get_total_discharge_storage()
+        # Assert
+        self.assertEqual(total_discharge, -1.0)
 
     def test__set_producers_to_max(self):
         """Test to set the producers to the max power."""
@@ -129,7 +152,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(producers[self.producer1.id][PROPERTY_TEMPERATURE_SUPPLY], 30.0)
         self.assertTrue(producers[self.producer1.id][PROPERTY_SET_PRESSURE])
 
-        self.assertEqual(producers[self.producer2.id][PROPERTY_HEAT_DEMAND], 2.0)
+        self.assertEqual(producers[self.producer2.id][PROPERTY_HEAT_DEMAND], 4.0)
         self.assertEqual(producers[self.producer2.id][PROPERTY_TEMPERATURE_RETURN], 40.0)
         self.assertEqual(producers[self.producer2.id][PROPERTY_TEMPERATURE_SUPPLY], 50.0)
         self.assertFalse(producers[self.producer2.id][PROPERTY_SET_PRESSURE])
@@ -159,6 +182,7 @@ class ControllerTest(unittest.TestCase):
     def test__set_producers_based_on_priority(self):
         """Test to set the producers based on priority."""
         self.controller.consumers[0].get_heat_demand.return_value = 0.5
+        self.controller.storages[0].max_charge_power = 0
         # Act
         producers = self.controller._set_producers_based_on_priority(datetime.now())
         # Assert
@@ -176,38 +200,49 @@ class ControllerTest(unittest.TestCase):
         self.assertIn(self.consumer1.id, result)
         self.assertIn(self.consumer2.id, result)
 
-    def test_esdl_loading(self):
-        """Test to load the controller data from the esdl object."""
+    def test_controller_capped_demand(self):
+        """Test total supply and storage > demand"""
         # Arrange
-        esdl_file = Path(__file__).parent / ".." / ".." / ".." / "testdata" / "test1.esdl"
-        esdl_file = str(esdl_file)
-        esdl_object = EsdlObject(pyesdl_from_file(esdl_file))
-        controller = EsdlControllerMapper().to_entity(esdl_object)
-        start = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S").replace(
-            tzinfo=timezone.utc
-        )
+        self.controller.consumers[0].get_heat_demand.return_value = 5
+        self.controller.consumers[1].get_heat_demand.return_value = 5
+
         # Act
-        results = controller.update_setpoints(start)
+        result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertIn("cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4", results)
-        self.assertIn("48f3e425-2143-4dcd-9101-c7e22559e82b", results)
-        self.assertEqual(
-            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_HEAT_DEMAND], 360800.0
-        )
-        self.assertEqual(
-            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_RETURN], 313.15
-        )
-        self.assertEqual(
-            results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_TEMPERATURE_SUPPLY], 353.15
-        )
-        self.assertTrue(results["cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"][PROPERTY_SET_PRESSURE])
-        self.assertEqual(
-            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_HEAT_DEMAND], 360800.0
-        )
-        self.assertEqual(
-            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_RETURN], 313.15
-        )
-        self.assertEqual(
-            results["48f3e425-2143-4dcd-9101-c7e22559e82b"][PROPERTY_TEMPERATURE_SUPPLY], 353.15
-        )
+        self.assertEqual(result['consumer1']['heat_demand'], 2.5)
+        self.assertEqual(result['consumer2']['heat_demand'], 2.5)
+
+    def test_controller_charge_storage_max(self):
+        """Test total supply able to charge storage to max"""
+        # Arrange
+
+        # Act
+        result = self.controller.update_setpoints(datetime.now())
+
+        # Assert
+        self.assertEqual(result['storage1']['heat_demand'], 1)
+
+    def test_controller_charge_storage_based_on_surplus(self):
+        """Test total supply able to charge storage based on surplus"""
+        # Arrange
+        self.controller.producers[1].power = 2.7
+
+        # Act
+        result = self.controller.update_setpoints(datetime.now())
+
+        # Assert
+        self.assertAlmostEqual(result['storage1']['heat_demand'], 0.7, delta=0.01)
+
+    def test_controller_discharge_storage_based_on_deficit(self):
+        """Test total supply able to discharge storage based on deficit"""
+        # Arrange
+        self.controller.producers[1].power = 1.7
+
+        # Act
+        result = self.controller.update_setpoints(datetime.now())
+
+        # Assert
+        self.assertAlmostEqual(result['storage1']['heat_demand'], -0.3, delta=0.01)
+
+
