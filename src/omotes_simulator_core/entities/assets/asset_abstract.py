@@ -21,7 +21,6 @@ from typing import Dict, List
 from pandas import DataFrame, concat
 
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -33,12 +32,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 
 class AssetAbstract(ABC):
     """Abstract class for Asset."""
-
-    from_junction: Junction | None
-    """The junction where the asset starts."""
-
-    to_junction: Junction | None
-    """The junction where the asset ends."""
 
     name: str
     """The name of the asset."""
@@ -52,7 +45,11 @@ class AssetAbstract(ABC):
     connected_ports: List[str]
     """List of ids of the connected ports."""
     solver_asset: BaseAsset
+    """The asset object use for the solver."""
     asset_type = "asset_abstract"
+    """The type of the asset."""
+    number_of_con_points: int = 2
+    """The number of connection points of the asset."""
 
     def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
         """Basic constructor for asset objects.
@@ -91,20 +88,6 @@ class AssetAbstract(ABC):
     @abstractmethod
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Placeholder method to add physical data to an asset."""
-
-    def set_from_junction(self, from_junction: Junction) -> None:
-        """Method to set the from junction of an asset.
-
-        :param Junction from_junction: The junction where the asset starts.
-        """
-        self.from_junction = from_junction
-
-    def set_to_junction(self, to_junction: Junction) -> None:
-        """Method to set the to junction of an asset.
-
-        :param Junction to_junction: The junction where the asset ends.
-        """
-        self.to_junction = to_junction
 
     def write_standard_output(self) -> None:
         """Write the output of the asset to the output list.

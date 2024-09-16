@@ -18,12 +18,10 @@
 import logging
 from typing import List, Tuple
 
-from esdl import InPort, OutPort
 from esdl.esdl_handler import EnergySystemHandler
 
 from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.utils import Port
 
 logger = logging.getLogger(__name__)
 
@@ -60,31 +58,24 @@ class EsdlObject:
             ]
         return output_list
 
-    def get_connected_assets(self, asset_id: str, port: Port) -> List[Tuple[str, Port]]:
+    def get_connected_assets(self, asset_id: str, port_id: str) -> List[Tuple[str, str]]:
         """Method to get the id's of connected assets from the esdl.
 
-        This returns a list of list with the connected asset id and the port to which it is
-        connected to the asset.
-        First it is set if the request is an in or outport. Then the connected ports to the asset
-        are added to a list. In the final step all assets elong to the ports are listed together
-        with the type of port they are connected to.
+        This returns a list of a tuple with the id of the connected asset and the id of the port
+        to which the original asset is connected.
 
-        :param str id: id of the asset for which we want to know the connected assets
-        :param Port port: port for which the connected assets need to be returned.
-        :return: List of list which the id of the connected assets and the connected port.
+        :param str asset_id: id of the asset for which to return the connected assets.
+        :param str port_id: id of the port for which to return the connected assets.
+        :return: List of tuple with the id of the connected assets and the connected port ids.
         """
-        # TODO 1. Add support for components with multiple in and outports, like heat exchanger
-        # TODO 2. What if it is connected to a joint?
-        connected_assets = []
         esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
-        type_port = OutPort if port == Port.Out else InPort
         connected_port_ids = []
         for esdl_port in esdl_asset.port:
-            if isinstance(esdl_port, type_port):
+            if esdl_port.id == port_id:
                 connected_port_ids = esdl_port.connectedTo
                 break
-        for connected_port_id in connected_port_ids:
-            connected_port_type = Port.Out if isinstance(connected_port_id, OutPort) else Port.In
-            connected_assets.append((connected_port_id.energyasset.id, connected_port_type))
+        if not connected_port_ids:
+            raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
+        connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets

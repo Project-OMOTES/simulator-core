@@ -36,7 +36,7 @@ class StringEsdlAssetMapper:
         esdl.Conversion: "conversion",
         esdl.Pipe: "pipe",
         esdl.Transport: "transport",
-        esdl.Joint: "junction",
+        esdl.Joint: "joint",
         esdl.ATES: "storage",
     }
 

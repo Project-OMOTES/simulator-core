@@ -24,7 +24,6 @@ from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAs
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.entities.assets.utils import Port
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
@@ -81,13 +80,14 @@ class EsdlObjectTest(unittest.TestCase):
         """Test for connection of two assets."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0].esdl_asset
-        test_list1 = [("Pipe1_ret", Port.Out)]
-        test_list2 = [("Pipe1", Port.In)]
+        pipes = self.esdl_object.get_all_assets_of_type("pipe")
+        test_list1 = [(pipes[1].get_id(), pipes[1].get_port_ids()[1])]
+        test_list2 = [(pipes[0].get_id(), pipes[0].get_port_ids()[0])]
 
         # Act
-        connected_assets1 = self.esdl_object.get_connected_assets(asset.id, Port.In)
+        connected_assets1 = self.esdl_object.get_connected_assets(asset.id, asset.port[1].id)
 
-        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, Port.Out)  # act
+        connected_assets2 = self.esdl_object.get_connected_assets(asset.id, asset.port[0].id)  # act
 
         # Assert
         self.assertEqual(connected_assets1, test_list1)
@@ -211,6 +211,42 @@ class EsdlObjectTest(unittest.TestCase):
             "Port type not recognized: Error",
         )
 
+    def test_multiple_connection(self):
+        """Test for multiple connections to one asset."""
+        # Arrange
+        esdl_file_path = (
+            Path(__file__).parent / ".." / ".." / "testdata" / "test_multiple_connection.esdl"
+        )
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        pipe = esdl_object.get_all_assets_of_type("pipe")[0]
+        assets = esdl_object.get_all_assets_of_type("producer")
+        test_list = [(asset.get_id(), asset.get_port_ids()[0]) for asset in assets]
+
+        # Act
+        connected_assets = esdl_object.get_connected_assets(pipe.get_id(), pipe.get_port_ids()[0])
+
+        # Assert
+        self.assertEqual(connected_assets, test_list)
+
+    def test_no_connected_assets_error(self):
+        """Test for error when no connected assets are found."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+        pipe = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.esdl_object.get_connected_assets(asset.get_id(), pipe.get_port_ids()[0])
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception),
+            f"No connected assets found for asset: {asset.get_id()} and "
+            f"port: {pipe.get_port_ids()[0]}",
+        )
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
@@ -232,7 +268,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.conversion_str = "conversion"
         self.pipe_str = "pipe"
         self.transport_str = "transport"
-        self.joint_str = "junction"
+        self.joint_str = "joint"
 
     def test_to_string(self):
         """Test for conversion from esdl asset to string."""

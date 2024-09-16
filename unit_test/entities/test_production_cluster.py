@@ -15,7 +15,7 @@
 
 """Test Junction entities."""
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -26,7 +26,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -38,17 +37,12 @@ class ProductionClusterTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test case."""
-        # Create two junctions
-        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
-        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
         # Create a production cluster object
         self.production_cluster = ProductionCluster(
             asset_name="production_cluster",
             asset_id="production_cluster_id",
             port_ids=["test1", "test2"],
         )
-        self.production_cluster.set_from_junction(from_junction=self.from_junction)
-        self.production_cluster.set_to_junction(to_junction=self.to_junction)
 
     def test_production_cluster_create(self) -> None:
         """Evaluate the creation of a production_cluster object."""

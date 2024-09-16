@@ -22,7 +22,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAsset
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 
 from omotes_simulator_core.entities.assets.junction import Junction
-from omotes_simulator_core.entities.assets.utils import Port
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
@@ -39,34 +38,12 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
 )
 
 
-def connect_connected_asset(
-    connected_py_assets: List[Tuple[str, Port]],
-    junction: Junction,
-    py_assets_list: List[AssetAbstract],
-) -> None:
-    """Method to connect assets connected to one asset to the same junction.
-
-    :param connected_py_assets: List of connected assets
-    :param junction: Junction to connect the assets to
-    :param py_assets_list: List of assets
-    :return: None
-    """
-    for connected_py_asset in connected_py_assets:
-        index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
-            connected_py_asset[0]
-        )
-        if connected_py_asset[1] == Port.In:  # from
-            py_assets_list[index].set_from_junction(from_junction=junction)
-        else:  # to
-            py_assets_list[index].set_to_junction(to_junction=junction)
-
-
 def replace_joint_in_connected_assets(
-    connected_py_assets: List[Tuple[str, Port]],
-    py_joint_dict: Dict[str, List[Tuple[str, Port]]],
+    connected_py_assets: List[Tuple[str, str]],
+    py_joint_dict: Dict[str, List[Tuple[str, str]]],
     py_asset_id: str,
     iteration_limit: int = 10,
-) -> List[Tuple[str, Port]]:
+) -> List[Tuple[str, str]]:
     """Replace joint with assets connected to the elements.
 
     Replace items in the connected_py_assets list that are connected to a Joint
@@ -131,32 +108,36 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the Heatnetwork object.
-        :param Network network: network to add the compenents to.
+        :param Network network: network to add the components to.
         :return: (List[AssetAbstract], List[Junction]), tuple of list of assets and junctions.
         """
         # TODO: This method requires a clean-up!
-        py_assets_list = []
-        py_joint_dict = {}
-        for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
-            # Esdl Junctions need to be skipped for now, are added later.
-            if isinstance(esdl_asset.esdl_asset, esdl_junction):
-                py_joint_dict[esdl_asset.esdl_asset.id] = [
-                    *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.In),
-                    *self.esdl_object.get_connected_assets(esdl_asset.esdl_asset.id, Port.Out),
-                ]
-            else:
-                py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset))
-                py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
-                network.add_existing_asset(py_assets_list[-1].solver_asset)
+        py_assets_list = self._convert_assets(network)
+        py_junction_list = self._create_junctions(network, py_assets_list)
 
+        return py_assets_list, py_junction_list
+
+    def _create_junctions(
+        self,
+        network: Network,
+        py_assets_list: list[AssetAbstract],
+    ) -> List[Junction]:
+        """Method to create junctions and connect the assets with them.
+
+        :param network: network to add the junctions to.
+        :param py_assets_list: list of assets to connect to the junctions.
+        :param py_joint_dict: dictionary with all jints in the esdl.
+
+        :return: List of junctions that are created and connected to the assets.
+        """
+        py_joint_dict = self._get_junction()
         py_junction_list = []
-
         # loop over assets and create junctions and connect them
         for py_asset in py_assets_list:
-            for con_point in range(0, 2):
+            for con_point in range(0, py_asset.number_of_con_points):
                 if not py_asset.solver_asset.is_connected(con_point):
                     connected_py_assets = self.esdl_object.get_connected_assets(
-                        py_asset.asset_id, Port.In if con_point == 0 else Port.Out
+                        py_asset.asset_id, py_asset.connected_ports[con_point]
                     )
                     # Replace items in the connected_py_assets list that are connected to a Joint
                     # with the items that are connected to the Joint, except for the current asset.
@@ -167,35 +148,57 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                         index = [py_asset_temp.asset_id for py_asset_temp in py_assets_list].index(
                             connected_py_asset
                         )
-                        if connected_py_port == Port.In:
-                            node_id = network.connect_assets(
-                                asset1_id=py_asset.solver_asset.name,
-                                connection_point_1=con_point,
-                                asset2_id=py_assets_list[index].solver_asset.name,
-                                connection_point_2=0,
-                            )
-                            py_junction_list.append(
-                                Junction(network.get_node(node_id), name=str(node_id))
-                            )
-                            py_assets_list[index].set_to_junction(py_junction_list[-1])
-                        else:
-                            node_id = network.connect_assets(
-                                asset1_id=py_asset.solver_asset.name,
-                                connection_point_1=con_point,
-                                asset2_id=py_assets_list[index].solver_asset.name,
-                                connection_point_2=1,
-                            )
-                            py_junction_list.append(
-                                Junction(network.get_node(node_id), name=str(node_id))
-                            )
-                            py_assets_list[index].set_from_junction(py_junction_list[-1])
-                        # connect the connected assets to the junction
-                        if con_point == 0:
-                            py_asset.set_to_junction(py_junction_list[-1])
-                        else:
-                            py_asset.set_from_junction(py_junction_list[-1])
+                        con_point_2 = py_assets_list[index].connected_ports.index(connected_py_port)
 
-        return py_assets_list, py_junction_list
+                        node_id = network.connect_assets(
+                            asset1_id=py_asset.solver_asset.name,
+                            connection_point_1=con_point,
+                            asset2_id=py_assets_list[index].solver_asset.name,
+                            connection_point_2=con_point_2,
+                        )
+                        py_junction_list.append(
+                            Junction(network.get_node(node_id), name=str(node_id))
+                        )
+        return py_junction_list
+
+    def _convert_assets(self, network: Network) -> List[AssetAbstract]:
+        """Method to convert all assets from the esdl to a list of pyassets.
+
+        This method loops over all assets in the esdl and converts them to pyassets.
+
+        :param Network network: network to add the components to.
+        :return: List of pyassets.
+        """
+        py_assets_list = []
+        for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
+            # Esdl Junctions need to be skipped for now, are added later.
+            if isinstance(esdl_asset.esdl_asset, esdl_junction):
+                continue
+            py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset))
+            py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
+            network.add_existing_asset(py_assets_list[-1].solver_asset)
+        return py_assets_list
+
+    def _get_junction(self) -> dict[str, list[tuple[str, str]]]:
+        """Method to create an overview of all assets connected to a joint in the esdl.
+
+        This method creates a dictionary with the joint id as key.
+        The value is a list of all connected assets and the id of the port it is connected to.
+
+        :return: dict[Any, list[list[tuple[str, str]]], which is the dictionary with the connected
+        assets.
+        """
+        py_joint_dict = {}
+        for esdl_joint in self.esdl_object.get_all_assets_of_type("joint"):
+            # Esdl Junctions need to be skipped for now, are added later.
+            temp_list = [
+                self.esdl_object.get_connected_assets(
+                    asset_id=esdl_joint.esdl_asset.id, port_id=port
+                )
+                for port in esdl_joint.get_port_ids()
+            ]
+            py_joint_dict[esdl_joint.get_id()] = [item for sublist in temp_list for item in sublist]
+        return py_joint_dict
 
 
 class EsdlControllerMapper(EsdlMapperAbstract):
