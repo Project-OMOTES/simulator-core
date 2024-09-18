@@ -70,10 +70,5 @@ def main() -> None:
     logger.debug(result.head())
 
 
-def main() -> None:
-    """Main function for simulator core."""
-    run_simulator(r".\testdata\test1.esdl")
-
-
 if __name__ == "__main__":
     main()
