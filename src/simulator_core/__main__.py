@@ -15,7 +15,7 @@
 
 """__main__.py file entry point for testing."""
 
-from simulator_core.infrastructure.app import run
+from simulator_core.infrastructure.app import run_simulator
 
 if __name__ == "__main__":
-    print(run())
+    print(run_simulator())

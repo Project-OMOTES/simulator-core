@@ -59,10 +59,11 @@ def run_simulator(file_path: str | None = None) -> pd.DataFrame:
 def main() -> None:
     """Main function for the OMOTES simulator."""
     # Set loglevel to logging.DEBUG for more verbose output
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
+    )
     t1 = datetime.now()
-    result = run(r".\testdata\test1.esdl")
+    result = run_simulator(r".\testdata\test1.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")

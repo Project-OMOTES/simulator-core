@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cProfile
-from simulator_core.infrastructure.app import run  # noqa: F401
+from simulator_core.infrastructure.app import run_simulator  # noqa: F401
 import argparse
 
 
@@ -25,4 +25,4 @@ if __name__ == "__main__":
     parser.add_argument("esdl_file")
     parser.add_argument("profiling_output_file")
     args = parser.parse_args()
-    cProfile.run("run(args.esdl_file)", args.profiling_output_file)
+    cProfile.run("run_simulator(args.esdl_file)", args.profiling_output_file)
