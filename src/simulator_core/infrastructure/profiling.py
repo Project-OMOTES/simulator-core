@@ -16,19 +16,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cProfile
-from simulator_core.infrastructure.app import run
+from simulator_core.infrastructure.app import run  # noqa: F401
 import argparse
 
 
-parser = argparse.ArgumentParser(description="sample argument parser")
-parser.add_argument("esdl_file")
-parser.add_argument("profiling_output_file")
-args = parser.parse_args()
-
-
-def profiler_main() -> None:
-    """Main function to be called from the profiler."""
-    run(args.esdl_file)
-
-
-cProfile.run("profiler_main()", args.profiling_output_file)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="sample argument parser")
+    parser.add_argument("esdl_file")
+    parser.add_argument("profiling_output_file")
+    args = parser.parse_args()
+    cProfile.run("run(args.esdl_file)", args.profiling_output_file)
