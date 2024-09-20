@@ -35,10 +35,10 @@ class NetworkController(NetworkControllerAbstract):
     """Class to store the network controller."""
 
     def __init__(
-            self,
-            producers: List[ControllerProducer],
-            consumers: List[ControllerConsumer],
-            storages: List[ControllerStorage],
+        self,
+        producers: List[ControllerProducer],
+        consumers: List[ControllerConsumer],
+        storages: List[ControllerStorage],
     ) -> None:
         """Constructor for controller for a heat network."""
         self.producers = producers
@@ -56,7 +56,7 @@ class NetworkController(NetworkControllerAbstract):
                 -1 * self.get_total_discharge_storage())) <= self.get_total_demand(time):
             logger.warning(f"Total supply + storage is lower than total demand at time: {time}")
             producers = self._set_producers_to_max()
-            storages = self._set_storages_discharge_to_max()
+            storages = self._set_all_storages_discharge_to_max()
             consumers = self._set_consumer_capped(time)
         else:
             # Consumers can meet their demand
@@ -64,16 +64,16 @@ class NetworkController(NetworkControllerAbstract):
             if self.get_total_supply() > self.get_total_demand(time):
                 surplus_supply = self.get_total_supply() - self.get_total_demand(time)
                 if surplus_supply <= self.get_total_charge_storage():
-                    storages = self._set_storages_to_demand(surplus_supply)
+                    storages = self._set_storages_power(surplus_supply)
                     producers = self._set_producers_to_max()
                 else:
                     # need to cap the power of the source based on priority
-                    storages = self._set_storages_to_demand(self.get_total_charge_storage())
+                    storages = self._set_storages_power(self.get_total_charge_storage())
                     producers = self._set_producers_based_on_priority(time)
 
             else:
                 deficit_supply = self.get_total_supply() - self.get_total_demand(time)
-                storages = self._set_storages_to_demand(deficit_supply)
+                storages = self._set_storages_power(deficit_supply)
                 producers = self._set_producers_to_max()
 
         producers.update(consumers)
@@ -138,8 +138,8 @@ class NetworkController(NetworkControllerAbstract):
         producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return producers
 
-    def _set_storages_discharge_to_max(self) -> dict:
-        """Method to set the storages to the max discharge power.
+    def _set_all_storages_discharge_to_max(self) -> dict:
+        """Method to set all the storages to the max discharge power.
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.
         """
@@ -152,8 +152,8 @@ class NetworkController(NetworkControllerAbstract):
             }
         return storages
 
-    def _set_storages_charge_to_max(self) -> dict:
-        """Method to set the storages to the max charge power.
+    def _set_all_storages_charge_to_max(self) -> dict:
+        """Method to set all the storages to the max charge power.
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.
         """
@@ -166,7 +166,7 @@ class NetworkController(NetworkControllerAbstract):
             }
         return storages
 
-    def _set_storages_to_demand(self, power: float = 0) -> dict:
+    def _set_storages_power(self, power: float = 0) -> dict:
         """Method to set the storages to power. discharge (-), charge (+).
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.

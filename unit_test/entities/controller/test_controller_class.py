@@ -58,8 +58,8 @@ class ControllerTest(unittest.TestCase):
         self.consumer2.temperature_supply = 50.0
         self.storage1 = Mock()
         self.storage1.id = "storage1"
-        self.storage1.max_charge_power = 1.0
-        self.storage1.max_discharge_power = -1.0
+        self.storage1.max_charge_power = 0.0
+        self.storage1.max_discharge_power = -0.0
         self.storage1.temperature_return = 20.0
         self.storage1.temperature_supply = 40.0
         self.controller = NetworkController(
@@ -103,7 +103,6 @@ class ControllerTest(unittest.TestCase):
 
     def test_get_total_demand(self):
         """Test to get the total demand of the network."""
-        # Arrange
         # Act
         total_demand = self.controller.get_total_demand(datetime.now())
 
@@ -126,6 +125,9 @@ class ControllerTest(unittest.TestCase):
 
     def test_get_total_charge_storage(self):
         """Test to get the total charge storage of the network."""
+        # Arrange
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
         # Act
         total_charge = self.controller.get_total_charge_storage()
         # Assert
@@ -133,6 +135,9 @@ class ControllerTest(unittest.TestCase):
 
     def test_get_total_discharge_storage(self):
         """Test to get the total discharge storage of the network."""
+        # Arrange
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
         # Act
         total_discharge = self.controller.get_total_discharge_storage()
         # Assert
@@ -212,6 +217,8 @@ class ControllerTest(unittest.TestCase):
     def test_controller_charge_storage_max(self):
         """Test total supply able to charge storage to max."""
         # Arrange
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
@@ -223,6 +230,8 @@ class ControllerTest(unittest.TestCase):
         """Test total supply able to charge storage based on surplus."""
         # Arrange
         self.controller.producers[1].power = 2.7
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
@@ -234,6 +243,8 @@ class ControllerTest(unittest.TestCase):
         """Test total supply able to discharge storage based on deficit."""
         # Arrange
         self.controller.producers[1].power = 1.7
+        self.storage1.max_charge_power = 1.0
+        self.storage1.max_discharge_power = -1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())

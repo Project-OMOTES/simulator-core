@@ -29,14 +29,14 @@ class ControllerStorage(AssetControllerAbstract):
     """Class to store the storage for the controller asset."""
 
     def __init__(
-            self,
-            name: str,
-            identifier: str,
-            temperature_supply: float,
-            temperature_return: float,
-            max_charge_power: float,
-            max_discharge_power: float,
-            profile: pd.DataFrame,
+        self,
+        name: str,
+        identifier: str,
+        temperature_supply: float,
+        temperature_return: float,
+        max_charge_power: float,
+        max_discharge_power: float,
+        profile: pd.DataFrame,
     ):
         """Constructor for the storage.
 
