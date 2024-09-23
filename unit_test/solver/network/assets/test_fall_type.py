@@ -43,10 +43,10 @@ class FallTypeTest(unittest.TestCase):
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)
 
-    @patch.object(FallType, "add_thermal_equations")
-    @patch.object(FallType, "add_press_to_node_equation")
-    @patch.object(FallType, "add_internal_cont_equation")
-    @patch.object(FallType, "add_internal_pressure_loss_equation")
+    @patch.object(FallType, "get_thermal_equations")
+    @patch.object(FallType, "get_press_to_node_equation")
+    @patch.object(FallType, "get_internal_cont_equation")
+    @patch.object(FallType, "get_internal_pressure_loss_equation")
     def test_get_equations(
         self, press_loss_eq_patch, internal_cont_eq_patch, press_to_node_patch, thermal_patch
     ) -> None:
@@ -102,7 +102,7 @@ class FallTypeTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, ValueError)
         self.assertEqual(str(cm.exception), "The number of unknowns must be 6!")
 
-    def test_add_internal_cont_equation(self) -> None:
+    def test_get_internal_cont_equation(self) -> None:
         """Evaluate the addition of an internal continuity equation to the boundary object.
 
         Conservation of mass equation:
@@ -111,7 +111,7 @@ class FallTypeTest(unittest.TestCase):
         # Arrange
 
         # Act
-        equation_object = self.asset.add_internal_cont_equation()
+        equation_object = self.asset.get_internal_cont_equation()
 
         # Assert
         np_testing.assert_array_equal(
@@ -128,7 +128,7 @@ class FallTypeTest(unittest.TestCase):
         np_testing.assert_array_equal(equation_object.coefficients, np.array([1.0, 1.0]))
         self.assertEqual(equation_object.rhs, 0.0)
 
-    def test_add_internal_energy_equation(self) -> None:
+    def test_get_internal_energy_equation(self) -> None:
         """Evaluate the addition of an internal energy equation to the boundary object.
 
         The equation is:
@@ -145,7 +145,7 @@ class FallTypeTest(unittest.TestCase):
         ]
 
         # Act
-        equation_object = self.asset.add_internal_energy_equation()
+        equation_object = self.asset.get_internal_energy_equation()
 
         # Assert
         np_testing.assert_array_equal(
@@ -193,7 +193,7 @@ class FallTypeTest(unittest.TestCase):
             + self.asset.heat_supplied,
         )
 
-    def test_add_internal_pressure_loss_equation(self) -> None:
+    def test_get_internal_pressure_loss_equation(self) -> None:
         """Evaluate the addition of an internal pressure loss equation to the boundary object.
 
         The equation is:
@@ -212,7 +212,7 @@ class FallTypeTest(unittest.TestCase):
         self.asset.update_loss_coefficient()
 
         # Act
-        equation_object = self.asset.add_internal_pressure_loss_equation()
+        equation_object = self.asset.get_internal_pressure_loss_equation()
 
         # Assert
         np_testing.assert_array_equal(
@@ -246,7 +246,7 @@ class FallTypeTest(unittest.TestCase):
             * abs(self.asset.prev_sol[index_core_quantity.mass_flow_rate]),
         )
 
-    def test_add_internal_pressure_loss_equation_linearized_discharge(self) -> None:
+    def test_get_internal_pressure_loss_equation_linearized_discharge(self) -> None:
         """Evaluate the addition of an internal pressure loss equation to the boundary object.
 
         The equation is:
@@ -258,7 +258,7 @@ class FallTypeTest(unittest.TestCase):
         self.asset.update_loss_coefficient()
 
         # Act
-        equation_object = self.asset.add_internal_pressure_loss_equation()
+        equation_object = self.asset.get_internal_pressure_loss_equation()
 
         # Assert
         np_testing.assert_array_equal(
@@ -284,8 +284,8 @@ class FallTypeTest(unittest.TestCase):
             * self.asset.prev_sol[index_core_quantity.mass_flow_rate],
         )
 
-    @patch.object(FallType, "add_internal_energy_equation")
-    def test_add_thermal_equations(self, mock_energy_eq) -> None:
+    @patch.object(FallType, "get_internal_energy_equation")
+    def test_get_thermal_equations(self, mock_energy_eq) -> None:
         """Evaluate the addition of thermal equations to the boundary object.
 
         The equations are:
@@ -299,13 +299,13 @@ class FallTypeTest(unittest.TestCase):
         ] = 1.0
 
         # Act
-        self.asset.add_thermal_equations(connection_point=connection_point)
+        self.asset.get_thermal_equations(connection_point=connection_point)
 
         # Assert
         self.assertEqual(mock_energy_eq.call_count, 1)
 
-    @patch.object(FallType, "add_press_to_node_equation")
-    def test_add_press_to_node_equation(self, mock_press_to_node_eq) -> None:
+    @patch.object(FallType, "get_press_to_node_equation")
+    def test_get_press_to_node_equation(self, mock_press_to_node_eq) -> None:
         """Evaluate the addition of pressure to node equations to the boundary object.
 
         The equations are:
@@ -315,7 +315,7 @@ class FallTypeTest(unittest.TestCase):
         connection_point = 0
 
         # Act
-        self.asset.add_press_to_node_equation(connection_point=connection_point)
+        self.asset.get_press_to_node_equation(connection_point=connection_point)
 
         # Assert
         self.assertEqual(mock_press_to_node_eq.call_count, 1)

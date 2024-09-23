@@ -40,11 +40,11 @@ class FallType(BaseAsset):
         Returns a list of EquationObjects that represent the equations for the asset.
     add_equations()
         Adds the equations for the asset to the equation system.
-    add_internal_cont_equation() -> EquationObject
+    get_internal_cont_equation() -> EquationObject
         Returns an EquationObject that represents the internal continuity equation for the asset.
-    add_internal_pressure_loss_equation() -> EquationObject
+    get_internal_pressure_loss_equation() -> EquationObject
         Returns an EquationObject that represents the internal pressure loss equation for the asset.
-    add_internal_energy_equation() -> EquationObject
+    get_internal_energy_equation() -> EquationObject
         Returns an EquationObject that represents the internal energy equation for the asset.
     update_pressure_loss_equation() -> EquationObject
         Returns an updated EquationObject that represents the internal pressure loss equation
@@ -105,16 +105,16 @@ class FallType(BaseAsset):
             raise ValueError("The number of unknowns must be 6!")
         # Add the equations for the asset
         equations = [
-            self.add_press_to_node_equation(0),
-            self.add_press_to_node_equation(1),
-            self.add_thermal_equations(0),
-            self.add_thermal_equations(1),
-            self.add_internal_cont_equation(),
-            self.add_internal_pressure_loss_equation(),
+            self.get_press_to_node_equation(0),
+            self.get_press_to_node_equation(1),
+            self.get_thermal_equations(0),
+            self.get_thermal_equations(1),
+            self.get_internal_cont_equation(),
+            self.get_internal_pressure_loss_equation(),
         ]
         return equations
 
-    def add_thermal_equations(self, connection_point: int) -> EquationObject:
+    def get_thermal_equations(self, connection_point: int) -> EquationObject:
         """Adds a thermal equation for a connection point of the asset.
 
         :param connection_point: The index of the connection point to add the equation for.
@@ -130,11 +130,11 @@ class FallType(BaseAsset):
             ]
             > 0
         ):
-            return self.add_internal_energy_equation()
+            return self.get_internal_energy_equation()
         else:
-            return self.add_internal_energy_to_node_equation(connection_point=connection_point)
+            return self.get_internal_energy_to_node_equation(connection_point=connection_point)
 
-    def add_internal_cont_equation(self) -> EquationObject:
+    def get_internal_cont_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the internal continuity equation for the asset.
 
         :return: EquationObject
@@ -156,7 +156,7 @@ class FallType(BaseAsset):
         equation_object.rhs = 0.0
         return equation_object
 
-    def add_internal_energy_equation(self) -> EquationObject:
+    def get_internal_energy_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the internal energy equation for the asset.
 
          The equation is:
@@ -243,7 +243,7 @@ class FallType(BaseAsset):
         )
         return equation_object
 
-    def add_internal_pressure_loss_equation(self) -> EquationObject:
+    def get_internal_pressure_loss_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the pressure loss equation for the asset.
 
         The equation is:

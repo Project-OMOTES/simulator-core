@@ -104,9 +104,9 @@ class NodeTest(unittest.TestCase):
             cm.exception.args[0], f"Node {self.node.name} " f"is not connected to any asset."
         )
 
-    @patch.object(Node, "add_node_cont_equation")
-    @patch.object(Node, "add_discharge_equation")
-    @patch.object(Node, "add_energy_equations")
+    @patch.object(Node, "get_node_cont_equation")
+    @patch.object(Node, "get_discharge_equation")
+    @patch.object(Node, "get_energy_equations")
     @patch.object(Node, "set_temperature_equation")
     def test_get_equations_connected(
         self, temperature_patch, energy_patch, discharge_patch, continuity_patch
@@ -127,12 +127,12 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(temperature_patch.call_count, 0)
         self.assertEqual(len(equations), 3)
 
-    def test_add_node_cont_equation(self) -> None:
-        """Test the add_node_cont_equation method of the Node class."""
+    def test_get_node_cont_equation(self) -> None:
+        """Test the get_node_cont_equation method of the Node class."""
         # arrange
 
         # act
-        equation_object = self.node.add_node_cont_equation()
+        equation_object = self.node.get_node_cont_equation()
 
         # assert
         self.assertEqual(
@@ -141,15 +141,15 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 0.0)
 
-    def test_add_node_cont_equation_with_additional_asset(self) -> None:
-        """Test the add_node_cont_equation method of the Node class with additional asset."""
+    def test_get_node_cont_equation_with_additional_asset(self) -> None:
+        """Test the get_node_cont_equation method of the Node class with additional asset."""
         # arrange
         connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
         self.node.connect_asset(asset=connected_asset, connection_point=connection_point)
 
         # act
-        equation_object = self.node.add_node_cont_equation()  # act
+        equation_object = self.node.get_node_cont_equation()  # act
 
         # assert
         np_test.assert_array_equal(
@@ -164,12 +164,12 @@ class NodeTest(unittest.TestCase):
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0, 1.0]))
         self.assertEqual(equation_object.rhs, 0.0)
 
-    def test_add_discharge_equation(self) -> None:
-        """Test the add_discharge_equation method of the Node class."""
+    def test_get_discharge_equation(self) -> None:
+        """Test the get_discharge_equation method of the Node class."""
         # arrange
 
         # act
-        equation_object = self.node.add_discharge_equation()
+        equation_object = self.node.get_discharge_equation()
 
         # assert
         np_test.assert_array_equal(
@@ -179,14 +179,14 @@ class NodeTest(unittest.TestCase):
         np_test.assert_array_equal(equation_object.coefficients, np.array([1.0]))
         self.assertEqual(equation_object.rhs, 0.0)
 
-    def test_add_pressure_set_equation(self) -> None:
-        """Test the add_pressure_set_equation method of the Node class."""
+    def test_get_pressure_set_equation(self) -> None:
+        """Test the get_pressure_set_equation method of the Node class."""
         # arrange
         node_name = str(uuid4())
         node = Node(name=node_name, _id=node_name, set_pressure=5.0)
 
         # act
-        equation_object = node.add_pressure_set_equation()
+        equation_object = node.get_pressure_set_equation()
 
         # assert
         np_test.assert_array_equal(
@@ -256,14 +256,14 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset_2.set_matrix_index(index_core_quantity.number_core_quantities * 2)
         self.connection_point_2 = 1
 
-    def test_add_energy_equation(self) -> None:
-        """Test the add_energy_equation method of the Node class."""
+    def test_get_energy_equation(self) -> None:
+        """Test the get_energy_equation method of the Node class."""
         # arrange
         self.node.prev_sol[index_core_quantity.mass_flow_rate] = self.discharge
         self.node.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
 
         # act
-        equation_object = self.node.add_energy_equation()
+        equation_object = self.node.get_energy_equation()
 
         # assert
         np_test.assert_array_equal(
@@ -280,8 +280,8 @@ class NodeTestEnergyEquation(unittest.TestCase):
         )
         self.assertEqual(equation_object.rhs, self.internal_energy * self.discharge)
 
-    def test_add_energy_equation_with_additional_asset(self) -> None:
-        """Test the add_energy_equation method of the Node class with additional node."""
+    def test_get_energy_equation_with_additional_asset(self) -> None:
+        """Test the get_energy_equation method of the Node class with additional node."""
         # arrange
         self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
         self.node.prev_sol[index_core_quantity.mass_flow_rate] = self.discharge
@@ -290,7 +290,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.connected_asset.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
 
         # act
-        equation_object = self.node.add_energy_equation()
+        equation_object = self.node.get_energy_equation()
 
         # assert
         np_test.assert_array_equal(
@@ -324,12 +324,12 @@ class NodeTestEnergyEquation(unittest.TestCase):
             np.prod(self.node.prev_sol) + np.prod(self.connected_asset.prev_sol),
         )
 
-    @patch.object(Node, "add_energy_equation")
+    @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
-    def test_add_energy_equations_with_positive_negative_flow(
+    def test_get_energy_equations_with_positive_negative_flow(
         self, mock_set_temperature, mock_set_energy
     ) -> None:
-        """Test the add_energy_equations method of the Node class."""
+        """Test the get_energy_equations method of the Node class."""
         # arrange
         # - Outflow
         self.connected_asset.prev_sol[
@@ -347,18 +347,18 @@ class NodeTestEnergyEquation(unittest.TestCase):
         )
 
         # act
-        self.node.add_energy_equations()
+        self.node.get_energy_equations()
 
         # assert
         mock_set_energy.assert_called_once()
         self.assertEqual(mock_set_temperature.call_count, 0)
 
-    @patch.object(Node, "add_energy_equation")
+    @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
-    def test_add_energy_equations_with_all_positive_flow(
+    def test_get_energy_equations_with_all_positive_flow(
         self, mock_set_temperature, mock_set_energy
     ) -> None:
-        """Test the add_energy_equations method of the Node class."""
+        """Test the get_energy_equations method of the Node class."""
         # arrange
         # - Outflow
         self.connected_asset.prev_sol[
@@ -376,18 +376,18 @@ class NodeTestEnergyEquation(unittest.TestCase):
         )
 
         # act
-        self.node.add_energy_equations()
+        self.node.get_energy_equations()
 
         # assert
         mock_set_temperature.assert_called_once()
         self.assertEqual(mock_set_energy.call_count, 0)
 
-    @patch.object(Node, "add_energy_equation")
+    @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
-    def test_add_energy_equations_with_all_negative_flow(
+    def test_get_energy_equations_with_all_negative_flow(
         self, mock_set_temperature, mock_set_energy
     ) -> None:
-        """Test the add_energy_equations method of the Node class."""
+        """Test the get_energy_equations method of the Node class."""
         # arrange
         # - Outflow
         self.connected_asset.prev_sol[
@@ -405,16 +405,16 @@ class NodeTestEnergyEquation(unittest.TestCase):
         )
 
         # act
-        self.node.add_energy_equations()
+        self.node.get_energy_equations()
 
         # assert
         mock_set_temperature.assert_called_once()
         self.assertEqual(mock_set_energy.call_count, 0)
 
-    @patch.object(Node, "add_energy_equation")
+    @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
-    def test_add_energy_equations_with_no_flow(self, mock_set_temperature, mock_set_energy) -> None:
-        """Test the add_energy_equations method of the Node class."""
+    def test_get_energy_equations_with_no_flow(self, mock_set_temperature, mock_set_energy) -> None:
+        """Test the get_energy_equations method of the Node class."""
         # arrange
         # - Outflow
         self.connected_asset.prev_sol[
@@ -432,7 +432,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
         )
 
         # act
-        self.node.add_energy_equations()
+        self.node.get_energy_equations()
 
         # assert
         mock_set_temperature.assert_called_once()

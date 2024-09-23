@@ -47,13 +47,13 @@ class BaseBoundaryTest(unittest.TestCase):
         self.assertEqual(self.asset.number_of_connection_point, 1)
         self.assertEqual(self.asset.number_of_unknowns, 3)
 
-    def test_add_pressure_equation(self) -> None:
+    def test_get_pressure_equation(self) -> None:
         """Evaluate the addition of a pressure equation to the boundary object."""
         # Arrange
         self.asset.initial_pressure = 50000.0
 
         # Act
-        equation_object = self.asset.add_pressure_equation()
+        equation_object = self.asset.get_pressure_equation()
 
         # Assert
         self.assertEqual(
@@ -62,8 +62,8 @@ class BaseBoundaryTest(unittest.TestCase):
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 50000.0)
 
-    @patch.object(BaseAsset, "add_thermal_equations")
-    @patch.object(BaseAsset, "add_press_to_node_equation")
+    @patch.object(BaseAsset, "get_thermal_equations")
+    @patch.object(BaseAsset, "get_press_to_node_equation")
     def test_get_equations(self, thermal_patch, press_to_node_patch) -> None:
         """Evaluate the retrieval of equations from the boundary object."""
         # Arrange
