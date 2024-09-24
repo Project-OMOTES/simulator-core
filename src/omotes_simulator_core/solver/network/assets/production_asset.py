@@ -183,6 +183,6 @@ class ProductionAsset(FallType):
             ]
             > 0
         ):
-            return self.add_prescribe_temp(connection_point)
+            return self.get_prescribe_temp(connection_point)
         else:
             return self.get_internal_energy_to_node_equation(connection_point)
