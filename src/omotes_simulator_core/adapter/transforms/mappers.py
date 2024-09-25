@@ -174,7 +174,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
-            py_assets_list.append(EsdlAssetMapper().to_entity(esdl_asset))
+            py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
             py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
             network.add_existing_asset(py_assets_list[-1].solver_asset)
         return py_assets_list
