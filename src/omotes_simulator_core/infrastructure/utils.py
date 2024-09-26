@@ -25,7 +25,7 @@ def pyesdl_from_file(file_path: str | Path) -> EnergySystemHandler:
 
     Please note that it is not checked if the file is a valid esdl file.
     :param str | Path file_path: Location of the ESDL file to be loaded into memory.
-    If file_path is a string, convert it to a Path object, then check if its not a path
+    If file_path is a string, convert it to a Path object, then check if its not a path.
     """
     if isinstance(file_path, str):
         file_path = Path(file_path)
