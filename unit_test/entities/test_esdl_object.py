@@ -66,10 +66,10 @@ class EsdlObjectTest(unittest.TestCase):
         pipes = self.esdl_object.get_all_assets_of_type(pipe)
 
         # Act
-        asset_producer = EsdlAssetMapper().to_entity(producers[0])
-        asset_consumer = EsdlAssetMapper().to_entity(consumers[0])
+        asset_producer = EsdlAssetMapper.to_entity(producers[0])
+        asset_consumer = EsdlAssetMapper.to_entity(consumers[0])
 
-        asset_pipe = EsdlAssetMapper().to_entity(pipes[0])  # act
+        asset_pipe = EsdlAssetMapper.to_entity(pipes[0])  # act
 
         # Assert
         self.assertTrue(isinstance(asset_producer, ProductionCluster))

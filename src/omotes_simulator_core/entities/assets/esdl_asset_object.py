@@ -28,7 +28,7 @@ class EsdlAssetObject:
     """
     Class to hold an esdl asset and convert it to local class objects.
 
-    Conversion is done based on the classes in the conversion_dict.
+    Conversion is done based on the classes in the CONVERSION_DICT.
     """
 
     esdl_asset: esdl.Asset
