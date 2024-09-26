@@ -38,7 +38,7 @@ class FluidPropertiesInitializationTest(unittest.TestCase):
         self.assertEqual(fluid_props.rho, [3, 8])
         self.assertEqual(fluid_props.visc, [4, 9])
         self.assertEqual(fluid_props.therm_cond, [5, 10])
-        self.assertEqual(fluid_props.IE, [0, 22.5])
+        self.assertEqual(fluid_props.IE, [0.0, 22.5])
         self.assertEqual(mock_csv_reader.call_count, 1)
 
 
@@ -61,7 +61,7 @@ class FluidPropertiesTest(unittest.TestCase):
         IE = self.fluid_props.get_ie(T)
 
         # Assert
-        self.assertEqual(IE, 0)
+        self.assertEqual(IE, 0.0)
 
     def test_get_internal_energy_with_invalid_temperature(self):
         """Test the get_internal_energy method with an invalid temperature."""
@@ -81,7 +81,7 @@ class FluidPropertiesTest(unittest.TestCase):
     def test_get_temperature(self):
         """Test the get_temperature method."""
         # Arrange
-        IE = 0
+        IE = 0.0
 
         # Act
         T = self.fluid_props.get_t(IE)
