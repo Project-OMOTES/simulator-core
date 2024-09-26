@@ -12,5 +12,5 @@ This class is split from the base item class to avoid import errors. This class 
 import the node class for the type checking, while the node class needs to import the asset
 class. This resulted in a circular import  error. By splitting this class this is avoided.
 
-.. autoclass:: simulator_core.solver.network.assets.base_asset.BaseAsset
+.. autoclass:: omotes_simulator_core.solver.network.assets.base_asset.BaseAsset
     :members:

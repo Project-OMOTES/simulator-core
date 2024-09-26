@@ -2,5 +2,5 @@
 pushd .
 cd /D "%~dp0"
 cd ..\..\
-pip-sync
+python -m piptools sync
 popd

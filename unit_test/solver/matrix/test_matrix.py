@@ -20,8 +20,8 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from simulator_core.solver.matrix.matrix import Matrix
-from simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.matrix import Matrix
+from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class MatrixTest(unittest.TestCase):
@@ -224,9 +224,8 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertIsInstance(cm.exception, IndexError)
         self.assertEqual(
-            str(cm.exception),
-            f"Index ({11}) greater than number "
-            f"of unknowns ({10})")
+            str(cm.exception), f"Index ({11}) greater than number " f"of unknowns ({10})"
+        )
 
     def test_get_solution_error_number(self) -> None:
         """Test the get solution to raise an error when index is out of bound."""
@@ -245,7 +244,8 @@ class MatrixTest(unittest.TestCase):
             str(cm.exception),
             f"Index ({5}) plus request number of elements "
             f"({10}) greater than "
-            f"number of unknowns {10}")
+            f"number of unknowns {10}",
+        )
 
     def test_reset_solution(self) -> None:
         """Test the reset solution of the matrix object."""

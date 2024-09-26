@@ -18,20 +18,13 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-from simulator_core.entities.assets.junction import Junction
-from simulator_core.entities.assets.pipe import Pipe
-from simulator_core.entities.esdl_object import EsdlObject
-from simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.entities.assets.pipe import Pipe
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class PipeTest(unittest.TestCase):
     """Testcase for HeatNetwork class."""
-
-    def setUp(self):
-        """Set up test case."""
-        # Create two junctions
-        self.from_junction = Junction(solver_node=Mock(), name="from_junction")
-        self.to_junction = Junction(solver_node=Mock(), name="to_junction")
 
     def test_pipe_create(self):
         """Evaluate the creation of a pipe object."""
@@ -39,8 +32,6 @@ class PipeTest(unittest.TestCase):
 
         # Act
         pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
 
         # Assert
         self.assertIsInstance(pipe, Pipe)
@@ -51,8 +42,6 @@ class PipeTest(unittest.TestCase):
         """Evaluate the unit conversion of the pipe object."""
         # Arrange
         pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
 
         # Act
 
@@ -64,8 +53,6 @@ class PipeTest(unittest.TestCase):
         """Evaluate the get property diameter method to retrieve diameters."""
         # Arrange
         pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
         esdl_asset_mock.get_property.return_value = (1.0, True)
 
@@ -78,8 +65,6 @@ class PipeTest(unittest.TestCase):
         """Evaluate failure to retrieve diameter from ESDL asset."""
         # Arrange
         pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
         esdl_asset_mock = Mock()
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
@@ -103,8 +88,6 @@ class PipeTest(unittest.TestCase):
         esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
         # - Create pipe object
         pipe = Pipe(asset_name="pipe", asset_id="pipe_id", port_ids=["test1", "test2"])
-        pipe.from_junction = self.from_junction
-        pipe.to_junction = self.to_junction
 
         # Act
         alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)  # act

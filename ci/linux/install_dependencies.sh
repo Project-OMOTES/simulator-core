@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 . .venv/bin/activate
-pip-sync
+python -m piptools sync

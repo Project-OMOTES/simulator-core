@@ -10,5 +10,5 @@ This class stores the information on the network. This is divided into:
 They main responsibility of this class is to stores these and to enable the user to add assets, and connect them.
 For this purpose several methods have been implemented.
 
-.. autoclass:: simulator_core.solver.network.network.Network
+.. autoclass:: omotes_simulator_core.solver.network.network.Network
    :members:

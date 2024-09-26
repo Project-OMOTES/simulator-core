@@ -1,8 +1,8 @@
 [project]
-name = "simulator-core"
+name = "omotes-simulator-core"
 dynamic = ["version"]
 authors = [{ name = "Michiel Tukker", email = "michiel.tukker@deltares.nl" }]
-description = "Core library of the NWN simulator"
+description = "Core library of the OMOTES simulator"
 readme = "README.md"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -19,38 +19,38 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy==1.26.0",
-    "pandas==2.1.1",
-    "scipy==1.14.0",
-    "pyesdl==24.2.0",
-    "dataclass-wizard==0.22.2",
-    "influxdb==5.3.1",
+    "numpy~=2.1.0",
+    "pandas~=2.2.2",
+    "scipy~=1.14.1",
+    "pyesdl~=24.2.0",
+    "dataclass-wizard~=0.22.3",
+    "influxdb~=5.3.2",
+    "pyjnius~=1.6.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pip-tools~=7.3.0",
-    "setuptools-git-versioning<2",
-    "black~=22.1.0",
-    "flake8==6.0.0",
-    "Flake8-pyproject==1.2.3",
-    "flake8-docstrings==1.7.0",
-    "flake8-quotes==3.3.2",
-    "flake8-pytest-style==1.7.2",
-    "flake8-bugbear==23.9.16",
-    "flake8-mock==0.4",
-    "flake8-tuple==0.4.1",
-    "flake8-aaa==0.16.0",
-    "pytest ~=7.3.1",
-    "pytest-cov ~=4.0.0",
-    "bump2version==1.0.1",
-    "mypy ~= 1.5.1",
-    "build ~= 1.0.3",
-    "sphinx==7.2.6",
-    "furo==2023.9.10",
-    "geopandas==0.14.3",
-    "plotly==5.21.0",
-    "shapely==2.0.4",
+    "pip-tools~=7.4.1",
+    "setuptools-git-versioning>=2.0, <3",
+    "black~=24.8.0",
+    "flake8~=7.1.1",
+    "Flake8-pyproject~=1.2.3",
+    "flake8-docstrings~=1.7.0",
+    "flake8-quotes~=3.4.0",
+    "flake8-pytest-style~=2.0.0",
+    "flake8-bugbear~=24.8.19",
+    "flake8-mock~=0.4",
+    "flake8-tuple~=0.4.1",
+    "pytest~=7.4.4",
+    "pytest-cov~=5.0.0",
+    "mypy~=1.11.2",
+    "build~=1.0.3",
+    "sphinx~=8.0.2",
+    "furo~=2024.8.6",
+    "geopandas~=1.0.1",
+    "plotly~=5.24.0",
+    "shapely~=2.0.6",
+    "snakeviz==2.2.0"
 ]
 
 [project.urls]
@@ -64,22 +64,23 @@ build-backend = "setuptools.build_meta"
 requires = [
     "setuptools ~= 69.0.3",
     "wheel ~= 0.40.0",
-    "setuptools-git-versioning<2",
+    "setuptools-git-versioning>=2.0,<3",
 ]
 
 [tool.setuptools-git-versioning]
 enabled = true
-version_file = "VERSION"
+starting_version = "0.0.1"
+version_file = "src/omotes_simulator_core/VERSION"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
 
 # [tool.setuptools]
-# packages = ["src/simulator_core"]
+# packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
@@ -96,9 +97,6 @@ ignore = [
     'W503',  # Starting lines with operators.
     'PT009', # use a regular assert instead of unittest-style assertion
     'PT027', # pytest.raises() should be used instead of assertRaises()
-    'AAA01', # no Act block found in test
-    'AAA03', # No act block found. '
-    'AAA06', # Comment in Act block
 ]
 exclude = ['.venv/*', 'venv/*', 'doc/*']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']

@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 . .venv/bin/activate
-pip-sync  ./requirements.txt ./dev-requirements.txt
+python -m piptools sync  ./requirements.txt ./dev-requirements.txt

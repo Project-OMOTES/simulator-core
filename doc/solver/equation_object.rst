@@ -13,7 +13,7 @@ This can be easily obtained by making use of the CoreQuantIndex class.
 The coefficients are the coefficients which are obtained by linearizing the equations. The same holds for the right hand side. This linearization should be done via the Newton-Raphson methode.
 More information can be found on this `website`_.
 
-.. autoclass:: simulator_core.solver.matrix.equation_object.EquationObject
+.. autoclass:: omotes_simulator_core.solver.matrix.equation_object.EquationObject
    :members:
 
 .. _website: https://en.wikipedia.org/wiki/Newton%27s_method
