@@ -47,11 +47,13 @@ CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
 class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
-    def to_esdl(self, entity: AssetAbstract) -> Any:
+    @staticmethod
+    def to_esdl(entity: AssetAbstract) -> Any:
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
+    @staticmethod
+    def to_entity(model: EsdlAssetObject) -> AssetAbstract:
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
