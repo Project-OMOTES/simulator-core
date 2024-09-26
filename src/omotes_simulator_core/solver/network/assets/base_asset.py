@@ -143,7 +143,7 @@ class BaseAsset(BaseItem):
     def get_thermal_equations(self, connection_point: int) -> EquationObject:
         """Gets a thermal equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to Gets the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
@@ -158,11 +158,11 @@ class BaseAsset(BaseItem):
             ]
             > 0
         ):
-            return self.get_prescribe_temp(connection_point)
+            return self.get_prescribe_temp_equation(connection_point)
         else:
             return self.get_internal_energy_to_node_equation(connection_point)
 
-    def get_prescribe_temp(self, connection_point: int) -> EquationObject:
+    def get_prescribe_temp_equation(self, connection_point: int) -> EquationObject:
         """Adds a prescribed temperature equation for a connection point of the asset.
 
         :param connection_point: The index of the connection point to add the equation for.

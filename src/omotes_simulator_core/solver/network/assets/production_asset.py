@@ -40,7 +40,7 @@ class ProductionAsset(FallType):
     -------
     get_equations() -> list[EquationObject]
         Returns a list of EquationObjects that represent the equations for the asset.
-    get_pre_scribe_equation(connection_point: int) -> EquationObject
+    get_pre_scribe_mass_flow_or_pressure_equations(connection_point: int) -> EquationObject
         Returns an EquationObject that represents the prescribed mass flow rate or pressure
         equation for the asset at the given connection point.
     """
@@ -108,12 +108,14 @@ class ProductionAsset(FallType):
             super().get_press_to_node_equation(1),
             self.get_thermal_equations(0),
             self.get_thermal_equations(1),
-            self.get_pre_scribe_equation(0),
-            self.get_pre_scribe_equation(1),
+            self.get_pre_scribe_mass_flow_or_pressure_equations(0),
+            self.get_pre_scribe_mass_flow_or_pressure_equations(1),
         ]
         return equations
 
-    def get_pre_scribe_equation(self, connection_point: int) -> EquationObject:
+    def get_pre_scribe_mass_flow_or_pressure_equations(
+        self, connection_point: int
+    ) -> EquationObject:
         """Returns an EquationObject for a pre describe equation.
 
         The returned equation object represents the prescribed mass flow rate or pressure
@@ -183,6 +185,6 @@ class ProductionAsset(FallType):
             ]
             > 0
         ):
-            return self.get_prescribe_temp(connection_point)
+            return self.get_prescribe_temp_equation(connection_point)
         else:
             return self.get_internal_energy_to_node_equation(connection_point)

@@ -57,7 +57,9 @@ class ProductionAssetTest(unittest.TestCase):
         connection_point_id = 1
 
         # Act
-        equation_object = self.asset.get_pre_scribe_equation(connection_point=connection_point_id)
+        equation_object = self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+            connection_point=connection_point_id
+        )
 
         # Assert
         self.assertTrue(self.asset.pre_scribe_mass_flow)
@@ -76,7 +78,9 @@ class ProductionAssetTest(unittest.TestCase):
         connection_point_id = 1
 
         # Act
-        equation_object = self.asset.get_pre_scribe_equation(connection_point=connection_point_id)
+        equation_object = self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+            connection_point=connection_point_id
+        )
 
         # Assert
         self.assertFalse(self.asset.pre_scribe_mass_flow)
@@ -94,7 +98,9 @@ class ProductionAssetTest(unittest.TestCase):
 
         # Act
         with self.assertRaises(IndexError) as cm:
-            self.asset.get_pre_scribe_equation(connection_point=connection_point_id)
+            self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+                connection_point=connection_point_id
+            )
 
         # Assert
         self.assertIsInstance(cm.exception, IndexError)
