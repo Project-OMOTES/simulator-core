@@ -277,8 +277,12 @@ class BaseAsset(BaseItem):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES,
-                self.connected_nodes[connection_point].matrix_index + IndexEnum.discharge,
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.connected_nodes[connection_point].get_index_matrix(
+                    property_name="mass_flow_rate", use_relative_indexing=False
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, -1.0])

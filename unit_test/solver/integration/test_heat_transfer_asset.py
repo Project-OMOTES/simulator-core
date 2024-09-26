@@ -17,11 +17,11 @@
 import unittest
 from uuid import uuid4
 
-from simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
-from simulator_core.solver.network.assets.production_asset import ProductionAsset
-from simulator_core.solver.network.network import Network
-from simulator_core.solver.solver import Solver
-from simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
+from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.network import Network
+from omotes_simulator_core.solver.solver import Solver
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class HeatTransferAssetIntegrationTest(unittest.TestCase):

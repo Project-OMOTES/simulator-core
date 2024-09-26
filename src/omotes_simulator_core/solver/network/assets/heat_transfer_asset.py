@@ -14,16 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing a Heat Transfer asset."""
-import typing
 from enum import Enum
 from typing import List, Optional
 
 import numpy as np
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.matrix.equation_object import EquationObject
-from simulator_core.solver.network.assets.base_asset import BaseAsset
-from simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class FlowDirection(Enum):
@@ -87,7 +86,7 @@ class HeatTransferAsset(BaseAsset):
         super().__init__(
             name=name,
             _id=_id,
-            number_of_unknowns=NUMBER_CORE_QUANTITIES * 4,
+            number_of_unknowns=index_core_quantity.number_core_quantities * 4,
             number_connection_points=4,
         )
         # Define the supply temperature of the asset on the cold side
@@ -100,9 +99,9 @@ class HeatTransferAsset(BaseAsset):
         # at the hot side of the heat pump
         self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
         # Define the mass flow rate set point for the asset on the secondary side
-        self.mass_flow_rate_set_point_secondary = mass_flow_rate_set_point_secondary
+        self.mass_flow_rate_rate_set_point_secondary = mass_flow_rate_set_point_secondary
         # Define the mass flow rate set point for the asset on the primary side
-        self.mass_flow_rate_set_point_primary = mass_flow_rate_set_point_primary
+        self.mass_flow_rate_rate_set_point_primary = mass_flow_rate_set_point_primary
         # Define the pressure set point for the asset
         self.pressure_set_point_secondary = pressure_set_point_secondary
         # Define the primary side of the heat transfer asset
@@ -150,9 +149,16 @@ class HeatTransferAsset(BaseAsset):
         :return: FlowDirection
             The flow direction of the heat transfer asset.
         """
-        if self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] > 0:
+        discharge = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=connection_point,
+                use_relative_indexing=False,
+            )
+        ]
+        if discharge > 0:
             return FlowDirection.POSITIVE
-        elif self.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] < 0:
+        elif discharge < 0:
             return FlowDirection.NEGATIVE
         else:
             return FlowDirection.ZERO
@@ -301,13 +307,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_inflow,
-                    mass_flow_value=-self.mass_flow_rate_set_point_secondary,
+                    mass_flow_value=-self.mass_flow_rate_rate_set_point_secondary,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    mass_flow_value=+self.mass_flow_rate_set_point_secondary,
+                    mass_flow_value=+self.mass_flow_rate_rate_set_point_secondary,
                 )
             )
         else:
@@ -356,7 +362,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=primary_side_inflow,
-                    mass_flow_value=self.mass_flow_rate_set_point_primary,
+                    mass_flow_value=self.mass_flow_rate_rate_set_point_primary,
                 )
             )
         # Return the equations
@@ -369,7 +375,9 @@ class HeatTransferAsset(BaseAsset):
 
         .. math::
 
-            \dot{m}_{primary, inflow} = - \left| \frac{u_{primary, inflow} - u_{primary, outflow}}{c \left( \dot{m}_{secondary, inflow}u_{secondary, inflow} - \dot{m}_{secondary, outflow}u_{secondary, outflow} \right)} \right|
+            \dot{m}_{primary, inflow} = - \left| \frac{u_{primary, inflow} - u_{primary, outflow}}
+            {c \left( \dot{m}_{secondary, inflow}u_{secondary, inflow} -
+            \dot{m}_{secondary, outflow}u_{secondary, outflow} \right)} \right|
 
         with :math:`c` as the heat transfer coefficient.
 
@@ -378,23 +386,49 @@ class HeatTransferAsset(BaseAsset):
         """
         internal_energy_difference_primary = (
             self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.primary_side_inflow
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=self.primary_side_inflow,
+                    use_relative_indexing=False,
+                )
             ]
             - self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.primary_side_outflow
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=self.primary_side_outflow,
+                    use_relative_indexing=False,
+                )
             ]
         )
         # Define the energy on the secondary side
         energy_secondary_side = self.heat_transfer_coefficient * (
-            self.prev_sol[IndexEnum.discharge + NUMBER_CORE_QUANTITIES * self.secondary_side_inflow]
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.secondary_side_inflow,
+                    use_relative_indexing=False,
+                )
+            ]
             * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.secondary_side_inflow
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=self.secondary_side_inflow,
+                    use_relative_indexing=False,
+                )
             ]
             + self.prev_sol[
-                IndexEnum.discharge + NUMBER_CORE_QUANTITIES * self.secondary_side_outflow
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.secondary_side_outflow,
+                    use_relative_indexing=False,
+                )
             ]
             * self.prev_sol[
-                IndexEnum.internal_energy + NUMBER_CORE_QUANTITIES * self.secondary_side_outflow
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=self.secondary_side_outflow,
+                    use_relative_indexing=False,
+                )
             ]
         )
         return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
@@ -415,8 +449,14 @@ class HeatTransferAsset(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index + IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES,
-                self.connected_nodes[connection_point].matrix_index + IndexEnum.discharge,
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                ),
+                self.connected_nodes[connection_point].get_index_matrix(
+                    property_name="mass_flow_rate", use_relative_indexing=True
+                ),
             ]
         )
         equation_object.coefficients = np.array([1, -1])
@@ -447,12 +487,16 @@ class HeatTransferAsset(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index
-                + IndexEnum.discharge
-                + connection_point_1 * NUMBER_CORE_QUANTITIES,
-                self.matrix_index
-                + IndexEnum.discharge
-                + connection_point_2 * NUMBER_CORE_QUANTITIES,
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point_1,
+                    use_relative_indexing=True,
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point_2,
+                    use_relative_indexing=True,
+                ),
             ]
         )
         equation_object.coefficients = np.array([1.0, 1.0])
@@ -479,9 +523,11 @@ class HeatTransferAsset(BaseAsset):
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
-                self.matrix_index
-                + IndexEnum.internal_energy
-                + connection_point * NUMBER_CORE_QUANTITIES
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
             ]
         )
         equation_object.coefficients = np.array([1.0])
@@ -503,7 +549,13 @@ class HeatTransferAsset(BaseAsset):
         # Add the equations
         equation_object = EquationObject()
         equation_object.indices = np.array(
-            [self.matrix_index + IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES]
+            [
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
+            ]
         )
         equation_object.coefficients = np.array([1])
         equation_object.rhs = mass_flow_value
@@ -525,7 +577,13 @@ class HeatTransferAsset(BaseAsset):
         # Add the equations
         equation_object = EquationObject()
         equation_object.indices = np.array(
-            [self.matrix_index + IndexEnum.pressure + connection_point * NUMBER_CORE_QUANTITIES]
+            [
+                self.get_index_matrix(
+                    property_name="pressure",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
+            ]
         )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = pressure_value

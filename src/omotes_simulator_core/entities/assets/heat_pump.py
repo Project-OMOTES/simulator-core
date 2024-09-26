@@ -16,27 +16,23 @@
 """HeatPump class."""
 from typing import Dict
 
-from simulator_core.entities.assets.asset_abstract import AssetAbstract
-from simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_NODE_HEIGHT,
+from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
-from simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from simulator_core.entities.assets.utils import (
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
 
 
 class HeatPump(AssetAbstract):
-    """A HeatPump represents a combination of assets that produce heat while consuming
-    heat from another source."""
+    """A HeatPump represents a combination of assets that produce heat."""
 
     temperature_supply_primary: float
     """The supply temperature of the heat pump on the primary side [K]."""
@@ -65,7 +61,7 @@ class HeatPump(AssetAbstract):
     coefficient_of_performance: float
     """Coefficient of perfomance for the heat pump."""
 
-    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
+    def __init__(self, asset_name: str, asset_id: str, connected_ports: list[str]):
         """Initialize a new HeatPump instance.
 
         :param asset_name: The name of the asset.
@@ -75,7 +71,7 @@ class HeatPump(AssetAbstract):
         super().__init__(
             asset_name=asset_name,
             asset_id=asset_id,
-            port_ids=port_ids,
+            connected_ports=connected_ports,
         )
 
         # Set default values for the temperatures
@@ -145,10 +141,16 @@ class HeatPump(AssetAbstract):
         self.control_mass_flow_secondary = setpoints_secondary[PROPERTY_SET_PRESSURE]
 
         # Assign setpoints to the HeatTransferAsset solver asset
-        self.solver_asset.supply_temperature_secondary = self.temperature_supply_secondary  # type: ignore
-        self.solver_asset.return_temperature_secondary = self.temperature_return_secondary  # type: ignore
+        self.solver_asset.supply_temperature_secondary = (  # type: ignore
+            self.temperature_supply_secondary
+        )
+        self.solver_asset.return_temperature_secondary = (  # type: ignore
+            self.temperature_return_secondary
+        )
         self.solver_asset.mass_flow_rate_secondary = self.mass_flow_secondary  # type: ignore
-        self.solver_asset.pre_scribe_mass_flow_secondary = self.control_mass_flow_secondary  # type: ignore
+        self.solver_asset.pre_scribe_mass_flow_secondary = (  # type: ignore
+            self.control_mass_flow_secondary
+        )
 
     def _set_setpoints_primary(self, setpoints_primary: Dict) -> None:
         """The primary side of the heat pump acts as a consumer of heat.
@@ -187,8 +189,12 @@ class HeatPump(AssetAbstract):
         )
 
         # Assign setpoints to the HeatTransferAsset solver asset
-        self.solver_asset.supply_temperature_primary = self.temperature_supply_primary  # type: ignore
-        self.solver_asset.return_temperature_primary = self.temperature_return_primary  # type: ignore
+        self.solver_asset.supply_temperature_primary = (  # type: ignore
+            self.temperature_supply_primary
+        )
+        self.solver_asset.return_temperature_primary = (  # type: ignore
+            self.temperature_return_primary
+        )
         self.solver_asset.mass_flow_rate_primary = self.mass_flow_primary  # type: ignore
 
     def set_setpoints(self, setpoints: Dict) -> None:

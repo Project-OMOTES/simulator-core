@@ -23,6 +23,7 @@ from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
 
 
 class Network:

@@ -17,15 +17,14 @@
 import unittest
 from uuid import uuid4
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES, IndexEnum
-from simulator_core.solver.network.assets.heat_transfer_asset import (
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
     FlowDirection,
     HeatTransferAsset,
 )
-from simulator_core.solver.network.assets.node import Node
-from simulator_core.solver.network.network import Network
-from simulator_core.solver.solver import Solver
-from simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.solver.network.assets.node import Node
+from omotes_simulator_core.solver.network.network import Network
+from omotes_simulator_core.solver.solver import Solver
 
 
 class HeatTransferAssetTest(unittest.TestCase):
@@ -80,7 +79,9 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = +10.0
-        self.asset.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] = (
+        self.asset.prev_sol[index_core_quantity.get_index_property(
+            property_name="mass_flow_rate", connection_point=connection_point
+        )] = (
             mass_flow
         )
 
@@ -95,7 +96,9 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = -10.0
-        self.asset.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] = (
+        self.asset.prev_sol[index_core_quantity.get_index_property(
+            property_name="mass_flow_rate", connection_point=connection_point
+        )] = (
             mass_flow
         )
 
@@ -110,7 +113,9 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = +0.0
-        self.asset.prev_sol[IndexEnum.discharge + connection_point * NUMBER_CORE_QUANTITIES] = (
+        self.asset.prev_sol[index_core_quantity.get_index_property(
+            property_name="mass_flow_rate", connection_point=connection_point
+        )] = (
             mass_flow
         )
 

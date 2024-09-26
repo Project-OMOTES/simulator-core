@@ -19,8 +19,8 @@ import numpy as np
 import numpy.typing as npt
 import scipy as sp
 
-from simulator_core.solver.matrix.core_enum import NUMBER_CORE_QUANTITIES
-from simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 
 
 class Matrix:
@@ -151,16 +151,16 @@ class Matrix:
         self,
         matrix: sp.sparse.csc_matrix,
         rhs_array: sp.sparse.csc_matrix,
-        file_name: str = "dump.csv",
+        filename: str = "dump.csv",
     ) -> None:
         """Method to dump the matrix to a csv file.
 
         :param matrix: Matrix to be printed to the file
         :param rhs_array: Right hand side to be printed to the file
-        :param file_name: File name to dump the matrix in default=dump.csv
+        :param filename: File name to dump the matrix in default=dump.csv
         :return:
         """
-        with open(file_name, "w", newline="") as f:
+        with open(filename, "w", newline="", encoding="utf-8") as f:
             write = csv.writer(f)
             write.writerow(
                 ["m", "P", "u"]
