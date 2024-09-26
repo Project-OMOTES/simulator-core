@@ -23,6 +23,10 @@ import numpy as np
 class BaseItem(ABC):
     """A base class for items in a network."""
 
+    prev_sol: np.ndarray
+    """The previous solution of the calculation, defaults to an array of
+    zeros with a certain length (number of unknowns)."""
+
     def __init__(self, number_of_unknowns: int, name: str, _id: str, number_connection_points: int):
         """Initializes the BaseItem object with the given parameters.
 
