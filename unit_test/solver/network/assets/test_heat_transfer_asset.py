@@ -23,8 +23,6 @@ from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
     HeatTransferAsset,
 )
 from omotes_simulator_core.solver.network.assets.node import Node
-from omotes_simulator_core.solver.network.network import Network
-from omotes_simulator_core.solver.solver import Solver
 
 
 class HeatTransferAssetTest(unittest.TestCase):
@@ -62,7 +60,7 @@ class HeatTransferAssetTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "The number of connected nodes must be 4!")
 
     def test_get_equations_invalid_number_of_unknowns(self) -> None:
-        """Evaluate the retrieval of equations from the object with non-matching number of unknowns."""
+        """Evaluate the get equations from the object with non-matching number of unknowns."""
         # Arrange
         self.asset.number_of_unknowns = 14
 
@@ -79,11 +77,11 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = +10.0
-        self.asset.prev_sol[index_core_quantity.get_index_property(
-            property_name="mass_flow_rate", connection_point=connection_point
-        )] = (
-            mass_flow
-        )
+        self.asset.prev_sol[
+            index_core_quantity.get_index_property(
+                property_name="mass_flow_rate", connection_point=connection_point
+            )
+        ] = mass_flow
 
         # Act
         flow_direction = self.asset.flow_direction(connection_point=connection_point)
@@ -96,11 +94,11 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = -10.0
-        self.asset.prev_sol[index_core_quantity.get_index_property(
-            property_name="mass_flow_rate", connection_point=connection_point
-        )] = (
-            mass_flow
-        )
+        self.asset.prev_sol[
+            index_core_quantity.get_index_property(
+                property_name="mass_flow_rate", connection_point=connection_point
+            )
+        ] = mass_flow
 
         # Act
         flow_direction = self.asset.flow_direction(connection_point=connection_point)
@@ -113,11 +111,11 @@ class HeatTransferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         mass_flow = +0.0
-        self.asset.prev_sol[index_core_quantity.get_index_property(
-            property_name="mass_flow_rate", connection_point=connection_point
-        )] = (
-            mass_flow
-        )
+        self.asset.prev_sol[
+            index_core_quantity.get_index_property(
+                property_name="mass_flow_rate", connection_point=connection_point
+            )
+        ] = mass_flow
 
         # Act
         flow_direction = self.asset.flow_direction(connection_point=connection_point)
