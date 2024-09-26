@@ -32,37 +32,35 @@ from omotes_simulator_core.entities.assets.controller.controller_consumer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
 
+CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
+    esdl.Producer: ProductionCluster,
+    esdl.GenericProducer: ProductionCluster,
+    esdl.Consumer: DemandCluster,
+    esdl.GenericConsumer: DemandCluster,
+    esdl.HeatingDemand: DemandCluster,
+    esdl.Pipe: Pipe,
+    esdl.ATES: AtesCluster,
+    esdl.HeatPump: HeatPump,
+}
+
 
 class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
-    CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
-        esdl.Producer: ProductionCluster,
-        esdl.GenericProducer: ProductionCluster,
-        esdl.Consumer: DemandCluster,
-        esdl.GenericConsumer: DemandCluster,
-        esdl.HeatingDemand: DemandCluster,
-        esdl.Pipe: Pipe,
-        esdl.ATES: AtesCluster,
-        esdl.HeatPump: HeatPump,
-    }
-
-    @staticmethod
-    def to_esdl(entity: AssetAbstract) -> Any:
+    def to_esdl(self, entity: AssetAbstract) -> Any:
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
-    @staticmethod
-    def to_entity(model: EsdlAssetObject) -> AssetAbstract:
+    def to_entity(self, model: EsdlAssetObject) -> AssetAbstract:
         """Method to map an esdl asset to an asset entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
 
         :return: Entity object of type AssetAbstract.
         """
-        if not type(model.esdl_asset) in EsdlAssetMapper.CONVERSION_DICT:
+        if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
-        return EsdlAssetMapper.CONVERSION_DICT[type(model.esdl_asset)](
+        return CONVERSION_DICT[type(model.esdl_asset)](
             model.esdl_asset.name, model.esdl_asset.id, model.get_port_ids()
         )
 
