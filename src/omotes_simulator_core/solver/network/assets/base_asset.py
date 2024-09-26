@@ -304,13 +304,15 @@ class BaseAsset(BaseItem):
         :param int connection_point: The connection point for which to get the mass flow rate.
         :return: The mass flow rate of the connection point.
         """
-        return self.prev_sol[
-            self.get_index_matrix(
-                property_name="mass_flow_rate",
-                connection_point=connection_point,
-                use_relative_indexing=True,
-            )
-        ]
+        return float(
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
+            ]
+        )
 
     def get_pressure(self, connection_point: int) -> float:
         """Method to get the pressure of a connection point.
@@ -318,13 +320,15 @@ class BaseAsset(BaseItem):
         :param int connection_point: The connection point for which to get the pressure.
         :return: The pressure of the connection point.
         """
-        return self.prev_sol[
-            self.get_index_matrix(
-                property_name="pressure",
-                connection_point=connection_point,
-                use_relative_indexing=True,
-            )
-        ]
+        return float(
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="pressure",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
+            ]
+        )
 
     def get_temperature(self, connection_point: int) -> float:
         """Method to get the temperature of a connection point.

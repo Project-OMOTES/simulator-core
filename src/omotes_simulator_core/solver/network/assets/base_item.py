@@ -17,10 +17,15 @@
 from abc import ABC, abstractmethod
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+import numpy as np
 
 
 class BaseItem(ABC):
     """A base class for items in a network."""
+
+    prev_sol: np.ndarray
+    """The previous solution of the calculation, defaults to an array of
+    zeros with a certain length (number of unknowns)."""
 
     def __init__(self, number_of_unknowns: int, name: str, _id: str, number_connection_points: int):
         """Initializes the BaseItem object with the given parameters.
@@ -35,7 +40,7 @@ class BaseItem(ABC):
         self.number_of_unknowns = number_of_unknowns
         self.number_of_connection_point = number_connection_points
         self.matrix_index = 0
-        self.prev_sol: list[float] = [0.0] * self.number_of_unknowns
+        self.prev_sol = np.zeros(self.number_of_unknowns)
 
     def __repr__(self) -> str:
         """Returns the string representation of the item."""

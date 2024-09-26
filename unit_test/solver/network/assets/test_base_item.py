@@ -16,6 +16,7 @@
 """Test BaseItem asset of the solver class."""
 import unittest
 from uuid import uuid4
+import numpy as np
 
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
@@ -54,7 +55,8 @@ class BaseItemTest(unittest.TestCase):
         self.assertEqual(asset.name, asset_name)
         self.assertEqual(asset.number_of_unknowns, number_of_unknowns)
         self.assertEqual(asset.matrix_index, 0)
-        self.assertEqual(asset.prev_sol, [0.0] * number_of_unknowns)
+
+        np.testing.assert_array_equal(asset.prev_sol, np.zeros(number_of_unknowns))
 
     def test_set_matrix_index(self) -> None:
         """Test the set_matrix_index method of the BaseItem class."""
