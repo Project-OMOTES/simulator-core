@@ -163,9 +163,9 @@ class BaseAsset(BaseItem):
             return self.get_internal_energy_to_node_equation(connection_point)
 
     def get_prescribe_temp_equation(self, connection_point: int) -> EquationObject:
-        """Adds a prescribed temperature equation for a connection point of the asset.
+        """Gets a prescribed temperature equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the prescribed temperature equation.
         :rtype: EquationObject
@@ -190,9 +190,9 @@ class BaseAsset(BaseItem):
         return equation_object
 
     def get_internal_energy_to_node_equation(self, connection_point: int) -> EquationObject:
-        """Adds a temperature to node equation for a connection point of the asset.
+        """Gets a temperature to node equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the temperature to node equation.
         :rtype: EquationObject
@@ -228,9 +228,9 @@ class BaseAsset(BaseItem):
         """
 
     def get_press_to_node_equation(self, connection_point: int) -> EquationObject:
-        """Adds a pressure to node equation for a connection point of the asset.
+        """Gets a pressure to node equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the pressure to node equation.
         :rtype: EquationObject

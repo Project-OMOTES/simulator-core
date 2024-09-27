@@ -127,7 +127,7 @@ class ProductionAsset(FallType):
         property
         - If pre_scribe_mass_flow is False, then Pressure at connection point = Set pressure
         property
-        :param int connection_point: The connection point for which to add the equation
+        :param int connection_point: The connection point for which to get the equation
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
@@ -168,9 +168,9 @@ class ProductionAsset(FallType):
         return equation_object
 
     def get_thermal_equations(self, connection_point: int) -> EquationObject:
-        """Adds a thermal equation for a connection point of the asset.
+        """Gets a thermal equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject

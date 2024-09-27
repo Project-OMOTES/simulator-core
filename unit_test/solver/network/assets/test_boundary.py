@@ -48,7 +48,7 @@ class BaseBoundaryTest(unittest.TestCase):
         self.assertEqual(self.asset.number_of_unknowns, 3)
 
     def test_get_pressure_equation(self) -> None:
-        """Evaluate the addition of a pressure equation to the boundary object."""
+        """Evaluate getting a pressure equation for the boundary object."""
         # Arrange
         self.asset.initial_pressure = 50000.0
 

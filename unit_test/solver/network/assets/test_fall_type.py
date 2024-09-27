@@ -103,7 +103,7 @@ class FallTypeTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "The number of unknowns must be 6!")
 
     def test_get_internal_cont_equation(self) -> None:
-        """Evaluate the addition of an internal continuity equation to the boundary object.
+        """Evaluate getting an internal continuity equation for the boundary object.
 
         Conservation of mass equation:
         m_in = m_out
@@ -129,7 +129,7 @@ class FallTypeTest(unittest.TestCase):
         self.assertEqual(equation_object.rhs, 0.0)
 
     def test_get_internal_energy_equation(self) -> None:
-        """Evaluate the addition of an internal energy equation to the boundary object.
+        """Evaluate getting an internal energy equation for the boundary object.
 
         The equation is:
         -m_in * EI_in + m_out * EI_out - Q_supplied = 0
@@ -194,7 +194,7 @@ class FallTypeTest(unittest.TestCase):
         )
 
     def test_get_internal_pressure_loss_equation(self) -> None:
-        """Evaluate the addition of an internal pressure loss equation to the boundary object.
+        """Evaluate getting an internal pressure loss equation for the boundary object.
 
         The equation is:
         - Pressure at inlet - Pressure at outlet - 2 * Loss coefficient * Mass flow rate *
@@ -247,7 +247,7 @@ class FallTypeTest(unittest.TestCase):
         )
 
     def test_get_internal_pressure_loss_equation_linearized_discharge(self) -> None:
-        """Evaluate the addition of an internal pressure loss equation to the boundary object.
+        """Evaluate getting an internal pressure loss equation for the boundary object.
 
         The equation is:
         - Pressure at inlet - Pressure at outlet - 2 * Loss coefficient * Mass flow rate *
@@ -286,7 +286,7 @@ class FallTypeTest(unittest.TestCase):
 
     @patch.object(FallType, "get_internal_energy_equation")
     def test_get_thermal_equations(self, mock_energy_eq) -> None:
-        """Evaluate the addition of thermal equations to the boundary object.
+        """Evaluate getting thermal equations for the boundary object.
 
         The equations are:
         mIE_in - mIE_out = 0
@@ -306,7 +306,7 @@ class FallTypeTest(unittest.TestCase):
 
     @patch.object(FallType, "get_press_to_node_equation")
     def test_get_press_to_node_equation(self, mock_press_to_node_eq) -> None:
-        """Evaluate the addition of pressure to node equations to the boundary object.
+        """Evaluate getting pressure to node equations for the boundary object.
 
         The equations are:
         - Pressure at the boundary - Pressure at the node = 0

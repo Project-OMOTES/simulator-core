@@ -103,7 +103,7 @@ class FallType(BaseAsset):
         # Check if the number of unknowns is 6
         if self.number_of_unknowns != 6:
             raise ValueError("The number of unknowns must be 6!")
-        # Add the equations for the asset
+        # Get the equations for the asset
         equations = [
             self.get_press_to_node_equation(0),
             self.get_press_to_node_equation(1),
@@ -115,9 +115,9 @@ class FallType(BaseAsset):
         return equations
 
     def get_thermal_equations(self, connection_point: int) -> EquationObject:
-        """Adds a thermal equation for a connection point of the asset.
+        """Gets a thermal equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject

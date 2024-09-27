@@ -52,9 +52,9 @@ class BaseBoundary(BaseAsset):
         self.initial_pressure = 10000.0
 
     def get_pressure_equation(self) -> EquationObject:
-        """Add a prescribed pressure equation for the boundary.
+        """Get a prescribed pressure equation for the boundary.
 
-        This method adds an equation to the matrix that sets the pressure at the boundary
+        This method gets an equation to the matrix that sets the pressure at the boundary
         to a fixed value.
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
