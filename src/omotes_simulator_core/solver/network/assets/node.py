@@ -41,18 +41,18 @@ class Node(BaseNodeItem):
         Connects an asset object to the node at the given connection point index.
     get_equations() -> list[EquationObject]
         Returns a list of EquationObjects that represent the equations for the node.
-    add_energy_equations() -> EquationObject
+    get_energy_equations() -> EquationObject
         Returns an EquationObject that represents the energy balance equation for the node.
-    add_node_cont_equation() -> EquationObject
+    get_node_cont_equation() -> EquationObject
         Returns an EquationObject that represents the mass flow rate continuity equation for
         the node.
-    add_discharge_equation() -> EquationObject
+    get_discharge_equation() -> EquationObject
         Returns an EquationObject that represents the discharge equation for the node.
-    add_pressure_set_equation() -> EquationObject
+    get_pressure_set_equation() -> EquationObject
         Returns an EquationObject that represents the pressure set equation for the node.
     set_temperature_equation() -> EquationObject
         Returns an EquationObject that represents the temperature set equation for the node.
-    add_energy_equation() -> EquationObject
+    get_energy_equation() -> EquationObject
         Returns an EquationObject that represents the energy equation for the node.
     is_connected() -> bool
         Returns True if the node is connected to any asset, False otherwise.
@@ -118,13 +118,13 @@ class Node(BaseNodeItem):
             raise ValueError(f"Node {self.name} is not connected to any asset.")
         # Construct equation object
         equations = [
-            self.add_node_cont_equation(),
-            self.add_energy_equations(),
-            self.add_discharge_equation(),
+            self.get_node_cont_equation(),
+            self.get_energy_equations(),
+            self.get_discharge_equation(),
         ]
         return equations
 
-    def add_energy_equations(self) -> EquationObject:
+    def get_energy_equations(self) -> EquationObject:
         """Returns an EquationObject that represents the energy balance equation for the node.
 
         When the mass flow rate of all connected components is smaller or equal 0.
@@ -149,9 +149,9 @@ class Node(BaseNodeItem):
         if all(flows >= 0.0) or all(flows <= 0.0):
             return self.set_temperature_equation()
         else:
-            return self.add_energy_equation()
+            return self.get_energy_equation()
 
-    def add_node_cont_equation(self) -> EquationObject:
+    def get_node_cont_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the mass continuity equation for the node.
 
         :return: EquationObject
@@ -178,7 +178,7 @@ class Node(BaseNodeItem):
             equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
         return equation_object
 
-    def add_discharge_equation(self) -> EquationObject:
+    def get_discharge_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the discharge is zero equation for the node.
 
         :return: EquationObject
@@ -193,7 +193,7 @@ class Node(BaseNodeItem):
         equation_object.rhs = 0.0
         return equation_object
 
-    def add_pressure_set_equation(self) -> EquationObject:
+    def get_pressure_set_equation(self) -> EquationObject:
         """Returns an EquationObject that sets the pressure of the node to a pre-defined value.
 
         :return: EquationObject
@@ -223,7 +223,7 @@ class Node(BaseNodeItem):
         equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
 
-    def add_energy_equation(self) -> EquationObject:
+    def get_energy_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the energy equation for the node.
 
         :return: EquationObject

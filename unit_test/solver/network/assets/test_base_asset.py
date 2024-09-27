@@ -152,8 +152,8 @@ class BaseAssetTest(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
-    def test_base_add_thermal_equations_with_discharge(self) -> None:
-        """Test the add_thermal_equations method.
+    def test_base_get_thermal_equations_with_discharge(self) -> None:
+        """Test the get_thermal_equations method.
 
         The discharge at the connection point of the prev_sol is greater than 0.
         """
@@ -166,7 +166,7 @@ class BaseAssetTest(unittest.TestCase):
         ] = 1.0
 
         # Act
-        equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
+        equation_object = self.asset.get_thermal_equations(connection_point=connection_point_id)
 
         # Assert
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
@@ -179,8 +179,8 @@ class BaseAssetTest(unittest.TestCase):
             ],
         )
 
-    def test_base_add_thermal_equations_no_discharge(self) -> None:
-        """Test the add_thermal_equations method.
+    def test_base_get_thermal_equations_no_discharge(self) -> None:
+        """Test the get_thermal_equations method.
 
         The discharge at the connection point of the prev_sol is 0.
         """
@@ -189,7 +189,7 @@ class BaseAssetTest(unittest.TestCase):
         self.asset.connect_node(node=self.supply_node, connection_point=connection_point_id)
 
         # Act
-        equation_object = self.asset.add_thermal_equations(connection_point=connection_point_id)
+        equation_object = self.asset.get_thermal_equations(connection_point=connection_point_id)
 
         # Assert
         self.assertEqual(equation_object.rhs, 0.0)
@@ -199,8 +199,8 @@ class BaseAssetTest(unittest.TestCase):
             [index_core_quantity.internal_energy, index_core_quantity.internal_energy],
         )
 
-    def test_base_add_thermal_equations_no_discharge_not_connected(self) -> None:
-        """Test the add_thermal_equations method.
+    def test_base_get_thermal_equations_no_discharge_not_connected(self) -> None:
+        """Test the get_thermal_equations method.
 
         The discharge at the connection point of the prev_sol is 0.
         """
@@ -209,7 +209,7 @@ class BaseAssetTest(unittest.TestCase):
 
         # Act
         with self.assertRaises(ValueError) as cm:
-            self.asset.add_thermal_equations(connection_point=connection_point_id)
+            self.asset.get_thermal_equations(connection_point=connection_point_id)
 
         # Assert
         self.assertIsInstance(cm.exception, ValueError)
@@ -221,14 +221,14 @@ class BaseAssetTest(unittest.TestCase):
             ),
         )
 
-    def test_base_add_press_to_node_equation(self) -> None:
-        """Test the add_press_to_node_equations method."""
+    def test_base_get_press_to_node_equation(self) -> None:
+        """Test the get_press_to_node_equations method."""
         # Arrange
         connection_point_id = 0
         self.asset.connect_node(node=self.supply_node, connection_point=connection_point_id)
 
         # Act
-        equation_object = self.asset.add_press_to_node_equation(
+        equation_object = self.asset.get_press_to_node_equation(
             connection_point=connection_point_id
         )
 
@@ -245,14 +245,14 @@ class BaseAssetTest(unittest.TestCase):
             ],
         )
 
-    def test_base_add_press_to_node_equation_not_connected(self) -> None:
-        """Test the add_press_to_node_equations method."""
+    def test_base_get_press_to_node_equation_not_connected(self) -> None:
+        """Test the get_press_to_node_equations method."""
         # Arrange
         connection_point_id = 0
 
         # Act
         with self.assertRaises(ValueError) as cm:
-            self.asset.add_press_to_node_equation(connection_point=connection_point_id)
+            self.asset.get_press_to_node_equation(connection_point=connection_point_id)
 
         # Assert
         self.assertIsInstance(cm.exception, ValueError)

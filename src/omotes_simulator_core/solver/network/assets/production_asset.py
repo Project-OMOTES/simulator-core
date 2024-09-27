@@ -40,7 +40,7 @@ class ProductionAsset(FallType):
     -------
     get_equations() -> list[EquationObject]
         Returns a list of EquationObjects that represent the equations for the asset.
-    add_pre_scribe_equation(connection_point: int) -> EquationObject
+    get_pre_scribe_mass_flow_or_pressure_equations(connection_point: int) -> EquationObject
         Returns an EquationObject that represents the prescribed mass flow rate or pressure
         equation for the asset at the given connection point.
     """
@@ -104,16 +104,18 @@ class ProductionAsset(FallType):
             values of the equations.
         """
         equations = [
-            super().add_press_to_node_equation(0),
-            super().add_press_to_node_equation(1),
-            self.add_thermal_equations(0),
-            self.add_thermal_equations(1),
-            self.add_pre_scribe_equation(0),
-            self.add_pre_scribe_equation(1),
+            super().get_press_to_node_equation(0),
+            super().get_press_to_node_equation(1),
+            self.get_thermal_equations(0),
+            self.get_thermal_equations(1),
+            self.get_pre_scribe_mass_flow_or_pressure_equations(0),
+            self.get_pre_scribe_mass_flow_or_pressure_equations(1),
         ]
         return equations
 
-    def add_pre_scribe_equation(self, connection_point: int) -> EquationObject:
+    def get_pre_scribe_mass_flow_or_pressure_equations(
+        self, connection_point: int
+    ) -> EquationObject:
         """Returns an EquationObject for a pre describe equation.
 
         The returned equation object represents the prescribed mass flow rate or pressure
@@ -125,7 +127,7 @@ class ProductionAsset(FallType):
         property
         - If pre_scribe_mass_flow is False, then Pressure at connection point = Set pressure
         property
-        :param int connection_point: The connection point for which to add the equation
+        :param int connection_point: The connection point for which to get the equation
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
@@ -165,10 +167,10 @@ class ProductionAsset(FallType):
                 equation_object.rhs = self.set_pressure
         return equation_object
 
-    def add_thermal_equations(self, connection_point: int) -> EquationObject:
-        """Adds a thermal equation for a connection point of the asset.
+    def get_thermal_equations(self, connection_point: int) -> EquationObject:
+        """Gets a thermal equation for a connection point of the asset.
 
-        :param connection_point: The index of the connection point to add the equation for.
+        :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
@@ -183,6 +185,6 @@ class ProductionAsset(FallType):
             ]
             > 0
         ):
-            return self.add_prescribe_temp(connection_point)
+            return self.get_prescribe_temp_equation(connection_point)
         else:
-            return self.add_internal_energy_to_node_equation(connection_point)
+            return self.get_internal_energy_to_node_equation(connection_point)
