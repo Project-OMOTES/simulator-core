@@ -52,15 +52,32 @@ class NetworkController(NetworkControllerAbstract):
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-        if self.get_total_supply() <= self.get_total_demand(time):
-            logger.warning(f"Total supply is lower than total demand at time: {time}")
+        if (self.get_total_supply() + (
+                -1 * self.get_total_discharge_storage())) <= self.get_total_demand(time):
+            logger.warning(f"Total supply + storage is lower than total demand at time: {time}")
             producers = self._set_producers_to_max()
+            storages = self._set_all_storages_discharge_to_max()
             consumers = self._set_consumer_capped(time)
         else:
-            # need to cap the power of the source based on priority. Consumers can meet their demand
+            # Consumers can meet their demand
             consumers = self._set_consumer_to_demand(time)
-            producers = self._set_producers_based_on_priority(time)
+            if self.get_total_supply() > self.get_total_demand(time):
+                surplus_supply = self.get_total_supply() - self.get_total_demand(time)
+                if surplus_supply <= self.get_total_charge_storage():
+                    storages = self._set_storages_power(surplus_supply)
+                    producers = self._set_producers_to_max()
+                else:
+                    # need to cap the power of the source based on priority
+                    storages = self._set_storages_power(self.get_total_charge_storage())
+                    producers = self._set_producers_based_on_priority(time)
+
+            else:
+                deficit_supply = self.get_total_supply() - self.get_total_demand(time)
+                storages = self._set_storages_power(deficit_supply)
+                producers = self._set_producers_to_max()
+
         producers.update(consumers)
+        producers.update(storages)
         return producers
 
     def get_total_demand(self, time: datetime.datetime) -> float:
@@ -70,6 +87,22 @@ class NetworkController(NetworkControllerAbstract):
         :return float: Total heat demand of all consumers.
         """
         return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
+
+    def get_total_discharge_storage(self) -> float:
+        """Method to get the total storage discharge power of the network.
+
+        :return float: Total heat discharge of all storages.
+        """
+        # TODO add limit based on state of charge
+        return float(sum([storage.max_discharge_power for storage in self.storages]))
+
+    def get_total_charge_storage(self) -> float:
+        """Method to get the total storage charge power of the network.
+
+        :return float: Total heat charge of all storages.
+        """
+        # TODO add limit based on state of charge
+        return float(sum([storage.max_charge_power for storage in self.storages]))
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
@@ -104,6 +137,48 @@ class NetworkController(NetworkControllerAbstract):
         # setting the first producer to set the pressure.
         producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return producers
+
+    def _set_all_storages_discharge_to_max(self) -> dict:
+        """Method to set all the storages to the max discharge power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the storages.
+        """
+        storages = {}
+        for storage in self.storages:
+            storages[storage.id] = {
+                PROPERTY_HEAT_DEMAND: storage.max_discharge_power,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+            }
+        return storages
+
+    def _set_all_storages_charge_to_max(self) -> dict:
+        """Method to set all the storages to the max charge power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the storages.
+        """
+        storages = {}
+        for storage in self.storages:
+            storages[storage.id] = {
+                PROPERTY_HEAT_DEMAND: storage.max_charge_power,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+            }
+        return storages
+
+    def _set_storages_power(self, power: float = 0) -> dict:
+        """Method to set the storages to power. discharge (-), charge (+).
+
+        :return dict: Dict with key= asset-id and value=setpoints for the storages.
+        """
+        storages = {}
+        for storage in self.storages:
+            storages[storage.id] = {
+                PROPERTY_HEAT_DEMAND: power / len(self.storages),
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+            }
+        return storages
 
     def _set_consumer_capped(self, time: datetime.datetime) -> dict:
         """Method to set the consumer to the max available power of the producers.
@@ -144,7 +219,7 @@ class NetworkController(NetworkControllerAbstract):
         producers.
         """
         producers = self._set_producers_to_max()
-        total_demand = self.get_total_demand(time)
+        total_demand = self.get_total_demand(time) + self.get_total_charge_storage()
         if total_demand > self.get_total_supply():
             raise ValueError(
                 "Total demand is higher than total supply. "

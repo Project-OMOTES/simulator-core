@@ -147,12 +147,17 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
-        power = np.inf
+        result = esdl_asset.get_property(esdl_property_name="maxDischargeRate",
+                                         default_value=np.inf)
+        discharge_power = np.inf
         if result[1]:
-            power = result[0]
-        if power == 0:
-            power = np.inf
+            discharge_power = result[0]
+
+        result = esdl_asset.get_property(esdl_property_name="maxChargeRate",
+                                         default_value=np.inf)
+        charge_power = np.inf
+        if result[1]:
+            charge_power = result[0]
 
         temperature_supply = esdl_asset.get_supply_temperature("In")
         temperature_return = esdl_asset.get_return_temperature("Out")
@@ -162,7 +167,8 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
             identifier=esdl_asset.esdl_asset.id,
             temperature_supply=temperature_supply,
             temperature_return=temperature_return,
-            max_power=power,
+            max_charge_power=charge_power,
+            max_discharge_power=discharge_power,
             profile=profile,
         )
         return contr_storage
