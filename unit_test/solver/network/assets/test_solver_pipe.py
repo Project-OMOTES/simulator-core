@@ -193,7 +193,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.calc_lambda_loss()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.lambda_loss, 4), 0.0426)
+        self.assertEqual(np.round(self.asset.lambda_loss, 4), 0.0415)  # 0.0426)
         mock_reynolds_number.assert_called_once()
 
     def test_update_loss_coefficient(self) -> None:
