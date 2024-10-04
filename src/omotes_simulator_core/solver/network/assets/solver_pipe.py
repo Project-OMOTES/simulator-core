@@ -450,8 +450,8 @@ class SolverPipe(FallType):
         The heat loss is calculated with the following formula:
         .. math::
 
-        \dot{m} c_p (T_{in} - T_{out}) (1 - \exp(-\alpha \pi D L
-        / (\dot{m} c_p)))
+        \dot{m} c_p \left(T_{in} - T_{out}\right) \left(1 -
+        \exp{\frac{-\alpha \pi D L}{\dot{m} c_p}})\right
 
         :param float tin: The temperature of the fluid at the inlet of the pipe.
         :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
