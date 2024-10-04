@@ -497,7 +497,7 @@ class SolverPipe(FallType):
             return self.alpha_value
 
     def _calculate_total_heat_loss(self, tin: float, mass_flow_rate: float) -> float:
-        """Calculate the total heat loss of the pipe.
+        r"""Calculate the total heat loss of the pipe.
 
         The heat loss is calculated with the following formula:
         .. math::
