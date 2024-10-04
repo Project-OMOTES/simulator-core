@@ -229,7 +229,6 @@ class SolverPipeTest(unittest.TestCase):
         )
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
@@ -239,9 +238,6 @@ class SolverPipeTest(unittest.TestCase):
 
         # assert
         self.assertEqual(np.round(self.asset.heat_supplied * 1e-6, 1), -3.3)
-        self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 54.11
-        )  # pylint: disable=protected-access
 
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -252,7 +248,6 @@ class SolverPipeTest(unittest.TestCase):
         ] = fluid_props.get_ie(56.8500061035156 + 273.15)
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
@@ -261,10 +256,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.2)
-        self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[0][0]) - 273.15, 2), 20.12
-        )  # pylint: disable=protected-access
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.8)
 
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -284,10 +276,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -446.2)
-        self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.12
-        )  # pylint: disable=protected-access
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.8)
 
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
@@ -308,14 +297,6 @@ class SolverPipeTest(unittest.TestCase):
 
         # assert
         self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), 0.0)
-        self.assertTrue(
-            all(
-                np.apply_along_axis(
-                    lambda x: fluid_props.get_t(x[0]), axis=1, arr=self.asset._internal_energy_grid
-                )
-                == self.asset.ambient_temperature
-            )  # pylint: disable=protected-access
-        )
 
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
@@ -326,7 +307,6 @@ class SolverPipeTest(unittest.TestCase):
         )
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 5.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
@@ -335,10 +315,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
-        self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.00
-        )  # pylint: disable=protected-access
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -448.0)
 
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
@@ -349,7 +326,6 @@ class SolverPipeTest(unittest.TestCase):
         )
         self.asset.alpha_value = 10.0  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
@@ -358,58 +334,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
-        self.assertEqual(
-            np.round(fluid_props.get_t(self.asset._internal_energy_grid[-1][0]) - 273.15, 2), 20.00
-        )  # pylint: disable=protected-access
-
-    def test_determine_flow_direction_positive_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = 2.906  # kg/s
-        self.asset._grid_size = grid_size  # pylint: disable=protected-access
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 2.906)
-        self.assertEqual(start_index, 1)
-        self.assertEqual(end_index, grid_size + 1)
-        self.assertEqual(step, 1)
-
-    def test_determine_flow_direction_negative_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = -2.906
-        self.asset._grid_size = grid_size
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 2.906)
-        self.assertEqual(start_index, grid_size - 1)
-        self.assertEqual(end_index, -1)
-        self.assertEqual(step, -1)
-
-    def test_determine_flow_direction_zero_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = 0.0
-        self.asset._grid_size = grid_size
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 0.0)
-        self.assertEqual(start_index, 1)
-        self.assertEqual(end_index, 0)
-        self.assertEqual(step, 1)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -448.0)
 
     def test_calculate_graetz_number(self) -> None:
         """Test the calculate_graetz_number method."""

@@ -47,9 +47,6 @@ class SolverPipe(FallType):
     ambient_temperature: float = 293.15
     """ The ambient temperature of the pipe with units [K] """
 
-    _grid_size: int = 10
-    """ The number of grid points in the internal grid of the pipe. """
-
     _use_fluid_capacity: bool = False
     """ A boolean to determine if the fluid capacity is used in the heat transfer calculation. """
 
@@ -76,8 +73,6 @@ class SolverPipe(FallType):
         self.roughness: float = roughness
         # Calculate the area of the pipe
         self.area: float = np.pi * self.diameter**2 / 4
-        # Create internal grid
-        self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
 
     def set_physical_properties(self, physical_properties: Dict[str, float]) -> None:
         """Method to set the physical properties of the pipe.
@@ -429,19 +424,11 @@ class SolverPipe(FallType):
         # Calculate the heat transfer coefficient
         return nusselt_number * fluid_props.get_thermal_conductivity(temperature) / self.diameter
 
-    def _determine_flow_direction(self) -> tuple[float, int, int, int]:
-        """Determine the flow direction and iteration indices for the pipe.
+    def _determine_inflow_temperature(self) -> tuple[float, float]:
+        """Determine the inflow temperature and mass flow rate of the pipe.
 
-        Method determines the flow direction and iteration indices for the
-        internal energy grid of the pipe. The method returns the mass flow rate,
-        the start index, the end index, and the step size for the iteration.
-
-        :return tuple[float, int, int, int]: The mass flow rate, the start index,
-            the end index, and the step size.
-
+        The inflow temperature is determined by looking at the flow direction in the pipe
         """
-        # Reset the internal energy grid
-        self._internal_energy_grid = np.zeros((self._grid_size + 1, 1))
         mass_flow_rate = self.prev_sol[
             self.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
@@ -450,67 +437,31 @@ class SolverPipe(FallType):
         # Determine the flow direction
         if mass_flow_rate < 0:
             # Flow from connection point 1 to connection point 0
-            start_index = self._grid_size - 1
-            end_index = -1
-            step = -1
-            # Set the internal energy at the connection point
-            self._internal_energy_grid[-1] = self.prev_sol[
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, use_relative_indexing=True
-                )
-            ]
-            # Retrieve the mass flow rate
+            tin = fluid_props.get_t(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=1,
+                        use_relative_indexing=True,
+                    )
+                ]
+            )
             mass_flow_rate = abs(mass_flow_rate)
         elif mass_flow_rate > 0:
             # Flow from connection point 0 to connection point 1
-            start_index = 1
-            end_index = self._grid_size + 1
-            step = 1
-            # Set the internal energy at the connection point
-            self._internal_energy_grid[0] = self.prev_sol[
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
-                )
-            ]
-            # Retrieve the mass flow rate
+            tin = fluid_props.get_t(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=0,
+                        use_relative_indexing=True,
+                    )
+                ]
+            )
         else:
             # No flow
-            start_index = 1
-            end_index = 0
-            step = 1
-            # Set the internal energy grid
-            self._internal_energy_grid[:] = fluid_props.get_ie(self.ambient_temperature)
-            # Retrieve the mass flow rate
-        return mass_flow_rate, start_index, end_index, step
-
-    def _calculate_heat_loss_grid_point(self, iteration_index: int) -> float:
-        r"""Calculate the heat loss over a grid point.
-
-        The '_internal_energy_grid' method is used to calculate the internal energy
-        at the grid point. Thereafter, the temperature of the fluid is calculated
-        using the "get_t" method of the fluid properties. The heat loss is then
-        calculated using the following equation:
-
-        .. math::
-
-            \alpha A \left( T_{i} - T_{\text{ambient}} \right)
-
-
-        :param int iteration_index: The index of the grid point.
-        """
-        # Retrieve the internal energy
-        internal_energy_current = self._internal_energy_grid[iteration_index]
-        # Retrieve the temperature of the fluid
-        temperature_current = fluid_props.get_t(internal_energy_current)
-        # Calculate the heat loss
-        return -(
-            self.alpha_value
-            * np.pi
-            * self.diameter
-            * self.length
-            / self._grid_size
-            * (temperature_current - self.ambient_temperature)
-        )
+            tin = self.ambient_temperature
+        return tin, float(mass_flow_rate)
 
     def _calculate_total_heat_transfer_coefficient(
         self, temperature: float, mass_flow_rate: float
@@ -545,79 +496,34 @@ class SolverPipe(FallType):
         else:
             return self.alpha_value
 
-    def _internal_energy_steady_state_objective(
-        self,
-        internal_energy_iteration: float,
-        internal_energy: float,
-        mass_flow_rate: float,
-    ) -> float:
-        r"""Root function for the internal energy steady state equation.
+    def _calculate_total_heat_loss(self, tin: float, mass_flow_rate: float) -> float:
+        r"""Calculate the total heat loss of the pipe.
 
-        Solves the following optimization objective:
-
+        The heat loss is calculated with the following formula:
         .. math::
 
-            \dot{m} \left( e_{i-1} - e_{i} \right) - \alpha A \left( T_{i} - T_{\text{ambient}}
-            \right) = 0
+        \dot{m} c_p \left(T_{in} - T_{out}\right) \left(1 -
+        \exp{\frac{-\alpha \pi D L}{\dot{m} c_p}})\right
 
-        :param float internal_energy_iteration: The internal energy at the current grid point.
-        :param float internal_energy: The internal energy at the previous grid point.
-        :param float mass_flow_rate: The mass flow rate of the fluid.
-
+        :param float tin: The temperature of the fluid at the inlet of the pipe.
+        :param float mass_flow_rate: The mass flow rate of the fluid in the pipe.
+        :return: float, the total heat loss of the pipe.
         """
-        # Calculate the temperature of the fluid
-        temperature = fluid_props.get_t(internal_energy_iteration)
-        # Calculate the total heat transfer coefficient
-        total_heat_transfer_coefficient = self._calculate_total_heat_transfer_coefficient(
-            temperature=temperature, mass_flow_rate=mass_flow_rate
-        )
-        # Return the objective function
-        element_size = self.length / self._grid_size
-        objective = mass_flow_rate * (
-            internal_energy - internal_energy_iteration
-        ) - total_heat_transfer_coefficient * np.pi * self.diameter * element_size * (
-            temperature - self.ambient_temperature
-        )
-        return float(np.array(objective).item())
-
-    def _update_internal_energy_grid(self) -> float:
-        r"""Update the internal energy grid of the pipe.
-
-        Iteratively calculate the internal energy at each grid point of the pipe.
-
-        Solve the following equation for the internal energy at each grid point:
-        .. math::
-
-            \dot{m} \left( e_{i-1} - e_{i} \right) = \alpha A \left( T_{i} -
-            T_{\text{ambient}} \right)
-
-        :return: float, the heat supplied by the pipe (W).
-        """
-        # Retrieve the flow direction
-        mass_flow_rate, start_index, end_index, step = self._determine_flow_direction()
-
-        heat_supplied = 0.0
-        # Update the internal energy grid
-        for iteration_index in np.arange(start_index, end_index, step):
-            # Retrieve the previous value of the internal energy
-            previous_internal_energy = self._internal_energy_grid[iteration_index - step]
-            # Use root finding to determine the internal energy at the current grid point
-            internal_energy_iteration = root(
-                self._internal_energy_steady_state_objective,
-                previous_internal_energy,
-                args=(previous_internal_energy, mass_flow_rate),
-                method="hybr",
-                tol=1e-6,
-            ).x[0]
-            # Update the internal energy grid
-            self._internal_energy_grid[iteration_index] = internal_energy_iteration
-            # Calculate the loss over the grid cell
-            heat_loss_grid_cell = self._calculate_heat_loss_grid_point(
-                iteration_index=iteration_index
+        if mass_flow_rate == 0:
+            return 0.0
+        cp = fluid_props.get_heat_capacity(tin)
+        heat_loss = (
+            mass_flow_rate
+            * cp
+            * (tin - self.ambient_temperature)
+            * (
+                1
+                - np.exp(
+                    -self.alpha_value * np.pi * self.diameter * self.length / (mass_flow_rate * cp)
+                )
             )
-            # Update the heat supplied
-            heat_supplied += heat_loss_grid_cell
-        return heat_supplied
+        )
+        return float(heat_loss)
 
     def update_heat_supplied(self) -> None:
         """Calculate the heat supplied by the pipe.
@@ -626,5 +532,11 @@ class SolverPipe(FallType):
         the fluid.
 
         """
-        # Update the internal energy grid
-        self.heat_supplied = self._update_internal_energy_grid()
+        tin, mass_flow_rate = self._determine_inflow_temperature()
+
+        self._calculate_total_heat_transfer_coefficient(
+            temperature=tin, mass_flow_rate=mass_flow_rate
+        )
+        self.heat_supplied = -self._calculate_total_heat_loss(
+            tin=tin, mass_flow_rate=mass_flow_rate
+        )
