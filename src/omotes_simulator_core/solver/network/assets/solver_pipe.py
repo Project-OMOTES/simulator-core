@@ -183,11 +183,21 @@ class SolverPipe(FallType):
         For Reynolds numbers between 100 and 2000:
             .. math:: \lambda = \frac{64}{Re}
 
-        For Reynolds numbers higher than 2000 use the Colebrook-White equation:
+        For Reynolds numbers higher than 2000 use the Tkachenko and Mileikovsky (2020) correlation:
             .. math::
 
-                \frac{1}{\lambda} = -2 \log \left( \frac{\epsilon}{3.71 D} +
-                \frac{2.51}{Re \lambda} \right)
+                f = \left( \frac{8.128943 + A_1}{8.128943 A_0 - 0.86859209 A_1 \ln \left(
+                        \frac{A_1}{3.7099535 Re} \right)} \right)^2
+
+        with the following coefficients:
+
+            .. math::
+
+                    A_0 = -0.79638 \ln \left( \frac{\frac{\epsilon}{D}}{8.208}
+                        + \frac{7.3357}{Re} \right)
+
+                    A_1 = Re \left( \frac{\epsilon}{D} \right) + 9.3120665 A_0
+
         """
         # Update the Reynolds number
         self.reynolds_number = self.calculate_reynolds_number()
@@ -200,12 +210,54 @@ class SolverPipe(FallType):
             # Interpolate between f calculated with Reynolds = 2000.0 and f calculated with
             # Reynolds = 4000
             f_lower = 64.0 / 2000.0
-            f_upper = self._colebrook_white(reynolds_number=4000.0)
+            f_upper = self._calculate_explicit_friction_factor(
+                reynolds_number=4000.0
+            )  # self._colebrook_white(reynolds_number=4000.0)
             self.lambda_loss = f_lower + ((f_upper - f_lower) / 2000.0) * (
                 self.reynolds_number - 2000.0
             )
         else:
-            self.lambda_loss = self._colebrook_white()
+            self.lambda_loss = self._calculate_explicit_friction_factor()  # self._colebrook_white()
+
+    def _calculate_explicit_friction_factor(self, reynolds_number: float | None = None) -> float:
+        r"""Method to calculate the explicit friction factor of the pipe.
+
+        The explicit friction factor is calculated with the Tkaenko and Mileikovsky (2020)
+        correlation:
+
+        .. math::
+
+            f = \left( \frac{8.128943 + A_1}{8.128943 A_0 - 0.86859209 A_1 \ln \left(
+                    \frac{A_1}{3.7099535 Re} \right)} \right)^2
+
+        with the following coefficients:
+
+        .. math::
+
+                A_0 = -0.79638 \ln \left( \frac{\frac{\epsilon}{D}}{8.208}
+                    + \frac{7.3357}{Re} \right)
+
+                A_1 = Re \left( \frac{\epsilon}{D} \right) + 9.3120665 A_0
+
+
+        :param float reynolds_number: The Reynolds number of the flow in the pipe.
+        :return: float, the friction factor.
+        """
+        # Check existence of Reynolds number
+        if reynolds_number is None:
+            reynolds_number = self.reynolds_number
+        # Calculate the coefficients
+        A0 = -0.79638 * np.log((self.roughness / self.diameter) / 8.208 + 7.3357 / reynolds_number)
+        A1 = reynolds_number * (self.roughness / self.diameter) + 9.3120665 * A0
+
+        # Calculate the friction factor
+        return float(
+            (
+                (8.128943 + A1)
+                / (8.128943 * A0 - 0.86859209 * A1 * np.log(A1 / (3.7099535 * reynolds_number)))
+            )
+            ** 2
+        )
 
     def _colebrook_white_objective(self, lambda_guess: float) -> float:
         r"""Root function for the Colebrook-White equation.
