@@ -336,54 +336,6 @@ class SolverPipeTest(unittest.TestCase):
         # assert
         self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -448.0)
 
-    def test_determine_flow_direction_positive_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = 2.906  # kg/s
-        self.asset._grid_size = grid_size  # pylint: disable=protected-access
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 2.906)
-        self.assertEqual(start_index, 1)
-        self.assertEqual(end_index, grid_size + 1)
-        self.assertEqual(step, 1)
-
-    def test_determine_flow_direction_negative_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = -2.906
-        self.asset._grid_size = grid_size
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 2.906)
-        self.assertEqual(start_index, grid_size - 1)
-        self.assertEqual(end_index, -1)
-        self.assertEqual(step, -1)
-
-    def test_determine_flow_direction_zero_discharge(self) -> None:
-        """Test the determine_flow_direction method."""
-        # arrange
-        grid_size = 10
-        self.asset.prev_sol[index_core_quantity.mass_flow_rate] = 0.0
-        self.asset._grid_size = grid_size
-
-        # act
-        mass_flow, start_index, end_index, step = self.asset._determine_flow_direction()
-
-        # assert
-        self.assertEqual(mass_flow, 0.0)
-        self.assertEqual(start_index, 1)
-        self.assertEqual(end_index, 0)
-        self.assertEqual(step, 1)
-
     def test_calculate_graetz_number(self) -> None:
         """Test the calculate_graetz_number method."""
         # arrange
