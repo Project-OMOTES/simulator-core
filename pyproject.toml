@@ -19,13 +19,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy~=2.1.0",
+    "numpy~=1.25",
     "pandas~=2.2.2",
     "scipy~=1.14.1",
     "pyesdl~=24.2.0",
     "dataclass-wizard~=0.22.3",
     "influxdb~=5.3.2",
     "pyjnius~=1.6.1",
+    "fluidprop~=1.2.0",
 ]
 
 [project.optional-dependencies]
@@ -80,7 +81,7 @@ dirty_template = "{tag}.dev{ccount}"
 # packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+# addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]

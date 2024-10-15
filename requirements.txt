@@ -6,28 +6,33 @@
 #
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
+coolprop==6.6.0
+    # via fluidprop
 dataclass-wizard==0.22.3
+    # via omotes-simulator-core (..\..\pyproject.toml)
+fluidprop==1.2.0
     # via omotes-simulator-core (..\..\pyproject.toml)
 future-fstrings==1.2.0
     # via pyecore
-idna==3.8
+idna==3.10
     # via requests
 influxdb==5.3.2
     # via omotes-simulator-core (..\..\pyproject.toml)
 lxml==5.3.0
     # via pyecore
-msgpack==1.0.8
+msgpack==1.1.0
     # via influxdb
-numpy==2.1.1
+numpy==1.26.4
     # via
+    #   fluidprop
     #   omotes-simulator-core (..\..\pyproject.toml)
     #   pandas
     #   scipy
 ordered-set==4.1.0
     # via pyecore
-pandas==2.2.2
+pandas==2.2.3
     # via omotes-simulator-core (..\..\pyproject.toml)
 pyecore==0.12.1
     # via pyesdl
@@ -39,13 +44,13 @@ python-dateutil==2.9.0.post0
     # via
     #   influxdb
     #   pandas
-pytz==2024.1
+pytz==2024.2
     # via
     #   influxdb
     #   pandas
 requests==2.32.3
     # via influxdb
-restrictedpython==7.2
+restrictedpython==7.4
     # via pyecore
 scipy==1.14.1
     # via omotes-simulator-core (..\..\pyproject.toml)
@@ -53,7 +58,7 @@ six==1.16.0
     # via
     #   influxdb
     #   python-dateutil
-tzdata==2024.1
+tzdata==2024.2
     # via pandas
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
