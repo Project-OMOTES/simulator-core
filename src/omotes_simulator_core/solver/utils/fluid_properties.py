@@ -113,7 +113,7 @@ class OmotesFluidProperties:
         self.rho = []
         self.visc = []
         self.therm_cond = []
-        p_ref = 100.00  # Reference pressure [barg]
+        p_ref = 20.00  # Reference pressure [barg]
         fluid = "Water"  # fluid to be used
 
         for t in range(150):

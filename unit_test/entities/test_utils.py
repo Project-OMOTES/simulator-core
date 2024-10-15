@@ -63,7 +63,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        self.assertEqual(mass_flow_calculated, 0.011891030595621722)
+        self.assertEqual(mass_flow_calculated, 0.011902381642040025)
 
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
@@ -78,7 +78,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        self.assertEqual(heat_demand_calculated, 1005.5263629842184)
+        self.assertEqual(heat_demand_calculated, 1004.6880216929337)
 
     def test_calculate_inverse_heat_transfer_coefficient(self) -> None:
         """Test calculate_inverse_heat_transfer_coefficient.
