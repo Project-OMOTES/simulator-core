@@ -75,9 +75,14 @@ count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
+[tool.setuptools]
+include-package-data = true
 
-# [tool.setuptools]
-# packages = ["src/omotes_simulator_core"]
+[tool.setuptools.package-data]
+"omotes_simulator_core" = ["solver/utils/temp_props.csv", "VERSION"]
+
+#[tool.setuptools]
+#packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
