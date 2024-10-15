@@ -16,12 +16,18 @@ distributed over the source at the observed priority. In the case the demand is 
 available source capacity, a message is passed to the user and the demand is downscaled to match
 the available capacity.
 
+When an storage is present in the network, the controller will first allocate the capacity of the
+sources to meet the demand of the consumers. The remaining capacity will be used to charge the storage.
+When the capacity of the sources is not sufficient to meet the demand of the consumers,
+the controller will use the storage to meet the remaining demand. This is a very simple
+implementation of a control strategy. In future more complex strategies might be added.
+
 The controller consists of the following classes:
 
-#. :ref:`main_controller_class`: Main controller class, used to store the assets and calculate the
-control value for a time step.
+#. :ref:`main_controller_class`: Main controller class, used to store the assets and calculate the control value for a time step.
 #. :ref:`consumer_controller_class`: Class to control consumers in the network
 #. :ref:`producer_controller_class`: Class to control producers in the network
+#. :ref:`ates_controller_class`: Class to control Ates cluster in the network
 
 **Contents**
 
@@ -32,4 +38,5 @@ control value for a time step.
     main_controller_class
     assets/consumer
     assets/producer
+    assets/ates
 
