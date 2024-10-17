@@ -1,26 +1,23 @@
 Controller
 =====================================
-The controller is responsible for providing set points for the assets in the simulator.
-The ESDL is parsed in the mapper functions to controller objects. This will result in a controller
-class object which can be called each time step. The controller will then calculate the set points
-for this time step. It will then pass back the set points to the simulator.
-This is done via a dict, where the key is the id of the asset and the value is another dict.
-This dict contains the set points for the asset. The key of this dict is the property which needs
-to be set (e.g. supply temperature, heat demand). The value is the set point for this property.
+The controller manages set points for assets in the simulator. ESDL data is parsed by mapper
+functions into controller objects. These controller objects are stored in an overarching
+controller class, which is invoked at each time step to calculate and
+return the set points for that step. These set points are passed back to the simulator in a
+dictionary format, where the key is the asset ID, and the value is another dictionary.
+This inner dictionary holds the set points, with the keys being properties (e.g., supply
+temperature, heat demand) and the values being their corresponding set points.
 
-The current controller implementation works based on the priority of the source.
-The controller will first allocate capacity of the source with the priority of 1.
-If more capacity is required, the sources with priority 2 will be used etc. If the demand is
-lower then the available capacity of the observed sources, the remaining demand will be equally
-distributed over the source at the observed priority. In the case the demand is higher then the
-available source capacity, a message is passed to the user and the demand is downscaled to match
-the available capacity.
+The overarching controller class prioritizes source allocation based on a priority system.
+It first assigns capacity from priority 1 sources. If more capacity is needed,
+it moves to priority 2, and so on. If demand is lower than the available capacity at a
+given priority, the excess is equally distributed across the sources. If demand exceeds capacity,
+a message is sent to the user, and demand is downscaled to match available resources.
 
-When an storage is present in the network, the controller will first allocate the capacity of the
-sources to meet the demand of the consumers. The remaining capacity will be used to charge the storage.
-When the capacity of the sources is not sufficient to meet the demand of the consumers,
-the controller will use the storage to meet the remaining demand. This is a very simple
-implementation of a control strategy. In future more complex strategies might be added.
+When storage is present, the controller first allocates source capacity to meet consumer demand.
+Any remaining capacity is used to charge the storage. If source capacity is insufficient, the
+controller taps into the storage to meet the remaining demand. This basic control strategy may
+be extended with more complex strategies in the future.
 
 The controller consists of the following classes:
 
