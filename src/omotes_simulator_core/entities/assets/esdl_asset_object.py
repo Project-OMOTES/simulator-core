@@ -46,13 +46,21 @@ class EsdlAssetObject:
         return str(self.esdl_asset.id)
 
     def get_property(self, esdl_property_name: str, default_value: Any) -> Tuple[Any, bool]:
-        """Get property value from the esdl_asset based on the "ESDL" name.
+        """Get property value from the esdl_asset based on the 'ESDL' name.
 
+        :param esdl_property_name: The name of the property in the ESDL asset.
+        :param default_value: The default value to return if the property has no value.
         :return: Tuple with the value of the property and a boolean indicating whether the property
-        was found in the esdl_asset.
+                was found in the esdl_asset.
+        If the property is 0, then should it be False or true?
         """
         try:
-            return getattr(self.esdl_asset, esdl_property_name), True
+            value = getattr(self.esdl_asset, esdl_property_name)
+            if value == 0:
+                # Should it be false if its zero? some properties can be zero.
+                return default_value, False
+            return value, True
+
         except AttributeError:
             return default_value, False
 

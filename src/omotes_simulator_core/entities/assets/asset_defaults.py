@@ -26,6 +26,7 @@ DEFAULT_NODE_HEIGHT = 0.0  # [m]
 DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 DEFAULT_POWER = 500000.0  # [W]
 DEFAULT_MISSING_VALUE = -9999.99  # [-]
+DEFAULT_ROUGHNESS = 10.0e-4  # [m]
 
 
 @dataclass
@@ -46,6 +47,7 @@ class PipeDefaults:
     qheat_external: float = 0.0
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
+    roughness: float = DEFAULT_ROUGHNESS
 
 
 @dataclass
