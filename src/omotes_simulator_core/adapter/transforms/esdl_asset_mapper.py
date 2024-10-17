@@ -70,7 +70,7 @@ class EsdlAssetMapper:
         """
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
-        if type(model.esdl_asset) == esdl.Pipe:
+        if isinstance(model.esdl_asset, esdl.Pipe):
             return EsdlAssetPipeMapper().to_entity(model)
         else:
             return CONVERSION_DICT[type(model.esdl_asset)](
