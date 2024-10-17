@@ -101,22 +101,31 @@ class OmotesFluidProperties:
     visc: list[float]
     """A list of floats that store the viscosity of the fluid [Pa.s] per temperature."""
 
-    def __init__(self) -> None:
+    therm_cond: list[float]
+    """A list of floats that store the thermal conductivity of the fluid [W/m/K] per temperature."""
+
+    IE: list[float]
+    """A list of floats that store the internal energy of the fluid [J/kg] per temperature."""
+
+    def __init__(
+        self, p_ref: float = 20, fluid: str = "Water", T_min: int = 0, T_max: int = 150
+    ) -> None:
         """Constructor of the fluid properties class.
 
         Initializes the class properties. Loads a list of the fluid property as function of the
         temperature using the fluidprop library. These are then used interpolation class objects.
-
+        :param p_ref: The reference pressure of the fluid.
+        :param fluid: The fluid to use for the fluid properties.
+        :param T_min: The minimum temperature in Celsius to load the fluid properties for.
+        :param T_max: The maximum temperature in Celsius to load the fluid properties for.
         """
         self.T = []
         self.cp = []
         self.rho = []
         self.visc = []
         self.therm_cond = []
-        p_ref = 20.00  # Reference pressure [barg]
-        fluid = "Water"  # fluid to be used
 
-        for t in range(150):
+        for t in range(T_min, T_max):
             self.T.append(t + 273.15)
             fluidprops = FluidProperties(fluid, t, p_ref)
             self.cp.append(float(fluidprops.Cp[0]))
