@@ -21,7 +21,7 @@ from fluidprop import FluidProperties
 class Interpolation:
     """Class to enable interpolation in a set of data points."""
 
-    def __init__(self, x: list[float], y: list[float], order: int = 5):
+    def __init__(self, x: list[float], y: list[float], order: int = 5, bounds: float = 0.1):
         """Constructor of the interpolation class.
 
         It stores the x and y data and determine the coefficients of a polynomial of the given
@@ -31,10 +31,12 @@ class Interpolation:
         :param x: The x values of the data points.
         :param y: The y values of the data points.
         :param order: The order of the polynomial to use for the interpolation.
+        :param bounds: The bounds on the x values used to check if the value is within bounds.
         """
         self.x = x
         self.y = y
         self.order = order
+        self.bounds = bounds
         self.coefficients = np.polyfit(x, y, order)
         self._check_interpolation()
 
@@ -75,10 +77,10 @@ class Interpolation:
     def _check_bounds(self, value: float) -> None:
         """Check if the value is within the bounds of the data.
 
-        The bounds check is set 10% wider, since we are fitting a curve on the data points.
-        The result is that the curve can be a bit wider than the data points.
+        The bounds check is within the set bounds default 10%, since we are fitting a curve
+        on the data points. The result is that the curve can be a bit wider than the data points.
         """
-        if value < self.x[0] * 0.9 or value > self.x[-1] * 1.1:
+        if value < self.x[0] * (1.0 - self.bounds) or value > self.x[-1] * (1.0 + self.bounds):
             raise ValueError("Value is out of bounds.")
 
 
