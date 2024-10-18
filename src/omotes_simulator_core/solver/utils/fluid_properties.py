@@ -15,7 +15,7 @@
 """This module contains the fluid properties class."""
 
 import numpy as np
-from src.omotes_simulator_core.solver.utils.fluidprop import FluidProperties
+from omotes_simulator_core.solver.utils.fluidprop import FluidProperties
 
 
 class Interpolation:
@@ -45,14 +45,9 @@ class Interpolation:
         For every data point the difference with the interpolated value is calculated.
         If this difference is more than 2% and value error is raised.
         """
-        for i in range(len(self.x)):
-            if self.y[i] == 0:
-                continue
-            error = abs(self.y[i] - self(self.x[i])) / self.y[i]
-            if error == np.inf:
-                continue
-            if error > 0.02:
-                raise ValueError("Interpolation error: error is more then 2%.")
+        error = [(y - self(x)) / y for x, y in zip(self.x, self.y)]
+        if any(abs(e) > 0.02 and abs(e) != np.inf for e in error):
+            raise ValueError("Interpolation error: error is more then 2%.")
 
     def __call__(self, value: float) -> float:
         """Returns the interpolated value at a given point.

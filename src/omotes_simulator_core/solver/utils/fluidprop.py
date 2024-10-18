@@ -281,7 +281,7 @@ class FluidProperties:
         # Derived: Thermal diffusivity [m^2/s]
         self.kappa = self.lambda_ / self.rho / self.Cp
 
-    def report(self):
+    def report(self) -> None:
         """Print all fluid properties as a table to the terminal. Will only
         print the first element if arrays were used as input.
         """
@@ -322,7 +322,7 @@ def pprint(
     unit: str = "",
     format_spec: str = "e",
     N_decimals: int = 3,
-):
+) -> none:
     """Pretty print in columns."""
     print(f"    {descr:<22} | {abbrev:<7} = " f"{value:<11.{N_decimals}{format_spec}} {unit:<8}")
 
