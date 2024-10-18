@@ -24,7 +24,7 @@ certifi==2024.8.30
     #   pyogrio
     #   pyproj
     #   requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via
     #   -c ..\..\requirements.txt
     #   requests
@@ -38,7 +38,11 @@ colorama==0.4.6
     #   click
     #   pytest
     #   sphinx
-coverage[toml]==7.6.1
+coolprop==6.6.0
+    # via
+    #   -c ..\..\requirements.txt
+    #   omotes-simulator-core (..\..\pyproject.toml)
+coverage[toml]==7.6.3
     # via pytest-cov
 dataclass-wizard==0.22.3
     # via
@@ -78,7 +82,7 @@ future-fstrings==1.2.0
     #   pyecore
 geopandas==1.0.1
     # via omotes-simulator-core (..\..\pyproject.toml)
-idna==3.8
+idna==3.10
     # via
     #   -c ..\..\requirements.txt
     #   requests
@@ -96,11 +100,11 @@ lxml==5.3.0
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
-markupsafe==2.1.5
+markupsafe==3.0.1
     # via jinja2
 mccabe==0.7.0
     # via flake8
-msgpack==1.0.8
+msgpack==1.1.0
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
@@ -110,7 +114,7 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-numpy==2.1.1
+numpy==2.1.2
     # via
     #   -c ..\..\requirements.txt
     #   geopandas
@@ -133,7 +137,7 @@ packaging==24.1
     #   pytest
     #   setuptools-git-versioning
     #   sphinx
-pandas==2.2.2
+pandas==2.2.3
     # via
     #   -c ..\..\requirements.txt
     #   geopandas
@@ -142,9 +146,9 @@ pathspec==0.12.1
     # via black
 pip-tools==7.4.1
     # via omotes-simulator-core (..\..\pyproject.toml)
-platformdirs==4.2.2
+platformdirs==4.3.6
     # via black
-plotly==5.24.0
+plotly==5.24.1
     # via omotes-simulator-core (..\..\pyproject.toml)
 pluggy==1.5.0
     # via pytest
@@ -170,11 +174,11 @@ pyjnius==1.6.1
     # via
     #   -c ..\..\requirements.txt
     #   omotes-simulator-core (..\..\pyproject.toml)
-pyogrio==0.9.0
+pyogrio==0.10.0
     # via geopandas
-pyproj==3.6.1
+pyproj==3.7.0
     # via geopandas
-pyproject-hooks==1.1.0
+pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
@@ -189,7 +193,7 @@ python-dateutil==2.9.0.post0
     #   -c ..\..\requirements.txt
     #   influxdb
     #   pandas
-pytz==2024.1
+pytz==2024.2
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
@@ -199,7 +203,7 @@ requests==2.32.3
     #   -c ..\..\requirements.txt
     #   influxdb
     #   sphinx
-restrictedpython==7.2
+restrictedpython==7.4
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
@@ -219,6 +223,8 @@ six==1.16.0
     #   flake8-tuple
     #   influxdb
     #   python-dateutil
+snakeviz==2.2.0
+    # via omotes-simulator-core (..\..\pyproject.toml)
 snowballstemmer==2.2.0
     # via
     #   pydocstyle
@@ -246,13 +252,15 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tenacity==9.0.0
     # via plotly
+tornado==6.4.1
+    # via snakeviz
 typing-extensions==4.12.2
     # via mypy
-tzdata==2024.1
+tzdata==2024.2
     # via
     #   -c ..\..\requirements.txt
     #   pandas
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   -c ..\..\requirements.txt
     #   requests
