@@ -322,7 +322,7 @@ def pprint(
     unit: str = "",
     format_spec: str = "e",
     N_decimals: int = 3,
-) -> none:
+) -> None:
     """Pretty print in columns."""
     print(f"    {descr:<22} | {abbrev:<7} = " f"{value:<11.{N_decimals}{format_spec}} {unit:<8}")
 
