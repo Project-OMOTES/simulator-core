@@ -99,7 +99,7 @@ ignore = [
     'PT009', # use a regular assert instead of unittest-style assertion
     'PT027', # pytest.raises() should be used instead of assertRaises()
 ]
-exclude = ['.venv/*', 'venv/*', 'doc/*']
+exclude = ['.venv/*', 'venv/*', 'doc/*', 'src/omotes_simulator_core/solver/utils/fluidprop.py']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
 
 [tool.black]
