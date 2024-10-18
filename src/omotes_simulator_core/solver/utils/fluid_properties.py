@@ -15,7 +15,7 @@
 """This module contains the fluid properties class."""
 
 import numpy as np
-from fluidprop import FluidProperties
+from src.omotes_simulator_core.solver.utils.fluidprop import FluidProperties
 
 
 class Interpolation:

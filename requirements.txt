@@ -9,10 +9,8 @@ certifi==2024.8.30
 charset-normalizer==3.4.0
     # via requests
 coolprop==6.6.0
-    # via fluidprop
-dataclass-wizard==0.22.3
     # via omotes-simulator-core (..\..\pyproject.toml)
-fluidprop==1.2.0
+dataclass-wizard==0.22.3
     # via omotes-simulator-core (..\..\pyproject.toml)
 future-fstrings==1.2.0
     # via pyecore
@@ -24,9 +22,8 @@ lxml==5.3.0
     # via pyecore
 msgpack==1.1.0
     # via influxdb
-numpy==1.26.4
+numpy==2.1.2
     # via
-    #   fluidprop
     #   omotes-simulator-core (..\..\pyproject.toml)
     #   pandas
     #   scipy
