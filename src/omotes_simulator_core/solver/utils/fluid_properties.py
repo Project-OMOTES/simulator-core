@@ -25,8 +25,7 @@ class Interpolation:
         """Constructor of the interpolation class.
 
         It stores the x and y data and determine the coefficients of a polynomial of the given
-        order. This polynomial is used to interpolate the data. Please note that no checks on
-        the bounds have been included.
+        order. This polynomial is used to interpolate the data.
 
         :param x: The x values of the data points.
         :param y: The y values of the data points.

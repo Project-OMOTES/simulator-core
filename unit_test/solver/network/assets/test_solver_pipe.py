@@ -404,7 +404,7 @@ class SolverPipeTest(unittest.TestCase):
         )
 
         # assert
-        self.assertAlmostEqual(heat_transfer_coefficient, 246.9676649954736, 2)
+        self.assertAlmostEqual(heat_transfer_coefficient, 246.9677, 2)
 
     def test_calculate_heat_transfer_coefficient_small_reynolds_large_graetz(self) -> None:
         r"""Test the calculate_heat_transfer_coefficient_fluid method.
