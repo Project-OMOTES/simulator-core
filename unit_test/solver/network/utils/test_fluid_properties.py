@@ -17,6 +17,7 @@
 import unittest
 import numpy as np
 import numpy.testing as npt
+
 from omotes_simulator_core.solver.utils.fluid_properties import OmotesFluidProperties
 from omotes_simulator_core.solver.utils.fluid_properties import Interpolation
 
@@ -116,6 +117,21 @@ class InterpolationTest(unittest.TestCase):
         # Assert
         self.assertEqual(str(cm.exception), "Value is out of bounds.")
         self.assertIsInstance(cm.exception, ValueError)
+
+    def test_check_real_polynomial(self):
+        """Test the check real polynomial method of the Interpolation class."""
+        # Arrange
+        a = 2.0
+        b = 3.0
+        c = 4.0
+        x = [*range(10)]
+        y = [a * i**2 + b * i + c for i in x]
+        interpol = Interpolation(x, y, 2)
+        # Act
+        result = interpol(5)
+
+        # Assert
+        self.assertAlmostEquals(result, 2 * 5**2 + 3 * 5 + 4, 3)
 
 
 class OmotesFluidPropertiesTest(unittest.TestCase):
