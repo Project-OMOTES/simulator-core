@@ -68,20 +68,21 @@ class ProductionCluster(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
-        self.thermal_production_required = None
-        self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.thermal_production_required = thermal_production_required
+        self.temperature_supply = temperature_supply  #
+        self.temperature_return = temperature_return  #
         # DemandCluster pressure specifications
-        self.pressure_supply = DEFAULT_PRESSURE
-        self.control_mass_flow = False
+        self.pressure_supply = pressure_supply  #
+        self.control_mass_flow = control_mass_flow
         # Controlled mass flow
-        self.controlled_mass_flow = None
+        self.controlled_mass_flow = controlled_mass_flow  #
         self.solver_asset = ProductionAsset(
             name=self.name,
             _id=self.asset_id,
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
+        self.output = []
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.
@@ -89,6 +90,10 @@ class ProductionCluster(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The ESDL asset object containing the physical data.
         :return:
         """
+        self.temperature_supply = self._set_supply_temperature(esdl_asset=esdl_asset)
+        self.temperature_return = self._set_return_temperature(esdl_asset=esdl_asset)
+        self.controlled_mass_flow = self._set_heat_demand(esdl_asset=esdl_asset)
+        self.pressure_supply = self._set_pressure_supply(esdl_asset=esdl_asset)
 
     def _set_supply_temperature(self, temperature_supply: float) -> None:
         """Set the supply temperature of the asset.
