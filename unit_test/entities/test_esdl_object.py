@@ -173,6 +173,50 @@ class EsdlObjectTest(unittest.TestCase):
         # Assert
         self.assertEqual(return_temperature, 313.15)
 
+    def test_get_supply_temperature_consumer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
+
+        # Act
+        supply_temperature = asset.get_return_temperature("Out")
+
+        # Assert
+        self.assertEqual(supply_temperature, 313.15)
+
+    def test_get_return_temperature_consumer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("In")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_supply_temperature_producer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("Out")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_return_temperature_producer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        supply_temperature = asset.get_return_temperature("In")
+
+        # Assert
+        self.assertEqual(supply_temperature, 313.15)
+
     def test_get_port_type_in(self):
         """Test get_port_type method."""
         # Arrange
