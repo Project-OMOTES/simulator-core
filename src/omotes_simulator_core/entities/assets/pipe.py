@@ -47,23 +47,42 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
-    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
+    def __init__(
+        self,
+        asset_name: str,
+        asset_id: str,
+        port_ids: list[str],
+        length: float,
+        inner_diameter: float,
+        roughness: float,
+        alpha_value: float,
+        minor_loss_coefficient: float,
+        external_temperature: float,
+        qheat_external: float,
+    ):
         """Initialize a Pipe object.
 
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param List[str] port_ids: List of ids of the connected ports.
+        :param float length: The length of the pipe.
+        :param float inner_diameter: The inner diameter of the pipe.
+        :param float minor_loss_coefficient: The minor loss coefficient of the pipe.
+        :param float external_temperature: The external temperature surrounding the pipe.
+        :param float qheat_external: The external heat flow into the pipe.
+        :param float roughness: The wall roughness of the pipe.
+        :param float alpha_value: The alpha value of the pipe.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         # Initialize the default values of the pipe
-        self._minor_loss_coefficient = PIPE_DEFAULTS.minor_loss_coefficient
-        self._external_temperature = PIPE_DEFAULTS.external_temperature
-        self._qheat_external = PIPE_DEFAULTS.qheat_external
+        self._minor_loss_coefficient = minor_loss_coefficient
+        self._external_temperature = external_temperature
+        self._qheat_external = qheat_external
         # Define properties of the pipe
-        self.length = PIPE_DEFAULTS.length
-        self.diameter = PIPE_DEFAULTS.diameter
-        self.roughness = PIPE_DEFAULTS.k_value
-        self.alpha_value = PIPE_DEFAULTS.alpha_value
+        self.length = length
+        self.diameter = inner_diameter
+        self.roughness = roughness
+        self.alpha_value = alpha_value
         self.solver_asset = SolverPipe(
             name=self.name,
             _id=self.asset_id,
