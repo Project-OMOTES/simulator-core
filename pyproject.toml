@@ -79,6 +79,9 @@ dirty_template = "{tag}.dev{ccount}"
 include-package-data = true
 zip-safe = false
 
+[tool.setuptools]
+zip-safe = false
+
 [tool.setuptools.package-data]
 "omotes_simulator_core" = ["solver/utils/temp_props.csv"]
 
