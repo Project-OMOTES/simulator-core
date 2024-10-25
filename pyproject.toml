@@ -51,7 +51,7 @@ dev = [
     "geopandas~=1.0.1",
     "plotly~=5.24.0",
     "shapely~=2.0.6",
-    "snakeviz==2.2.0"
+    "snakeviz==2.2.0",
 ]
 
 [project.urls]
@@ -70,8 +70,7 @@ requires = [
 
 [tool.setuptools-git-versioning]
 enabled = true
-starting_version = "0.0.1"
-version_file = "src/omotes_simulator_core/VERSION"
+starting_version = "0.0.9"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
@@ -82,9 +81,6 @@ zip-safe = false
 
 [tool.setuptools.package-data]
 "omotes_simulator_core" = ["solver/utils/temp_props.csv"]
-
-#[tool.setuptools]
-#packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
