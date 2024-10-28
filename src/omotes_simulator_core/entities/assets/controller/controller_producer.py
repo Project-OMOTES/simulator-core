@@ -29,6 +29,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_supply: float,
         temperature_return: float,
         power: float,
+        marginal_costs: float,
         priority: int = 1,
     ):
         """Constructor for the source.
@@ -44,4 +45,5 @@ class ControllerProducer(AssetControllerAbstract):
         self.temperature_return: float = temperature_return
         self.temperature_supply: float = temperature_supply
         self.power: float = power
+        self.marginal_costs: float = marginal_costs
         self.priority: int = priority
