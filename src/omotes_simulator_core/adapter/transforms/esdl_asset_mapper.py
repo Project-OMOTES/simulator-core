@@ -33,14 +33,11 @@ from omotes_simulator_core.entities.assets.controller.controller_storage import 
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
 
 
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
-from omotes_simulator_core.entities.assets.utils import (
-    calculate_inverse_heat_transfer_coefficient,
-    get_thermal_conductivity_table,
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetPipeMapper import (
+    EsdlAssetPipeMapper,
 )
 
-
-CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
+CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
     esdl.GenericProducer: ProductionCluster,
     esdl.Consumer: DemandCluster,
@@ -50,6 +47,9 @@ CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.ATES: AtesCluster,
     esdl.HeatPump: HeatPump,
 }
+
+# Define the conversion dictionary
+conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper}
 
 
 class EsdlAssetMapper:
@@ -70,14 +70,20 @@ class EsdlAssetMapper:
         """
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
-        if isinstance(model.esdl_asset, esdl.Pipe):
-            return EsdlAssetPipeMapper().to_entity(model)
-        else:
-            return CONVERSION_DICT[type(model.esdl_asset)](
-                model.esdl_asset.name,
-                model.esdl_asset.id,
-                model.get_port_ids(),
-            )
+
+        # Use the dictionary to get the appropriate mapper
+        asset_type = type(model.esdl_asset)
+        if asset_type in conversion_dict_mappers:
+            mapper = conversion_dict_mappers[asset_type]()
+            return mapper.to_entity(model)
+
+        converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
+            model.get_name(),
+            model.get_id(),
+            model.get_port_ids(),
+        )
+        converted_asset.add_physical_data(esdl_asset=model)
+        return converted_asset
 
 
 class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
@@ -185,64 +191,3 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
             profile=profile,
         )
         return contr_storage
-
-
-class EsdlAssetPipeMapper(EsdlMapperAbstract):
-    """Class to map an ESDL asset to a pipe entity class."""
-
-    def to_esdl(self, entity: Pipe) -> EsdlAssetObject:
-        """Map a Pipe entity to an EsdlAsset."""
-        raise NotImplementedError("EsdlAssetPipeMapper.to_esdl()")
-
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> AssetAbstract:
-        """Method to map an ESDL asset to a pipe entity class.
-
-        :param EsdlAssetObject esdl_asset: Object to be converted to a pipe entity.
-        :return: Pipe object.
-        """
-        # Note: Need to add a check if the returned value is false or not. Some values can be zero.
-        pipe_entity = Pipe(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
-            port_ids=esdl_asset.get_port_ids(),
-            length=esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],
-            inner_diameter=esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)[0],
-            roughness=esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0],
-            alpha_value=self._get_heat_transfer_coefficient(esdl_asset),
-            minor_loss_coefficient=esdl_asset.get_property(
-                "minor_loss_coefficient", PIPE_DEFAULTS.minor_loss_coefficient
-            )[0],
-            external_temperature=esdl_asset.get_property(
-                "external_temperature", PIPE_DEFAULTS.external_temperature
-            )[0],
-            qheat_external=esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external)[
-                0
-            ],
-        )
-
-        return pipe_entity
-
-    def _get_heat_transfer_coefficient(self, esdl_asset: EsdlAssetObject) -> float:
-        """Calculate the heat transfer coefficient of the pipe.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
-                current pipe object.
-
-        :return: The heat transfer coefficient of the pipe [W/(m2 K)]. If the heat transfer
-                coefficient cannot be calculated - for example when the material table is
-                not specified - , the default alpha value is returned.
-        """
-        diameters, heat_coefficients = get_thermal_conductivity_table(esdl_asset=esdl_asset)
-        if diameters:
-            diameters_np = np.array(diameters)
-            heat_coefficients_np = np.array(heat_coefficients)
-            inverse_heat_transfer_coefficient = np.sum(
-                calculate_inverse_heat_transfer_coefficient(
-                    inner_diameter=diameters_np[:-1],
-                    outer_diameter=diameters_np[1:],
-                    thermal_conductivity=heat_coefficients_np,
-                )
-            )
-            return 1.0 / float(inverse_heat_transfer_coefficient)
-        else:
-            return PIPE_DEFAULTS.alpha_value

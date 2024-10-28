@@ -21,6 +21,7 @@ import pandas as pd
 from esdl import esdl
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,6 +41,10 @@ class EsdlAssetObject:
         :param asset, esdl.Asset: PyEsdl Asset object
         """
         self.esdl_asset = asset
+
+    def get_name(self) -> str:
+        """Get the name of the asset."""
+        return str(self.esdl_asset.name)
 
     def get_id(self) -> str:
         """Get the id of the asset."""

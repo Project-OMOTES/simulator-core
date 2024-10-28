@@ -17,7 +17,6 @@
 from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
-from esdl.esdl import Pipe as esdl_Pipe
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 
@@ -36,8 +35,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
     EsdlAssetControllerStorageMapper,
 )
-
-from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetPipeMapper
 
 
 def replace_joint_in_connected_assets(
@@ -176,13 +173,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             # Esdl Junctions need to be skipped for now, are added later.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
-            if isinstance(esdl_asset.esdl_asset, esdl_Pipe):
-                py_asset = EsdlAssetPipeMapper().to_entity(esdl_asset=esdl_asset)
-            else:
-                py_asset = EsdlAssetMapper.to_entity(esdl_asset)
-                py_asset.add_physical_data(esdl_asset=esdl_asset)
-            py_assets_list.append(py_asset)
-            network.add_existing_asset(py_asset.solver_asset)
+            py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
+            network.add_existing_asset(py_assets_list[-1].solver_asset)
 
         return py_assets_list
 

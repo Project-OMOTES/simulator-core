@@ -39,6 +39,8 @@ class PipeTest(unittest.TestCase):
 
     def test_pipe_create(self):
         """Evaluate the creation of a pipe object."""
+        # Arrange
+
         # Act
         pipe = Pipe(
             asset_name="pipe",
@@ -52,12 +54,18 @@ class PipeTest(unittest.TestCase):
             external_temperature=self.external_temperature,
             qheat_external=self.qheat_external,
         )
-        solver_pipe = SolverPipe(name="pipe", _id="pipe_id", length=pipe.length)
+
         # Assert
         self.assertIsInstance(pipe, Pipe)
         self.assertEqual(pipe.name, "pipe")
         self.assertEqual(pipe.asset_id, "pipe_id")
-        self.assertEqual(solver_pipe.length, self.length)
+        self.assertEqual(pipe.length, self.length)
+        self.assertEqual(pipe.diameter, self.inner_diameter)
+        self.assertEqual(pipe.roughness, self.roughness)
+        self.assertEqual(pipe.alpha_value, self.alpha_value)
+        self.assertEqual(pipe._minor_loss_coefficient, self.minor_loss_coefficient)
+        self.assertEqual(pipe._external_temperature, self.external_temperature)
+        self.assertEqual(pipe._qheat_external, self.qheat_external)
 
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
@@ -75,6 +83,7 @@ class PipeTest(unittest.TestCase):
             qheat_external=self.qheat_external,
         )
 
+        # Act
         solver_pipe = SolverPipe(
             name="pipe", _id="pipe_id", length=pipe.length, roughness=pipe.roughness
         )
