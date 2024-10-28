@@ -46,7 +46,7 @@ class NetworkController(NetworkControllerAbstract):
         self.storages = storages
         self._set_priority_from_marginal_costs()
 
-    def _set_priority_from_marginal_costs(self):
+    def _set_priority_from_marginal_costs(self) -> None:
         """This method sets the priority of the producers based on the marginal costs."""
         # Sort the producers based on the marginal costs
         self.producers.sort(key=lambda x: x.marginal_costs)
