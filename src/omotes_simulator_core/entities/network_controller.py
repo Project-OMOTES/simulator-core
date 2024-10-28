@@ -44,6 +44,24 @@ class NetworkController(NetworkControllerAbstract):
         self.producers = producers
         self.consumers = consumers
         self.storages = storages
+        self._set_priority_from_marginal_costs()
+
+    def _set_priority_from_marginal_costs(self):
+        """This method sets the priority of the producers based on the marginal costs."""
+
+        # Sort the producers based on the marginal costs
+        self.producers.sort(key=lambda x: x.marginal_costs)
+
+        # Set the priority based on the sorted list
+        previous_marginal_costs = self.producers[0].marginal_costs
+        priority = 1
+        for producer in self.producers:
+            if producer.marginal_costs == previous_marginal_costs:
+                producer.priority = priority
+            else:
+                priority += 1
+                producer.priority = priority
+                previous_marginal_costs = producer.marginal_costs
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
@@ -52,8 +70,9 @@ class NetworkController(NetworkControllerAbstract):
         :return: dict with the key the asset id and the heat demand for that asset.
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
-        if (self.get_total_supply() + (
-                -1 * self.get_total_discharge_storage())) <= self.get_total_demand(time):
+        if (
+            self.get_total_supply() + (-1 * self.get_total_discharge_storage())
+        ) <= self.get_total_demand(time):
             logger.warning(f"Total supply + storage is lower than total demand at time: {time}")
             producers = self._set_producers_to_max()
             storages = self._set_all_storages_discharge_to_max()

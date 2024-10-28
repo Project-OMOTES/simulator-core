@@ -40,12 +40,14 @@ class ControllerTest(unittest.TestCase):
         self.producer1.priority = 1
         self.producer1.temperature_return = 20.0
         self.producer1.temperature_supply = 30.0
+        self.producer1.marginal_costs = 0.5
         self.producer2 = Mock()
         self.producer2.id = "producer2"
         self.producer2.power = 4.0
         self.producer2.priority = 2
         self.producer2.temperature_return = 40.0
         self.producer2.temperature_supply = 50.0
+        self.producer2.marginal_costs = 0.8
         self.consumer1 = Mock()
         self.consumer1.id = "consumer1"
         self.consumer1.get_heat_demand.return_value = 1.0
@@ -82,6 +84,7 @@ class ControllerTest(unittest.TestCase):
             temperature_return=20.0,
             temperature_supply=30.0,
             power=1.0,
+            marginal_costs=0.1,
             priority=1,
         )
         storage = ControllerStorage(
@@ -100,6 +103,43 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(controller.consumers, [consumer])
         self.assertEqual(controller.producers, [producer])
         self.assertEqual(controller.storages, [storage])
+
+    def test__set_priority(self):
+        """Test to set the priority of the producers."""
+        # Arrange
+        self.producer1.marginal_costs = 0.5
+        self.producer2.marginal_costs = 0.8
+        # Act
+        producers = self.controller._set_priority_from_marginal_costs()
+        # Assert
+        self.assertEqual(self.producer1, self.controller.producers[0])
+        self.assertEqual(self.producer2, self.controller.producers[1])
+        self.assertEqual(self.controller.producers[0].priority, 1)
+        self.assertEqual(self.controller.producers[1].priority, 2)
+
+    def test__set_priority_equal_marg_costs(self):
+        """Test to set the priority of the producers."""
+        # Arrange
+        self.producer1.marginal_costs = 0.5
+        self.producer2.marginal_costs = 0.5
+        # Act
+        producers = self.controller._set_priority_from_marginal_costs()
+        # Assert
+        self.assertEqual(self.controller.producers[0].priority, 1)
+        self.assertEqual(self.controller.producers[1].priority, 1)
+
+    def test__set_priority_reversed_order(self):
+        """Test to set the priority of the producers."""
+        # Arrange
+        self.producer1.marginal_costs = 0.8
+        self.producer2.marginal_costs = 0.5
+        # Act
+        producers = self.controller._set_priority_from_marginal_costs()
+        # Assert
+        self.assertEqual(self.producer1, self.controller.producers[1])
+        self.assertEqual(self.producer2, self.controller.producers[0])
+        self.assertEqual(self.controller.producers[0].priority, 1)
+        self.assertEqual(self.controller.producers[1].priority, 2)
 
     def test_get_total_demand(self):
         """Test to get the total demand of the network."""
@@ -211,8 +251,8 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertEqual(result['consumer1']['heat_demand'], 2.5)
-        self.assertEqual(result['consumer2']['heat_demand'], 2.5)
+        self.assertEqual(result["consumer1"]["heat_demand"], 2.5)
+        self.assertEqual(result["consumer2"]["heat_demand"], 2.5)
 
     def test_controller_charge_storage_max(self):
         """Test total supply able to charge storage to max."""
@@ -224,7 +264,7 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertEqual(result['storage1']['heat_demand'], 1)
+        self.assertEqual(result["storage1"]["heat_demand"], 1)
 
     def test_controller_charge_storage_based_on_surplus(self):
         """Test total supply able to charge storage based on surplus."""
@@ -237,7 +277,7 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertAlmostEqual(result['storage1']['heat_demand'], 0.7, delta=0.01)
+        self.assertAlmostEqual(result["storage1"]["heat_demand"], 0.7, delta=0.01)
 
     def test_controller_discharge_storage_based_on_deficit(self):
         """Test total supply able to discharge storage based on deficit."""
@@ -250,4 +290,4 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertAlmostEqual(result['storage1']['heat_demand'], -0.3, delta=0.01)
+        self.assertAlmostEqual(result["storage1"]["heat_demand"], -0.3, delta=0.01)
