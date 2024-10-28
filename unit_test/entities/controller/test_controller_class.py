@@ -110,7 +110,7 @@ class ControllerTest(unittest.TestCase):
         self.producer1.marginal_costs = 0.5
         self.producer2.marginal_costs = 0.8
         # Act
-        producers = self.controller._set_priority_from_marginal_costs()
+        self.controller._set_priority_from_marginal_costs()
         # Assert
         self.assertEqual(self.producer1, self.controller.producers[0])
         self.assertEqual(self.producer2, self.controller.producers[1])
@@ -123,7 +123,7 @@ class ControllerTest(unittest.TestCase):
         self.producer1.marginal_costs = 0.5
         self.producer2.marginal_costs = 0.5
         # Act
-        producers = self.controller._set_priority_from_marginal_costs()
+        self.controller._set_priority_from_marginal_costs()
         # Assert
         self.assertEqual(self.controller.producers[0].priority, 1)
         self.assertEqual(self.controller.producers[1].priority, 1)
@@ -134,7 +134,7 @@ class ControllerTest(unittest.TestCase):
         self.producer1.marginal_costs = 0.8
         self.producer2.marginal_costs = 0.5
         # Act
-        producers = self.controller._set_priority_from_marginal_costs()
+        self.controller._set_priority_from_marginal_costs()
         # Assert
         self.assertEqual(self.producer1, self.controller.producers[1])
         self.assertEqual(self.producer2, self.controller.producers[0])
