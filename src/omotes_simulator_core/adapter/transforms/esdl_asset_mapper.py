@@ -31,6 +31,10 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetConsumerMapper import (
+    EsdlAssetConsumerMapper,
+)
+
 
 CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
@@ -42,6 +46,8 @@ CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.ATES: AtesCluster,
     esdl.HeatPump: HeatPump,
 }
+
+conversion_dict_mappers = {esdl.Consumer: EsdlAssetConsumerMapper}
 
 
 class EsdlAssetMapper:
@@ -62,9 +68,20 @@ class EsdlAssetMapper:
         """
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
-        return CONVERSION_DICT[type(model.esdl_asset)](
-            model.esdl_asset.name, model.esdl_asset.id, model.get_port_ids()
+
+        # Use the dictionary to get the appropriate mapper
+        asset_type = type(model.esdl_asset)
+        if asset_type in conversion_dict_mappers:
+            mapper = conversion_dict_mappers[asset_type]()
+            return mapper.to_entity(model)
+
+        converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
+            model.get_name(),
+            model.get_id(),
+            model.get_port_ids(),
         )
+        converted_asset.add_physical_data(esdl_asset=model)
+        return converted_asset
 
 
 class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
