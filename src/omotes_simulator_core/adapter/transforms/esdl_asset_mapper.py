@@ -30,6 +30,9 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetHeatPumpMapper import (
+    EsdlAssetHeatPumpMapper,
+)
 
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
@@ -43,11 +46,13 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.GenericConsumer: DemandCluster,
     esdl.HeatingDemand: DemandCluster,
     esdl.ATES: AtesCluster,
-    esdl.HeatPump: HeatPump,
 }
 
 # Define the conversion dictionary
-conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper}
+conversion_dict_mappers = {
+	esdl.Pipe: EsdlAssetPipeMapper,
+	esdl.HeatPump: EsdlAssetHeatPumpMapper
+}
 
 
 class EsdlAssetMapper:
