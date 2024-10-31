@@ -25,7 +25,6 @@ from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObj
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
