@@ -156,6 +156,21 @@ class NetworkController(NetworkControllerAbstract):
         producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return producers
 
+    def _get_basic_producers(self) -> dict:
+        """Method to get the basic dict with setting for the producers.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the producers.
+        """
+        producers = {}
+        for source in self.producers:
+            producers[source.id] = {
+                PROPERTY_HEAT_DEMAND: 0.0,
+                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                PROPERTY_SET_PRESSURE: False,
+            }
+        return producers
+
     def _set_all_storages_discharge_to_max(self) -> dict:
         """Method to set all the storages to the max discharge power.
 
@@ -236,7 +251,7 @@ class NetworkController(NetworkControllerAbstract):
         :return: dict with the key the asset id and the value a dict with the set points for the
         producers.
         """
-        producers = self._set_producers_to_max()
+        producers = self._get_basic_producers()
         total_demand = self.get_total_demand(time) + self.get_total_charge_storage()
         if total_demand > self.get_total_supply():
             raise ValueError(
@@ -262,4 +277,8 @@ class NetworkController(NetworkControllerAbstract):
                     if source.priority == priority:
                         producers[source.id][PROPERTY_HEAT_DEMAND] = source.power
                 total_demand -= total_supply
+        if set_pressure:
+            # set pressure has not been set and it needs to be set. This is set for the first
+            # producer
+            producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
         return producers

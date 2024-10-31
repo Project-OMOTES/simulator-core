@@ -98,7 +98,7 @@ class EsdlAssetObject:
         if self.esdl_asset.costInformation.marginalCosts is None:
             logger.warning(f"No marginal costs found for asset: {self.esdl_asset.name}")
             return 0
-        return float(self.esdl_asset.costInformation.marginalCosts)
+        return float(self.esdl_asset.costInformation.marginalCosts.value)
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:
