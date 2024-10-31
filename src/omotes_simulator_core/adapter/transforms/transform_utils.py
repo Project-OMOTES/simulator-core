@@ -25,7 +25,7 @@ class PortType(Enum):
     OUT = 2
 
 
-def sort_ports(connected_ports: list[tuple[str:PortType]]) -> list[str]:
+def sort_ports(connected_ports: list[tuple[str, PortType]]) -> list[str]:
     """Sort the ports of the asset based on the port type.
 
     The sort order is Inport, Outport, Starting with the first inport, then the first outport
