@@ -41,7 +41,6 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a pipe entity.
         :return: Pipe object.
         """
-        # Note: Need to add a check if the returned value is false or not. Some values can be zero.
         pipe_entity = Pipe(
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
