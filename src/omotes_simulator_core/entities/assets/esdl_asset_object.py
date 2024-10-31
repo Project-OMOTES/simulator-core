@@ -41,6 +41,10 @@ class EsdlAssetObject:
         """
         self.esdl_asset = asset
 
+    def get_name(self) -> str:
+        """Get the name of the asset."""
+        return str(self.esdl_asset.name)
+
     def get_id(self) -> str:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
