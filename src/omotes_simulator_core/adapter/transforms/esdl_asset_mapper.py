@@ -31,6 +31,9 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetProducerMapper import (
+    EsdlAssetProducerMapper,
+)
 
 CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
@@ -42,6 +45,8 @@ CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.ATES: AtesCluster,
     esdl.HeatPump: HeatPump,
 }
+
+conversion_dict_mappers = {esdl.Producer: EsdlAssetProducerMapper}
 
 
 class EsdlAssetMapper:
@@ -62,14 +67,20 @@ class EsdlAssetMapper:
         """
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
-        if isinstance(model.esdl_asset, (esdl.Producer, esdl.GenericProducer)):
-            return EsdlAssetProducerMapper().to_entity(model)
-        else:
-            return CONVERSION_DICT[type(model.esdl_asset)](
-                model.esdl_asset.name,
-                model.esdl_asset.id,
-                model.get_port_ids(),
-            )
+
+        # Use the dictionary to get the appropriate mapper
+        asset_type = type(model.esdl_asset)
+        if asset_type in conversion_dict_mappers:
+            mapper = conversion_dict_mappers[asset_type]()
+            return mapper.to_entity(model)
+
+        converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
+            model.get_name(),
+            model.get_id(),
+            model.get_port_ids(),
+        )
+        converted_asset.add_physical_data(esdl_asset=model)
+        return converted_asset
 
 
 class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
@@ -177,35 +188,3 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
             profile=profile,
         )
         return contr_storage
-
-
-class EsdlAssetProducerMapper(EsdlMapperAbstract):
-    """Class to map an ESDL asset to a pipe entity class."""
-
-    def to_esdl(self, entity: ProductionCluster) -> EsdlAssetObject:
-        """Map a Pipe entity to an EsdlAsset."""
-        raise NotImplementedError("EsdlAssetPipeMapper.to_esdl()")
-
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> AssetAbstract:
-        """Method to map an ESDL asset to a pipe entity class.
-
-        :param EsdlAssetObject esdl_asset: Object to be converted to a pipe entity.
-        :return: Pipe object.
-        """
-        # Note: Need to add a check if the returned value is false or not. Some values can be zero.
-        producer_entity = ProductionCluster(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
-            port_ids=esdl_asset.get_port_ids(),
-            temperature_supply=esdl_asset.get_supply_temperature(
-                esdl_asset.get_port_type(esdl_asset.port)
-            ),
-            temperature_return=esdl_asset.get_return_temperature(
-                esdl_asset.get_port_type(esdl_asset.port)
-            ),
-            pressure_supply=esdl_asset.get_property("pressure_supply", 0)[0],
-            control_mass_flow=esdl_asset.get_property("control_mass_flow", False)[0],
-            controlled_mass_flow=esdl_asset.get_property("controlled_mass_flow", None)[0],
-        )
-
-        return producer_entity
