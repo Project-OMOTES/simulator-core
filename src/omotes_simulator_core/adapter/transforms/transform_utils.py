@@ -15,6 +15,34 @@
 
 """File containing utility functions for the transforms."""
 from typing import Dict, List
+from enum import Enum
+
+
+class PortType(Enum):
+    """Enum to define the type of port."""
+
+    IN = 1
+    OUT = 2
+
+
+def sort_ports(connected_ports: list[tuple[str:PortType]]) -> list[str]:
+    """Sort the ports of the asset based on the port type.
+
+    The sort order is Inport, Outport, Starting with the first inport, then the first outport
+    and so on.
+
+    :param connected_ports: List of tuples with the port id and the port type.
+    :return: List of port ids sorted by port type.
+    """
+    in_ports = [port_id for port_id, port_type in connected_ports if port_type == PortType.IN]
+    out_ports = [port_id for port_id, port_type in connected_ports if port_type == PortType.OUT]
+    if len(in_ports) != len(out_ports):
+        raise ValueError("The number of in ports and out ports are not equal")
+    result = []
+    for in_port, out_port in zip(in_ports, out_ports):
+        result.append(in_port)
+        result.append(out_port)
+    return result
 
 
 def reverse_dict(original_dict: dict) -> Dict[str, List[type]]:

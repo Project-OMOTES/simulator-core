@@ -31,6 +31,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.transform_utils import sort_ports
 
 CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
@@ -63,7 +64,7 @@ class EsdlAssetMapper:
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
         return CONVERSION_DICT[type(model.esdl_asset)](
-            model.esdl_asset.name, model.esdl_asset.id, model.get_port_ids()
+            model.esdl_asset.name, model.esdl_asset.id, sort_ports(model.get_port_ids())
         )
 
 
