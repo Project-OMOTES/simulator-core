@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Module containing the Esdl to Pipe asset mapper class."""
+"""Module containing the Esdl to Producer asset mapper class."""
 
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -21,17 +21,17 @@ from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlAssetProducerMapper(EsdlMapperAbstract):
-    """Class to map an ESDL asset to a pipe entity class."""
+    """Class to map an ESDL asset to a producer entity class."""
 
     def to_esdl(self, entity: ProductionCluster) -> EsdlAssetObject:
-        """Map a Pipe entity to an EsdlAsset."""
-        raise NotImplementedError("EsdlAssetPipeMapper.to_esdl()")
+        """Map a Producer entity to an EsdlAsset."""
+        raise NotImplementedError("EsdlAssetProducerMapper.to_esdl()")
 
     def to_entity(self, esdl_asset: EsdlAssetObject) -> AssetAbstract:
-        """Method to map an ESDL asset to a pipe entity class.
+        """Method to map an ESDL asset to a producer entity class.
 
-        :param EsdlAssetObject esdl_asset: Object to be converted to a pipe entity.
-        :return: Pipe object.
+        :param EsdlAssetObject esdl_asset: Object to be converted to a producer entity.
+        :return: Producer object.
         """
         # Note: Need to add a check if the returned value is false or not. Some values can be zero.
         producer_entity = ProductionCluster(
