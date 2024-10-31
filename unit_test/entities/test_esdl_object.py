@@ -90,8 +90,8 @@ class EsdlObjectTest(unittest.TestCase):
         connected_assets2 = self.esdl_object.get_connected_assets(asset.id, asset.port[0].id)  # act
 
         # Assert
-        self.assertEqual(connected_assets1, test_list1)
-        self.assertEqual(connected_assets2, test_list2)
+        self.assertEqual(connected_assets1, test_list2)
+        self.assertEqual(connected_assets2, test_list1)
 
     def test_get_property(self):
         """Test get_property method."""

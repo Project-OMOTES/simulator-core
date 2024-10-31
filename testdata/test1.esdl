@@ -22,11 +22,11 @@
         <geometry xsi:type="esdl:Point" CRS="WGS84" lon="4.63726043701172" lat="52.158769628869045"/>
       </asset>
       <asset xsi:type="esdl:GenericProducer" power="5000000.0" id="cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4" name="GenericProducer_cf3d">
-        <port xsi:type="esdl:OutPort" id="2d818e3d-8a39-4cec-afa0-f6dbbfd50696" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a" name="Out" connectedTo="a9793a5e-df4f-4795-8079-015dfaf57f82"/>
         <port xsi:type="esdl:InPort" connectedTo="935fb733-9f76-4a8d-8899-1ad8689a4b12" id="9c258b9d-3149-4720-8931-f4bef1080ec1" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret" name="In"/>
+		<port xsi:type="esdl:OutPort" id="2d818e3d-8a39-4cec-afa0-f6dbbfd50696" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a" name="Out" connectedTo="a9793a5e-df4f-4795-8079-015dfaf57f82"/>
         <geometry xsi:type="esdl:Point" CRS="WGS84" lon="4.558639526367188" lat="52.148869383489114"/>
       </asset>
-      <asset xsi:type="esdl:Pipe" related="Pipe1_ret" id="Pipe1" length="6267.0" name="Pipe1" innerDiameter="0.5">
+      <asset xsi:type="esdl:Pipe" related="Pipe1_ret" id="Pipe1" length="6267.0" name="Pipe1" innerDiameter="0.1">
         <port xsi:type="esdl:InPort" connectedTo="2d818e3d-8a39-4cec-afa0-f6dbbfd50696" id="a9793a5e-df4f-4795-8079-015dfaf57f82" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a" name="In"/>
         <port xsi:type="esdl:OutPort" id="3f2dc09a-0cee-44bd-a337-cea55461a334" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a" name="Out" connectedTo="af0904f7-ba1f-4e79-9040-71e08041601b"/>
         <geometry xsi:type="esdl:Line" CRS="WGS84">
@@ -35,7 +35,7 @@
           <point xsi:type="esdl:Point" lon="4.63726043701172" lat="52.158769628869045"/>
         </geometry>
       </asset>
-      <asset xsi:type="esdl:Pipe" related="Pipe1" id="Pipe1_ret" length="6267.0" name="Pipe1_ret" innerDiameter="0.5">
+      <asset xsi:type="esdl:Pipe" related="Pipe1" id="Pipe1_ret" length="6267.0" name="Pipe1_ret" innerDiameter="0.1">
         <port xsi:type="esdl:InPort" connectedTo="e890f65f-80e7-46fa-8c52-5385324bf686" id="422cb921-23d2-4410-9072-aaa5796a0620" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret" name="In_ret"/>
         <port xsi:type="esdl:OutPort" id="935fb733-9f76-4a8d-8899-1ad8689a4b12" carrier="0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret" name="Out_ret" connectedTo="9c258b9d-3149-4720-8931-f4bef1080ec1"/>
         <geometry xsi:type="esdl:Line">
