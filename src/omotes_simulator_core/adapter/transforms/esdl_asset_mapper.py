@@ -23,7 +23,6 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
@@ -36,8 +35,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetProduc
 )
 
 CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
-    esdl.Producer: ProductionCluster,
-    esdl.GenericProducer: ProductionCluster,
     esdl.Consumer: DemandCluster,
     esdl.GenericConsumer: DemandCluster,
     esdl.HeatingDemand: DemandCluster,
@@ -46,7 +43,10 @@ CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.HeatPump: HeatPump,
 }
 
-conversion_dict_mappers = {esdl.Producer: EsdlAssetProducerMapper}
+conversion_dict_mappers = {
+    esdl.Producer: EsdlAssetProducerMapper,
+    esdl.GenericProducer: EsdlAssetProducerMapper,
+}
 
 
 class EsdlAssetMapper:
@@ -65,7 +65,10 @@ class EsdlAssetMapper:
 
         :return: Entity object of type AssetAbstract.
         """
-        if not type(model.esdl_asset) in CONVERSION_DICT:
+        if (
+            not type(model.esdl_asset) in CONVERSION_DICT
+            and not type(model.esdl_asset) in conversion_dict_mappers
+        ):
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
 
         # Use the dictionary to get the appropriate mapper

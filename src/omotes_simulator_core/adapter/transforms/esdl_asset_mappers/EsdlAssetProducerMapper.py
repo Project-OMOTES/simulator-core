@@ -33,7 +33,6 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a producer entity.
         :return: Producer object.
         """
-        # Note: Need to add a check if the returned value is false or not. Some values can be zero.
         producer_entity = ProductionCluster(
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
