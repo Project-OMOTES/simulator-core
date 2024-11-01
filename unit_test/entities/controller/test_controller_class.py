@@ -142,10 +142,8 @@ class ControllerTest(unittest.TestCase):
         # Act
         self.controller._set_priority_from_marginal_costs()
         # Assert
-        self.assertEqual(self.producer1, self.controller.producers[1])
-        self.assertEqual(self.producer2, self.controller.producers[0])
-        self.assertEqual(self.controller.producers[0].priority, 1)
-        self.assertEqual(self.controller.producers[1].priority, 2)
+        self.assertEqual(self.controller.producers[0].priority, 2)
+        self.assertEqual(self.controller.producers[1].priority, 1)
 
     def test_get_total_demand(self):
         """Test to get the total demand of the network."""

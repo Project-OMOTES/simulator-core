@@ -17,6 +17,9 @@
 import datetime
 import logging
 from typing import List
+
+from mypy.modulefinder import unique
+
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -55,20 +58,17 @@ class NetworkController(NetworkControllerAbstract):
         self._set_priority_from_marginal_costs()
 
     def _set_priority_from_marginal_costs(self) -> None:
-        """This method sets the priority of the producers based on the marginal costs."""
-        # Sort the producers based on the marginal costs
-        self.producers.sort(key=lambda x: x.marginal_costs)
+        """This method sets the priority of the producers based on the marginal costs.
 
-        # Set the priority based on the sorted list
-        previous_marginal_costs = self.producers[0].marginal_costs
-        priority = 1
+        The priority of the producers is set based on the marginal costs. The producer with the
+        lowest marginal costs has the highest priority (lowest value).
+        """
+        # Created a sorted list of unique marginal costs.
+        unique_sorted_values = sorted(set([producer.marginal_costs for producer in self.producers]))
+
+        # set the priority based on the index of the marginal cost in the sorted list.
         for producer in self.producers:
-            if producer.marginal_costs == previous_marginal_costs:
-                producer.priority = priority
-            else:
-                priority += 1
-                producer.priority = priority
-                previous_marginal_costs = producer.marginal_costs
+            producer.priority = unique_sorted_values.index(producer.marginal_costs) + 1
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
@@ -80,7 +80,10 @@ class NetworkController(NetworkControllerAbstract):
         if (
             self.get_total_supply() + (-1 * self.get_total_discharge_storage())
         ) <= self.get_total_demand(time):
-            logger.warning(f"Total supply + storage is lower than total demand at time: {time}")
+            logger.warning(
+                f"Total supply + storage is lower than total demand at time: {time}"
+                f"Consumers are capped to the available power."
+            )
             producers = self._set_producers_to_max()
             storages = self._set_all_storages_discharge_to_max()
             consumers = self._set_consumer_capped(time)
@@ -262,28 +265,29 @@ class NetworkController(NetworkControllerAbstract):
         producers = self._get_basic_producers()
         total_demand = self.get_total_demand(time) + self.get_total_charge_storage()
         if total_demand > self.get_total_supply():
-            raise ValueError(
-                "Total demand is higher than total supply. "
-                "Cannot set producers based on priority."
+            logger.warning(
+                "Total demand is higher than total supply. Cannot set producers based on priority."
             )
+
         priority = 0
         set_pressure = True
         while total_demand > 0:
             priority += 1
             total_supply = self.get_total_supply_priority(priority)
+            priority_producers = [
+                producer for producer in self.producers if producer.priority == priority
+            ]
             if total_supply > total_demand:
                 factor = total_demand / total_supply
-                for source in self.producers:
-                    if source.priority == priority:
-                        producers[source.id][PROPERTY_HEAT_DEMAND] = source.power * factor
-                        if set_pressure:
-                            producers[source.id][PROPERTY_SET_PRESSURE] = True
-                            set_pressure = False
+                for source in priority_producers:
+                    producers[source.id][PROPERTY_HEAT_DEMAND] = source.power * factor
+                    if set_pressure:
+                        producers[source.id][PROPERTY_SET_PRESSURE] = True
+                        set_pressure = False
                 total_demand = 0
             else:
-                for source in self.producers:
-                    if source.priority == priority:
-                        producers[source.id][PROPERTY_HEAT_DEMAND] = source.power
+                for source in priority_producers:
+                    producers[source.id][PROPERTY_HEAT_DEMAND] = source.power
                 total_demand -= total_supply
         if set_pressure:
             # set pressure has not been set and it needs to be set. This is set for the first
