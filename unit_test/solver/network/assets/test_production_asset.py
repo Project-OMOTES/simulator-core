@@ -64,7 +64,7 @@ class ProductionAssetTest(unittest.TestCase):
         # Assert
         self.assertTrue(self.asset.pre_scribe_mass_flow)
         self.assertEqual(self.asset.mass_flow_rate_set_point, 20.0)
-        self.assertEqual(equation_object.rhs, -20.0)
+        self.assertEqual(equation_object.rhs, 20.0)
         self.assertTrue(all(equation_object.coefficients == [1.0]))
 
     def test_pre_scribe_pressure(self) -> None:
