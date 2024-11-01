@@ -178,7 +178,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             network.add_existing_asset(py_assets_list[-1].solver_asset)
 
         return py_assets_list
-        return py_assets_list
 
     def _get_junction(self) -> dict[str, list[tuple[str, str]]]:
         """Method to create an overview of all assets connected to a joint in the esdl.
