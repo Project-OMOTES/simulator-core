@@ -26,7 +26,6 @@ from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.adapter.transforms.transform_utils import PortType
 
 
 class EsdlObjectTest(unittest.TestCase):
@@ -82,8 +81,8 @@ class EsdlObjectTest(unittest.TestCase):
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0].esdl_asset
         pipes = self.esdl_object.get_all_assets_of_type("pipe")
-        test_list1 = [(pipes[1].get_id(), pipes[1].get_port_ids()[1][0])]
-        test_list2 = [(pipes[0].get_id(), pipes[0].get_port_ids()[0][0])]
+        test_list1 = [(pipes[1].get_id(), pipes[1].get_port_ids()[1])]
+        test_list2 = [(pipes[0].get_id(), pipes[0].get_port_ids()[0])]
 
         # Act
         connected_assets1 = self.esdl_object.get_connected_assets(asset.id, asset.port[1].id)
@@ -128,10 +127,7 @@ class EsdlObjectTest(unittest.TestCase):
         # Assert
         self.assertEqual(
             port_ids,
-            [
-                ("a9793a5e-df4f-4795-8079-015dfaf57f82", PortType.IN),
-                ("3f2dc09a-0cee-44bd-a337-cea55461a334", PortType.OUT),
-            ],
+            ["a9793a5e-df4f-4795-8079-015dfaf57f82", "3f2dc09a-0cee-44bd-a337-cea55461a334"],
         )
         self.assertEqual(len(port_ids), 2)
 
@@ -269,12 +265,10 @@ class EsdlObjectTest(unittest.TestCase):
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         pipe = esdl_object.get_all_assets_of_type("pipe")[0]
         assets = esdl_object.get_all_assets_of_type("producer")
-        test_list = [(asset.get_id(), asset.get_port_ids()[0][0]) for asset in assets]
+        test_list = [(asset.get_id(), asset.get_port_ids()[1]) for asset in assets]
 
         # Act
-        connected_assets = esdl_object.get_connected_assets(
-            pipe.get_id(), pipe.get_port_ids()[0][0]
-        )
+        connected_assets = esdl_object.get_connected_assets(pipe.get_id(), pipe.get_port_ids()[0])
 
         # Assert
         self.assertEqual(connected_assets, test_list)

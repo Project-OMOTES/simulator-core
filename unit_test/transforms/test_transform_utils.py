@@ -20,103 +20,122 @@ from omotes_simulator_core.adapter.transforms.transform_utils import (
     order_prim_sec_ports,
     reverse_dict,
     PortType,
+    Port,
 )
 
 
 class TransformUtilsTest(unittest.TestCase):
     """Class to test the transform utils functions."""
 
+    def setUp(self) -> None:
+        """Set up test case."""
+        self.connected_ports = [
+            Port(port_id="port1", port_name="Prim port1", port_type=PortType.IN),
+            Port(port_id="port2", port_name="Prim port2", port_type=PortType.OUT),
+        ]
+
     def test_sort_ports_basic(self):
         """Test the port sorting function. THe order is nto changed."""
-        # act
-        connected_ports = [("port1", PortType.IN), ("port2", PortType.OUT)]
-
         # arrange
-        result = sort_ports(connected_ports)
+
+        # act
+        result = sort_ports(self.connected_ports)
 
         # assert
-        self.assertEqual(result, ["port1", "port2"])
+        self.assertEqual(result, [port.port_id for port in self.connected_ports])
 
     def test_sort_ports_reverse(self):
         """Test the port sorting function. The order is reversed."""
-        # act
-        connected_ports = [("port2", PortType.OUT), ("port1", PortType.IN)]
-
         # arrange
+        connected_ports = self.connected_ports[::-1]
+
+        # act
         result = sort_ports(connected_ports)
 
         # assert
-        self.assertEqual(result, ["port1", "port2"])
+        self.assertEqual(result, [port.port_id for port in self.connected_ports])
 
     def test_sort_ports_4_ports(self):
         """Test the port sorting function with 4 ports, the order remains the same."""
-        # act
-        connected_ports = [
-            ("Prim port1", PortType.IN),
-            ("Prim port2", PortType.OUT),
-            ("Sec port3", PortType.IN),
-            ("Sec port4", PortType.OUT),
-        ]
-
         # arrange
-        result = sort_ports(connected_ports)
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+        self.connected_ports.append(
+            Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+        # act
+        result = sort_ports(self.connected_ports)
 
         # assert
-        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
+        self.assertEqual(result, [port.port_id for port in self.connected_ports])
 
     def test_sort_ports_4_ports_reverse(self):
         """Test the port sorting function with 4 ports, the order is reversed."""
-        # act
-        connected_ports = [
-            ("Sec port4", PortType.OUT),
-            ("Sec port3", PortType.IN),
-            ("Prim port1", PortType.IN),
-            ("Prim port2", PortType.OUT),
-        ]
-
         # arrange
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+        self.connected_ports.append(
+            Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+        connected_ports = self.connected_ports[::-1]
+
+        # act
         result = sort_ports(connected_ports)
 
         # assert
-        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
+        self.assertEqual(result, [port.port_id for port in self.connected_ports])
 
     def test_sort_port_error_number_of_ports(self):
         """Test the port sorting function.
 
         This test has different number of in and out port resulting in error.
         """
-        # act
-        connected_ports = [("port1", PortType.IN), ("port2", PortType.OUT), ("port3", PortType.IN)]
-
         # arrange
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+
+        # act
         with self.assertRaises(ValueError) as cm:
-            sort_ports(connected_ports)
+            sort_ports(self.connected_ports)
 
         # assert
         self.assertEqual(str(cm.exception), "The number of in ports and out ports are not equal")
 
     def test_order_prim_sec_ports(self):
         """Test the order primary secondary ports function."""
-        # act
-        connected_ports = ["Prim port1", "Prim port2", "Sec port3", "Sec port4"]
-
         # arrange
-        result = order_prim_sec_ports(connected_ports)
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+        self.connected_ports.append(
+            Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+
+        # act
+        result = order_prim_sec_ports(self.connected_ports)
 
         # assert
-        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
+        self.assertEqual(result, self.connected_ports)
 
     def test_order_prim_sec_ports_error_prim(self):
         """Test the order primary secondary ports function.
 
         This test has different number of primary ports resulting in error.
         """
-        # act
-        connected_ports = ["Prim port1", "Prim port2", "Prim port3", "Sec port4"]
-
         # arrange
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Prim port3", port_type=PortType.IN)
+        )
+        self.connected_ports.append(
+            Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+
+        # act
         with self.assertRaises(ValueError) as cm:
-            order_prim_sec_ports(connected_ports)
+            order_prim_sec_ports(self.connected_ports)
 
         # assert
         self.assertEqual(
@@ -128,12 +147,20 @@ class TransformUtilsTest(unittest.TestCase):
 
         This test has different number of secondary ports resulting in error.
         """
-        # act
-        connected_ports = ["Prim port1", "Prim port2", "Sec port3", "Sec port4", "Sec port5"]
-
         # arrange
+        self.connected_ports.append(
+            Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+        self.connected_ports.append(
+            Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+        self.connected_ports.append(
+            Port(port_id="port5", port_name="Sec port5", port_type=PortType.OUT)
+        )
+
+        # act
         with self.assertRaises(ValueError) as cm:
-            order_prim_sec_ports(connected_ports)
+            order_prim_sec_ports(self.connected_ports)
 
         # assert
         self.assertEqual(
@@ -145,21 +172,28 @@ class TransformUtilsTest(unittest.TestCase):
 
         This test has the order reversed.
         """
-        # act
-        connected_ports = ["Sec port4", "Sec port3", "Prim port2", "Prim port1"]
-
         # arrange
-        result = order_prim_sec_ports(connected_ports)
+        self.connected_ports.insert(
+            0, Port(port_id="port4", port_name="Sec port4", port_type=PortType.OUT)
+        )
+        self.connected_ports.insert(
+            0, Port(port_id="port3", port_name="Sec port3", port_type=PortType.IN)
+        )
+        # act
+        result = order_prim_sec_ports(self.connected_ports)
 
         # assert
-        self.assertEqual(result, ["Prim port2", "Prim port1", "Sec port4", "Sec port3"])
+        self.assertEqual(result[0], self.connected_ports[2])
+        self.assertEqual(result[1], self.connected_ports[3])
+        self.assertEqual(result[2], self.connected_ports[0])
+        self.assertEqual(result[3], self.connected_ports[1])
 
     def test_reverse_dict(self):
         """Test the reverse dict function."""
-        # act
+        # arrange
         original_dict = {"key1": "value1", "key2": "value2", "key3": "value1"}
 
-        # arrange
+        # act
         result = reverse_dict(original_dict)
 
         # assert

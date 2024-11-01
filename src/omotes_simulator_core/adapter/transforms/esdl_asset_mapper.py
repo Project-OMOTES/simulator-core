@@ -64,7 +64,7 @@ class EsdlAssetMapper:
         if not type(model.esdl_asset) in CONVERSION_DICT:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
         return CONVERSION_DICT[type(model.esdl_asset)](
-            model.esdl_asset.name, model.esdl_asset.id, sort_ports(model.get_port_ids())
+            model.esdl_asset.name, model.esdl_asset.id, model.get_port_ids()
         )
 
 

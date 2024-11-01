@@ -16,6 +16,7 @@
 """File containing utility functions for the transforms."""
 from typing import Dict, List
 from enum import Enum
+from dataclasses import dataclass
 
 
 class PortType(Enum):
@@ -25,29 +26,38 @@ class PortType(Enum):
     OUT = 2
 
 
-def sort_ports(connected_ports: list[tuple[str, PortType]]) -> list[str]:
+@dataclass
+class Port:
+    """Dataclass to hold the port information."""
+
+    port_id: str
+    port_name: str
+    port_type: PortType
+
+
+def sort_ports(connected_ports: list[Port]) -> list[str]:
     """Sort the ports of the asset based on the port type.
 
     The sort order is Inport, Outport, Starting with the first inport, then the first outport
     and so on.
 
-    :param connected_ports: List of tuples with the port id and the port type.
+    :param connected_ports: List of tuples with the port id, name and the port type.
     :return: List of port ids sorted by port type.
     """
-    in_ports = [port_id for port_id, port_type in connected_ports if port_type == PortType.IN]
-    out_ports = [port_id for port_id, port_type in connected_ports if port_type == PortType.OUT]
+    in_ports = [port for port in connected_ports if port.port_type == PortType.IN]
+    out_ports = [port for port in connected_ports if port.port_type == PortType.OUT]
     if len(in_ports) != len(out_ports):
         raise ValueError("The number of in ports and out ports are not equal")
-    result = []
+    sorted_port_list = []
     for in_port, out_port in zip(in_ports, out_ports):
-        result.append(in_port)
-        result.append(out_port)
-    if len(result) == 4:
-        result = order_prim_sec_ports(result)
-    return result
+        sorted_port_list.append(in_port)
+        sorted_port_list.append(out_port)
+    if len(sorted_port_list) == 4:
+        sorted_port_list = order_prim_sec_ports(sorted_port_list)
+    return [port.port_id for port in sorted_port_list]
 
 
-def order_prim_sec_ports(connected_ports: list[str]) -> list[str]:
+def order_prim_sec_ports(connected_ports: list[Port]) -> list[Port]:
     """Order the primary and secondary ports. in correct order.
 
     The correct order is first primary port, then secondary port.
@@ -57,10 +67,10 @@ def order_prim_sec_ports(connected_ports: list[str]) -> list[str]:
     :param connected_ports: List of connected ports to be sorted.
     :return: List of connected ports sorted by primary and secondary ports.
     """
-    primary_ports = [port for port in connected_ports if "Prim" in port]
+    primary_ports = [port for port in connected_ports if "Prim" in port.port_name]
     if len(primary_ports) != 2:
         raise ValueError("The number of ports with prim in the name is not equal to 2")
-    secondary_ports = [port for port in connected_ports if "Sec" in port]
+    secondary_ports = [port for port in connected_ports if "Sec" in port.port_name]
     if len(secondary_ports) != 2:
         raise ValueError("The number of ports with sec in the name is not equal to 2")
     return primary_ports + secondary_ports

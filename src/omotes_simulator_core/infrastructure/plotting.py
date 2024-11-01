@@ -77,20 +77,20 @@ class Plotting:
                     "asset_id": asset.id,
                     "asset_name": asset.name,
                     "geometry": LineString(coor_pipe),
-                    "mass_flow": result[(asset_object.get_port_ids()[0][0], PROPERTY_MASSFLOW)][
+                    "mass_flow": result[(asset_object.get_port_ids()[0], PROPERTY_MASSFLOW)][
                         last_data_index
                     ],
-                    "pressure_in": result[(asset_object.get_port_ids()[0][0], PROPERTY_PRESSURE)][
+                    "pressure_in": result[(asset_object.get_port_ids()[0], PROPERTY_PRESSURE)][
                         last_data_index
                     ],
-                    "pressure_out": result[(asset_object.get_port_ids()[1][0], PROPERTY_PRESSURE)][
+                    "pressure_out": result[(asset_object.get_port_ids()[1], PROPERTY_PRESSURE)][
                         last_data_index
                     ],
                     "temperature_in": result[
-                        (asset_object.get_port_ids()[0][0], PROPERTY_TEMPERATURE)
+                        (asset_object.get_port_ids()[0], PROPERTY_TEMPERATURE)
                     ][last_data_index],
                     "temperature_out": result[
-                        (asset_object.get_port_ids()[1][0], PROPERTY_TEMPERATURE)
+                        (asset_object.get_port_ids()[1], PROPERTY_TEMPERATURE)
                     ][last_data_index],
                 }
 
