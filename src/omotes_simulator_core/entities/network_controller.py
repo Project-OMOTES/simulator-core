@@ -18,8 +18,6 @@ import datetime
 import logging
 from typing import List
 
-from mypy.modulefinder import unique
-
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_SUPPLY,
