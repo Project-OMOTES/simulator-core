@@ -42,7 +42,28 @@ def sort_ports(connected_ports: list[tuple[str, PortType]]) -> list[str]:
     for in_port, out_port in zip(in_ports, out_ports):
         result.append(in_port)
         result.append(out_port)
+    if len(result) == 4:
+        result = order_prim_sec_ports(result)
     return result
+
+
+def order_prim_sec_ports(connected_ports: list[str]) -> list[str]:
+    """Order the primary and secondary ports. in correct order.
+
+    The correct order is first primary port, then secondary port.
+    This can only be done by checking the port names.
+    In primary port prim is in the name for secondary port sec is in the name.
+
+    :param connected_ports: List of connected ports to be sorted.
+    :return: List of connected ports sorted by primary and secondary ports.
+    """
+    primary_ports = [port for port in connected_ports if "Prim" in port]
+    if len(primary_ports) != 2:
+        raise ValueError("The number of ports with prim in the name is not equal to 2")
+    secondary_ports = [port for port in connected_ports if "Sec" in port]
+    if len(secondary_ports) != 2:
+        raise ValueError("The number of ports with sec in the name is not equal to 2")
+    return primary_ports + secondary_ports
 
 
 def reverse_dict(original_dict: dict) -> Dict[str, List[type]]:

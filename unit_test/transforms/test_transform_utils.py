@@ -17,6 +17,7 @@
 import unittest
 from omotes_simulator_core.adapter.transforms.transform_utils import (
     sort_ports,
+    order_prim_sec_ports,
     reverse_dict,
     PortType,
 )
@@ -51,35 +52,35 @@ class TransformUtilsTest(unittest.TestCase):
         """Test the port sorting function with 4 ports, the order remains the same."""
         # act
         connected_ports = [
-            ("port1", PortType.IN),
-            ("port2", PortType.OUT),
-            ("port3", PortType.IN),
-            ("port4", PortType.OUT),
+            ("Prim port1", PortType.IN),
+            ("Prim port2", PortType.OUT),
+            ("Sec port3", PortType.IN),
+            ("Sec port4", PortType.OUT),
         ]
 
         # arrange
         result = sort_ports(connected_ports)
 
         # assert
-        self.assertEqual(result, ["port1", "port2", "port3", "port4"])
+        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
 
     def test_sort_ports_4_ports_reverse(self):
         """Test the port sorting function with 4 ports, the order is reversed."""
         # act
         connected_ports = [
-            ("port4", PortType.OUT),
-            ("port3", PortType.IN),
-            ("port1", PortType.IN),
-            ("port2", PortType.OUT),
+            ("Sec port4", PortType.OUT),
+            ("Sec port3", PortType.IN),
+            ("Prim port1", PortType.IN),
+            ("Prim port2", PortType.OUT),
         ]
 
         # arrange
         result = sort_ports(connected_ports)
 
         # assert
-        self.assertEqual(result, ["port3", "port4", "port1", "port2"])
+        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
 
-    def test_sort_port_errror_number_of_ports(self):
+    def test_sort_port_error_number_of_ports(self):
         """Test the port sorting function.
 
         This test has different number of in and out port resulting in error.
@@ -93,6 +94,65 @@ class TransformUtilsTest(unittest.TestCase):
 
         # assert
         self.assertEqual(str(cm.exception), "The number of in ports and out ports are not equal")
+
+    def test_order_prim_sec_ports(self):
+        """Test the order primary secondary ports function."""
+        # act
+        connected_ports = ["Prim port1", "Prim port2", "Sec port3", "Sec port4"]
+
+        # arrange
+        result = order_prim_sec_ports(connected_ports)
+
+        # assert
+        self.assertEqual(result, ["Prim port1", "Prim port2", "Sec port3", "Sec port4"])
+
+    def test_order_prim_sec_ports_error_prim(self):
+        """Test the order primary secondary ports function.
+
+        This test has different number of primary ports resulting in error.
+        """
+        # act
+        connected_ports = ["Prim port1", "Prim port2", "Prim port3", "Sec port4"]
+
+        # arrange
+        with self.assertRaises(ValueError) as cm:
+            order_prim_sec_ports(connected_ports)
+
+        # assert
+        self.assertEqual(
+            str(cm.exception), "The number of ports with prim in the name is not equal to 2"
+        )
+
+    def test_order_prim_sec_ports_error_sec(self):
+        """Test the order primary secondary ports function.
+
+        This test has different number of secondary ports resulting in error.
+        """
+        # act
+        connected_ports = ["Prim port1", "Prim port2", "Sec port3", "Sec port4", "Sec port5"]
+
+        # arrange
+        with self.assertRaises(ValueError) as cm:
+            order_prim_sec_ports(connected_ports)
+
+        # assert
+        self.assertEqual(
+            str(cm.exception), "The number of ports with sec in the name is not equal to 2"
+        )
+
+    def test_order_prim_sec_ports_reversed(self):
+        """Test the order primary secondary ports function.
+
+        This test has the order reversed.
+        """
+        # act
+        connected_ports = ["Sec port4", "Sec port3", "Prim port2", "Prim port1"]
+
+        # arrange
+        result = order_prim_sec_ports(connected_ports)
+
+        # assert
+        self.assertEqual(result, ["Prim port2", "Prim port1", "Sec port4", "Sec port3"])
 
     def test_reverse_dict(self):
         """Test the reverse dict function."""
