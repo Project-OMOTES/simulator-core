@@ -31,7 +31,6 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
-from omotes_simulator_core.adapter.transforms.transform_utils import sort_ports
 
 CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
