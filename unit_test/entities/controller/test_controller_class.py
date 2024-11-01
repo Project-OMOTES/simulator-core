@@ -194,14 +194,26 @@ class ControllerTest(unittest.TestCase):
         # Act
         producers = self.controller._set_producers_to_max()
         # Assert
-        self.assertEqual(producers[self.producer1.id][PROPERTY_HEAT_DEMAND], 1.0)
-        self.assertEqual(producers[self.producer1.id][PROPERTY_TEMPERATURE_RETURN], 20.0)
-        self.assertEqual(producers[self.producer1.id][PROPERTY_TEMPERATURE_SUPPLY], 30.0)
+        self.assertEqual(producers[self.producer1.id][PROPERTY_HEAT_DEMAND], self.producer1.power)
+        self.assertEqual(
+            producers[self.producer1.id][PROPERTY_TEMPERATURE_RETURN],
+            self.consumer1.temperature_return,
+        )
+        self.assertEqual(
+            producers[self.producer1.id][PROPERTY_TEMPERATURE_SUPPLY],
+            self.consumer1.temperature_supply,
+        )
         self.assertTrue(producers[self.producer1.id][PROPERTY_SET_PRESSURE])
 
-        self.assertEqual(producers[self.producer2.id][PROPERTY_HEAT_DEMAND], 4.0)
-        self.assertEqual(producers[self.producer2.id][PROPERTY_TEMPERATURE_RETURN], 40.0)
-        self.assertEqual(producers[self.producer2.id][PROPERTY_TEMPERATURE_SUPPLY], 50.0)
+        self.assertEqual(producers[self.producer2.id][PROPERTY_HEAT_DEMAND], self.producer2.power)
+        self.assertEqual(
+            producers[self.producer2.id][PROPERTY_TEMPERATURE_RETURN],
+            self.consumer2.temperature_return,
+        )
+        self.assertEqual(
+            producers[self.producer2.id][PROPERTY_TEMPERATURE_SUPPLY],
+            self.consumer2.temperature_supply,
+        )
         self.assertFalse(producers[self.producer2.id][PROPERTY_SET_PRESSURE])
 
     def test__set_consumer_capped(self):
@@ -219,13 +231,29 @@ class ControllerTest(unittest.TestCase):
         # Act
         consumers = self.controller._set_consumer_to_demand(datetime.now())
         # Assert
-        self.assertEqual(consumers[self.consumer1.id][PROPERTY_HEAT_DEMAND], 1.0)
-        self.assertEqual(consumers[self.consumer1.id][PROPERTY_TEMPERATURE_RETURN], 20.0)
-        self.assertEqual(consumers[self.consumer1.id][PROPERTY_TEMPERATURE_SUPPLY], 30.0)
+        self.assertEqual(
+            consumers[self.consumer1.id][PROPERTY_HEAT_DEMAND], self.consumer1.get_heat_demand()
+        )
+        self.assertEqual(
+            consumers[self.consumer1.id][PROPERTY_TEMPERATURE_RETURN],
+            self.consumer1.temperature_return,
+        )
+        self.assertEqual(
+            consumers[self.consumer1.id][PROPERTY_TEMPERATURE_SUPPLY],
+            self.consumer1.temperature_supply,
+        )
 
-        self.assertEqual(consumers[self.consumer2.id][PROPERTY_HEAT_DEMAND], 2.0)
-        self.assertEqual(consumers[self.consumer2.id][PROPERTY_TEMPERATURE_RETURN], 40.0)
-        self.assertEqual(consumers[self.consumer2.id][PROPERTY_TEMPERATURE_SUPPLY], 50.0)
+        self.assertEqual(
+            consumers[self.consumer2.id][PROPERTY_HEAT_DEMAND], self.consumer2.get_heat_demand()
+        )
+        self.assertEqual(
+            consumers[self.consumer2.id][PROPERTY_TEMPERATURE_RETURN],
+            self.consumer2.temperature_return,
+        )
+        self.assertEqual(
+            consumers[self.consumer2.id][PROPERTY_TEMPERATURE_SUPPLY],
+            self.consumer2.temperature_supply,
+        )
 
     def test__set_producers_based_on_priority(self):
         """Test to set the producers based on priority."""
