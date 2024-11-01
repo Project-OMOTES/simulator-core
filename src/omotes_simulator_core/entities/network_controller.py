@@ -40,7 +40,14 @@ class NetworkController(NetworkControllerAbstract):
         consumers: List[ControllerConsumer],
         storages: List[ControllerStorage],
     ) -> None:
-        """Constructor for controller for a heat network."""
+        """Constructor for controller for a heat network.
+
+        The priority of the producers is set based on the marginal costs. The lowest marginal
+        costs has the highest priority.
+
+        :param List[ControllerProducer] producers: List of producers in the network.
+        :param List[ControllerConsumer] consumers: List of consumers in the network.
+        :param List[ControllerStorage] storages: List of storages in the network."""
         self.producers = producers
         self.consumers = consumers
         self.storages = storages

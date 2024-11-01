@@ -39,6 +39,7 @@ class ControllerProducer(AssetControllerAbstract):
         :param float temperature_supply: Supply temperature of the source.
         :param float temperature_return: Return temperature of the source.
         :param float power: Power of the source.
+        :param float marginal_costs: Marginal costs of the source.
         :param int priority: Priority of the source.
         """
         super().__init__(name, identifier)

@@ -65,11 +65,14 @@ class ControllerTest(unittest.TestCase):
         self.storage1.temperature_return = 20.0
         self.storage1.temperature_supply = 40.0
         self.controller = NetworkController(
-            [self.producer1, self.producer2], [self.consumer1, self.consumer2], [self.storage1]
+            producers=[self.producer1, self.producer2],
+            consumers=[self.consumer1, self.consumer2],
+            storages=[self.storage1],
         )
 
     def test_controller_init(self):
         """Test to initialize the controller."""
+        # Arrange
         consumer = ControllerConsumer(
             name="consumer",
             identifier="id",
@@ -96,8 +99,11 @@ class ControllerTest(unittest.TestCase):
             max_discharge_power=0.0,
             profile=Mock(),
         )
-        controller = NetworkController([producer], [consumer], [storage])
+
         # Act
+        controller = NetworkController(
+            producers=[producer], consumers=[consumer], storages=[storage]
+        )
 
         # Assert
         self.assertEqual(controller.consumers, [consumer])
@@ -200,6 +206,7 @@ class ControllerTest(unittest.TestCase):
 
     def test__set_consumer_capped(self):
         """Test to set the consumer to the capped power."""
+        # Arrange
         self.controller.producers[1].power = 0.5
         # Act
         consumers = self.controller._set_consumer_capped(datetime.now())
@@ -222,6 +229,7 @@ class ControllerTest(unittest.TestCase):
 
     def test__set_producers_based_on_priority(self):
         """Test to set the producers based on priority."""
+        # Arrange
         self.controller.consumers[0].get_heat_demand.return_value = 0.5
         self.controller.storages[0].max_charge_power = 0
         # Act

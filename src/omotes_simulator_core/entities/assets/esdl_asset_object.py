@@ -93,10 +93,16 @@ class EsdlAssetObject:
     def get_marginal_costs(self) -> float:
         """Get the marginal costs of the asset."""
         if self.esdl_asset.costInformation is None:
-            logger.warning(f"No cost information found for asset: {self.esdl_asset.name}")
+            logger.warning(
+                f"No cost information found for asset, Marginal costs set to 0 for: "
+                f"{self.esdl_asset.name}"
+            )
             return 0
         if self.esdl_asset.costInformation.marginalCosts is None:
-            logger.warning(f"No marginal costs found for asset: {self.esdl_asset.name}")
+            logger.warning(
+                f"No marginal costs found for asset, Marginal costs set to 0 for: "
+                f"{self.esdl_asset.name}"
+            )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)
 
