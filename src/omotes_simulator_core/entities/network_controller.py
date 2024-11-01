@@ -47,7 +47,8 @@ class NetworkController(NetworkControllerAbstract):
 
         :param List[ControllerProducer] producers: List of producers in the network.
         :param List[ControllerConsumer] consumers: List of consumers in the network.
-        :param List[ControllerStorage] storages: List of storages in the network."""
+        :param List[ControllerStorage] storages: List of storages in the network.
+        """
         self.producers = producers
         self.consumers = consumers
         self.storages = storages
