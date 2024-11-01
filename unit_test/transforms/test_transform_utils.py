@@ -23,8 +23,10 @@ from omotes_simulator_core.adapter.transforms.transform_utils import (
 
 
 class TransformUtilsTest(unittest.TestCase):
+    """Class to test the transform utils functions."""
 
     def test_sort_ports_basic(self):
+        """Test the port sorting function. THe order is nto changed."""
         # act
         connected_ports = [("port1", PortType.IN), ("port2", PortType.OUT)]
 
@@ -35,6 +37,7 @@ class TransformUtilsTest(unittest.TestCase):
         self.assertEqual(result, ["port1", "port2"])
 
     def test_sort_ports_reverse(self):
+        """Test the port sorting function. The order is reversed."""
         # act
         connected_ports = [("port2", PortType.OUT), ("port1", PortType.IN)]
 
@@ -45,6 +48,7 @@ class TransformUtilsTest(unittest.TestCase):
         self.assertEqual(result, ["port1", "port2"])
 
     def test_sort_ports_4_ports(self):
+        """Test the port sorting function with 4 ports, the order remains the same."""
         # act
         connected_ports = [
             ("port1", PortType.IN),
@@ -60,6 +64,7 @@ class TransformUtilsTest(unittest.TestCase):
         self.assertEqual(result, ["port1", "port2", "port3", "port4"])
 
     def test_sort_ports_4_ports_reverse(self):
+        """Test the port sorting function with 4 ports, the order is reversed."""
         # act
         connected_ports = [
             ("port4", PortType.OUT),
@@ -75,6 +80,10 @@ class TransformUtilsTest(unittest.TestCase):
         self.assertEqual(result, ["port3", "port4", "port1", "port2"])
 
     def test_sort_port_errror_number_of_ports(self):
+        """Test the port sorting function.
+
+        This test has different number of in and out port resulting in error.
+        """
         # act
         connected_ports = [("port1", PortType.IN), ("port2", PortType.OUT), ("port3", PortType.IN)]
 
@@ -86,6 +95,7 @@ class TransformUtilsTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "The number of in ports and out ports are not equal")
 
     def test_reverse_dict(self):
+        """Test the reverse dict function."""
         # act
         original_dict = {"key1": "value1", "key2": "value2", "key3": "value1"}
 
