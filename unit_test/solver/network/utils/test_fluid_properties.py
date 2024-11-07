@@ -15,196 +15,199 @@
 
 """Test Fluid properties entities."""
 import unittest
-from unittest.mock import patch
+import numpy as np
+import numpy.testing as npt
 
-from omotes_simulator_core.solver.utils.fluid_properties import FluidProperties
+from omotes_simulator_core.solver.utils.fluid_properties import OmotesFluidProperties
+from omotes_simulator_core.solver.utils.fluid_properties import Interpolation
 
 
-class FluidPropertiesInitializationTest(unittest.TestCase):
-    """Testcase for the initialization of the FluidProperties class."""
+class InterpolationTest(unittest.TestCase):
+    """Test the Interpolation class."""
 
-    @patch("csv.reader")
-    def test_init_of_fluid_properties(self, mock_csv_reader):
-        """Test the initialization of the fluid properties class."""
+    def test_init(self):
+        """Test the initialization of the Interpolation class."""
         # Arrange
-        mock_csv_reader.return_value = [["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "10"]]
+        x = [1, 2, 3]
+        y = [2, 4, 6]
+        order = 1
 
         # Act
-        fluid_props = FluidProperties()  # act
+        interpolation = Interpolation(x, y, order)
 
         # Assert
-        self.assertEqual(fluid_props.T, [1, 6])
-        self.assertEqual(fluid_props.cp, [2, 7])
-        self.assertEqual(fluid_props.rho, [3, 8])
-        self.assertEqual(fluid_props.visc, [4, 9])
-        self.assertEqual(fluid_props.therm_cond, [5, 10])
-        self.assertEqual(fluid_props.IE, [0, 22.5])
-        self.assertEqual(mock_csv_reader.call_count, 1)
+        self.assertEqual(interpolation.x, x)
+        self.assertEqual(interpolation.y, y)
+        self.assertEqual(interpolation.order, order)
+        npt.assert_almost_equal(interpolation.coefficients, np.array([2, 0]))
+
+    def test_init_order_5(self):
+        """Test the initialization of the Interpolation class."""
+        # Arrange
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        order = 5
+        y = [value**order for value in x]
+
+        # Act
+        interpolation = Interpolation(x, y, order)
+
+        # Assert
+        self.assertEqual(interpolation.x, x)
+        self.assertEqual(interpolation.y, y)
+        self.assertEqual(interpolation.order, order)
+        npt.assert_almost_equal(interpolation.coefficients, np.array([1, 0, 0, 0, 0, 0]))
+
+    def test_call(self):
+        """Test the call method of the Interpolation class."""
+        # Arrange
+        x = [1, 2, 3]
+        y = [2, 4, 6]
+        order = 1
+        interpolation = Interpolation(x, y, order)
+
+        # Act
+        interpolated_value = interpolation(2)
+
+        # Assert
+        self.assertAlmostEquals(interpolated_value, 4)
+
+    def test_call_order_5(self):
+        """Test the call method of the Interpolation class."""
+        # Arrange
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        order = 5
+        y = [value**order for value in x]
+        interpolation = Interpolation(x, y, order)
+
+        # Act
+        interpolated_value = interpolation(2)
+
+        # Assert
+        self.assertAlmostEquals(interpolated_value, 32)
+
+    def test_validation_error(self):
+        """Test the validation error method of the Interpolation class."""
+        # Arrange
+        x = [1, 2, 3]
+        y = [2, 4, 6]
+        order = 1
+        interpolation = Interpolation(x, y, order)
+        interpolation.coefficients = np.array([0, 1])
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            interpolation._check_interpolation()
+
+        # Assert
+        self.assertEqual(str(cm.exception), "Interpolation error: error is more then 2%.")
+        self.assertIsInstance(cm.exception, ValueError)
+
+    def test_check_bounds(self):
+        """Test the check bounds method of the Interpolation class."""
+        # Arrange
+        x = [1, 2, 3]
+        y = [2, 4, 6]
+        order = 1
+        interpolation = Interpolation(x, y, order)
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            interpolation._check_bounds(0)
+
+        # Assert
+        self.assertEqual(str(cm.exception), "Value is out of bounds.")
+        self.assertIsInstance(cm.exception, ValueError)
+
+    def test_check_real_polynomial(self):
+        """Test the check real polynomial method of the Interpolation class."""
+        # Arrange
+        a = 2.0
+        b = 3.0
+        c = 4.0
+        x = [*range(10)]
+        y = [a * i**2 + b * i + c for i in x]
+        interpol = Interpolation(x, y, 2)
+        # Act
+        result = interpol(5)
+
+        # Assert
+        self.assertAlmostEquals(result, 2 * 5**2 + 3 * 5 + 4, 3)
 
 
-class FluidPropertiesTest(unittest.TestCase):
-    """Testcase for FluidProperties class."""
+class OmotesFluidPropertiesTest(unittest.TestCase):
+    """Test the OmotesFluidProperties class."""
 
-    @patch("csv.reader")
-    def setUp(self, mock_csv_reader):
+    def setUp(self):
         """Set up the test."""
-        mock_csv_reader.return_value = [["1", "2", "3", "4", "5"], ["6", "7", "8", "9", "10"]]
+        self.omotes_fluid_properties = OmotesFluidProperties()
 
-        self.fluid_props = FluidProperties()
-
-    def test_get_internal_energy(self):
-        """Test the get_internal_energy method."""
+    def test_init(self):
+        """Test the initialization of the OmotesFluidProperties class."""
         # Arrange
-        T = 1
+        T = [i + 273.15 for i in range(150)]
 
         # Act
-        IE = self.fluid_props.get_ie(T)
+        omotes_fluid_properties = OmotesFluidProperties()
 
         # Assert
-        self.assertEqual(IE, 0)
-
-    def test_get_internal_energy_with_invalid_temperature(self):
-        """Test the get_internal_energy method with an invalid temperature."""
-        # Arrange
-        T = 0
-
-        # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_ie(T)
-
-        # Assert
-        self.assertEqual(
-            str(cm.exception), "The temperature 0 is outside the range of the fluid properties."
-        )
-        self.assertIsInstance(cm.exception, ValueError)
-
-    def test_get_temperature(self):
-        """Test the get_temperature method."""
-        # Arrange
-        IE = 0
-
-        # Act
-        T = self.fluid_props.get_t(IE)
-
-        # Assert
-        self.assertEqual(T, 1)
-
-    def test_get_temperature_with_invalid_internal_energy(self):
-        """Test the get_temperature method with an invalid internal energy."""
-        # Arrange
-        IE = -1
-
-        # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_t(IE)
-
-        # Assert
-        self.assertEqual(
-            str(cm.exception),
-            "The internal energy -1 is outside the range of the fluid properties.",
-        )
-        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(omotes_fluid_properties.T, T)
+        self.assertAlmostEquals(len(omotes_fluid_properties.rho), 150)
+        self.assertAlmostEquals(len(omotes_fluid_properties.visc), 150)
+        self.assertAlmostEquals(len(omotes_fluid_properties.therm_cond), 150)
+        self.assertAlmostEquals(len(omotes_fluid_properties.cp), 150)
+        self.assertAlmostEquals(len(omotes_fluid_properties.IE), 150)
 
     def test_get_density(self):
-        """Test the get_density method."""
+        """Test the get_density method of the OmotesFluidProperties class."""
         # Arrange
-        T = 1
+        T = 300
 
         # Act
-        rho = self.fluid_props.get_density(T)
+        density = self.omotes_fluid_properties.get_density(T)
 
         # Assert
-        self.assertEqual(rho, 3)
-
-    def test_get_density_with_invalid_temperature(self):
-        """Test the get_density method with an invalid temperature."""
-        # Arrange
-        T = 0
-
-        # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_density(T)
-
-        # Assert
-        self.assertEqual(
-            str(cm.exception), "The temperature 0 is outside the range of the fluid properties."
-        )
-        self.assertIsInstance(cm.exception, ValueError)
+        self.assertAlmostEquals(density, 997.4151741509487, 3)
 
     def test_get_viscosity(self):
-        """Test the get_viscosity method."""
+        """Test the get_viscosity method of the OmotesFluidProperties class."""
         # Arrange
-        T = 1
+        T = 300
 
         # Act
-        visc = self.fluid_props.get_viscosity(T)
+        viscosity = self.omotes_fluid_properties.get_viscosity(T)
 
         # Assert
-        self.assertEqual(visc, 4)
-
-    def test_get_viscosity_with_invalid_temperature(self):
-        """Test the get_viscosity method with an invalid temperature."""
-        # Arrange
-        T = 0
-
-        # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_viscosity(T)
-
-        # Assert
-        self.assertEqual(
-            str(cm.exception), "The temperature 0 is outside the range of the fluid properties."
-        )
-        self.assertIsInstance(cm.exception, ValueError)
+        self.assertAlmostEquals(viscosity, 8.498706251104486e-07, 3)
 
     def test_get_heat_capacity(self):
-        """Test the get_heat_capacity method."""
+        """Test the get_heat_capacity method of the OmotesFluidProperties class."""
         # Arrange
-        T = 1
+        T = 300
 
         # Act
-        cp = self.fluid_props.get_heat_capacity(T)
+        heat_capacity = self.omotes_fluid_properties.get_heat_capacity(T)
 
         # Assert
-        self.assertEqual(cp, 2)
+        self.assertAlmostEquals(heat_capacity, 4175.063249530409, 3)
 
-    def test_get_heat_capacity_with_invalid_temperature(self):
-        """Test the get_heat_capacity method with an invalid temperature."""
+    def test_get_ie(self):
+        """Test the get_ie method of the OmotesFluidProperties class."""
         # Arrange
-        T = 0
+        T = 300
 
         # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_heat_capacity(T)
+        ie = self.omotes_fluid_properties.get_ie(T)
 
         # Assert
-        self.assertEqual(
-            str(cm.exception), "The temperature 0 is outside the range of the fluid properties."
-        )
-        self.assertIsInstance(cm.exception, ValueError)
+        self.assertAlmostEquals(ie, 112413.55124584399, 3)
 
-    def test_get_thermal_conductivity(self):
-        """Test the get_thermal_conductivity method."""
+    def test_get_t(self):
+        """Test the get_t method of the OmotesFluidProperties class."""
         # Arrange
-        T = 1
+        ie = 0.0
 
         # Act
-        therm_cond = self.fluid_props.get_thermal_conductivity(T)
+        T = self.omotes_fluid_properties.get_t(ie)
 
         # Assert
-        self.assertEqual(therm_cond, 5)
-
-    def test_get_thermal_conductivity_with_invalid_temperature(self):
-        """Test the get_thermal_conductivity method with an invalid temperature."""
-        # Arrange
-        T = 0
-
-        # Act
-        with self.assertRaises(ValueError) as cm:
-            self.fluid_props.get_thermal_conductivity(T)
-
-        # Assert
-        self.assertEqual(
-            str(cm.exception), "The temperature 0 is outside the range of the fluid properties."
-        )
-        self.assertIsInstance(cm.exception, ValueError)
+        self.assertAlmostEquals(T, 273.1442035399455, 3)

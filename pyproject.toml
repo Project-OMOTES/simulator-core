@@ -26,6 +26,7 @@ dependencies = [
     "dataclass-wizard~=0.22.3",
     "influxdb~=5.3.2",
     "pyjnius~=1.6.1",
+    "CoolProp~=6.6.0",
 ]
 
 [project.optional-dependencies]
@@ -75,12 +76,17 @@ count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
+[tool.setuptools]
+include-package-data = true
 
-# [tool.setuptools]
-# packages = ["src/omotes_simulator_core"]
+[tool.setuptools.package-data]
+"omotes_simulator_core" = ["solver/utils/temp_props.csv", "VERSION"]
+
+#[tool.setuptools]
+#packages = ["src/omotes_simulator_core"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+# addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
@@ -98,7 +104,7 @@ ignore = [
     'PT009', # use a regular assert instead of unittest-style assertion
     'PT027', # pytest.raises() should be used instead of assertRaises()
 ]
-exclude = ['.venv/*', 'venv/*', 'doc/*']
+exclude = ['.venv/*', 'venv/*', 'doc/*', 'src/omotes_simulator_core/solver/utils/fluidprop.py']
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
 
 [tool.black]
