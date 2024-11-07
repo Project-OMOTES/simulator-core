@@ -75,7 +75,7 @@ class EsdlAssetMapper:
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
             return mapper.to_entity(model)
-
+        # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
             model.get_name(),
             model.get_id(),
