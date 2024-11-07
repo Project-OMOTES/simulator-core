@@ -30,20 +30,6 @@ from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 class Pipe(AssetAbstract):
     """A class representing a pipe in a heat network."""
 
-    _minor_loss_coefficient: float
-    """The minor loss coefficient of the pipe [-]."""
-    _external_temperature: float
-    """The external temperature surrounding the pipe [K]."""
-    _qheat_external: float
-    """The external heat flow into the pipe [W]."""
-    length: float
-    """The length of the pipe [m]."""
-    diameter: float
-    """The diameter of the pipe [m]."""
-    roughness: float
-    """The wall roughness of the pipe [m]."""
-    alpha_value: float
-    """The alpha value of the pipe [W/(m2 K)]."""
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
@@ -65,19 +51,19 @@ class Pipe(AssetAbstract):
         :param str asset_name: The name of the asset.
         :param str asset_id: The unique identifier of the asset.
         :param List[str] port_ids: List of ids of the connected ports.
-        :param float length: The length of the pipe.
-        :param float inner_diameter: The inner diameter of the pipe.
-        :param float minor_loss_coefficient: The minor loss coefficient of the pipe.
-        :param float external_temperature: The external temperature surrounding the pipe.
-        :param float qheat_external: The external heat flow into the pipe.
-        :param float roughness: The wall roughness of the pipe.
-        :param float alpha_value: The alpha value of the pipe.
+        :param float length: The length of the pipe [m].
+        :param float inner_diameter: The inner diameter of the pipe [m].
+        :param float minor_loss_coefficient: The minor loss coefficient of the pipe [-].
+        :param float external_temperature: The external temperature surrounding the pipe [K].
+        :param float qheat_external: The external heat flow into the pipe [W].
+        :param float roughness: The wall roughness of the pipe [m].
+        :param float alpha_value: The alpha value of the pipe [W/(m2 K)].
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
         # Initialize the default values of the pipe
-        self._minor_loss_coefficient = minor_loss_coefficient
-        self._external_temperature = external_temperature
-        self._qheat_external = qheat_external
+        self.minor_loss_coefficient = minor_loss_coefficient
+        self.external_temperature = external_temperature
+        self.qheat_external = qheat_external
         # Define properties of the pipe
         self.length = length
         self.diameter = inner_diameter
@@ -91,6 +77,26 @@ class Pipe(AssetAbstract):
             roughness=self.roughness,
         )
         self.output = []
+
+    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
+        """Method to add physical data to the asset.
+
+        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
+                current pipe object.
+        """
+        # Error handling is performed in EsdlAssetObject.get_asset_parameters
+        self.length, _ = esdl_asset.get_property(
+            esdl_property_name="length", default_value=self.length
+        )
+        self.roughness, _ = esdl_asset.get_property(
+            esdl_property_name="roughness", default_value=self.roughness
+        )
+        self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
+        self.diameter = self._get_diameter(esdl_asset=esdl_asset)
+
+        self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
+        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness}
+        self.solver_asset.set_physical_properties(physical_properties=prop_dict)
 
     def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
         """Retrieve the diameter of the pipe and convert it if necessary."""
@@ -132,26 +138,6 @@ class Pipe(AssetAbstract):
             return 1.0 / float(inverse_heat_transfer_coefficient)
         else:
             return self.alpha_value
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
-                current pipe object.
-        """
-        # Error handling is performed in EsdlAssetObject.get_asset_parameters
-        self.length, _ = esdl_asset.get_property(
-            esdl_property_name="length", default_value=self.length
-        )
-        self.roughness, _ = esdl_asset.get_property(
-            esdl_property_name="roughness", default_value=self.roughness
-        )
-        self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
-        self.diameter = self._get_diameter(esdl_asset=esdl_asset)
-
-        self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
-        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness}
-        self.solver_asset.set_physical_properties(physical_properties=prop_dict)
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Set the setpoints of the pipe prior to a simulation.

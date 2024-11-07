@@ -62,7 +62,6 @@ class EsdlAssetObject:
         try:
             value = getattr(self.esdl_asset, esdl_property_name)
             if value == 0:
-                # Should it be false if its zero? some properties can be zero.
                 return default_value, False
             return value, True
 

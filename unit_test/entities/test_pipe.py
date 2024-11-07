@@ -63,9 +63,9 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pipe.diameter, self.inner_diameter)
         self.assertEqual(pipe.roughness, self.roughness)
         self.assertEqual(pipe.alpha_value, self.alpha_value)
-        self.assertEqual(pipe._minor_loss_coefficient, self.minor_loss_coefficient)
-        self.assertEqual(pipe._external_temperature, self.external_temperature)
-        self.assertEqual(pipe._qheat_external, self.qheat_external)
+        self.assertEqual(pipe.minor_loss_coefficient, self.minor_loss_coefficient)
+        self.assertEqual(pipe.external_temperature, self.external_temperature)
+        self.assertEqual(pipe.qheat_external, self.qheat_external)
 
     def test_pipe_unit_conversion(self):
         """Evaluate the unit conversion of the pipe object."""
