@@ -94,7 +94,6 @@ class HeatDemandTest(unittest.TestCase):
         q_dot_demand = dict()
         fluid_props = FluidProperties()
 
-
         for demand in demands:
             demand_id = demand.id
             in_port_id = in_out_demand_dict[demand_id]["InPort"]  
@@ -105,7 +104,7 @@ class HeatDemandTest(unittest.TestCase):
             cp_in_out_demand[demand_id] = dict()
 
             m_dot_in_list = result[(in_port_id, 'mass_flow')]
-            m_dot_out_list = result[(out_port_id, 'mass_flow')]
+            m_dot_out_list = -1*result[(out_port_id, 'mass_flow')]
             m_dot_in_out_demand[demand_id]["In"] = m_dot_in_list
             m_dot_in_out_demand[demand_id]["Out"] = m_dot_out_list
 
@@ -124,23 +123,22 @@ class HeatDemandTest(unittest.TestCase):
             cp = (np.array(cp_in) + np.array(cp_out)) / 2
             q_dot_in = np.array(m_dot_in_list) * cp * np.array(temp_in_list)
             q_dot_out = np.array(m_dot_out_list) * cp * np.array(temp_out_list)
-            delta_q_dot = q_dot_out - q_dot_in
+            delta_q_dot = q_dot_in - q_dot_out
             q_dot_demand[demand_id] = delta_q_dot
 
         print(q_dot_demand)
-
-       
-        
-        # Use the previous dics to compute Qdot at each demand.
-        
-        # Extract the values as an array and multiply them all together to get Qdot.
-
         # Figure out how to get the demand profiles from the esdl. Maybe ask Ryvo.
 
-        # Attest
+        # Atest
         # Compare the consumed Qdot with the profile supplied by the esdl.
+        # Ensure that return temperature is equal or lower than the primary one.
+        for demand in demands:
+            demand_id = demand.id
+            temp_in_list = temp_in_out_demand[demand_id]["In"].tolist()
+            temp_out_list = temp_in_out_demand[demand_id]["Out"].tolist()
+            for temp_in, temp_out in zip(temp_in_list, temp_out_list):
+                self.assertGreaterEqual(temp_in + 1e-5, temp_out)
 
-        pass
 
 if __name__ == "__main__":
     test_object = HeatDemandTest()
