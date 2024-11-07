@@ -193,7 +193,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             # Esdl Junctions need to be skipped for now, are added later.
             temp_list = [
                 self.esdl_object.get_connected_assets(
-                    asset_id=esdl_joint.esdl_asset.id, port_id=port[0]
+                    asset_id=esdl_joint.esdl_asset.id, port_id=port
                 )
                 for port in esdl_joint.get_port_ids()
             ]
