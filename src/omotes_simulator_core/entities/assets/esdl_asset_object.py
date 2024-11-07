@@ -20,6 +20,7 @@ from typing import Any, Tuple, Type
 import pandas as pd
 from esdl import esdl
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.adapter.transforms.transform_utils import PortType, sort_ports, Port
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +79,18 @@ class EsdlAssetObject:
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_port_ids(self) -> list[str]:
-        """Get the port ids of the asset."""
-        return [port.id for port in self.esdl_asset.port]
+        """Returns a sorted list of the port ids of the asset."""
+        list_of_ports = sort_ports(
+            [
+                Port(
+                    port.id,
+                    port.name,
+                    PortType.IN if isinstance(port, esdl.InPort) else PortType.OUT,
+                )
+                for port in self.esdl_asset.port
+            ]
+        )
+        return list_of_ports
 
     def get_port_type(self, port_type: str) -> Type[esdl.Port]:
         """Get the port type of the port."""

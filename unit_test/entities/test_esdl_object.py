@@ -265,7 +265,7 @@ class EsdlObjectTest(unittest.TestCase):
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         pipe = esdl_object.get_all_assets_of_type("pipe")[0]
         assets = esdl_object.get_all_assets_of_type("producer")
-        test_list = [(asset.get_id(), asset.get_port_ids()[0]) for asset in assets]
+        test_list = [(asset.get_id(), asset.get_port_ids()[1]) for asset in assets]
 
         # Act
         connected_assets = esdl_object.get_connected_assets(pipe.get_id(), pipe.get_port_ids()[0])
