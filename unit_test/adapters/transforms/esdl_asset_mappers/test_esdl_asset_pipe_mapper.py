@@ -23,6 +23,7 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper imp
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
+from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 
 
 class TestEsdlAssetPipeMapper(unittest.TestCase):
@@ -30,7 +31,6 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
     def setUp(self):
         """Define the variables used in the tests."""
-
         self.length: float = 1
         self.inner_diameter: float = 1
         self.roughness: float = 0.001

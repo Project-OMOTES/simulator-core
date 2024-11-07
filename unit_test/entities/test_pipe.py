@@ -17,7 +17,6 @@
 import unittest
 
 from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
 class PipeTest(unittest.TestCase):
