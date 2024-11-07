@@ -86,6 +86,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             power = result[0]
         else:
             raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+        marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
         contr_producer = ControllerProducer(
@@ -94,6 +95,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             temperature_supply=temperature_supply,
             temperature_return=temperature_return,
             power=power,
+            marginal_costs=marginal_costs,
         )
         return contr_producer
 
