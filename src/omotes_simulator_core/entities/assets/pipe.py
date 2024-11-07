@@ -15,15 +15,9 @@
 """Module containing pipe class."""
 from typing import Dict, List
 
-import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.utils import (
-    calculate_inverse_heat_transfer_coefficient,
-    get_thermal_conductivity_table,
-)
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
@@ -103,65 +97,7 @@ class Pipe(AssetAbstract):
         self.output = []
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
-                current pipe object.
-        """
-        # Error handling is performed in EsdlAssetObject.get_asset_parameters
-        self.length, _ = esdl_asset.get_property(
-            esdl_property_name="length", default_value=self.length
-        )
-        self.roughness, _ = esdl_asset.get_property(
-            esdl_property_name="roughness", default_value=self.roughness
-        )
-        self.roughness = PIPE_DEFAULTS.k_value if self.roughness == 0 else self.roughness
-        self.diameter = self._get_diameter(esdl_asset=esdl_asset)
-
-        self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
-        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness}
-        self.solver_asset.set_physical_properties(physical_properties=prop_dict)
-
-    def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
-        """Retrieve the diameter of the pipe and convert it if necessary."""
-        temp_diameter, property_available = esdl_asset.get_property("innerDiameter", self.diameter)
-        if property_available:
-            if temp_diameter == 0:
-                return self.diameter
-            return float(temp_diameter)
-        else:
-            # Implement DN-conversion
-            raise NotImplementedError(
-                f"The innderDiamter property is unavailable for {esdl_asset.esdl_asset.name}. \
-                    Conversion from DN to diameter is not yet implemented."
-            )
-
-    def _get_heat_transfer_coefficient(self, esdl_asset: EsdlAssetObject) -> float:
-        """Calculate the heat transfer coefficient of the pipe.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
-                current pipe object.
-
-        :return: The heat transfer coefficient of the pipe [W/(m2 K)]. If the heat transfer
-                coefficient cannot be calculated - for example when the material table is
-                not specified - , the default alpha value is returned.
-        """
-        diameters, heat_coefficients = get_thermal_conductivity_table(esdl_asset=esdl_asset)
-        if diameters:
-            # Create a numpy array of the diameters and heat coefficients
-            diameters_np = np.array(diameters)
-            heat_coefficients_np = np.array(heat_coefficients)
-            # Calculate the heat transfer coefficient from the heat transfer table
-            inverse_heat_transfer_coefficient = np.sum(
-                calculate_inverse_heat_transfer_coefficient(
-                    inner_diameter=diameters_np[:-1],
-                    outer_diameter=diameters_np[1:],
-                    thermal_conductivity=heat_coefficients_np,
-                )
-            )
-            return 1.0 / float(inverse_heat_transfer_coefficient)
-        else:
-            return self.alpha_value
+        """Method to add physical data to the asset."""
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Set the setpoints of the pipe prior to a simulation.

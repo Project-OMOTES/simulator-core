@@ -15,13 +15,9 @@
 
 """Test Junction entities."""
 import unittest
-from pathlib import Path
-from unittest.mock import Mock
 
 from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
 class PipeTest(unittest.TestCase):
@@ -66,108 +62,3 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pipe.minor_loss_coefficient, self.minor_loss_coefficient)
         self.assertEqual(pipe.external_temperature, self.external_temperature)
         self.assertEqual(pipe.qheat_external, self.qheat_external)
-
-    def test_pipe_unit_conversion(self):
-        """Evaluate the unit conversion of the pipe object."""
-        # Arrange
-        pipe = Pipe(
-            asset_name="pipe",
-            asset_id="pipe_id",
-            port_ids=["test1", "test2"],
-            length=self.length,
-            inner_diameter=self.inner_diameter,
-            roughness=self.roughness,
-            alpha_value=self.alpha_value,
-            minor_loss_coefficient=self.minor_loss_coefficient,
-            external_temperature=self.external_temperature,
-            qheat_external=self.qheat_external,
-        )
-
-        # Act
-        solver_pipe = SolverPipe(
-            name="pipe", _id="pipe_id", length=pipe.length, roughness=pipe.roughness
-        )
-
-        # Assert
-        self.assertEqual(solver_pipe.length, pipe.length)
-        self.assertEqual(solver_pipe.roughness, pipe.roughness)
-
-    def test_pipe_get_property_diameter(self):
-        """Evaluate the get property diameter method to retrieve diameters."""
-        # Arrange
-        pipe = Pipe(
-            asset_name="pipe",
-            asset_id="pipe_id",
-            port_ids=["test1", "test2"],
-            length=self.length,
-            inner_diameter=self.inner_diameter,
-            roughness=self.roughness,
-            alpha_value=self.alpha_value,
-            minor_loss_coefficient=self.minor_loss_coefficient,
-            external_temperature=self.external_temperature,
-            qheat_external=self.qheat_external,
-        )
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, True)
-
-        # Act
-
-        # Assert
-        self.assertEqual(pipe._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
-
-    def test_pipe_get_property_diameter_failed(self):
-        """Evaluate failure to retrieve diameter from ESDL asset."""
-        # Arrange
-        pipe = Pipe(
-            asset_name="pipe",
-            asset_id="pipe_id",
-            port_ids=["test1", "test2"],
-            length=self.length,
-            inner_diameter=self.inner_diameter,
-            roughness=self.roughness,
-            alpha_value=self.alpha_value,
-            minor_loss_coefficient=self.minor_loss_coefficient,
-            external_temperature=self.external_temperature,
-            qheat_external=self.qheat_external,
-        )
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, False)
-
-        # Act
-        pass
-
-        # Assert
-        with self.assertRaises(NotImplementedError):
-            pipe._get_diameter(esdl_asset=esdl_asset_mock)
-
-    def test_pipe_get_heat_transfer_coefficient(self):
-        """Evaluate the get heat transfer coefficient method."""
-        # Arrange
-        # - Load esdl pipe asset
-        esdl_file_path = (
-            Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
-        )
-        esdl_file_path = str(esdl_file_path)
-        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        esdl_pipes = esdl_object.get_all_assets_of_type("pipe")
-        esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
-        # - Create pipe object
-        # Act
-        alpha_value = self.alpha_value
-        pipe = Pipe(
-            asset_name="pipe",
-            asset_id="pipe_id",
-            port_ids=["test1", "test2"],
-            length=self.length,
-            inner_diameter=self.inner_diameter,
-            roughness=self.roughness,
-            alpha_value=self.alpha_value,
-            minor_loss_coefficient=self.minor_loss_coefficient,
-            external_temperature=self.external_temperature,
-            qheat_external=self.qheat_external,
-        )
-
-        alpha_value = pipe._get_heat_transfer_coefficient(esdl_asset=esdl_pipe)  # act
-
-        # Assert
-        self.assertEqual(alpha_value, 0.8901927763663371)
