@@ -32,7 +32,7 @@ from omotes_simulator_core.entities.assets.controller.controller_storage import 
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
 
 
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetPipeMapper import (
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
 

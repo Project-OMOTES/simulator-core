@@ -33,6 +33,30 @@ class Pipe(AssetAbstract):
     output: List[Dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
+    length: float
+    """The length of the pipe [m]."""
+
+    diameter: float
+    """The inner diameter of the pipe [m]."""
+
+    roughness: float
+    """The wall roughness of the pipe [m]."""
+
+    alpha_value: float
+    """The alpha value of the pipe [W/(m2 K)]."""
+
+    minor_loss_coefficient: float
+    """The minor loss coefficient of the pipe [-]."""
+
+    external_temperature: float
+    """The external temperature surrounding the pipe [K]."""
+
+    qheat_external: float
+    """The external heat flow into the pipe [W]."""
+
+    name: str
+    """The name of the pipe."""
+
     def __init__(
         self,
         asset_name: str,

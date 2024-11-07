@@ -46,7 +46,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             asset_id=esdl_asset.esdl_asset.id,
             port_ids=esdl_asset.get_port_ids(),
             length=esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],
-            inner_diameter=esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)[0],
+            inner_diameter=self._get_diameter(esdl_asset=esdl_asset),
             roughness=esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0],
             alpha_value=self._get_heat_transfer_coefficient(esdl_asset),
             minor_loss_coefficient=esdl_asset.get_property(
@@ -86,3 +86,19 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             return 1.0 / float(inverse_heat_transfer_coefficient)
         else:
             return PIPE_DEFAULTS.alpha_value
+
+    def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
+        """Retrieve the diameter of the pipe and convert it if necessary."""
+        temp_diameter, property_available = esdl_asset.get_property(
+            "innerDiameter", PIPE_DEFAULTS.diameter
+        )
+        if property_available:
+            if temp_diameter == 0:
+                return PIPE_DEFAULTS.diameter
+            return float(temp_diameter)
+        else:
+            # Implement DN-conversion
+            raise NotImplementedError(
+                f"The innderDiamter property is unavailable for {esdl_asset.esdl_asset.name}. \
+                    Conversion from DN to diameter is not yet implemented."
+            )
