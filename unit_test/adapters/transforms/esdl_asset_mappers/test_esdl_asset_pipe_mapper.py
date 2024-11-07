@@ -23,9 +23,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper imp
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
-from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 
 class TestEsdlAssetPipeMapper(unittest.TestCase):
@@ -60,10 +57,20 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         self.assertEqual(pipe_entity.name, esdl_asset.esdl_asset.name)
         self.assertEqual(pipe_entity.asset_id, esdl_asset.esdl_asset.id)
         self.assertEqual(pipe_entity.connected_ports, esdl_asset.get_port_ids())  # type: ignore
-        self.assertEqual(pipe_entity.length, esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0])  # type: ignore
-        self.assertEqual(pipe_entity.diameter, self.mapper._get_diameter(esdl_asset))  # type: ignore
-        self.assertEqual(pipe_entity.roughness, esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0])  # type: ignore
-        self.assertEqual(pipe_entity.alpha_value, self.mapper._get_heat_transfer_coefficient(esdl_asset))  # type: ignore
+        self.assertEqual(
+            pipe_entity.length,
+            esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],  # type: ignore
+        )
+        self.assertEqual(
+            pipe_entity.diameter, self.mapper._get_diameter(esdl_asset)  # type: ignore
+        )
+        self.assertEqual(
+            pipe_entity.roughness, esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0]
+        )  # type: ignore
+        self.assertEqual(
+            pipe_entity.alpha_value,  # type: ignore
+            self.mapper._get_heat_transfer_coefficient(esdl_asset),
+        )
         self.assertEqual(
             pipe_entity.minor_loss_coefficient,  # type: ignore
             esdl_asset.get_property("minor_loss_coefficient", PIPE_DEFAULTS.minor_loss_coefficient)[
