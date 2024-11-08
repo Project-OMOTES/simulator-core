@@ -32,7 +32,7 @@ from omotes_simulator_core.entities.simulation_configuration import SimulationCo
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.simulation.networksimulation import NetworkSimulation
-from omotes_simulator_core.solver.utils.fluid_properties import FluidProperties
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class HeatDemandTest(unittest.TestCase):
@@ -92,7 +92,6 @@ class HeatDemandTest(unittest.TestCase):
         temp_in_out_demand = dict()
         cp_in_out_demand = dict()
         q_dot_demand = dict()
-        fluid_props = FluidProperties()
 
         for demand in demands:
             demand_id = demand.id
@@ -128,7 +127,7 @@ class HeatDemandTest(unittest.TestCase):
 
         print(q_dot_demand)
         # Figure out how to get the demand profiles from the esdl. Maybe ask Ryvo.
-
+        print(temp_in_out_demand)
         # Atest
         # Compare the consumed Qdot with the profile supplied by the esdl.
         # Ensure that return temperature is equal or lower than the primary one.
