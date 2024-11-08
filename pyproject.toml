@@ -70,14 +70,21 @@ requires = [
 
 [tool.setuptools-git-versioning]
 enabled = true
-starting_version = "0.0.9"
-count_commits_from_version_file = true
+starting_version = "0.0.10"
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
 [tool.setuptools]
 include-package-data = true
 zip-safe = false
+
+[tool.setuptools.package-data]
+"omotes_simulator_core" = [
+    "entities/assets/bin/ates_sequential_temp.xml",
+    "entities/assets/bin/jfxrt.jar",
+    "entities/assets/bin/rosim-batch-0.4.2.jar",
+    "entities/assets/bin/sequentialTemplate_v0.4.2_template.xml",
+]
 
 [tool.pytest.ini_options]
 addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
