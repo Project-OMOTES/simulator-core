@@ -12,8 +12,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """Mapper classes."""
+
 from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
@@ -175,7 +175,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
             py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
-            py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
             network.add_existing_asset(py_assets_list[-1].solver_asset)
         return py_assets_list
 
