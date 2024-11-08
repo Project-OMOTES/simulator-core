@@ -83,6 +83,7 @@ PROPERTY_SET_PRESSURE = "set_pressure"
 PROPERTY_LENGTH = "length"
 PROPERTY_DIAMETER = "diameter"
 PROPERTY_ROUGHNESS = "roughness"
+PROPERTY_ALPHA_VALUE = "alpha_value"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
