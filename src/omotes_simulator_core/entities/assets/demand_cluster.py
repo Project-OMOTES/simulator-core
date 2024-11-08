@@ -77,7 +77,7 @@ class DemandCluster(AssetAbstract):
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-        self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
+        self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
         self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
