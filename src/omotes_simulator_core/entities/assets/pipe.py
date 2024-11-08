@@ -131,7 +131,8 @@ class Pipe(AssetAbstract):
         self.diameter = self._get_diameter(esdl_asset=esdl_asset)
 
         self.alpha_value = self._get_heat_transfer_coefficient(esdl_asset=esdl_asset)
-        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness}
+        prop_dict = {"length": self.length, "diameter": self.diameter, "roughness": self.roughness,
+                     "alpha_value": self.alpha_value}
         self.solver_asset.set_physical_properties(physical_properties=prop_dict)
 
     def set_setpoints(self, setpoints: Dict) -> None:
