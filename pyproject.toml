@@ -79,9 +79,6 @@ dirty_template = "{tag}.dev{ccount}"
 include-package-data = true
 zip-safe = false
 
-[tool.setuptools.package-data]
-"omotes_simulator_core" = ["solver/utils/temp_props.csv"]
-
 [tool.pytest.ini_options]
 addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
