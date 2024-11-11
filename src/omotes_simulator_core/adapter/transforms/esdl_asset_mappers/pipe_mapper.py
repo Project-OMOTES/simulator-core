@@ -62,7 +62,8 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
 
         return pipe_entity
 
-    def _get_heat_transfer_coefficient(self, esdl_asset: EsdlAssetObject) -> float:
+    @staticmethod
+    def _get_heat_transfer_coefficient(esdl_asset: EsdlAssetObject) -> float:
         """Calculate the heat transfer coefficient of the pipe.
 
         :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
@@ -87,7 +88,8 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         else:
             return PIPE_DEFAULTS.alpha_value
 
-    def _get_diameter(self, esdl_asset: EsdlAssetObject) -> float:
+    @staticmethod
+    def _get_diameter(esdl_asset: EsdlAssetObject) -> float:
         """Retrieve the diameter of the pipe and convert it if necessary."""
         temp_diameter, property_available = esdl_asset.get_property(
             "innerDiameter", PIPE_DEFAULTS.diameter

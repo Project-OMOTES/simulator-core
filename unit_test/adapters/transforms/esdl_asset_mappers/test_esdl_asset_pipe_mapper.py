@@ -109,7 +109,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         pass
 
         # Assert
-        self.assertEqual(EsdlAssetPipeMapper._get_diameter(self, esdl_asset=esdl_asset_mock), 1.0)
+        self.assertEqual(EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
 
     def test_pipe_get_property_diameter_failed(self):
         """Evaluate failure to retrieve diameter from ESDL asset."""
@@ -119,7 +119,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
         # Act
         with self.assertRaises(NotImplementedError) as cm:
-            EsdlAssetPipeMapper._get_diameter(self, esdl_asset=esdl_asset_mock)
+            EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock)
 
         # Assert
         self.assertIsInstance(cm.exception, NotImplementedError)
@@ -149,7 +149,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
         # Act
         alpha_value = EsdlAssetPipeMapper._get_heat_transfer_coefficient(
-            self, esdl_asset=esdl_pipe
+            esdl_asset=esdl_pipe
         )  # act
 
         # Assert
