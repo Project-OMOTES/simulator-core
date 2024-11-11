@@ -107,6 +107,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             power = result[0]
         else:
             raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+        marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
         contr_producer = ControllerProducer(
@@ -115,6 +116,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             temperature_supply=temperature_supply,
             temperature_return=temperature_return,
             power=power,
+            marginal_costs=marginal_costs,
         )
         return contr_producer
 
@@ -140,8 +142,10 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
         if power == 0:
             power = np.inf
 
-        temperature_supply = esdl_asset.get_supply_temperature("In")
-        temperature_return = esdl_asset.get_return_temperature("Out")
+        # It looks like they are switch, but this is because of the definition used in ESDL,
+        # which is different as what we use.
+        temperature_supply = esdl_asset.get_return_temperature("Out")
+        temperature_return = esdl_asset.get_supply_temperature("In")
         profile = esdl_asset.get_profile()
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,

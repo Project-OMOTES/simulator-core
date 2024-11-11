@@ -2,10 +2,18 @@
 
 Network controller class
 =====================================
-The network controller class is hte basic controller class. It stores lists of the controllable
-assets. The method run_time_step is used to get the controller settings for the given time step.
-For developers if you want to implement a new controller a class can be created with its own logic
-as long as there is a method run_time_step that returns the controller settings.
+The NetworkController class serves as the base controller, managing lists of controllable assets.
+The update_setpoints method retrieves controller settings for a specific time step.
+
+To create a custom controller, implement a new class with your desired logic and inherit from
+the NetworkControllerAbstract class.
+
+In the current implementation of the controller the priority of the sources is set based on the
+marginal costs.
+
+.. autoclass:: omotes_simulator_core.entities.network_controller_abstract.NetworkControllerAbstract
+    :members:
+    :no-index:
 
 .. autoclass:: omotes_simulator_core.entities.network_controller.NetworkController
     :members:
