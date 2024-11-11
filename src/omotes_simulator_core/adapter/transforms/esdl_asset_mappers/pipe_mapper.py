@@ -99,6 +99,6 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         else:
             # Implement DN-conversion
             raise NotImplementedError(
-                f"The innderDiamter property is unavailable for {esdl_asset.esdl_asset.name}. \
-                    Conversion from DN to diameter is not yet implemented."
+                f"The innerDiameter property is unavailable for {esdl_asset.esdl_asset.name}. "
+                "Conversion from DN to diameter is not yet implemented."
             )

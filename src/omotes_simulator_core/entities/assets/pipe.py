@@ -84,14 +84,14 @@ class Pipe(AssetAbstract):
         self.qheat_external = qheat_external
         # Define properties of the pipe
         self.length = length
-        self.diameter = inner_diameter
+        self.inner_diameter = inner_diameter
         self.roughness = roughness
         self.alpha_value = alpha_value
         self.solver_asset = SolverPipe(
             name=self.name,
             _id=self.asset_id,
             length=self.length,
-            diameter=self.diameter,
+            diameter=self.inner_diameter,
             roughness=self.roughness,
         )
         self.output = []

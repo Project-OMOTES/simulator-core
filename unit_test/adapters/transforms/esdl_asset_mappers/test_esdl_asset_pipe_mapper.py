@@ -41,7 +41,13 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
         # Arranging standard objects for the other test
         esdl_file_path = (
-            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test1.esdl"
+            Path(__file__).parent
+            / ".."
+            / ".."
+            / ".."
+            / ".."
+            / "testdata"
+            / "test_pipe_roughness.esdl"
         )
         esdl_file_path = str(esdl_file_path)
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
@@ -49,11 +55,16 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
     def test_to_entity_method(self):
         """Test for to_entity method."""
-        pipes = self.esdl_object.get_all_assets_of_type("pipe")  # act
+        # Arrange
+        pipes = self.esdl_object.get_all_assets_of_type("pipe")
         self.assertGreater(len(pipes), 0, "No pipes found in the ESDL file.")
         self.esdl_asset = pipes[0]
         esdl_asset = pipes[0]
+
+        # Act
         pipe_entity = self.mapper.to_entity(esdl_asset)
+
+        # Assert
         self.assertEqual(pipe_entity.name, esdl_asset.esdl_asset.name)
         self.assertEqual(pipe_entity.asset_id, esdl_asset.esdl_asset.id)
         self.assertEqual(pipe_entity.connected_ports, esdl_asset.get_port_ids())  # type: ignore
@@ -62,11 +73,13 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],  # type: ignore
         )
         self.assertEqual(
-            pipe_entity.diameter, self.mapper._get_diameter(esdl_asset)  # type: ignore
+            pipe_entity.inner_diameter,  # type: ignore
+            esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)[0],
         )
         self.assertEqual(
-            pipe_entity.roughness, esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0]
-        )  # type: ignore
+            pipe_entity.roughness,  # type: ignore
+            esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0],
+        )
         self.assertEqual(
             pipe_entity.alpha_value,  # type: ignore
             self.mapper._get_heat_transfer_coefficient(esdl_asset),
@@ -105,11 +118,16 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         esdl_asset_mock.get_property.return_value = (1.0, False)
 
         # Act
-        pass
+        with self.assertRaises(NotImplementedError) as cm:
+            EsdlAssetPipeMapper._get_diameter(self, esdl_asset=esdl_asset_mock)
 
         # Assert
-        with self.assertRaises(NotImplementedError):
-            EsdlAssetPipeMapper._get_diameter(self, esdl_asset=esdl_asset_mock)
+        self.assertIsInstance(cm.exception, NotImplementedError)
+        self.assertEqual(
+            cm.exception.args[0],
+            f"The innerDiameter property is unavailable for {esdl_asset_mock.esdl_asset.name}. "
+            "Conversion from DN to diameter is not yet implemented.",
+        )
 
     def test_pipe_get_heat_transfer_coefficient(self):
         """Evaluate the get heat transfer coefficient method."""
