@@ -38,7 +38,6 @@ class TestEsdlAssetAtesMapper(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test case."""
-
         esdl_file_path = (
             Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_ates.esdl"
         )

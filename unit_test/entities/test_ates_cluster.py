@@ -33,6 +33,7 @@ class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
     def setUp(self) -> None:
+        """Set up for the test case."""
         self.aquifer_depth = ATES_DEFAULTS.aquifer_depth
         self.aquifer_thickness = ATES_DEFAULTS.aquifer_thickness
         self.aquifer_mid_temperature = ATES_DEFAULTS.aquifer_mid_temperature
@@ -45,7 +46,6 @@ class AtesClusterTest(unittest.TestCase):
         self.well_distance = ATES_DEFAULTS.well_distance
         self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge
         self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge
-        """Set up before each test case."""
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
