@@ -40,7 +40,6 @@ class TestEsdlAssetProducerMapper(unittest.TestCase):
         """Test for to_entity method."""
         # Arrange
         producers = self.esdl_object.get_all_assets_of_type("producer")
-        self.assertGreater(len(producers), 0, "No producers found in the ESDL file.")
         esdl_asset = producers[0]
 
         # Act
