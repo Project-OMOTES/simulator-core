@@ -29,8 +29,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
-
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.entities.assets.utils import (
@@ -63,7 +61,60 @@ class AtesCluster(AssetAbstract):
     mass_flowrate: float
     """The flow rate going in or out by the asset [kg/s]."""
 
-    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
+    aquifer_depth: float
+    """The depth of the aquifer [m]."""
+
+    aquifer_thickness: float
+    """The thickness of the aquifer [m]."""
+
+    aquifer_mid_temperature: float
+    """The mid temperature of the aquifer [Celcius]."""
+
+    aquifer_net_to_gross: float
+    """The net to gross of the aquifer [%]."""
+
+    aquifer_porosity: float
+    """The porosity of the aquifer [%]."""
+
+    aquifer_permeability: float
+    """The permeability of the aquifer [mD]."""
+
+    aquifer_anisotropy: float
+    """The anisotropy of the aquifer [-]."""
+
+    salinity: float
+    """The salinity of the aquifer [ppm]."""
+
+    well_casing_size: float
+    """The casing size of the well [inch]."""
+
+    well_distance: float
+    """The distance of the well [m]."""
+
+    maximum_flow_charge: float
+    """The maximum flow charge [m3/h]."""
+
+    maximum_flow_discharge: float
+    """The maximum flow discharge [m3/h]."""
+
+    def __init__(
+        self,
+        asset_name: str,
+        asset_id: str,
+        port_ids: list[str],
+        aquifer_depth: float,
+        aquifer_thickness: float,
+        aquifer_mid_temperature: float,
+        aquifer_net_to_gross: float,
+        aquifer_porosity: float,
+        aquifer_permeability: float,
+        aquifer_anisotropy: float,
+        salinity: float,
+        well_casing_size: float,
+        well_distance: float,
+        maximum_flow_charge: float,
+        maximum_flow_discharge: float,
+    ) -> None:
         """Initialize a AtesCluster object.
 
         :param str asset_name: The name of the asset.
@@ -77,21 +128,22 @@ class AtesCluster(AssetAbstract):
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         # ATES default properties
-        self.aquifer_depth = ATES_DEFAULTS.aquifer_depth  # meters
-        self.aquifer_thickness = ATES_DEFAULTS.aquifer_thickness  # meters
-        self.aquifer_mid_temperature = ATES_DEFAULTS.aquifer_mid_temperature  # Celcius
-        self.aquifer_net_to_gross = ATES_DEFAULTS.aquifer_net_to_gross  # percentage
-        self.aquifer_porosity = ATES_DEFAULTS.aquifer_porosity  # percentage
-        self.aquifer_permeability = ATES_DEFAULTS.aquifer_permeability  # mD
-        self.aquifer_anisotropy = ATES_DEFAULTS.aquifer_anisotropy  # -
-        self.salinity = ATES_DEFAULTS.salinity  # ppm
-        self.well_casing_size = ATES_DEFAULTS.well_casing_size  # inch
-        self.well_distance = ATES_DEFAULTS.well_distance  # meters
-        self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge  # m3/h
-        self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
+        self.aquifer_depth = aquifer_depth  # meters
+        self.aquifer_thickness = aquifer_thickness  # meters
+        self.aquifer_mid_temperature = aquifer_mid_temperature  # Celcius
+        self.aquifer_net_to_gross = aquifer_net_to_gross  # percentage
+        self.aquifer_porosity = aquifer_porosity  # percentage
+        self.aquifer_permeability = aquifer_permeability  # mD
+        self.aquifer_anisotropy = aquifer_anisotropy  # -
+        self.salinity = salinity  # ppm
+        self.well_casing_size = well_casing_size  # inch
+        self.well_distance = well_distance  # meters
+        self.maximum_flow_charge = maximum_flow_charge  # m3/h
+        self.maximum_flow_discharge = maximum_flow_discharge  # m3/h
 
         # Output list
         self.output: list = []
+        self._init_rosim()
 
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
@@ -142,54 +194,6 @@ class AtesCluster(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
          :return:
         """
-        self.aquifer_depth, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferTopDepth", default_value=self.aquifer_depth
-        )
-        self.aquifer_thickness, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferThickness", default_value=self.aquifer_thickness
-        )
-        self.aquifer_mid_temperature, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferMidTemperature", default_value=self.aquifer_mid_temperature
-        )
-        self.aquifer_net_to_gross, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferNetToGross", default_value=self.aquifer_net_to_gross
-        )
-        self.aquifer_porosity, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferPorosity", default_value=self.aquifer_porosity
-        )
-        self.aquifer_permeability, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferPermeability", default_value=self.aquifer_permeability
-        )
-        self.aquifer_anisotropy, _ = esdl_asset.get_property(
-            esdl_property_name="aquiferAnisotropy", default_value=self.aquifer_anisotropy
-        )
-        self.salinity, _ = esdl_asset.get_property(
-            esdl_property_name="salinity", default_value=self.salinity
-        )
-        self.well_casing_size, _ = esdl_asset.get_property(
-            esdl_property_name="wellCasingSize", default_value=self.well_casing_size
-        )
-        self.well_distance, _ = esdl_asset.get_property(
-            esdl_property_name="wellDistance", default_value=self.well_distance
-        )
-
-        maximum_charge_power, _ = esdl_asset.get_property(
-            esdl_property_name="maxChargeRate", default_value=12e7
-        )
-
-        self.maximum_flow_charge = heat_demand_and_temperature_to_mass_flow(
-            maximum_charge_power, self.temperature_supply, self.temperature_return
-        )
-
-        maximum_discharge_power, _ = esdl_asset.get_property(
-            esdl_property_name="maxChargeRate", default_value=12e7
-        )
-
-        self.maximum_flow_discharge = heat_demand_and_temperature_to_mass_flow(
-            maximum_discharge_power, self.temperature_supply, self.temperature_return
-        )
-
-        self._init_rosim()
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.

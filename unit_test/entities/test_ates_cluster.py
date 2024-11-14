@@ -16,6 +16,7 @@
 """Test Ates Cluster entities."""
 import faulthandler
 import unittest
+from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
 
 faulthandler.disable()
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
@@ -32,10 +33,36 @@ class AtesClusterTest(unittest.TestCase):
     """Testcase for AtesCluster class."""
 
     def setUp(self) -> None:
+        self.aquifer_depth = ATES_DEFAULTS.aquifer_depth
+        self.aquifer_thickness = ATES_DEFAULTS.aquifer_thickness
+        self.aquifer_mid_temperature = ATES_DEFAULTS.aquifer_mid_temperature
+        self.aquifer_net_to_gross = ATES_DEFAULTS.aquifer_net_to_gross
+        self.aquifer_porosity = ATES_DEFAULTS.aquifer_porosity
+        self.aquifer_permeability = ATES_DEFAULTS.aquifer_permeability
+        self.aquifer_anisotropy = ATES_DEFAULTS.aquifer_anisotropy
+        self.salinity = ATES_DEFAULTS.salinity
+        self.well_casing_size = ATES_DEFAULTS.well_casing_size
+        self.well_distance = ATES_DEFAULTS.well_distance
+        self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge
+        self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge
         """Set up before each test case."""
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
-            asset_name="ates_cluster", asset_id="ates_cluster_id", port_ids=["test1", "test2"]
+            asset_name="ates_cluster",
+            asset_id="ates_cluster_id",
+            port_ids=["test1", "test2"],
+            aquifer_depth=self.aquifer_depth,
+            aquifer_thickness=self.aquifer_thickness,
+            aquifer_mid_temperature=self.aquifer_mid_temperature,
+            aquifer_net_to_gross=self.aquifer_net_to_gross,
+            aquifer_porosity=self.aquifer_porosity,
+            aquifer_permeability=self.aquifer_permeability,
+            aquifer_anisotropy=self.aquifer_anisotropy,
+            salinity=self.salinity,
+            well_casing_size=self.well_casing_size,
+            well_distance=self.well_distance,
+            maximum_flow_charge=self.maximum_flow_charge,
+            maximum_flow_discharge=self.maximum_flow_discharge,
         )
         faulthandler.disable()
         self.ates_cluster._init_rosim()
