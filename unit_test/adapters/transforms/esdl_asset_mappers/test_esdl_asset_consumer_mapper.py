@@ -40,7 +40,6 @@ class TestEsdlAssetConsumerMapper(unittest.TestCase):
         """Test for to_entity method."""
         # Arrange
         consumers = self.esdl_object.get_all_assets_of_type("consumer")
-        self.assertGreater(len(consumers), 0, "No consumers found in the ESDL file.")
         esdl_asset = consumers[0]
 
         # Act
