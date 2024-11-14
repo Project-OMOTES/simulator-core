@@ -143,7 +143,6 @@ class AtesCluster(AssetAbstract):
 
         # Output list
         self.output: list = []
-        self._init_rosim()
 
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
@@ -194,6 +193,7 @@ class AtesCluster(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
          :return:
         """
+        self._init_rosim()
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
