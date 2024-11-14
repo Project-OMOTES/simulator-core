@@ -40,7 +40,6 @@ class TestEsdlAssetHeatPumpMapper(unittest.TestCase):
         """Test for to_entity method."""
         # Arrange
         pumps = self.esdl_object.get_all_assets_of_type("pump")
-        self.assertGreater(len(pumps), 0, "No pumps found in the ESDL file.")
         esdl_asset = pumps[0]
 
         # Act
