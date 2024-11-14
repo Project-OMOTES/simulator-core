@@ -15,6 +15,7 @@
 
 """Test Junction entities."""
 import unittest
+from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.pipe import Pipe
 
@@ -61,3 +62,30 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pipe.minor_loss_coefficient, self.minor_loss_coefficient)
         self.assertEqual(pipe.external_temperature, self.external_temperature)
         self.assertEqual(pipe.qheat_external, self.qheat_external)
+
+    def test_get_velocity(self):
+        """Test the get_velocity method."""
+        # arrange
+        pipe = Pipe(
+            asset_name="pipe",
+            asset_id="pipe_id",
+            port_ids=["test1", "test2"],
+            length=self.length,
+            inner_diameter=self.inner_diameter,
+            roughness=self.roughness,
+            alpha_value=self.alpha_value,
+            minor_loss_coefficient=self.minor_loss_coefficient,
+            external_temperature=self.external_temperature,
+            qheat_external=self.qheat_external,
+        )
+        with (
+            patch.object(
+                pipe,
+                "get_volume_flow_rate",
+            ) as get_volume_flow_rate,
+        ):
+            get_volume_flow_rate.return_value = 10.0
+            # act
+            velocity = pipe.get_velocity(port=0)
+        # assert
+        self.assertEqual(velocity, 12.732395447351628)

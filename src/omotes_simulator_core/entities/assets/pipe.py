@@ -18,6 +18,7 @@ from typing import Dict, List
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_VELOCITY
 
 
 class Pipe(AssetAbstract):
@@ -93,7 +94,6 @@ class Pipe(AssetAbstract):
             diameter=self.inner_diameter,
             roughness=self.roughness,
         )
-        self.output = []
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset."""
@@ -111,4 +111,14 @@ class Pipe(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        pass
+        for i in range(len(self.connected_ports)):
+            output_dict_temp = {PROPERTY_VELOCITY: self.get_velocity(i)}
+            self.outputs[i][-1].update(output_dict_temp)
+
+    def get_velocity(self, port: int) -> float:
+        """Get the velocity of the fluid in the pipe at the given connection point.
+
+        :param int port: The port of the pipe for which to get the velocity.
+        :return: The velocity of the fluid in the pipe [m/s].
+        """
+        return self.get_volume_flow_rate(port) / self.solver_asset.area
