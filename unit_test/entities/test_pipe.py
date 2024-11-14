@@ -25,13 +25,25 @@ class PipeTest(unittest.TestCase):
 
     def setUp(self):
         """Define the variables used in the tests."""
-        self.length: float = 1
+        self.length: float = 5
         self.inner_diameter: float = 1
         self.roughness: float = 0.001
         self.alpha_value: float = 0.8
         self.minor_loss_coefficient: float = 0.0
         self.external_temperature: float = 273.15 + 20.0
         self.qheat_external: float = 0.0
+        self.pipe = Pipe(
+            asset_name="pipe",
+            asset_id="pipe_id",
+            port_ids=["test1", "test2"],
+            length=self.length,
+            inner_diameter=self.inner_diameter,
+            roughness=self.roughness,
+            alpha_value=self.alpha_value,
+            minor_loss_coefficient=self.minor_loss_coefficient,
+            external_temperature=self.external_temperature,
+            qheat_external=self.qheat_external,
+        )
 
     def test_pipe_create(self):
         """Evaluate the creation of a pipe object."""
@@ -66,26 +78,65 @@ class PipeTest(unittest.TestCase):
     def test_get_velocity(self):
         """Test the get_velocity method."""
         # arrange
-        pipe = Pipe(
-            asset_name="pipe",
-            asset_id="pipe_id",
-            port_ids=["test1", "test2"],
-            length=self.length,
-            inner_diameter=self.inner_diameter,
-            roughness=self.roughness,
-            alpha_value=self.alpha_value,
-            minor_loss_coefficient=self.minor_loss_coefficient,
-            external_temperature=self.external_temperature,
-            qheat_external=self.qheat_external,
-        )
         with (
             patch.object(
-                pipe,
+                self.pipe,
                 "get_volume_flow_rate",
             ) as get_volume_flow_rate,
         ):
             get_volume_flow_rate.return_value = 10.0
             # act
-            velocity = pipe.get_velocity(port=0)
+            velocity = self.pipe.get_velocity(port=0)
         # assert
         self.assertEqual(velocity, 12.732395447351628)
+
+    def test_get_pressure_loss(self):
+        """Test the get_pressure_loss method."""
+
+        # arrange
+        def get_pressure(_, i: int):
+            if i == 0:
+                return 1.0
+            if i == 1:
+                return 2.0
+
+        with patch(
+            "omotes_simulator_core.solver.network.assets.solver_pipe.SolverPipe.get_pressure",
+            get_pressure,
+        ):
+            # act
+            pressure_loss = self.pipe.get_pressure_loss()
+
+        # assert
+        self.assertEqual(pressure_loss, 1.0)
+
+    def test_get_pressure_loss_per_length(self):
+        """Test for the get_pressure_loss_per_length method."""
+
+        # arrange
+        def get_pressure(_, i: int):
+            if i == 0:
+                return 10.0
+            if i == 1:
+                return 20.0
+
+        with patch(
+            "omotes_simulator_core.solver.network.assets.solver_pipe.SolverPipe.get_pressure",
+            get_pressure,
+        ):
+            # act
+            pressure_loss = self.pipe.get_pressure_loss_per_length()
+
+        # assert
+        self.assertEqual(pressure_loss, 2.0)
+
+    def test_get_heat_loss(self):
+        """Test the get_heat_loss method."""
+        # arrange
+        self.pipe.solver_asset.heat_supplied = 1000.0
+
+        # act
+        heat_loss = self.pipe.get_heat_loss()
+
+        # assert
+        self.assertEqual(heat_loss, -1000.0)
