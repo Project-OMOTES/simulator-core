@@ -87,7 +87,7 @@ class Pipe(AssetAbstract):
         self.inner_diameter = inner_diameter
         self.roughness = roughness
         self.alpha_value = alpha_value
-        self.solver_asset = SolverPipe(
+        self.solver_asset: SolverPipe = SolverPipe(
             name=self.name,
             _id=self.asset_id,
             length=self.length,
@@ -121,4 +121,4 @@ class Pipe(AssetAbstract):
         :param int port: The port of the pipe for which to get the velocity.
         :return: The velocity of the fluid in the pipe [m/s].
         """
-        return self.get_volume_flow_rate(port) / self.solver_asset.area
+        return float(self.get_volume_flow_rate(port) / self.solver_asset.area)
