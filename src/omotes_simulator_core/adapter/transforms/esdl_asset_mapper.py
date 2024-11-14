@@ -30,7 +30,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.EsdlAssetConsumerMapper import (
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
     EsdlAssetConsumerMapper,
 )
 
@@ -77,7 +77,7 @@ class EsdlAssetMapper:
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
             return mapper.to_entity(model)
-
+        # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
             model.get_name(),
             model.get_id(),
