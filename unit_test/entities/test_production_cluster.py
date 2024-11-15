@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Test Junction entities."""
+"""Test production cluster."""
 import unittest
 from unittest.mock import patch
 
@@ -248,3 +248,22 @@ class ProductionClusterTest(unittest.TestCase):
             volume_flow_rate = self.production_cluster.get_volume_flow_rate(i=0)
             # Assert
             self.assertEqual(volume_flow_rate, 1.0)
+
+    def test_get_actual_heat_supplied(self):
+        """Test getting the actual heat supplied by a production cluster."""
+
+        # Arrange
+        def get_internal_energy(_, i: int):
+            if i == 0:
+                return 1.0e6
+            if i == 1:
+                return 2.0e6
+
+        with patch(
+            "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_internal_energy",
+            get_internal_energy,
+        ):
+            # Act
+            actual_heat_supplied = self.production_cluster.get_actual_heat_supplied()
+            # Assert
+            self.assertEqual(actual_heat_supplied, 1e6)
