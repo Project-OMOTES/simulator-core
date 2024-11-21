@@ -101,7 +101,7 @@ class DemandCluster(AssetAbstract):
         represents the output of its asset for a specific timestep.
         """
         output_dict_temp = {
-            PROPERTY_HEAT_DEMAND_SET_POINT: self.thermal_power_allocation,
+            PROPERTY_HEAT_DEMAND_SET_POINT: -self.thermal_power_allocation,
             PROPERTY_HEAT_DEMAND: self.get_actual_heat_supplied(),
         }
         self.outputs[1][-1].update(output_dict_temp)
@@ -111,4 +111,6 @@ class DemandCluster(AssetAbstract):
 
         :return float: The actual heat supplied by the asset [W].
         """
-        return self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        return (
+            self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        ) * self.solver_asset.get_mass_flow_rate(0)
