@@ -13,11 +13,3 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """__init__.py file for initialization code."""
-from importlib.metadata import version, PackageNotFoundError
-
-try:
-    __version__ = version("omotes-simulator-core")
-except PackageNotFoundError:
-    # should always find a version, but just in case
-    __version__ = "unknown"
-    pass

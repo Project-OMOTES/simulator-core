@@ -17,7 +17,6 @@
 from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
-
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 
@@ -175,8 +174,8 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
             py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
-            py_assets_list[-1].add_physical_data(esdl_asset=esdl_asset)
             network.add_existing_asset(py_assets_list[-1].solver_asset)
+
         return py_assets_list
 
     def _get_junction(self) -> dict[str, list[tuple[str, str]]]:

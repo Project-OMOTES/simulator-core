@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
+    PROPERTY_ALPHA_VALUE
 )
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
@@ -55,6 +56,7 @@ class SolverPipeTest(unittest.TestCase):
             PROPERTY_DIAMETER: 0.5,
             PROPERTY_LENGTH: 2000.0,
             PROPERTY_ROUGHNESS: 0.002,
+            PROPERTY_ALPHA_VALUE: 0.5,
         }
 
         # act
@@ -64,6 +66,7 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(self.asset.diameter, physical_properties_dict[PROPERTY_DIAMETER])
         self.assertEqual(self.asset.length, physical_properties_dict[PROPERTY_LENGTH])
         self.assertEqual(self.asset.roughness, physical_properties_dict[PROPERTY_ROUGHNESS])
+        self.assertEqual(self.asset.alpha_value, physical_properties_dict[PROPERTY_ALPHA_VALUE])
         self.assertEqual(self.asset.area, 0.19634954084936207)
 
     def test_set_physical_properties_missing_key(self) -> None:
