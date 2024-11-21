@@ -264,11 +264,13 @@ class ProductionClusterTest(unittest.TestCase):
 
         with (
             patch(
-                "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_internal_energy",
+                "omotes_simulator_core.solver.network.assets.base_asset."
+                "BaseAsset.get_internal_energy",
                 get_internal_energy,
             ),
             patch(
-                "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_mass_flow_rate",
+                "omotes_simulator_core.solver.network.assets.base_asset."
+                "BaseAsset.get_mass_flow_rate",
                 get_mass_flow_rate,
             ),
         ):
