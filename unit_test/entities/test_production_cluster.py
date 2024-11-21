@@ -250,7 +250,7 @@ class ProductionClusterTest(unittest.TestCase):
             self.assertEqual(volume_flow_rate, 1.0)
 
     def test_get_actual_heat_supplied(self):
-        """Test getting the actual heat supplied by a production cluster."""
+        """Test getting the actual heat supplied by a production cluster."""  # noqa: D202
 
         # Arrange
         def get_internal_energy(_, i: int):
