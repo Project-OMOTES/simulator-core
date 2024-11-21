@@ -259,11 +259,20 @@ class ProductionClusterTest(unittest.TestCase):
             if i == 1:
                 return 2.0e6
 
-        with patch(
-            "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_internal_energy",
-            get_internal_energy,
+        def get_mass_flow_rate(_, i: int):
+            return 0.5
+
+        with (
+            patch(
+                "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_internal_energy",
+                get_internal_energy,
+            ),
+            patch(
+                "omotes_simulator_core.solver.network.assets.base_asset.BaseAsset.get_mass_flow_rate",
+                get_mass_flow_rate,
+            ),
         ):
             # Act
             actual_heat_supplied = self.production_cluster.get_actual_heat_supplied()
             # Assert
-            self.assertEqual(actual_heat_supplied, 1e6)
+            self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
