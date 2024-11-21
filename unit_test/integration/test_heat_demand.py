@@ -16,7 +16,6 @@
 import unittest
 import esdl
 import uuid
-import sys
 import numpy as np
 from datetime import datetime
 from pathlib import Path
@@ -24,133 +23,127 @@ from unittest.mock import Mock
 import pandas as pd
 
 from omotes_simulator_core.adapter.transforms.mappers import (
-    EsdlControllerMapper,
-    EsdlEnergySystemMapper,
+    EsdlControllerMapper
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.simulation.networksimulation import NetworkSimulation
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class HeatDemandTest(unittest.TestCase):
-    """Integration test for heat demand."""
 
-    # Possible extra functions here: setUp (for setting up the tests).
-
-    def test_heat_demand(self):
+    def setUp(self) -> None:
         """
-        This test checks the physics of the heat demand and supply system. It
-        fist gets the supplied demand profiles from the esdl and then, for each
-        time step, gets the cp, mass flow and temperatures. These values are used
-        to calculate the heat flow at each demand point and then compare to the
-        edl input.
+        Setting up and running the simulation used for the tests
         """
 
-        # Arrange
-        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
-        esdl_file_path = str(esdl_file_path)
+        esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl")
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
-        controller = EsdlControllerMapper().to_entity(esdl_object)
-        network_simulation = NetworkSimulation(network, controller)
-        start_time = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
-        end_time = datetime.strptime("2019-01-01T06:00:00", "%Y-%m-%dT%H:%M:%S")
+        self.controller = EsdlControllerMapper().to_entity(esdl_object)
+        self.start_time = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
+        self.end_time = datetime.strptime("2019-01-01T06:00:00", "%Y-%m-%dT%H:%M:%S")
         config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                         name="test run",
                                         timestep=3600,
-                                        start=start_time,
-                                        stop=end_time)
-        # Act
+                                        start = self.start_time,
+                                        stop = self.end_time)
         callback = Mock()
         app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
-        result = app.execute(callback)
+        self.result = app.execute(callback)
 
         energy_system = esdl_object.energy_system_handler.energy_system
-
+        
         # Collect demands
-        demands = []
+        self.demands = []
         for element in energy_system.eAllContents():
             if isinstance(element, esdl.HeatingDemand):
-                demands.append(element)
+                self.demands.append(element)
 
         # Collect id of in and out ports of each demand.
-        in_out_demand_dict = dict()
-        for demand in demands:
-            demand_id = demand.id
-            in_out_demand_dict[demand_id] = dict()
+        self.in_out_demand_dict = dict()
+        for demand in self.demands:
+            self.in_out_demand_dict[demand.id] = dict()
             for port in demand.port:
                 if isinstance(port, esdl.InPort):
-                    in_out_demand_dict[demand_id]["InPort"] = port.id
+                    self.in_out_demand_dict[demand.id]["InPort"] = port.id
                 elif isinstance(port, esdl.OutPort):
-                    in_out_demand_dict[demand_id]["OutPort"] = port.id
-
-        # Run through results to get the temperature and mass vaules over time.
-        q_dot_demand_computed = dict()
-        temp_in_out_demand = dict()
-
-        for demand in demands:
-            demand_id = demand.id
-            in_port_id = in_out_demand_dict[demand_id]["InPort"]  
-            out_port_id = in_out_demand_dict[demand_id]["OutPort"]
-
-            m_dot_in_array = np.array(result[(in_port_id, 'mass_flow')])
-            m_dot_out_array = np.array(result[(out_port_id, 'mass_flow')])
-
-            m_dot = (-m_dot_in_array + m_dot_out_array)/2
+                    self.in_out_demand_dict[demand.id]["OutPort"] = port.id       
+    
+    def _get_demand_in_out_temperatures(self, in_out_ports:dict): 
+        """
+        Gets the temperatures at the in and out ports of the demand assets in the simulation.
+        """
+        temp_in_dict = dict()
+        temp_out_dict = dict()
+        for demand in self.demands:
+            in_port_id = in_out_ports[demand.id]["InPort"]  
+            out_port_id = in_out_ports[demand.id]["OutPort"]
+        
+            temp_in_dict[demand.id] = np.array(self.result[(in_port_id, 'temperature')])
+            temp_out_dict[demand.id] = np.array(self.result[(out_port_id, 'temperature')])
             
-            temp_in = result[(in_port_id, 'temperature')]
-            temp_out = result[(out_port_id, 'temperature')]
-            temp_in_out_demand[demand_id] = dict()
-            temp_in_out_demand[demand_id]["In"] = temp_in
-            temp_in_out_demand[demand_id]["Out"] = temp_out
+        return temp_in_dict, temp_out_dict 
 
-            cp_in = [] 
-            cp_out = []
-            for temp_in, temp_out in zip(temp_in, temp_out):
-                cp_in.append(fluid_props.get_heat_capacity(temp_in))
-                cp_out.append(fluid_props.get_heat_capacity(temp_out))
+    def test_heat_power(self) -> None:
+        """
+        This test checks if the heat power supplied matches the demand profiles inputted through
+        the esdl. It first computes the heat consumption and the demand assets using the mass 
+        flow, heat capacity and temperature delta and then compares it with esdl demand profile.
+        """    
 
-            cp = (np.array(cp_in) + np.array(cp_out)) / 2
+        q_dot_demand_computed = dict()
+        temp_in_dict, temp_out_dict = self._get_demand_in_out_temperatures(self.in_out_demand_dict)
+        q_dot_demand_esdl = dict()
+        consumers_object = self.controller.consumers
 
-            q_dot_demand_computed[demand_id] = m_dot * cp * (temp_in - temp_out)
+        for demand in self.demands:
+            in_port_id = self.in_out_demand_dict[demand.id]["InPort"]
+            out_port_id = self.in_out_demand_dict[demand.id]["OutPort"]
+            m_dot_in_array = np.array(self.result[(in_port_id, 'mass_flow')])
+            m_dot_out_array = np.array(self.result[(out_port_id, 'mass_flow')])
+            m_dot = (-m_dot_in_array + m_dot_out_array)/2
+            cp = np.array([])
+            temp_in_array = temp_in_dict[demand.id]
+            temp_out_array = temp_out_dict[demand.id]
+
+            for temp_in, temp_out in zip(temp_in_array, temp_out_array):
+                cp = np.append(cp, fluid_props.get_heat_capacity((temp_in + temp_out)/2))
+
+            q_dot_demand_computed[demand.id] = m_dot * cp * (temp_in_array - temp_out_array)
 
         # Obtain demand profiles from the esdl
-        q_dot_demand_esdl = dict()
-        consumers_object = controller.consumers
         for demand in consumers_object:
             demand_id = demand.id
             profile_dates = demand.profile["date"]
             profile_vals = demand.profile["values"]
-            start_timestamp = pd.Timestamp(start_time).tz_localize('UTC')
-            end_timestamp = pd.Timestamp(end_time).tz_localize('UTC')
+            start_timestamp = pd.Timestamp(self.start_time).tz_localize('UTC')
+            end_timestamp = pd.Timestamp(self.end_time).tz_localize('UTC')
             idx_start_prof = profile_dates.tolist().index(start_timestamp)
             idx_end_prof = profile_dates.tolist().index(end_timestamp)
-
-            #idx_end_prof = 
             q_dot_demand_esdl[demand_id] = profile_vals[idx_start_prof:idx_end_prof]
         
-        # Atest
-        for demand in consumers_object: # The number of tests done here depends on the number of demand elements in the problem.
+        # Compare the computed heat consumption with the demand profiles in the esdl.
+        for demand in consumers_object: 
             demand_id = demand.id
             q_dot_esdl = np.array(q_dot_demand_esdl[demand_id])
             q_dot_computed = q_dot_demand_computed[demand_id]
-            print(q_dot_esdl- q_dot_computed)
-            for q_dot_val_esdl, q_dot_val_comp in zip(q_dot_esdl, q_dot_computed):
-                self.assertAlmostEqual(q_dot_val_esdl, q_dot_val_comp)
-        
-        # Ensure that return temperature is equal or lower than the primary one.
-        for demand in demands:
-            demand_id = demand.id
-            temp_in_list = temp_in_out_demand[demand_id]["In"].tolist()
-            temp_out_list = temp_in_out_demand[demand_id]["Out"].tolist()
-            for temp_in, temp_out in zip(temp_in_list, temp_out_list):
-                self.assertGreaterEqual(temp_in + 1e-5, temp_out)
+            np.testing.assert_allclose(q_dot_esdl, q_dot_computed, rtol = 0.001)
 
+    def test_primary_return_temperature(self) -> None:
+        """
+        This test checks wether the return temperatures are always lower than the primary ones
+        at the demand assets. It does it by comparing the temperatures at the in and out ports.
+        """
+        temp_in_dict, temp_out_dict = self._get_demand_in_out_temperatures(self.in_out_demand_dict)
+        for demand in self.demands:
+            temp_in_array = temp_in_dict[demand.id]
+            temp_out_array = temp_out_dict[demand.id]
+            np.testing.assert_array_less(temp_out_array, temp_in_array + 1e-5)
 
 if __name__ == "__main__":
     test_object = HeatDemandTest()
-    test_object.test_heat_demand()
+    test_object.setUp()
+    test_object.test_heat_power()
+    test_object.test_primary_return_temperature()
