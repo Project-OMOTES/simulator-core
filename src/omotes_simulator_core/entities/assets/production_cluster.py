@@ -207,7 +207,9 @@ class ProductionCluster(AssetAbstract):
 
         :return float: The actual heat supplied by the asset [W].
         """
-        return self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        return (
+            self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        ) * self.solver_asset.get_mass_flow_rate(0)
 
     def write_to_output(self) -> None:
         """Method to write the asset to the output.
