@@ -91,7 +91,7 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(velocity, 12.732395447351628)
 
     def test_get_pressure_loss(self):
-        """Test the get_pressure_loss method."""
+        """Test the get_pressure_loss."""  # noqa: D202
 
         # arrange
         def get_pressure(_, i: int):
@@ -111,7 +111,7 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pressure_loss, 1.0)
 
     def test_get_pressure_loss_per_length(self):
-        """Test for the get_pressure_loss_per_length method."""
+        """Test for the get_pressure_loss_per_length method."""  # noqa: D202
 
         # arrange
         def get_pressure(_, i: int):
