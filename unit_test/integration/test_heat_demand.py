@@ -21,6 +21,7 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock
+import pandas as pd
 
 from omotes_simulator_core.adapter.transforms.mappers import (
     EsdlControllerMapper,
@@ -56,13 +57,13 @@ class HeatDemandTest(unittest.TestCase):
         network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
         controller = EsdlControllerMapper().to_entity(esdl_object)
         network_simulation = NetworkSimulation(network, controller)
+        start_time = datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
+        end_time = datetime.strptime("2019-01-01T06:00:00", "%Y-%m-%dT%H:%M:%S")
         config = SimulationConfiguration(simulation_id=uuid.uuid1(),
                                         name="test run",
                                         timestep=3600,
-                                        start=datetime.strptime("2019-01-01T00:00:00",
-                                                                "%Y-%m-%dT%H:%M:%S"),
-                                        stop=datetime.strptime("2019-01-01T06:00:00",
-                                                                "%Y-%m-%dT%H:%M:%S"))
+                                        start=start_time,
+                                        stop=end_time)
         # Act
         callback = Mock()
         app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
@@ -88,48 +89,59 @@ class HeatDemandTest(unittest.TestCase):
                     in_out_demand_dict[demand_id]["OutPort"] = port.id
 
         # Run through results to get the temperature and mass vaules over time.
-        m_dot_in_out_demand = dict()
+        q_dot_demand_computed = dict()
         temp_in_out_demand = dict()
-        cp_in_out_demand = dict()
-        q_dot_demand = dict()
 
         for demand in demands:
             demand_id = demand.id
             in_port_id = in_out_demand_dict[demand_id]["InPort"]  
             out_port_id = in_out_demand_dict[demand_id]["OutPort"]
-                        
-            m_dot_in_out_demand[demand_id] = dict()
+
+            m_dot_in_array = np.array(result[(in_port_id, 'mass_flow')])
+            m_dot_out_array = np.array(result[(out_port_id, 'mass_flow')])
+
+            m_dot = (-m_dot_in_array + m_dot_out_array)/2
+            
+            temp_in = result[(in_port_id, 'temperature')]
+            temp_out = result[(out_port_id, 'temperature')]
             temp_in_out_demand[demand_id] = dict()
-            cp_in_out_demand[demand_id] = dict()
+            temp_in_out_demand[demand_id]["In"] = temp_in
+            temp_in_out_demand[demand_id]["Out"] = temp_out
 
-            m_dot_in_list = result[(in_port_id, 'mass_flow')]
-            m_dot_out_list = -1*result[(out_port_id, 'mass_flow')]
-            m_dot_in_out_demand[demand_id]["In"] = m_dot_in_list
-            m_dot_in_out_demand[demand_id]["Out"] = m_dot_out_list
-
-            temp_in_list = result[(in_port_id, 'temperature')]
-            temp_out_list = result[(out_port_id, 'temperature')]
-            temp_in_out_demand[demand_id]["In"] = temp_in_list
-            temp_in_out_demand[demand_id]["Out"] = temp_out_list
             cp_in = [] 
             cp_out = []
-            for temp_in, temp_out in zip(temp_in_list, temp_out_list):
+            for temp_in, temp_out in zip(temp_in, temp_out):
                 cp_in.append(fluid_props.get_heat_capacity(temp_in))
                 cp_out.append(fluid_props.get_heat_capacity(temp_out))
-            cp_in_out_demand[demand_id]["In"] = cp_in
-            cp_in_out_demand[demand_id]["Out"] = cp_out
 
             cp = (np.array(cp_in) + np.array(cp_out)) / 2
-            q_dot_in = np.array(m_dot_in_list) * cp * np.array(temp_in_list)
-            q_dot_out = np.array(m_dot_out_list) * cp * np.array(temp_out_list)
-            delta_q_dot = q_dot_in - q_dot_out
-            q_dot_demand[demand_id] = delta_q_dot
 
-        print(q_dot_demand)
-        # Figure out how to get the demand profiles from the esdl. Maybe ask Ryvo.
-        print(temp_in_out_demand)
+            q_dot_demand_computed[demand_id] = m_dot * cp * (temp_in - temp_out)
+
+        # Obtain demand profiles from the esdl
+        q_dot_demand_esdl = dict()
+        consumers_object = controller.consumers
+        for demand in consumers_object:
+            demand_id = demand.id
+            profile_dates = demand.profile["date"]
+            profile_vals = demand.profile["values"]
+            start_timestamp = pd.Timestamp(start_time).tz_localize('UTC')
+            end_timestamp = pd.Timestamp(end_time).tz_localize('UTC')
+            idx_start_prof = profile_dates.tolist().index(start_timestamp)
+            idx_end_prof = profile_dates.tolist().index(end_timestamp)
+
+            #idx_end_prof = 
+            q_dot_demand_esdl[demand_id] = profile_vals[idx_start_prof:idx_end_prof]
+        
         # Atest
-        # Compare the consumed Qdot with the profile supplied by the esdl.
+        for demand in consumers_object: # The number of tests done here depends on the number of demand elements in the problem.
+            demand_id = demand.id
+            q_dot_esdl = np.array(q_dot_demand_esdl[demand_id])
+            q_dot_computed = q_dot_demand_computed[demand_id]
+            print(q_dot_esdl- q_dot_computed)
+            for q_dot_val_esdl, q_dot_val_comp in zip(q_dot_esdl, q_dot_computed):
+                self.assertAlmostEqual(q_dot_val_esdl, q_dot_val_comp)
+        
         # Ensure that return temperature is equal or lower than the primary one.
         for demand in demands:
             demand_id = demand.id
