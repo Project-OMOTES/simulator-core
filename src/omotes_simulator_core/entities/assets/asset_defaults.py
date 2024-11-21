@@ -90,7 +90,7 @@ PROPERTY_ROUGHNESS = "roughness"
 PROPERTY_ALPHA_VALUE = "alpha_value"
 PROPERTY_PRESSURE_LOSS = "pressure_loss"
 PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
-PROPERTY_HEAT_LOSS = ("heat_loss",)
+PROPERTY_HEAT_LOSS = "heat_loss"
 PROPERTY_HEAT_SUPPLIED = "heat_supplied"
 PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
 
