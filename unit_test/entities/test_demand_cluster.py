@@ -21,6 +21,8 @@ from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 
 
 class TestDemandCluster(unittest.TestCase):
+    """Test demand cluster."""
+
     def setUp(self) -> None:
         """Set up test case."""
         # Create a production cluster object
