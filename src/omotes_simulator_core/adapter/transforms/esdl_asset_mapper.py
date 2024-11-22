@@ -19,35 +19,41 @@ from typing import Any, Type
 import esdl
 import numpy as np
 
-from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
-
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
-
-
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
+    EsdlAssetProducerMapper,
+)
+from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.heat_pump import HeatPump
+from omotes_simulator_core.simulation.mappers.mappers import Entity, EsdlMapperAbstract
 
 CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
-    esdl.Producer: ProductionCluster,
-    esdl.GenericProducer: ProductionCluster,
     esdl.Consumer: DemandCluster,
     esdl.GenericConsumer: DemandCluster,
     esdl.HeatingDemand: DemandCluster,
     esdl.ATES: AtesCluster,
     esdl.HeatPump: HeatPump,
 }
-
 # Define the conversion dictionary
-conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper}
+conversion_dict_mappers = {
+    esdl.Pipe: EsdlAssetPipeMapper,
+    esdl.Producer: EsdlAssetProducerMapper,
+    esdl.GenericProducer: EsdlAssetProducerMapper,
+}
 
 
 class EsdlAssetMapper:
@@ -77,7 +83,6 @@ class EsdlAssetMapper:
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
             return mapper.to_entity(model)
-
         # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
             model.get_name(),
