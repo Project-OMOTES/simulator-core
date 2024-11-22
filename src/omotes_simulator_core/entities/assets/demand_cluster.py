@@ -77,13 +77,13 @@ class DemandCluster(AssetAbstract):
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-        self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-        self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
-        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_RETURN]
+        self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
+        self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
+        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
             self.thermal_power_allocation, self.temperature_supply, self.temperature_return_target
         )
-        self.solver_asset.supply_temperature = self.temperature_return_target
+        self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:

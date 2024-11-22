@@ -33,6 +33,7 @@ class ControllerProducerTest(unittest.TestCase):
             temperature_supply=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
             temperature_return=DEFAULT_TEMPERATURE,
             power=1000,
+            marginal_costs=0.1,
             priority=1,
         )
         # Act
@@ -45,4 +46,5 @@ class ControllerProducerTest(unittest.TestCase):
             producer.temperature_supply, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(producer.power, 1000)
+        self.assertEqual(producer.marginal_costs, 0.1)
         self.assertEqual(producer.priority, 1)

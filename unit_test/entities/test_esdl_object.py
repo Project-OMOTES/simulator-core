@@ -90,8 +90,8 @@ class EsdlObjectTest(unittest.TestCase):
         connected_assets2 = self.esdl_object.get_connected_assets(asset.id, asset.port[0].id)  # act
 
         # Assert
-        self.assertEqual(connected_assets1, test_list1)
-        self.assertEqual(connected_assets2, test_list2)
+        self.assertEqual(connected_assets1, test_list2)
+        self.assertEqual(connected_assets2, test_list1)
 
     def test_get_property(self):
         """Test get_property method."""
@@ -173,6 +173,50 @@ class EsdlObjectTest(unittest.TestCase):
         # Assert
         self.assertEqual(return_temperature, 313.15)
 
+    def test_get_supply_temperature_consumer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
+
+        # Act
+        supply_temperature = asset.get_return_temperature("Out")
+
+        # Assert
+        self.assertEqual(supply_temperature, 313.15)
+
+    def test_get_return_temperature_consumer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("In")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_supply_temperature_producer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        supply_temperature = asset.get_supply_temperature("Out")
+
+        # Assert
+        self.assertEqual(supply_temperature, 353.15)
+
+    def test_get_return_temperature_producer(self):
+        """Test get_supply_temperature method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        supply_temperature = asset.get_return_temperature("In")
+
+        # Assert
+        self.assertEqual(supply_temperature, 313.15)
+
     def test_get_port_type_in(self):
         """Test get_port_type method."""
         # Arrange
@@ -221,7 +265,7 @@ class EsdlObjectTest(unittest.TestCase):
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         pipe = esdl_object.get_all_assets_of_type("pipe")[0]
         assets = esdl_object.get_all_assets_of_type("producer")
-        test_list = [(asset.get_id(), asset.get_port_ids()[0]) for asset in assets]
+        test_list = [(asset.get_id(), asset.get_port_ids()[1]) for asset in assets]
 
         # Act
         connected_assets = esdl_object.get_connected_assets(pipe.get_id(), pipe.get_port_ids()[0])

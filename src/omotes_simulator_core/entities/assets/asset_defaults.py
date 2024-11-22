@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
-DEFAULT_PRESSURE = 10.0e5  # [bar]
+DEFAULT_PRESSURE = 1e6  # [bar]
 DEFAULT_PRESSURE_DIFFERENCE = 5e5  # [bar]
 DEFAULT_TEMPERATURE = 300.0  # [K]
 DEFAULT_TEMPERATURE_DIFFERENCE = 30.0  # [K]
@@ -26,6 +26,7 @@ DEFAULT_NODE_HEIGHT = 0.0  # [m]
 DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 DEFAULT_POWER = 500000.0  # [W]
 DEFAULT_MISSING_VALUE = -9999.99  # [-]
+DEFAULT_ROUGHNESS = 1e-3  # [m]
 
 
 @dataclass
@@ -46,6 +47,7 @@ class PipeDefaults:
     qheat_external: float = 0.0
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
+    roughness: float = DEFAULT_ROUGHNESS
 
 
 @dataclass
@@ -83,6 +85,7 @@ PROPERTY_SET_PRESSURE = "set_pressure"
 PROPERTY_LENGTH = "length"
 PROPERTY_DIAMETER = "diameter"
 PROPERTY_ROUGHNESS = "roughness"
+PROPERTY_ALPHA_VALUE = "alpha_value"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()

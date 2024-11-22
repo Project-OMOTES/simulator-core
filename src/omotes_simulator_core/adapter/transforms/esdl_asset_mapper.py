@@ -19,31 +19,38 @@ from typing import Any, Type
 import esdl
 import numpy as np
 
-from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
-
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
+    EsdlAssetPipeMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
     EsdlAssetProducerMapper,
 )
+from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.heat_pump import HeatPump
+from omotes_simulator_core.simulation.mappers.mappers import Entity, EsdlMapperAbstract
 
-CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
+CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.Consumer: DemandCluster,
     esdl.GenericConsumer: DemandCluster,
     esdl.HeatingDemand: DemandCluster,
-    esdl.Pipe: Pipe,
     esdl.ATES: AtesCluster,
     esdl.HeatPump: HeatPump,
 }
-
+# Define the conversion dictionary
 conversion_dict_mappers = {
+    esdl.Pipe: EsdlAssetPipeMapper,
     esdl.Producer: EsdlAssetProducerMapper,
     esdl.GenericProducer: EsdlAssetProducerMapper,
 }
@@ -105,6 +112,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             power = result[0]
         else:
             raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+        marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
         contr_producer = ControllerProducer(
@@ -113,6 +121,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             temperature_supply=temperature_supply,
             temperature_return=temperature_return,
             power=power,
+            marginal_costs=marginal_costs,
         )
         return contr_producer
 
@@ -138,8 +147,10 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
         if power == 0:
             power = np.inf
 
-        temperature_supply = esdl_asset.get_supply_temperature("In")
-        temperature_return = esdl_asset.get_return_temperature("Out")
+        # It looks like they are switch, but this is because of the definition used in ESDL,
+        # which is different as what we use.
+        temperature_supply = esdl_asset.get_return_temperature("Out")
+        temperature_return = esdl_asset.get_supply_temperature("In")
         profile = esdl_asset.get_profile()
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,

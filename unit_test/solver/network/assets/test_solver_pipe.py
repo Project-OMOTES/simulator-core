@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
+    PROPERTY_ALPHA_VALUE
 )
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
@@ -55,6 +56,7 @@ class SolverPipeTest(unittest.TestCase):
             PROPERTY_DIAMETER: 0.5,
             PROPERTY_LENGTH: 2000.0,
             PROPERTY_ROUGHNESS: 0.002,
+            PROPERTY_ALPHA_VALUE: 0.5,
         }
 
         # act
@@ -64,6 +66,7 @@ class SolverPipeTest(unittest.TestCase):
         self.assertEqual(self.asset.diameter, physical_properties_dict[PROPERTY_DIAMETER])
         self.assertEqual(self.asset.length, physical_properties_dict[PROPERTY_LENGTH])
         self.assertEqual(self.asset.roughness, physical_properties_dict[PROPERTY_ROUGHNESS])
+        self.assertEqual(self.asset.alpha_value, physical_properties_dict[PROPERTY_ALPHA_VALUE])
         self.assertEqual(self.asset.area, 0.19634954084936207)
 
     def test_set_physical_properties_missing_key(self) -> None:
@@ -256,7 +259,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.8)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -276,7 +279,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.8)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
@@ -315,7 +318,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -448.0)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
 
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
@@ -334,7 +337,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -448.0)
+        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
 
     def test_calculate_graetz_number(self) -> None:
         """Test the calculate_graetz_number method."""
@@ -348,7 +351,7 @@ class SolverPipeTest(unittest.TestCase):
         )  # act
 
         # assert
-        self.assertAlmostEqual(graetz_number, 28.27, 2)
+        self.assertAlmostEqual(graetz_number, 27.93991534523842, 2)
 
     def test_calculate_graetz_number_small_velocity(self) -> None:
         """Test the calculate_graetz_number method."""
@@ -373,7 +376,7 @@ class SolverPipeTest(unittest.TestCase):
         prandtl_number = self.asset.calculate_prandtl_number(temperature=temperature)
 
         # assert
-        self.assertAlmostEqual(prandtl_number, 13.69, 2)
+        self.assertAlmostEqual(prandtl_number, 13.439, 2)
 
     def test_calculate_prandtl_number_no_temperature(self) -> None:
         """Test the calculate_prandtl_number method."""
@@ -385,7 +388,7 @@ class SolverPipeTest(unittest.TestCase):
         prandtl_number = self.asset.calculate_prandtl_number()
 
         # assert
-        self.assertAlmostEqual(prandtl_number, 13.69, 2)
+        self.assertAlmostEqual(prandtl_number, 13.439, 2)
 
     def test_calculate_heat_transfer_coefficient_fluid_large_reynolds(self) -> None:
         """Test the calculate_heat_transfer_coefficient_fluid method.
@@ -404,7 +407,7 @@ class SolverPipeTest(unittest.TestCase):
         )
 
         # assert
-        self.assertAlmostEqual(heat_transfer_coefficient, 244.77, 2)
+        self.assertAlmostEqual(heat_transfer_coefficient, 246.9677, 2)
 
     def test_calculate_heat_transfer_coefficient_small_reynolds_large_graetz(self) -> None:
         r"""Test the calculate_heat_transfer_coefficient_fluid method.
@@ -428,7 +431,7 @@ class SolverPipeTest(unittest.TestCase):
         )
 
         # assert
-        self.assertAlmostEqual(heat_transfer_coefficient, 1.85, 2)
+        self.assertAlmostEqual(heat_transfer_coefficient, 1.87, 2)
 
     def test_calculate_heat_transfer_coefficient_small_reynolds_small_graetz(self) -> None:
         r"""Test the calculate_heat_transfer_coefficient_fluid method.

@@ -1,22 +1,30 @@
 Controller
 =====================================
-The controller is responsible for providing set points for the assets in the simulator.
-The controller parses the ESDL and creates objects of the assets it is providing set points for.
-When a time step is calculated the controller passes back a dict of the set points
-for the controllable assets in the network. The key of this dict is the id of the asset.
-The value is another dict. The key of this dict is the property which needs to be set
-(e.g. supply temperature, heat demand). The value is the set point for this property.
-The controller works based on the priority of the source. The controller will first allocate
-capacity of the source with the priority of 1. If more capacity is required, the sources with
-priority 2 will be used etc. If the demand is lower then the available capacity of the observed
-sources, the remaining demand will be equally distributed over the source at the observed priority.
-In the case the demand is higher then the available source capacity, a message is passed to the user
-and the demand is downscaled to match the available capacity.
+The controller manages set points for assets in the simulator. ESDL data is parsed by mapper
+functions into controller objects. These controller objects are stored in an overarching
+controller class, which is invoked at each time step to calculate and
+return the set points for that step. These set points are passed back to the simulator in a
+dictionary format, where the key is the asset ID, and the value is another dictionary.
+This inner dictionary holds the set points, with the keys being properties (e.g., supply
+temperature, heat demand) and the values being their corresponding set points.
+
+The overarching controller class prioritizes source allocation based on a priority system.
+It first assigns capacity from priority 1 sources. If more capacity is needed,
+it moves to priority 2, and so on. If demand is lower than the available capacity at a
+given priority, the excess is equally distributed across the sources. If demand exceeds capacity,
+a message is sent to the user, and demand is downscaled to match available resources.
+
+When storage is present, the controller first allocates source capacity to meet consumer demand.
+Any remaining capacity is used to charge the storage. If source capacity is insufficient, the
+controller taps into the storage to meet the remaining demand. This basic control strategy may
+be extended with more complex strategies in the future.
+
 The controller consists of the following classes:
 
-#. :ref:`main_controller_class`: Main controller class
+#. :ref:`main_controller_class`: Main controller class, used to store the assets and calculate the control value for a time step.
 #. :ref:`consumer_controller_class`: Class to control consumers in the network
 #. :ref:`producer_controller_class`: Class to control producers in the network
+#. :ref:`ates_controller_class`: Class to control Ates cluster in the network
 
 **Contents**
 
@@ -27,4 +35,5 @@ The controller consists of the following classes:
     main_controller_class
     assets/consumer
     assets/producer
+    assets/ates
 
