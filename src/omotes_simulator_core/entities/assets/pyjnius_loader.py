@@ -52,7 +52,7 @@ class PyjniusLoader:
     def load_class(self, classpath: str) -> JavaClass:
         """Load a Java class.
 
-        If it has been loaded previously, the reference to the class will be laoded from cache.
+        If it has been loaded previously, the reference to the class will be loaded from cache.
         Otherwise, it is loaded through pyjnius.
 
         """
