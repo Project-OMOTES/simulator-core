@@ -28,13 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - PR #220 Ppackage-data for Rosim jar files. previous commit was not merged in Omotes-0.5 branch
 
+
 ## [0.0.12] - 2024-12-5
 ### Fixed
 - Issue #216:  Pyjnius should be loaded after initialisation of Ates class to prevent issues with subprocess/forking
 
+
 ## [0.0.11] - 2024-11-8
 ### Added
 - PR #210 Added package-data for Rosim jar files
+
 
 ## [0.0.10] - 2024-11-8
 ### Added
@@ -49,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Speed improvement by solving heat loss explicitly (#177)
 - Speed improvement by solving friction factor explicitly (#178)
 - Updated controller to support Ates (#129)
-
 
 ### Fixed
 - PR #208 Fixed package build settings 
@@ -74,10 +76,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Many code-style issues
 - Unit tests and settings
 - Documentation
+`
 
 ## [0.0.3 - 0.0.8] - 2024-3-24
 ### Changed
 -  Added/tested release workflow in GH actions
+
 
 ## [0.0.2] - 2024-3-24
 ### Added
