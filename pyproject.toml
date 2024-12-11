@@ -86,7 +86,7 @@ zip-safe = false
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 90"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
