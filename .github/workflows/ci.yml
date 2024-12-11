@@ -37,7 +37,6 @@ jobs:
       matrix:
         python-version: ["3.11"]
     steps:
-      # {% raw %}
       - uses: actions/checkout@v3
       - name: Restore venv
         uses: actions/download-artifact@v4
