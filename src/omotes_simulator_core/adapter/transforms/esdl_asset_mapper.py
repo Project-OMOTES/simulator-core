@@ -53,6 +53,8 @@ conversion_dict_mappers = {
 	esdl.HeatPump: EsdlAssetHeatPumpMapper
 }
 
+conversion_dict_mappers = {esdl.HeatPump: EsdlAssetHeatPumpMapper}
+
 
 class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
