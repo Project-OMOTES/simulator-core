@@ -78,7 +78,8 @@ class EsdlObject:
                 break
         if not connected_port_ids:
             if not (isinstance(esdl_asset, esdl.Joint)):
-                raise ValueError
-                (f"No connected assets found for asset: {asset_id} and port: {port_id}")
+                raise ValueError(
+                    f"No connected assets found for asset: {asset_id} and port: {port_id}"
+                )
         connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets
