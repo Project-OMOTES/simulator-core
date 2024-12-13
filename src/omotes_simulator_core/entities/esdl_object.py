@@ -18,6 +18,7 @@
 import logging
 from typing import List, Tuple
 
+import esdl
 from esdl.esdl_handler import EnergySystemHandler
 
 from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
@@ -76,6 +77,9 @@ class EsdlObject:
                 connected_port_ids = esdl_port.connectedTo
                 break
         if not connected_port_ids:
-            raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
+            if not (isinstance(esdl_asset, esdl.Joint)):
+                logger.warning(
+                    f"No connected assets found for asset: {asset_id} and port: {port_id}"
+                )
         connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets
