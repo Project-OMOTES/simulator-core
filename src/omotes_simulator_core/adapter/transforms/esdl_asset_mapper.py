@@ -48,12 +48,7 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
 }
 
 # Define the conversion dictionary
-conversion_dict_mappers = {
-	esdl.Pipe: EsdlAssetPipeMapper,
-	esdl.HeatPump: EsdlAssetHeatPumpMapper
-}
-
-conversion_dict_mappers = {esdl.HeatPump: EsdlAssetHeatPumpMapper}
+conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper, esdl.HeatPump: EsdlAssetHeatPumpMapper}
 
 
 class EsdlAssetMapper:
