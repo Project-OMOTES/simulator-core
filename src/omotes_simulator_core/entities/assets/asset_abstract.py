@@ -116,7 +116,7 @@ class AssetAbstract(ABC):
         :return float: The volume flow rate.
         """
         rho = fluid_props.get_density(self.solver_asset.get_temperature(i))
-        return self.solver_asset.get_mass_flow_rate(i) / rho
+        return abs(self.solver_asset.get_mass_flow_rate(i)) / rho
 
     @abstractmethod
     def write_to_output(self) -> None:
