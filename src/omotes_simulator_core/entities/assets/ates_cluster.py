@@ -28,6 +28,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
+    CHARGE_RATE,
+    DISCHARGE_RATE,
 )
 from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
 
@@ -190,14 +192,13 @@ class AtesCluster(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        output_dict = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
+        mass_flow = self.solver_asset.get_mass_flow_rate(0)
+        output_dict_temp = {
+            CHARGE_RATE: mass_flow if mass_flow > 0 else 0,
+            DISCHARGE_RATE: abs(mass_flow) if mass_flow < 0 else 0,
         }
-        self.output.append(output_dict)
+
+        self.outputs[0][-1].update(output_dict_temp)
 
     def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
