@@ -102,7 +102,7 @@ class AssetAbstract(ABC):
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {
-                PROPERTY_MASSFLOW: abs(self.solver_asset.get_mass_flow_rate(i)),
+                PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
                 PROPERTY_PRESSURE: self.solver_asset.get_pressure(i),
                 PROPERTY_TEMPERATURE: self.solver_asset.get_temperature(i),
                 PROPERTY_VOLUMEFLOW: self.get_volume_flow_rate(i),

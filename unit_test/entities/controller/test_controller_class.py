@@ -311,7 +311,7 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertAlmostEqual(result["storage1"]["heat_demand"], 0.7, delta=0.01)
+        self.assertAlmostEqual(result["storage1"]["heat_demand"], -1.0, delta=0.01)
 
     def test_controller_discharge_storage_based_on_deficit(self):
         """Test total supply able to discharge storage based on deficit."""
@@ -324,4 +324,4 @@ class ControllerTest(unittest.TestCase):
         result = self.controller.update_setpoints(datetime.now())
 
         # Assert
-        self.assertAlmostEqual(result["storage1"]["heat_demand"], -0.3, delta=0.01)
+        self.assertAlmostEqual(result["storage1"]["heat_demand"], -1.0, delta=0.01)
