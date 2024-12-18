@@ -331,10 +331,10 @@ class HeatTransferAsset(BaseAsset):
             )
         # -- Pressure (4x) --
         # Connect the pressure at the nodes to the asset
-        equations.append(self.add_press_to_node_equation(connection_point=primary_side_inflow))
-        equations.append(self.add_press_to_node_equation(connection_point=primary_side_outflow))
-        equations.append(self.add_press_to_node_equation(connection_point=secondary_side_inflow))
-        equations.append(self.add_press_to_node_equation(connection_point=secondary_side_outflow))
+        equations.append(self.get_press_to_node_equation(connection_point=primary_side_inflow))
+        equations.append(self.get_press_to_node_equation(connection_point=primary_side_outflow))
+        equations.append(self.get_press_to_node_equation(connection_point=secondary_side_inflow))
+        equations.append(self.get_press_to_node_equation(connection_point=secondary_side_outflow))
         # -- Internal continuity (2x) --
         # Add the internal continuity equation at the primary side.
         equations.append(

@@ -385,3 +385,4 @@ if __name__=="__main__":
     heat_transfer_test = HeatTransferAssetIntegrationTest()
     heat_transfer_test.setUp()
     heat_transfer_test.test_heat_transfer_asset_heat_transfer_coefficient_of_one()
+    heat_transfer_test.test_heat_transfer_asset_negative_heat_transfer_coefficient()
