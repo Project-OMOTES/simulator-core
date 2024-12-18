@@ -46,7 +46,7 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
 }
 
 # Define the conversion dictionary
-conversion_dict_mappers = {
+conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
     esdl.Consumer: EsdlAssetConsumerMapper,
     esdl.GenericConsumer: EsdlAssetConsumerMapper,
     esdl.HeatingDemand: EsdlAssetConsumerMapper,
@@ -59,7 +59,7 @@ class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
     @staticmethod
-    def to_esdl(entity: AssetAbstract) -> Any:
+    def to_esdl(entity: AssetAbstract) -> EsdlAssetObject:
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
