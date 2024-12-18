@@ -88,6 +88,9 @@ class AtesCluster(AssetAbstract):
     maximum_flow_discharge: float
     """The maximum flow discharge [m3/h]."""
 
+    pyjnius_loader: PyjniusLoader
+    """Loader object to delay importing pyjnius module and Java classes."""
+
     def __init__(
         self,
         asset_name: str,
@@ -134,9 +137,8 @@ class AtesCluster(AssetAbstract):
 
         # Output list
         self.output: list = []
-        self._init_rosim()
-
         self.pyjnius_loader = PyjniusLoader.get_loader()
+        self._init_rosim()
 
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
