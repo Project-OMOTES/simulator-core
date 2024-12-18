@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-from typing import Any, Type
+from typing import Type
 
 import esdl
 import numpy as np
