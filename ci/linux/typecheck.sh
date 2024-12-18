@@ -1,4 +1,8 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-. .venv/bin/activate
-python -m mypy ./src/omotes_simulator_core
+if [[ "$OSTYPE" != "win32" && "$OSTYPE" != "msys" ]]; then
+  echo "Activating .venv first."
+  . .venv/bin/activate
+fi
+
+python -m mypy ./src/omotes_simulator_core ./unit_test/
