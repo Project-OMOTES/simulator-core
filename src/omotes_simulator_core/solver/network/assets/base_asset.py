@@ -258,6 +258,35 @@ class BaseAsset(BaseItem):
         equation_object.rhs = 0.0
         return equation_object
 
+    def add_massflow_to_node_equation(self, connection_point: int) -> EquationObject:
+        """Adds a pressure to node equation for a connection point of the asset.
+        :param connection_point: The index of the connection point to add the equation for.
+        :type connection_point: int
+        :return: An equation object representing the pressure to node equation.
+        :rtype: EquationObject
+        """
+        # Check if the connection point is connected to a node
+        if not self.is_connected(connection_point=connection_point):
+            raise ValueError(
+                f"Connection point {connection_point} of asset {self.name} is not connected to a"
+                + " node."
+            )
+
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                ),
+                self.connected_nodes[connection_point].get_index_matrix(
+                    property_name="mass_flow_rate", use_relative_indexing=False
+                ),
+            ]
+        )
+        equation_object.coefficients = np.array([1.0, -1.0])
+        equation_object.rhs = 0.0
+        return equation_object
+
     def get_result(self) -> list[float]:
         """Method to get the result of the asset.
 
