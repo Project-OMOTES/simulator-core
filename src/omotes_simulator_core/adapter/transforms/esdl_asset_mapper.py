@@ -49,7 +49,7 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.HeatPump: HeatPump,
 }
 # Define the conversion dictionary
-conversion_dict_mappers = {
+conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
     esdl.Pipe: EsdlAssetPipeMapper,
     esdl.Producer: EsdlAssetProducerMapper,
     esdl.GenericProducer: EsdlAssetProducerMapper,
@@ -82,7 +82,7 @@ class EsdlAssetMapper:
         asset_type = type(model.esdl_asset)
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
-            return mapper.to_entity(model)
+            return mapper.to_entity(model)  # type: ignore
         # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
             model.get_name(),
