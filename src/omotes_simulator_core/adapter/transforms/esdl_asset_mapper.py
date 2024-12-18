@@ -20,12 +20,15 @@ import esdl
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObjec
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
+)
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
@@ -42,10 +45,6 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper imp
     EsdlAssetAtesMapper,
 )
 
-CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
-    esdl.ATES: AtesCluster,
-}
-
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
     esdl.Producer: EsdlAssetProducerMapper,
@@ -56,9 +55,6 @@ conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
     esdl.Pipe: EsdlAssetPipeMapper,
     esdl.HeatPump: EsdlAssetHeatPumpMapper,
     esdl.ATES: EsdlAssetAtesMapper,
-}
-
-conversion_dict_mappers = {
 }
 
 
@@ -78,10 +74,7 @@ class EsdlAssetMapper:
 
         :return: Entity object of type AssetAbstract.
         """
-        if (
-            not type(model.esdl_asset) in CONVERSION_DICT
-            and not type(model.esdl_asset) in conversion_dict_mappers
-        ):
+        if type(model.esdl_asset) not in conversion_dict_mappers:
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
 
         # Use the dictionary to get the appropriate mapper
@@ -93,7 +86,7 @@ class EsdlAssetMapper:
 class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a producer entity class."""
 
-    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
@@ -126,7 +119,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
 class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a consumer entity class."""
 
-    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
@@ -163,7 +156,7 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
 class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
     """Class to map an esdl asset to a storage entity class."""
 
-    def to_esdl(self, entity: Entity) -> EsdlAssetObject:
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerStorageMapper.to_esdl()")
 
