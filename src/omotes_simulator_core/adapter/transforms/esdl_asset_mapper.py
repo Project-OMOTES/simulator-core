@@ -24,12 +24,14 @@ from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
+    EsdlAssetHeatPumpMapper,
+)
 
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
@@ -43,11 +45,13 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.GenericConsumer: DemandCluster,
     esdl.HeatingDemand: DemandCluster,
     esdl.ATES: AtesCluster,
-    esdl.HeatPump: HeatPump,
 }
 
 # Define the conversion dictionary
-conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper}
+conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+    esdl.Pipe: EsdlAssetPipeMapper,
+    esdl.HeatPump: EsdlAssetHeatPumpMapper,
+}
 
 
 class EsdlAssetMapper:
@@ -76,7 +80,7 @@ class EsdlAssetMapper:
         asset_type = type(model.esdl_asset)
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
-            return mapper.to_entity(model)
+            return mapper.to_entity(model)  # type: ignore
 
         # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
@@ -106,7 +110,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
         if result[1]:
             power = result[0]
         else:
-            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+            raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
