@@ -14,38 +14,51 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-from typing import Any, Type
+from typing import Type
 
 import esdl
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
-
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObjec
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
+    EsdlAssetPipeMapper,
+)
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
+    EsdlAssetProducerMapper,
+)
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
+    EsdlAssetConsumerMapper,
+)
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
+    EsdlAssetHeatPumpMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
     EsdlAssetAtesMapper,
 )
 
-CONVERSION_DICT: dict[esdl.EnergyAsset, Type[AssetAbstract]] = {
-    esdl.Producer: ProductionCluster,
-    esdl.GenericProducer: ProductionCluster,
-    esdl.Consumer: DemandCluster,
-    esdl.GenericConsumer: DemandCluster,
-    esdl.HeatingDemand: DemandCluster,
-    esdl.Pipe: Pipe,
-    esdl.HeatPump: HeatPump,
+CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
+    esdl.ATES: AtesCluster,
+}
+
+# Define the conversion dictionary
+conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+    esdl.Producer: EsdlAssetProducerMapper,
+    esdl.GenericProducer: EsdlAssetProducerMapper,
+    esdl.Consumer: EsdlAssetConsumerMapper,
+    esdl.GenericConsumer: EsdlAssetConsumerMapper,
+    esdl.HeatingDemand: EsdlAssetConsumerMapper,
+    esdl.Pipe: EsdlAssetPipeMapper,
+    esdl.HeatPump: EsdlAssetHeatPumpMapper,
+    esdl.ATES: EsdlAssetAtesMapper,
 }
 
 conversion_dict_mappers = {
-    esdl.ATES: EsdlAssetAtesMapper,
 }
 
 
@@ -53,7 +66,7 @@ class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
     @staticmethod
-    def to_esdl(entity: AssetAbstract) -> Any:
+    def to_esdl(entity: AssetAbstract) -> EsdlAssetObject:
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
@@ -71,18 +84,10 @@ class EsdlAssetMapper:
         ):
             raise NotImplementedError(str(model.esdl_asset) + " not implemented in conversion")
 
+        # Use the dictionary to get the appropriate mapper
         asset_type = type(model.esdl_asset)
-        if asset_type in conversion_dict_mappers:
-            mapper = conversion_dict_mappers[asset_type]()
-            return mapper.to_entity(model)
-        # TODO: Remove this if statement when all assets are implemented
-        converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
-            model.get_name(),
-            model.get_id(),
-            model.get_port_ids(),
-        )
-        converted_asset.add_physical_data(esdl_asset=model)
-        return converted_asset
+        mapper = conversion_dict_mappers[asset_type]()
+        return mapper.to_entity(model)  # type: ignore
 
 
 class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
@@ -103,7 +108,8 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
         if result[1]:
             power = result[0]
         else:
-            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+            raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
+        marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
         contr_producer = ControllerProducer(
@@ -112,6 +118,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
             temperature_supply=temperature_supply,
             temperature_return=temperature_return,
             power=power,
+            marginal_costs=marginal_costs,
         )
         return contr_producer
 

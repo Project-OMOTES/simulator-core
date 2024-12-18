@@ -30,20 +30,11 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_SUPPLY,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-
-path = os.path.dirname(__file__)
-import jnius_config  # noqa
-
-jnius_config.add_classpath(os.path.join(path, "bin/jfxrt.jar"))
-jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-0.4.2.jar"))
-from jnius import autoclass  # noqa
-
-javaioFile = autoclass("java.io.File")
-RosimSequential = autoclass("tno.calc.RosimSequential")
 
 
 class AtesCluster(AssetAbstract):
@@ -145,6 +136,8 @@ class AtesCluster(AssetAbstract):
         self.output: list = []
         self._init_rosim()
 
+        self.pyjnius_loader = PyjniusLoader.get_loader()
+
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
@@ -212,6 +205,7 @@ class AtesCluster(AssetAbstract):
 
     def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
+        path = os.path.dirname(__file__)
         xmlfile = os.path.join(path, "bin/sequentialTemplate_v0.4.2_template.xml")
         with open(xmlfile, "r") as fd:
             xml_str = fd.read()
@@ -255,6 +249,8 @@ class AtesCluster(AssetAbstract):
         with open(temp_xmlfile_path, "w") as temp_xmlfile:
             temp_xmlfile.write(xml_str)
 
+        javaioFile = self.pyjnius_loader.load_class("java.io.File")
+        RosimSequential = self.pyjnius_loader.load_class("tno.calc.RosimSequential")
         xmlfilejava = javaioFile(temp_xmlfile_path)
         self.rosim = RosimSequential(xmlfilejava, False, 2)
 

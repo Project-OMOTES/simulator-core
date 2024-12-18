@@ -15,6 +15,65 @@
 
 """File containing utility functions for the transforms."""
 from typing import Dict, List
+from enum import Enum
+from dataclasses import dataclass
+
+
+class PortType(Enum):
+    """Enum to define the type of port."""
+
+    IN = 1
+    OUT = 2
+
+
+@dataclass
+class Port:
+    """Dataclass to hold the port information."""
+
+    port_id: str
+    port_name: str
+    port_type: PortType
+
+
+def sort_ports(connected_ports: list[Port]) -> list[str]:
+    """Sort the ports of the asset based on the port type.
+
+    The sort order is Inport, Outport, Starting with the first inport, then the first outport
+    and so on.
+
+    :param connected_ports: List of tuples with the port id, name and the port type.
+    :return: List of port ids sorted by port type.
+    """
+    in_ports = [port for port in connected_ports if port.port_type == PortType.IN]
+    out_ports = [port for port in connected_ports if port.port_type == PortType.OUT]
+    if len(in_ports) != len(out_ports):
+        raise ValueError("The number of in ports and out ports are not equal")
+    sorted_port_list = []
+    for in_port, out_port in zip(in_ports, out_ports):
+        sorted_port_list.append(in_port)
+        sorted_port_list.append(out_port)
+    if len(sorted_port_list) == 4:
+        sorted_port_list = order_prim_sec_ports(sorted_port_list)
+    return [port.port_id for port in sorted_port_list]
+
+
+def order_prim_sec_ports(connected_ports: list[Port]) -> list[Port]:
+    """Order the primary and secondary ports. in correct order.
+
+    The correct order is first primary port, then secondary port.
+    This can only be done by checking the port names.
+    In primary port prim is in the name for secondary port sec is in the name.
+
+    :param connected_ports: List of connected ports to be sorted.
+    :return: List of connected ports sorted by primary and secondary ports.
+    """
+    primary_ports = [port for port in connected_ports if "Prim" in port.port_name]
+    if len(primary_ports) != 2:
+        raise ValueError("The number of ports with prim in the name is not equal to 2")
+    secondary_ports = [port for port in connected_ports if "Sec" in port.port_name]
+    if len(secondary_ports) != 2:
+        raise ValueError("The number of ports with sec in the name is not equal to 2")
+    return primary_ports + secondary_ports
 
 
 def reverse_dict(original_dict: dict) -> Dict[str, List[type]]:
