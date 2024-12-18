@@ -20,6 +20,8 @@ from typing import Any, Tuple, Type
 import pandas as pd
 from esdl import esdl
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.adapter.transforms.transform_utils import PortType, sort_ports, Port
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +52,20 @@ class EsdlAssetObject:
         return str(self.esdl_asset.id)
 
     def get_property(self, esdl_property_name: str, default_value: Any) -> Tuple[Any, bool]:
-        """Get property value from the esdl_asset based on the "ESDL" name.
+        """Get property value from the esdl_asset based on the 'ESDL' name.
 
+        :param esdl_property_name: The name of the property in the ESDL asset.
+        :param default_value: The default value to return if the property has no value.
         :return: Tuple with the value of the property and a boolean indicating whether the property
-        was found in the esdl_asset.
+                was found in the esdl_asset.
+        If the property is 0, then should it be False or true?
         """
         try:
-            return getattr(self.esdl_asset, esdl_property_name), True
+            value = getattr(self.esdl_asset, esdl_property_name)
+            if value == 0:
+                return default_value, False
+            return value, True
+
         except AttributeError:
             return default_value, False
 
@@ -82,8 +91,18 @@ class EsdlAssetObject:
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_port_ids(self) -> list[str]:
-        """Get the port ids of the asset."""
-        return [port.id for port in self.esdl_asset.port]
+        """Returns a sorted list of the port ids of the asset."""
+        list_of_ports = sort_ports(
+            [
+                Port(
+                    port.id,
+                    port.name,
+                    PortType.IN if isinstance(port, esdl.InPort) else PortType.OUT,
+                )
+                for port in self.esdl_asset.port
+            ]
+        )
+        return list_of_ports
 
     def get_port_type(self, port_type: str) -> Type[esdl.Port]:
         """Get the port type of the port."""
@@ -93,6 +112,22 @@ class EsdlAssetObject:
             return esdl.OutPort  # type: ignore [no-any-return]
         else:
             raise ValueError(f"Port type not recognized: {port_type}")
+
+    def get_marginal_costs(self) -> float:
+        """Get the marginal costs of the asset."""
+        if self.esdl_asset.costInformation is None:
+            logger.warning(
+                f"No cost information found for asset, Marginal costs set to 0 for: "
+                f"{self.esdl_asset.name}"
+            )
+            return 0
+        if self.esdl_asset.costInformation.marginalCosts is None:
+            logger.warning(
+                f"No marginal costs found for asset, Marginal costs set to 0 for: "
+                f"{self.esdl_asset.name}"
+            )
+            return 0
+        return float(self.esdl_asset.costInformation.marginalCosts.value)
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:

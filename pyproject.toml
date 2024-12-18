@@ -51,7 +51,7 @@ dev = [
     "geopandas~=1.0.1",
     "plotly~=5.24.0",
     "shapely~=2.0.6",
-    "snakeviz==2.2.0"
+    "snakeviz==2.2.0",
 ]
 
 [project.urls]
@@ -70,23 +70,24 @@ requires = [
 
 [tool.setuptools-git-versioning]
 enabled = true
-starting_version = "0.0.1"
-version_file = "src/omotes_simulator_core/VERSION"
-count_commits_from_version_file = true
+starting_version = "0.0.10"
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
 
 [tool.setuptools]
 include-package-data = true
+zip-safe = false
 
 [tool.setuptools.package-data]
-"omotes_simulator_core" = ["solver/utils/temp_props.csv", "VERSION"]
-
-#[tool.setuptools]
-#packages = ["src/omotes_simulator_core"]
+"omotes_simulator_core" = [
+    "entities/assets/bin/ates_sequential_temp.xml",
+    "entities/assets/bin/jfxrt.jar",
+    "entities/assets/bin/rosim-batch-0.4.2.jar",
+    "entities/assets/bin/sequentialTemplate_v0.4.2_template.xml",
+]
 
 [tool.pytest.ini_options]
-# addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 80"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
@@ -104,7 +105,12 @@ ignore = [
     'PT009', # use a regular assert instead of unittest-style assertion
     'PT027', # pytest.raises() should be used instead of assertRaises()
 ]
-exclude = ['.venv/*', 'venv/*', 'doc/*', 'src/omotes_simulator_core/solver/utils/fluidprop.py']
+exclude = [
+    '.venv/*',
+    'venv/*',
+    'doc/*',
+    'src/omotes_simulator_core/solver/utils/fluidprop.py',
+]
 per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
 
 [tool.black]
