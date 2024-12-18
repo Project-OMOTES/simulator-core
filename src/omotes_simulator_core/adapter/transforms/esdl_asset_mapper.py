@@ -14,13 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-from typing import Any, Type
+from typing import Type
 
 import esdl
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
@@ -29,26 +28,28 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
+    EsdlAssetConsumerMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
     EsdlAssetHeatPumpMapper,
 )
-
-
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
 
+
 CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
     esdl.GenericProducer: ProductionCluster,
-    esdl.Consumer: DemandCluster,
-    esdl.GenericConsumer: DemandCluster,
-    esdl.HeatingDemand: DemandCluster,
     esdl.ATES: AtesCluster,
 }
 
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+    esdl.Consumer: EsdlAssetConsumerMapper,
+    esdl.GenericConsumer: EsdlAssetConsumerMapper,
+    esdl.HeatingDemand: EsdlAssetConsumerMapper,
     esdl.Pipe: EsdlAssetPipeMapper,
     esdl.HeatPump: EsdlAssetHeatPumpMapper,
 }
@@ -58,7 +59,7 @@ class EsdlAssetMapper:
     """Creates entity Asset objects based on a PyESDL EnergySystem assets."""
 
     @staticmethod
-    def to_esdl(entity: AssetAbstract) -> Any:
+    def to_esdl(entity: AssetAbstract) -> EsdlAssetObject:
         """Maps entity object to PyEsdl objects."""
         raise NotImplementedError("EsdlAssetMapper.to_esdl()")
 
