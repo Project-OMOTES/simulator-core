@@ -1,5 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-. .venv/bin/activate
+if [[ "$OSTYPE" != "win32" && "$OSTYPE" != "msys" ]]; then
+  echo "Activating .venv first."
+  . .venv/bin/activate
+fi
+
 git reset --hard  # reset any changes in git repo
 python -m build
