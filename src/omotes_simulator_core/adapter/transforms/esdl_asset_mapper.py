@@ -48,7 +48,10 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
 }
 
 # Define the conversion dictionary
-conversion_dict_mappers = {esdl.Pipe: EsdlAssetPipeMapper, esdl.HeatPump: EsdlAssetHeatPumpMapper}
+conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+    esdl.Pipe: EsdlAssetPipeMapper,
+    esdl.HeatPump: EsdlAssetHeatPumpMapper,
+}
 
 
 class EsdlAssetMapper:
@@ -77,7 +80,7 @@ class EsdlAssetMapper:
         asset_type = type(model.esdl_asset)
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
-            return mapper.to_entity(model)
+            return mapper.to_entity(model)  # type: ignore
 
         # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
@@ -107,7 +110,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
         if result[1]:
             power = result[0]
         else:
-            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+            raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
