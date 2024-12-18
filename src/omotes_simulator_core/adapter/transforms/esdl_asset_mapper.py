@@ -19,12 +19,6 @@ from typing import Type
 import esdl
 import numpy as np
 
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
-    EsdlAssetPipeMapper,
-)
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
-    EsdlAssetProducerMapper,
-)
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
@@ -45,15 +39,12 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
     EsdlAssetHeatPumpMapper,
 )
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
-    EsdlAssetPipeMapper,
-)
 
 
 CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.ATES: AtesCluster,
 }
-  
+
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
     esdl.Producer: EsdlAssetProducerMapper,
