@@ -21,32 +21,34 @@ import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
+    EsdlAssetPipeMapper,
+)
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
+    EsdlAssetProducerMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
     EsdlAssetConsumerMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
     EsdlAssetHeatPumpMapper,
 )
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
-    EsdlAssetPipeMapper,
-)
 
 
 CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
-    esdl.Producer: ProductionCluster,
-    esdl.GenericProducer: ProductionCluster,
     esdl.ATES: AtesCluster,
 }
 
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+    esdl.Producer: EsdlAssetProducerMapper,
+    esdl.GenericProducer: EsdlAssetProducerMapper,
     esdl.Consumer: EsdlAssetConsumerMapper,
     esdl.GenericConsumer: EsdlAssetConsumerMapper,
     esdl.HeatingDemand: EsdlAssetConsumerMapper,
