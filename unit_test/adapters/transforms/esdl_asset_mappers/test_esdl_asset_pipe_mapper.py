@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test pipe mapper."""
+import typing
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
@@ -21,6 +22,7 @@ from unittest.mock import Mock
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
+from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
@@ -29,7 +31,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 class TestEsdlAssetPipeMapper(unittest.TestCase):
     """Test class for pipe mapper."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Define the variables used in the tests."""
         self.length: float = 1
         self.inner_diameter: float = 1
@@ -49,11 +51,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             / "testdata"
             / "test_pipe_roughness.esdl"
         )
-        esdl_file_path = str(esdl_file_path)
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         self.mapper = EsdlAssetPipeMapper()
 
-    def test_to_entity_method(self):
+    def test_to_entity_method(self) -> None:
         """Test for to_entity method."""
         # Arrange
         pipes = self.esdl_object.get_all_assets_of_type("pipe")
@@ -62,9 +63,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         esdl_asset = pipes[0]
 
         # Act
-        pipe_entity = self.mapper.to_entity(esdl_asset)
+        pipe_entity = typing.cast(Pipe, self.mapper.to_entity(esdl_asset))
 
         # Assert
+        self.assertIsInstance(pipe_entity, Pipe)
         self.assertEqual(pipe_entity.name, esdl_asset.esdl_asset.name)
         self.assertEqual(pipe_entity.asset_id, esdl_asset.esdl_asset.id)
         self.assertEqual(pipe_entity.connected_ports, esdl_asset.get_port_ids())  # type: ignore
@@ -99,7 +101,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external)[0],
         )
 
-    def test_pipe_get_property_diameter(self):
+    def test_pipe_get_property_diameter(self) -> None:
         """Evaluate the get property diameter method to retrieve diameters."""
         # Arrange
         esdl_asset_mock = Mock()
@@ -111,7 +113,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         # Assert
         self.assertEqual(EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
 
-    def test_pipe_get_property_diameter_failed(self):
+    def test_pipe_get_property_diameter_failed(self) -> None:
         """Evaluate failure to retrieve diameter from ESDL asset."""
         # Arrange
         esdl_asset_mock = Mock()
@@ -129,7 +131,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             "Conversion from DN to diameter is not yet implemented.",
         )
 
-    def test_pipe_get_heat_transfer_coefficient(self):
+    def test_pipe_get_heat_transfer_coefficient(self) -> None:
         """Evaluate the get heat transfer coefficient method."""
         # Arrange
         # - Load esdl pipe asset
@@ -142,7 +144,6 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             / "testdata"
             / "test_pipe_material.esdl"
         )
-        esdl_file_path = str(esdl_file_path)
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         esdl_pipes = esdl_object.get_all_assets_of_type("pipe")
         esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
