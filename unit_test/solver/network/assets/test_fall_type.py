@@ -18,6 +18,7 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
+import numpy
 import numpy as np
 import numpy.testing as np_testing
 
@@ -135,14 +136,14 @@ class FallTypeTest(unittest.TestCase):
         -m_in * EI_in + m_out * EI_out - Q_supplied = 0
         """
         # Arrange
-        self.asset.prev_sol = [
+        self.asset.prev_sol = numpy.array([
             1.0,  # discharge 0
             2.0,  # pressure 0
             3.0,  # internal energy 0
             4.0,  # discharge 1
             5.0,  # pressure 1
             6.0,  # internal energy 1
-        ]
+        ])
 
         # Act
         equation_object = self.asset.get_internal_energy_equation()
@@ -201,14 +202,14 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = [
+        self.asset.prev_sol = numpy.array([
             1.0,  # mass_flow_rate 0
             2.0,  # pressure 0
             3.0,  # internal energy 0
             4.0,  # mass_flow_rate 1
             5.0,  # pressure 1
             6.0,  # internal energy 1
-        ]
+        ])
         self.asset.update_loss_coefficient()
 
         # Act
@@ -254,7 +255,7 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = [0.0, 2.0, 3.0, 0.0, 5.0, 6.0]
+        self.asset.prev_sol = numpy.array([0.0, 2.0, 3.0, 0.0, 5.0, 6.0])
         self.asset.update_loss_coefficient()
 
         # Act

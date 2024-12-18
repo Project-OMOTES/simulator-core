@@ -23,7 +23,6 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
-from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
@@ -31,6 +30,9 @@ from omotes_simulator_core.entities.assets.controller.controller_storage import 
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract, Entity
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
     EsdlAssetConsumerMapper,
+)
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
+    EsdlAssetHeatPumpMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
@@ -41,7 +43,6 @@ CONVERSION_DICT: dict[type, Type[AssetAbstract]] = {
     esdl.Producer: ProductionCluster,
     esdl.GenericProducer: ProductionCluster,
     esdl.ATES: AtesCluster,
-    esdl.HeatPump: HeatPump,
 }
 
 # Define the conversion dictionary
@@ -50,6 +51,7 @@ conversion_dict_mappers = {
     esdl.GenericConsumer: EsdlAssetConsumerMapper,
     esdl.HeatingDemand: EsdlAssetConsumerMapper,
     esdl.Pipe: EsdlAssetPipeMapper,
+    esdl.HeatPump: EsdlAssetHeatPumpMapper,
 }
 
 
@@ -79,7 +81,7 @@ class EsdlAssetMapper:
         asset_type = type(model.esdl_asset)
         if asset_type in conversion_dict_mappers:
             mapper = conversion_dict_mappers[asset_type]()
-            return mapper.to_entity(model)
+            return mapper.to_entity(model)  # type: ignore
 
         # TODO: Remove this if statement when all assets are implemented
         converted_asset = CONVERSION_DICT[type(model.esdl_asset)](
@@ -109,7 +111,7 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
         if result[1]:
             power = result[0]
         else:
-            raise ValueError("No power found for asset: " + esdl_asset.esdl_asset.name)
+            raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")

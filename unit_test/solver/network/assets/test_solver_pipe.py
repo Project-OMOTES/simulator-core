@@ -270,7 +270,6 @@ class SolverPipeTest(unittest.TestCase):
         )
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
@@ -290,7 +289,6 @@ class SolverPipeTest(unittest.TestCase):
         )
         self.asset.alpha_value = 0.1  # W/m2K
         self.asset.length = 3e5  # m
-        self.asset._grid_size = 10  # pylint: disable=protected-access
         self.asset.diameter = 1.0  # m
         self.asset.area = self.asset.diameter**2 * np.pi / 4  # m2
         self.asset._use_fluid_capacity = False  # pylint: disable=protected-access
