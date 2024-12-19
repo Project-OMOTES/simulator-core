@@ -12,8 +12,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """Mapper classes."""
+
 from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
