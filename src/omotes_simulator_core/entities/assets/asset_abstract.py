@@ -20,6 +20,7 @@ from typing import Dict, List
 
 from pandas import DataFrame, concat
 
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
@@ -27,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
     PROPERTY_TEMPERATURE,
+    PROPERTY_VOLUMEFLOW,
 )
 
 
@@ -103,8 +105,18 @@ class AssetAbstract(ABC):
                 PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
                 PROPERTY_PRESSURE: self.solver_asset.get_pressure(i),
                 PROPERTY_TEMPERATURE: self.solver_asset.get_temperature(i),
+                PROPERTY_VOLUMEFLOW: self.get_volume_flow_rate(i),
             }
             self.outputs[i].append(output_dict_temp)
+
+    def get_volume_flow_rate(self, i: int) -> float:
+        """Calculates and returns the volume flow rate for the given port.
+
+        :param int i: The index of the port.
+        :return float: The volume flow rate.
+        """
+        rho = fluid_props.get_density(self.solver_asset.get_temperature(i))
+        return self.solver_asset.get_mass_flow_rate(i) / rho
 
     @abstractmethod
     def write_to_output(self) -> None:
