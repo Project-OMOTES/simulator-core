@@ -15,7 +15,7 @@
 
 """Module containing classes to be able to interact with esdl objects."""
 import logging
-from typing import Any, Tuple, Type
+from typing import Any
 
 import pandas as pd
 from esdl import esdl
@@ -51,7 +51,7 @@ class EsdlAssetObject:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
 
-    def get_property(self, esdl_property_name: str, default_value: Any) -> Tuple[Any, bool]:
+    def get_property(self, esdl_property_name: str, default_value: Any) -> tuple[Any, bool]:
         """Get property value from the esdl_asset based on the 'ESDL' name.
 
         :param esdl_property_name: The name of the property in the ESDL asset.
@@ -104,7 +104,7 @@ class EsdlAssetObject:
         )
         return list_of_ports
 
-    def get_port_type(self, port_type: str) -> Type[esdl.Port]:
+    def get_port_type(self, port_type: str) -> type[esdl.Port]:
         """Get the port type of the port."""
         if port_type == "In":
             return esdl.InPort  # type: ignore [no-any-return]

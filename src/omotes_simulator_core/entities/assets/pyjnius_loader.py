@@ -16,7 +16,7 @@
 """Binding to Rosim through Pyjnius."""
 
 import os
-from typing import Dict, Callable
+from typing import Callable
 
 JavaClass = Callable
 
@@ -33,7 +33,7 @@ class PyjniusLoader:
     """
 
     INSTANCE = None
-    loaded_classes: Dict[str, JavaClass]
+    loaded_classes: dict[str, JavaClass]
 
     def __init__(self) -> None:
         """Create an instance of PyjniusLoader.
@@ -57,13 +57,14 @@ class PyjniusLoader:
 
         """
         from jnius import autoclass  # noqa
+
         if classpath not in self.loaded_classes:
             self.loaded_classes[classpath] = autoclass(classpath)
 
         return self.loaded_classes[classpath]
 
     @staticmethod
-    def get_loader() -> 'PyjniusLoader':
+    def get_loader() -> "PyjniusLoader":
         """Get the global instance of the PyjniusLoader.
 
         This loader allows to load Java classes. This is the preferred method of retrieving

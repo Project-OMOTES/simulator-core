@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-from typing import Dict
-
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
@@ -158,7 +156,7 @@ class ProductionCluster(AssetAbstract):
         # Set the pressure of the solver asset
         self.solver_asset.set_pressure = self.pressure_supply  # type: ignore
 
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Set the setpoints of the asset.
 
         :param Dict setpoints: The setpoints of the asset in a dictionary,
