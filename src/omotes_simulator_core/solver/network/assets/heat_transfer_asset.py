@@ -258,7 +258,7 @@ class HeatTransferAsset(BaseAsset):
             \dot{m}_0 \left{ u_0 - u_1 \right} + C \left{ u_2 \dot{m}_2 + u_3 \dot{m}_3 \right} = 0
 
         If the mass flow at the inflow node of the primary and secondary side is zero, we prescribe
-         we prescribe the mass flow rate at the primary side of the heat transfer asset.
+         the mass flow rate at the primary side of the heat transfer asset.
 
         .. math::
 
@@ -301,7 +301,7 @@ class HeatTransferAsset(BaseAsset):
                 supply_temperature=self.supply_temperature_secondary,
             )
         )
-        # -- Mass flow rate or pressure on secnodary side (2x) --
+        # -- Mass flow rate or pressure on secondary side (2x) --
         # Prescribe the pressure at the secondary side of the heat transfer asset.
         if self.pre_scribe_mass_flow_secondary:
             equations.append(

@@ -66,7 +66,7 @@ class HeatPump(AssetAbstract):
 
         :param asset_name: The name of the asset.
         :param asset_id: The unique identifier of the asset.
-        :param port_ids: The unique identifiers of the ports of the asset.
+        :connected_ports: The unique identifiers of the ports of the asset.
         """
         super().__init__(
             asset_name=asset_name,

@@ -49,3 +49,8 @@ class TestEsdlAssetHeatPumpMapper(unittest.TestCase):
         self.assertEqual(heatpump_entity.name, esdl_asset.esdl_asset.name)
         self.assertEqual(heatpump_entity.asset_id, esdl_asset.esdl_asset.id)
         self.assertEqual(heatpump_entity.connected_ports, esdl_asset.get_port_ids())
+
+if __name__ == '__main__':
+    test = TestEsdlAssetHeatPumpMapper()
+    test.setUp()
+    test.test_to_entity_method()
