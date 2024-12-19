@@ -15,7 +15,7 @@
 
 """HeatNetwork entity class."""
 import datetime
-from typing import Callable, List, Tuple
+from typing import Callable
 
 import pandas as pd
 
@@ -29,7 +29,7 @@ class HeatNetwork:
     """Class to store information on the heat network."""
 
     def __init__(
-        self, conversion_factory: Callable[[Network], Tuple[List[AssetAbstract], List[Junction]]]
+        self, conversion_factory: Callable[[Network], tuple[list[AssetAbstract], list[Junction]]]
     ) -> None:
         """Constructor of heat network class.
 

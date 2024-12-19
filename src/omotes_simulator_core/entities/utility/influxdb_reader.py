@@ -18,11 +18,10 @@ from esdl.profiles.influxdbprofilemanager import InfluxDBProfileManager
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
-from typing import Dict, Tuple
 import pandas as pd
 
 
-def parse_esdl_profiles(esh: EnergySystemHandler) -> Dict[str, pd.DataFrame]:
+def parse_esdl_profiles(esh: EnergySystemHandler) -> dict[str, pd.DataFrame]:
     """Method to parse the esdl profiles from an energy system.
 
     This method tries to parse the esdl profiles from an energy system.
@@ -44,7 +43,7 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    influx_cred_map: Dict[str, Tuple[str, str]] = {}
+    influx_cred_map: dict[str, tuple[str, str]] = {}
     profile_host = esdl_profile.host
     ssl_setting = False
     if "https" in profile_host:
@@ -56,7 +55,7 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     if esdl_profile.port == 443:
         ssl_setting = True
 
-    influx_host = "{}:{}".format(profile_host, esdl_profile.port)
+    influx_host = f"{profile_host}:{esdl_profile.port}"
     if influx_host in influx_cred_map:
         (username, password) = influx_cred_map[influx_host]
     else:

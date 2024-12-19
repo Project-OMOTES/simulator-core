@@ -16,7 +16,6 @@
 """Esdl asset wrapper class."""
 
 import logging
-from typing import List, Tuple
 
 from esdl.esdl_handler import EnergySystemHandler
 
@@ -58,7 +57,7 @@ class EsdlObject:
             ]
         return output_list
 
-    def get_connected_assets(self, asset_id: str, port_id: str) -> List[Tuple[str, str]]:
+    def get_connected_assets(self, asset_id: str, port_id: str) -> list[tuple[str, str]]:
         """Method to get the id's of connected assets from the esdl.
 
         This returns a list of a tuple with the id of the connected asset and the id of the port

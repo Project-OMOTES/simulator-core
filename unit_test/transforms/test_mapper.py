@@ -15,7 +15,6 @@
 """Test energy system mapper class."""
 import unittest
 from pathlib import Path
-from typing import List, Tuple
 
 from omotes_simulator_core.adapter.transforms.mappers import (
     EsdlEnergySystemMapper,
@@ -43,10 +42,10 @@ class EsdlEnergySystemMapperTest(unittest.TestCase):
         result = EsdlEnergySystemMapper(esdl_object).to_entity(network)
 
         # assert
-        self.assertIsInstance(result, Tuple)
-        self.assertIsInstance(result[0], List)
+        self.assertIsInstance(result, tuple)
+        self.assertIsInstance(result[0], list)
         self.assertIsInstance(result[0][0], AssetAbstract)
-        self.assertIsInstance(result[1], List)
+        self.assertIsInstance(result[1], list)
         self.assertIsInstance(result[1][0], Junction)
         self.assertEqual(len(result[0]), 4)
         self.assertEqual(len(result[1]), 4)

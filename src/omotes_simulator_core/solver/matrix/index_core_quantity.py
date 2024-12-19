@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""This file contains the class for the core quantities of the matrix."""
+"""Classes for storing core quantities of the matrix."""
 import dataclasses
 
 

@@ -305,7 +305,7 @@ class Network:
 
         :return:True when asset exists and False when not
         """
-        if not (asset_id in self.assets):
+        if asset_id not in self.assets:
             raise ValueError(f"Asset with id:{asset_id} does not exist in network.")
         else:
             return True
@@ -317,7 +317,7 @@ class Network:
 
         :return:True when node exists and False when not
         """
-        if not (node_id in self.nodes):
+        if node_id not in self.nodes:
             raise ValueError(f"Node with id:{node_id} does not exist in network.")
         else:
             return True

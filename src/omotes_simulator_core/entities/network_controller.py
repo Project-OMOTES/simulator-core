@@ -16,7 +16,6 @@
 """NetworkController entity."""
 import datetime
 import logging
-from typing import List
 
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -37,9 +36,9 @@ class NetworkController(NetworkControllerAbstract):
 
     def __init__(
         self,
-        producers: List[ControllerProducer],
-        consumers: List[ControllerConsumer],
-        storages: List[ControllerStorage],
+        producers: list[ControllerProducer],
+        consumers: list[ControllerConsumer],
+        storages: list[ControllerStorage],
     ) -> None:
         """Constructor for controller for a heat network.
 
@@ -56,7 +55,7 @@ class NetworkController(NetworkControllerAbstract):
         self._set_priority_from_marginal_costs()
 
     def _set_priority_from_marginal_costs(self) -> None:
-        """This method sets the priority of the producers based on the marginal costs.
+        """Sets the priority of the producers based on the marginal costs.
 
         The priority of the producers is set based on the marginal costs. The producer with the
         lowest marginal costs has the highest priority (lowest value).

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 def progressLogger(progress: float, message: str) -> None:
     """Function to report progress to logging/stdout."""
-    logger.info(f"{message} ({progress*100:.2f}%)")
+    logger.info(f"{message} ({progress * 100:.2f}%)")
 
 
 def run(file_path: str | None = None) -> pd.DataFrame:
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")
-    logger.info(f"Execution time: {t2-t1}")
+    logger.info(f"Execution time: {t2 - t1}")
     logger.debug(result.head())

@@ -27,7 +27,8 @@ class BaseBoundary(BaseAsset):
     This class represents a boundary condition and
     has a number of connection points, a name, and a number of unknowns.
 
-    Attributes:
+    Attributes
+    ----------
         connected_nodes (list): A list of nodes that are connected to this boundary.
         number_of_connection_point (int): The number of connection points for this boundary.
         equations_dict (dict): A dictionary that maps equation ids to equation indices in the

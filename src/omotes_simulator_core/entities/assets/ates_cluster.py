@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """atesCluster class."""
-from typing import Dict
 import os
 import math
 
@@ -154,7 +153,7 @@ class AtesCluster(AssetAbstract):
             self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
@@ -209,7 +208,7 @@ class AtesCluster(AssetAbstract):
         """Function to initailized Rosim from XML file."""
         path = os.path.dirname(__file__)
         xmlfile = os.path.join(path, "bin/sequentialTemplate_v0.4.2_template.xml")
-        with open(xmlfile, "r") as fd:
+        with open(xmlfile) as fd:
             xml_str = fd.read()
 
         # overwrite template value with ESDL properties for ROSIM input

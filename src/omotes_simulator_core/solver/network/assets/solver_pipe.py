@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """module containing pipe class."""
 
-from typing import Dict
-
 import numpy as np
 from scipy.optimize import root
 
@@ -24,7 +22,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
-    PROPERTY_ALPHA_VALUE
+    PROPERTY_ALPHA_VALUE,
 )
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -75,14 +73,18 @@ class SolverPipe(FallType):
         # Calculate the area of the pipe
         self.area: float = np.pi * self.diameter**2 / 4
 
-    def set_physical_properties(self, physical_properties: Dict[str, float]) -> None:
+    def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
         """Method to set the physical properties of the pipe.
 
         :param physical_properties: dictionary containing the physical properties of the pipe.
         expected properties are: length [m], diameter [m], roughness [m]
         """
-        expected_properties = [PROPERTY_LENGTH, PROPERTY_DIAMETER, PROPERTY_ROUGHNESS,
-                               PROPERTY_ALPHA_VALUE]
+        expected_properties = [
+            PROPERTY_LENGTH,
+            PROPERTY_DIAMETER,
+            PROPERTY_ROUGHNESS,
+            PROPERTY_ALPHA_VALUE,
+        ]
 
         for expected_property in expected_properties:
             if expected_property not in physical_properties:
