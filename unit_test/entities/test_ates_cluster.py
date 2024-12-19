@@ -14,15 +14,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Ates Cluster entities."""
-import faulthandler
 import unittest
 from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
-
-faulthandler.disable()
-from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster  # noqa: E402
-
-faulthandler.enable()
-from omotes_simulator_core.entities.assets.asset_defaults import (  # noqa: E402
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
+from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
@@ -64,12 +59,8 @@ class AtesClusterTest(unittest.TestCase):
             maximum_flow_charge=self.maximum_flow_charge,
             maximum_flow_discharge=self.maximum_flow_discharge,
         )
-        faulthandler.disable()
-        self.ates_cluster._init_rosim()
 
-    def tearDown(self):
-        """Clean up after each test case."""
-        faulthandler.enable()
+        self.ates_cluster._init_rosim()
 
     def test_injection(self) -> None:
         """Test injection to ATES."""
