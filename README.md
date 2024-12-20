@@ -21,29 +21,21 @@ from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 # Create a callable that prints the progress messages
 def progressLogger(progress: float, message: str) -> None:
     """Function to report progress to logging/stdout."""
-    logger.info(f"{message} ({progress*100:.2f}%)")
+    logger.info(f"({progress*100:.2f}%) {message}")
 
 #  Create simulation config parameters
 config = SimulationConfiguration(
-        simulation_id=uuid.uuid1(),
-        name="test run",
-        timestep=3600,
+        simulation_id=uuid.uuid1(),  #creates a new uuid for this simulation
+        name="test run",             # user defined name
+        timestep=3600,               # timestep, start and stop datetime (simulation period)
         start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
         stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
     )
-
-# Path to the Esdl file
 esdl_file_path = "path/to/whatever/file.esdl"
 
 # Run the simulation
-try:
-    app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
-    result = app.execute(progressLogger)
-    return result
-except Exception as error:
-    logger.error(f"Error occured: {error} at: {traceback.format_exc(limit=-1)}")
-    logger.debug(traceback.format_exc())
-    raise error
+sim = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
+result = sim.execute(progressLogger)
 ```
 
 ## Contributing
