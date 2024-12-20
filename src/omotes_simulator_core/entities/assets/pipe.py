@@ -18,6 +18,12 @@ from typing import Dict, List
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_VELOCITY,
+    PROPERTY_PRESSURE_LOSS,
+    PROPERTY_PRESSURE_LOSS_PER_LENGTH,
+    PROPERTY_HEAT_LOSS,
+)
 
 
 class Pipe(AssetAbstract):
@@ -86,14 +92,13 @@ class Pipe(AssetAbstract):
         self.inner_diameter = inner_diameter
         self.roughness = roughness
         self.alpha_value = alpha_value
-        self.solver_asset = SolverPipe(
+        self.solver_asset: SolverPipe = SolverPipe(
             name=self.name,
             _id=self.asset_id,
             length=self.length,
             diameter=self.inner_diameter,
             roughness=self.roughness,
         )
-        self.output = []
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset."""
@@ -111,4 +116,37 @@ class Pipe(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        pass
+        for i in range(len(self.connected_ports)):
+            output_dict_temp = {PROPERTY_VELOCITY: self.get_velocity(i)}
+            if i == 1:  # only for the second connection point these properties are added
+                output_dict_temp.update(
+                    {
+                        PROPERTY_PRESSURE_LOSS: self.get_pressure_loss(),
+                        PROPERTY_PRESSURE_LOSS_PER_LENGTH: self.get_pressure_loss_per_length(),
+                        PROPERTY_HEAT_LOSS: self.get_heat_loss(),
+                    }
+                )
+            self.outputs[i][-1].update(output_dict_temp)
+
+    def get_velocity(self, port: int) -> float:
+        """Get the velocity of the fluid in the pipe at the given connection point.
+
+        :param int port: The port of the pipe for which to get the velocity.
+        :return: The velocity of the fluid in the pipe [m/s].
+        """
+        return float(self.get_volume_flow_rate(port) / self.solver_asset.area)
+
+    def get_pressure_loss(self) -> float:
+        """Get the pressure loss of the pipe."""
+        return self.solver_asset.get_pressure(1) - self.solver_asset.get_pressure(0)
+
+    def get_pressure_loss_per_length(self) -> float:
+        """Get the pressure loss of the pipe per length."""
+        return self.get_pressure_loss() / self.length
+
+    def get_heat_loss(self) -> float:
+        """Get the heat loss of the pipe.
+
+        The minus sign is added to make it a loss instead of supply.
+        """
+        return -self.solver_asset.heat_supplied
