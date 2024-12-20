@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-from typing import Type
-
 import esdl
 import numpy as np
 
@@ -46,7 +44,7 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper imp
 )
 
 # Define the conversion dictionary
-conversion_dict_mappers: dict[type, Type[EsdlMapperAbstract]] = {
+conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
     esdl.Producer: EsdlAssetProducerMapper,
     esdl.GenericProducer: EsdlAssetProducerMapper,
     esdl.Consumer: EsdlAssetConsumerMapper,

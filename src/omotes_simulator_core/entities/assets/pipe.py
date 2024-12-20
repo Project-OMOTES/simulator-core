@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing pipe class."""
-from typing import Dict, List
-
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
@@ -23,7 +21,7 @@ from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 class Pipe(AssetAbstract):
     """A class representing a pipe in a heat network."""
 
-    output: List[Dict[str, float]]
+    output: list[dict[str, float]]
     """The output list of the pipe with a dictionaries for each timestep."""
 
     length: float
@@ -98,7 +96,7 @@ class Pipe(AssetAbstract):
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset."""
 
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Set the setpoints of the pipe prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the pipe.

@@ -16,7 +16,6 @@
 import esdl
 
 from omotes_simulator_core.adapter.transforms.transform_utils import reverse_dict
-from typing import List
 
 
 class StringEsdlAssetMapper:
@@ -43,7 +42,7 @@ class StringEsdlAssetMapper:
 
     str_to_type_dict = reverse_dict(original_dict=type_to_str_dict)
 
-    def to_esdl(self, entity: str) -> List[type]:
+    def to_esdl(self, entity: str) -> list[type]:
         """Method to convert a string to esdl class type.
 
         :param str entity: String to be converted to an esdl class type object.

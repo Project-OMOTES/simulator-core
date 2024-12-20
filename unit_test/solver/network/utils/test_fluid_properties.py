@@ -69,7 +69,7 @@ class InterpolationTest(unittest.TestCase):
         interpolated_value = interpolation(2)
 
         # Assert
-        self.assertAlmostEquals(interpolated_value, 4)
+        self.assertAlmostEqual(interpolated_value, 4)
 
     def test_call_order_5(self):
         """Test the call method of the Interpolation class."""
@@ -83,7 +83,7 @@ class InterpolationTest(unittest.TestCase):
         interpolated_value = interpolation(2)
 
         # Assert
-        self.assertAlmostEquals(interpolated_value, 32)
+        self.assertAlmostEqual(interpolated_value, 32)
 
     def test_validation_error(self):
         """Test the validation error method of the Interpolation class."""
@@ -131,7 +131,7 @@ class InterpolationTest(unittest.TestCase):
         result = interpol(5)
 
         # Assert
-        self.assertAlmostEquals(result, 2 * 5**2 + 3 * 5 + 4, 3)
+        self.assertAlmostEqual(result, 2 * 5**2 + 3 * 5 + 4, 3)
 
 
 class OmotesFluidPropertiesTest(unittest.TestCase):
@@ -151,11 +151,11 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(omotes_fluid_properties.T, T)
-        self.assertAlmostEquals(len(omotes_fluid_properties.rho), 150)
-        self.assertAlmostEquals(len(omotes_fluid_properties.visc), 150)
-        self.assertAlmostEquals(len(omotes_fluid_properties.therm_cond), 150)
-        self.assertAlmostEquals(len(omotes_fluid_properties.cp), 150)
-        self.assertAlmostEquals(len(omotes_fluid_properties.IE), 150)
+        self.assertAlmostEqual(len(omotes_fluid_properties.rho), 150)
+        self.assertAlmostEqual(len(omotes_fluid_properties.visc), 150)
+        self.assertAlmostEqual(len(omotes_fluid_properties.therm_cond), 150)
+        self.assertAlmostEqual(len(omotes_fluid_properties.cp), 150)
+        self.assertAlmostEqual(len(omotes_fluid_properties.IE), 150)
 
     def test_get_density(self):
         """Test the get_density method of the OmotesFluidProperties class."""
@@ -166,7 +166,7 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         density = self.omotes_fluid_properties.get_density(T)
 
         # Assert
-        self.assertAlmostEquals(density, 997.4151741509487, 3)
+        self.assertAlmostEqual(density, 997.4151741509487, 3)
 
     def test_get_viscosity(self):
         """Test the get_viscosity method of the OmotesFluidProperties class."""
@@ -177,7 +177,7 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         viscosity = self.omotes_fluid_properties.get_viscosity(T)
 
         # Assert
-        self.assertAlmostEquals(viscosity, 8.498706251104486e-07, 3)
+        self.assertAlmostEqual(viscosity, 8.498706251104486e-07, 3)
 
     def test_get_heat_capacity(self):
         """Test the get_heat_capacity method of the OmotesFluidProperties class."""
@@ -188,7 +188,7 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         heat_capacity = self.omotes_fluid_properties.get_heat_capacity(T)
 
         # Assert
-        self.assertAlmostEquals(heat_capacity, 4175.063249530409, 3)
+        self.assertAlmostEqual(heat_capacity, 4175.063249530409, 3)
 
     def test_get_ie(self):
         """Test the get_ie method of the OmotesFluidProperties class."""
@@ -199,7 +199,7 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         ie = self.omotes_fluid_properties.get_ie(T)
 
         # Assert
-        self.assertAlmostEquals(ie, 112413.55124584399, 3)
+        self.assertAlmostEqual(ie, 112413.55124584399, 3)
 
     def test_get_t(self):
         """Test the get_t method of the OmotesFluidProperties class."""
@@ -210,4 +210,4 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         T = self.omotes_fluid_properties.get_t(ie)
 
         # Assert
-        self.assertAlmostEquals(T, 273.1442035399455, 3)
+        self.assertAlmostEqual(T, 273.1442035399455, 3)
