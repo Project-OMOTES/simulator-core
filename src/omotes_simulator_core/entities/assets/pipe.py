@@ -118,15 +118,16 @@ class Pipe(AssetAbstract):
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {PROPERTY_VELOCITY: self.get_velocity(i)}
-            if i == 1:  # only for the second connection point these properties are added
-                output_dict_temp.update(
-                    {
-                        PROPERTY_PRESSURE_LOSS: self.get_pressure_loss(),
-                        PROPERTY_PRESSURE_LOSS_PER_LENGTH: self.get_pressure_loss_per_length(),
-                        PROPERTY_HEAT_LOSS: self.get_heat_loss(),
-                    }
-                )
             self.outputs[i][-1].update(output_dict_temp)
+
+        # only for the second connection point these properties are added
+        self.outputs[1][-1].update(
+            {
+                PROPERTY_PRESSURE_LOSS: self.get_pressure_loss(),
+                PROPERTY_PRESSURE_LOSS_PER_LENGTH: self.get_pressure_loss_per_length(),
+                PROPERTY_HEAT_LOSS: self.get_heat_loss(),
+            }
+        )
 
     def get_velocity(self, port: int) -> float:
         """Get the velocity of the fluid in the pipe at the given connection point.
