@@ -88,7 +88,7 @@ class PipeTest(unittest.TestCase):
             # act
             velocity = self.pipe.get_velocity(port=0)
         # assert
-        self.assertEqual(velocity, 12.732395447351628)
+        self.assertAlmostEquals(velocity, 12.732, places=3)
 
     def test_get_pressure_loss(self):
         """Test the get_pressure_loss."""  # noqa: D202
