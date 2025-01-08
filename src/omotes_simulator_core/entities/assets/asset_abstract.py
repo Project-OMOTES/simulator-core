@@ -111,6 +111,9 @@ class AssetAbstract(ABC):
     def get_volume_flow_rate(self, i: int) -> float:
         """Calculates and returns the volume flow rate for the given port.
 
+        The volumetric flow rate is calculated for the specified asset port based on fluid
+        temperature/density and mass flow rate from last computed timestep
+
         :param int i: The index of the port.
         :return float: The volume flow rate.
         """
