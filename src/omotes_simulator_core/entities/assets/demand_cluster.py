@@ -55,7 +55,6 @@ class DemandCluster(AssetAbstract):
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0.0
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
-        # Output list
         self.output: list = []
 
     def set_setpoints(self, setpoints: Dict) -> None:
