@@ -95,10 +95,10 @@ class DemandCluster(AssetAbstract):
         """
 
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
+        """Method to write time step results to the output dict.
 
         The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
+        represents the output of the asset for a specific timestep.
         """
         output_dict_temp = {
             PROPERTY_HEAT_DEMAND_SET_POINT: -self.thermal_power_allocation,

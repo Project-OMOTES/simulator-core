@@ -192,10 +192,10 @@ class AtesCluster(AssetAbstract):
         self._init_rosim()
 
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
+        """Method to write time step results to the output dict.
 
         The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
+        represents the output of the asset for a specific timestep.
         """
         output_dict = {
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),

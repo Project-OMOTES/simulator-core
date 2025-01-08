@@ -111,10 +111,10 @@ class Pipe(AssetAbstract):
         """
 
     def write_to_output(self) -> None:
-        """Write the output of the asset to the output list.
+        """Method to write time step results to the output dict.
 
         The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
+        represents the output of the asset for a specific timestep.
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {PROPERTY_VELOCITY: self.get_velocity(i)}

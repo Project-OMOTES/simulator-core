@@ -92,13 +92,12 @@ class AssetAbstract(ABC):
         """Placeholder method to add physical data to an asset."""
 
     def write_standard_output(self) -> None:
-        """Write the output of the asset to the output list.
+        """Write the standard time step results of the asset to the output list.
 
-        The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
-        The output of the asset is a list with a dictionary for each port
-        of the asset. Teh basic properties mass flow rate, pressure and temperature are stored.
-        All assets can add their own properties to the dictionary.
+        The output list is a list of list with dictionaries, where each dictionary
+        represents the output of its asset for a specific timestep of a specific port.
+        The basic properties mass flow rate, pressure and temperature are stored.
+        All assets can add their own properties to the dictionary via the write_output method.
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {
@@ -120,7 +119,11 @@ class AssetAbstract(ABC):
 
     @abstractmethod
     def write_to_output(self) -> None:
-        """Placeholder to get data and store it in the asset."""
+        """Placeholder to write time step results to the output dict.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of the asset for a specific timestep.
+        """
 
     def get_timeseries(self) -> DataFrame:
         """Get timeseries as a dataframe from a asset.
