@@ -70,7 +70,8 @@ class TestDemandCluster(unittest.TestCase):
         self.assertEqual(demand_cluster.output, [])
 
     def test_get_actual_heat_supplied(self):
-        """Evaluate the get_actual_heat_supplied method."""  # noqa: D202
+        """Evaluate the get_actual_heat_supplied method."""
+        pass  # need to not have a blank line after the docstring.
 
         # Arrange
         def get_internal_energy(_, i: int):
