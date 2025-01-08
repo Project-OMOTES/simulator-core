@@ -14,16 +14,15 @@ The general proces is as follows:
 
 
 # Code Quality guide lines
-Quality guide lines serve to improve quality. They should not be busy work nor work against developers.
-They should be of value.
+Quality guide lines serve to improve quality. Within this project we strive to write high quality code and share the knowledge within the team through reviews and discussion.
 
 ## Code review
 - Every commit should be created on its own branch and submitted per pull request to be merged with the main branch.
 - Every pull request must be reviewed by at least one other developer and all comments must be resolved.
 - No linting issues may remain before merging.
 - No type checking issues may remain before merging.
-- Code reviews are not about distrust. They are about sharing knowledge about the code base, sharing knowledge about
-  writing code and increasing quality by collaboration.
+- per-line ignores of linting and/or type-checker rules should be discussed. A different solution may be possible. 
+- Code reviews are not about distrust. They are about sharing knowledge about the code base, sharing knowledge about writing code and increasing quality by collaboration.
 
 ## Documentation
 - Every function must have documentation explaining what the function does in a summary and explaining
@@ -31,12 +30,14 @@ They should be of value.
 
 ## Linting
 - Linting maintains a shared quality of the code base across repositories.
-- Rules of the linter may only be ignored when approved by the software leads. Prefer to silence individual lines by <TODO show how to silence individual errors>'
+- Rules of the linter may only be ignored when approved by the team. Prefer to silence individual lines by adding ` #noqa` at the end of the line. Note that the code reviewer will (should?) ask you why this line has to be ignored.
 
 ## Type checking
 - Every function must have a return type and an argument list annotated with functions.
 - Rules of the type checker may only be ignored when approved by the software leads.
-- 
+
+## Code formatting
+We use Black and isort for code formatting. No discussion. Both tools are configured in `pyproject.toml`
 
 ## Testing
 ### Unit testing

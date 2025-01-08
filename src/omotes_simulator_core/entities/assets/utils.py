@@ -18,7 +18,6 @@ from enum import IntEnum
 
 import numpy as np
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from typing import List, Tuple
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -59,7 +58,7 @@ def mass_flow_and_temperature_to_heat_demand(
     return mass_flow * (internal_energy1 - internal_energy2)
 
 
-def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> Tuple[List[float], List[float]]:
+def get_thermal_conductivity_table(esdl_asset: EsdlAssetObject) -> tuple[list[float], list[float]]:
     """Retrieve the thermal conductivity table of the asset.
 
     :param EsdlAssetObject esdl_asset: The asset of which the heat transfer table should be

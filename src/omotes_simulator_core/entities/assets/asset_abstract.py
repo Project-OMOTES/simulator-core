@@ -16,14 +16,11 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
-
 from pandas import DataFrame, concat
 
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
-
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
@@ -41,10 +38,10 @@ class AssetAbstract(ABC):
     asset_id: str
     """The unique identifier of the asset."""
 
-    outputs: List[List[Dict[str, float]]]
+    outputs: list[list[dict[str, float]]]
     """The output of the asset as a list with a dictionary per timestep."""
 
-    connected_ports: List[str]
+    connected_ports: list[str]
     """List of ids of the connected ports."""
     solver_asset: BaseAsset
     """The asset object use for the solver."""
@@ -53,7 +50,7 @@ class AssetAbstract(ABC):
     number_of_con_points: int = 2
     """The number of connection points of the asset."""
 
-    def __init__(self, asset_name: str, asset_id: str, connected_ports: List[str]) -> None:
+    def __init__(self, asset_name: str, asset_id: str, connected_ports: list[str]) -> None:
         """Basic constructor for asset objects.
 
         :param str asset_name: The name of the asset.
@@ -72,14 +69,14 @@ class AssetAbstract(ABC):
         return self.__class__.__name__ + " " + self.name
 
     @abstractmethod
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
 
-    def get_setpoints(self) -> Dict[str, float]:
+    def get_setpoints(self) -> dict[str, float]:
         """Placeholder to get the setpoint attributes of an asset.
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the

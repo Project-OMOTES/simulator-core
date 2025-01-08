@@ -23,7 +23,7 @@ from omotes_simulator_core.entities.assets.pipe import Pipe
 class PipeTest(unittest.TestCase):
     """Testcase for HeatNetwork class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Define the variables used in the tests."""
         self.length: float = 5
         self.inner_diameter: float = 1
@@ -45,7 +45,7 @@ class PipeTest(unittest.TestCase):
             qheat_external=self.qheat_external,
         )
 
-    def test_pipe_create(self):
+    def test_pipe_create(self) -> None:
         """Evaluate the creation of a pipe object."""
         # Arrange
 
