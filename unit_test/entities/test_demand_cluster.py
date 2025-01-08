@@ -18,6 +18,13 @@
 import unittest
 from unittest.mock import patch
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_DIAMETER,
+    DEFAULT_POWER,
+    DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
+)
 
 
 class TestDemandCluster(unittest.TestCase):
@@ -47,12 +54,17 @@ class TestDemandCluster(unittest.TestCase):
         self.assertEqual(demand_cluster.name, "demand_cluster")
         self.assertEqual(demand_cluster.asset_id, "demand_cluster_id")
         self.assertEqual(demand_cluster.connected_ports, ["test1", "test2"])
-        self.assertEqual(demand_cluster._internal_diameter, 1.2)
-        self.assertEqual(demand_cluster.temperature_supply, 300)
-        self.assertEqual(demand_cluster.temperature_return, 300 - 30)
-        self.assertEqual(demand_cluster.temperature_return_target, 270)
-        self.assertEqual(demand_cluster.pressure_input, 1e6)
-        self.assertEqual(demand_cluster.thermal_power_allocation, 500000.0)
+        self.assertEqual(demand_cluster._internal_diameter, DEFAULT_DIAMETER)
+        self.assertEqual(demand_cluster.temperature_supply, DEFAULT_TEMPERATURE)
+        self.assertEqual(
+            demand_cluster.temperature_return, DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        )
+        self.assertEqual(
+            demand_cluster.temperature_return_target,
+            DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
+        )
+        self.assertEqual(demand_cluster.pressure_input, DEFAULT_PRESSURE)
+        self.assertEqual(demand_cluster.thermal_power_allocation, DEFAULT_POWER)
         self.assertEqual(demand_cluster.mass_flowrate, 0.0)
         self.assertEqual(demand_cluster.solver_asset.name, "demand_cluster")
         self.assertEqual(demand_cluster.output, [])
