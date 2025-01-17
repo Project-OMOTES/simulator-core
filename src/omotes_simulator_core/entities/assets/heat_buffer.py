@@ -67,7 +67,14 @@ class HeatBuffer(AssetAbstract):
     """The timestep of the heat storage to calculate volume during injection \
     and production [seconds]."""
 
-    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
+    def __init__(
+        self,
+        asset_name: str,
+        asset_id: str,
+        port_ids: list[str],
+        maximum_volume: float,
+        fill_level: float,
+    ) -> None:
         """Initialize a HeatBuffer object.
 
         :param str asset_name: The name of the asset.
@@ -78,8 +85,8 @@ class HeatBuffer(AssetAbstract):
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.thermal_power_allocation = 0
         self.mass_flowrate = 0
-        self.maximum_volume = 1
-        self.fill_level = 0.5
+        self.maximum_volume = maximum_volume
+        self.fill_level = fill_level
         self.timestep = 3600
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)  # since
 
@@ -149,12 +156,6 @@ class HeatBuffer(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
          :return:
         """
-        self.maximum_volume, _ = esdl_asset.get_property(
-            esdl_property_name="volume", default_value=self.maximum_volume
-        )
-        self.fill_level, _ = esdl_asset.get_property(
-            esdl_property_name="fillLevel", default_value=self.fill_level
-        )
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
