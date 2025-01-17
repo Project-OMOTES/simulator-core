@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """demandCluster class."""
-from typing import Dict
-
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
@@ -57,7 +55,7 @@ class DemandCluster(AssetAbstract):
         # Output list
         self.output: list = []
 
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
 
         :param Dict setpoints: The setpoints that should be set for the asset.

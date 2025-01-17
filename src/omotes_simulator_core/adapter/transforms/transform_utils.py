@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """File containing utility functions for the transforms."""
-from typing import Dict, List
 from enum import Enum
 from dataclasses import dataclass
 
@@ -76,7 +75,7 @@ def order_prim_sec_ports(connected_ports: list[Port]) -> list[Port]:
     return primary_ports + secondary_ports
 
 
-def reverse_dict(original_dict: dict) -> Dict[str, List[type]]:
+def reverse_dict(original_dict: dict) -> dict[str, list[type]]:
     """Method to reverse a dict.
 
     Creates a dict with set(values) as keys and the keys of the original dict as list values.
