@@ -34,7 +34,7 @@ class Network:
         "Fall": FallType,
         "Production": ProductionAsset,
         "Pipe": SolverPipe,
-        "HeatTRansferAsset": HeatTransferAsset,
+        "HeatTransferAsset": HeatTransferAsset,
     }
     assets: dict[str, BaseAsset]
     nodes: dict[str, Node]
