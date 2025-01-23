@@ -2,12 +2,12 @@
    contain the root `toctree` directive.
 
 Welcome to OMOTES simulator-core documentation!
-==============================================================
-This is the documentation for the OMOTES simulator. This simulator can be used the simulate
-thermo-hydraulics of a district heating system. This simulator is developed as part of the
-Dutch Nieuwe Warmte Nu program. More info can be found the  `NWN website`_.
-The simulator is written in Python.
-As input it use the `ESDL`_ format. The results are passed back as a pandas dataFrame.
+===============================================
+This documentation covers the OMOTES simulator, a tool designed to simulate the thermo-hydraulics of district heating systems.
+Developed as part of the Dutch Nieuwe Warmte Nu program, the simulator is written in Python and uses the ESDL format as input.
+
+For more information, visit the `NWN website`_ or the `ESDL website`_.
+
 This documentation is divided in the following sections:
 
 .. toctree::

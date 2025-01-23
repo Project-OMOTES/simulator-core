@@ -1,8 +1,8 @@
 .. _asset_factory:
 
 Asset factories
-====================================
-This encloses multiple classes, which are used to map esdl asset object to objects used by the simulator.
+===============
+The asset factories are used to map esdl asset object to objects used by the simulator.
 All classes are derived from the EsdlMapperAbstract class, which is a base class for all asset factories.
 The following classes are available:
 

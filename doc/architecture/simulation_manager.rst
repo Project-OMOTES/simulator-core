@@ -1,9 +1,12 @@
 .. _simulation manager:
 
 Simulation manager
-=====================================
-This class store the manager which runs the simulation. Its main responsibility is to create the network and controller classes
-and create and run the network simulation class, which is explained here: :ref:`network_simulation`.
+==================
+This class manages the simulation processes. Its primary responsibilities include: 
+
+- Creating instances of the network and controller classes
+- Initializing and exectuing the network simulation, as detailed in :ref:`network_simulation`.
+
 
 .. autoclass:: omotes_simulator_core.infrastructure.simulation_manager.SimulationManager
     :members:

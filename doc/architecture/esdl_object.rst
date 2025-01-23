@@ -2,9 +2,10 @@
 
 ESDL object class
 =====================================
-The main purpose of this class is to provide a wrapper around pyesdl and to provide a common interface for the simulator.
+The ESDL object class acts as a wrapper around pyesdl to have a common interface for the simulator.
 It can be used to query the esdl object for assets and other information.
-esdl asets will be return as an esdlassetobject, which is described in the :ref:`esdl_asset_object` section.
+
+ESDL asets will be returned as an esdlassetobject, see section :ref:`esdl_asset_object`.
 
 .. autoclass:: omotes_simulator_core.entities.esdl_object.EsdlObject
     :members:
