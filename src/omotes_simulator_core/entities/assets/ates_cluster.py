@@ -37,7 +37,7 @@ from omotes_simulator_core.entities.assets.utils import (
 
 
 class AtesCluster(AssetAbstract):
-    """An AtesCluster represents a group of Ates assets. An Ates asset consumes heat and produces heat."""
+    """An AtesCluster contains Ates assets that consumes heat and produces heat."""
 
     temperature_supply: float
     """The supply temperature of the asset [K]."""
