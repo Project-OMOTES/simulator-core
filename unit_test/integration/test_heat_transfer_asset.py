@@ -209,9 +209,15 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.production_asset.supply_temperature = 30 + 273.15
         # Act
         self.solver.solve()
-        # Assert
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[0], -77.59, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[6], +38.76, 2)
+        # Assert. To get port connections: heat_transfer_asset -> get_connection_points. At every port: mass flow, pressure, temp.
+        # self.get_index_matrix(property_name = 'mass_flow_rate', connection_point=0, use_relative_indexing = False), probably comes from Base_asset or above.
+        # This probably fails because the internal energy was computed using a way that is no longer used in the solver.
+        # TODO: add missing tests: zero flow for example or more.
+        # Get a better understanding of the full implementation.
+        # Implement the self.get_index method to make the tests more readable.
+        # Heat pumps and hexes are intended to work basically the same but with different heat transfer coefficients and different connection directions.
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[0], -77.59, 2) # mass flow at connection point 0
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[6], +38.76, 2) # mass flow at connection point 2
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[2], fluid_props.get_ie(303.15), 2)
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[8], fluid_props.get_ie(343.15), 2)
 
