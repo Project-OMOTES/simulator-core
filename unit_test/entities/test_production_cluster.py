@@ -222,9 +222,9 @@ class ProductionClusterTest(unittest.TestCase):
             self.production_cluster.outputs[0][0],
             {
                 PROPERTY_TEMPERATURE: 333.15,
-                PROPERTY_MASSFLOW: 1e6,
+                PROPERTY_MASSFLOW: -1e6,
                 PROPERTY_PRESSURE: 2e5,
-                PROPERTY_VOLUMEFLOW: 100.0,
+                PROPERTY_VOLUMEFLOW: -100.0,
             },
         )
 
