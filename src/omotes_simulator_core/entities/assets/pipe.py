@@ -16,6 +16,7 @@
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
+from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_VELOCITY,
     PROPERTY_PRESSURE_LOSS,
@@ -115,7 +116,7 @@ class Pipe(AssetAbstract):
         represents the output of the asset for a specific timestep.
         """
         for i in range(len(self.connected_ports)):
-            output_dict_temp = {PROPERTY_VELOCITY: self.get_velocity(i)}
+            output_dict_temp = {PROPERTY_VELOCITY: sign_output(i) * self.get_velocity(i)}
             self.outputs[i][-1].update(output_dict_temp)
 
         # only for the second connection point these properties are added

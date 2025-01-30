@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
     heat_demand_and_temperature_to_mass_flow,
     mass_flow_and_temperature_to_heat_demand,
+    sign_output,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
@@ -137,3 +138,25 @@ class UtilFunctionTest(unittest.TestCase):
         # Assert
         with self.assertRaises(NotImplementedError):
             get_thermal_conductivity_table(esdl_asset=esdl_asset_mock)
+
+    def test_sign_output(self):
+        """Test sign_output."""
+        # Arrange
+        port_number = 0
+
+        # Act
+        sign = sign_output(port_number)
+
+        # Assert
+        self.assertEqual(sign, -1)
+
+    def test_sign_output_odd(self):
+        """Test sign_output."""
+        # Arrange
+        port_number = 1
+
+        # Act
+        sign = sign_output(port_number)
+
+        # Assert
+        self.assertEqual(sign, 1)

@@ -20,6 +20,7 @@ from pandas import DataFrame, concat
 
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
+from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
@@ -98,10 +99,10 @@ class AssetAbstract(ABC):
         """
         for i in range(len(self.connected_ports)):
             output_dict_temp = {
-                PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(i),
+                PROPERTY_MASSFLOW: sign_output(i) * self.solver_asset.get_mass_flow_rate(i),
                 PROPERTY_PRESSURE: self.solver_asset.get_pressure(i),
                 PROPERTY_TEMPERATURE: self.solver_asset.get_temperature(i),
-                PROPERTY_VOLUMEFLOW: self.get_volume_flow_rate(i),
+                PROPERTY_VOLUMEFLOW: sign_output(i) * self.get_volume_flow_rate(i),
             }
             self.outputs[i].append(output_dict_temp)
 
