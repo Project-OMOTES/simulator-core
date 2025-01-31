@@ -15,7 +15,7 @@
 
 """Junction classes."""
 
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
@@ -34,7 +34,7 @@ class Junction:
         pn_bar: float = DEFAULT_PRESSURE,
         tfluid_k: float = DEFAULT_TEMPERATURE,
         height_m: float = DEFAULT_NODE_HEIGHT,
-        geodata: Optional[List[Any]] = None,
+        geodata: Optional[list[Any]] = None,
         name: str = "None",
         in_service: bool = True,
         index: Optional[int] = None,

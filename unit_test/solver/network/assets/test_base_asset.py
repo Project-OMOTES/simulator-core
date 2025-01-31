@@ -308,4 +308,4 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_temperature(connection_point=connection_point_id)
 
         # Assert
-        self.assertAlmostEquals(result, temperature, 2)
+        self.assertAlmostEqual(result, temperature, 2)
