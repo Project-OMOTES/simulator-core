@@ -21,7 +21,6 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock
-import pandas as pd
 
 from typing import Tuple
 
@@ -32,7 +31,6 @@ from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class PressureDropTest(unittest.TestCase):
@@ -62,7 +60,7 @@ class PressureDropTest(unittest.TestCase):
         self.demands = []
         self.producers = []
         self.pipes = []
-        
+
         for element in energy_system.eAllContents():
             if isinstance(element, esdl.HeatingDemand):
                 self.demands.append(element)
@@ -71,16 +69,52 @@ class PressureDropTest(unittest.TestCase):
             elif isinstance(element, esdl.Pipe):
                 self.pipes.append(element)
 
-        # Collect id of in and out ports of each demand.
-        self.in_out_demand_dict = dict()
-        for demand in self.demands:
-            self.in_out_demand_dict[demand.id] = dict()
-            for port in demand.port:
-                if isinstance(port, esdl.InPort):
-                    self.in_out_demand_dict[demand.id]["InPort"] = port.id
-                elif isinstance(port, esdl.OutPort):
-                    self.in_out_demand_dict[demand.id]["OutPort"] = port.id
+    def _get_in_out_port_id(self, asset) -> Tuple[str, str]:
+        """Gets the in and out port ids for the given asset."""
+        for port_check in asset.port:
+            port_m_dot = self.result[port_check.id, 'mass_flow'][0]
+            if port_m_dot > 0:
+                out_port_id = port_check.id
+            else:
+                in_port_id = port_check.id
 
-if __name__ == '__main__':
-    test = PressureDropTest()
-    test.setUp()
+        return in_port_id, out_port_id
+
+    def test_pressure_drop(self) -> None:
+        """
+        This test checks whether the pressure drop has the correct sign.
+
+        It does this by first computing the in and out ports of each asset,
+        based on the mass flow sign. The pressure drop is computed as
+        pressure out - pressure in and then asserts whether it is negaitve
+        for pipes, positive for producers and negative for consumers.
+        """
+        for pipe in self.pipes:
+            # Check which port is in and which out.
+            [in_port_id, out_port_id] = self._get_in_out_port_id(pipe)
+            # Compute pressure drop.
+            p_out = self.result[out_port_id, 'pressure']
+            p_in = self.result[in_port_id, 'pressure']
+            delta_p_list = p_out - p_in
+            for delta_p in delta_p_list:
+                np.testing.assert_(delta_p < 0)
+
+        for producer in self.producers:
+            # Check which port is in and which out.
+            [in_port_id, out_port_id] = self._get_in_out_port_id(producer)
+            # Compute pressure drop.
+            p_out = self.result[out_port_id, 'pressure']
+            p_in = self.result[in_port_id, 'pressure']
+            delta_p_list = p_out - p_in
+            for delta_p in delta_p_list:
+                np.testing.assert_(delta_p > 0)
+
+        for demand in self.demands:
+            # Check which port is in and which out.
+            [in_port_id, out_port_id] = self._get_in_out_port_id(demand)
+            # Compute pressure drop.
+            p_out = self.result[out_port_id, 'pressure']
+            p_in = self.result[in_port_id, 'pressure']
+            delta_p_list = p_out - p_in
+            for delta_p in delta_p_list:
+                np.testing.assert_(delta_p < 0)
