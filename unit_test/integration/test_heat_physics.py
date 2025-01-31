@@ -22,7 +22,7 @@ from pathlib import Path
 from unittest.mock import Mock
 import pandas as pd
 
-from typing import Tuple
+from typing import Dict, Tuple
 
 from omotes_simulator_core.adapter.transforms.mappers import (
     EsdlControllerMapper
@@ -36,6 +36,17 @@ from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 class HeatDemandTest(unittest.TestCase):
     """Class to store the heat demand tests."""
+
+    def _get_in_out_port_id(self, asset) -> Tuple[str, str]:
+        """Gets the in and out port ids for the given asset."""
+        for port_check in asset.port:
+            port_m_dot = self.result[port_check.id, 'mass_flow'][0]
+            if port_m_dot > 0:
+                out_port_id = port_check.id
+            else:
+                in_port_id = port_check.id
+
+        return in_port_id, out_port_id
 
     def setUp(self) -> None:
         """Setting up and running the simulation used for the tests."""
@@ -64,16 +75,17 @@ class HeatDemandTest(unittest.TestCase):
                 self.demands.append(element)
 
         # Collect id of in and out ports of each demand.
-        self.in_out_demand_dict = dict()
+        self.in_out_demand_dict: Dict[str, dict] = {}
         for demand in self.demands:
             self.in_out_demand_dict[demand.id] = dict()
-            for port in demand.port:
-                if isinstance(port, esdl.InPort):
-                    self.in_out_demand_dict[demand.id]["InPort"] = port.id
-                elif isinstance(port, esdl.OutPort):
-                    self.in_out_demand_dict[demand.id]["OutPort"] = port.id
+            [in_port_id, out_port_id] = self._get_in_out_port_id(demand)
+            self.in_out_demand_dict[demand.id]["InPort"] = in_port_id
+            self.in_out_demand_dict[demand.id]["OutPort"] = out_port_id
 
-    def _get_demand_in_out_temperatures(self, in_out_ports: dict) -> Tuple[dict, dict]:
+    def _get_demand_in_out_temperatures(
+            self,
+            in_out_ports: dict
+    ) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
         """Gets the temperatures at the in and out ports of the demand assets in the simulation."""
         temp_in_dict = dict()
         temp_out_dict = dict()
