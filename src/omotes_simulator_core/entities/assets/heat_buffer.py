@@ -87,10 +87,11 @@ class HeatBuffer(AssetAbstract):
         self.mass_flowrate = 0
         self.maximum_volume = maximum_volume
         self.fill_level = fill_level
+        self.current_volume = fill_level * maximum_volume
         self.timestep = 3600
-        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)  # since
-
-        # Output list
+        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
+        # using ProductionAsset since heat buffer acts either as producer or consumer,
+        # positive flow is discharge and negative flow is charge
         self.output: list = []
 
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -136,7 +137,7 @@ class HeatBuffer(AssetAbstract):
                           * self.maximum_volume) / self.maximum_volume
         if new_fill_level >= 0 and new_fill_level <= 1:
             self.fill_level = new_fill_level
-            self.current_level = new_fill_level * self.maximum_volume
+            self.current_volume = new_fill_level * self.maximum_volume
         else:
             raise ValueError(
                 f"The new fill level is {new_fill_level}. It should be between 0 and 1."
