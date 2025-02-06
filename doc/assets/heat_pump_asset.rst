@@ -9,4 +9,4 @@ This asset is stored within the `HeatPump` class in the `omotes_simulator_core.e
 .. autoclass:: omotes_simulator_core.entities.assets.heat_pump.HeatPump
    :members:
 
-.. _numpy: https://numpy.org/
+

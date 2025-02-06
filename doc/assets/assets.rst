@@ -1,16 +1,16 @@
 Assets
 =========================
-This section provides an overview of the asset classes within the simulator core. Assets are the essential components that represent different entities and systems modeled in the simulation. These assets include energy producers, consumers, storage systems, and transport components, such as pipes. A brief overview of the assets is provided below:
+This section provides an overview of the asset classes within the simulator core. Assets are the essential components that represent different entities and systems modeled in the simulation. These assets include heat producers, consumers, storage systems, and transport components, such as pipes. A brief overview of the assets is provided below:
 
 #. :ref:`ates-asset`: Represents an Aquifer Thermal Energy Storage (ATES) system for storing and retrieving thermal energy from groundwater.
 
-#. :ref:`consumer-asset`: Models energy consumers, such as households or industrial facilities, that draw energy from the network.
+#. :ref:`consumer-asset`: Models heat consumers, such as households or industrial facilities, that draw heat from the network.
 
 #. :ref:`heatpump-asset`: Defines heat pump systems, which transfer thermal energy for heating or cooling purposes.
 
-#. :ref:`pipe-asset`: Pipes which act as conduits for energy transfer between network entities.
+#. :ref:`pipe-asset`: Pipes transport heat between assets.
 
-#. :ref:`producer-asset`: Represents energy-producing sources.
+#. :ref:`producer-asset`: Represents thermal energy producing sources.
 
 Assets consists of different class to model the different assets.
 The main goal of the assets classes is to take the physical input of the

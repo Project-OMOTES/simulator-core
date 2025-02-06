@@ -9,4 +9,3 @@ This index should be used in creating equation objects. For solving the standard
 .. autoclass:: omotes_simulator_core.solver.matrix.matrix.Matrix
    :members:
 
-.. _numpy: https://numpy.org/

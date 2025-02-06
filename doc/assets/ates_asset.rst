@@ -9,4 +9,4 @@ This asset is stored within the `AtesCluster` class in the `omotes_simulator_cor
 .. autoclass:: omotes_simulator_core.entities.assets.ates_cluster.AtesCluster
    :members:
 
-.. _numpy: https://numpy.org/
+
