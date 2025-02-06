@@ -120,10 +120,11 @@ class Pipe(AssetAbstract):
             self.outputs[i][-1].update(output_dict_temp)
 
         # only for the second connection point these properties are added
+        pressure_loss = self.solver_asset.get_pressure(1) - self.solver_asset.get_pressure(0)
         self.outputs[1][-1].update(
             {
-                PROPERTY_PRESSURE_LOSS: self.get_pressure_loss(),
-                PROPERTY_PRESSURE_LOSS_PER_LENGTH: self.get_pressure_loss_per_length(),
+                PROPERTY_PRESSURE_LOSS: pressure_loss,
+                PROPERTY_PRESSURE_LOSS_PER_LENGTH: pressure_loss / self.length,
                 PROPERTY_HEAT_LOSS: self.get_heat_loss(),
             }
         )
@@ -135,14 +136,6 @@ class Pipe(AssetAbstract):
         :return: The velocity of the fluid in the pipe [m/s].
         """
         return float(self.get_volume_flow_rate(port) / self.solver_asset.area)
-
-    def get_pressure_loss(self) -> float:
-        """Get the pressure loss of the pipe."""
-        return self.solver_asset.get_pressure(1) - self.solver_asset.get_pressure(0)
-
-    def get_pressure_loss_per_length(self) -> float:
-        """Get the pressure loss of the pipe per length."""
-        return self.get_pressure_loss() / self.length
 
     def get_heat_loss(self) -> float:
         """Get the heat loss of the pipe.

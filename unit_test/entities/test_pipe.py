@@ -18,6 +18,10 @@ import unittest
 from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.pipe import Pipe
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_PRESSURE_LOSS,
+    PROPERTY_PRESSURE_LOSS_PER_LENGTH,
+)
 
 
 class PipeTest(unittest.TestCase):
@@ -90,28 +94,9 @@ class PipeTest(unittest.TestCase):
         # assert
         self.assertAlmostEquals(velocity, 12.732, places=3)
 
-    def test_get_pressure_loss(self):
-        """Test the get_pressure_loss."""  # noqa: D202
-
-        # arrange
-        def get_pressure(_, i: int):
-            if i == 0:
-                return 1.0
-            if i == 1:
-                return 2.0
-
-        with patch(
-            "omotes_simulator_core.solver.network.assets.solver_pipe.SolverPipe.get_pressure",
-            get_pressure,
-        ):
-            # act
-            pressure_loss = self.pipe.get_pressure_loss()
-
-        # assert
-        self.assertEqual(pressure_loss, 1.0)
-
-    def test_get_pressure_loss_per_length(self):
+    def test_write_to_output(self):
         """Test for the get_pressure_loss_per_length method."""  # noqa: D202
+        self.pipe.write_standard_output()
 
         # arrange
         def get_pressure(_, i: int):
@@ -125,10 +110,11 @@ class PipeTest(unittest.TestCase):
             get_pressure,
         ):
             # act
-            pressure_loss = self.pipe.get_pressure_loss_per_length()
+            self.pipe.write_to_output()
 
         # assert
-        self.assertEqual(pressure_loss, 2.0)
+        self.assertEqual(self.pipe.outputs[1][-1][PROPERTY_PRESSURE_LOSS], 10.0)
+        self.assertEqual(self.pipe.outputs[1][-1][PROPERTY_PRESSURE_LOSS_PER_LENGTH], 2.0)
 
     def test_get_heat_loss(self):
         """Test the get_heat_loss method."""
