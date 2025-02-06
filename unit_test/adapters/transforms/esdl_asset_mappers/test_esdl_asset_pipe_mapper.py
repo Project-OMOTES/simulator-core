@@ -22,10 +22,10 @@ from unittest.mock import Mock
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
+from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 
 
 class TestEsdlAssetPipeMapper(unittest.TestCase):
@@ -72,15 +72,15 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         self.assertEqual(pipe_entity.connected_ports, esdl_asset.get_port_ids())  # type: ignore
         self.assertEqual(
             pipe_entity.length,
-            esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],  # type: ignore
+            esdl_asset.get_property("length", PIPE_DEFAULTS.length),  # type: ignore
         )
         self.assertEqual(
             pipe_entity.inner_diameter,  # type: ignore
-            esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)[0],
+            esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter),
         )
         self.assertEqual(
             pipe_entity.roughness,  # type: ignore
-            esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0],
+            esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness),
         )
         self.assertEqual(
             pipe_entity.alpha_value,  # type: ignore
@@ -88,24 +88,23 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         )
         self.assertEqual(
             pipe_entity.minor_loss_coefficient,  # type: ignore
-            esdl_asset.get_property("minor_loss_coefficient", PIPE_DEFAULTS.minor_loss_coefficient)[
-                0
-            ],
+            esdl_asset.get_property("minor_loss_coefficient", PIPE_DEFAULTS.minor_loss_coefficient),
         )
         self.assertEqual(
             pipe_entity.external_temperature,  # type: ignore
-            esdl_asset.get_property("external_temperature", PIPE_DEFAULTS.external_temperature)[0],
+            esdl_asset.get_property("external_temperature", PIPE_DEFAULTS.external_temperature),
         )
         self.assertEqual(
             pipe_entity.qheat_external,  # type: ignore
-            esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external)[0],
+            esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external),
         )
 
     def test_pipe_get_property_diameter(self) -> None:
         """Evaluate the get property diameter method to retrieve diameters."""
         # Arrange
         esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, True)
+        esdl_asset_mock.get_property.return_value = 1.0
+        esdl_asset_mock.has_property.return_value = True
 
         # Act
         pass
@@ -117,7 +116,8 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         """Evaluate failure to retrieve diameter from ESDL asset."""
         # Arrange
         esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = (1.0, False)
+        esdl_asset_mock.get_property.return_value = 1.0
+        esdl_asset_mock.has_property.return_value = False
 
         # Act
         with self.assertRaises(NotImplementedError) as cm:

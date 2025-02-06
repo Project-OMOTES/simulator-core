@@ -17,21 +17,8 @@
 import esdl
 import numpy as np
 
-from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-    AssetControllerAbstract,
-)
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
-    EsdlAssetPipeMapper,
-)
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
-    EsdlAssetProducerMapper,
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
+    EsdlAssetAtesMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
     EsdlAssetConsumerMapper,
@@ -39,9 +26,27 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
     EsdlAssetHeatPumpMapper,
 )
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
-    EsdlAssetAtesMapper,
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
+    EsdlAssetPipeMapper,
 )
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper import (
+    EsdlAssetProducerMapper,
+)
+from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
+)
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
@@ -95,14 +100,16 @@ class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(esdl_property_name="power", default_value=0)
-        if result[1]:
-            power = result[0]
+        # Get power from the asset
+        if esdl_asset.has_property("power"):
+            power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
         else:
             raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
+        # Get other properties from the asset
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")
+        # Create the Controller for the Producer
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -128,18 +135,20 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
-        power = np.inf
-        if result[1]:
-            power = result[0]
-        if power == 0:
-            power = np.inf
+        # Get power from the asset
+        power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
+        # TODO: Discuss with the team if we should raise an error if no power is found
+        # if esdl_asset.has_property("power"):
+        #     power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
+        # else:
+        #     raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
 
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
         temperature_supply = esdl_asset.get_return_temperature("Out")
         temperature_return = esdl_asset.get_supply_temperature("In")
         profile = esdl_asset.get_profile()
+        # Create the Controller for the Consumer
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -165,21 +174,26 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(
+        # Retrieve the discharge power from the asset
+        discharge_power = esdl_asset.get_property(
             esdl_property_name="maxDischargeRate", default_value=np.inf
         )
-        discharge_power = np.inf
-        if result[1]:
-            discharge_power = result[0]
+        # TODO: Discuss with the team if we should raise an error if no discharge power is found
+        # if esdl_asset.has_property("maxDischargeRate"):
+        #     discharge_power = esdl_asset.get_property(esdl_property_name="maxDischargeRate", default_value=np.inf)
+        # else:
+        #     raise ValueError(f"No discharge power found for asset: {esdl_asset.esdl_asset.name}")
 
-        result = esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=np.inf)
-        charge_power = np.inf
-        if result[1]:
-            charge_power = result[0]
+        # Retrieve the maxChargeRate from the asset
+        charge_power = esdl_asset.get_property(
+            esdl_property_name="maxChargeRate", default_value=np.inf
+        )
 
         temperature_supply = esdl_asset.get_supply_temperature("In")
         temperature_return = esdl_asset.get_return_temperature("Out")
         profile = esdl_asset.get_profile()
+
+        # Create the Controller for the Storage
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
