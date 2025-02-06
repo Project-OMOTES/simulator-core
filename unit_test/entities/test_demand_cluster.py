@@ -91,6 +91,6 @@ class TestDemandCluster(unittest.TestCase):
             get_mass_flow_rate,
         ):
             # Act
-            actual_heat_supplied = self.heat_demand.get_actual_heat_supplied()
+            actual_heat_supplied = self.heat_demand.get_heat_supplied()
             # Assert
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)

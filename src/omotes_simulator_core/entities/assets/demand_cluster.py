@@ -99,11 +99,11 @@ class DemandCluster(AssetAbstract):
         """
         output_dict_temp = {
             PROPERTY_HEAT_DEMAND_SET_POINT: -self.thermal_power_allocation,
-            PROPERTY_HEAT_DEMAND: self.get_actual_heat_supplied(),
+            PROPERTY_HEAT_DEMAND: self.get_heat_supplied(),
         }
         self.outputs[1][-1].update(output_dict_temp)
 
-    def get_actual_heat_supplied(self) -> float:
+    def get_heat_supplied(self) -> float:
         """Get the actual heat supplied by the asset.
 
         :return float: The actual heat supplied by the asset [W].
