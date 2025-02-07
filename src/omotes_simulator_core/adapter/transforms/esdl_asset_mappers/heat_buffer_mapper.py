@@ -21,7 +21,7 @@ from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import HEAT_BUFFER_DEFAULTS
 
 
-class EsdlAssetAtesMapper(EsdlMapperAbstract):
+class EsdlAssetHeatBufferMapper(EsdlMapperAbstract):
     """Class to map an ESDL asset to a HeatBuffer entity class."""
 
     def to_esdl(self, entity: HeatBuffer) -> EsdlAssetObject:
