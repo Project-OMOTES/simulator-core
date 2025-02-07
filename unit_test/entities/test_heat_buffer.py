@@ -23,8 +23,6 @@ from omotes_simulator_core.entities.assets.heat_buffer import HeatBuffer  # noqa
 faulthandler.enable()
 from omotes_simulator_core.entities.assets.asset_defaults import (  # noqa: E402
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
 )
 
 
@@ -38,6 +36,8 @@ class HeatBufferTest(unittest.TestCase):
             asset_name="heat_buffer", asset_id="heat_buffer_id", port_ids=["test1", "test2"],
             maximum_volume=1, fill_level=0.5
         )
+        self.heat_buffer.temperature_supply = 353.15
+        self.heat_buffer.temperature_return = 313.15
         faulthandler.disable()
 
     def tearDown(self):
@@ -49,8 +49,6 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e4,
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 313.15,
         }
 
         # Act
@@ -58,7 +56,7 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEqual(self.heat_buffer.temperature_supply, 353.15, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.temperature_return, 313.155, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.temperature_return, 313.15, delta=0.1)
         self.assertAlmostEqual(self.heat_buffer.fill_level, 0.72, delta=0.01)
 
     def test_production(self) -> None:
@@ -66,8 +64,6 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e4,
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 313.15,
         }
 
         # Act

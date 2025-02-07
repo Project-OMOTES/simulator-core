@@ -102,8 +102,6 @@ class HeatBuffer(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY,
-            PROPERTY_TEMPERATURE_RETURN,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -111,8 +109,6 @@ class HeatBuffer(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-            self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
-            self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
 
             self._calculate_massflowrate()
             self._calculate_fill_level_and_volume()
