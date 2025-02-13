@@ -19,13 +19,9 @@ from typing import Any
 
 import pandas as pd
 from esdl import esdl
-
-from omotes_simulator_core.adapter.transforms.transform_utils import (
-    Port,
-    PortType,
-    sort_ports,
-)
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.adapter.transforms.transform_utils import PortType, sort_ports, Port
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,23 +51,23 @@ class EsdlAssetObject:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
 
-    def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
+    def get_property(self, esdl_property_name: str, default_value: Any) -> tuple[Any, bool]:
         """Get property value from the esdl_asset based on the 'ESDL' name.
 
         :param esdl_property_name: The name of the property in the ESDL asset.
         :param default_value: The default value to return if the property has no value.
-        :return: Value of the property from the ESDL or the default value if not found.
+        :return: Tuple with the value of the property and a boolean indicating whether the property
+                was found in the esdl_asset.
+        If the property is 0, then should it be False or true?
         """
-        # ESDL .eIsSet can be used to check if the property is set.
-        if not self.esdl_asset.eIsSet(esdl_property_name):
-            # Send message to logger
-            logger.warning(
-                f"Property {esdl_property_name} is not set for: {self.esdl_asset.name}."
-                + f"Returning default value: {default_value}."
-            )
-            return default_value
-        else:
-            return getattr(self.esdl_asset, esdl_property_name, default_value)
+        try:
+            value = getattr(self.esdl_asset, esdl_property_name)
+            if value == 0:
+                return default_value, False
+            return value, True
+
+        except AttributeError:
+            return default_value, False
 
     def get_profile(self) -> pd.DataFrame:
         """Get the profile of the asset."""
