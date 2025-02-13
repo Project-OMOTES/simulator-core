@@ -17,8 +17,8 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
 class FallType(BaseAsset):
@@ -56,7 +56,7 @@ class FallType(BaseAsset):
         name: str,
         _id: str,
         supply_temperature: float = 293.15,
-        heat_supplied: float = 0.0,
+        heat_flux: float = 0.0,
         loss_coefficient: float = 1.0,
     ):
         """
@@ -66,12 +66,14 @@ class FallType(BaseAsset):
         ----------
         name : str The name of the asset.
         _id : str The unique identifier of the asset.
-        number_of_unknowns : int, optional
-            The number of unknown variables for the asset. The default is 6, which corresponds
-            to the mass flow rate, pressure, and temperature at each connection point.
-        number_con_points : int, optional
-            The number of connection points for the asset. The default is 2, which corresponds to
-            the inlet and outlet.
+        supply_temperature : float, defaults to 293.15 [K]
+            The supply temperature of the asset.
+        heat_flux : float, defaults to 0.0 [W]
+            The heat flux of the asset, which is the heat supplied to the asset. The heat flux
+            is positive if heat is supplied to the asset and negative if heat is extracted from
+            the asset.
+        loss_coefficient: float, defaults to 1.0
+            The pressure loss coefficient of the asset.
         """
         super().__init__(
             name=name,
@@ -80,7 +82,7 @@ class FallType(BaseAsset):
             number_connection_points=2,
             supply_temperature=supply_temperature,
         )
-        self.heat_supplied = heat_supplied
+        self.heat_flux = heat_flux
         self.loss_coefficient = loss_coefficient
 
     def get_equations(self) -> list[EquationObject]:
@@ -239,7 +241,7 @@ class FallType(BaseAsset):
                     property_name="internal_energy", connection_point=1, use_relative_indexing=True
                 )
             ]
-            + self.heat_supplied
+            + self.heat_flux
         )
         return equation_object
 
