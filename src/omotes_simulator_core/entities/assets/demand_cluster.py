@@ -25,7 +25,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
@@ -83,13 +82,6 @@ class DemandCluster(AssetAbstract):
         )
         self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
-         :return:
-        """
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
