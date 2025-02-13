@@ -15,6 +15,7 @@
 
 """Module containing the Esdl to asset mapper class."""
 import esdl
+import numpy as np
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
     EsdlAssetAtesMapper,
@@ -32,6 +33,18 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper
     EsdlAssetProducerMapper,
 )
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
+)
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
@@ -71,3 +84,117 @@ class EsdlAssetMapper:
         asset_type = type(model.esdl_asset)
         mapper = conversion_dict_mappers[asset_type]()
         return mapper.to_entity(model)  # type: ignore
+
+
+class EsdlAssetControllerProducerMapper(EsdlMapperAbstract):
+    """Class to map an esdl asset to a producer entity class."""
+
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
+
+    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerProducer:
+        """Method to map an esdl asset to a producer entity class.
+
+        :param EsdlAssetObject model: Object to be converted to an asset entity.
+
+        :return: Entity object.
+        """
+        # Get power from the asset
+        power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
+
+        # Get other properties from the asset
+        marginal_costs = esdl_asset.get_marginal_costs()
+        temperature_supply = esdl_asset.get_supply_temperature("Out")
+        temperature_return = esdl_asset.get_return_temperature("In")
+        # Create the Controller for the Producer
+        contr_producer = ControllerProducer(
+            name=esdl_asset.esdl_asset.name,
+            identifier=esdl_asset.esdl_asset.id,
+            temperature_supply=temperature_supply,
+            temperature_return=temperature_return,
+            power=power,
+            marginal_costs=marginal_costs,
+        )
+        return contr_producer
+
+
+class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
+    """Class to map an esdl asset to a consumer entity class."""
+
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
+
+    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerConsumer:
+        """Method to map an esdl asset to a consumer entity class.
+
+        :param EsdlAssetObject model: Object to be converted to an asset entity.
+
+        :return: Entity object.
+        """
+        # Get power from the asset
+        power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
+
+        # It looks like they are switch, but this is because of the definition used in ESDL,
+        # which is different as what we use.
+        temperature_supply = esdl_asset.get_return_temperature("Out")
+        temperature_return = esdl_asset.get_supply_temperature("In")
+        profile = esdl_asset.get_profile()
+        # Create the Controller for the Consumer
+        contr_consumer = ControllerConsumer(
+            name=esdl_asset.esdl_asset.name,
+            identifier=esdl_asset.esdl_asset.id,
+            temperature_supply=temperature_supply,
+            temperature_return=temperature_return,
+            max_power=power,
+            profile=profile,
+        )
+        return contr_consumer
+
+
+class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
+    """Class to map an esdl asset to a storage entity class."""
+
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerStorageMapper.to_esdl()")
+
+    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerStorage:
+        """Method to map an esdl asset to a storage entity class.
+
+        :param EsdlAssetObject model: Object to be converted to an asset entity.
+
+        :return: Entity object.
+        """
+        # Retrieve the discharge power from the asset
+        discharge_power = esdl_asset.get_property(
+            esdl_property_name="maxDischargeRate", default_value=np.inf
+        )
+        # TODO: Discuss with the team if we should raise an error if no discharge power is found
+        # if esdl_asset.has_property("maxDischargeRate"):
+        #     discharge_power = esdl_asset.get_property(esdl_property_name="maxDischargeRate",
+        #           default_value=np.inf)
+        # else:
+        #     raise ValueError(f"No discharge power found for asset: {esdl_asset.esdl_asset.name}")
+
+        # Retrieve the maxChargeRate from the asset
+        charge_power = esdl_asset.get_property(
+            esdl_property_name="maxChargeRate", default_value=np.inf
+        )
+
+        temperature_supply = esdl_asset.get_supply_temperature("In")
+        temperature_return = esdl_asset.get_return_temperature("Out")
+        profile = esdl_asset.get_profile()
+
+        # Create the Controller for the Storage
+        contr_storage = ControllerStorage(
+            name=esdl_asset.esdl_asset.name,
+            identifier=esdl_asset.esdl_asset.id,
+            temperature_supply=temperature_supply,
+            temperature_return=temperature_return,
+            max_charge_power=charge_power,
+            max_discharge_power=discharge_power,
+            profile=profile,
+        )
+        return contr_storage

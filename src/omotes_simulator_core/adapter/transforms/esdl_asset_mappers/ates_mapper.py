@@ -14,18 +14,18 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to Ates asset mapper class."""
 
-from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
 )
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+)
+from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlAssetAtesMapper(EsdlMapperAbstract):
@@ -47,47 +47,45 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             port_ids=esdl_asset.get_port_ids(),
             aquifer_depth=esdl_asset.get_property(
                 esdl_property_name="aquiferTopDepth", default_value=ATES_DEFAULTS.aquifer_depth
-            )[0],
+            ),
             aquifer_thickness=esdl_asset.get_property(
                 esdl_property_name="aquiferThickness", default_value=ATES_DEFAULTS.aquifer_thickness
-            )[0],
+            ),
             aquifer_mid_temperature=esdl_asset.get_property(
                 esdl_property_name="aquiferMidTemperature",
                 default_value=ATES_DEFAULTS.aquifer_mid_temperature,
-            )[0],
+            ),
             aquifer_net_to_gross=esdl_asset.get_property(
                 esdl_property_name="aquiferNetToGross",
                 default_value=ATES_DEFAULTS.aquifer_net_to_gross,
-            )[0],
+            ),
             aquifer_porosity=esdl_asset.get_property(
                 esdl_property_name="aquiferPorosity", default_value=ATES_DEFAULTS.aquifer_porosity
-            )[0],
+            ),
             aquifer_permeability=esdl_asset.get_property(
                 esdl_property_name="aquiferPermeability",
                 default_value=ATES_DEFAULTS.aquifer_permeability,
-            )[0],
+            ),
             aquifer_anisotropy=esdl_asset.get_property(
                 esdl_property_name="aquiferAnisotropy",
                 default_value=ATES_DEFAULTS.aquifer_anisotropy,
-            )[0],
+            ),
             salinity=esdl_asset.get_property(
                 esdl_property_name="salinity", default_value=ATES_DEFAULTS.salinity
-            )[0],
+            ),
             well_casing_size=esdl_asset.get_property(
                 esdl_property_name="wellCasingSize", default_value=ATES_DEFAULTS.well_casing_size
-            )[0],
+            ),
             well_distance=esdl_asset.get_property(
                 esdl_property_name="wellDistance", default_value=ATES_DEFAULTS.well_distance
-            )[0],
+            ),
             maximum_flow_charge=heat_demand_and_temperature_to_mass_flow(
-                esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=12e7)[0],
+                esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=12e7),
                 DEFAULT_TEMPERATURE,
                 DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
             ),
             maximum_flow_discharge=heat_demand_and_temperature_to_mass_flow(
-                esdl_asset.get_property(esdl_property_name="maxDischargeRate", default_value=12e7)[
-                    0
-                ],
+                esdl_asset.get_property(esdl_property_name="maxDischargeRate", default_value=12e7),
                 DEFAULT_TEMPERATURE,
                 DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
             ),
