@@ -19,11 +19,12 @@ import esdl
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
     EsdlAssetAtesMapper,
 )
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper import (
-    EsdlAssetConsumerMapper,
+from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
 )
-from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
-    EsdlAssetHeatPumpMapper,
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
@@ -32,6 +33,13 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper
     EsdlAssetProducerMapper,
 )
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+=======
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
