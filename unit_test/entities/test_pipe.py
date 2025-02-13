@@ -17,11 +17,11 @@
 import unittest
 from unittest.mock import patch
 
-from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_LOSS,
     PROPERTY_PRESSURE_LOSS_PER_LENGTH,
 )
+from omotes_simulator_core.entities.assets.pipe import Pipe
 
 
 class PipeTest(unittest.TestCase):
@@ -119,7 +119,7 @@ class PipeTest(unittest.TestCase):
     def test_get_heat_loss(self):
         """Test the get_heat_loss method."""
         # arrange
-        self.pipe.solver_asset.heat_supplied = 1000.0
+        self.pipe.solver_asset.heat_flux = 1000.0
 
         # act
         heat_loss = self.pipe.get_heat_loss()

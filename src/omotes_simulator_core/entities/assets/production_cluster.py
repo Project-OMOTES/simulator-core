@@ -21,17 +21,17 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_HEAT_SUPPLIED,
+    PROPERTY_HEAT_SUPPLY_SET_POINT,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_HEAT_SUPPLIED,
-    PROPERTY_HEAT_SUPPLY_SET_POINT,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 
 class ProductionCluster(AssetAbstract):
@@ -80,7 +80,7 @@ class ProductionCluster(AssetAbstract):
         self.control_mass_flow = False
         # Controlled mass flow
         self.controlled_mass_flow = None
-        self.solver_asset = ProductionAsset(
+        self.solver_asset = HeatBoundary(
             name=self.name,
             _id=self.asset_id,
             pre_scribe_mass_flow=False,
