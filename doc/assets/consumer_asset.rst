@@ -12,7 +12,7 @@ Values are set for different parameters that include as internal diameter, suppl
 pressure input, thermal power allocation, and mass flow rate.
 
 The `set_setpoints` method ensures that required setpoints—supply temperature, return temperature, and heat 
-demand—are provided before adjusting the thermal power allocation and computing the mass flow rate accordingly. 
+demand are provided before adjusting the thermal power allocation and computing the mass flow rate accordingly. 
 This calculated data is then passed to the `solver_asset` instance for further use in simulations.
 
 
