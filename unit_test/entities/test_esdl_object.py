@@ -117,28 +117,6 @@ class EsdlObjectTest(unittest.TestCase):
         # Assert
         self.assertEqual(length, 0.0)
 
-    def test_has_property(self):
-        """Test has_property method."""
-        # Arrange
-        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
-
-        # Act
-        has_length = asset.has_property("length")
-
-        # Assert
-        self.assertTrue(has_length)
-
-    def test_has_property_not_found(self):
-        """Test has_property method."""
-        # Arrange
-        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
-
-        # Act
-        has_length = asset.has_property("length_not_found")
-
-        # Assert
-        self.assertFalse(has_length)
-
     def test_get_port_ids(self):
         """Test get_port_ids method."""
         # Arrange

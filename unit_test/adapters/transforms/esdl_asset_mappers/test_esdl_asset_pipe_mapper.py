@@ -112,25 +112,6 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         # Assert
         self.assertEqual(EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
 
-    def test_pipe_get_property_diameter_failed(self) -> None:
-        """Evaluate failure to retrieve diameter from ESDL asset."""
-        # Arrange
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = 1.0
-        esdl_asset_mock.has_property.return_value = False
-
-        # Act
-        with self.assertRaises(NotImplementedError) as cm:
-            EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock)
-
-        # Assert
-        self.assertIsInstance(cm.exception, NotImplementedError)
-        self.assertEqual(
-            cm.exception.args[0],
-            f"The innerDiameter property is unavailable for {esdl_asset_mock.esdl_asset.name}. "
-            "Conversion from DN to diameter is not yet implemented.",
-        )
-
     def test_pipe_get_heat_transfer_coefficient(self) -> None:
         """Evaluate the get heat transfer coefficient method."""
         # Arrange

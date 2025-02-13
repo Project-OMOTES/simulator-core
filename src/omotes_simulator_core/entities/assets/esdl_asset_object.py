@@ -62,7 +62,6 @@ class EsdlAssetObject:
         :param default_value: The default value to return if the property has no value.
         :return: Value of the property from the ESDL or the default value if not found.
         """
-        prop = getattr(self.esdl_asset, esdl_property_name, default_value)
         # ESDL .eIsSet can be used to check if the property is set.
         if not self.esdl_asset.eIsSet(esdl_property_name):
             # Send message to logger
@@ -72,15 +71,7 @@ class EsdlAssetObject:
             )
             return default_value
         else:
-            return prop
-
-    def has_property(self, esdl_property_name: str) -> bool:
-        """Check if the property exists in the esdl_asset.
-
-        :param esdl_property_name: The name of the property in the ESDL asset.
-        :return: True if the property exists, False otherwise.
-        """
-        return hasattr(self.esdl_asset, esdl_property_name)
+            return getattr(self.esdl_asset, esdl_property_name, default_value)
 
     def get_profile(self) -> pd.DataFrame:
         """Get the profile of the asset."""
