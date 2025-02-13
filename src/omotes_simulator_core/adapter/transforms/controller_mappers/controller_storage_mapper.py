@@ -40,18 +40,13 @@ class ControllerStorageMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(
+        discharge_power = esdl_asset.get_property(
             esdl_property_name="maxDischargeRate", default_value=np.inf
         )
-        discharge_power = np.inf
-        if result[1]:
-            discharge_power = result[0]
 
-        result = esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=np.inf)
-        charge_power = np.inf
-        if result[1]:
-            charge_power = result[0]
-
+        charge_power = esdl_asset.get_property(
+            esdl_property_name="maxChargeRate", default_value=np.inf
+        )
         temperature_supply = esdl_asset.get_supply_temperature("In")
         temperature_return = esdl_asset.get_return_temperature("Out")
         profile = esdl_asset.get_profile()

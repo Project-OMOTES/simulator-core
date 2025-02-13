@@ -38,11 +38,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(esdl_property_name="power", default_value=0)
-        if result[1]:
-            power = result[0]
-        else:
-            raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
+        power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_supply = esdl_asset.get_supply_temperature("Out")
         temperature_return = esdl_asset.get_return_temperature("In")

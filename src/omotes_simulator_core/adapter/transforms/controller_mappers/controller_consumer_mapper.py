@@ -40,13 +40,7 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        result = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
-        power = np.inf
-        if result[1]:
-            power = result[0]
-        if power == 0:
-            power = np.inf
-
+        power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
         temperature_supply = esdl_asset.get_return_temperature("Out")
