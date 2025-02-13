@@ -15,17 +15,16 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import numpy as np
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.pipe import Pipe
-from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-
-
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
 )
+from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
@@ -45,19 +44,17 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
             port_ids=esdl_asset.get_port_ids(),
-            length=esdl_asset.get_property("length", PIPE_DEFAULTS.length)[0],
+            length=esdl_asset.get_property("length", PIPE_DEFAULTS.length),
             inner_diameter=self._get_diameter(esdl_asset=esdl_asset),
-            roughness=esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness)[0],
+            roughness=esdl_asset.get_property("roughness", PIPE_DEFAULTS.roughness),
             alpha_value=self._get_heat_transfer_coefficient(esdl_asset),
             minor_loss_coefficient=esdl_asset.get_property(
                 "minor_loss_coefficient", PIPE_DEFAULTS.minor_loss_coefficient
-            )[0],
+            ),
             external_temperature=esdl_asset.get_property(
                 "external_temperature", PIPE_DEFAULTS.external_temperature
-            )[0],
-            qheat_external=esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external)[
-                0
-            ],
+            ),
+            qheat_external=esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external),
         )
 
         return pipe_entity
@@ -91,16 +88,11 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
     @staticmethod
     def _get_diameter(esdl_asset: EsdlAssetObject) -> float:
         """Retrieve the diameter of the pipe and convert it if necessary."""
-        temp_diameter, property_available = esdl_asset.get_property(
-            "innerDiameter", PIPE_DEFAULTS.diameter
-        )
-        if property_available:
-            if temp_diameter == 0:
-                return PIPE_DEFAULTS.diameter
-            return float(temp_diameter)
+        # Check if the property is available
+        # Retrieve the diameter
+        temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
+        # Check if the diameter is 0, if so return the default diameter!
+        if temp_diameter == 0:
+            return PIPE_DEFAULTS.diameter
         else:
-            # Implement DN-conversion
-            raise NotImplementedError(
-                f"The innerDiameter property is unavailable for {esdl_asset.esdl_asset.name}. "
-                "Conversion from DN to diameter is not yet implemented."
-            )
+            return float(temp_diameter)
