@@ -32,7 +32,7 @@ from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 
 class AtesCluster(AssetAbstract):
@@ -118,7 +118,7 @@ class AtesCluster(AssetAbstract):
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
-        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
+        self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
         # ATES default properties
         self.aquifer_depth = aquifer_depth  # meters
         self.aquifer_thickness = aquifer_thickness  # meters

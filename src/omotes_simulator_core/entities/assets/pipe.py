@@ -14,14 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing pipe class."""
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
-from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_VELOCITY,
+    PROPERTY_HEAT_LOSS,
     PROPERTY_PRESSURE_LOSS,
     PROPERTY_PRESSURE_LOSS_PER_LENGTH,
-    PROPERTY_HEAT_LOSS,
+    PROPERTY_VELOCITY,
 )
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.utils import sign_output
+from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
 
 class Pipe(AssetAbstract):
@@ -138,4 +139,4 @@ class Pipe(AssetAbstract):
 
         The minus sign is added to make it a loss instead of supply.
         """
-        return -self.solver_asset.heat_supplied
+        return -self.solver_asset.heat_flux

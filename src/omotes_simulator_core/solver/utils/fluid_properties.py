@@ -15,6 +15,7 @@
 """Module for computing fluid properties."""
 
 import numpy as np
+
 from omotes_simulator_core.solver.utils.fluidprop import FluidProperties
 
 
