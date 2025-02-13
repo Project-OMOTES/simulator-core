@@ -180,7 +180,8 @@ class EsdlAssetControllerStorageMapper(EsdlMapperAbstract):
         )
         # TODO: Discuss with the team if we should raise an error if no discharge power is found
         # if esdl_asset.has_property("maxDischargeRate"):
-        #     discharge_power = esdl_asset.get_property(esdl_property_name="maxDischargeRate", default_value=np.inf)
+        #     discharge_power = esdl_asset.get_property(esdl_property_name="maxDischargeRate",
+        #           default_value=np.inf)
         # else:
         #     raise ValueError(f"No discharge power found for asset: {esdl_asset.esdl_asset.name}")
 
