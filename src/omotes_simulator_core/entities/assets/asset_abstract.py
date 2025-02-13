@@ -19,10 +19,9 @@ from abc import ABC, abstractmethod
 
 from pandas import DataFrame, concat
 
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.entities.assets.utils import sign_output
-from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
