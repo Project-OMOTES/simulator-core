@@ -63,13 +63,11 @@ class EsdlAssetObject:
         :return: Value of the property from the ESDL or the default value if not found.
         """
         prop = getattr(self.esdl_asset, esdl_property_name, default_value)
-        # ESDL does not use None when values are missing; it replaces missing values with 0.0.
-        # Bug has reported to ESDL developers.
-        # The code replaces 0.0 with the default value.
-        if prop == 0:
+        # ESDL .eIsSet can be used to check if the property is set.
+        if not self.esdl_asset.eIsSet(esdl_property_name):
             # Send message to logger
             logger.warning(
-                f"Property {esdl_property_name} has value 0.0 for asset: {self.esdl_asset.name}."
+                f"Property {esdl_property_name} is not set for: {self.esdl_asset.name}."
                 + f"Returning default value: {default_value}."
             )
             return default_value
