@@ -84,13 +84,6 @@ class DemandCluster(AssetAbstract):
         self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
-         :return:
-        """
-
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
 

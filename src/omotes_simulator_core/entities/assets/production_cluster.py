@@ -81,13 +81,6 @@ class ProductionCluster(AssetAbstract):
             set_pressure=self.pressure_supply,
         )
 
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object containing the physical data.
-        :return:
-        """
-
     def _set_supply_temperature(self, temperature_supply: float) -> None:
         """Set the supply temperature of the asset.
 

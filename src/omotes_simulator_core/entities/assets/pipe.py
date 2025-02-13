@@ -93,9 +93,6 @@ class Pipe(AssetAbstract):
         )
         self.output = []
 
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset."""
-
     def set_setpoints(self, setpoints: dict) -> None:
         """Set the setpoints of the pipe prior to a simulation.
 

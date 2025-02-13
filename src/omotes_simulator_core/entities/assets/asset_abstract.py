@@ -16,14 +16,16 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
+
 from pandas import DataFrame, concat
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
     PROPERTY_TEMPERATURE,
 )
+from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
 class AssetAbstract(ABC):
@@ -80,10 +82,6 @@ class AssetAbstract(ABC):
             setpoints and the values are the values.
         """
         return {}
-
-    @abstractmethod
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Placeholder method to add physical data to an asset."""
 
     def write_standard_output(self) -> None:
         """Write the output of the asset to the output list.

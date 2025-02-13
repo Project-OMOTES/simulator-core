@@ -42,10 +42,6 @@ class HeatPump(AssetAbstract):
         """Placeholder to set the setpoints of an asset prior to a simulation."""
         pass
 
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Add physical data to the asset."""
-        pass
-
     def write_to_output(self) -> None:
         """Write the output of the asset to the output list."""
         pass

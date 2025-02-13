@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """atesCluster class."""
-import os
 import math
+import os
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -30,10 +30,10 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
+from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 
 
 class AtesCluster(AssetAbstract):
@@ -181,13 +181,6 @@ class AtesCluster(AssetAbstract):
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
-         :return:
-        """
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
