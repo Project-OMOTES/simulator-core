@@ -36,7 +36,10 @@ class HeatDemandTest(unittest.TestCase):
     """Class to store the heat demand tests."""
 
     def _get_in_out_port_id(self, asset) -> Tuple[str, str]:
-        """Gets the in and out port ids for the given asset."""
+        """Gets the in and out port ids for the given asset.
+
+        Note that is method only works for assets with one in and one out port.
+        """
         for port_check in asset.port:
             if isinstance(port_check, esdl.InPort):
                 in_port_id = port_check.id
