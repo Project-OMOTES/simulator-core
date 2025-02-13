@@ -135,11 +135,6 @@ class EsdlAssetControllerConsumerMapper(EsdlMapperAbstract):
         """
         # Get power from the asset
         power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
-        # TODO: Discuss with the team if we should raise an error if no power is found
-        # if esdl_asset.has_property("power"):
-        #     power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
-        # else:
-        #     raise ValueError(f"No power found for asset: {esdl_asset.esdl_asset.name}")
 
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
