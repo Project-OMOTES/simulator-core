@@ -89,17 +89,10 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
     def _get_diameter(esdl_asset: EsdlAssetObject) -> float:
         """Retrieve the diameter of the pipe and convert it if necessary."""
         # Check if the property is available
-        if esdl_asset.has_property("innerDiameter"):
-            # Retrieve the diameter
-            temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
-            # Check if the diameter is 0, if so return the default diameter!
-            if temp_diameter == 0:
-                return PIPE_DEFAULTS.diameter
-            else:
-                return float(temp_diameter)
+        # Retrieve the diameter
+        temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
+        # Check if the diameter is 0, if so return the default diameter!
+        if temp_diameter == 0:
+            return PIPE_DEFAULTS.diameter
         else:
-            # Implement DN-conversion
-            raise NotImplementedError(
-                f"The innerDiameter property is unavailable for {esdl_asset.esdl_asset.name}. "
-                "Conversion from DN to diameter is not yet implemented."
-            )
+            return float(temp_diameter)
