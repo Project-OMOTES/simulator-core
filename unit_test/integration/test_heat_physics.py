@@ -24,9 +24,7 @@ import pandas as pd
 
 from typing import Dict, Tuple
 
-from omotes_simulator_core.adapter.transforms.mappers import (
-    EsdlControllerMapper
-)
+from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
@@ -40,12 +38,10 @@ class HeatDemandTest(unittest.TestCase):
     def _get_in_out_port_id(self, asset) -> Tuple[str, str]:
         """Gets the in and out port ids for the given asset."""
         for port_check in asset.port:
-            port_m_dot = self.result[port_check.id, 'mass_flow'][0]
-            if port_m_dot > 0:
-                out_port_id = port_check.id
-            else:
+            if isinstance(port_check, esdl.InPort):
                 in_port_id = port_check.id
-
+            else:
+                out_port_id = port_check.id
         return in_port_id, out_port_id
 
     def setUp(self) -> None:
@@ -60,7 +56,7 @@ class HeatDemandTest(unittest.TestCase):
             name="test run",
             timestep=3600,
             start=self.start_time,
-            stop=self.end_time
+            stop=self.end_time,
         )
         callback = Mock()
         app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
@@ -83,8 +79,7 @@ class HeatDemandTest(unittest.TestCase):
             self.in_out_demand_dict[demand.id]["OutPort"] = out_port_id
 
     def _get_demand_in_out_temperatures(
-            self,
-            in_out_ports: dict
+        self, in_out_ports: dict
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
         """Gets the temperatures at the in and out ports of the demand assets in the simulation."""
         temp_in_dict = dict()
@@ -93,8 +88,8 @@ class HeatDemandTest(unittest.TestCase):
             in_port_id = in_out_ports[demand.id]["InPort"]
             out_port_id = in_out_ports[demand.id]["OutPort"]
 
-            temp_in_dict[demand.id] = np.array(self.result[(in_port_id, 'temperature')])
-            temp_out_dict[demand.id] = np.array(self.result[(out_port_id, 'temperature')])
+            temp_in_dict[demand.id] = np.array(self.result[(in_port_id, "temperature")])
+            temp_out_dict[demand.id] = np.array(self.result[(out_port_id, "temperature")])
 
         return temp_in_dict, temp_out_dict
 
@@ -113,9 +108,9 @@ class HeatDemandTest(unittest.TestCase):
         for demand in self.demands:
             in_port_id = self.in_out_demand_dict[demand.id]["InPort"]
             out_port_id = self.in_out_demand_dict[demand.id]["OutPort"]
-            m_dot_in_array = np.array(self.result[(in_port_id, 'mass_flow')])
-            m_dot_out_array = np.array(self.result[(out_port_id, 'mass_flow')])
-            m_dot = (-m_dot_in_array + m_dot_out_array) / 2
+            m_dot_in_array = np.array(self.result[(in_port_id, "mass_flow")])
+            m_dot_out_array = np.array(self.result[(out_port_id, "mass_flow")])
+            m_dot = (m_dot_in_array + m_dot_out_array) / 2
             cp = np.array([])
             temp_in_array = temp_in_dict[demand.id]
             temp_out_array = temp_out_dict[demand.id]
@@ -130,8 +125,8 @@ class HeatDemandTest(unittest.TestCase):
             demand_id = demand.id
             profile_dates = demand.profile["date"]
             profile_vals = demand.profile["values"]
-            start_timestamp = pd.Timestamp(self.start_time).tz_localize('UTC')
-            end_timestamp = pd.Timestamp(self.end_time).tz_localize('UTC')
+            start_timestamp = pd.Timestamp(self.start_time).tz_localize("UTC")
+            end_timestamp = pd.Timestamp(self.end_time).tz_localize("UTC")
             idx_start_prof = profile_dates.tolist().index(start_timestamp)
             idx_end_prof = profile_dates.tolist().index(end_timestamp)
             q_dot_demand_esdl[demand_id] = profile_vals[idx_start_prof:idx_end_prof]

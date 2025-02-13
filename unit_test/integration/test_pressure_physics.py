@@ -24,9 +24,7 @@ from unittest.mock import Mock
 
 from typing import Tuple
 
-from omotes_simulator_core.adapter.transforms.mappers import (
-    EsdlControllerMapper
-)
+from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
@@ -48,7 +46,7 @@ class PressureDropTest(unittest.TestCase):
             name="test run",
             timestep=3600,
             start=self.start_time,
-            stop=self.end_time
+            stop=self.end_time,
         )
         callback = Mock()
         app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
@@ -70,14 +68,15 @@ class PressureDropTest(unittest.TestCase):
                 self.pipes.append(element)
 
     def _get_in_out_port_id(self, asset) -> Tuple[str, str]:
-        """Gets the in and out port ids for the given asset."""
-        for port_check in asset.port:
-            port_m_dot = self.result[port_check.id, 'mass_flow'][0]
-            if port_m_dot > 0:
-                out_port_id = port_check.id
-            else:
-                in_port_id = port_check.id
+        """Gets the in and out port ids for the given asset.
 
+        Note that is method only works for assets with one in and one out port.
+        """
+        for port_check in asset.port:
+            if isinstance(port_check, esdl.InPort):
+                in_port_id = port_check.id
+            else:
+                out_port_id = port_check.id
         return in_port_id, out_port_id
 
     def test_pressure_drop(self) -> None:
@@ -93,8 +92,8 @@ class PressureDropTest(unittest.TestCase):
             # Check which port is in and which out.
             [in_port_id, out_port_id] = self._get_in_out_port_id(pipe)
             # Compute pressure drop.
-            p_out = self.result[out_port_id, 'pressure']
-            p_in = self.result[in_port_id, 'pressure']
+            p_out = self.result[out_port_id, "pressure"]
+            p_in = self.result[in_port_id, "pressure"]
             delta_p_list = p_out - p_in
             for delta_p in delta_p_list:
                 np.testing.assert_(delta_p < 0)
@@ -103,8 +102,8 @@ class PressureDropTest(unittest.TestCase):
             # Check which port is in and which out.
             [in_port_id, out_port_id] = self._get_in_out_port_id(producer)
             # Compute pressure drop.
-            p_out = self.result[out_port_id, 'pressure']
-            p_in = self.result[in_port_id, 'pressure']
+            p_out = self.result[out_port_id, "pressure"]
+            p_in = self.result[in_port_id, "pressure"]
             delta_p_list = p_out - p_in
             for delta_p in delta_p_list:
                 np.testing.assert_(delta_p > 0)
@@ -113,8 +112,8 @@ class PressureDropTest(unittest.TestCase):
             # Check which port is in and which out.
             [in_port_id, out_port_id] = self._get_in_out_port_id(demand)
             # Compute pressure drop.
-            p_out = self.result[out_port_id, 'pressure']
-            p_in = self.result[in_port_id, 'pressure']
+            p_out = self.result[out_port_id, "pressure"]
+            p_in = self.result[in_port_id, "pressure"]
             delta_p_list = p_out - p_in
             for delta_p in delta_p_list:
                 np.testing.assert_(delta_p < 0)
