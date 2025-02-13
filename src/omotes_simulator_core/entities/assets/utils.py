@@ -108,3 +108,17 @@ class Port(IntEnum):
 
     In = 0
     Out = 1
+
+
+def sign_output(port_number: int) -> int:
+    """Give the multiplication factor to correct the output.
+
+    The mass flow rate on the in ports is negative, while it should be positive. This
+    function returns the multiplication factor to correct the output. It is either -1 for odd ports
+    or 1 for even ports. This assumes that the even ports are in ports and the odd ports are out
+    ports.
+
+    :param int port_number: The port number of the asset.
+    :return: The multiplication factor for the output.
+    """
+    return -1 + 2 * (port_number % 2)
