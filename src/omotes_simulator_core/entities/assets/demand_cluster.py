@@ -21,15 +21,15 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_DEMAND_SET_POINT,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 
 class DemandCluster(AssetAbstract):
@@ -51,7 +51,7 @@ class DemandCluster(AssetAbstract):
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0.0
-        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
+        self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
         self.output: list = []
 
     def set_setpoints(self, setpoints: dict) -> None:
