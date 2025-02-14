@@ -20,7 +20,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_LOSS_PER_LENGTH,
     PROPERTY_VELOCITY,
 )
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 
