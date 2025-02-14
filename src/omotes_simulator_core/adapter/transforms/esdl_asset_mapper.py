@@ -39,6 +39,10 @@ from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
     esdl.Producer: EsdlAssetProducerMapper,
     esdl.GenericProducer: EsdlAssetProducerMapper,
+    esdl.GeothermalSource: EsdlAssetProducerMapper,
+    esdl.ResidualHeatSource: EsdlAssetProducerMapper,
+    esdl.SolarCollector: EsdlAssetProducerMapper,
+    esdl.GasHeater: EsdlAssetProducerMapper,
     esdl.Consumer: EsdlAssetConsumerMapper,
     esdl.GenericConsumer: EsdlAssetConsumerMapper,
     esdl.HeatingDemand: EsdlAssetConsumerMapper,
