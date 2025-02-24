@@ -49,7 +49,7 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         )
         temperature_supply = esdl_asset.get_supply_temperature("In")
         temperature_return = esdl_asset.get_return_temperature("Out")
-        profile = esdl_asset.get_profile()
+        profile = []  # esdl_asset.get_profile()
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
