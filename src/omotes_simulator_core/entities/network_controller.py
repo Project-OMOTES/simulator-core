@@ -75,7 +75,7 @@ class NetworkController(NetworkControllerAbstract):
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
         if (
-            self.get_total_supply() + (-1 * self.get_total_discharge_storage())
+            self.get_total_supply() + (self.get_total_discharge_storage())
         ) <= self.get_total_demand(time):
             logger.warning(
                 f"Total supply + storage is lower than total demand at time: {time}"
