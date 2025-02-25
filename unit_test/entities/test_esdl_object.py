@@ -298,7 +298,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
     def setUp(self) -> None:
         """Arranging of the data for the tests."""
         self.asset = esdl.Asset
-        self.producer = esdl.GenericProducer
+        self.producer = esdl.Producer
         self.consumer = esdl.GenericConsumer
         self.geothermal_source = esdl.GeothermalSource
         self.conversion = esdl.Conversion

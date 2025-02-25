@@ -15,6 +15,7 @@
 
 """Module containing the Esdl to asset mapper class."""
 import numpy as np
+import pandas as pd
 from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -50,7 +51,7 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         )
         temperature_supply = esdl_asset.get_supply_temperature("In")
         temperature_return = esdl_asset.get_return_temperature("Out")
-        profile = DataFrame()  # esdl_asset.get_profile()
+        profile = pd.DataFrame()  # esdl_asset.get_profile()
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,

@@ -305,7 +305,7 @@ class ControllerTest(unittest.TestCase):
         # Arrange
         self.controller.producers[1].power = 2.7
         self.storage1.max_charge_power = 1.0
-        self.storage1.max_discharge_power = -1.0
+        self.storage1.max_discharge_power = 1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
@@ -318,7 +318,7 @@ class ControllerTest(unittest.TestCase):
         # Arrange
         self.controller.producers[1].power = 1.7
         self.storage1.max_charge_power = 1.0
-        self.storage1.max_discharge_power = -1.0
+        self.storage1.max_discharge_power = 1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
