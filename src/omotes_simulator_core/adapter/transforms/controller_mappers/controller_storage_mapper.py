@@ -16,7 +16,6 @@
 """Module containing the Esdl to asset mapper class."""
 import numpy as np
 import pandas as pd
-from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
