@@ -28,7 +28,7 @@ class StringEsdlAssetMapper:
 
     type_to_str_dict = {
         esdl.Asset: "asset",
-        esdl.GenericProducer: "producer",
+        esdl.Producer: "producer",
         esdl.GenericConsumer: "consumer",
         esdl.HeatingDemand: "consumer",
         esdl.GeothermalSource: "geothermal",
