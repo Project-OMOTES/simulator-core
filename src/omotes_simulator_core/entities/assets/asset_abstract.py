@@ -65,6 +65,7 @@ class AssetAbstract(ABC):
         self.asset_id = asset_id
         self.connected_ports = connected_ports
         self.outputs = [[] for _ in range(len(self.connected_ports))]
+        self.time_step: float = 3600  # s
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""
@@ -144,4 +145,4 @@ class AssetAbstract(ABC):
 
         :param float time_step: The time step to set for the asset.
         """
-        pass
+        self.time_step = time_step
