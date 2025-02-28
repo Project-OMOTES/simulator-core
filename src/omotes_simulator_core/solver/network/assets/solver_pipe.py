@@ -40,7 +40,7 @@ class SolverPipe(FallType):
     reynolds_number: float = 0.0
     r""" The Reynolds number of the flow in the pipe .. math:: \frac{v D}{\nu}  """
 
-    alpha_value: float = 0.0
+    alpha_value: float = 1.0
     """ The heat transfer coefficient of the pipe with units [W/m^2/K] """
 
     ambient_temperature: float = 293.15

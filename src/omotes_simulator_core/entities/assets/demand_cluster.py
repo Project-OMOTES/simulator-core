@@ -54,6 +54,7 @@ class DemandCluster(AssetAbstract):
         self.mass_flowrate = 0.0
         self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
         self.output: list = []
+        self.first_time_step = True
 
     def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -76,10 +77,21 @@ class DemandCluster(AssetAbstract):
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
         self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
-        self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
+
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
+
+        # First time step: use default setpoint temperature
+        if self.first_time_step:
+            self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
+            self.first_time_step = False
+        else:
+            # After the first time step: use solver temperature
+            self.temperature_return = self.solver_asset.get_temperature(0)
+
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_supply, self.temperature_return_target
+            self.thermal_power_allocation,
+            self.temperature_supply,
+            self.temperature_return,
         )
         self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
@@ -111,3 +123,13 @@ class DemandCluster(AssetAbstract):
         return (
             self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
         ) * self.solver_asset.get_mass_flow_rate(0)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        if abs(self.get_heat_supplied() - (-self.thermal_power_allocation)) < 10:
+            return True
+        else:
+            return False
