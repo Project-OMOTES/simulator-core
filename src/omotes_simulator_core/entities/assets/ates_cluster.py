@@ -132,7 +132,7 @@ class AtesCluster(AssetAbstract):
         self.well_distance = well_distance  # meters
         self.maximum_flow_charge = maximum_flow_charge  # m3/h
         self.maximum_flow_discharge = maximum_flow_discharge  # m3/h
-        self.time_step = 3600  # s HARDCODED to 1 hour
+        self.time_step: float = 3600  # s HARDCODED to 1 hour
 
         # Output list
         self.output: list = []
