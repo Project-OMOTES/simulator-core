@@ -64,7 +64,7 @@ class NetworkSimulation:
             iteration = 0
             is_converged = False
 
-            while is_converged is False and iteration < max_iterations:
+            while not is_converged and iteration < max_iterations:
                 self.network.run_time_step(time, controller_input)
                 is_converged = self.network.check_convergence()
                 iteration += 1

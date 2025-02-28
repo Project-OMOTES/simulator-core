@@ -80,6 +80,7 @@ class DemandCluster(AssetAbstract):
         self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
 
         # First time step: use default setpoint temperature
+        # Todo replace this by adding logical temperature to the consumer asset similar to the production_asset implementation.
         if self.first_time_step:
             self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
             self.first_time_step = False
@@ -117,11 +118,10 @@ class DemandCluster(AssetAbstract):
         ) * self.solver_asset.get_mass_flow_rate(0)
 
     def is_converged(self) -> bool:
-        """Check if the asset has converged.
+        """Check if the asset has converged with accepted error of 0.1%.
 
         :return: True if the asset has converged, False otherwise
         """
-        if abs(self.get_heat_supplied() - (-self.thermal_power_allocation)) < 10:
-            return True
-        else:
-            return False
+        return abs(self.get_heat_supplied() - (-self.thermal_power_allocation)) < (
+            (-self.thermal_power_allocation) * 0.001
+        )
