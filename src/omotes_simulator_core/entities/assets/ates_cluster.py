@@ -132,6 +132,7 @@ class AtesCluster(AssetAbstract):
         self.well_distance = well_distance  # meters
         self.maximum_flow_charge = maximum_flow_charge  # m3/h
         self.maximum_flow_discharge = maximum_flow_discharge  # m3/h
+        self.time_step = 3600  # s HARDCODED to 1 hour
 
         # Output list
         self.output: list = []
@@ -251,7 +252,7 @@ class AtesCluster(AssetAbstract):
         """Function to calculate storage temperature after injection and production."""
         volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline
         # density needs to change with PVT calculation
-        timestep = 1  # HARDCODED to 1 hour
+        timestep = self.time_step / 3600  # convert to hours
 
         rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
         # and second element is for injection well, positive flow is going upward and negative flow
@@ -277,3 +278,10 @@ class AtesCluster(AssetAbstract):
         # update supply return temperature from ATES
         self.temperature_supply = hot_well_temperature
         self.temperature_return = cold_well_temperature
+
+    def set_time_step(self, time_step: float) -> None:
+        """Set the time step of the asset.
+
+        :param float time_step: The time step to simulate
+        """
+        self.time_step = time_step

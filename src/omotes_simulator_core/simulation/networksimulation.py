@@ -63,7 +63,9 @@ class NetworkSimulation:
             while not_converged:
                 not_converged = False  # for the moment we do not check on convergence,
                 # to get stuff running. Also need to add break after 10 iteration.
-                self.network.run_time_step(time, controller_input)
+                self.network.run_time_step(
+                    time=time, time_step=config.timestep, controller_input=controller_input
+                )
             self.network.store_output()
 
             if (time_step % progress_interval) == 0:
