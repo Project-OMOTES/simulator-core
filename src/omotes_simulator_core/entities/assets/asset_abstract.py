@@ -138,3 +138,9 @@ class AssetAbstract(ABC):
             ]
             temp_data = concat([temp_data, temp_frame], axis=1)
         return temp_data
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged.
+
+        :return: True if the asset has converged, False otherwise
+        """

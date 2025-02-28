@@ -83,3 +83,11 @@ class HeatNetwork:
         for py_asset in self.assets:
             result = pd.concat([result, py_asset.get_timeseries()], axis=1)
         return result
+
+    def check_convergence(self) -> bool:
+        """Method to check if the network has converged.
+
+        :return: True if the network has converged, False otherwise
+        """
+        for py_asset in self.assets:
+            return py_asset.is_converged()
