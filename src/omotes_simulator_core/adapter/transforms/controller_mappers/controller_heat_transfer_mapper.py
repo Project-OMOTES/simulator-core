@@ -41,8 +41,8 @@ class ControllerHeatTransferMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
+        cop = esdl_asset.get_property(esdl_property_name="COP", default_value=1)
         contr_heat_transfer = ControllerHeatTransferAsset(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.esdl_asset.name, identifier=esdl_asset.esdl_asset.id, factor=cop
         )
         return contr_heat_transfer
