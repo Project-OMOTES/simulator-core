@@ -20,13 +20,17 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
     ControllerProducerMapper,
     ControllerStorageMapper,
+    ControllerHeatTransferMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
+from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
+from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
 
@@ -230,4 +234,50 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
+        heat_transfer_assets = [
+            ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
+        ]
         return NetworkController(producers, consumers, storages)
+
+    def to_entity_new(self, esdl_object: EsdlObject) -> NetworkControllerNew:
+        """Method to convert esdl to NetworkController object.
+
+        This method first converts all assets into a list of assets.
+        Next to this a list of Junctions is created. This is then used
+        to create the NetworkController object.
+        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
+
+        :return: NetworkController, which is the converted EsdlObject object.
+        """
+        # create graph to be able to check for connectivity
+        graph = Graph()
+        for esdl_asset in esdl_object.get_all_assets_of_type("asset"):
+            graph.add_node(esdl_asset.get_id())
+        for esdl_asset in esdl_object.get_all_assets_of_type("asset"):
+            for port in esdl_asset.get_port_ids():
+                for connected_asset_id in esdl_asset.get_connected_assets(port):
+                    graph.connect(esdl_asset.get_id(), connected_asset_id)
+        #
+
+        consumers = [
+            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+        ]
+        producers = [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+        ]
+        storages = [
+            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+        ]
+        heat_transfer_assets = [
+            ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
+        ]
+
+        networks = []
+        test_network = ControllerNetwork()
+        networks.append(test_network)
+        return NetworkControllerNew(networks=networks)

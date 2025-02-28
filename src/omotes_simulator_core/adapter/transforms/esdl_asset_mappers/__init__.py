@@ -12,20 +12,5 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Module containing the class for a heat trasnfer asset."""
 
-from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-    AssetControllerAbstract,
-)
-
-
-class ControllerHeatTransferAsset(AssetControllerAbstract):
-
-    def __init__(self, name: str, identifier: str, factor: float):
-        """Constructor of the class, which sets all attributes.
-
-        :param str name: Name of the consumer.
-        :param str identifier: Unique identifier of the consumer.
-        """
-        super().__init__(name, identifier)
-        self.factor = factor
+"""__init__.py file for initialization code."""
