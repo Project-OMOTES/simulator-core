@@ -90,4 +90,6 @@ class HeatNetwork:
         :return: True if the network has converged, False otherwise
         """
         for py_asset in self.assets:
-            return py_asset.is_converged()
+            if not py_asset.is_converged():
+                return False
+        return True

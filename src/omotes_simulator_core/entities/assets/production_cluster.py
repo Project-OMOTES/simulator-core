@@ -220,11 +220,3 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
         }
         self.outputs[1][-1].update(output_dict_temp)
-
-    # TODO: Implement the method. for now it assumes converged
-    def is_converged(self) -> bool:
-        """Check if the asset has converged.
-
-        :return: True if the asset has converged, False otherwise
-        """
-        return True

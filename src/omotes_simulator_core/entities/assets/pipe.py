@@ -143,11 +143,3 @@ class Pipe(AssetAbstract):
         The minus sign is added to make it a loss instead of supply.
         """
         return -self.solver_asset.heat_supplied
-
-    # TODO: Implement the method. for now it assumes converged
-    def is_converged(self) -> bool:
-        """Check if the asset has converged.
-
-        :return: True if the asset has converged, False otherwise
-        """
-        return True
