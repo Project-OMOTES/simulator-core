@@ -144,3 +144,4 @@ class AssetAbstract(ABC):
 
         :return: True if the asset has converged, False otherwise
         """
+        return self.solver_asset.is_converged()

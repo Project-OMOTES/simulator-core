@@ -360,3 +360,11 @@ class BaseAsset(BaseItem):
                 )
             ]
         )
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        # Placeholder implementation, should be overridden by subclasses
+        return True
