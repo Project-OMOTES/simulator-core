@@ -160,21 +160,3 @@ class Node:
         """
         if edge not in self.edges:
             self.edges.append(edge)
-
-
-if __name__ == "__main__":
-    graph = Graph()
-    graph.add_node("A")
-    graph.add_node("B")
-    graph.add_node("C")
-    graph.add_node("D")
-    graph.add_node("E")
-    graph.add_node("F")
-
-    graph.connect("A", "B")
-    graph.connect("B", "C")
-    graph.connect("C", "E")
-    graph.connect("E", "F")
-    print(graph.is_directly_connected("A", "B"))
-    print(graph.is_directly_connected("B", "A"))
-    print(graph.is_connected("A", "E"))
