@@ -291,6 +291,17 @@ class EsdlObjectTest(unittest.TestCase):
             f"port: {pipe.get_port_ids()[0]}",
         )
 
+    def test_get_asset_by_id(self):
+        # Arrange
+        producers = self.esdl_object.get_all_assets_of_type("producer")
+        producer = producers[0]
+
+        # Act
+        asset = self.esdl_object.get_asset_by_id(producer.get_id())
+
+        # Assert
+        self.assertEqual(asset.esdl_asset, producer.esdl_asset)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
