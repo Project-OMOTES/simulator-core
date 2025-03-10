@@ -23,6 +23,6 @@ from omotes_simulator_core.adapter.transforms.controller_mappers.controller_prod
 from omotes_simulator_core.adapter.transforms.controller_mappers.controller_storage_mapper import (
     ControllerStorageMapper,
 )
-from omotes_simulator_core.adapter.transforms.controller_mappers.controller_heat_transfer_mapper import (
+from omotes_simulator_core.adapter.transforms.controller_mappers.controller_heat_transfer_mapper import (  # noqa: E501
     ControllerHeatTransferMapper,
 )
