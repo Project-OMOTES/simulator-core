@@ -146,3 +146,10 @@ class AssetAbstract(ABC):
         :param float time_step: The time step to set for the asset.
         """
         self.time_step = time_step
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        return True

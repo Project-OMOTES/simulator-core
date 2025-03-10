@@ -53,19 +53,23 @@ class NetworkSimulation:
         logger.info("Number of time steps: " + str(number_of_time_steps))
         progress_interval = max(round(number_of_time_steps / max_number_messages), 1)
         for time_step in range(number_of_time_steps):
-            not_converged = True
             time = (config.start + timedelta(seconds=time_step * config.timestep)).replace(
                 tzinfo=timezone.utc
             )
             controller_input = self.controller.update_setpoints(time)
             logger.debug("Simulating for timestep " + str(time))
 
-            while not_converged:
-                not_converged = False  # for the moment we do not check on convergence,
-                # to get stuff running. Also need to add break after 10 iteration.
+            # Iteration loop to ensure convergence
+            max_iterations = 20
+            iteration = 0
+            is_converged = False
+
+            while not is_converged and iteration < max_iterations:
                 self.network.run_time_step(
                     time=time, time_step=config.timestep, controller_input=controller_input
                 )
+                is_converged = self.network.check_convergence()
+                iteration += 1
             self.network.store_output()
 
             if (time_step % progress_interval) == 0:
