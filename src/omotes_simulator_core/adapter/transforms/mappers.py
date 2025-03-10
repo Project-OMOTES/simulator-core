@@ -253,25 +253,94 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
-        #
-        consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
-        ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
+        network_list = []
         heat_transfer_assets = [
             ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
         ]
+        for heat_transfer_aset in heat_transfer_assets:
+            network_dict = {
+                "heat_transfer_primary": [heat_transfer_aset],
+                "heat_transfer_secondary": [],
+                "consumer": [],
+                "producer": [],
+                "storage": [],
+            }
+            network_list.append(network_dict)
+            network_dict = {
+                "heat_transfer_primary": [],
+                "heat_transfer_secondary": [heat_transfer_aset],
+                "consumer": [],
+                "producer": [],
+                "storage": [],
+            }
 
+            network_list.append(network_dict)
+
+        consumers = [
+            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+        ]
+        for consumer in consumers:
+            for network in network_list:
+                if network["heat_transfer_primary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_primary"][0].id + "_primary", consumer.id
+                    ):
+                        network["consumer"].append(consumer)
+                        continue
+                if network["heat_transfer_secondary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_secondary"][0].id + "_secondary", consumer.id
+                    ):
+                        network["consumer"].append(consumer)
+                        continue
+        producers = [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+        ]
+        for producer in producers:
+            for network in network_list:
+                if network["heat_transfer_primary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_primary"][0].id + "_primary", producer.id
+                    ):
+                        network["producer"].append(producer)
+                        continue
+                if network["heat_transfer_secondary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_secondary"][0].id + "_secondary", producer.id
+                    ):
+                        network["producer"].append(producer)
+                        continue
+        storages = [
+            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+        ]
+        for storage in storages:
+            for network in network_list:
+                if network["heat_transfer_primary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_primary"][0].id + "_primary", storage.id
+                    ):
+                        network["storage"].append(storage)
+                        continue
+                if network["heat_transfer_secondary"]:
+                    if graph.is_connected(
+                        network["heat_transfer_secondary"][0].id + "_secondary", storage.id
+                    ):
+                        network["storage"].append(storage)
+                        continue
+
+        # creating network controller classes
         networks = []
-        test_network = ControllerNetwork()
-        networks.append(test_network)
+        for network in network_list:
+            networks.append(
+                ControllerNetwork(
+                    network["heat_transfer_primary"] + network["heat_transfer_secondary"],
+                    network["producer"],
+                    network["consumer"],
+                    network["storage"],
+                )
+            )
         return NetworkControllerNew(networks=networks)
