@@ -35,4 +35,4 @@ class NetworkControllerNew(NetworkControllerAbstract):
         :param float time: Time step for which to run the controller.
         :return: dict with the key the asset id and the heat demand for that asset.
         """
-        pass
+        return {}

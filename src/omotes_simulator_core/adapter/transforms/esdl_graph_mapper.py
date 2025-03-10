@@ -25,7 +25,7 @@ from omotes_simulator_core.adapter.utility.graph import Graph
 class EsdlGraphMapper(EsdlMapperAbstract):
     """Class to map an esdl file to an internal graph representation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the class."""
         pass
 
