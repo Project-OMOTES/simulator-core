@@ -78,3 +78,11 @@ class EsdlObject:
             raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
         connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
         return connected_assets
+
+    def get_asset_by_id(self, asset_id: str) -> EsdlAssetObject:
+        """Method to get an asset by its id.
+
+        :param str asset_id: id of the asset to get.
+        :return: EsdlAssetObject with the asset.
+        """
+        return EsdlAssetObject(self.energy_system_handler.get_by_id(asset_id))
