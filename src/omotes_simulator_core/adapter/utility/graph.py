@@ -53,7 +53,7 @@ class Graph:
             raise ValueError(f"Node {node2} does not exist in the graph.")
         if self.is_directly_connected(node1, node2):
             return
-        self.edges.append(Edge(self.nodes[node1], self.nodes[node2]))
+        self.edges.append(Edge(node1, node2))
         self.nodes[node1].add_edge(self.edges[-1])
         self.nodes[node2].add_edge(self.edges[-1])
 
@@ -104,7 +104,8 @@ class Graph:
             node = node_to_check.pop(0)
             nodes_checked.append(node)
             for edge in node.edges:
-                for node in edge.nodes:
+                for node_name in edge.nodes:
+                    node = self.nodes[node_name]
                     if node == self.nodes[node2]:
                         return True
                     if node not in nodes_checked and node not in node_to_check:
@@ -115,7 +116,7 @@ class Graph:
 class Edge:
     """Class for the edges in the graph."""
 
-    def __init__(self, node1, node2) -> None:
+    def __init__(self, node1: str, node2: str) -> None:
         """Constructor of the class.
 
         An edge can only be connected to two nodes. The nodes are stored in a list.
@@ -134,7 +135,7 @@ class Edge:
         If the node is connected to the edge, the method returns True, otherwise False.
         :param str node: Name of the node to check.
         """
-        return any([node_name == node.node_name for node in self.nodes])
+        return node_name in self.nodes
 
 
 class Node:
@@ -172,7 +173,7 @@ if __name__ == "__main__":
 
     graph.connect("A", "B")
     graph.connect("B", "C")
-    graph.connect("C", "D")
+    graph.connect("C", "E")
     graph.connect("E", "F")
     print(graph.is_directly_connected("A", "B"))
     print(graph.is_directly_connected("B", "A"))
