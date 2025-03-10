@@ -18,7 +18,7 @@
 class Graph:
     """Main class for the graph."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor of the class.
 
         The graph is stored as a dictionary of nodes and a list of edges.

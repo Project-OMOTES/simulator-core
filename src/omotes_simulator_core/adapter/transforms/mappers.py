@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper classes."""
+import dataclasses
 
 from esdl.esdl import Joint as esdl_junction
 
@@ -24,7 +25,13 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    ControllerHeatTransferAsset,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
+from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
@@ -33,6 +40,7 @@ from omotes_simulator_core.entities.network_controller_new import NetworkControl
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
+from omotes_simulator_core.adapter.utility.graph import Graph
 
 
 def replace_joint_in_connected_assets(
@@ -78,6 +86,17 @@ def replace_joint_in_connected_assets(
         raise RuntimeError("Error in replacing joint in connected assets.")
     else:
         return connected_py_assets
+
+
+@dataclasses.dataclass
+class NetworkItems:
+    """Dataclass to hold the different network items."""
+
+    heat_transfer_primary: list[ControllerHeatTransferAsset]
+    heat_transfer_secondary: list[ControllerHeatTransferAsset]
+    consumer: list[ControllerConsumer]
+    producer: list[ControllerProducer]
+    storage: list[ControllerStorage]
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -254,23 +273,24 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
         ]
         for heat_transfer_aset in heat_transfer_assets:
-            network_dict = {
-                "heat_transfer_primary": [heat_transfer_aset],
-                "heat_transfer_secondary": [],
-                "consumer": [],
-                "producer": [],
-                "storage": [],
-            }
-            network_list.append(network_dict)
-            network_dict = {
-                "heat_transfer_primary": [],
-                "heat_transfer_secondary": [heat_transfer_aset],
-                "consumer": [],
-                "producer": [],
-                "storage": [],
-            }
-
-            network_list.append(network_dict)
+            network_list.append(
+                NetworkItems(
+                    heat_transfer_primary=[heat_transfer_aset],
+                    heat_transfer_secondary=[],
+                    consumer=[],
+                    producer=[],
+                    storage=[],
+                )
+            )
+            network_list.append(
+                NetworkItems(
+                    heat_transfer_primary=[],
+                    heat_transfer_secondary=[heat_transfer_aset],
+                    consumer=[],
+                    producer=[],
+                    storage=[],
+                )
+            )
 
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
@@ -278,64 +298,55 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         ]
         for consumer in consumers:
             for network in network_list:
-                if network["heat_transfer_primary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_primary"][0].id + "_primary", consumer.id
-                    ):
-                        network["consumer"].append(consumer)
-                        continue
-                if network["heat_transfer_secondary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_secondary"][0].id + "_secondary", consumer.id
-                    ):
-                        network["consumer"].append(consumer)
-                        continue
+                if belongs_to_network(consumer.id, network, graph):
+                    network.consumer.append(consumer)
+                    continue
         producers = [
             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("producer")
         ]
         for producer in producers:
             for network in network_list:
-                if network["heat_transfer_primary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_primary"][0].id + "_primary", producer.id
-                    ):
-                        network["producer"].append(producer)
-                        continue
-                if network["heat_transfer_secondary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_secondary"][0].id + "_secondary", producer.id
-                    ):
-                        network["producer"].append(producer)
-                        continue
+                if belongs_to_network(producer.id, network, graph):
+                    network.producer.append(producer)
+                    continue
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
         for storage in storages:
             for network in network_list:
-                if network["heat_transfer_primary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_primary"][0].id + "_primary", storage.id
-                    ):
-                        network["storage"].append(storage)
-                        continue
-                if network["heat_transfer_secondary"]:
-                    if graph.is_connected(
-                        network["heat_transfer_secondary"][0].id + "_secondary", storage.id
-                    ):
-                        network["storage"].append(storage)
-                        continue
+                if belongs_to_network(storage.id, network, graph):
+                    network.storage.append(storage)
+                    continue
 
         # creating network controller classes
         networks = []
         for network in network_list:
             networks.append(
                 ControllerNetwork(
-                    network["heat_transfer_primary"] + network["heat_transfer_secondary"],
-                    network["producer"],
-                    network["consumer"],
-                    network["storage"],
+                    heat_transfer_assets_in=network.heat_transfer_primary
+                    + network.heat_transfer_secondary,
+                    consumers_in=network.consumer,
+                    producers_in=network.producer,
+                    storage_in=network.storage,
                 )
             )
         return NetworkControllerNew(networks=networks)
+
+
+def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
+    """Check if the id is connected to a heat transfer asset in the network..
+
+    :param id: id to check if it belongs to the network.
+    :param network: NetworkItems to check if the id belongs to the network.
+    :param graph: for checking connectivity.
+    :return: bool, which is True if the id belongs to the network.
+    """
+    if network.heat_transfer_primary:
+        if graph.is_connected(network.heat_transfer_primary[0].id + "_primary", id):
+            return True
+    if network.heat_transfer_secondary:
+        if graph.is_connected(network.heat_transfer_secondary[0].id + "_secondary", id):
+            return True
+    return False

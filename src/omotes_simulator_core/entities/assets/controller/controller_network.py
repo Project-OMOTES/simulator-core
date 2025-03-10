@@ -45,10 +45,12 @@ class ControllerNetwork:
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
         """Method which the total heat demand at the given time."""
         pass
+        return 0
 
     def get_total_supply(self, priority: int) -> float:
         """Method which returns the total supply of the network."""
         pass
+        return 0
 
     def set_demand(self, factor: float = 1) -> None:
         """Method to set the demand of the network."""
