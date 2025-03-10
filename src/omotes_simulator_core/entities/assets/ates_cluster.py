@@ -251,7 +251,7 @@ class AtesCluster(AssetAbstract):
         """Function to calculate storage temperature after injection and production."""
         volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline
         # density needs to change with PVT calculation
-        timestep = 1  # HARDCODED to 1 hour
+        timestep = self.time_step / 3600  # convert to hours
 
         rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
         # and second element is for injection well, positive flow is going upward and negative flow
