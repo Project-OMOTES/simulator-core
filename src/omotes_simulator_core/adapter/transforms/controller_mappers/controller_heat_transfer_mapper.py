@@ -15,12 +15,10 @@
 
 
 """Module containing the Esdl to asset mapper class."""
-import numpy as np
-
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
-from omotes_simulator_core.entities.assets.controller.controler_heat_transfer import (
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject

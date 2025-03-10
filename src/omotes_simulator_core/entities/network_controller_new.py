@@ -26,6 +26,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
         self,
         networks: list[ControllerNetwork],
     ) -> None:
+        """Constructor of the class, which sets all attributes."""
         self.networks = networks
 
     def update_setpoints(self, time: datetime.datetime) -> dict:

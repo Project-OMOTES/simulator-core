@@ -20,6 +20,7 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
 
 
 class ControllerHeatTransferAsset(AssetControllerAbstract):
+    """Class for controlling a heat transfer asset."""
 
     def __init__(self, name: str, identifier: str, factor: float):
         """Constructor of the class, which sets all attributes.

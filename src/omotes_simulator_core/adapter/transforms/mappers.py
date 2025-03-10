@@ -25,7 +25,6 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
-from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
@@ -234,10 +233,6 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
-        heat_transfer_assets = [
-            ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
         ]
         return NetworkController(producers, consumers, storages)
 

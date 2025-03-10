@@ -15,7 +15,7 @@
 """Module containing the class for a controller network."""
 
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controler_heat_transfer import (
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
@@ -25,7 +25,9 @@ import datetime
 
 class ControllerNetwork:
     """Class storing an assets in the network which are hydraulic connected to each other.
-    This class is used to be able to cope with heat exchangers and heat pumps."""
+
+    This class is used to be able to cope with heat exchangers and heat pumps.
+    """
 
     def __init__(
         self,
@@ -45,11 +47,13 @@ class ControllerNetwork:
         pass
 
     def get_total_supply(self, priority: int) -> float:
-        """Method which returns the total supply of the network"""
+        """Method which returns the total supply of the network."""
         pass
 
     def set_demand(self, factor: float = 1) -> None:
+        """Method to set the demand of the network."""
         pass
 
     def set_supply(self, total_supply: float, priority: int) -> None:
+        """Method to set the supply of the network."""
         pass
