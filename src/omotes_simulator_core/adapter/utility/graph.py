@@ -115,7 +115,7 @@ class Graph:
 class Edge:
     """Class for the edges in the graph."""
 
-    def __init__(self, node1, node2):
+    def __init__(self, node1, node2) -> None:
         """Constructor of the class.
 
         An edge can only be connected to two nodes. The nodes are stored in a list.
@@ -140,7 +140,7 @@ class Edge:
 class Node:
     """Class for the nodes in the graph."""
 
-    def __init__(self, node: str):
+    def __init__(self, node: str) -> None:
         """Constructor of the class.
 
         :param str node: Name of the node.
