@@ -39,7 +39,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
 
         # Act
-        controller_heat_pump = mapper.to_entity(heat_transfer_assets[0])
+        mapper.to_entity(heat_transfer_assets[0])
 
         # Assert
         pass
@@ -60,7 +60,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
 
         # Act
-        controller_heat_exchange = mapper.to_entity(heat_transfer_assets[0])
+        mapper.to_entity(heat_transfer_assets[0])
 
         # Assert
         pass

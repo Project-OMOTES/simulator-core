@@ -22,7 +22,8 @@ class Graph:
         """Constructor of the class.
 
         The graph is stored as a dictionary of nodes and a list of edges.
-        Both are initialised empty."""
+        Both are initialised empty.
+        """
         self.nodes: dict[str, Node] = {}
         self.edges: list[Edge] = []
 
@@ -30,7 +31,8 @@ class Graph:
         """Method to add a node to the graph.
 
         When the node already exists in the graph, an error is raised.
-        :param str node: Name of the node to add."""
+        :param str node: Name of the node to add.
+        """
         if node in self.nodes:
             raise ValueError(f"Node {node} already exists in the graph.")
         self.nodes[node] = Node(node)
@@ -43,7 +45,8 @@ class Graph:
         Otherwise a new edge is created and added to the graph.
 
         :param str node1: Name of the first node.
-        :param str node2: Name of the second node."""
+        :param str node2: Name of the second node.
+        """
         if not self.node_exists(node1):
             raise ValueError(f"Node {node1} does not exist in the graph.")
         if not self.node_exists(node2):
@@ -57,7 +60,8 @@ class Graph:
     def node_exists(self, node: str) -> bool:
         """Method to check if a node exists in the graph.
 
-        :param str node: Name of the node to check."""
+        :param str node: Name of the node to check.
+        """
         return node in self.nodes
 
     def is_directly_connected(self, node1: str, node2: str) -> bool:
@@ -67,7 +71,8 @@ class Graph:
 
         When the nodes are not in the graph, an error is raised.
         :param str node1: Name of the first node.
-        :param str node2: Name of the second node."""
+        :param str node2: Name of the second node.
+        """
         if not self.node_exists(node1):
             raise ValueError(f"Node {node1} does not exist in the graph.")
         if not self.node_exists(node2):
@@ -87,7 +92,8 @@ class Graph:
         If the nodes are connected, the method returns True, otherwise False.
 
         :param str node1: Name of the first node.
-        :param str node2: Name of the second node."""
+        :param str node2: Name of the second node.
+        """
         if not self.node_exists(node1):
             raise ValueError(f"Node {node1} does not exist in the graph.")
         if not self.node_exists(node2):
@@ -116,8 +122,8 @@ class Edge:
         Node1 and node2 need to be different nodes, otherwise an error is raised.
 
         :param Node node1: First node connected to the edge.
-        :param Node node2: Second node connected to the edge."""
-
+        :param Node node2: Second node connected to the edge.
+        """
         if node1 == node2:
             raise ValueError("An edge cannot connect a node to itself.")
         self.nodes = [node1, node2]  # list of nodes connected to the edge
@@ -126,7 +132,8 @@ class Edge:
         """Method to check if a node is connected to the edge.
 
         If the node is connected to the edge, the method returns True, otherwise False.
-        :param str node: Name of the node to check."""
+        :param str node: Name of the node to check.
+        """
         return any([node_name == node.node_name for node in self.nodes])
 
 
@@ -136,7 +143,8 @@ class Node:
     def __init__(self, node: str):
         """Constructor of the class.
 
-        :param str node: Name of the node."""
+        :param str node: Name of the node.
+        """
         self.node_name = node
         self.edges: list[Edge] = []  # list of edges connected to the node
 
@@ -149,7 +157,6 @@ class Node:
 
         :param Edge edge: Edge to add to the node.
         """
-
         if edge not in self.edges:
             self.edges.append(edge)
 
