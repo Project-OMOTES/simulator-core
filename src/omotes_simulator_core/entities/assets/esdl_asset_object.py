@@ -155,6 +155,12 @@ class EsdlAssetObject:
                 return connected_assets
         raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
 
+    def is_heat_exchange_asset(self) -> bool:
+        """Check if the asset is a heat exchange asset."""
+        return isinstance(self.esdl_asset, esdl.HeatPump) or isinstance(
+            self.esdl_asset, esdl.HeatExchange
+        )
+
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:
     """Get the temperature of the port."""

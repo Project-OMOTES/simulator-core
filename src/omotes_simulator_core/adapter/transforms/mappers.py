@@ -33,6 +33,7 @@ from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
+from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
 
 
 def replace_joint_in_connected_assets(
@@ -251,15 +252,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         :return: NetworkController, which is the converted EsdlObject object.
         """
         # create graph to be able to check for connectivity
-        graph = Graph()
-        for esdl_asset in esdl_object.get_all_assets_of_type("asset"):
-            graph.add_node(esdl_asset.get_id())
-        for esdl_asset in esdl_object.get_all_assets_of_type("asset"):
-            for port in esdl_asset.get_port_ids():
-                for connected_asset_id in esdl_asset.get_connected_assets(port):
-                    graph.connect(esdl_asset.get_id(), connected_asset_id)
+        graph = EsdlGraphMapper().to_entity(esdl_object)
         #
-
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
