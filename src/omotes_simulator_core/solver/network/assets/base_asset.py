@@ -15,7 +15,6 @@
 
 """Module containing BaseAsset class."""
 import math
-from typing import Dict
 
 import numpy as np
 
@@ -32,7 +31,7 @@ class BaseAsset(BaseItem):
     status, and adding thermal and pressure equations.
     """
 
-    connected_nodes: Dict[int, BaseNodeItem]
+    connected_nodes: dict[int, BaseNodeItem]
 
     def __init__(
         self,
@@ -221,7 +220,7 @@ class BaseAsset(BaseItem):
         equation_object.rhs = 0.0
         return equation_object
 
-    def set_physical_properties(self, physical_properties: Dict[str, float]) -> None:
+    def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
         """Method to set the physical properties of the asset.
 
         This method is implemented in the derived classes of this class.
@@ -366,6 +365,22 @@ class BaseAsset(BaseItem):
         :return: The temperature of the connection point.
         """
         return fluid_props.get_t(
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
+                )
+            ]
+        )
+
+    def get_internal_energy(self, connection_point: int) -> float:
+        """Method to get the internal energy of a connection point for the last computed time step.
+
+        :param int connection_point: The connection point for which to get the internal energy.
+        :return: The internal energy of the connection point.
+        """
+        return float(
             self.prev_sol[
                 self.get_index_matrix(
                     property_name="internal_energy",

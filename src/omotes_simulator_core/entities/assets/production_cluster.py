@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
-from typing import Dict
-
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
@@ -23,15 +21,16 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_HEAT_SUPPLIED,
+    PROPERTY_HEAT_SUPPLY_SET_POINT,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 
 class ProductionCluster(AssetAbstract):
@@ -58,6 +57,9 @@ class ProductionCluster(AssetAbstract):
     controlled_mass_flow: float | None
     """The controlled mass flow of the asset [kg/s]."""
 
+    heat_demand_set_point: float
+    """The heat demand set point of the asset [W]."""
+
     def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a ProductionCluster object.
 
@@ -73,22 +75,16 @@ class ProductionCluster(AssetAbstract):
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         # DemandCluster pressure specifications
         self.pressure_supply = DEFAULT_PRESSURE
+        self.heat_demand_set_point = 0.0
         self.control_mass_flow = False
         # Controlled mass flow
         self.controlled_mass_flow = None
-        self.solver_asset = ProductionAsset(
+        self.solver_asset = HeatBoundary(
             name=self.name,
             _id=self.asset_id,
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object containing the physical data.
-        :return:
-        """
 
     def _set_supply_temperature(self, temperature_supply: float) -> None:
         """Set the supply temperature of the asset.
@@ -116,6 +112,7 @@ class ProductionCluster(AssetAbstract):
             The heat demand should be supplied in Watts.
         """
         # Calculate the mass flow rate
+        self.heat_demand_set_point = heat_demand
         self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand,
             temperature_supply=self.temperature_supply,
@@ -158,7 +155,7 @@ class ProductionCluster(AssetAbstract):
         # Set the pressure of the solver asset
         self.solver_asset.set_pressure = self.pressure_supply  # type: ignore
 
-    def set_setpoints(self, setpoints: Dict) -> None:
+    def set_setpoints(self, setpoints: dict) -> None:
         """Set the setpoints of the asset.
 
         :param Dict setpoints: The setpoints of the asset in a dictionary,
@@ -195,10 +192,23 @@ class ProductionCluster(AssetAbstract):
         to the value of the previous simulation.
         """
 
+    def get_actual_heat_supplied(self) -> float:
+        """Get the actual heat supplied by the asset.
+
+        :return float: The actual heat supplied by the asset [W].
+        """
+        return (
+            self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        ) * self.solver_asset.get_mass_flow_rate(0)
+
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
+        """Method to write time step results to the output dict.
 
         The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
+        represents the output of the asset for a specific timestep.
         """
-        pass
+        output_dict_temp = {
+            PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
+            PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
+        }
+        self.outputs[1][-1].update(output_dict_temp)

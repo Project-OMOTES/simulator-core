@@ -16,7 +16,6 @@
 """NetworkController entity."""
 import datetime
 import logging
-from typing import List
 
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -37,9 +36,9 @@ class NetworkController(NetworkControllerAbstract):
 
     def __init__(
         self,
-        producers: List[ControllerProducer],
-        consumers: List[ControllerConsumer],
-        storages: List[ControllerStorage],
+        producers: list[ControllerProducer],
+        consumers: list[ControllerConsumer],
+        storages: list[ControllerStorage],
     ) -> None:
         """Constructor for controller for a heat network.
 
@@ -56,7 +55,7 @@ class NetworkController(NetworkControllerAbstract):
         self._set_priority_from_marginal_costs()
 
     def _set_priority_from_marginal_costs(self) -> None:
-        """This method sets the priority of the producers based on the marginal costs.
+        """Sets the priority of the producers based on the marginal costs.
 
         The priority of the producers is set based on the marginal costs. The producer with the
         lowest marginal costs has the highest priority (lowest value).
@@ -76,7 +75,7 @@ class NetworkController(NetworkControllerAbstract):
         """
         # TODO add also the possibility to return mass flow rate instead of heat demand.
         if (
-            self.get_total_supply() + (-1 * self.get_total_discharge_storage())
+            self.get_total_supply() + (self.get_total_discharge_storage())
         ) <= self.get_total_demand(time):
             logger.warning(
                 f"Total supply + storage is lower than total demand at time: {time}"
@@ -88,7 +87,8 @@ class NetworkController(NetworkControllerAbstract):
         else:
             # Consumers can meet their demand
             consumers = self._set_consumer_to_demand(time)
-            if self.get_total_supply() > self.get_total_demand(time):
+            if self.get_total_supply() >= self.get_total_demand(time):
+                # there is a surplus of supply we can charge the storage, storage becomes consumer.
                 surplus_supply = self.get_total_supply() - self.get_total_demand(time)
                 if surplus_supply <= self.get_total_charge_storage():
                     storages = self._set_storages_power(surplus_supply)
@@ -99,6 +99,8 @@ class NetworkController(NetworkControllerAbstract):
                     producers = self._set_producers_based_on_priority(time)
 
             else:
+                # there is a deficit of supply we can discharge the storage, storage becomes
+                # producer.
                 deficit_supply = self.get_total_supply() - self.get_total_demand(time)
                 storages = self._set_storages_power(deficit_supply)
                 producers = self._set_producers_to_max()
@@ -188,7 +190,7 @@ class NetworkController(NetworkControllerAbstract):
         storages = {}
         for storage in self.storages:
             storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_discharge_power,
+                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
                 PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
                 PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
             }
@@ -231,7 +233,9 @@ class NetworkController(NetworkControllerAbstract):
         :return: dict with the key the asset id and the value a dict with the set points for the
         consumers.
         """
-        factor = self.get_total_supply() / self.get_total_demand(time)
+        factor = (
+            self.get_total_supply() + self.get_total_discharge_storage()
+        ) / self.get_total_demand(time)
         return self._set_consumer_to_demand(time=time, factor=factor)
 
     def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:

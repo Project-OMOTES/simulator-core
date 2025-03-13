@@ -15,9 +15,10 @@
 
 """HeatNetwork entity class."""
 import datetime
-from typing import Callable, List, Tuple
+from typing import Callable
 
 import pandas as pd
+
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.junction import Junction
@@ -29,7 +30,7 @@ class HeatNetwork:
     """Class to store information on the heat network."""
 
     def __init__(
-        self, conversion_factory: Callable[[Network], Tuple[List[AssetAbstract], List[Junction]]]
+        self, conversion_factory: Callable[[Network], tuple[list[AssetAbstract], list[Junction]]]
     ) -> None:
         """Constructor of heat network class.
 
@@ -40,18 +41,23 @@ class HeatNetwork:
         self.assets, self.junctions = conversion_factory(self.network)
         self.solver = Solver(self.network)
 
-    def run_time_step(self, time: datetime.datetime, controller_input: dict) -> None:
+    def run_time_step(
+        self, time: datetime.datetime, time_step: float, controller_input: dict
+    ) -> None:
         """Method to simulate a time step.
 
         It first sets the controller input to the assets and then simulates the time step.
 
-        :param float time: Timestep for which to simulate the model
+        :param Datetime time: Time for which to simulate the model
+        :param float time_step: The time step to simulate
         :param dict controller_input: Dict specifying the heat demand for the different assets.
         :return: None
         """
         for py_asset in self.assets:
             if py_asset.asset_id in controller_input:
+                py_asset.set_time_step(time_step)
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
+
         self.solver.solve()
 
     def plot_network(self) -> None:

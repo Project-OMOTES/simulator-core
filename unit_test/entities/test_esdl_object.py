@@ -20,7 +20,9 @@ from pathlib import Path
 import esdl
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    StringEsdlAssetMapper,
+)
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
@@ -99,11 +101,10 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        length, property_available = asset.get_property("length", 0.0)  # act
+        length = asset.get_property("length", 0.0)  # act
 
         # Assert
         self.assertEqual(length, asset.esdl_asset.length)
-        self.assertTrue(property_available)
 
     def test_get_property_not_found(self):
         """Test get_property when the property is not found."""
@@ -111,11 +112,10 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        length, property_available = asset.get_property("length_not_found", 0.0)  # act
+        length = asset.get_property("length_not_found", 0.0)  # act
 
         # Assert
         self.assertEqual(length, 0.0)
-        self.assertFalse(property_available)
 
     def test_get_port_ids(self):
         """Test get_port_ids method."""
@@ -298,7 +298,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
     def setUp(self) -> None:
         """Arranging of the data for the tests."""
         self.asset = esdl.Asset
-        self.producer = esdl.GenericProducer
+        self.producer = esdl.Producer
         self.consumer = esdl.GenericConsumer
         self.geothermal_source = esdl.GeothermalSource
         self.conversion = esdl.Conversion

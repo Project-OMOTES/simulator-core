@@ -12,9 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""This module contains the fluid properties class."""
+"""Module for computing fluid properties."""
 
 import numpy as np
+
 from omotes_simulator_core.solver.utils.fluidprop import FluidProperties
 
 

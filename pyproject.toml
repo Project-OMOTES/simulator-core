@@ -110,7 +110,10 @@ exclude = [
     'doc/*',
     'src/omotes_simulator_core/solver/utils/fluidprop.py',
 ]
-per-file-ignores = ['__init__.py:F401', 'unit_test/*:D100,D104']
+per-file-ignores = [
+    '__init__.py:F401',
+    'unit_test/*:D100,D101,D102,D103,D104,D105,D106',
+]
 
 [tool.black]
 line-length = 100

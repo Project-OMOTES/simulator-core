@@ -16,21 +16,22 @@
 """Test Junction entities."""
 import unittest
 from uuid import uuid4
+
 import numpy.testing as npt
 
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
-class ProductionAssetTest(unittest.TestCase):
-    """Testcase for ProductionAsset class."""
+class HeatBoundaryTest(unittest.TestCase):
+    """Testcase for HeatBoundary class."""
 
     def setUp(self) -> None:
         """Set up the test case."""
-        # Create a ProductionAsset object
-        self.asset = ProductionAsset(
+        # Create a HeatBoundary object
+        self.asset = HeatBoundary(
             name=str(uuid4()),
             _id=str(uuid4()),
         )

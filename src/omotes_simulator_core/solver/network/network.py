@@ -14,13 +14,14 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the network class."""
 import uuid
+
 import numpy.typing as npt
 
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.boundary import BaseBoundary
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.network.assets.node import Node
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
 
@@ -32,7 +33,7 @@ class Network:
         "Boundary": BaseBoundary,
         "Asset": BaseAsset,
         "Fall": FallType,
-        "Production": ProductionAsset,
+        "Production": HeatBoundary,
         "Pipe": SolverPipe,
         "HeatTransferAsset": HeatTransferAsset,
     }
@@ -307,7 +308,7 @@ class Network:
 
         :return:True when asset exists and False when not
         """
-        if not (asset_id in self.assets):
+        if asset_id not in self.assets:
             raise ValueError(f"Asset with id:{asset_id} does not exist in network.")
         else:
             return True
@@ -319,7 +320,7 @@ class Network:
 
         :return:True when node exists and False when not
         """
-        if not (node_id in self.nodes):
+        if node_id not in self.nodes:
             raise ValueError(f"Node with id:{node_id} does not exist in network.")
         else:
             return True

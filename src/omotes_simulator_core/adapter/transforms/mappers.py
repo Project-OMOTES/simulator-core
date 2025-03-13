@@ -12,37 +12,31 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """Mapper classes."""
-from typing import Dict, List, Tuple
 
 from esdl.esdl import Joint as esdl_junction
+
+from omotes_simulator_core.adapter.transforms.controller_mappers import (
+    ControllerConsumerMapper,
+    ControllerProducerMapper,
+    ControllerStorageMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
-from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
-    EsdlAssetControllerProducerMapper,
-)
-from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
-    EsdlAssetControllerConsumerMapper,
-)
-from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import (
-    EsdlAssetControllerStorageMapper,
-)
 
 
 def replace_joint_in_connected_assets(
-    connected_py_assets: List[Tuple[str, str]],
-    py_joint_dict: Dict[str, List[Tuple[str, str]]],
+    connected_py_assets: list[tuple[str, str]],
+    py_joint_dict: dict[str, list[tuple[str, str]]],
     py_asset_id: str,
     iteration_limit: int = 10,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Replace joint with assets connected to the elements.
 
     Replace items in the connected_py_assets list that are connected to a Joint
@@ -101,7 +95,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
 
-    def to_entity(self, network: Network) -> Tuple[List[AssetAbstract], List[Junction]]:
+    def to_entity(self, network: Network) -> tuple[list[AssetAbstract], list[Junction]]:
         """Method to convert esdl to Heatnetwork object.
 
         This method first converts all assets into a list of assets.
@@ -120,7 +114,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         self,
         network: Network,
         py_assets_list: list[AssetAbstract],
-    ) -> List[Junction]:
+    ) -> list[Junction]:
         """Method to create junctions and connect the assets with them.
 
         :param network: network to add the junctions to.
@@ -160,7 +154,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                         )
         return py_junction_list
 
-    def _convert_assets(self, network: Network) -> List[AssetAbstract]:
+    def _convert_assets(self, network: Network) -> list[AssetAbstract]:
         """Method to convert all assets from the esdl to a list of pyassets.
 
         This method loops over all assets in the esdl and converts them to pyassets.
@@ -225,15 +219,15 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         :return: NetworkController, which is the converted EsdlObject object.
         """
         consumers = [
-            EsdlAssetControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
         ]
         producers = [
-            EsdlAssetControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("producer")
         ]
         storages = [
-            EsdlAssetControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
         return NetworkController(producers, consumers, storages)
