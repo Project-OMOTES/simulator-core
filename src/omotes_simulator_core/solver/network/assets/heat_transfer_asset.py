@@ -129,7 +129,7 @@ class HeatTransferAsset(BaseAsset):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
-        # Check if there are two nodes connected to the asset
+        # Check if there are four nodes connected to the asset
         if len(self.connected_nodes) != 4:
             raise ValueError("The number of connected nodes must be 4!")
         # Check if the number of unknowns is 12
@@ -156,6 +156,7 @@ class HeatTransferAsset(BaseAsset):
                 use_relative_indexing=False,
             )
         ]
+        # TODO: this needs changin with the new flow direction implementations.
         if discharge > 0:
             return FlowDirection.POSITIVE
         elif discharge < 0:
@@ -278,6 +279,9 @@ class HeatTransferAsset(BaseAsset):
                 flow_direction_secondary=flow_direction_secondary,
             )
         )
+        # TODO: Change the previous part to be based on the in an dout ports. It is defined in the 
+        # integration tests.
+
         # -- Internal energy (4x) --
         # Add the internal energy equations at connection points 0, and 2 to define
         # the connection with the nodes.
@@ -295,6 +299,7 @@ class HeatTransferAsset(BaseAsset):
                 supply_temperature=self.supply_temperature_primary,
             )
         )
+        # TODO: why is it using the supply temperature if it is an outlet?
         equations.append(
             self.prescribe_temperature_at_connection_point(
                 connection_point=secondary_side_outflow,
@@ -303,6 +308,7 @@ class HeatTransferAsset(BaseAsset):
         )
         # -- Mass flow rate or pressure on secondary side (2x) --
         # Prescribe the pressure at the secondary side of the heat transfer asset.
+        # TODO: This probably also needs to be changed.
         if self.pre_scribe_mass_flow_secondary:
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
@@ -335,7 +341,7 @@ class HeatTransferAsset(BaseAsset):
         equations.append(self.get_press_to_node_equation(connection_point=primary_side_outflow))
         equations.append(self.get_press_to_node_equation(connection_point=secondary_side_inflow))
         equations.append(self.get_press_to_node_equation(connection_point=secondary_side_outflow))
-        # -- Internal continuity (2x) --
+        # -- Internal continuity (1x) -- 
         # Add the internal continuity equation at the primary side.
         equations.append(
             self.add_continuity_equation(
@@ -374,16 +380,18 @@ class HeatTransferAsset(BaseAsset):
         Method uses the following equation to determine the mass flow rate set point:
 
         .. math::
-
-            \dot{m}_{primary, inflow} = - \left| \frac{u_{primary, inflow} - u_{primary, outflow}}
-            {c \left( \dot{m}_{secondary, inflow}u_{secondary, inflow} -
-            \dot{m}_{secondary, outflow}u_{secondary, outflow} \right)} \right|
+            \dot{m}_{primary_inflow} = - \left|\frac{c \left( \dot{m}_{secondary, inflow}u_{secondary, inflow} -
+            \dot{m}_{secondary, outflow}u_{secondary, outflow} \right)}
+            {u_{primary, inflow} - u_{primary, outflow}}
+            \right|
 
         with :math:`c` as the heat transfer coefficient.
 
         :return: float, :math:`\dot{m}_{primary, inflow}`
 
         """
+        # TODO: Fix the equation documentation above. The fraction is the wrong way around.
+
         internal_energy_difference_primary = (
             self.prev_sol[
                 self.get_index_matrix(
