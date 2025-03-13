@@ -149,6 +149,7 @@ class HeatTransferAsset(BaseAsset):
         :return: FlowDirection
             The flow direction of the heat transfer asset.
         """
+
         discharge = self.prev_sol[
             self.get_index_matrix(
                 property_name="mass_flow_rate",
@@ -156,7 +157,7 @@ class HeatTransferAsset(BaseAsset):
                 use_relative_indexing=False,
             )
         ]
-        # TODO: this needs changin with the new flow direction implementations.
+
         if discharge > 0:
             return FlowDirection.POSITIVE
         elif discharge < 0:
@@ -279,7 +280,7 @@ class HeatTransferAsset(BaseAsset):
                 flow_direction_secondary=flow_direction_secondary,
             )
         )
-        # TODO: Change the previous part to be based on the in an dout ports. It is defined in the 
+        # TODO: Change the previous part to be based on the in and out ports. It is defined in the 
         # integration tests.
 
         # -- Internal energy (4x) --
@@ -329,6 +330,7 @@ class HeatTransferAsset(BaseAsset):
                     pressure_value=self.pressure_set_point_secondary / 2,
                 )
             )
+            # TODO: Why is the pressure above divided by 2?
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=secondary_side_outflow,
@@ -390,7 +392,6 @@ class HeatTransferAsset(BaseAsset):
         :return: float, :math:`\dot{m}_{primary, inflow}`
 
         """
-        # TODO: Fix the equation documentation above. The fraction is the wrong way around.
 
         internal_energy_difference_primary = (
             self.prev_sol[
