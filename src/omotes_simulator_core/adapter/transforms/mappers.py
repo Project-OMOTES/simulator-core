@@ -98,6 +98,17 @@ class NetworkItems:
     producer: list[ControllerProducer]
     storage: list[ControllerStorage]
 
+    def add(self, asset: AssetAbstract) -> None:
+        """Add the asset to the correct list."""
+        if isinstance(asset, ControllerConsumer):
+            self.consumer.append(asset)
+        elif isinstance(asset, ControllerProducer):
+            self.producer.append(asset)
+        elif isinstance(asset, ControllerStorage):
+            self.storage.append(asset)
+        else:
+            raise ValueError("Asset type not recognized.")
+
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
     """Creates a HeatNetwork entity object based on a PyESDL EnergySystem object."""
@@ -272,54 +283,58 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
         ]
-        for heat_transfer_aset in heat_transfer_assets:
-            network_list.append(
-                NetworkItems(
-                    heat_transfer_primary=[heat_transfer_aset],
-                    heat_transfer_secondary=[],
-                    consumer=[],
-                    producer=[],
-                    storage=[],
+        for heat_transfer_asset in heat_transfer_assets:
+            # First check if the heat transfer asset is connected to a network that already is in the list
+            belongs = False
+            for network in network_list:
+                if belongs_to_network(heat_transfer_asset.id + "_primary", network, graph):
+                    network.heat_transfer_primary.append(heat_transfer_asset)
+                    belongs = True
+                    break
+            if not belongs:
+                network_list.append(
+                    NetworkItems(
+                        heat_transfer_primary=[heat_transfer_asset],
+                        heat_transfer_secondary=[],
+                        consumer=[],
+                        producer=[],
+                        storage=[],
+                    )
                 )
-            )
-            network_list.append(
-                NetworkItems(
-                    heat_transfer_primary=[],
-                    heat_transfer_secondary=[heat_transfer_aset],
-                    consumer=[],
-                    producer=[],
-                    storage=[],
+            belongs = False
+            for network in network_list:
+                if belongs_to_network(heat_transfer_asset.id + "_secondary", network, graph):
+                    network.heat_transfer_primary.append(heat_transfer_asset)
+                    belongs = True
+                    break
+            if not belongs:
+                network_list.append(
+                    NetworkItems(
+                        heat_transfer_primary=[],
+                        heat_transfer_secondary=[heat_transfer_asset],
+                        consumer=[],
+                        producer=[],
+                        storage=[],
+                    )
                 )
-            )
 
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
         ]
-        for consumer in consumers:
-            for network in network_list:
-                if belongs_to_network(consumer.id, network, graph):
-                    network.consumer.append(consumer)
-                    continue
         producers = [
             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("producer")
         ]
-        for producer in producers:
-            for network in network_list:
-                if belongs_to_network(producer.id, network, graph):
-                    network.producer.append(producer)
-                    continue
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
-        for storage in storages:
+        for asset in consumers + producers + storages:
             for network in network_list:
-                if belongs_to_network(storage.id, network, graph):
-                    network.storage.append(storage)
+                if belongs_to_network(asset.id, network, graph):
+                    network.add(asset)
                     continue
-
         # creating network controller classes
         networks = []
         for network in network_list:
