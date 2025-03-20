@@ -23,7 +23,7 @@ import numpy.testing as np_test
 
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -64,7 +64,7 @@ class NodeTest(unittest.TestCase):
     def test_connect_asset(self) -> None:
         """Test the connect_asset method of the Node class."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         connection_id = 0
 
         # act
@@ -76,7 +76,7 @@ class NodeTest(unittest.TestCase):
     def test_connect_asset_with_invalid_connection_id(self) -> None:
         """Test the connect_asset method of the Node class with invalid connection_id."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         connection_id = 2
 
         # act
@@ -113,7 +113,7 @@ class NodeTest(unittest.TestCase):
     ) -> None:
         """Test the get_equations method of the Node class when connected."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
         self.node.connect_asset(asset=connected_asset, connection_point=connection_point)
 
@@ -144,7 +144,7 @@ class NodeTest(unittest.TestCase):
     def test_get_node_cont_equation_with_additional_asset(self) -> None:
         """Test the get_node_cont_equation method of the Node class with additional asset."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
         self.node.connect_asset(asset=connected_asset, connection_point=connection_point)
 
@@ -215,7 +215,7 @@ class NodeTest(unittest.TestCase):
     def test_is_connected_true(self) -> None:
         """Test the is_connected method of the Node class."""
         # arrange
-        connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         connection_point = 0
 
         # act
@@ -248,11 +248,11 @@ class NodeTestEnergyEquation(unittest.TestCase):
             name=str(uuid4()), _id=str(uuid4()), initial_temperature=self.initial_temperature
         )
         # Create connected asset
-        self.connected_asset = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        self.connected_asset = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         self.connected_asset.set_matrix_index(index_core_quantity.number_core_quantities)
         self.connection_point = 0
         # Create connected asset on other connection point
-        self.connected_asset_2 = ProductionAsset(name=str(uuid4()), _id=str(uuid4()))
+        self.connected_asset_2 = HeatBoundary(name=str(uuid4()), _id=str(uuid4()))
         self.connected_asset_2.set_matrix_index(index_core_quantity.number_core_quantities * 2)
         self.connection_point_2 = 1
 

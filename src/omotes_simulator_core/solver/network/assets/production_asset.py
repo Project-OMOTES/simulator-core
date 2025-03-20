@@ -12,19 +12,19 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Module containing the production asset class."""
+"""Implementation of the HeatBoundary class."""
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 
 
-class ProductionAsset(FallType):
+class HeatBoundary(FallType):
     """
-    A class to represent a production asset in a network.
+    A class to represent a heat boundary in a network.
 
     This class inherits from the FallType class and implements the methods to generate
-    the equations for the production asset.
+    the equations for the heat boundary.
 
     Attributes
     ----------
@@ -60,14 +60,14 @@ class ProductionAsset(FallType):
         name: str,
         _id: str,
         supply_temperature: float = 293.15,
-        heat_supplied: float = 0.0,
+        heat_flux: float = 0.0,
         loss_coefficient: float = 1.0,
         pre_scribe_mass_flow: bool = True,
         mass_flow_rate_set_point: float = 10.0,
         set_pressure: float = 10000.0,
     ):
         """
-        Initializes the ProductionAsset object with the given parameters.
+        Initializes the HeatBoundary object with the given parameters.
 
         Parameters
         ----------
@@ -88,7 +88,7 @@ class ProductionAsset(FallType):
             name=name,
             _id=_id,
             supply_temperature=supply_temperature,
-            heat_supplied=heat_supplied,
+            heat_flux=heat_flux,
             loss_coefficient=loss_coefficient,
         )
 
