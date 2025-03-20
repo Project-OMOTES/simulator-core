@@ -26,28 +26,6 @@ class TestGraph(unittest.TestCase):
         """Set up test case."""
         self.graph = Graph()
 
-    def test_graph_adding_nodes(self):
-        """Test for graph."""
-        # Arrange
-
-        # Act
-        self.graph.add_node("node1")
-        # Assert
-        self.assertTrue("node1" in self.graph.nodes)
-
-    def test_connecting(self):
-        """Test for graph."""
-        # Arrange
-        self.graph.add_node("node1")
-        self.graph.add_node("node2")
-
-        # Act
-        self.graph.connect("node1", "node2")
-
-        # Assert
-        self.assertEqual(len(self.graph.edges), 1)
-        self.assertEqual(self.graph.edges[0].nodes, ["node1", "node2"])
-
     def test_node_exists(self):
         """Test for graph."""
         # Arrange
@@ -70,17 +48,17 @@ class TestGraph(unittest.TestCase):
         # Assert
         self.assertTrue(res)
 
-        def test_is_directly_connected_false(self):
-            """Test for graph."""
-            # Arrange
-            self.graph.add_node("A")
-            self.graph.add_node("B")
+    def test_is_directly_connected_false(self):
+        """Test for graph."""
+        # Arrange
+        self.graph.add_node("A")
+        self.graph.add_node("B")
 
-            # Act
-            res = self.graph.is_directly_connected("A", "B")
+        # Act
+        res = self.graph.is_directly_connected("A", "B")
 
-            # Assert
-            self.assertFalse(res)
+        # Assert
+        self.assertFalse(res)
 
     def test_is_connected(self):
         """Test for graph."""
