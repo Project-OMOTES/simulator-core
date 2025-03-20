@@ -340,8 +340,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         for network in network_list:
             networks.append(
                 ControllerNetwork(
-                    heat_transfer_assets_in=network.heat_transfer_primary
-                    + network.heat_transfer_secondary,
+                    heat_transfer_assets_prim_in=network.heat_transfer_primary,
+                    heat_transfer_assets_sec_in=network.heat_transfer_secondary,
                     consumers_in=network.consumer,
                     producers_in=network.producer,
                     storage_in=network.storage,
