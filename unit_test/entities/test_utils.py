@@ -55,12 +55,12 @@ class UtilFunctionTest(unittest.TestCase):
         """Test heat_demand_and_temperature_to_mass_flow."""
         # Arrange
         thermal_demand = 1000  # [w]
-        temperature_supply = 373  # [K]
-        temperature_return = 353  # [K]
+        temperature_out = 373  # [K]
+        temperature_in = 353  # [K]
 
         # act
         mass_flow_calculated = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand, temperature_supply, temperature_return
+            thermal_demand, temperature_out, temperature_in
         )  # act
 
         # Assert
@@ -69,13 +69,13 @@ class UtilFunctionTest(unittest.TestCase):
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
         # Arrange
-        temperature_supply = 373  # [K]
-        temperature_return = 353  # [K]
+        temperature_out = 373  # [K]
+        temperature_in = 353  # [K]
         mass_flow = 0.011956001912960305
 
         # Act
         heat_demand_calculated = mass_flow_and_temperature_to_heat_demand(
-            temperature_supply, temperature_return, mass_flow
+            temperature_out, temperature_in, mass_flow
         )  # act
 
         # Assert

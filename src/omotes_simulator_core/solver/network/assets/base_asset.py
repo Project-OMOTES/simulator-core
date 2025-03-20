@@ -39,7 +39,7 @@ class BaseAsset(BaseItem):
         _id: str,
         number_of_unknowns: int = 6,
         number_connection_points: int = 2,
-        supply_temperature: float = 293.15,
+        out_temperature: float = 293.15,
     ):
         """Initializes the BaseAsset object with the given parameters.
 
@@ -56,7 +56,7 @@ class BaseAsset(BaseItem):
             number_of_unknowns=number_of_unknowns,
             number_connection_points=number_connection_points,
         )
-        self.supply_temperature = supply_temperature
+        self.out_temperature = out_temperature
         self.connected_nodes = {}
 
     def check_connection_point_valid(self, connection_point: int) -> bool:
@@ -185,7 +185,7 @@ class BaseAsset(BaseItem):
             ]
         )
         equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
+        equation_object.rhs = fluid_props.get_ie(self.out_temperature)
         return equation_object
 
     def get_internal_energy_to_node_equation(self, connection_point: int) -> EquationObject:

@@ -24,8 +24,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
     PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -39,10 +39,10 @@ class ProductionCluster(AssetAbstract):
     thermal_production_required: float | None
     """The thermal production required by the asset [W]."""
 
-    temperature_supply: float
+    temperature_out: float
     """The supply temperature of the asset [K]."""
 
-    temperature_return: float
+    temperature_in: float
     """The return temperature of the asset [K]."""
 
     pressure_supply: float
@@ -71,8 +71,8 @@ class ProductionCluster(AssetAbstract):
         self.height_m = DEFAULT_NODE_HEIGHT
         # DemandCluster thermal and mass flow specifications
         self.thermal_production_required = None
-        self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_out = DEFAULT_TEMPERATURE
+        self.temperature_in = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         # DemandCluster pressure specifications
         self.pressure_supply = DEFAULT_PRESSURE
         self.heat_demand_set_point = 0.0
@@ -86,24 +86,24 @@ class ProductionCluster(AssetAbstract):
             set_pressure=self.pressure_supply,
         )
 
-    def _set_supply_temperature(self, temperature_supply: float) -> None:
+    def _set_out_temperature(self, temperature_out: float) -> None:
         """Set the supply temperature of the asset.
 
-        :param float temperature_supply: The supply temperature of the asset.
+        :param float temperature_out: The supply temperature of the asset.
             The temperature should be supplied in Kelvin.
         """
         # Set the temperature of the circulation pump mass flow
-        self.temperature_supply = temperature_supply
-        self.solver_asset.supply_temperature = self.temperature_supply
+        self.temperature_out = temperature_out
+        self.solver_asset.out_temperature = self.temperature_out
 
-    def _set_return_temperature(self, temperature_return: float) -> None:
+    def _set_in_temperature(self, temperature_in: float) -> None:
         """Set the return temperature of the asset.
 
-        :param float temperature_return: The return temperature of the asset.
+        :param float temperature_in: The return temperature of the asset.
             The temperature should be supplied in Kelvin.
         """
         # Set the return temperature of the asset
-        self.temperature_return = temperature_return
+        self.temperature_in = temperature_in
 
     def _set_heat_demand(self, heat_demand: float) -> None:
         """Set the heat demand of the asset.
@@ -115,8 +115,8 @@ class ProductionCluster(AssetAbstract):
         self.heat_demand_set_point = heat_demand
         self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand,
-            temperature_supply=self.temperature_supply,
-            temperature_return=self.temperature_return,
+            temperature_out=self.temperature_out,
+            temperature_in=self.temperature_in,
         )
 
         # Check if the mass flow rate is positive
@@ -164,8 +164,8 @@ class ProductionCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY,
-            PROPERTY_TEMPERATURE_RETURN,
+            PROPERTY_TEMPERATURE_OUT,
+            PROPERTY_TEMPERATURE_IN,
             PROPERTY_HEAT_DEMAND,
             PROPERTY_SET_PRESSURE,
         }
@@ -175,8 +175,8 @@ class ProductionCluster(AssetAbstract):
         if necessary_setpoints.issubset(setpoints_set):
             # Set the setpoints
             self._set_pressure_or_mass_flow_control(setpoints[PROPERTY_SET_PRESSURE])
-            self._set_supply_temperature(setpoints[PROPERTY_TEMPERATURE_SUPPLY])
-            self._set_return_temperature(setpoints[PROPERTY_TEMPERATURE_RETURN])
+            self._set_out_temperature(setpoints[PROPERTY_TEMPERATURE_OUT])
+            self._set_in_temperature(setpoints[PROPERTY_TEMPERATURE_IN])
             self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
         else:
             # Print missing setpoints

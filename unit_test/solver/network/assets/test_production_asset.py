@@ -150,4 +150,4 @@ class HeatBoundaryTest(unittest.TestCase):
             ],
         )
         npt.assert_array_equal(equation_object.coefficients, [1.0])
-        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
+        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.out_temperature))

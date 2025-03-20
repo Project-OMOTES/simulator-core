@@ -169,7 +169,7 @@ class BaseAssetTest(unittest.TestCase):
         equation_object = self.asset.get_thermal_equations(connection_point=connection_point_id)
 
         # Assert
-        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
+        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.out_temperature))
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         npt.assert_array_equal(
             equation_object.indices,

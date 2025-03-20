@@ -30,8 +30,8 @@ class ControllerProducerTest(unittest.TestCase):
         producer = ControllerProducer(
             "producer",
             "id",
-            temperature_supply=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_return=DEFAULT_TEMPERATURE,
+            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_in=DEFAULT_TEMPERATURE,
             power=1000,
             marginal_costs=0.1,
             priority=1,
@@ -41,9 +41,9 @@ class ControllerProducerTest(unittest.TestCase):
         # Assert
         self.assertEqual(producer.name, "producer")
         self.assertEqual(producer.id, "id")
-        self.assertEqual(producer.temperature_return, DEFAULT_TEMPERATURE)
+        self.assertEqual(producer.temperature_in, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            producer.temperature_supply, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(producer.power, 1000)
         self.assertEqual(producer.marginal_costs, 0.1)

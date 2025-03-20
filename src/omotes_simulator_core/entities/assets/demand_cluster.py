@@ -23,8 +23,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_DEMAND_SET_POINT,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -45,9 +45,9 @@ class DemandCluster(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         self._internal_diameter = DEFAULT_DIAMETER
-        self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
-        self.temperature_return_target = self.temperature_return
+        self.temperature_out = DEFAULT_TEMPERATURE
+        self.temperature_in: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_in_target = self.temperature_in
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0.0
@@ -62,8 +62,8 @@ class DemandCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY,
-            PROPERTY_TEMPERATURE_RETURN,
+            PROPERTY_TEMPERATURE_OUT,
+            PROPERTY_TEMPERATURE_IN,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -75,12 +75,12 @@ class DemandCluster(AssetAbstract):
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
         self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
-        self.temperature_return_target = setpoints[PROPERTY_TEMPERATURE_RETURN]
-        self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
+        self.temperature_in_target = setpoints[PROPERTY_TEMPERATURE_IN]
+        self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_supply, self.temperature_return_target
+            self.thermal_power_allocation, self.temperature_out, self.temperature_in_target
         )
-        self.solver_asset.supply_temperature = self.temperature_supply
+        self.solver_asset.out_temperature = self.temperature_out
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
     def write_to_output(self) -> None:

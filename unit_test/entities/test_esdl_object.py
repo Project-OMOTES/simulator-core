@@ -131,91 +131,91 @@ class EsdlObjectTest(unittest.TestCase):
         )
         self.assertEqual(len(port_ids), 2)
 
-    def test_get_supply_temperature_in(self):
-        """Test get_supply_temperature method."""
+    def test_get_out_temperature_in(self):
+        """Test get_out_temperature method."""
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
-        supply_temperature = asset.get_supply_temperature("In")
+        out_temperature = asset.get_out_temperature("In")
 
         # Assert
-        self.assertEqual(supply_temperature, 353.15)
+        self.assertEqual(out_temperature, 353.15)
 
-    def test_get_supply_temperature_out(self):
-        """Test get_supply_temperature method."""
+    def test_get_out_temperature_out(self):
+        """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        supply_temperature = asset.get_supply_temperature("Out")
+        out_temperature = asset.get_out_temperature("Out")
 
         # Assert
-        self.assertEqual(supply_temperature, 353.15)
+        self.assertEqual(out_temperature, 353.15)
 
-    def test_get_return_temperature_in(self):
-        """Test get_return_temperature method."""
+    def test_get_in_temperature_in(self):
+        """Test get_in_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        return_temperature = asset.get_return_temperature("In")
+        in_temperature = asset.get_in_temperature("In")
 
         # Assert
-        self.assertEqual(return_temperature, 313.15)
+        self.assertEqual(in_temperature, 313.15)
 
-    def test_get_return_temperature_out(self):
-        """Test get_return_temperature method."""
+    def test_get_in_temperature_out(self):
+        """Test get_in_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        return_temperature = asset.get_return_temperature("Out")
+        in_temperature = asset.get_in_temperature("Out")
 
         # Assert
-        self.assertEqual(return_temperature, 313.15)
+        self.assertEqual(in_temperature, 313.15)
 
-    def test_get_supply_temperature_consumer(self):
-        """Test get_supply_temperature method."""
+    def test_get_out_temperature_consumer(self):
+        """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        supply_temperature = asset.get_return_temperature("Out")
+        out_temperature = asset.get_in_temperature("Out")
 
         # Assert
-        self.assertEqual(supply_temperature, 313.15)
+        self.assertEqual(out_temperature, 313.15)
 
-    def test_get_return_temperature_consumer(self):
-        """Test get_supply_temperature method."""
+    def test_get_in_temperature_consumer(self):
+        """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        supply_temperature = asset.get_supply_temperature("In")
+        out_temperature = asset.get_out_temperature("In")
 
         # Assert
-        self.assertEqual(supply_temperature, 353.15)
+        self.assertEqual(out_temperature, 353.15)
 
-    def test_get_supply_temperature_producer(self):
-        """Test get_supply_temperature method."""
+    def test_get_out_temperature_producer(self):
+        """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        supply_temperature = asset.get_supply_temperature("Out")
+        out_temperature = asset.get_out_temperature("Out")
 
         # Assert
-        self.assertEqual(supply_temperature, 353.15)
+        self.assertEqual(out_temperature, 353.15)
 
-    def test_get_return_temperature_producer(self):
-        """Test get_supply_temperature method."""
+    def test_get_in_temperature_producer(self):
+        """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        supply_temperature = asset.get_return_temperature("In")
+        out_temperature = asset.get_in_temperature("In")
 
         # Assert
-        self.assertEqual(supply_temperature, 313.15)
+        self.assertEqual(out_temperature, 313.15)
 
     def test_get_port_type_in(self):
         """Test get_port_type method."""

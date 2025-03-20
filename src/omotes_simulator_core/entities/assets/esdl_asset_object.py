@@ -80,18 +80,18 @@ class EsdlAssetObject:
                 return get_data_from_profile(esdl_port.profile[0])
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
 
-    def get_supply_temperature(self, port_type: str) -> float:
+    def get_out_temperature(self, port_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
-                return get_supply_temperature(esdl_port)
+                return get_out_temperature(esdl_port)
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
-    def get_return_temperature(self, port_type: str) -> float:
+    def get_in_temperature(self, port_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
-                return get_return_temperature(esdl_port)
+                return get_in_temperature(esdl_port)
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_port_ids(self) -> list[str]:
@@ -134,11 +134,11 @@ class EsdlAssetObject:
         return float(self.esdl_asset.costInformation.marginalCosts.value)
 
 
-def get_return_temperature(esdl_port: esdl.Port) -> float:
+def get_in_temperature(esdl_port: esdl.Port) -> float:
     """Get the temperature of the port."""
     return float(esdl_port.carrier.returnTemperature) + 273.15
 
 
-def get_supply_temperature(esdl_port: esdl.Port) -> float:
+def get_out_temperature(esdl_port: esdl.Port) -> float:
     """Get the temperature of the port."""
     return float(esdl_port.carrier.supplyTemperature) + 273.15

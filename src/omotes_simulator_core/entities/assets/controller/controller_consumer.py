@@ -32,8 +32,8 @@ class ControllerConsumer(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_supply: float,
-        temperature_return: float,
+        temperature_out: float,
+        temperature_in: float,
         max_power: float,
         profile: pd.DataFrame,
     ):
@@ -43,8 +43,8 @@ class ControllerConsumer(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         """
         super().__init__(name, identifier)
-        self.temperature_return = temperature_return
-        self.temperature_supply = temperature_supply
+        self.temperature_in = temperature_in
+        self.temperature_out = temperature_out
         self.profile: pd.DataFrame = profile
         self.start_index = 0
         self.max_power: float = max_power

@@ -47,8 +47,8 @@ class TestControllerProducerMapper(unittest.TestCase):
         controller_producer = self.mapper.to_entity(producer_assets[0])
 
         # Assert
-        # TODO: Why is the temperature_supply and temperature_return switched?
-        self.assertEqual(controller_producer.temperature_return, 313.15)
-        self.assertEqual(controller_producer.temperature_supply, 353.15)
+        # TODO: Why is the temperature_out and temperature_in switched?
+        self.assertEqual(controller_producer.temperature_in, 313.15)
+        self.assertEqual(controller_producer.temperature_out, 353.15)
         self.assertEqual(controller_producer.power, 1e8)
         self.assertEqual(controller_producer.marginal_costs, 0)

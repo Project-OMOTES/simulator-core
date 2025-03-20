@@ -40,13 +40,13 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         """
         power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
         marginal_costs = esdl_asset.get_marginal_costs()
-        temperature_supply = esdl_asset.get_supply_temperature("Out")
-        temperature_return = esdl_asset.get_return_temperature("In")
+        temperature_out = esdl_asset.get_out_temperature("Out")
+        temperature_in = esdl_asset.get_in_temperature("In")
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_supply=temperature_supply,
-            temperature_return=temperature_return,
+            temperature_out=temperature_out,
+            temperature_in=temperature_in,
             power=power,
             marginal_costs=marginal_costs,
         )
