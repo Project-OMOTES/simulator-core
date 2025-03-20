@@ -347,6 +347,20 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     storage_in=network.storage,
                 )
             )
+        # storing the path from network to the main network (number 0). We use a grpah for this.
+        graph = Graph()
+        for i in range(len(networks)):
+            graph.add_node(str(i))
+        for i in range(len(networks)):
+            for heat_transfer_asset in networks[i].heat_transfer_assets_prim:
+                for j in range(len(networks)):
+                    if i == j:
+                        continue
+                    if networks[j].exists(heat_transfer_asset.id):
+                        graph.connect(str(i), str(j))
+
+        for i in range(1, len(networks)):
+            networks[i].path = graph.get_path(str(i), "0")
         return NetworkControllerNew(networks=networks)
 
 
