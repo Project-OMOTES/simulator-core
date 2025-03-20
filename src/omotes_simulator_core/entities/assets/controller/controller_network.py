@@ -20,6 +20,12 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
+)
 import datetime
 
 
@@ -87,10 +93,65 @@ class ControllerNetwork:
         """
         return float(sum([producer.power for producer in self.producers])) * self.factor
 
-    def set_demand(self, factor: float = 1) -> None:
-        """Method to set the demand of the network."""
-        pass
+    def set_supply_to_max(self):
+        """Method to set the producers to the max power.
 
-    def set_supply(self, total_supply: float, priority: int) -> None:
-        """Method to set the supply of the network."""
-        pass
+        :return dict: Dict with key= asset-id and value=setpoints for the producers.
+        """
+        producers = {}
+        for source in self.producers:
+            producers[source.id] = {
+                PROPERTY_HEAT_DEMAND: source.power / self.factor,
+                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                PROPERTY_SET_PRESSURE: False,
+            }
+        # setting the first producer to set the pressure.
+        producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
+        return producers
+
+    def set_all_storages_discharge_to_max(self) -> dict:
+        """Method to set all the storages to the max discharge power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the storages.
+        """
+        storages = {}
+        for storage in self.storages:
+            storages[storage.id] = {
+                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power / self.factor,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+            }
+        return storages
+
+    def set_all_storages_charge_to_max(self) -> dict:
+        """Method to set all the storages to the max discharge power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the storages.
+        """
+        storages = {}
+        for storage in self.storages:
+            storages[storage.id] = {
+                PROPERTY_HEAT_DEMAND: storage.max_charge_power / self.factor,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+            }
+        return storages
+
+    def set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:
+        """Method to set the consumer to the demand.
+
+        :param datetime.datetime time: Time for which to set the consumer to the demand.
+        :param float factor: Factor to multiply the heat demand with.
+
+        :return: dict with the key the asset id and the value a dict with the set points for the
+        consumers.
+        """
+        consumers = {}
+        for consumer in self.consumers:
+            consumers[consumer.id] = {
+                PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor / self.factor,
+                PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply,
+            }
+        return consumers
