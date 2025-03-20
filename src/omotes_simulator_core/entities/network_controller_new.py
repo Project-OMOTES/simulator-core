@@ -66,17 +66,65 @@ class NetworkControllerNew(NetworkControllerAbstract):
         total_discharge_storage = sum(
             [network.get_total_discharge_storage() for network in self.networks]
         )
-        if total_demand > (total_supply + total_discharge_storage):
-            logger.warning("Not enough supply to meet demand")
-            # source to max , storage to max and demand capped.
-            return {}
-        if total_demand > total_supply:
-            # source to max, storage set to mat final part of demand, demand to what is needed
-            return {}
-        # source to max and remaining to storage
-        if total_demand + total_charge_storage > total_supply:
-            # source to max, storage to max and demand capped
-            return {}
 
-        # source capped and storage to max
+        if (total_supply + total_discharge_storage) <= total_demand:
+            logger.warning(
+                f"Total supply + storage is lower than total demand at time: {time}"
+                f"Consumers are capped to the available power."
+            )
+            factor = total_demand / (total_supply + total_discharge_storage)
+            producers = self._set_producers_to_max()
+            producers.update(self._set_all_storages_discharge_to_max())
+            producers.update(self._set_consumer_to_demand(time, factor=factor))
+            return producers
+        consumers = self._set_consumer_to_demand(time)
+        if total_supply >= total_demand:
+            # there is a surplus of supply we can charge the storage, storage becomes consumer.
+            surplus_supply = total_supply - total_demand
+            if surplus_supply <= total_charge_storage:
+                storages = self._set_storages_power(surplus_supply)
+                producers = self._set_producers_to_max()
+            else:
+                # need to cap the power of the source based on priority
+                storages = self._set_storages_power(total_charge_storage)
+                producers = self._set_producers_based_on_priority(time)
+
+        else:
+            # there is a deficit of supply we can discharge the storage, storage becomes
+            # producer.
+            deficit_supply = total_supply - total_demand
+            storages = self._set_storages_power(deficit_supply)
+            producers = self._set_producers_to_max()
+        producers.update(consumers)
+        producers.update(storages)
+        return producers
+
+    def _set_producers_to_max(self) -> dict:
+        result = {}
+        for network in self.networks:
+            result.update(network.set_supply_to_max())
+        return result
+
+    def _set_all_storages_discharge_to_max(self) -> dict:
+        result = {}
+        for network in self.networks:
+            result.update(network.set_all_storages_discharge_to_max())
+        return result
+
+    def _set_all_storages_charge_to_max(self) -> dict:
+        result = {}
+        for network in self.networks:
+            result.update(network.set_all_storages_charge_to_max())
+        return result
+
+    def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1) -> dict:
+        result = {}
+        for network in self.networks:
+            result.update(network.set_consumer_to_demand(time, factor=factor))
+        return result
+
+    def _set_storages_power(self, power: float) -> dict:
+        return {}
+
+    def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
         return {}
