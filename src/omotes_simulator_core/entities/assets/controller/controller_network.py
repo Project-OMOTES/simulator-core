@@ -31,26 +31,61 @@ class ControllerNetwork:
 
     def __init__(
         self,
-        heat_transfer_assets_in: list[ControllerHeatTransferAsset],
+        heat_transfer_assets_prim_in: list[ControllerHeatTransferAsset],
+        heat_transfer_assets_sec_in: list[ControllerHeatTransferAsset],
         consumers_in: list[ControllerConsumer],
         producers_in: list[ControllerProducer],
         storage_in: list[ControllerStorage],
+        factor: float = 1,
     ) -> None:
         """Constructor of the class, which sets all attributes."""
-        self.heat_transfer_assets = heat_transfer_assets_in
+        self.heat_transfer_assets_prim = heat_transfer_assets_prim_in
+        self.heat_transfer_assets_sec = heat_transfer_assets_sec_in
         self.consumers = consumers_in
         self.producers = producers_in
-        self.storage = storage_in
+        self.storages = storage_in
+        self.factor = factor
+        self.path: list[str] = []
+
+    def exists(self, id: str) -> bool:
+        """Method to check an asset is in the network."""
+        return any(
+            [
+                asset.id == id
+                for asset in self.heat_transfer_assets_prim
+                + self.heat_transfer_assets_sec
+                + self.consumers
+                + self.producers
+                + self.storages
+            ]
+        )
 
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
         """Method which the total heat demand at the given time."""
-        pass
-        return 0
+        return sum([consumer.get_heat_demand(time) for consumer in self.consumers]) * self.factor
 
-    def get_total_supply(self, priority: int) -> float:
-        """Method which returns the total supply of the network."""
-        pass
-        return 0
+    def get_total_discharge_storage(self) -> float:
+        """Method to get the total storage discharge power of the network.
+
+        :return float: Total heat discharge of all storages.
+        """
+        # TODO add limit based on state of charge
+        return float(sum([storage.max_discharge_power for storage in self.storages])) * self.factor
+
+    def get_total_charge_storage(self) -> float:
+        """Method to get the total storage charge power of the network.
+
+        :return float: Total heat charge of all storages.
+        """
+        # TODO add limit based on state of charge
+        return float(sum([storage.max_charge_power for storage in self.storages])) * self.factor
+
+    def get_total_supply(self) -> float:
+        """Method to get the total heat supply of the network.
+
+        :return float: Total heat supply of all producers.
+        """
+        return float(sum([producer.power for producer in self.producers])) * self.factor
 
     def set_demand(self, factor: float = 1) -> None:
         """Method to set the demand of the network."""
