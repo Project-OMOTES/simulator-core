@@ -50,12 +50,18 @@ class SimulationManager:
 
         :return: DataFrame with the result of the simulations
         """
-        # convert ESDL to Heat Network, NetworkController
-        network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
-        controller = EsdlControllerMapper().to_entity(self.esdl)
+        try:
+            # convert ESDL to Heat Network, NetworkController
+            network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
+            controller = EsdlControllerMapper().to_entity(self.esdl)
 
-        worker = NetworkSimulation(network, controller)
-        worker.run(self.config, progress_calback)
+            worker = NetworkSimulation(network, controller)
+            worker.run(self.config, progress_calback)
+        except Exception as error:
+            logger.error(
+                f"Error occured: {error}"
+            )  # Asset ID is not set,  error is reported for the entire ESDL/run
+            raise error
 
         # Run output presenter that iterates over het network (/controller?) and
         # gathers the output into a single data object

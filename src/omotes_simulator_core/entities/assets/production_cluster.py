@@ -32,6 +32,10 @@ from omotes_simulator_core.entities.assets.utils import (
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ProductionCluster(AssetAbstract):
     """A ProductionCluster represents an asset that produces heat."""
@@ -121,6 +125,11 @@ class ProductionCluster(AssetAbstract):
 
         # Check if the mass flow rate is positive
         if self.controlled_mass_flow < 0.0:
+            logger.error(
+                f"The mass flow rate {self.controlled_mass_flow} of the asset {self.name}"
+                + " is negative.",
+                extra={"esdl_object_id": self.asset_id},
+            )
             raise ValueError(
                 f"The mass flow rate {self.controlled_mass_flow} of the asset {self.name}"
                 + " is negative."
@@ -147,6 +156,10 @@ class ProductionCluster(AssetAbstract):
         """
         # Check if the pressure is positive
         if pressure_supply < 0.0:
+            logger.error(
+                f"The pressure {pressure_supply} of the asset {self.name} can not be negative.",
+                extra={"esdl_object_id": self.asset_id},
+            )
             raise ValueError(
                 f"The pressure {pressure_supply} of the asset {self.name} can not be negative."
             )
@@ -180,6 +193,10 @@ class ProductionCluster(AssetAbstract):
             self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
         else:
             # Print missing setpoints
+            logger.error(
+                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing.",
+                extra={"esdl_object_id": self.asset_id},
+            )
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
