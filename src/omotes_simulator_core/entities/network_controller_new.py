@@ -16,6 +16,8 @@
 
 import datetime
 import logging
+
+from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_SET_PRESSURE
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 
@@ -87,7 +89,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
             else:
                 # need to cap the power of the source based on priority
                 storages = self._set_storages_power(total_charge_storage)
-                producers = self._set_producers_based_on_priority(time)
+                producers = self._set_producers_based_on_priority(total_demand)
 
         else:
             # there is a deficit of supply we can discharge the storage, storage becomes
@@ -97,6 +99,9 @@ class NetworkControllerNew(NetworkControllerAbstract):
             producers = self._set_producers_to_max()
         producers.update(consumers)
         producers.update(storages)
+        for network in self.networks:
+            pressure_set_asset = network.set_pressure()
+            producers[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
         return producers
 
     def _set_producers_to_max(self) -> dict:
@@ -126,5 +131,25 @@ class NetworkControllerNew(NetworkControllerAbstract):
     def _set_storages_power(self, power: float) -> dict:
         return {}
 
-    def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
-        return {}
+    def _set_producers_based_on_priority(self, required_supply: int) -> dict:
+        """Method to set the producers based on the priority of the source."""
+        producers = {}
+        priority = 0
+        while required_supply > 0:
+            priority += 1
+            max_supply_priority = self._get_total_supply_priority(priority)
+            required_supply -= max_supply_priority
+            if required_supply > 0:
+                # set the producers with the priority to the max
+                for network in self.networks:
+                    producers.update(network.set_supply_to_max(priority))
+            else:
+                # set the producers with the priority with a factor.
+                factor = 1 + required_supply / max_supply_priority
+                for network in self.networks:
+                    producers.update(network.set_supply(factor=factor, priority=priority))
+        return producers
+
+    def _get_total_supply_priority(self, priority: int) -> float:
+        """Method to get the total supply of the network based on priority."""
+        return sum([network.get_total_supply_priority(priority) for network in self.networks])
