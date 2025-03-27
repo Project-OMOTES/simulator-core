@@ -67,7 +67,8 @@ class EsdlAssetObject:
             # Send message to logger
             logger.warning(
                 f"Property {esdl_property_name} is not set for: {self.esdl_asset.name}."
-                + f"Returning default value: {default_value}."
+                + f"Returning default value: {default_value}.",
+                extra={"esdl_object_id": self.get_id()},
             )
             return default_value
         else:
@@ -78,6 +79,10 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return get_data_from_profile(esdl_port.profile[0])
+        logger.error(
+            f"No profile found for asset: {self.esdl_asset.name}",
+            extra={"esdl_object_id": self.get_id()},
+        )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
 
     def get_supply_temperature(self, port_type: str) -> float:
@@ -85,6 +90,10 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
                 return get_supply_temperature(esdl_port)
+        logger.error(
+            f"No port found with type: {port_type} for asset: {self.esdl_asset.name}",
+            extra={"esdl_object_id": self.get_id()},
+        )
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_return_temperature(self, port_type: str) -> float:
@@ -92,6 +101,10 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
                 return get_return_temperature(esdl_port)
+        logger.error(
+            f"No port found with type: {port_type} for asset: {self.esdl_asset.name}",
+            extra={"esdl_object_id": self.get_id()},
+        )
         raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
 
     def get_port_ids(self) -> list[str]:
@@ -115,6 +128,10 @@ class EsdlAssetObject:
         elif port_type == "Out":
             return esdl.OutPort  # type: ignore [no-any-return]
         else:
+            logger.error(
+                f"Port type not recognized: {port_type} for asset: {self.esdl_asset.name}",
+                extra={"esdl_object_id": self.get_id()},
+            )
             raise ValueError(f"Port type not recognized: {port_type}")
 
     def get_marginal_costs(self) -> float:
@@ -122,13 +139,15 @@ class EsdlAssetObject:
         if self.esdl_asset.costInformation is None:
             logger.warning(
                 f"No cost information found for asset, Marginal costs set to 0 for: "
-                f"{self.esdl_asset.name}"
+                f"{self.esdl_asset.name}",
+                extra={"esdl_object_id": self.get_id()},
             )
             return 0
         if self.esdl_asset.costInformation.marginalCosts is None:
             logger.warning(
                 f"No marginal costs found for asset, Marginal costs set to 0 for: "
-                f"{self.esdl_asset.name}"
+                f"{self.esdl_asset.name}",
+                extra={"esdl_object_id": self.get_id()},
             )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)

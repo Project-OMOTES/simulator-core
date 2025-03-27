@@ -19,6 +19,9 @@ from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def parse_esdl_profiles(esh: EnergySystemHandler) -> dict[str, pd.DataFrame]:
@@ -72,24 +75,48 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
 
     # I do not thing this is required since you set it in mapeditor.
     if time_series_data.end_datetime != esdl_profile.endDate:
+        logger.error(
+            f"The user input profile end datetime: {esdl_profile.endDate} does not match the end"
+            f" datetime in the datbase: {time_series_data.end_datetime} for variable: "
+            f"{esdl_profile.field}",
+            extra={"esdl_object_id": esdl_profile.id},
+        )
         raise RuntimeError(
             f"The user input profile end datetime: {esdl_profile.endDate} does not match the end"
             f" datetime in the datbase: {time_series_data.end_datetime} for variable: "
             f"{esdl_profile.field}"
         )
     if time_series_data.start_datetime != esdl_profile.startDate:
+        logger.error(
+            f"The user input profile start datetime: {esdl_profile.startDate} does not match the"
+            f" start date in the datbase: {time_series_data.start_datetime} for variable: "
+            f"{esdl_profile.field}",
+            extra={"esdl_object_id": esdl_profile.id},
+        )
         raise RuntimeError(
             f"The user input profile start datetime: {esdl_profile.startDate} does not match the"
             f" start date in the datbase: {time_series_data.start_datetime} for variable: "
             f"{esdl_profile.field}"
         )
     if time_series_data.start_datetime != time_series_data.profile_data_list[0][0]:
+        logger.error(
+            f"The profile's variable value for the start datetime: "
+            f"{time_series_data.start_datetime} does not match the start datetime of the"
+            f" profile data: {time_series_data.profile_data_list[0][0]}",
+            extra={"esdl_object_id": esdl_profile.id},
+        )
         raise RuntimeError(
             f"The profile's variable value for the start datetime: "
             f"{time_series_data.start_datetime} does not match the start datetime of the"
             f" profile data: {time_series_data.profile_data_list[0][0]}"
         )
     if time_series_data.end_datetime != time_series_data.profile_data_list[-1][0]:
+        logger.error(
+            f"The profile's variable value for the end datetime: "
+            f"{time_series_data.end_datetime} does not match the end datetime of the"
+            f" profile data: {time_series_data.profile_data_list[-1][0]}",
+            extra={"esdl_object_id": esdl_profile.id},
+        )
         raise RuntimeError(
             f"The profile's variable value for the end datetime: "
             f"{time_series_data.end_datetime} does not match the end datetime of the"

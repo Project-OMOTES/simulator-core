@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """atesCluster class."""
+import logging
 import math
 import os
 
@@ -33,6 +34,8 @@ from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+
+logger = logging.getLogger(__name__)
 
 
 class AtesCluster(AssetAbstract):
@@ -177,6 +180,10 @@ class AtesCluster(AssetAbstract):
             self._set_solver_asset_setpoint()
         else:
             # Print missing setpoints
+            logger.error(
+                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing.",
+                extra={"esdl_object_id": self.asset_id},
+            )
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
