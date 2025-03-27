@@ -21,7 +21,6 @@ from omotes_simulator_core.solver.network.assets.production_asset import HeatBou
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from omotes_simulator_core.solver.network.network import Network
 from omotes_simulator_core.solver.solver import Solver
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class NetworkZeroFlowTest(unittest.TestCase):
@@ -118,6 +117,3 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     ),
                     0.0,
                 )
-
-        # TODO: Check switch in components (production asset, node, fall_type, and heat transfer asset (e.g., flow-direction))
-        # TODO: massflow limit zero flow
