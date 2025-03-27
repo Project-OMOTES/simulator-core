@@ -130,7 +130,7 @@ class FallType(BaseAsset):
                     "mass_flow_rate", connection_point=connection_point, use_relative_indexing=True
                 )
             ]
-            > 1e-5
+            > self.massflow_zero_limit
         ):
             return self.get_internal_energy_equation()
         else:

@@ -17,8 +17,9 @@
 from abc import ABC, abstractmethod
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.network.assets.base_item import BaseItem
+from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
 
 
 class BaseNodeItem(ABC):
@@ -35,6 +36,7 @@ class BaseNodeItem(ABC):
         self.id = _id
         self.number_of_unknowns = number_of_unknowns
         self.matrix_index = 0
+        self.massflow_zero_limit = MASSFLOW_ZERO_LIMIT
         self.prev_sol: list[float] = [0.0] * self.number_of_unknowns
 
     def set_matrix_index(self, index: int) -> None:
