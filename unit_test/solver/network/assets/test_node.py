@@ -350,15 +350,18 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.node.get_energy_equations()
 
         # assert
-        mock_set_energy.assert_called_once()
         self.assertEqual(mock_set_temperature.call_count, 0)
+        self.assertEqual(mock_set_energy.call_count, 1)
 
     @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
     def test_get_energy_equations_with_all_positive_flow(
         self, mock_set_temperature, mock_set_energy
     ) -> None:
-        """Test the get_energy_equations method of the Node class."""
+        """Test the get_energy_equations method of the Node class.
+
+        For same sign flow only temperature can be set.
+        """
         # arrange
         # - Outflow
         self.connected_asset.prev_sol[
@@ -379,7 +382,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.node.get_energy_equations()
 
         # assert
-        mock_set_temperature.assert_called_once()
+        self.assertEqual(mock_set_temperature.call_count, 1)
         self.assertEqual(mock_set_energy.call_count, 0)
 
     @patch.object(Node, "get_energy_equation")
@@ -408,7 +411,7 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.node.get_energy_equations()
 
         # assert
-        mock_set_temperature.assert_called_once()
+        self.assertEqual(mock_set_temperature.call_count, 1)
         self.assertEqual(mock_set_energy.call_count, 0)
 
     @patch.object(Node, "get_energy_equation")
@@ -435,5 +438,5 @@ class NodeTestEnergyEquation(unittest.TestCase):
         self.node.get_energy_equations()
 
         # assert
-        mock_set_temperature.assert_called_once()
+        self.assertEqual(mock_set_temperature.call_count, 1)
         self.assertEqual(mock_set_energy.call_count, 0)

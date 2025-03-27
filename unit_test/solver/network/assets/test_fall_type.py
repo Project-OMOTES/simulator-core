@@ -290,8 +290,8 @@ class FallTypeTest(unittest.TestCase):
         )
 
     @patch.object(FallType, "get_internal_energy_equation")
-    def test_get_thermal_equations(self, mock_energy_eq) -> None:
-        """Evaluate getting thermal equations for the boundary object.
+    def test_get_thermal_equations_higher_than_massflow_threshold(self, mock_energy_eq) -> None:
+        """Evaluate thermal equations higher than threshold massflow.
 
         The equations are:
         mIE_in - mIE_out = 0
@@ -302,6 +302,26 @@ class FallTypeTest(unittest.TestCase):
             index_core_quantity.mass_flow_rate
             + index_core_quantity.number_core_quantities * connection_point
         ] = 1.0
+
+        # Act
+        self.asset.get_thermal_equations(connection_point=connection_point)
+
+        # Assert
+        self.assertEqual(mock_energy_eq.call_count, 1)
+
+    @patch.object(FallType, "get_internal_energy_to_node_equation")
+    def test_get_thermal_equations_lower_than_massflow_threshold(self, mock_energy_eq) -> None:
+        """Evaluate thermal equations lower than threshold massflow.
+
+        The equations are:
+        IE_connection_point = IE_node
+        """
+        # Arrange
+        connection_point = 0
+        self.asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + index_core_quantity.number_core_quantities * connection_point
+        ] = (self.asset.massflow_zero_limit * 0.1)
 
         # Act
         self.asset.get_thermal_equations(connection_point=connection_point)

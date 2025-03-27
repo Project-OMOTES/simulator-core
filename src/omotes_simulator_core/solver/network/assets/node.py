@@ -146,7 +146,11 @@ class Node(BaseNodeItem):
             ]
         )
 
-        if all(flows >= 0.0) or all(flows <= 0.0):
+        if (
+            all(np.sign(flows) == 1)
+            or all(np.sign(flows) == -1)
+            or all(abs(flows) <= self.massflow_zero_limit)
+        ):
             return self.set_temperature_equation()
         else:
             return self.get_energy_equation()

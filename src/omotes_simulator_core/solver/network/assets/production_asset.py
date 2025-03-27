@@ -183,7 +183,7 @@ class HeatBoundary(FallType):
                     use_relative_indexing=True,
                 )
             ]
-            > 0
+            > self.massflow_zero_limit
         ):
             return self.get_prescribe_temp_equation(connection_point)
         else:
