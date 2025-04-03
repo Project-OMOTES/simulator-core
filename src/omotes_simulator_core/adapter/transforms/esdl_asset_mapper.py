@@ -37,6 +37,9 @@ from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_buffer_mapper import (
     EsdlAssetHeatBufferMapper,
 )
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_buffer_mapper import (
+    EsdlAssetHeatBufferMapper,
+)
 
 # Define the conversion dictionary
 conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
