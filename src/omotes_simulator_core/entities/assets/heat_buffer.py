@@ -20,21 +20,20 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_FILL_LEVEL,
-    PROPERTY_VOLUME
+    PROPERTY_VOLUME,
 )
-
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.solver.network.assets.production_asset import ProductionAsset
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -63,8 +62,8 @@ class HeatBuffer(AssetAbstract):
     current_volume: float
     """The current volume of the heat storage [m3]."""
 
-    timestep: float
-    """The timestep of the heat storage to calculate volume during injection \
+    accumulation_time: float
+    """The accumulation_time of the heat storage to calculate volume during injection 
     and production [seconds]."""
 
     def __init__(
@@ -81,17 +80,27 @@ class HeatBuffer(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
+
+        # Supply and return temperature of the asset [K]
         self.temperature_supply = DEFAULT_TEMPERATURE
         self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
-        self.thermal_power_allocation = 0
-        self.mass_flowrate = 0
+
+        # Volume properties of the asset: maximum volume [m3], fill level [fraction 0-1], current
+        # volume [m3]
         self.maximum_volume = maximum_volume
         self.fill_level = fill_level
         self.current_volume = fill_level * maximum_volume
-        self.timestep = 3600
-        self.solver_asset = ProductionAsset(name=self.name, _id=self.asset_id)
-        # using ProductionAsset since heat buffer acts either as producer or consumer,
+
+        # Thermal power allocation [W] for injection (positive) or production (negative) by the
+        # asset and mass flowrate [kg/s] going in or out by the asset
+        self.thermal_power_allocation = 0
+        self.mass_flowrate = 0
+
+        # HeatBoundary since heat buffer acts either as producer or consumer,
         # positive flow is discharge and negative flow is charge
+        self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
+
+        self.accumulation_time = 3600
         self.output: list = []
 
     def set_setpoints(self, setpoints: Dict) -> None:
@@ -129,8 +138,10 @@ class HeatBuffer(AssetAbstract):
         """Calculate fill level of the storage."""
         density = fluid_props.get_density(self.temperature_supply)
         original_fill_level = self.fill_level
-        new_fill_level = (self.mass_flowrate / density * self.timestep + original_fill_level
-                          * self.maximum_volume) / self.maximum_volume
+        new_fill_level = (
+            self.mass_flowrate / density * self.accumulation_time
+            + original_fill_level * self.maximum_volume
+        ) / self.maximum_volume
         if new_fill_level >= 0 and new_fill_level <= 1:
             self.fill_level = new_fill_level
             self.current_volume = new_fill_level * self.maximum_volume

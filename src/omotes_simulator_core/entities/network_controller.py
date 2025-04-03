@@ -17,16 +17,24 @@
 import datetime
 import logging
 
-from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.network_controller_abstract import (
+    NetworkControllerAbstract,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +130,7 @@ class NetworkController(NetworkControllerAbstract):
 
         :return float: Total heat discharge of all storages.
         """
-        # TODO add limit based on state of charge
+
         return float(sum([storage.max_discharge_power for storage in self.storages]))
 
     def get_total_charge_storage(self) -> float:
