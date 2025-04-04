@@ -32,6 +32,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorage,
 )
+from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import (
     NetworkControllerAbstract,
 )
@@ -61,6 +62,45 @@ class NetworkController(NetworkControllerAbstract):
         self.consumers = consumers
         self.storages = storages
         self._set_priority_from_marginal_costs()
+
+    def update_network_state(
+        self, network: HeatNetwork, time: datetime.datetime, timestep: float
+    ) -> None:
+        """Method to update the network state.
+
+        :param HeatNetwork network: Network to update.
+        :param datetime.datetime time: Time for which to update the network.
+        :param float timestep: Time step for which to update the network.
+        """
+        # TODO check if we need to update the network state based on the timestep
+        # TODO check if we need to update the network state based on the network
+        # Update state of the storage controllers in the network.
+        self._update_storage_controller_state(network=network)
+
+    def _update_storage_controller_state(self, network: HeatNetwork) -> None:
+        """Get effective max charge and discharge power of the storage.
+
+        Full or empty storages may not be able to charge or discharge at their maximum power.
+        This method updates the effective max charge and discharge power of the storage based on the
+        previous timestep of the network.
+
+        :param HeatNetwork network: Network to update.
+        """
+        for storage in self.storages:
+            # Asset found boolean
+            asset_found = False
+            # Get network asset based on the id of the storage.
+            for py_asset in network.assets:
+                if py_asset.asset_id in storage.id:
+                    asset_found = True
+                    # Update the controller input based on the network asset.
+                    storage.max_charge_power = py_asset.get_effective_max_charge_power()
+                    storage.max_discharge_power = py_asset.get_effective_max_discharge_power()
+                    # TODO: Rebase to effectively test.
+                    break
+
+            if asset_found is False:
+                logger.warning(f"Asset {storage.id} not found in network.")
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
