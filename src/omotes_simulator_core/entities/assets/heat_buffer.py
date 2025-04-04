@@ -63,7 +63,7 @@ class HeatBuffer(AssetAbstract):
     """The current volume of the heat storage [m3]."""
 
     accumulation_time: float
-    """The accumulation_time of the heat storage to calculate volume during injection 
+    """The accumulation_time of the heat storage to calculate volume during injection
     and production [seconds]."""
 
     def __init__(
@@ -157,6 +157,13 @@ class HeatBuffer(AssetAbstract):
         else:
             self.solver_asset.supply_temperature = self.temperature_supply
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
+
+    def get_effective_max_charge_power(self, max_charge_power: float) -> float:
+        """Get the effective maximum charge power of the asset.
+
+        :return: The effective maximum charge power of the asset.
+        """
+        return self.maximum_volume * fluid_props.get_density(self.temperature_supply)
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
         """Method to add physical data to the asset.

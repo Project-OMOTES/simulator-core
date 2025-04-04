@@ -37,6 +37,8 @@ class ControllerStorage(AssetControllerAbstract):
         temperature_return: float,
         max_charge_power: float,
         max_discharge_power: float,
+        fill_level: float,
+        max_volume: float,
         profile: pd.DataFrame,
     ):
         """Constructor for the storage.
@@ -54,6 +56,15 @@ class ControllerStorage(AssetControllerAbstract):
         self.max_charge_power: float = max_charge_power
         self.max_discharge_power: float = max_discharge_power
 
+        # Fill level and max volume of the storage.
+        self.fill_level: float = fill_level
+        self.max_volume: float = max_volume
+        self.current_volume: float = fill_level * max_volume
+
+        # Effective maximum charge and discharge power of the storage.
+        self.effective_max_charge_power: float = max_charge_power
+        self.effective_max_discharge_power: float = max_discharge_power
+
     def get_heat_power(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.
 
@@ -66,21 +77,68 @@ class ControllerStorage(AssetControllerAbstract):
         for index in range(self.start_index, len(self.profile)):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
                 self.start_index = index
-                if self.profile["values"][index] > self.max_charge_power:
+                if self.profile["values"][index] > self.effective_max_charge_power:
                     logging.warning(
                         "Storage of %s is higher than maximum charge power of asset at time %s.",
                         self.name,
                         time,
                     )
-                    return self.max_charge_power
-                elif self.profile["values"][index] < self.max_discharge_power:
+                    return self.effective_max_charge_power
+                elif self.profile["values"][index] < self.effective_max_discharge_power:
                     logging.warning(
                         "Storage of %s is higher than maximum discharge power of asset at time %s.",
                         self.name,
                         time,
                     )
-                    return self.max_discharge_power
+                    return self.effective_max_discharge_power
                 else:
                     return float(self.profile["values"][index])
-        # TODO: The loop is not complete as the asset also has a fill-level that should not surpass the maximum fill-level.
+        # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
+        # the maximum fill-level.
         return 0.0
+
+    def get_max_discharge_power(
+        self,
+        timestep: float = 3600,
+    ) -> float:
+        """Determine the effective maximum discharge power of the asset.
+
+        The effective maximum discharge power is the maximum discharge power of the asset minus the
+        volume of the asset. The effective maximum discharge power is calculated by dividing the
+        available volume by the time step of the simulation. The available volume is the maximum
+        volume of the asset minus the current volume. The effective maximum discharge power is
+        limited by the maximum discharge power of the asset.
+
+        :param float timestep: The time step of the simulation in seconds. Default is 3600 seconds.
+        """
+        # Calculate the effective maximum discharge power of the asset.
+        available_volume = self.current_volume
+        if available_volume > 0:
+            effective_max_discharge_power = min(
+                self.max_discharge_power, available_volume / timestep
+            )
+        else:
+            effective_max_discharge_power = 0.0
+        return effective_max_discharge_power
+
+    def get_max_charge_power(
+        self,
+        timestep: float = 3600,
+    ) -> float:
+        """Determine the effective maximum charge power of the asset.
+
+        The effective maximum charge power is the maximum charge power of the asset minus the volume
+        of the asset. The effective maximum charge power is calculated by dividing the available
+        volume by the time step of the simulation. The available volume is the maximum volume of
+        the asset minus the current volume. The effective maximum charge power is limited by the
+        maximum charge power of the asset.
+
+        :param float timestep: The time step of the simulation in seconds. Default is 3600 seconds.
+        """
+        # Calculate the effective maximum charge power of the asset.
+        available_volume = self.max_volume - self.current_volume
+        if available_volume > 0:
+            effective_max_charge_power = min(self.max_charge_power, available_volume / timestep)
+        else:
+            effective_max_charge_power = 0.0
+        return effective_max_charge_power

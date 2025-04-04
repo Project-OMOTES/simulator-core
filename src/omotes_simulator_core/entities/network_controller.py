@@ -75,9 +75,9 @@ class NetworkController(NetworkControllerAbstract):
         # TODO check if we need to update the network state based on the timestep
         # TODO check if we need to update the network state based on the network
         # Update state of the storage controllers in the network.
-        self._update_storage_controller_state(network=network)
+        self._update_storage_controller_state(network=network, timestep=timestep)
 
-    def _update_storage_controller_state(self, network: HeatNetwork) -> None:
+    def _update_storage_controller_state(self, network: HeatNetwork, timestep: float) -> None:
         """Get effective max charge and discharge power of the storage.
 
         Full or empty storages may not be able to charge or discharge at their maximum power.
@@ -85,6 +85,7 @@ class NetworkController(NetworkControllerAbstract):
         previous timestep of the network.
 
         :param HeatNetwork network: Network to update.
+        :param float timestep: Time step for which to update the network.
         """
         for storage in self.storages:
             # Asset found boolean
@@ -94,9 +95,15 @@ class NetworkController(NetworkControllerAbstract):
                 if py_asset.asset_id in storage.id:
                     asset_found = True
                     # Update the controller input based on the network asset.
-                    storage.max_charge_power = py_asset.get_effective_max_charge_power()
-                    storage.max_discharge_power = py_asset.get_effective_max_discharge_power()
-                    # TODO: Rebase to effectively test.
+                    storage.fill_level = py_asset.fill_level  # type: ignore
+                    storage.current_volume = py_asset.current_volume  # type: ignore
+                    # Get the effective max charge and discharge power of the storage.
+                    storage.effective_max_charge_power = storage.get_max_charge_power(
+                        timestep=timestep
+                    )
+                    storage.effective_max_discharge_power = storage.get_max_discharge_power(
+                        timestep=timestep
+                    )
                     break
 
             if asset_found is False:
@@ -170,8 +177,7 @@ class NetworkController(NetworkControllerAbstract):
 
         :return float: Total heat discharge of all storages.
         """
-
-        return float(sum([storage.max_discharge_power for storage in self.storages]))
+        return float(sum([storage.effective_max_discharge_power for storage in self.storages]))
 
     def get_total_charge_storage(self) -> float:
         """Method to get the total storage charge power of the network.
@@ -179,7 +185,7 @@ class NetworkController(NetworkControllerAbstract):
         :return float: Total heat charge of all storages.
         """
         # TODO add limit based on state of charge
-        return float(sum([storage.max_charge_power for storage in self.storages]))
+        return float(sum([storage.effective_max_charge_power for storage in self.storages]))
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
@@ -237,8 +243,9 @@ class NetworkController(NetworkControllerAbstract):
         """
         storages = {}
         for storage in self.storages:
+            # Update the setpoints
             storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
+                PROPERTY_HEAT_DEMAND: -storage.effective_max_discharge_power,
                 PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
                 PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
             }
@@ -251,8 +258,9 @@ class NetworkController(NetworkControllerAbstract):
         """
         storages = {}
         for storage in self.storages:
+            # Update the setpoints
             storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power,
+                PROPERTY_HEAT_DEMAND: storage.effective_max_charge_power,
                 PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
                 PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
             }
