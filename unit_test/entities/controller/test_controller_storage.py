@@ -50,6 +50,9 @@ class StorageControllerTest(unittest.TestCase):
             max_volume=1.0,
             profile=self.profile,
         )
+        # Set effective storage and discharge
+        self.storage.effective_max_charge_power = self.storage.max_charge_power
+        self.storage.effective_max_discharge_power = self.storage.max_discharge_power
 
     def test_storage_init(self):
         """Test to initialize the storage."""
@@ -82,6 +85,7 @@ class StorageControllerTest(unittest.TestCase):
         """Test to set the storage to the max charge power."""
         # Arrange
         self.storage.max_charge_power = 1.0
+        self.storage.effective_max_charge_power = 1.0
         # Act
         heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
         # Assert
@@ -91,6 +95,7 @@ class StorageControllerTest(unittest.TestCase):
         """Test to set the storage to the max discharge power."""
         # Arrange
         self.storage.max_discharge_power = -1.0
+        self.storage.effective_max_discharge_power = -1.0
         # Act
         heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
         # Assert
