@@ -39,7 +39,7 @@ class NetworkSimulation:
         self.network = network
         self.controller = controller
 
-        # Define hidden atributes
+        # Define hidden attributes
         self._max_iterations = 20
         self._iteration = 0
         self._is_converged = False
