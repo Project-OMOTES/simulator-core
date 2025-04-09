@@ -92,7 +92,7 @@ class NetworkController(NetworkControllerAbstract):
             asset_found = False
             # Get network asset based on the id of the storage.
             for py_asset in network.assets:
-                if py_asset.asset_id in storage.id:
+                if py_asset.asset_id == storage.id:
                     asset_found = True
                     # Update the controller input based on the network asset.
                     storage.fill_level = py_asset.fill_level  # type: ignore
