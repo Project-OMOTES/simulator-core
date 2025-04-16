@@ -177,7 +177,7 @@ class ControllerNetwork:
             }
         return consumers
 
-    def get_total_supply_priority(self, priority: int):
+    def get_total_supply_priority(self, priority: int) -> float:
         """Method to get the total supply of the network for all sources with a certain priority."""
         return float(
             sum([producer.power for producer in self.producers if producer.priority == priority])

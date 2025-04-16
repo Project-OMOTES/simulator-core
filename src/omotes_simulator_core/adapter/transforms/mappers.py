@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper classes."""
 import dataclasses
-
-from docutils.io import InputError
 from esdl.esdl import Joint as esdl_junction
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
@@ -154,7 +152,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         :param network: network to add the junctions to.
         :param py_assets_list: list of assets to connect to the junctions.
-        :param py_joint_dict: dictionary with all jints in the esdl.
 
         :return: List of junctions that are created and connected to the assets.
         """
@@ -279,7 +276,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
-        network_list = []
+        network_list: list[NetworkItems] = []
         heat_transfer_assets = [
             ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
@@ -372,7 +369,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     if networks[j].exists(heat_transfer_asset.id):
                         graph.connect(str(i), str(j))
         if not (graph.is_tree()):
-            raise InputError(
+            raise RuntimeError(
                 "The network is looped via the heat pumps and heat exchangers, "
                 "which is not supported."
             )
@@ -380,7 +377,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         for i in range(1, len(networks)):
             networks[i].path = graph.get_path(str(i), "0")
             if len(networks[i].path) > 3:
-                raise InputError(
+                raise RuntimeError(
                     "The network is connected via more then two stages which is not supported."
                 )
         return NetworkControllerNew(networks=networks)
