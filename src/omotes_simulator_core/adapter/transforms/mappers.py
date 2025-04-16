@@ -309,7 +309,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ]
             return NetworkControllerNew(networks=networks)
         for heat_transfer_asset in heat_transfer_assets:
-            # First check if the heat transfer asset is connected to a network that already is in the list
+            # First check if the heat transfer asset is connected to a network that already
+            # is in the list
             belongs = False
             for network in network_list:
                 if belongs_to_network(heat_transfer_asset.id + "_primary", network, graph):
@@ -372,7 +373,8 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                         graph.connect(str(i), str(j))
         if not (graph.is_tree()):
             raise InputError(
-                "The network is looped via the heat pumps and heat exchangers, which is not supported."
+                "The network is looped via the heat pumps and heat exchangers, "
+                "which is not supported."
             )
 
         for i in range(1, len(networks)):
