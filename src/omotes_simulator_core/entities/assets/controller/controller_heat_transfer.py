@@ -43,11 +43,11 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
         """
-
+        # TODO set correct values also for prim and secondary side.
         return {
             self.id: {
                 PROPERTY_HEAT_DEMAND: heat_demand,
-                PROPERTY_TEMPERATURE_RETURN: 293.15,  # TODO set correct values also for prim and secondary side.
+                PROPERTY_TEMPERATURE_RETURN: 293.15,
                 PROPERTY_TEMPERATURE_SUPPLY: 293.15,
                 PROPERTY_SET_PRESSURE: False,
             }

@@ -188,7 +188,8 @@ class ControllerNetwork:
 
         The controller needs to set per hydraulic separated part of the system the pressure.
         The network can thus pass back the id for which asset the pressure needs to be set.
-        The controller can then do this."""
+        The controller can then do this.
+        """
         if self.heat_transfer_assets_sec:
             return self.heat_transfer_assets_sec[0].id
         if self.producers:
