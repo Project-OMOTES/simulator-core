@@ -17,7 +17,10 @@
 import datetime
 import logging
 
-from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_SET_PRESSURE
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_SET_PRESSURE,
+    PROPERTY_HEAT_DEMAND,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 
@@ -90,7 +93,6 @@ class NetworkControllerNew(NetworkControllerAbstract):
                 # need to cap the power of the source based on priority
                 storages = self._set_storages_power(total_charge_storage)
                 producers = self._set_producers_based_on_priority(total_demand)
-
         else:
             # there is a deficit of supply we can discharge the storage, storage becomes
             # producer.
@@ -99,6 +101,30 @@ class NetworkControllerNew(NetworkControllerAbstract):
             producers = self._set_producers_to_max()
         producers.update(consumers)
         producers.update(storages)
+        # Getting the settings for the heat transfer assets
+
+        heat_transfer = {}
+        # Set all the networks where there is only on primary or secondary heat exchanger.
+        # Everything will then be set, since all heat transfer assets belong to a network where they are the only one.
+        for network in self.networks:
+            number_of_heat_exchangers = len(network.heat_transfer_assets_prim) + len(
+                network.heat_transfer_assets_sec
+            )
+            if number_of_heat_exchangers != 1:
+                continue
+            total_heat_supply = 0
+            for asset in network.producers:
+                total_heat_supply += producers[asset.id][PROPERTY_HEAT_DEMAND]
+            for asset in network.consumers:
+                total_heat_supply -= producers[asset.id][PROPERTY_HEAT_DEMAND]
+            for asset in network.storages:
+                total_heat_supply += producers[asset.id][PROPERTY_HEAT_DEMAND]
+            # this might look weird, but we know there is only one primary or secondary asset. So we can directly set it.
+            for asset in network.heat_transfer_assets_prim:
+                heat_transfer.update(asset.set_asset(total_heat_supply * asset.factor))
+            for asset in network.heat_transfer_assets_sec:
+                heat_transfer.update(asset.set_asset(-total_heat_supply))
+        producers.update(heat_transfer)
         for network in self.networks:
             pressure_set_asset = network.set_pressure()
             producers[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
