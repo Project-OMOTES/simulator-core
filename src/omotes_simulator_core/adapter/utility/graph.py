@@ -101,6 +101,17 @@ class Graph:
             return False
 
     def get_path(self, node1: str, node2: str) -> list[str]:
+        """Method to get the path between two nodes in the graph.
+
+        First it is checked if the nodes are in the graph. Then the shortest path algorithms is
+        used. If no path is found an empty list is returned.
+        :param str node1: Name of the first node.
+        :param str node2: Name of the second node.
+        """
+        if not self.node_exists(node1):
+            raise ValueError(f"Node {node1} does not exist in the graph.")
+        if not self.node_exists(node2):
+            raise ValueError(f"Node {node2} does not exist in the graph.")
         try:
             return nx.shortest_path(self.graph, node1, node2)
         except nx.NetworkXNoPath:
