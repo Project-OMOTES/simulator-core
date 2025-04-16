@@ -284,6 +284,30 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
         ]
+        consumers = [
+            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+        ]
+        producers = [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+        ]
+        storages = [
+            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+        ]
+        # if there are no heat transfer assets, all assets can be stored into one network.
+        if not heat_transfer_assets:
+            networks = [
+                ControllerNetwork(
+                    heat_transfer_assets_prim_in=[],
+                    heat_transfer_assets_sec_in=[],
+                    consumers_in=consumers,
+                    producers_in=producers,
+                    storage_in=storages,
+                )
+            ]
+            return NetworkControllerNew(networks=networks)
         for heat_transfer_asset in heat_transfer_assets:
             # First check if the heat transfer asset is connected to a network that already is in the list
             belongs = False
@@ -318,19 +342,6 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                         storage=[],
                     )
                 )
-
-        consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
-        ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
         for asset in consumers + producers + storages:
             for network in network_list:
                 if belongs_to_network(asset.id, network, graph):
