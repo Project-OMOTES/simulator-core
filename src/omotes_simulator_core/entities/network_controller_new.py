@@ -114,12 +114,12 @@ class NetworkControllerNew(NetworkControllerAbstract):
             if number_of_heat_exchangers != 1:
                 continue
             total_heat_supply = 0
-            for asset in network.producers:
-                total_heat_supply += producers[asset.id][PROPERTY_HEAT_DEMAND]
-            for asset in network.consumers:
-                total_heat_supply -= producers[asset.id][PROPERTY_HEAT_DEMAND]
-            for asset in network.storages:
-                total_heat_supply += producers[asset.id][PROPERTY_HEAT_DEMAND]
+            for producer in network.producers:
+                total_heat_supply += producers[producer.id][PROPERTY_HEAT_DEMAND]
+            for consumer in network.consumers:
+                total_heat_supply -= producers[consumer.id][PROPERTY_HEAT_DEMAND]
+            for storage in network.storages:
+                total_heat_supply += producers[storage.id][PROPERTY_HEAT_DEMAND]
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
@@ -159,7 +159,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
     def _set_storages_power(self, power: float) -> dict:
         return {}
 
-    def _set_producers_based_on_priority(self, required_supply: int) -> dict:
+    def _set_producers_based_on_priority(self, required_supply: float) -> dict:
         """Method to set the producers based on the priority of the source."""
         producers = {}
         priority = 0
