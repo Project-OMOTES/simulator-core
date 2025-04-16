@@ -30,7 +30,6 @@ class TestControllerNetwork(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-
         self.heat_transfer_assets_prim = []
         self.heat_transfer_assets_sec = []
         self.consumers = []
@@ -258,10 +257,3 @@ class TestControllerNetwork(unittest.TestCase):
         # assert
         pass
 
-    def test_get_total_supply(self):
-        # arrange
-
-        # act
-
-        # assert
-        pass
