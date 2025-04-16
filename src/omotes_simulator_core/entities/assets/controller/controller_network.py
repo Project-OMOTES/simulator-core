@@ -98,19 +98,7 @@ class ControllerNetwork:
 
         :return dict: Dict with key= asset-id and value=setpoints for the producers.
         """
-        producers = {}
-        for source in self.producers:
-            if priority == 0:
-                pass
-            elif source.priority != priority:
-                continue
-            producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.power,
-                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
-                PROPERTY_SET_PRESSURE: False,
-            }
-        return producers
+        return self.set_supply(factor=1, priority=priority)
 
     def set_supply(self, factor: float = 1, priority: int = 0) -> dict:
         """Method to set the producers to the max power.
