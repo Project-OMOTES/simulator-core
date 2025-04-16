@@ -97,7 +97,7 @@ class NetworkItems:
     producer: list[ControllerProducer]
     storage: list[ControllerStorage]
 
-    def add(self, asset: AssetAbstract) -> None:
+    def add(self, asset: ControllerStorage | ControllerProducer | ControllerConsumer) -> None:
         """Add the asset to the correct list."""
         if isinstance(asset, ControllerConsumer):
             self.consumer.append(asset)

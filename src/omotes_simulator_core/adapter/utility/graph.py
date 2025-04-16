@@ -113,7 +113,7 @@ class Graph:
         if not self.node_exists(node2):
             raise ValueError(f"Node {node2} does not exist in the graph.")
         try:
-            return nx.shortest_path(self.graph, node1, node2)
+            return nx.shortest_path(self.graph, node1, node2)  # type: ignore
         except nx.NetworkXNoPath:
             return []
 
