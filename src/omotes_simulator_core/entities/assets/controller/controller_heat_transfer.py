@@ -17,6 +17,12 @@
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
+)
 
 
 class ControllerHeatTransferAsset(AssetControllerAbstract):
@@ -30,3 +36,19 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         """
         super().__init__(name, identifier)
         self.factor = factor
+
+    def set_asset(self, heat_demand: float) -> dict[str, dict[str, float]]:
+        """Method to set the asset to the given heat demand.
+
+        The supply and return temperatures are also set.
+        :param float heat_demand: Heat demand to set.
+        """
+
+        return {
+            self.id: {
+                PROPERTY_HEAT_DEMAND: heat_demand,
+                PROPERTY_TEMPERATURE_RETURN: 293.15,  # TODO set correct values also for prim and secondary side.
+                PROPERTY_TEMPERATURE_SUPPLY: 293.15,
+                PROPERTY_SET_PRESSURE: False,
+            }
+        }

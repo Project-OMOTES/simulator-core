@@ -105,3 +105,12 @@ class Graph:
             return nx.shortest_path(self.graph, node1, node2)
         except nx.NetworkXNoPath:
             return []
+
+    def is_tree(self) -> bool:
+        """Method to check if the graph is a tree.
+
+        This check is needed since we cannot handle cycles.
+
+        :return: True if the graph is tree, False otherwise.
+        """
+        return nx.is_tree(self.graph)

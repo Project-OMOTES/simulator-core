@@ -15,6 +15,7 @@
 """Mapper classes."""
 import dataclasses
 
+from docutils.io import InputError
 from esdl.esdl import Joint as esdl_junction
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
@@ -347,7 +348,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     storage_in=network.storage,
                 )
             )
-        # storing the path from network to the main network (number 0). We use a grpah for this.
+        # storing the path from network to the main network (number 0). We use a graph for this.
         graph = Graph()
         for i in range(len(networks)):
             graph.add_node(str(i))
@@ -358,9 +359,17 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                         continue
                     if networks[j].exists(heat_transfer_asset.id):
                         graph.connect(str(i), str(j))
+        if not (graph.is_tree()):
+            raise InputError(
+                "The network is looped via the heat pumps and heat exchangers, which is not supported."
+            )
 
         for i in range(1, len(networks)):
             networks[i].path = graph.get_path(str(i), "0")
+            if len(networks[i].path) > 3:
+                raise InputError(
+                    "The network is connected via more then two stages which is not supported."
+                )
         return NetworkControllerNew(networks=networks)
 
 
