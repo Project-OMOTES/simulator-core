@@ -124,4 +124,6 @@ class Graph:
 
         :return: True if the graph is tree, False otherwise.
         """
+        if self.graph.number_of_nodes() == 0:
+            return True
         return nx.is_tree(self.graph)
