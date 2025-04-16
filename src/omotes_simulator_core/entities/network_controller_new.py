@@ -105,7 +105,8 @@ class NetworkControllerNew(NetworkControllerAbstract):
 
         heat_transfer = {}
         # Set all the networks where there is only on primary or secondary heat exchanger.
-        # Everything will then be set, since all heat transfer assets belong to a network where they are the only one.
+        # Everything will then be set, since all heat transfer assets belong to a network where
+        # they are the only one.
         for network in self.networks:
             number_of_heat_exchangers = len(network.heat_transfer_assets_prim) + len(
                 network.heat_transfer_assets_sec
@@ -119,7 +120,8 @@ class NetworkControllerNew(NetworkControllerAbstract):
                 total_heat_supply -= producers[asset.id][PROPERTY_HEAT_DEMAND]
             for asset in network.storages:
                 total_heat_supply += producers[asset.id][PROPERTY_HEAT_DEMAND]
-            # this might look weird, but we know there is only one primary or secondary asset. So we can directly set it.
+            # this might look weird, but we know there is only one primary or secondary asset.
+            # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
                 heat_transfer.update(asset.set_asset(total_heat_supply * asset.factor))
             for asset in network.heat_transfer_assets_sec:
