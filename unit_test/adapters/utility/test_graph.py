@@ -248,3 +248,14 @@ class TestGraph(unittest.TestCase):
 
         # Assert
         self.assertFalse(res)
+
+    def test_tree_one_node(self):
+        """Test for graph."""
+        # Arrange
+        self.graph.add_node("A")
+
+        # Act
+        res = self.graph.is_tree()
+
+        # Assert
+        self.assertTrue(res)

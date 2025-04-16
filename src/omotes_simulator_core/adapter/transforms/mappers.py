@@ -384,7 +384,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
 
 def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
-    """Check if the id is connected to a heat transfer asset in the network..
+    """Check if the id is connected to a heat transfer asset in the network.
 
     :param id: id to check if it belongs to the network.
     :param network: NetworkItems to check if the id belongs to the network.
