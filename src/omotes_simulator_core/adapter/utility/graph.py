@@ -19,7 +19,7 @@ import networkx as nx
 class Graph:
     """Main class for the graph."""
 
-    def __init__(self, weight=0) -> None:
+    def __init__(self) -> None:
         """Constructor of the class.
 
         The graph is stored as a dictionary of nodes and a list of edges.
@@ -60,7 +60,7 @@ class Graph:
 
         :param str node: Name of the node to check.
         """
-        return self.graph.has_node(node)
+        return bool(self.graph.has_node(node))
 
     def is_directly_connected(self, node1: str, node2: str) -> bool:
         """Method to check if two nodes are connected in the graph.
@@ -126,4 +126,4 @@ class Graph:
         """
         if self.graph.number_of_nodes() == 0:
             return True
-        return nx.is_tree(self.graph)
+        return bool(nx.is_tree(self.graph))

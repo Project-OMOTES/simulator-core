@@ -37,7 +37,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
         """Constructor of the class, which sets all attributes."""
         self.networks = networks
 
-    def update_networks_factor(self):
+    def update_networks_factor(self) -> None:
         """Method to update the factor of the networks taken into account the changing COP."""
         for network in self.networks:
             current_network = network
@@ -180,4 +180,6 @@ class NetworkControllerNew(NetworkControllerAbstract):
 
     def _get_total_supply_priority(self, priority: int) -> float:
         """Method to get the total supply of the network based on priority."""
-        return sum([network.get_total_supply_priority(priority) for network in self.networks])
+        return float(
+            sum([network.get_total_supply_priority(priority) for network in self.networks])
+        )
