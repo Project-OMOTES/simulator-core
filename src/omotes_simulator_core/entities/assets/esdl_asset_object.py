@@ -25,6 +25,12 @@ from omotes_simulator_core.adapter.transforms.transform_utils import (
     PortType,
     sort_ports,
 )
+
+from omotes_simulator_core.adapter.transforms.transform_utils import (
+    Port,
+    PortType,
+    sort_ports,
+)
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
