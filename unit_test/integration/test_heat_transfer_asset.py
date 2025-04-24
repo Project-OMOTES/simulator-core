@@ -107,11 +107,12 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
 
         return idx_dict
     
-    def _compute_primary_massflow(self, c, m_dot_2, m_dot_3, u_2, u_3, u_0, u_1):
+    def _compute_primary_massinflow(self, coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out):
 
-        m_0 =  -c * (m_dot_2 * u_2 - m_dot_3 * u_3) / (u_0 - u_1)
-        
-        return m_0
+        #m_prim_in =  -coeff * (m_sec_in * u_sec_in - m_sec_out * u_sec_out) / (u_prim_in - u_prim_out)
+        m_prim_in = -coeff * (m_sec_in * u_sec_in + m_sec_out * u_sec_out) / (u_prim_in - u_prim_out)
+
+        return m_prim_in
 
     def test_heat_transfer_asset_primary_positive_secondary_positive_flow(self) -> None:
         """Primary (index=0) positive and secondary (index=2) positive flow state.
@@ -162,19 +163,20 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
         
-        c = self.heat_transfer_asset.heat_transfer_coefficient
-        m2 = -self.demand_asset.mass_flow_rate_set_point
-        u2 = fluid_props.get_ie(self.demand_asset.supply_temperature)
-        m3 = m2
-        u3 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
-        u0 = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u1 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
-        m0 = self._compute_primary_massflow(c, m2, m3, u2, u3, u0, u1)
+        coeff = self.heat_transfer_asset.heat_transfer_coefficient
+        m_sec_in = -self.demand_asset.mass_flow_rate_set_point
+        u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
+        m_sec_out = -m_sec_in
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
+        u_prim_out =  fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
 
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m0, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m2, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(303.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(313.15), 2)
+        m_prim_in = self._compute_primary_massinflow(coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out)
+
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m_sec_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], u_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], u_sec_in, 2)
 
     def test_heat_transfer_asset_primary_negative_secondary_positive_flow(self) -> None:
         """Primary (index=0) negative and secondary (index=2) positive flow state.
@@ -230,19 +232,21 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
 
-        c = self.heat_transfer_asset.heat_transfer_coefficient
-        m2 = self.demand_asset.mass_flow_rate_set_point
-        u2 = fluid_props.get_ie(self.demand_asset.supply_temperature)
-        m3 = m2
-        u3 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
-        u0 = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u1 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
-        m0 = self._compute_primary_massflow(c, m2, m3, u2, u3, u0, u1)
+        coeff = self.heat_transfer_asset.heat_transfer_coefficient
+        m_sec_in = -self.demand_asset.mass_flow_rate_set_point
+        u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
+        m_sec_out = -m_sec_in
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
+        u_prim_out =  fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
 
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], +77.59, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], -38.76, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(293.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(313.15), 2)
+        m_prim_in = self._compute_primary_massinflow(coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out)
+        m_prim_out = -m_prim_in
+
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m_prim_out, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m_sec_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], u_prim_out, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], u_sec_in, 2)
 
     def test_heat_transfer_asset_primary_positive_secondary_negative_flow(self) -> None:
         """Primary (index=0) positive and secondary (index=2) negative flow state.
@@ -294,22 +298,25 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.production_asset.supply_temperature = 30 + 273.15
         # Act
         self.solver.solve()
-        # This probably fails because the internal energy was computed using a way that is no longer used in the solver.
-        # TODO: add missing tests: zero flow for example or more.
-        c = self.heat_transfer_asset.heat_transfer_coefficient
-        m2 = -self.demand_asset.mass_flow_rate_set_point
-        u2 = fluid_props.get_ie(self.demand_asset.supply_temperature)
-        m3 = m2
-        u3 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
-        u0 = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u1 = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
         
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], -77.59, 2) # mass flow at connection point 0
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], +38.76, 2) # mass flow at connection point 2
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(303.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(343.15), 2)
+
+        coeff = self.heat_transfer_asset.heat_transfer_coefficient
+        m_sec_in = -self.demand_asset.mass_flow_rate_set_point
+        u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
+        m_sec_out = -m_sec_in
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
+        u_prim_out =  fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+
+        m_prim_in = self._compute_primary_massinflow(coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out)
+        m_prim_out = -m_prim_in
+
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m_sec_out, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], u_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], u_sec_out, 2)
 
     def test_heat_transfer_asset_positive_heat_transfer_coefficient(self) -> None:
         """Test a positive heat transfer coefficient.
@@ -360,10 +367,22 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.solver.solve()
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], -93.10, 2)
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], -38.76, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(303.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(313.15), 2)
+
+        coeff = self.heat_transfer_asset.heat_transfer_coefficient
+        m_sec_in = -self.demand_asset.mass_flow_rate_set_point
+        u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
+        m_sec_out = -m_sec_in
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
+        u_prim_out =  fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+
+        m_prim_in = self._compute_primary_massinflow(coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out)
+        m_prim_out = -m_prim_in
+
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m_sec_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], u_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], u_sec_in, 2)
 
     def test_heat_transfer_asset_heat_transfer_coefficient_of_one(self) -> None:
         """Test a heat transfer coefficient equal to one.
@@ -400,7 +419,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 70 + 273.15
+        self.heat_transfer_asset.supply_temperature_primary = 40 + 273.15
         self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0  # - 1.0 / 5.0
         # Set the temperature of the demand
@@ -409,16 +428,28 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.demand_asset.pre_scribe_mass_flow = True
         # Set the temperature of the production
         self.production_asset.pre_scribe_mass_flow = False
-        self.production_asset.supply_temperature = 40 + 273.15
+        self.production_asset.supply_temperature = 70 + 273.15
         # Act
         self.solver.solve()
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], -38.76, 2)
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], -38.76, 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(313.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(313.15), 2)
-        
+
+        coeff = self.heat_transfer_asset.heat_transfer_coefficient
+        m_sec_in = -self.demand_asset.mass_flow_rate_set_point
+        u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
+        m_sec_out = -m_sec_in
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
+        u_prim_out =  fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+
+        m_prim_in = self._compute_primary_massinflow(coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out)
+        m_prim_out = -m_prim_in
+
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], m_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], m_sec_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], u_prim_in, 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], u_sec_in, 2)
+
     def test_heat_transfer_asset_negative_heat_transfer_coefficient(self) -> None:
         """Test a negative heat transfer coefficient.
 
@@ -468,8 +499,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.solver.solve()
         # Assert
         matrix_idx = self._get_matrix_idx_mass_flow_ie()
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], -93.10, 2)
-        #self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], -38.76, 2)
+
         # u_0 < u_1 on the primary side
         self.assertTrue(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]] < self.heat_transfer_asset.prev_sol[5])
         # u_2 > u_3 on the secondary side
@@ -477,15 +507,16 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
             self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]] > self.heat_transfer_asset.prev_sol[11]
         )
         # verify temperature
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(293.15), 2)
-        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(343.15), 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(self.production_asset.supply_temperature), 2)
+        self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(self.demand_asset.supply_temperature), 2)
 
 if __name__=="__main__":
     heat_transfer_test = HeatTransferAssetIntegrationTest()
     heat_transfer_test.setUp()
     heat_transfer_test.test_heat_transfer_asset_primary_positive_secondary_positive_flow()
-    #heat_transfer_test.test_heat_transfer_asset_primary_negative_secondary_positive_flow()
-    #heat_transfer_test.test_heat_transfer_asset_primary_positive_secondary_negative_flow()
-    #heat_transfer_test.test_heat_transfer_asset_positive_heat_transfer_coefficient()
-    #heat_transfer_test.test_heat_transfer_asset_heat_transfer_coefficient_of_one()
-    #heat_transfer_test.test_heat_transfer_asset_negative_heat_transfer_coefficient()
+    heat_transfer_test.setUp()
+    heat_transfer_test.test_heat_transfer_asset_primary_negative_secondary_positive_flow()
+    heat_transfer_test.test_heat_transfer_asset_primary_positive_secondary_negative_flow()
+    heat_transfer_test.test_heat_transfer_asset_positive_heat_transfer_coefficient()
+    heat_transfer_test.test_heat_transfer_asset_heat_transfer_coefficient_of_one()
+    heat_transfer_test.test_heat_transfer_asset_negative_heat_transfer_coefficient()
