@@ -20,6 +20,8 @@ import logging
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
@@ -77,30 +79,32 @@ class NetworkControllerNew(NetworkControllerAbstract):
                 f"Total supply + storage is lower than total demand at time: {time}"
                 f"Consumers are capped to the available power."
             )
-            factor = total_demand / (total_supply + total_discharge_storage)
+            factor = (total_supply + total_discharge_storage) / total_demand
             producers = self._set_producers_to_max()
             producers.update(self._set_all_storages_discharge_to_max())
             producers.update(self._set_consumer_to_demand(time, factor=factor))
-            return producers
-        consumers = self._set_consumer_to_demand(time)
-        if total_supply >= total_demand:
-            # there is a surplus of supply we can charge the storage, storage becomes consumer.
-            surplus_supply = total_supply - total_demand
-            if surplus_supply <= total_charge_storage:
-                storages = self._set_storages_power(surplus_supply)
-                producers = self._set_producers_to_max()
-            else:
-                # need to cap the power of the source based on priority
-                storages = self._set_storages_power(total_charge_storage)
-                producers = self._set_producers_based_on_priority(total_demand)
         else:
-            # there is a deficit of supply we can discharge the storage, storage becomes
-            # producer.
-            deficit_supply = total_supply - total_demand
-            storages = self._set_storages_power(deficit_supply)
-            producers = self._set_producers_to_max()
-        producers.update(consumers)
-        producers.update(storages)
+            consumers = self._set_consumer_to_demand(time)
+            if total_supply >= total_demand:
+                # there is a surplus of supply we can charge the storage, storage becomes consumer.
+                surplus_supply = total_supply - total_demand
+                if surplus_supply <= total_charge_storage:
+                    storages = self._set_storages_charge_power(surplus_supply)
+                    producers = self._set_producers_to_max()
+                else:
+                    # need to cap the power of the source based on priority
+                    storages = self._set_storages_charge_power(total_charge_storage)
+                    producers = self._set_producers_based_on_priority(
+                        total_demand + total_charge_storage
+                    )
+            else:
+                # there is a deficit of supply we can discharge the storage, storage becomes
+                # producer.
+                deficit_supply = total_supply - total_demand
+                storages = self._set_storages_discharge_power(deficit_supply)
+                producers = self._set_producers_to_max()
+            producers.update(consumers)
+            producers.update(storages)
         # Getting the settings for the heat transfer assets
 
         heat_transfer = {}
@@ -156,8 +160,25 @@ class NetworkControllerNew(NetworkControllerAbstract):
             result.update(network.set_consumer_to_demand(time, factor=factor))
         return result
 
-    def _set_storages_power(self, power: float) -> dict:
-        return {}
+    def _set_storages_charge_power(self, power: float) -> dict:
+        results = {}
+        total_power = sum([network.get_total_charge_storage() for network in self.networks])
+        if total_power == 0:
+            return results
+        factor = power / total_power
+        for network in self.networks:
+            results.update(network.set_storage_charge_power(factor=factor))
+        return results
+
+    def _set_storages_discharge_power(self, power: float) -> dict:
+        results = {}
+        total_power = sum([network.get_total_discharge_storage() for network in self.networks])
+        if total_power == 0:
+            return results
+        factor = power / total_power
+        for network in self.networks:
+            results.update(network.set_storage_discharge_power(factor=factor))
+        return results
 
     def _set_producers_based_on_priority(self, required_supply: float) -> dict:
         """Method to set the producers based on the priority of the source."""
@@ -176,6 +197,17 @@ class NetworkControllerNew(NetworkControllerAbstract):
                 factor = 1 + required_supply / max_supply_priority
                 for network in self.networks:
                     producers.update(network.set_supply(factor=factor, priority=priority))
+        if len(producers) < sum([len(network.producers) for network in self.networks]):
+            # not al producers are set need to set the remaining to zero.
+            for network in self.networks:
+                for producer in network.producers:
+                    if producer.id not in producers:
+                        producers[producer.id] = {
+                            PROPERTY_HEAT_DEMAND: 0,
+                            PROPERTY_TEMPERATURE_RETURN: producer.temperature_return,
+                            PROPERTY_TEMPERATURE_SUPPLY: producer.temperature_supply,
+                            PROPERTY_SET_PRESSURE: False,
+                        }
         return producers
 
     def _get_total_supply_priority(self, priority: int) -> float:
