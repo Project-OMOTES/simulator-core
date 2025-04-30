@@ -161,7 +161,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
         return result
 
     def _set_storages_charge_power(self, power: float) -> dict:
-        results = {}
+        results: dict = {}
         total_power = sum([network.get_total_charge_storage() for network in self.networks])
         if total_power == 0:
             return results
@@ -171,7 +171,7 @@ class NetworkControllerNew(NetworkControllerAbstract):
         return results
 
     def _set_storages_discharge_power(self, power: float) -> dict:
-        results = {}
+        results: dict = {}
         total_power = sum([network.get_total_discharge_storage() for network in self.networks])
         if total_power == 0:
             return results

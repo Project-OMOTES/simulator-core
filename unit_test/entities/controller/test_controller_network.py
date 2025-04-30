@@ -227,19 +227,71 @@ class TestControllerNetwork(unittest.TestCase):
 
     def test_set_all_storages_discharge_to_max(self):
         # arrange
-
+        storage1 = Mock()
+        storage1.id = "storage1"
+        storage1.max_charge_power = 10
+        storage1.max_discharge_power = 20
+        storage1.temperature_supply = 50
+        storage1.temperature_return = 40
+        storage2 = Mock()
+        storage2.id = "storage2"
+        storage2.max_charge_power = 15
+        storage2.max_discharge_power = 25
+        storage2.temperature_supply = 50
+        storage2.temperature_return = 40
+        self.controller_network.storages = [storage1, storage2]
         # act
-
+        result = self.controller_network.set_all_storages_discharge_to_max()
         # assert
-        pass
+        self.assertEqual(
+            result,
+            {
+                storage1.id: {
+                    PROPERTY_HEAT_DEMAND: -20,
+                    PROPERTY_TEMPERATURE_RETURN: 40,
+                    PROPERTY_TEMPERATURE_SUPPLY: 50,
+                },
+                storage2.id: {
+                    PROPERTY_HEAT_DEMAND: -25,
+                    PROPERTY_TEMPERATURE_RETURN: 40,
+                    PROPERTY_TEMPERATURE_SUPPLY: 50,
+                },
+            },
+        )
 
     def test_set_all_storages_charge_to_max(self):
         # arrange
-
+        storage1 = Mock()
+        storage1.id = "storage1"
+        storage1.max_charge_power = 10
+        storage1.max_discharge_power = 20
+        storage1.temperature_supply = 50
+        storage1.temperature_return = 40
+        storage2 = Mock()
+        storage2.id = "storage2"
+        storage2.max_charge_power = 15
+        storage2.max_discharge_power = 25
+        storage2.temperature_supply = 50
+        storage2.temperature_return = 40
+        self.controller_network.storages = [storage1, storage2]
         # act
-
+        result = self.controller_network.set_all_storages_charge_to_max()
         # assert
-        pass
+        self.assertEqual(
+            result,
+            {
+                storage1.id: {
+                    PROPERTY_HEAT_DEMAND: 10,
+                    PROPERTY_TEMPERATURE_RETURN: 40,
+                    PROPERTY_TEMPERATURE_SUPPLY: 50,
+                },
+                storage2.id: {
+                    PROPERTY_HEAT_DEMAND: 15,
+                    PROPERTY_TEMPERATURE_RETURN: 40,
+                    PROPERTY_TEMPERATURE_SUPPLY: 50,
+                },
+            },
+        )
 
     def test_set_set_consumer_to_demand(self):
         # arrange
