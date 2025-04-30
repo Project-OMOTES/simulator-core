@@ -41,7 +41,7 @@ class ControllerNetwork:
         heat_transfer_assets_sec_in: list[ControllerHeatTransferAsset],
         consumers_in: list[ControllerConsumer],
         producers_in: list[ControllerProducer],
-        storage_in: list[ControllerStorage],
+        storages_in: list[ControllerStorage],
         factor: float = 1,
     ) -> None:
         """Constructor of the class, which sets all attributes."""
@@ -49,7 +49,7 @@ class ControllerNetwork:
         self.heat_transfer_assets_sec = heat_transfer_assets_sec_in
         self.consumers = consumers_in
         self.producers = producers_in
-        self.storages = storage_in
+        self.storages = storages_in
         self.factor = factor
         self.path: list[str] = []
 
