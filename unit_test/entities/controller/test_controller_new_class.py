@@ -19,6 +19,12 @@ from unittest.mock import Mock
 from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    ControllerHeatTransferAsset,
+)
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
 )
@@ -46,7 +52,6 @@ class ControllerTest(unittest.TestCase):
 
     def test_init(self):
         # arrange
-
         # act
 
         # assert
@@ -88,41 +93,194 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(self.network2.factor, 0.5)
         self.assertEqual(self.network3.factor, 0.16666666666666666)
 
-    def test_update_setpoints(self):
+    def setup_update_set_points(self):
+        producer1 = ControllerProducer(
+            name="producer1",
+            identifier="producer1",
+            temperature_supply=50,
+            temperature_return=40,
+            power=50,
+            marginal_costs=1,
+            priority=2,
+        )
+        producer2 = ControllerProducer(
+            name="producer2",
+            identifier="producer2",
+            temperature_supply=50,
+            temperature_return=40,
+            power=40,
+            marginal_costs=1,
+            priority=3,
+        )
+        consumer1 = Mock(spec=ControllerConsumer)
+        consumer1.id = "consumer1"
+        consumer1.get_heat_demand = Mock(return_value=10)
+        consumer1.temperature_supply = 50
+        consumer1.temperature_return = 40
+        consumer2 = Mock(spec=ControllerConsumer)
+        consumer2.id = "consumer2"
+        consumer2.get_heat_demand = Mock(return_value=20)
+        consumer2.temperature_supply = 50
+        consumer2.temperature_return = 40
+
+        self.storage1 = Mock(spec=ControllerStorage)
+        self.storage1.id = "storage1"
+        self.storage1.max_discharge_power = 10
+        self.storage1.max_charge_power = 20
+        self.storage1.temperature_supply = 50
+        self.storage1.temperature_return = 40
+
+        heatpump = ControllerHeatTransferAsset(name="heatpump1", identifier="heatpump1", factor=5.0)
+        heatpump2 = ControllerHeatTransferAsset(
+            name="heatpump2", identifier="heatpump2", factor=1.0
+        )
+
+        self.controller.networks[0] = ControllerNetwork(
+            heat_transfer_assets_prim_in=[heatpump],
+            heat_transfer_assets_sec_in=[],
+            consumers_in=[],
+            producers_in=[producer1],
+            storages_in=[],
+        )
+        self.controller.networks[0].path = ["0"]
+
+        self.controller.networks[1] = ControllerNetwork(
+            heat_transfer_assets_prim_in=[heatpump2],
+            heat_transfer_assets_sec_in=[heatpump],
+            consumers_in=[consumer1],
+            producers_in=[producer2],
+            storages_in=[],
+        )
+        self.controller.networks[1].path = ["1", "0"]
+
+        self.controller.networks[2] = ControllerNetwork(
+            heat_transfer_assets_prim_in=[],
+            heat_transfer_assets_sec_in=[heatpump2],
+            consumers_in=[consumer2],
+            producers_in=[],
+            storages_in=[],
+        )
+        self.controller.networks[2].path = ["2", "1", "0"]
+
+    def test_update_setpoints_one_source_off(self):
         # arrange
+        self.setup_update_set_points()
+        # act
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
+        # assert
+        self.assertEqual(result["producer1"][PROPERTY_HEAT_DEMAND], 6.0)
+        self.assertEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0)
+        self.assertEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump1"][PROPERTY_HEAT_DEMAND], 30.0)
+        self.assertEqual(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0)
+
+        # to test:
+        # enough supply one source off : done
+        # enough supply two sources on
+        # Enough supply storage is charged.
+        # not enough supply, storage needs to supply
+        # not enough supply including storage.
+
+    def test_update_setpoints_with_storage(self):
+        self.setup_update_set_points()
+        self.controller.networks[1].storages = [self.storage1]
 
         # act
-
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
         # assert
-        pass
+        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0, places=3)
+        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 50.0, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+
+    def test_update_setpoints_two_source(self):
+        self.setup_update_set_points()
+        self.controller.networks[0].producers[0].power = 10.0
+        self.controller.networks[0].heat_transfer_assets_prim[0].factor = 1
+        # act
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
+        # assert
+        self.assertEqual(result["producer1"][PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump1"][PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0)
+
+    def test_update_setpoints_storage_discharge(self):
+        # arrange
+        self.setup_update_set_points()
+        self.controller.networks[1].storages = [self.storage1]
+        self.controller.networks[0].heat_transfer_assets_prim[0].factor = 1
+        self.controller.networks[0].producers[0].power = 25.0
+        self.controller.networks[1].producers = []
+
+        # act
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
+        # assert
+        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], 25.0, places=3)
+        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 25.0, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -5.0, places=3)
+
+    def test_update_steppoints_cap_demand(self):
+        # arrange
+        self.setup_update_set_points()
+        self.controller.networks[1].storages = [self.storage1]
+        self.controller.networks[0].heat_transfer_assets_prim[0].factor = 1
+        self.controller.networks[0].producers[0].power = 10.0
+        self.controller.networks[1].producers[0].power = 10.0
+        self.controller.networks[1].consumers[0].get_heat_demand = Mock(return_value=20)
+        # act
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
+        # assert
+        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
 
     def test__set_producers_to_max(self):
         # arrange
-        self.controller.networks[0].set_supply_to_max = Mock(return_value={"test": 1})
-        self.controller.networks[1].set_supply_to_max = Mock(return_value={"test1": 2})
-        self.controller.networks[2].set_supply_to_max = Mock(return_value={"test2": 3})
+        self.controller.networks[0].set_supply_to_max = Mock(
+            return_value={"id1": {"prop1": 3, "prop2": 5}}
+        )
+        self.controller.networks[1].set_supply_to_max = Mock(
+            return_value={"id2": {"prop1": 10, "prop2": 75}}
+        )
+        self.controller.networks[2].set_supply_to_max = Mock(
+            return_value={"id3": {"prop1": 9, "prop2": 15}}
+        )
         # act
         result = self.controller._set_producers_to_max()
         # assert
         self.assertEqual(
             result,
             {
-                "test": 1,
-                "test1": 2,
-                "test2": 3,
+                "id1": {"prop1": 3, "prop2": 5},
+                "id2": {"prop1": 10, "prop2": 75},
+                "id3": {"prop1": 9, "prop2": 15},
             },
         )
 
     def test__set_all_storages_discharge_to_max(self):
         # arrange
         self.controller.networks[0].set_all_storages_discharge_to_max = Mock(
-            return_value={"test": 1}
+            return_value={"id1": {"prop1": 9, "prop2": 11}}
         )
         self.controller.networks[1].set_all_storages_discharge_to_max = Mock(
-            return_value={"test1": 2}
+            return_value={"id2": {"prop1": 33, "prop2": 810}}
         )
         self.controller.networks[2].set_all_storages_discharge_to_max = Mock(
-            return_value={"test2": 3}
+            return_value={"id3": {"prop1": 54, "prop2": 78}}
         )
         # act
         result = self.controller._set_all_storages_discharge_to_max()
@@ -130,43 +288,55 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(
             result,
             {
-                "test": 1,
-                "test1": 2,
-                "test2": 3,
+                "id1": {"prop1": 9, "prop2": 11},
+                "id2": {"prop1": 33, "prop2": 810},
+                "id3": {"prop1": 54, "prop2": 78},
             },
         )
 
     def test__set_all_storages_charge_to_max(self):
         # arrange
-        self.controller.networks[0].set_all_storages_charge_to_max = Mock(return_value={"test": 1})
-        self.controller.networks[1].set_all_storages_charge_to_max = Mock(return_value={"test1": 2})
-        self.controller.networks[2].set_all_storages_charge_to_max = Mock(return_value={"test2": 3})
+        self.controller.networks[0].set_all_storages_charge_to_max = Mock(
+            return_value={"id1": {"prop1": 54, "prop2": 423}}
+        )
+        self.controller.networks[1].set_all_storages_charge_to_max = Mock(
+            return_value={"id2": {"prop1": 76, "prop2": 1324}}
+        )
+        self.controller.networks[2].set_all_storages_charge_to_max = Mock(
+            return_value={"id3": {"prop1": 53, "prop2": 13}}
+        )
         # act
         result = self.controller._set_all_storages_charge_to_max()
         # assert
         self.assertEqual(
             result,
             {
-                "test": 1,
-                "test1": 2,
-                "test2": 3,
+                "id1": {"prop1": 54, "prop2": 423},
+                "id2": {"prop1": 76, "prop2": 1324},
+                "id3": {"prop1": 53, "prop2": 13},
             },
         )
 
     def test__set_consumer_to_demand(self):
         # arrange
-        self.controller.networks[0].set_consumer_to_demand = Mock(return_value={"test": 1})
-        self.controller.networks[1].set_consumer_to_demand = Mock(return_value={"test1": 2})
-        self.controller.networks[2].set_consumer_to_demand = Mock(return_value={"test2": 3})
+        self.controller.networks[0].set_consumer_to_demand = Mock(
+            return_value={"id1": {"prop1": 432, "prop2": 23}}
+        )
+        self.controller.networks[1].set_consumer_to_demand = Mock(
+            return_value={"id2": {"prop1": 543, "prop2": 654}}
+        )
+        self.controller.networks[2].set_consumer_to_demand = Mock(
+            return_value={"id3": {"prop1": 56, "prop2": 56}}
+        )
         # act
         result = self.controller._set_consumer_to_demand(time=datetime.datetime.now(), factor=1)
         # assert
         self.assertEqual(
             result,
             {
-                "test": 1,
-                "test1": 2,
-                "test2": 3,
+                "id1": {"prop1": 432, "prop2": 23},
+                "id2": {"prop1": 543, "prop2": 654},
+                "id3": {"prop1": 56, "prop2": 56},
             },
         )
 

@@ -119,6 +119,36 @@ class ControllerNetwork:
             }
         return producers
 
+    def set_storage_charge_power(self, factor: float = 1) -> dict:
+        """Method to set the producers to the max power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the producers.
+        """
+        strorage_settings = {}
+        for storage in self.storages:
+            strorage_settings[storage.id] = {
+                PROPERTY_HEAT_DEMAND: storage.max_charge_power * factor,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+                PROPERTY_SET_PRESSURE: False,
+            }
+        return strorage_settings
+
+    def set_storage_discharge_power(self, factor: float = 1) -> dict:
+        """Method to set the producers to the max power.
+
+        :return dict: Dict with key= asset-id and value=setpoints for the producers.
+        """
+        strorage_settings = {}
+        for storage in self.storages:
+            strorage_settings[storage.id] = {
+                PROPERTY_HEAT_DEMAND: storage.max_discharge_power * factor,
+                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
+                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+                PROPERTY_SET_PRESSURE: False,
+            }
+        return strorage_settings
+
     def set_all_storages_discharge_to_max(self) -> dict:
         """Method to set all the storages to the max discharge power.
 
