@@ -229,7 +229,7 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -5.0, places=3)
 
-    def test_update_steppoints_cap_demand(self):
+    def test_update_stetpoints_cap_demand(self):
         # arrange
         self.setup_update_set_points()
         self.controller.networks[1].storages = [self.storage1]
@@ -247,6 +247,23 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 10, places=3)
         self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 15, places=3)
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
+
+    def test_update_stetpoints_cap_storage(self):
+        # arrange
+        self.setup_update_set_points()
+        self.storage1.max_charge_power = 100.0
+        self.controller.networks[1].storages = [self.storage1]
+        self.controller.networks[0].heat_transfer_assets_prim[0].factor = 1
+        # act
+        result = self.controller.update_setpoints(time=datetime.datetime.now())
+        # assert
+        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], 50.0, places=3)
+        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 40.0, places=3)
+        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 50, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 60.0, places=3)
 
     def test__set_producers_to_max(self):
         # arrange
