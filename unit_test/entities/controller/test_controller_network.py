@@ -41,7 +41,7 @@ class TestControllerNetwork(unittest.TestCase):
             heat_transfer_assets_sec_in=self.heat_transfer_assets_sec,
             consumers_in=self.consumers,
             producers_in=self.producers,
-            storage_in=self.storages,
+            storages_in=self.storages,
             factor=self.factor,
         )
 
@@ -256,4 +256,3 @@ class TestControllerNetwork(unittest.TestCase):
 
         # assert
         pass
-

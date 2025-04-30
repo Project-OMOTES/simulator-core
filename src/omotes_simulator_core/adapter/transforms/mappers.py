@@ -301,7 +301,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     heat_transfer_assets_sec_in=[],
                     consumers_in=consumers,
                     producers_in=producers,
-                    storage_in=storages,
+                    storages_in=storages,
                 )
             ]
             return NetworkControllerNew(networks=networks)
@@ -354,7 +354,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     heat_transfer_assets_sec_in=network.heat_transfer_secondary,
                     consumers_in=network.consumer,
                     producers_in=network.producer,
-                    storage_in=network.storage,
+                    storages_in=network.storage,
                 )
             )
         # storing the path from network to the main network (number 0). We use a graph for this.
