@@ -260,6 +260,7 @@ class BaseAsset(BaseItem):
 
     def add_massflow_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a pressure to node equation for a connection point of the asset.
+
         :param connection_point: The index of the connection point to add the equation for.
         :type connection_point: int
         :return: An equation object representing the pressure to node equation.
