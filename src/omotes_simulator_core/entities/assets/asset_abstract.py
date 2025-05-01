@@ -139,3 +139,17 @@ class AssetAbstract(ABC):
             ]
             temp_data = concat([temp_data, temp_frame], axis=1)
         return temp_data
+    
+    def set_time_step(self, time_step: float) -> None:
+        """Placeholder to set the time step for the asset.
+ 
+        :param float time_step: The time step to set for the asset.
+        """
+        self.time_step = time_step
+ 
+    def is_converged(self) -> bool:
+        """Check if the asset has converged.
+ 
+        :return: True if the asset has converged, False otherwise
+        """
+        return True
