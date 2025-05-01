@@ -88,14 +88,16 @@ class ControllerStorage(AssetControllerAbstract):
                 self.start_index = index
                 if self.profile["values"][index] > self.effective_max_charge_power:
                     logging.warning(
-                        "Supply to storage %s is higher than maximum charge power of asset at time %s.",
+                        "Supply to storage %s is higher than maximum charge power of asset"
+                        + " at time %s.",
                         self.name,
                         time,
                     )
                     return self.effective_max_charge_power
                 elif self.profile["values"][index] < self.effective_max_discharge_power:
                     logging.warning(
-                        "Demand from storage %s is higher than maximum discharge power of asset at time %s.",
+                        "Demand from storage %s is higher than maximum discharge power of asset"
+                        + " at time %s.",
                         self.name,
                         time,
                     )
@@ -168,7 +170,8 @@ class ControllerStorage(AssetControllerAbstract):
     def set_state(self, state: dict[str, float]) -> None:
         """Set the state of the controller.
 
-        :param dict[str, float] state: State of the controller from the asset_abstract get_state method.
+        :param dict[str, float] state: State of the controller from the asset_abstract
+            get_state method.
         """
         # Check available state keys
         available_state_keys = {

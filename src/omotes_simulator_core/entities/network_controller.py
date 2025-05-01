@@ -69,7 +69,8 @@ class NetworkController(NetworkControllerAbstract):
         :param HeatNetwork network: Network to update.
         """
         for controller in [*self.storages, *self.consumers, *self.producers]:
-            # Update the state of the Controllers based on the network state from previous iteration.
+            # Update the state of the Controllers based on the network state from
+            # previous timestep/iteration.
             controller.set_state(network.get_asset_by_id(controller.id).get_state())
 
     def _set_priority_from_marginal_costs(self) -> None:
