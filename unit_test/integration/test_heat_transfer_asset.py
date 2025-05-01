@@ -549,8 +549,51 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         The primary side is defined as [0, 1] and the secondary side is defined as [2, 3].
         Primary (index=0) positive and secondary (index=2) positive flow state.
         """
-        # TODO: Write this test once the zero flow fix has been merged through the PR.
-        # This test can be done by copying one of the previous ones and setting either the
-        # primary or secondary side mass flow to zero. Then run the simulation and check
-        # that the results make sense (probably assert that all mass flows become zero).
-        pass
+        
+        # Arrange
+        # Connect assets
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=0,
+            asset2_id=self.production_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=1,
+            asset2_id=self.production_asset.name,
+            connection_point_2=0,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=2,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=1,
+        )
+        self.network.connect_assets(
+            asset1_id=self.heat_transfer_asset.name,
+            connection_point_1=3,
+            asset2_id=self.demand_asset.name,
+            connection_point_2=0,
+        )
+        # Create a Solver Object
+        self.solver = Solver(network=self.network)
+        # Set the temperatures and cop for HP
+        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
+        self.heat_transfer_asset.supply_temperature_secondary = 20 + 273.15
+        self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
+        # Set the temperature of the demand
+        self.demand_asset.supply_temperature = 20 + 273.15
+        self.demand_asset.mass_flow_rate_set_point = 0.0
+        self.demand_asset.pre_scribe_mass_flow = True
+        # Set the temperature of the production
+        self.production_asset.pre_scribe_mass_flow = True
+        self.production_asset.mass_flow_rate_set_point = 0.0
+        self.production_asset.supply_temperature = 20 + 273.15
+        # Act
+        self.solver.solve()
+
+if __name__ == "__main__":
+    test = HeatTransferAssetIntegrationTest()
+    test.setUp()
+    test.test_heat_transfer_asset_zero_flow()
