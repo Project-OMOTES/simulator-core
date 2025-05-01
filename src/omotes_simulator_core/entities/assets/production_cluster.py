@@ -98,7 +98,7 @@ class ProductionCluster(AssetAbstract):
         """
         # Set the temperature of the circulation pump mass flow
         self.temperature_out = temperature_out
-        self.solver_asset.out_temperature = self.temperature_out
+        self.solver_asset.supply_temperature = self.temperature_out
 
     def _set_in_temperature(self, temperature_in: float) -> None:
         """Set the inlet temperature of the asset.

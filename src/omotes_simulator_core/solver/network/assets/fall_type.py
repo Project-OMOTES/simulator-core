@@ -55,7 +55,7 @@ class FallType(BaseAsset):
         self,
         name: str,
         _id: str,
-        out_temperature: float = 293.15,
+        supply_temperature: float = 293.15,
         heat_flux: float = 0.0,
         loss_coefficient: float = 1.0,
     ):
@@ -66,8 +66,8 @@ class FallType(BaseAsset):
         ----------
         name : str The name of the asset.
         _id : str The unique identifier of the asset.
-        out_temperature : float, defaults to 293.15 [K]
-            The outlet temperature of the asset.
+        supply_temperature : float, defaults to 293.15 [K]
+            The supply temperature of the asset.
         heat_flux : float, defaults to 0.0 [W]
             The heat flux of the asset, which is the heat supplied to the asset. The heat flux
             is positive if heat is supplied to the asset and negative if heat is extracted from
@@ -80,7 +80,7 @@ class FallType(BaseAsset):
             _id=_id,
             number_of_unknowns=index_core_quantity.number_core_quantities * 2,
             number_connection_points=2,
-            out_temperature=out_temperature,
+            supply_temperature=supply_temperature,
         )
         self.heat_flux = heat_flux
         self.loss_coefficient = loss_coefficient

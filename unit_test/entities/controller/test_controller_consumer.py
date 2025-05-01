@@ -38,8 +38,8 @@ class ConsumerControllerTest(unittest.TestCase):
         self.consumer = ControllerConsumer(
             "consumer",
             "id",
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_in=DEFAULT_TEMPERATURE,
+            temperature_in=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_out=DEFAULT_TEMPERATURE,
             max_power=20000,
             profile=self.profile,
         )
@@ -51,9 +51,9 @@ class ConsumerControllerTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.consumer.name, "consumer")
         self.assertEqual(self.consumer.id, "id")
-        self.assertEqual(self.consumer.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.consumer.temperature_out, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.consumer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.consumer.temperature_in, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(self.consumer.start_index, 0)
         self.assertEqual(self.consumer.max_power, 20000)

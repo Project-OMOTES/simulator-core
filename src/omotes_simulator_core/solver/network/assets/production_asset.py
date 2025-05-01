@@ -59,7 +59,7 @@ class HeatBoundary(FallType):
         self,
         name: str,
         _id: str,
-        out_temperature: float = 293.15,
+        supply_temperature: float = 293.15,
         heat_flux: float = 0.0,
         loss_coefficient: float = 1.0,
         pre_scribe_mass_flow: bool = True,
@@ -87,7 +87,7 @@ class HeatBoundary(FallType):
         super().__init__(
             name=name,
             _id=_id,
-            out_temperature=out_temperature,
+            supply_temperature=supply_temperature,
             heat_flux=heat_flux,
             loss_coefficient=loss_coefficient,
         )

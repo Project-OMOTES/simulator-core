@@ -69,8 +69,8 @@ class UtilFunctionTest(unittest.TestCase):
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
         # Arrange
-        temperature_out = 373  # [K]
-        temperature_in = 353  # [K]
+        temperature_in = 373  # [K]
+        temperature_out = 353  # [K]
         mass_flow = 0.011956001912960305
 
         # Act

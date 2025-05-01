@@ -166,7 +166,7 @@ class HeatBoundaryTest(unittest.TestCase):
             ],
         )
         npt.assert_array_equal(equation_object.coefficients, [1.0])
-        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.out_temperature))
+        self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
 
     @patch.object(HeatBoundary, "get_prescribe_temp_equation")
     def test_call_thermal_equation_with_discharge(self, mock_temp_eq) -> None:

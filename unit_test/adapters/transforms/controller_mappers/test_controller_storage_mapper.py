@@ -47,7 +47,6 @@ class TestControllerStorageMapper(unittest.TestCase):
         controller_storage = self.mapper.to_entity(storage_assets[0])
 
         # Assert
-        # TODO: Why is the temperature_out and temperature_in switched?
         self.assertEqual(controller_storage.temperature_out, 353.15)
         self.assertEqual(controller_storage.temperature_in, 313.15)
         self.assertEqual(controller_storage.max_charge_power, 11.61e6)

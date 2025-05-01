@@ -102,7 +102,7 @@ class DemandCluster(AssetAbstract):
             self.temperature_out,
             self.temperature_in,
         )
-        self.solver_asset.out_temperature = self.temperature_out
+        self.solver_asset.supply_temperature = self.temperature_out
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
 
     def write_to_output(self) -> None:
