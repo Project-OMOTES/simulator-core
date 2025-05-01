@@ -510,17 +510,16 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]], fluid_props.get_ie(self.production_asset.supply_temperature), 2)
         self.assertAlmostEqual(self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]], fluid_props.get_ie(self.demand_asset.supply_temperature), 2)
 
-if __name__=="__main__":
-    heat_transfer_test = HeatTransferAssetIntegrationTest()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_primary_positive_secondary_positive_flow()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_primary_negative_secondary_positive_flow()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_primary_positive_secondary_negative_flow()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_positive_heat_transfer_coefficient()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_heat_transfer_coefficient_of_one()
-    heat_transfer_test.setUp()
-    heat_transfer_test.test_heat_transfer_asset_negative_heat_transfer_coefficient()
+    def test_heat_transfer_asset_zero_flow(self) -> None:
+        """Test zero flow across the heat transfer asset.
+
+        The primary side is defined as [0, 1] and the secondary side is defined as [2, 3].
+        Primary (index=0) positive and secondary (index=2) positive flow state.
+        """
+        # TODO: Write this test once the zero flow fix has been merged through the PR.
+        # This test can be done by copying one of the previous ones and setting either the 
+        # primary or secondary side mass flow to zero. Then run the simulation and check
+        # that the results make sense (probably assert that all mass flows become zero).
+        pass
+
+
