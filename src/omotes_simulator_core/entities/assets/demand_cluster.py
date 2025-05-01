@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """demandCluster class."""
+import logging
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
@@ -30,6 +32,8 @@ from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+
+logger = logging.getLogger(__name__)
 
 
 class DemandCluster(AssetAbstract):
@@ -53,6 +57,7 @@ class DemandCluster(AssetAbstract):
         self.mass_flowrate = 0.0
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
         self.output: list = []
+        self.first_time_step = True
 
     def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -71,14 +76,31 @@ class DemandCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if not necessary_setpoints.issubset(setpoints_set):
             # Print missing setpoints
+            logger.error(
+                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing.",
+                extra={"esdl_object_id": self.asset_id},
+            )
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
         self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
-        self.temperature_in_target = setpoints[PROPERTY_TEMPERATURE_IN]
+
         self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+
+        # First time step: use default setpoint temperature
+        # TODO replace this by adding intial temperature to the consumer
+        #  similar to the production_asset implementation.
+        if self.first_time_step:
+            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+            self.first_time_step = False
+        else:
+            # After the first time step: use solver temperature
+            self.temperature_in = self.solver_asset.get_temperature(0)
+
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_out, self.temperature_in_target
+            self.thermal_power_allocation,
+            self.temperature_out,
+            self.temperature_in,
         )
         self.solver_asset.out_temperature = self.temperature_out
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore
@@ -103,3 +125,12 @@ class DemandCluster(AssetAbstract):
         return (
             self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
         ) * self.solver_asset.get_mass_flow_rate(0)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged with accepted error of 0.1%.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        return abs(self.get_heat_supplied() - (-self.thermal_power_allocation)) < (
+            (-self.thermal_power_allocation) * 0.001
+        )
