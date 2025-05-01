@@ -26,3 +26,11 @@ class AssetControllerAbstract:
         """
         self.name = name
         self.id = identifier
+
+    def set_state(self, state: dict[str, float]) -> None:
+        """Placeholder to set the state of the controller.
+
+        :param dict[str, float] state: State of the controller from the asset_abstract
+            get_state method.
+        """
+        return None

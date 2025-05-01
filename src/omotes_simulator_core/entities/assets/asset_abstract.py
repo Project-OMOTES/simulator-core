@@ -19,16 +19,15 @@ from abc import ABC, abstractmethod
 
 from pandas import DataFrame, concat
 
-
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
-from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
     PROPERTY_TEMPERATURE,
     PROPERTY_VOLUMEFLOW,
 )
+from omotes_simulator_core.entities.assets.utils import sign_output
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class AssetAbstract(ABC):
@@ -84,6 +83,14 @@ class AssetAbstract(ABC):
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
+        """
+        return {}
+
+    def get_state(self) -> dict[str, float]:
+        """ "Placeholder to get the state attributes of an asset.
+
+        :return Dict: The state of the asset. The keys of the dictionary are the names of the
+            states and the values are the values.
         """
         return {}
 
