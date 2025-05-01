@@ -90,13 +90,9 @@ class EsdlAssetObject:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
             if isinstance(esdl_port, self.get_port_type(port_type)):
-                if port_type == "In" and temp_type == "Supply":
+                if temp_type == "Supply":
                     return float(esdl_port.carrier.supplyTemperature) + 273.15
-                if port_type == "In" and temp_type == "Return":
-                    return float(esdl_port.carrier.returnTemperature) + 273.15
-                if port_type == "Out" and temp_type == "Supply":
-                    return float(esdl_port.carrier.supplyTemperature) + 273.15
-                elif port_type == "Out" and temp_type == "Return":
+                elif temp_type == "Return":
                     return float(esdl_port.carrier.returnTemperature) + 273.15
         logger.error(
             f"No port found with type: {port_type} for asset: {self.esdl_asset.name}",
