@@ -135,7 +135,7 @@ class EsdlObjectTest(unittest.TestCase):
         """Test get_out_temperature method."""
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
-        out_temperature = asset.get_out_temperature("In")
+        out_temperature = asset.get_temperature("In", "Supply")
 
         # Assert
         self.assertEqual(out_temperature, 353.15)
@@ -146,7 +146,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        out_temperature = asset.get_out_temperature("Out")
+        out_temperature = asset.get_temperature("Out", "Supply")
 
         # Assert
         self.assertEqual(out_temperature, 353.15)
@@ -157,7 +157,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        in_temperature = asset.get_in_temperature("In")
+        in_temperature = asset.get_temperature("In", "Return")
 
         # Assert
         self.assertEqual(in_temperature, 313.15)
@@ -168,18 +168,18 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        in_temperature = asset.get_in_temperature("Out")
+        in_temperature = asset.get_temperature("Out", "Return")
 
         # Assert
         self.assertEqual(in_temperature, 313.15)
 
     def test_get_out_temperature_consumer(self):
-        """Test get_out_temperature method."""
+        """Test get_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        out_temperature = asset.get_in_temperature("Out")
+        out_temperature = asset.get_temperature("Out", "Return")
 
         # Assert
         self.assertEqual(out_temperature, 313.15)
@@ -190,7 +190,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        out_temperature = asset.get_out_temperature("In")
+        out_temperature = asset.get_temperature("In", "Supply")
 
         # Assert
         self.assertEqual(out_temperature, 353.15)
@@ -201,7 +201,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        out_temperature = asset.get_out_temperature("Out")
+        out_temperature = asset.get_temperature("Out", "Supply")
 
         # Assert
         self.assertEqual(out_temperature, 353.15)
@@ -212,7 +212,7 @@ class EsdlObjectTest(unittest.TestCase):
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        out_temperature = asset.get_in_temperature("In")
+        out_temperature = asset.get_temperature("In", "Return")
 
         # Assert
         self.assertEqual(out_temperature, 313.15)
