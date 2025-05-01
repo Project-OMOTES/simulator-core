@@ -19,9 +19,15 @@ import logging
 
 import pandas as pd
 
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_FILL_LEVEL,
+    PROPERTY_TIMESTEP,
+    PROPERTY_VOLUME,
+)
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +58,9 @@ class ControllerStorage(AssetControllerAbstract):
         self.profile: pd.DataFrame = profile
         self.start_index = 0
 
+        # Timestep of the simulation or asset.
+        self.timestep: float = 3600  # [s]
+
         # Theoretical maximum charge and discharge power of the storage.
         self.max_charge_power: float = max_charge_power
         self.max_discharge_power: float = max_discharge_power
@@ -79,14 +88,14 @@ class ControllerStorage(AssetControllerAbstract):
                 self.start_index = index
                 if self.profile["values"][index] > self.effective_max_charge_power:
                     logging.warning(
-                        "Storage of %s is higher than maximum charge power of asset at time %s.",
+                        "Supply to storage %s is higher than maximum charge power of asset at time %s.",
                         self.name,
                         time,
                     )
                     return self.effective_max_charge_power
                 elif self.profile["values"][index] < self.effective_max_discharge_power:
                     logging.warning(
-                        "Storage of %s is higher than maximum discharge power of asset at time %s.",
+                        "Demand from storage %s is higher than maximum discharge power of asset at time %s.",
                         self.name,
                         time,
                     )
@@ -99,7 +108,6 @@ class ControllerStorage(AssetControllerAbstract):
 
     def get_max_discharge_power(
         self,
-        timestep: float = 3600,
     ) -> float:
         """Determine the effective maximum discharge power of the asset.
 
@@ -114,8 +122,15 @@ class ControllerStorage(AssetControllerAbstract):
         # Calculate the effective maximum discharge power of the asset.
         available_volume = self.current_volume
         if available_volume > 0:
-            effective_max_discharge_power = min(
-                self.max_discharge_power, available_volume / timestep
+            effective_max_discharge_power = max(
+                self.max_discharge_power,
+                (
+                    -1
+                    * (available_volume / self.timestep)
+                    * fluid_props.get_density(self.temperature_supply)
+                    * fluid_props.get_heat_capacity(self.temperature_supply)
+                    * self.temperature_supply
+                ),
             )
         else:
             effective_max_discharge_power = 0.0
@@ -123,7 +138,6 @@ class ControllerStorage(AssetControllerAbstract):
 
     def get_max_charge_power(
         self,
-        timestep: float = 3600,
     ) -> float:
         """Determine the effective maximum charge power of the asset.
 
@@ -138,7 +152,39 @@ class ControllerStorage(AssetControllerAbstract):
         # Calculate the effective maximum charge power of the asset.
         available_volume = self.max_volume - self.current_volume
         if available_volume > 0:
-            effective_max_charge_power = min(self.max_charge_power, available_volume / timestep)
+            effective_max_charge_power = min(
+                self.max_charge_power,
+                (
+                    (available_volume / self.timestep)
+                    * fluid_props.get_density(self.temperature_supply)
+                    * fluid_props.get_heat_capacity(self.temperature_supply)
+                    * self.temperature_supply
+                ),
+            )
         else:
             effective_max_charge_power = 0.0
         return effective_max_charge_power
+
+    def set_state(self, state: dict[str, float]) -> None:
+        """Set the state of the controller.
+
+        :param dict[str, float] state: State of the controller from the asset_abstract get_state method.
+        """
+        # Check available state keys
+        available_state_keys = {
+            PROPERTY_FILL_LEVEL,
+            PROPERTY_VOLUME,
+            PROPERTY_TIMESTEP,
+        }
+
+        if available_state_keys.issubset(state.keys()):
+            self.fill_level = state[PROPERTY_FILL_LEVEL]
+            self.current_volume = state[PROPERTY_VOLUME]
+            self.timestep = state[PROPERTY_TIMESTEP]
+        else:
+            missing_keys = sorted(available_state_keys.difference(state.keys()))
+            raise ValueError(f"State keys {missing_keys} are missing.")
+
+        # Update the effective maximum charge and discharge power of the asset.
+        self.effective_max_charge_power = self.get_max_charge_power()
+        self.effective_max_discharge_power = self.get_max_discharge_power()

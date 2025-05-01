@@ -63,51 +63,14 @@ class NetworkController(NetworkControllerAbstract):
         self.storages = storages
         self._set_priority_from_marginal_costs()
 
-    def update_network_state(
-        self, network: HeatNetwork, time: datetime.datetime, timestep: float
-    ) -> None:
+    def update_network_state(self, network: HeatNetwork) -> None:
         """Method to update the network state.
 
         :param HeatNetwork network: Network to update.
-        :param datetime.datetime time: Time for which to update the network.
-        :param float timestep: Time step for which to update the network.
         """
-        # TODO check if we need to update the network state based on the timestep
-        # TODO check if we need to update the network state based on the network
-        # Update state of the storage controllers in the network.
-        self._update_storage_controller_state(network=network, timestep=timestep)
-
-    def _update_storage_controller_state(self, network: HeatNetwork, timestep: float) -> None:
-        """Get effective max charge and discharge power of the storage.
-
-        Full or empty storages may not be able to charge or discharge at their maximum power.
-        This method updates the effective max charge and discharge power of the storage based on the
-        previous timestep of the network.
-
-        :param HeatNetwork network: Network to update.
-        :param float timestep: Time step for which to update the network.
-        """
-        for storage in self.storages:
-            # Asset found boolean
-            asset_found = False
-            # Get network asset based on the id of the storage.
-            for py_asset in network.assets:
-                if py_asset.asset_id == storage.id:
-                    asset_found = True
-                    # Update the controller input based on the network asset.
-                    storage.fill_level = py_asset.fill_level  # type: ignore
-                    storage.current_volume = py_asset.current_volume  # type: ignore
-                    # Get the effective max charge and discharge power of the storage.
-                    storage.effective_max_charge_power = storage.get_max_charge_power(
-                        timestep=timestep
-                    )
-                    storage.effective_max_discharge_power = storage.get_max_discharge_power(
-                        timestep=timestep
-                    )
-                    break
-
-            if asset_found is False:
-                logger.warning(f"Asset {storage.id} not found in network.")
+        for controller in [*self.storages, *self.consumers, *self.producers]:
+            # Update the state of the Controllers based on the network state from previous iteration.
+            controller.set_state(network.get_asset_by_id(controller.id).get_state())
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.

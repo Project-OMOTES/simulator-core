@@ -66,6 +66,8 @@ class NetworkSimulation:
             time = (config.start + timedelta(seconds=time_step * config.timestep)).replace(
                 tzinfo=timezone.utc
             )
+            # Establish link between controller and network
+            self.controller.update_network_state(network=self.network)
 
             # Update the controller with the current time
             controller_input = self.controller.update_setpoints(time=time)
@@ -75,11 +77,6 @@ class NetworkSimulation:
 
             # Store the output of the network
             self.network.store_output()
-
-            # Establish link between controller and network
-            self.controller.update_network_state(
-                network=self.network, time=time, timestep=config.timestep
-            )
 
             # Progress callback
             if (time_step % progress_interval) == 0:

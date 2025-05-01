@@ -21,6 +21,9 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_FILL_LEVEL,
+    PROPERTY_TIMESTEP,
+    PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorage,
@@ -69,17 +72,43 @@ class StorageControllerTest(unittest.TestCase):
         self.assertEqual(self.storage.max_charge_power, 1000000)
         pd.testing.assert_frame_equal(self.storage.profile, self.profile)
 
-    def test_controller_storage_get_heat_power(self) -> None:
-        """Test to get the heat power of the storage."""
+    def test_controller_set_state(self):
+        """Test to set the state of the storage."""
         # Arrange
+        state = {
+            PROPERTY_FILL_LEVEL: 0.5,
+            PROPERTY_VOLUME: 0.5,
+            PROPERTY_TIMESTEP: 3600,
+        }
 
         # Act
-        heatpower1 = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
-        heatpower2 = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+        self.storage.set_state(state)
 
         # Assert
-        self.assertEqual(heatpower1, self.values[0])
-        self.assertEqual(heatpower2, self.values[1])
+        self.assertEqual(self.storage.fill_level, 0.5)
+        self.assertEqual(self.storage.current_volume, 0.5)
+        self.assertEqual(self.storage.timestep, 3600)
+        self.assertAlmostEqual(self.storage.effective_max_charge_power * 1e-3, 188.8, 1)
+        self.assertAlmostEqual(self.storage.effective_max_discharge_power * 1e-3, -188.8, 1)
+
+    def test_controller_state_error(self):
+        """Error in state variables supplied."""
+        # Arrange
+        state = {
+            PROPERTY_FILL_LEVEL: 0.5,
+            PROPERTY_VOLUME: 0.5,
+        }
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.storage.set_state(state)
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
+        self.assertEqual(
+            str(cm.exception),
+            f"State keys ['{PROPERTY_TIMESTEP}'] are missing.",
+        )
 
     def test_storage_set_to_max_charge_power(self):
         """Test to set the storage to the max charge power."""
@@ -107,3 +136,104 @@ class StorageControllerTest(unittest.TestCase):
         heatpower = self.storage.get_heat_power(datetime(2021, 3, 2, 0, 0))
         # Assert
         self.assertEqual(heatpower, 0)
+
+    def test_set_effective_max_charge_power(self):
+        """Test to set the effective max charge power."""
+        # Arrange
+        self.storage.effective_max_charge_power = 1.0
+        # Act
+        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
+        # Assert
+        self.assertEqual(heatpower, 1.0)
+
+    def test_controller_storage_get_heat_power(self) -> None:
+        """Test to get the heat power of the storage, not empty or completely full."""
+        # Arrange
+
+        # Act
+        heatpower1 = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
+        heatpower2 = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+
+        # Assert
+        self.assertEqual(heatpower1, self.values[0])
+        self.assertEqual(heatpower2, self.values[1])
+
+    def test_get_max_discharge_power_sufficient_capacity(self):
+        """Test to get the max discharge power with sufficient capacity.
+
+        The storage is not drained, so the max discharge power is not limited by the volume.
+        """
+        # Arrange
+        self.storage.max_discharge_power = -100.0e3  # 100 kW
+
+        # Act
+        max_discharge_power = self.storage.get_max_discharge_power()
+
+        # Assert
+        self.assertEqual(max_discharge_power, -100.0e3)
+
+    def test_get_max_discharge_power_insufficient_capacity(self):
+        """Test to get the max discharge power with insufficient capacity.
+
+        The storage is drained, so the max discharge power is limited by the volume.
+        """
+        # Arrange
+        self.storage.max_discharge_power = -200.0e3  # 200 kW
+
+        # Act
+        max_discharge_power = self.storage.get_max_discharge_power()
+
+        # Assert
+        self.assertAlmostEqual(max_discharge_power * 1e-3, -188.8, 1)
+
+    def test_get_max_charge_power_sufficient_capacity(self):
+        """Test to get the max charge power with sufficient capacity.
+
+        The storage is not full, so the max charge power is not limited by the volume.
+        """
+        # Arrange
+        self.storage.max_charge_power = 100.0e3  # 100 kW
+
+        # Act
+        max_charge_power = self.storage.get_max_charge_power()
+
+        # Assert
+        self.assertEqual(max_charge_power, 100.0e3)
+
+    def test_get_max_charge_power_insufficient_capacity(self):
+        """Test to get the max charge power with insufficient capacity.
+
+        The storage will be full, so the max charge power is limited by the volume.
+        """
+        # Arrange
+        self.storage.max_discharge_power = 200.0e3  # 200 kW
+
+        # Act
+        max_discharge_power = self.storage.get_max_charge_power()
+
+        # Assert
+        self.assertAlmostEqual(max_discharge_power * 1e-3, 188.8, 1)
+
+    def test_calculate_heatpower_full(self):
+        """Test to calculate the effective max charge power when storage is full."""
+        # Arrange
+        self.storage.current_volume = self.storage.max_volume
+        self.storage.effective_max_charge_power = self.storage.get_max_charge_power()
+
+        # Act
+        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
+
+        # Assert
+        self.assertEqual(heatpower, 0.0)
+
+    def test_calculate_heatpower_empty(self):
+        """Test to calculate the effective max discharge power when storage is empty."""
+        # Arrange
+        self.storage.current_volume = 0.0
+        self.storage.effective_max_discharge_power = self.storage.get_max_discharge_power()
+
+        # Act
+        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+
+        # Assert
+        self.assertEqual(heatpower, 0.0)

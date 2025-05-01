@@ -27,6 +27,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TIMESTEP,
     PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -171,6 +172,17 @@ class HeatBuffer(AssetAbstract):
         :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
          :return:
         """
+
+    def get_state(self) -> dict[str, float]:
+        """Get the state of the asset.
+
+        :return: The state of the asset.
+        """
+        return {
+            PROPERTY_FILL_LEVEL: self.fill_level,
+            PROPERTY_VOLUME: self.current_volume,
+            PROPERTY_TIMESTEP: self.time_step,
+        }
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.
