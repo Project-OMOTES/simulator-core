@@ -15,6 +15,7 @@
 
 """Test Junction entities."""
 import unittest
+from unittest.mock import patch
 from uuid import uuid4
 
 import numpy.testing as npt
@@ -126,6 +127,21 @@ class HeatBoundaryTest(unittest.TestCase):
         npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
         self.assertEqual(equation_object.rhs, 0.0)
 
+    @patch.object(HeatBoundary, "get_internal_energy_to_node_equation")
+    def test_call_thermal_equation_no_discharge(self, mock_energy_to_node_eq) -> None:
+        """Test the thermal equation for a connection point of the asset.
+
+        Check handling of zero mass flow rate (IE1 == IE2).
+        """
+        # Arrange
+        connection_point_id = 0
+
+        # Act
+        self.asset.get_thermal_equations(connection_point=connection_point_id)
+
+        # Assert
+        self.assertEqual(mock_energy_to_node_eq.call_count, 1)
+
     def test_thermal_equation_with_discharge(self) -> None:
         """Test the thermal equation for a connection point of the asset.
 
@@ -151,3 +167,22 @@ class HeatBoundaryTest(unittest.TestCase):
         )
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.out_temperature))
+
+    @patch.object(HeatBoundary, "get_prescribe_temp_equation")
+    def test_call_thermal_equation_with_discharge(self, mock_temp_eq) -> None:
+        """Test the thermal equation for a connection point of the asset.
+
+        Check handling of non-zero mass flow rate (IE1 != IE2).
+        """
+        # Arrange
+        connection_point_id = 1
+        self.asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + connection_point_id * index_core_quantity.number_core_quantities
+        ] = 1.0
+
+        # Act
+        self.asset.get_thermal_equations(connection_point=connection_point_id)
+
+        # Assert
+        self.assertEqual(mock_temp_eq.call_count, 1)
