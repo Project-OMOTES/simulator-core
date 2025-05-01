@@ -564,7 +564,6 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         The primary side is defined as [0, 1] and the secondary side is defined as [2, 3].
         Primary (index=0) positive and secondary (index=2) positive flow state.
         """
-
         # Arrange
         # Connect assets
         self.network.connect_assets(
@@ -612,9 +611,26 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.solver.solve()
 
         # Assert
-
-
-if __name__ == "__main__":
-    test = HeatTransferAssetIntegrationTest()
-    test.setUp()
-    test.test_heat_transfer_asset_zero_flow()
+        matrix_idx = self._get_matrix_idx_mass_flow_ie()
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], 0.0, 2
+        )
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], 0.0, 2
+        )
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_2"]], 0.0, 2
+        )
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["mass_flow_0"]], 0.0, 2
+        )
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_0"]],
+            self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_1"]],
+            2
+        )
+        self.assertAlmostEqual(
+            self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_2"]],
+            self.heat_transfer_asset.prev_sol[matrix_idx["internal_energy_3"]],
+            2
+        )
