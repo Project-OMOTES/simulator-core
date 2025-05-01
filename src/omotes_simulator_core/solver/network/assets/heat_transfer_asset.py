@@ -19,11 +19,11 @@ from typing import List, Optional
 
 import numpy as np
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class FlowDirection(Enum):
@@ -160,7 +160,7 @@ class HeatTransferAsset(BaseAsset):
 
         if discharge > MASSFLOW_ZERO_LIMIT:
             return FlowDirection.POSITIVE
-        elif discharge < MASSFLOW_ZERO_LIMIT:
+        elif discharge < -MASSFLOW_ZERO_LIMIT:
             return FlowDirection.NEGATIVE
         else:
             return FlowDirection.ZERO
