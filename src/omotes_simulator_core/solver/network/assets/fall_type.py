@@ -67,7 +67,7 @@ class FallType(BaseAsset):
         name : str The name of the asset.
         _id : str The unique identifier of the asset.
         out_temperature : float, defaults to 293.15 [K]
-            The supply temperature of the asset.
+            The outlet temperature of the asset.
         heat_flux : float, defaults to 0.0 [W]
             The heat flux of the asset, which is the heat supplied to the asset. The heat flux
             is positive if heat is supplied to the asset and negative if heat is extracted from

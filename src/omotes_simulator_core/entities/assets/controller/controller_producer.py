@@ -36,8 +36,8 @@ class ControllerProducer(AssetControllerAbstract):
 
         :param str name: Name of the source.
         :param str identifier: Unique identifier of the source.
-        :param float temperature_out: Supply temperature of the source.
-        :param float temperature_in: Return temperature of the source.
+        :param float temperature_out: Outlet temperature of the source.
+        :param float temperature_in: Inlet temperature of the source.
         :param float power: Power of the source.
         :param float marginal_costs: Marginal costs of the source.
         :param int priority: Priority of the source.

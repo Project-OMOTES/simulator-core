@@ -29,7 +29,7 @@ def heat_demand_and_temperature_to_mass_flow(
     :param float thermal_demand: The thermal demand of the asset. The thermal demand should be
         supplied in Watts.
     :param float temperature_out: The temperature that the asset delivers to the "to_junction".
-        The temperature should be supplied in Kelvin. The supply temperature is used to calculate
+        The temperature should be supplied in Kelvin. The temperature supplied is used to calculate
         the specific heat capacity of the fluid.
     :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
@@ -46,7 +46,7 @@ def mass_flow_and_temperature_to_heat_demand(
     """Calculate the thermal demand that is met by the mass flow rate.
 
     :param float temperature_out: The temperature that the asset delivers to the "to_junction".
-        The temperature should be supplied in Kelvin. The supply temperature is used to calculate
+        The temperature should be supplied in Kelvin. The temperature supplied is used to calculate
         the specific heat capacity of the fluid.
     :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.

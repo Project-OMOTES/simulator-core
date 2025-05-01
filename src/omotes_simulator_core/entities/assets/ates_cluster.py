@@ -39,10 +39,10 @@ class AtesCluster(AssetAbstract):
     """A AtesCluster represents an asset that consumes heat and produces heat."""
 
     temperature_out: float
-    """The supply temperature of the asset [K]."""
+    """The outlet temperature of the asset [K]."""
 
     temperature_in: float
-    """The return temperature of the asset [K]."""
+    """The inlet temperature of the asset [K]."""
 
     thermal_power_allocation: float
     """The thermal for injection (positive) or production (negative) by the asset [W]."""

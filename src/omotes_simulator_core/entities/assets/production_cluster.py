@@ -40,10 +40,10 @@ class ProductionCluster(AssetAbstract):
     """The thermal production required by the asset [W]."""
 
     temperature_out: float
-    """The supply temperature of the asset [K]."""
+    """The outlet temperature of the asset [K]."""
 
     temperature_in: float
-    """The return temperature of the asset [K]."""
+    """The inlet temperature of the asset [K]."""
 
     pressure_supply: float
     """The supply pressure of the asset [Pa]."""
@@ -87,9 +87,9 @@ class ProductionCluster(AssetAbstract):
         )
 
     def _set_out_temperature(self, temperature_out: float) -> None:
-        """Set the supply temperature of the asset.
+        """Set the outlet temperature of the asset.
 
-        :param float temperature_out: The supply temperature of the asset.
+        :param float temperature_out: The outlet temperature of the asset.
             The temperature should be supplied in Kelvin.
         """
         # Set the temperature of the circulation pump mass flow
@@ -97,12 +97,12 @@ class ProductionCluster(AssetAbstract):
         self.solver_asset.out_temperature = self.temperature_out
 
     def _set_in_temperature(self, temperature_in: float) -> None:
-        """Set the return temperature of the asset.
+        """Set the inlet temperature of the asset.
 
-        :param float temperature_in: The return temperature of the asset.
+        :param float temperature_in: The inlet temperature of the asset.
             The temperature should be supplied in Kelvin.
         """
-        # Set the return temperature of the asset
+        # Set the inlet temperature of the asset
         self.temperature_in = temperature_in
 
     def _set_heat_demand(self, heat_demand: float) -> None:
@@ -187,7 +187,7 @@ class ProductionCluster(AssetAbstract):
     def update(self) -> None:
         """Update the asset properties to the results from the previous (timestep) simulation.
 
-        Sets the values of the supply temperature, return temperature and heat demand
+        Sets the values of the outlet temperature, inlet temperature and heat demand
         to the values of the previous simulation. In addition, the mass flow rate is set
         to the value of the previous simulation.
         """

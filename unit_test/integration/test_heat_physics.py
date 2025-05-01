@@ -143,7 +143,7 @@ class HeatDemandTest(unittest.TestCase):
 
     def test_primary_in_temperature(self) -> None:
         """
-        This test checks wether the return temperatures are always lower than the primary ones.
+        This test checks wether the inlet temperatures are always lower than the primary ones.
 
         It does it by comparing the temperatures at the in and out ports.
         """
