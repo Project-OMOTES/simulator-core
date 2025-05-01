@@ -88,8 +88,8 @@ class StorageControllerTest(unittest.TestCase):
         self.assertEqual(self.storage.fill_level, 0.5)
         self.assertEqual(self.storage.current_volume, 0.5)
         self.assertEqual(self.storage.timestep, 3600)
-        self.assertAlmostEqual(self.storage.effective_max_charge_power * 1e-3, 188.8, 1)
-        self.assertAlmostEqual(self.storage.effective_max_discharge_power * 1e-3, -188.8, 1)
+        self.assertAlmostEqual(self.storage.effective_max_charge_power * 1e-3, 17.3, 1)
+        self.assertAlmostEqual(self.storage.effective_max_discharge_power * 1e-3, -17.3, 1)
 
     def test_controller_state_error(self):
         """Error in state variables supplied."""
@@ -164,13 +164,13 @@ class StorageControllerTest(unittest.TestCase):
         The storage is not drained, so the max discharge power is not limited by the volume.
         """
         # Arrange
-        self.storage.max_discharge_power = -100.0e3  # 100 kW
+        self.storage.max_discharge_power = -10.0e3  # 100 kW
 
         # Act
         max_discharge_power = self.storage.get_max_discharge_power()
 
         # Assert
-        self.assertEqual(max_discharge_power, -100.0e3)
+        self.assertEqual(max_discharge_power, -10.0e3)
 
     def test_get_max_discharge_power_insufficient_capacity(self):
         """Test to get the max discharge power with insufficient capacity.
@@ -184,7 +184,7 @@ class StorageControllerTest(unittest.TestCase):
         max_discharge_power = self.storage.get_max_discharge_power()
 
         # Assert
-        self.assertAlmostEqual(max_discharge_power * 1e-3, -188.8, 1)
+        self.assertAlmostEqual(max_discharge_power * 1e-3, -17.3, 1)
 
     def test_get_max_charge_power_sufficient_capacity(self):
         """Test to get the max charge power with sufficient capacity.
@@ -192,13 +192,13 @@ class StorageControllerTest(unittest.TestCase):
         The storage is not full, so the max charge power is not limited by the volume.
         """
         # Arrange
-        self.storage.max_charge_power = 100.0e3  # 100 kW
+        self.storage.max_charge_power = 10.0e3  # 100 kW
 
         # Act
         max_charge_power = self.storage.get_max_charge_power()
 
         # Assert
-        self.assertEqual(max_charge_power, 100.0e3)
+        self.assertEqual(max_charge_power, 10.0e3)
 
     def test_get_max_charge_power_insufficient_capacity(self):
         """Test to get the max charge power with insufficient capacity.
@@ -212,7 +212,7 @@ class StorageControllerTest(unittest.TestCase):
         max_discharge_power = self.storage.get_max_charge_power()
 
         # Assert
-        self.assertAlmostEqual(max_discharge_power * 1e-3, 188.8, 1)
+        self.assertAlmostEqual(max_discharge_power * 1e-3, 17.3, 1)
 
     def test_calculate_heatpower_full(self):
         """Test to calculate the effective max charge power when storage is full."""

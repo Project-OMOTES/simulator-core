@@ -58,6 +58,10 @@ class ControllerStorage(AssetControllerAbstract):
         self.profile: pd.DataFrame = profile
         self.start_index = 0
 
+        # The temperature difference between the supply and return temperature.
+        self._delta_temperature = temperature_supply - temperature_return
+        self._average_temperature = (temperature_supply + temperature_return) / 2.0
+
         # Timestep of the simulation or asset.
         self.timestep: float = 3600  # [s]
 
@@ -129,9 +133,9 @@ class ControllerStorage(AssetControllerAbstract):
                 (
                     -1
                     * (available_volume / self.timestep)
-                    * fluid_props.get_density(self.temperature_supply)
-                    * fluid_props.get_heat_capacity(self.temperature_supply)
-                    * self.temperature_supply
+                    * fluid_props.get_density(self._average_temperature)
+                    * fluid_props.get_heat_capacity(self._average_temperature)
+                    * self._delta_temperature
                 ),
             )
         else:
@@ -158,9 +162,9 @@ class ControllerStorage(AssetControllerAbstract):
                 self.max_charge_power,
                 (
                     (available_volume / self.timestep)
-                    * fluid_props.get_density(self.temperature_supply)
-                    * fluid_props.get_heat_capacity(self.temperature_supply)
-                    * self.temperature_supply
+                    * fluid_props.get_density(self._average_temperature)
+                    * fluid_props.get_heat_capacity(self._average_temperature)
+                    * self._delta_temperature
                 ),
             )
         else:
