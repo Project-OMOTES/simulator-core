@@ -49,7 +49,7 @@ jobs:
           ./ci/linux/lint.sh
 
   formatting:
-    name: Lint
+    name: Check on formatting
     runs-on: ubuntu-latest
     needs: [ setup ]
     strategy:
