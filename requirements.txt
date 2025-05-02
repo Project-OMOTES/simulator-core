@@ -4,9 +4,9 @@
 #
 #    pip-compile --output-file='..\..\requirements.txt' '..\..\pyproject.toml'
 #
-certifi==2024.8.30
+certifi==2025.4.26
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
 coolprop==6.6.0
     # via omotes-simulator-core (..\..\pyproject.toml)
@@ -18,7 +18,7 @@ idna==3.10
     # via requests
 influxdb==5.3.2
     # via omotes-simulator-core (..\..\pyproject.toml)
-lxml==5.3.0
+lxml==5.4.0
     # via pyecore
 msgpack==1.1.0
     # via influxdb
@@ -41,21 +41,21 @@ python-dateutil==2.9.0.post0
     # via
     #   influxdb
     #   pandas
-pytz==2024.2
+pytz==2025.2
     # via
     #   influxdb
     #   pandas
 requests==2.32.3
     # via influxdb
-restrictedpython==7.4
+restrictedpython==8.1a1.dev0
     # via pyecore
 scipy==1.14.1
     # via omotes-simulator-core (..\..\pyproject.toml)
-six==1.16.0
+six==1.17.0
     # via
     #   influxdb
     #   python-dateutil
-tzdata==2024.2
+tzdata==2025.2
     # via pandas
-urllib3==2.2.3
+urllib3==2.4.0
     # via requests
