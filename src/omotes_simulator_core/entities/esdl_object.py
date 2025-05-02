@@ -19,7 +19,9 @@ import logging
 
 from esdl.esdl_handler import EnergySystemHandler
 
-from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    StringEsdlAssetMapper,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 
 logger = logging.getLogger(__name__)

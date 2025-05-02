@@ -17,6 +17,7 @@
 from enum import IntEnum
 
 import numpy as np
+
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 

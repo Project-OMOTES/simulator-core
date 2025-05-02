@@ -21,10 +21,10 @@ from uuid import uuid4
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_ALPHA_VALUE,
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
-    PROPERTY_ALPHA_VALUE
 )
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node

@@ -19,10 +19,10 @@ from scipy.optimize import root
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_MISSING_VALUE,
+    PROPERTY_ALPHA_VALUE,
     PROPERTY_DIAMETER,
     PROPERTY_LENGTH,
     PROPERTY_ROUGHNESS,
-    PROPERTY_ALPHA_VALUE,
 )
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props

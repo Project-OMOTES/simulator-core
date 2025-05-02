@@ -16,8 +16,9 @@
 """Test utility functions."""
 import unittest
 from pathlib import Path
-import numpy as np
 from unittest.mock import Mock
+
+import numpy as np
 
 from omotes_simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,

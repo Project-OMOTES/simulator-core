@@ -16,6 +16,7 @@
 """Test Junction entities."""
 import unittest
 from uuid import uuid4
+
 import numpy.testing as npt
 
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
