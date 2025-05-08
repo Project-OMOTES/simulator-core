@@ -46,7 +46,7 @@ class Interpolation:
         For every data point the difference with the interpolated value is calculated.
         If this difference is more than 2% and value error is raised.
         """
-        error = [(y - self(x)) / y for x, y in zip(self.x, self.y)]
+        error = [(y - self(x)) / (1 if y == 0 else y) for x, y in zip(self.x, self.y)]
         if any(abs(e) > 0.02 and abs(e) != np.inf for e in error):
             raise ValueError("Interpolation error: error is more then 2%.")
 
@@ -130,7 +130,7 @@ class OmotesFluidProperties:
             self.visc.append(float(fluidprops.nu[0]))
             self.therm_cond.append(float(fluidprops.lambda_[0]))
 
-        self.IE = [0.0]
+        self.IE = [10000.0]
         for i in range(1, len(self.T)):
             self.IE.append(
                 self.IE[-1] + (self.cp[i - 1] + self.cp[i]) / 2 * (self.T[i] - self.T[i - 1])
