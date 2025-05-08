@@ -43,11 +43,11 @@ class ProductionCluster(AssetAbstract):
     thermal_production_required: float | None
     """The thermal production required by the asset [W]."""
 
-    temperature_out: float
-    """The outlet temperature of the asset [K]."""
-
     temperature_in: float
     """The inlet temperature of the asset [K]."""
+
+    temperature_out: float
+    """The outlet temperature of the asset [K]."""
 
     pressure_supply: float
     """The supply pressure of the asset [Pa]."""
@@ -119,8 +119,8 @@ class ProductionCluster(AssetAbstract):
         self.heat_demand_set_point = heat_demand
         self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand,
-            temperature_out=self.temperature_out,
             temperature_in=self.temperature_in,
+            temperature_out=self.temperature_out,
         )
 
         # Check if the mass flow rate is positive
@@ -177,8 +177,8 @@ class ProductionCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_TEMPERATURE_IN,
+            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
             PROPERTY_SET_PRESSURE,
         }

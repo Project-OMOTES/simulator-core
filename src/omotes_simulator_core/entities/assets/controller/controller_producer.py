@@ -26,8 +26,8 @@ class ControllerProducer(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_out: float,
         temperature_in: float,
+        temperature_out: float,
         power: float,
         marginal_costs: float,
         priority: int = 1,
@@ -36,8 +36,8 @@ class ControllerProducer(AssetControllerAbstract):
 
         :param str name: Name of the source.
         :param str identifier: Unique identifier of the source.
-        :param float temperature_out: Outlet temperature of the source.
         :param float temperature_in: Inlet temperature of the source.
+        :param float temperature_out: Outlet temperature of the source.
         :param float power: Power of the source.
         :param float marginal_costs: Marginal costs of the source.
         :param int priority: Priority of the source.

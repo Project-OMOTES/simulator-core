@@ -41,11 +41,11 @@ logger = logging.getLogger(__name__)
 class AtesCluster(AssetAbstract):
     """A AtesCluster represents an asset that consumes heat and produces heat."""
 
-    temperature_out: float
-    """The outlet temperature of the asset [K]."""
-
     temperature_in: float
     """The inlet temperature of the asset [K]."""
+
+    temperature_out: float
+    """The outlet temperature of the asset [K]."""
 
     thermal_power_allocation: float
     """The thermal for injection (positive) or production (negative) by the asset [W]."""
@@ -144,7 +144,7 @@ class AtesCluster(AssetAbstract):
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_out, self.temperature_in
+            self.thermal_power_allocation, self.temperature_in, self.temperature_out
         )
 
     def _set_solver_asset_setpoint(self) -> None:
@@ -163,8 +163,8 @@ class AtesCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_TEMPERATURE_IN,
+            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set

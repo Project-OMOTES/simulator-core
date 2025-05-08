@@ -48,14 +48,14 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         charge_power = esdl_asset.get_property(
             esdl_property_name="maxChargeRate", default_value=np.inf
         )
-        temperature_out = esdl_asset.get_temperature("In", "Supply")
-        temperature_in = esdl_asset.get_temperature("Out", "Return")
+        temperature_in = esdl_asset.get_temperature("In", "Return")
+        temperature_out = esdl_asset.get_temperature("Out", "Supply")
         profile = pd.DataFrame()  # esdl_asset.get_profile()
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_out=temperature_out,
             temperature_in=temperature_in,
+            temperature_out=temperature_out,
             max_charge_power=charge_power,
             max_discharge_power=discharge_power,
             profile=profile,

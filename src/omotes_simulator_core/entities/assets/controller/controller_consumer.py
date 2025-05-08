@@ -32,8 +32,8 @@ class ControllerConsumer(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_out: float,
         temperature_in: float,
+        temperature_out: float,
         max_power: float,
         profile: pd.DataFrame,
     ):

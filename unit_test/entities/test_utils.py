@@ -60,7 +60,7 @@ class UtilFunctionTest(unittest.TestCase):
 
         # act
         mass_flow_calculated = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand, temperature_out, temperature_in
+            thermal_demand, temperature_in, temperature_out
         )  # act
 
         # Assert

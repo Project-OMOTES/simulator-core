@@ -49,9 +49,9 @@ class DemandCluster(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         self._internal_diameter = DEFAULT_DIAMETER
-        self.temperature_out = DEFAULT_TEMPERATURE
-        self.temperature_in: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
-        self.temperature_in_target = self.temperature_in
+        self.temperature_in = DEFAULT_TEMPERATURE
+        self.temperature_out: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_out_target = self.temperature_out
         self.pressure_input = DEFAULT_PRESSURE
         self.thermal_power_allocation = DEFAULT_POWER
         self.mass_flowrate = 0.0
@@ -67,8 +67,8 @@ class DemandCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_TEMPERATURE_IN,
+            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -99,8 +99,8 @@ class DemandCluster(AssetAbstract):
 
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
             self.thermal_power_allocation,
-            self.temperature_out,
             self.temperature_in,
+            self.temperature_out,
         )
         self.solver_asset.supply_temperature = self.temperature_out
         self.solver_asset.mass_flow_rate_set_point = adjusted_mass_flowrate  # type: ignore

@@ -22,14 +22,14 @@ from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 def heat_demand_and_temperature_to_mass_flow(
-    thermal_demand: float, temperature_out: float, temperature_in: float
+    thermal_demand: float, temperature_in: float, temperature_out: float
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
     :param float thermal_demand: The thermal demand of the asset. The thermal demand should be
         supplied in Watts.
     :param float temperature_out: The temperature that the asset delivers to the "to_junction".
-        The temperature should be supplied in Kelvin. The temperature supplied is used to calculate
+        The temperature should be supplied in Kelvin. This temperature is used to calculate
         the specific heat capacity of the fluid.
     :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
