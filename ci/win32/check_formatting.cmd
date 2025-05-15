@@ -1,4 +1,4 @@
-rem Short script to run linting
+rem Short script to check formatting of the codebase. It doesn't modify any files.
 rem @echo off
 
 pushd .
