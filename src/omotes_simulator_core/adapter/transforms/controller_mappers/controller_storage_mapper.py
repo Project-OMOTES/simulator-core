@@ -17,6 +17,7 @@
 import numpy as np
 import pandas as pd
 
+from omotes_simulator_core.entities.assets.asset_defaults import HEAT_BUFFER_DEFAULTS
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -41,23 +42,24 @@ class ControllerStorageMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        discharge_power = esdl_asset.get_property(
-            esdl_property_name="maxDischargeRate", default_value=np.inf
-        )
-
-        charge_power = esdl_asset.get_property(
-            esdl_property_name="maxChargeRate", default_value=np.inf
-        )
-        temperature_supply = esdl_asset.get_supply_temperature("In")
-        temperature_return = esdl_asset.get_return_temperature("Out")
         profile = pd.DataFrame()  # esdl_asset.get_profile()
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_supply=temperature_supply,
-            temperature_return=temperature_return,
-            max_charge_power=charge_power,
-            max_discharge_power=discharge_power,
+            temperature_supply=esdl_asset.get_supply_temperature("In"),
+            temperature_return=esdl_asset.get_return_temperature("Out"),
+            max_charge_power=esdl_asset.get_property(
+                esdl_property_name="maxChargeRate", default_value=np.inf
+            ),
+            max_discharge_power=esdl_asset.get_property(
+                esdl_property_name="maxDischargeRate", default_value=np.inf
+            ),
+            fill_level=esdl_asset.get_property(
+                esdl_property_name="fillLevel", default_value=HEAT_BUFFER_DEFAULTS.fill_level
+            ),
+            max_volume=esdl_asset.get_property(
+                esdl_property_name="volume", default_value=HEAT_BUFFER_DEFAULTS.maximum_volume
+            ),
             profile=profile,
         )
         return contr_storage

@@ -17,16 +17,25 @@
 import datetime
 import logging
 
-from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
+    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_SUPPLY,
 )
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.heat_network import HeatNetwork
+from omotes_simulator_core.entities.network_controller_abstract import (
+    NetworkControllerAbstract,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +62,16 @@ class NetworkController(NetworkControllerAbstract):
         self.consumers = consumers
         self.storages = storages
         self._set_priority_from_marginal_costs()
+
+    def update_network_state(self, network: HeatNetwork) -> None:
+        """Method to update the network state.
+
+        :param HeatNetwork network: Network to update.
+        """
+        for controller in [*self.storages, *self.consumers, *self.producers]:
+            # Update the state of the Controllers based on the network state from
+            # previous timestep/iteration.
+            controller.set_state(network.get_asset_by_id(controller.id).get_state())
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
@@ -122,8 +141,7 @@ class NetworkController(NetworkControllerAbstract):
 
         :return float: Total heat discharge of all storages.
         """
-        # TODO add limit based on state of charge
-        return float(sum([storage.max_discharge_power for storage in self.storages]))
+        return float(sum([storage.effective_max_discharge_power for storage in self.storages]))
 
     def get_total_charge_storage(self) -> float:
         """Method to get the total storage charge power of the network.
@@ -131,7 +149,7 @@ class NetworkController(NetworkControllerAbstract):
         :return float: Total heat charge of all storages.
         """
         # TODO add limit based on state of charge
-        return float(sum([storage.max_charge_power for storage in self.storages]))
+        return float(sum([storage.effective_max_charge_power for storage in self.storages]))
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
@@ -189,8 +207,9 @@ class NetworkController(NetworkControllerAbstract):
         """
         storages = {}
         for storage in self.storages:
+            # Update the setpoints
             storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
+                PROPERTY_HEAT_DEMAND: -storage.effective_max_discharge_power,
                 PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
                 PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
             }
@@ -203,8 +222,9 @@ class NetworkController(NetworkControllerAbstract):
         """
         storages = {}
         for storage in self.storages:
+            # Update the setpoints
             storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power,
+                PROPERTY_HEAT_DEMAND: storage.effective_max_charge_power,
                 PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
                 PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
             }

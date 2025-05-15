@@ -14,19 +14,25 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller class."""
 import unittest
-from unittest.mock import Mock
 from datetime import datetime
+from unittest.mock import Mock
 
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_RETURN,
     PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_SET_PRESSURE,
 )
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.network_controller import NetworkController
 
 
 class ControllerTest(unittest.TestCase):
@@ -64,6 +70,12 @@ class ControllerTest(unittest.TestCase):
         self.storage1.max_discharge_power = -0.0
         self.storage1.temperature_return = 20.0
         self.storage1.temperature_supply = 40.0
+        self.storage1.fill_level = 0.5
+        self.storage1.max_volume = 1.0
+        self.storage1.effective_max_charge_power = self.storage1.max_charge_power
+        self.storage1.effective_max_discharge_power = self.storage1.max_discharge_power
+        self.storage1.get_max_discharge_power = Mock(return_value=self.storage1.max_discharge_power)
+        self.storage1.get_max_charge_power = Mock(return_value=self.storage1.max_charge_power)
         self.controller = NetworkController(
             producers=[self.producer1, self.producer2],
             consumers=[self.consumer1, self.consumer2],
@@ -97,6 +109,8 @@ class ControllerTest(unittest.TestCase):
             temperature_return=30.0,
             max_charge_power=0.0,
             max_discharge_power=0.0,
+            fill_level=0.5,
+            max_volume=1.0,
             profile=Mock(),
         )
 
@@ -110,7 +124,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(controller.producers, [producer])
         self.assertEqual(controller.storages, [storage])
 
-    def test__set_priority(self):
+    def test_set_priority(self):
         """Test to set the priority of the producers."""
         # Arrange
         self.producer1.marginal_costs = 0.5
@@ -123,7 +137,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(self.controller.producers[0].priority, 1)
         self.assertEqual(self.controller.producers[1].priority, 2)
 
-    def test__set_priority_equal_marg_costs(self):
+    def test_set_priority_equal_marg_costs(self):
         """Test to set the priority of the producers."""
         # Arrange
         self.producer1.marginal_costs = 0.5
@@ -134,7 +148,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(self.controller.producers[0].priority, 1)
         self.assertEqual(self.controller.producers[1].priority, 1)
 
-    def test__set_priority_reversed_order(self):
+    def test_set_priority_reversed_order(self):
         """Test to set the priority of the producers."""
         # Arrange
         self.producer1.marginal_costs = 0.8
@@ -171,23 +185,43 @@ class ControllerTest(unittest.TestCase):
         """Test to get the total charge storage of the network."""
         # Arrange
         self.storage1.max_charge_power = 1.0
-        self.storage1.max_discharge_power = -1.0
+        self.storage1.effective_max_charge_power = 1.0
         # Act
         total_charge = self.controller.get_total_charge_storage()
         # Assert
         self.assertEqual(total_charge, 1.0)
 
+    def test_get_total_effective_charge_storage(self):
+        """Test to get the total effective charge storage of the network."""
+        # Arrange
+        self.storage1.effective_max_charge_power = 0.5
+        self.storage1.max_charge_power = 1.0
+        # Act
+        total_charge = self.controller.get_total_charge_storage()
+        # Assert
+        self.assertEqual(total_charge, 0.5)
+
     def test_get_total_discharge_storage(self):
         """Test to get the total discharge storage of the network."""
         # Arrange
-        self.storage1.max_charge_power = 1.0
         self.storage1.max_discharge_power = -1.0
+        self.storage1.effective_max_discharge_power = -1.0
         # Act
         total_discharge = self.controller.get_total_discharge_storage()
         # Assert
         self.assertEqual(total_discharge, -1.0)
 
-    def test__set_producers_to_max(self):
+    def test_get_total_effective_discharge_storage(self):
+        """Test to get the total effective discharge storage of the network."""
+        # Arrange
+        self.storage1.effective_max_discharge_power = -0.5
+        self.storage1.max_discharge_power = -1.0
+        # Act
+        total_discharge = self.controller.get_total_discharge_storage()
+        # Assert
+        self.assertEqual(total_discharge, -0.5)
+
+    def test_set_producers_to_max(self):
         """Test to set the producers to the max power."""
         # Act
         producers = self.controller._set_producers_to_max()
@@ -214,7 +248,7 @@ class ControllerTest(unittest.TestCase):
         )
         self.assertFalse(producers[self.producer2.id][PROPERTY_SET_PRESSURE])
 
-    def test__set_consumer_capped(self):
+    def test_set_consumer_capped(self):
         """Test to set the consumer to the capped power."""
         # Arrange
         self.controller.producers[1].power = 0.5
@@ -224,7 +258,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(consumers[self.consumer1.id][PROPERTY_HEAT_DEMAND], 1.0 * 1.5 / 3.0)
         self.assertEqual(consumers[self.consumer2.id][PROPERTY_HEAT_DEMAND], 2.0 * 1.5 / 3.0)
 
-    def test__set_consumer_to_demand(self):
+    def test_set_consumer_to_demand(self):
         """Test to set the consumer to the demand."""
         # Act
         consumers = self.controller._set_consumer_to_demand(datetime.now())
@@ -253,7 +287,7 @@ class ControllerTest(unittest.TestCase):
             self.consumer2.temperature_supply,
         )
 
-    def test__set_producers_based_on_priority(self):
+    def test_set_producers_based_on_priority(self):
         """Test to set the producers based on priority."""
         # Arrange
         self.controller.consumers[0].get_heat_demand.return_value = 0.5
@@ -293,6 +327,7 @@ class ControllerTest(unittest.TestCase):
         # Arrange
         self.storage1.max_charge_power = 1.0
         self.storage1.max_discharge_power = -1.0
+        self.storage1.effective_max_charge_power = 1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
@@ -306,6 +341,7 @@ class ControllerTest(unittest.TestCase):
         self.controller.producers[1].power = 2.7
         self.storage1.max_charge_power = 1.0
         self.storage1.max_discharge_power = 1.0
+        self.storage1.effective_max_charge_power = 1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
@@ -319,6 +355,8 @@ class ControllerTest(unittest.TestCase):
         self.controller.producers[1].power = 1.7
         self.storage1.max_charge_power = 1.0
         self.storage1.max_discharge_power = 1.0
+        self.storage1.effective_max_discharge_power = 1.0
+        self.storage1.effective_max_charge_power = 1.0
 
         # Act
         result = self.controller.update_setpoints(datetime.now())
