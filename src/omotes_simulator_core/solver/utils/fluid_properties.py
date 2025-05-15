@@ -46,8 +46,9 @@ class Interpolation:
         For every data point the difference with the interpolated value is calculated.
         If this difference is more than 2% and value error is raised.
         """
-        error = [(y - self(x)) / (max(self.y) if y == 0 else y) for x, y in zip(self.x, self.y)]
-        if any(abs(e) > 0.02 and abs(e) != np.inf for e in error):
+        series_range = max(self.y) - min(self.y)
+        error = [abs(y - self(x)) / series_range for x, y in zip(self.x, self.y)]
+        if any(e > 0.02 and e != np.inf for e in error):
             raise ValueError("Interpolation error: error is more then 2%.")
 
     def __call__(self, value: float) -> float:
