@@ -6,7 +6,7 @@
 #
 certifi==2025.4.26
     # via requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 coolprop==6.6.0
     # via omotes-simulator-core (..\..\pyproject.toml)
@@ -31,9 +31,9 @@ ordered-set==4.1.0
     # via pyecore
 pandas==2.2.3
     # via omotes-simulator-core (..\..\pyproject.toml)
-pyecore==0.12.1
+pyecore==0.13.2
     # via pyesdl
-pyesdl==24.2
+pyesdl==25.5.1
     # via omotes-simulator-core (..\..\pyproject.toml)
 pyjnius==1.6.1
     # via omotes-simulator-core (..\..\pyproject.toml)
@@ -47,7 +47,7 @@ pytz==2025.2
     #   pandas
 requests==2.32.3
     # via influxdb
-restrictedpython==8.1a1.dev0
+restrictedpython==8.0
     # via pyecore
 scipy==1.14.1
     # via omotes-simulator-core (..\..\pyproject.toml)

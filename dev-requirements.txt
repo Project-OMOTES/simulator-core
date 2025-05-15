@@ -22,11 +22,11 @@ certifi==2025.4.26
     #   pyogrio
     #   pyproj
     #   requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via
     #   -c ..\..\requirements.txt
     #   requests
-click==8.1.8
+click==8.2.0
     # via black
 colorama==0.4.6
     # via
@@ -138,21 +138,21 @@ pandas==2.2.3
     #   omotes-simulator-core (..\..\pyproject.toml)
 pathspec==0.12.1
     # via black
-platformdirs==4.3.7
+platformdirs==4.3.8
     # via black
 plotly==5.24.1
     # via omotes-simulator-core (..\..\pyproject.toml)
-pluggy==1.5.0
+pluggy==1.6.0
     # via pytest
 pycodestyle==2.12.1
     # via flake8
 pydocstyle==6.3.0
     # via flake8-docstrings
-pyecore==0.12.1
+pyecore==0.13.2
     # via
     #   -c ..\..\requirements.txt
     #   pyesdl
-pyesdl==24.2
+pyesdl==25.5.1
     # via
     #   -c ..\..\requirements.txt
     #   omotes-simulator-core (..\..\pyproject.toml)
@@ -166,7 +166,7 @@ pyjnius==1.6.1
     # via
     #   -c ..\..\requirements.txt
     #   omotes-simulator-core (..\..\pyproject.toml)
-pyogrio==0.10.0
+pyogrio==0.11.0
     # via geopandas
 pyproj==3.7.1
     # via geopandas
@@ -193,7 +193,7 @@ requests==2.32.3
     #   -c ..\..\requirements.txt
     #   influxdb
     #   sphinx
-restrictedpython==8.1a1.dev0
+restrictedpython==8.0
     # via
     #   -c ..\..\requirements.txt
     #   pyecore
@@ -215,7 +215,7 @@ six==1.17.0
     #   python-dateutil
 snakeviz==2.2.0
     # via omotes-simulator-core (..\..\pyproject.toml)
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
     # via
     #   pydocstyle
     #   sphinx
