@@ -24,8 +24,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE,
     PROPERTY_VOLUMEFLOW,
     PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -62,22 +62,22 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
+            PROPERTY_TEMPERATURE_OUT: 353.15,
+            PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Act
         mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
-            temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
+            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
+            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
         # Assert
-        self.assertEqual(self.production_cluster.temperature_supply, 353.15)
-        self.assertEqual(self.production_cluster.temperature_return, 333.15)
+        self.assertEqual(self.production_cluster.temperature_out, 353.15)
+        self.assertEqual(self.production_cluster.temperature_in, 333.15)
         self.assertEqual(self.production_cluster.controlled_mass_flow, mass_flow)
         self.assertEqual(
             self.production_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
@@ -92,11 +92,11 @@ class ProductionClusterTest(unittest.TestCase):
         """Test raise ValueError with missing setpoint."""
         # Arrange
         necessary_setpoints = set(
-            [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_SUPPLY, PROPERTY_TEMPERATURE_RETURN]
+            [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_OUT, PROPERTY_TEMPERATURE_IN]
         )
         setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
+            PROPERTY_TEMPERATURE_OUT: 353.15,
+            PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
@@ -116,15 +116,15 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
+            PROPERTY_TEMPERATURE_OUT: 353.15,
+            PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
         mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_supply=setpoints[PROPERTY_TEMPERATURE_SUPPLY],
-            temperature_return=setpoints[PROPERTY_TEMPERATURE_RETURN],
+            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
+            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
@@ -144,8 +144,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_SUPPLY: 353.15,
-            PROPERTY_TEMPERATURE_RETURN: 333.15,
+            PROPERTY_TEMPERATURE_OUT: 353.15,
+            PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: True,
         }
 

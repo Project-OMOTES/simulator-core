@@ -141,9 +141,9 @@ class HeatDemandTest(unittest.TestCase):
             q_dot_computed = q_dot_demand_computed[demand_id]
             np.testing.assert_allclose(q_dot_esdl, q_dot_computed, rtol=0.001)
 
-    def test_primary_return_temperature(self) -> None:
+    def test_primary_in_temperature(self) -> None:
         """
-        This test checks wether the return temperatures are always lower than the primary ones.
+        This test checks wether the inlet temperatures are always lower than the primary ones.
 
         It does it by comparing the temperatures at the in and out ports.
         """

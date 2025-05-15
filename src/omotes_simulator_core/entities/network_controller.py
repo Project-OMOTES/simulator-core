@@ -19,8 +19,8 @@ import logging
 
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_TEMPERATURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
 )
@@ -159,8 +159,8 @@ class NetworkController(NetworkControllerAbstract):
         for source in self.producers:
             producers[source.id] = {
                 PROPERTY_HEAT_DEMAND: source.power,
-                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: source.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_SET_PRESSURE: False,
             }
         # setting the first producer to set the pressure.
@@ -176,8 +176,8 @@ class NetworkController(NetworkControllerAbstract):
         for source in self.producers:
             producers[source.id] = {
                 PROPERTY_HEAT_DEMAND: 0.0,
-                PROPERTY_TEMPERATURE_RETURN: source.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: source.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: source.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_SET_PRESSURE: False,
             }
         return producers
@@ -191,8 +191,8 @@ class NetworkController(NetworkControllerAbstract):
         for storage in self.storages:
             storages[storage.id] = {
                 PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
-                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
             }
         return storages
 
@@ -205,8 +205,8 @@ class NetworkController(NetworkControllerAbstract):
         for storage in self.storages:
             storages[storage.id] = {
                 PROPERTY_HEAT_DEMAND: storage.max_charge_power,
-                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
             }
         return storages
 
@@ -219,8 +219,8 @@ class NetworkController(NetworkControllerAbstract):
         for storage in self.storages:
             storages[storage.id] = {
                 PROPERTY_HEAT_DEMAND: power / len(self.storages),
-                PROPERTY_TEMPERATURE_RETURN: storage.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: storage.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
             }
         return storages
 
@@ -251,8 +251,8 @@ class NetworkController(NetworkControllerAbstract):
         for consumer in self.consumers:
             consumers[consumer.id] = {
                 PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
-                PROPERTY_TEMPERATURE_RETURN: consumer.temperature_return,
-                PROPERTY_TEMPERATURE_SUPPLY: consumer.temperature_supply,
+                PROPERTY_TEMPERATURE_IN: consumer.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: consumer.temperature_out,
             }
         return consumers
 

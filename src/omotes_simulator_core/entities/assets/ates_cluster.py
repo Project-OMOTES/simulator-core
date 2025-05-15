@@ -26,8 +26,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
@@ -41,11 +41,11 @@ logger = logging.getLogger(__name__)
 class AtesCluster(AssetAbstract):
     """An AtesCluster contains Ates assets that consumes heat and produces heat."""
 
-    temperature_supply: float
-    """The supply temperature of the asset [K]."""
+    temperature_in: float
+    """The inlet temperature of the asset [K]."""
 
-    temperature_return: float
-    """The return temperature of the asset [K]."""
+    temperature_out: float
+    """The outlet temperature of the asset [K]."""
 
     thermal_power_allocation: float
     """The thermal for injection (positive) or production (negative) by the asset [W]."""
@@ -117,8 +117,8 @@ class AtesCluster(AssetAbstract):
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
-        self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_out = DEFAULT_TEMPERATURE
+        self.temperature_in = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -144,15 +144,15 @@ class AtesCluster(AssetAbstract):
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_supply, self.temperature_return
+            self.thermal_power_allocation, self.temperature_in, self.temperature_out
         )
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
         if self.mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_return
+            self.solver_asset.supply_temperature = self.temperature_in
         else:
-            self.solver_asset.supply_temperature = self.temperature_supply
+            self.solver_asset.supply_temperature = self.temperature_out
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -163,8 +163,8 @@ class AtesCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_SUPPLY,
-            PROPERTY_TEMPERATURE_RETURN,
+            PROPERTY_TEMPERATURE_IN,
+            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -172,8 +172,8 @@ class AtesCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-            self.temperature_return = setpoints[PROPERTY_TEMPERATURE_RETURN]
-            self.temperature_supply = setpoints[PROPERTY_TEMPERATURE_SUPPLY]
+            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
 
             self._calculate_massflowrate()
             self._run_rosim()
@@ -198,8 +198,8 @@ class AtesCluster(AssetAbstract):
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
             PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
+            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(0),
+            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(1),
         }
         self.output.append(output_dict)
 
@@ -265,10 +265,10 @@ class AtesCluster(AssetAbstract):
         # is downward
 
         if volume_flow > 0:
-            rosim_input_temperature = [self.temperature_supply - 273.15, -1]  # Celcius, -1 in
+            rosim_input_temperature = [self.temperature_out - 273.15, -1]  # Celcius, -1 in
             # injection well to make sure it is not used
         elif volume_flow < 0:
-            rosim_input_temperature = [-1, self.temperature_return - 273.15]  # Celcius, -1 in
+            rosim_input_temperature = [-1, self.temperature_in - 273.15]  # Celcius, -1 in
             # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
@@ -282,5 +282,5 @@ class AtesCluster(AssetAbstract):
         cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
 
         # update supply return temperature from ATES
-        self.temperature_supply = hot_well_temperature
-        self.temperature_return = cold_well_temperature
+        self.temperature_out = hot_well_temperature
+        self.temperature_in = cold_well_temperature

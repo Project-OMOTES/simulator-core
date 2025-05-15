@@ -55,12 +55,12 @@ class TestDemandCluster(unittest.TestCase):
         self.assertEqual(demand_cluster.asset_id, "demand_cluster_id")
         self.assertEqual(demand_cluster.connected_ports, ["test1", "test2"])
         self.assertEqual(demand_cluster._internal_diameter, DEFAULT_DIAMETER)
-        self.assertEqual(demand_cluster.temperature_supply, DEFAULT_TEMPERATURE)
+        self.assertEqual(demand_cluster.temperature_in, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            demand_cluster.temperature_return, DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+            demand_cluster.temperature_out, DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(
-            demand_cluster.temperature_return_target,
+            demand_cluster.temperature_out_target,
             DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
         )
         self.assertEqual(demand_cluster.pressure_input, DEFAULT_PRESSURE)

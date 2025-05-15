@@ -43,14 +43,14 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
-        temperature_supply = esdl_asset.get_return_temperature("Out")
-        temperature_return = esdl_asset.get_supply_temperature("In")
+        temperature_in = esdl_asset.get_temperature("In", "Supply")
+        temperature_out = esdl_asset.get_temperature("Out", "Return")
         profile = esdl_asset.get_profile()
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_supply=temperature_supply,
-            temperature_return=temperature_return,
+            temperature_in=temperature_in,
+            temperature_out=temperature_out,
             max_power=power,
             profile=profile,
         )

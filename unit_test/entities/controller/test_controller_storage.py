@@ -38,8 +38,8 @@ class StorageControllerTest(unittest.TestCase):
         self.storage = ControllerStorage(
             "storage",
             "id",
-            temperature_supply=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_return=DEFAULT_TEMPERATURE,
+            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_in=DEFAULT_TEMPERATURE,
             max_charge_power=1000000,
             max_discharge_power=-1000000,
             profile=self.profile,
@@ -52,9 +52,9 @@ class StorageControllerTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.storage.name, "storage")
         self.assertEqual(self.storage.id, "id")
-        self.assertEqual(self.storage.temperature_return, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.storage.temperature_in, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.storage.temperature_supply, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.storage.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
