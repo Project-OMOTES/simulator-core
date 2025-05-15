@@ -56,7 +56,9 @@ class Interpolation:
 
         The calculate the value at the given point, the coefficients of the polynomial are used.
         A backwards loop is used, since the first value in the list is the one which is multiplied
-        with the highest order. In this way we can step by step multiply the temp value with the
+        with the highest order. In this way we can first use 1, then multiply it with the value to
+         get first order, then again multiply it with the value to get second order and so on.
+         In this way we can step by step multiply the temp value with the
         value at the given point.
 
         :param value: The value to interpolate.
