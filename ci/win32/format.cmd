@@ -1,4 +1,4 @@
-rem Short script to run linting
+rem Short script to run formatting
 rem @echo off
 
 pushd .
