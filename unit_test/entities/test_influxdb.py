@@ -15,11 +15,16 @@
 
 """Test influxdb reader."""
 import unittest
-from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile, get_unit
 from pathlib import Path
+from unittest.mock import Mock
+
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
-from unittest.mock import Mock
+
+from omotes_simulator_core.entities.utility.influxdb_reader import (
+    get_data_from_profile,
+    get_unit,
+)
 
 
 class InfluxdbTest(unittest.TestCase):

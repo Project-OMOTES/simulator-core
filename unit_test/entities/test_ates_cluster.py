@@ -15,13 +15,14 @@
 
 """Test Ates Cluster entities."""
 import unittest
-from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
-from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 
 
 class AtesClusterTest(unittest.TestCase):

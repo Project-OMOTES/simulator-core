@@ -13,10 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
+import csv
+
 import numpy as np
 import numpy.typing as npt
 import scipy as sp
-import csv
+
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 

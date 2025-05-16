@@ -18,10 +18,9 @@ __version__ = "1.2.0"
 
 from typing import Union
 
-import numpy.typing as npt
-import numpy as np
 import CoolProp.CoolProp as CP
-
+import numpy as np
+import numpy.typing as npt
 
 ZERO_C = 273.15
 """0 'C in K"""

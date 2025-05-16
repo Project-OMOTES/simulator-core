@@ -17,7 +17,7 @@
 
 import unittest
 from unittest.mock import patch
-from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
     DEFAULT_POWER,
@@ -25,6 +25,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
 )
+from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 
 
 class TestDemandCluster(unittest.TestCase):

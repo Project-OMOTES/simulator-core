@@ -16,10 +16,11 @@
 """Test BaseItem asset of the solver class."""
 import unittest
 from uuid import uuid4
+
 import numpy as np
 
-from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 
 
 class MockBaseItem(BaseItem):

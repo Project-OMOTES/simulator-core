@@ -14,12 +14,16 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
-import pandas as pd
 from datetime import datetime
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+
+import pandas as pd
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+)
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
 )
 
 

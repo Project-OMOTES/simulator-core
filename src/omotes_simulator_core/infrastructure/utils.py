@@ -15,8 +15,9 @@
 
 """Module containing utility functions."""
 
-from esdl.esdl_handler import EnergySystemHandler
 from pathlib import Path
+
+from esdl.esdl_handler import EnergySystemHandler
 
 
 def pyesdl_from_file(file_path: str | Path) -> EnergySystemHandler:

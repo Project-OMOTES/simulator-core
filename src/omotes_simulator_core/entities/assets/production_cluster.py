@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ProductionCluster class."""
+import logging
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
@@ -31,8 +33,6 @@ from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
-
-import logging
 
 logger = logging.getLogger(__name__)
 

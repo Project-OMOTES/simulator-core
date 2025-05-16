@@ -19,7 +19,6 @@ from typing import Callable
 
 import pandas as pd
 
-
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.solver.network.network import Network

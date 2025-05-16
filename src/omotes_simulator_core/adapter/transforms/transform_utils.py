@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """File containing utility functions for the transforms."""
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 
 class PortType(Enum):

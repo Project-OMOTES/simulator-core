@@ -14,19 +14,21 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-import esdl
 import uuid
-import numpy as np
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock
-import pandas as pd
-
 from typing import Dict, Tuple
+from unittest.mock import Mock
+
+import esdl
+import numpy as np
+import pandas as pd
 
 from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
+from omotes_simulator_core.entities.simulation_configuration import (
+    SimulationConfiguration,
+)
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props

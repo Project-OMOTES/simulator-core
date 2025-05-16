@@ -15,8 +15,8 @@
 
 """NetworkController abstrac."""
 
-from abc import ABC, abstractmethod
 import datetime
+from abc import ABC, abstractmethod
 
 
 class NetworkControllerAbstract(ABC):

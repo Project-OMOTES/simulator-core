@@ -15,10 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import cProfile
-from omotes_simulator_core.infrastructure.app import run  # noqa: F401
 import argparse
+import cProfile
 
+from omotes_simulator_core.infrastructure.app import run  # noqa: F401
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="sample argument parser")

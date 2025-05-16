@@ -14,14 +14,17 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simulates an heat network for the specified duration."""
+import logging
+from datetime import timedelta, timezone
 from typing import Callable
+
 from pandas import DataFrame
+
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
-from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
-from datetime import timedelta, timezone
-
-import logging
+from omotes_simulator_core.entities.simulation_configuration import (
+    SimulationConfiguration,
+)
 
 logger = logging.getLogger(__name__)
 
