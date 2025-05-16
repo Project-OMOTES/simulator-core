@@ -23,39 +23,39 @@ from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 def heat_demand_and_temperature_to_mass_flow(
-    thermal_demand: float, temperature_supply: float, temperature_return: float
+    thermal_demand: float, temperature_in: float, temperature_out: float
 ) -> float:
     """Calculate the mass flow rate that is required to meet the thermal demand.
 
     :param float thermal_demand: The thermal demand of the asset. The thermal demand should be
         supplied in Watts.
-    :param float temperature_supply: The temperature that the asset delivers to the "to_junction".
-        The temperature should be supplied in Kelvin. The supply temperature is used to calculate
+    :param float temperature_out: The temperature that the asset delivers to the "to_junction".
+        The temperature should be supplied in Kelvin. This temperature is used to calculate
         the specific heat capacity of the fluid.
-    :param float temperature_return: The temperature that the asset receives from the
+    :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     """
-    heat_capacity = fluid_props.get_heat_capacity((temperature_return + temperature_supply) / 2)
-    return thermal_demand / ((temperature_supply - temperature_return) * float(heat_capacity))
+    heat_capacity = fluid_props.get_heat_capacity((temperature_in + temperature_out) / 2)
+    return thermal_demand / ((temperature_out - temperature_in) * float(heat_capacity))
 
 
 def mass_flow_and_temperature_to_heat_demand(
-    temperature_supply: float,
-    temperature_return: float,
+    temperature_out: float,
+    temperature_in: float,
     mass_flow: float,
 ) -> float:
     """Calculate the thermal demand that is met by the mass flow rate.
 
-    :param float temperature_supply: The temperature that the asset delivers to the "to_junction".
-        The temperature should be supplied in Kelvin. The supply temperature is used to calculate
+    :param float temperature_out: The temperature that the asset delivers to the "to_junction".
+        The temperature should be supplied in Kelvin. The temperature supplied is used to calculate
         the specific heat capacity of the fluid.
-    :param float temperature_return: The temperature that the asset receives from the
+    :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     :param float mass_flow: The mass flow rate that is used to meet the thermal demand. The mass
         flow rate should be supplied in kg/s.
     """
-    internal_energy1 = fluid_props.get_ie(temperature_supply)
-    internal_energy2 = fluid_props.get_ie(temperature_return)
+    internal_energy1 = fluid_props.get_ie(temperature_in)
+    internal_energy2 = fluid_props.get_ie(temperature_out)
     return mass_flow * (internal_energy1 - internal_energy2)
 
 

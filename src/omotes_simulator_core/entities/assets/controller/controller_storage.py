@@ -33,8 +33,8 @@ class ControllerStorage(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_supply: float,
-        temperature_return: float,
+        temperature_in: float,
+        temperature_out: float,
         max_charge_power: float,
         max_discharge_power: float,
         profile: pd.DataFrame,
@@ -45,8 +45,8 @@ class ControllerStorage(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         """
         super().__init__(name, identifier)
-        self.temperature_return = temperature_return
-        self.temperature_supply = temperature_supply
+        self.temperature_in = temperature_in
+        self.temperature_out = temperature_out
         self.profile: pd.DataFrame = profile
         self.start_index = 0
         self.max_charge_power: float = max_charge_power

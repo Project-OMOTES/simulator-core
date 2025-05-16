@@ -71,8 +71,8 @@ class AtesDefaults:
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_HEAT_DEMAND_SET_POINT = "heat_demand_set_point"
-PROPERTY_TEMPERATURE_SUPPLY = "temperature_supply"
-PROPERTY_TEMPERATURE_RETURN = "temperature_return"
+PROPERTY_TEMPERATURE_IN = "temperature_in"
+PROPERTY_TEMPERATURE_OUT = "temperature_out"
 PROPERTY_TEMPERATURE = "temperature"
 PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
