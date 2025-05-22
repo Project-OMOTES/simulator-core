@@ -42,11 +42,11 @@ class HeatTransferAsset(BaseAsset):
         name: str,
         _id: str,
         primary_side: Optional[List[int]] = None,
-        supply_temperature_primary: float = 293.15,
+        temperature_out_primary: float = 293.15,
         mass_flow_rate_set_point_primary: float = -20.0,
         heat_transfer_coefficient: float = 1.0,
         pre_scribe_mass_flow_secondary: bool = False,
-        supply_temperature_secondary: float = 293.15,
+        temperature_out_secondary: float = 293.15,
         mass_flow_rate_set_point_secondary: float = 80.0,
         pressure_set_point_secondary: float = 10000.0,
         primary_side_inflow: int = 0,
@@ -61,8 +61,8 @@ class HeatTransferAsset(BaseAsset):
         ----------
         name : str
             The unique identifier of the asset.
-        supply_temperature_primary: float, optional
-            The supply temperature of the asset on the primary side (i.e., hot side).
+        temperature_out_primary: float, optional
+            The outlet temperature of the asset on the primary side (i.e., hot side).
             The default value is 293.15 K.
         mass_flow_rate_set_point_primary: float, optional
             The mass flow rate set point for the asset on the primary side.
@@ -70,8 +70,8 @@ class HeatTransferAsset(BaseAsset):
         heat_transfer_coefficient : float, optional
             The heat transfer coefficient between the primary and secondary side.
             The default value is 1.0.
-        supply_temperature_secondary: float, optional
-            The supply temperature of the asset on the secondary side (i.e., cold side).
+        temperature_out_secondary: float, optional
+            The outlet temperature of the asset on the secondary side (i.e., cold side).
             The default value is 293.15 K.
         pre_scribe_mass_flow_secondary : bool
             A boolean flag that indicates whether the mass flow rate or the pressure is prescribed
@@ -90,10 +90,10 @@ class HeatTransferAsset(BaseAsset):
             number_of_unknowns=index_core_quantity.number_core_quantities * 4,
             number_connection_points=4,
         )
-        # Define the supply temperature of the asset on the cold side
-        self.supply_temperature_primary = supply_temperature_primary
-        # Define the supply temperature of the asset on the hot side
-        self.supply_temperature_secondary = supply_temperature_secondary
+        # Define the outlet temperature of the asset on the cold side
+        self.temperature_out_primary = temperature_out_primary
+        # Define the outlet temperature of the asset on the hot side
+        self.temperature_out_secondary = temperature_out_secondary
         # Define the heat transfer coefficient
         self.heat_transfer_coefficient = heat_transfer_coefficient
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
@@ -298,7 +298,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_temperature_at_connection_point(
                     connection_point=primary_side_outflow,
-                    supply_temperature=self.supply_temperature_primary,
+                    supply_temperature=self.temperature_out_primary,
                 )
             )
         else:
@@ -310,7 +310,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_temperature_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    supply_temperature=self.supply_temperature_secondary,
+                    supply_temperature=self.temperature_out_secondary,
                 )
             )
         else:

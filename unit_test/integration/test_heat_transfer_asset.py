@@ -137,8 +137,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
         # -- Set associated node temperature
         self.network.get_node(in_primary).initial_temperature = 20 + 273.15
@@ -166,9 +166,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -221,8 +221,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
         self.heat_transfer_asset.primary_side_inflow = 1
         self.heat_transfer_asset.primary_side_outflow = 0
@@ -255,9 +255,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -311,8 +311,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
         self.heat_transfer_asset.primary_side_inflow = 0
         self.heat_transfer_asset.primary_side_outflow = 1
@@ -345,9 +345,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -401,8 +401,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 5.0
         # -- Set associated node temperature
         self.network.get_node(hot_primary).initial_temperature = 20 + 273.15
@@ -430,9 +430,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -486,8 +486,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 40 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 40 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0  # - 1.0 / 5.0
         # -- Set associated node temperature
         self.network.get_node(hot_primary).initial_temperature = 40 + 273.15
@@ -515,9 +515,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -571,8 +571,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         # Create a Solver Object
         self.solver = Solver(network=self.network)
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 30 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 40 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 30 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 40 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = -1 * (1.0 - 1.0 / 5.0)
         # -- Set associated node temperature
         self.network.get_node(hot_primary).initial_temperature = 30 + 273.15
@@ -600,9 +600,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         m_sec_in = -self.demand_asset.mass_flow_rate_set_point
         u_sec_in = fluid_props.get_ie(self.demand_asset.supply_temperature)
         m_sec_out = -m_sec_in
-        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_secondary)
+        u_sec_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_secondary)
         u_prim_in = fluid_props.get_ie(self.production_asset.supply_temperature)
-        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.supply_temperature_primary)
+        u_prim_out = fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary)
 
         m_prim_in = self._compute_primary_massinflow(
             coeff, m_sec_in, m_sec_out, u_sec_in, u_sec_out, u_prim_in, u_prim_out
@@ -680,8 +680,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.solver = Solver(network=self.network)
 
         # Set the temperatures and cop for HP
-        self.heat_transfer_asset.supply_temperature_primary = 20 + 273.15
-        self.heat_transfer_asset.supply_temperature_secondary = 70 + 273.15
+        self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
+        self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 5.0
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_primary = 0.0
 
