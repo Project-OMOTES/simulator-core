@@ -30,17 +30,17 @@ class NetworkZeroFlowTest(unittest.TestCase):
         """Set up the test case."""
         # Create ProductionAsset object
         self.production_asset = HeatBoundary(
-            name=str(uuid4()),
+            name="Production",
             _id=str(uuid4()),
         )
         # Create DemandAsset object
         self.demand_asset = HeatBoundary(
-            name=str(uuid4()),
+            name="Demand",
             _id=str(uuid4()),
         )
         # Create a SolverPipe object supply
         self.supply_pipe = SolverPipe(
-            name=str(uuid4()),
+            name="Supply pipe",
             _id=str(uuid4()),
             length=1.0,
             diameter=0.1,
@@ -48,7 +48,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
         )
         # Create a SolverPipe object return
         self.return_pipe = SolverPipe(
-            name=str(uuid4()),
+            name="Return pipe",
             _id=str(uuid4()),
             length=1.0,
             diameter=0.1,
@@ -63,30 +63,45 @@ class NetworkZeroFlowTest(unittest.TestCase):
         self.network.add_existing_asset(self.return_pipe)
 
         # Connect assets
-        self.network.connect_assets(
-            asset1_id=self.production_asset.name,
-            connection_point_1=0,
-            asset2_id=self.return_pipe.name,
-            connection_point_2=1,
+        nodes_hot = []
+        nodes_cold = []
+        nodes_cold.append(
+            self.network.connect_assets(
+                asset1_id=self.production_asset.name,
+                connection_point_1=0,
+                asset2_id=self.return_pipe.name,
+                connection_point_2=1,
+            )
         )
-        self.network.connect_assets(
-            asset1_id=self.production_asset.name,
-            connection_point_1=1,
-            asset2_id=self.supply_pipe.name,
-            connection_point_2=0,
+        nodes_hot.append(
+            self.network.connect_assets(
+                asset1_id=self.production_asset.name,
+                connection_point_1=1,
+                asset2_id=self.supply_pipe.name,
+                connection_point_2=0,
+            )
         )
-        self.network.connect_assets(
-            asset1_id=self.demand_asset.name,
-            connection_point_1=0,
-            asset2_id=self.supply_pipe.name,
-            connection_point_2=1,
+        nodes_hot.append(
+            self.network.connect_assets(
+                asset1_id=self.demand_asset.name,
+                connection_point_1=0,
+                asset2_id=self.supply_pipe.name,
+                connection_point_2=1,
+            )
         )
-        self.network.connect_assets(
-            asset1_id=self.demand_asset.name,
-            connection_point_1=1,
-            asset2_id=self.return_pipe.name,
-            connection_point_2=0,
+        nodes_cold.append(
+            self.network.connect_assets(
+                asset1_id=self.demand_asset.name,
+                connection_point_1=1,
+                asset2_id=self.return_pipe.name,
+                connection_point_2=0,
+            )
         )
+        # Set the default temperature of the nodes
+        for node in nodes_hot:
+            self.network.get_node(node).initial_temperature = 60 + 273.15
+        for node in nodes_cold:
+            self.network.get_node(node).initial_temperature = 40 + 273.15
 
     def test_zeroflow(self) -> None:
         """Test zero flow."""
@@ -117,3 +132,22 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     ),
                     0.0,
                 )
+        for asset in self.network.assets:
+            for connection_point in [0, 1]:
+                # Print the internal energy and asset name per node
+                print(
+                    f"Asset: {self.network.get_asset(asset).name}, Connection Point: {connection_point}, "
+                    + f"Internal Energy: {self.network.get_asset(asset).prev_sol[self.network.get_asset(asset).get_index_matrix('internal_energy', connection_point, True)]:.2f}"
+                )
+                # self.assertEqual(
+                #     abs(
+                #         self.network.get_asset(asset).prev_sol[
+                #             self.network.get_asset(asset).get_index_matrix(
+                #                 property_name="internal_energy",
+                #                 connection_point=connection_point,
+                #                 use_relative_indexing=True,
+                #             )
+                #         ]
+                #     ),
+                #     0.0,
+                # )
