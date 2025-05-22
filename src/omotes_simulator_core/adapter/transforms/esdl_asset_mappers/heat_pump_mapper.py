@@ -36,7 +36,7 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
         heatpump_entity = HeatPump(
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
-            port_ids=esdl_asset.get_port_ids(),
+            connected_ports=esdl_asset.get_port_ids(),
         )
 
         return heatpump_entity
