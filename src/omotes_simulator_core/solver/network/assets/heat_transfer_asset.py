@@ -294,47 +294,67 @@ class HeatTransferAsset(BaseAsset):
         )
         # Add the internal energy equations at connection points 1, and 3 to set
         # the temperature through internal energy at the outlet of the heat transfer asset.
-        equations.append(
-            self.prescribe_temperature_at_connection_point(
-                connection_point=primary_side_outflow,
-                supply_temperature=self.supply_temperature_primary,
+        if flow_direction_primary != FlowDirection.ZERO:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=primary_side_outflow,
+                    supply_temperature=self.supply_temperature_primary,
+                )
             )
-        )
+        else:
+            equations.append(
+                self.get_internal_energy_to_node_equation(connection_point=primary_side_outflow)
+            )
         # TODO: why is it using the supply temperature if it is an outlet?
-        equations.append(
-            self.prescribe_temperature_at_connection_point(
-                connection_point=secondary_side_outflow,
-                supply_temperature=self.supply_temperature_secondary,
+        if flow_direction_secondary != FlowDirection.ZERO:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=secondary_side_outflow,
+                    supply_temperature=self.supply_temperature_secondary,
+                )
             )
-        )
+        else:
+            equations.append(
+                self.get_internal_energy_to_node_equation(connection_point=secondary_side_outflow)
+            )
         # -- Mass flow rate or pressure on secondary side (2x) --
         # Prescribe the pressure at the secondary side of the heat transfer asset.
         # TODO: This probably also needs to be changed.
         if self.pre_scribe_mass_flow_secondary:
+            if flow_direction_secondary == FlowDirection.ZERO:
+                mset = 0.0
+            else:
+                mset = self.mass_flow_rate_rate_set_point_secondary
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_inflow,
-                    mass_flow_value=-self.mass_flow_rate_rate_set_point_secondary,
+                    mass_flow_value=-mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    mass_flow_value=+self.mass_flow_rate_rate_set_point_secondary,
+                    mass_flow_value=+mset,
                 )
             )
         else:
+            if flow_direction_secondary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary / 2
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=secondary_side_inflow,
-                    pressure_value=self.pressure_set_point_secondary / 2,
+                    pressure_value=pset_in,
                 )
             )
             # TODO: Why is the pressure above divided by 2?
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=secondary_side_outflow,
-                    pressure_value=self.pressure_set_point_secondary / 1,
+                    pressure_value=pset_out,
                 )
             )
         # -- Pressure (4x) --
