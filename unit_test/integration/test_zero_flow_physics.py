@@ -21,6 +21,7 @@ from omotes_simulator_core.solver.network.assets.production_asset import HeatBou
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from omotes_simulator_core.solver.network.network import Network
 from omotes_simulator_core.solver.solver import Solver
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
 class NetworkZeroFlowTest(unittest.TestCase):
@@ -132,22 +133,25 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     ),
                     0.0,
                 )
-        for asset in self.network.assets:
-            for connection_point in [0, 1]:
-                # Print the internal energy and asset name per node
-                print(
-                    f"Asset: {self.network.get_asset(asset).name}, Connection Point: {connection_point}, "
-                    + f"Internal Energy: {self.network.get_asset(asset).prev_sol[self.network.get_asset(asset).get_index_matrix('internal_energy', connection_point, True)]:.2f}"
+
+        # - Temperature verification
+        self.assertEqual(
+            self.network.get_asset(self.production_asset.name).prev_sol[
+                self.network.get_asset(self.production_asset.name).get_index_matrix(
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
                 )
-                # self.assertEqual(
-                #     abs(
-                #         self.network.get_asset(asset).prev_sol[
-                #             self.network.get_asset(asset).get_index_matrix(
-                #                 property_name="internal_energy",
-                #                 connection_point=connection_point,
-                #                 use_relative_indexing=True,
-                #             )
-                #         ]
-                #     ),
-                #     0.0,
-                # )
+            ],
+            fluid_props.get_ie(
+                40 + 273.15,
+            ),
+        )
+        self.assertEqual(
+            self.network.get_asset(self.demand_asset.name).prev_sol[
+                self.network.get_asset(self.demand_asset.name).get_index_matrix(
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                )
+            ],
+            fluid_props.get_ie(
+                60 + 273.15,
+            ),
+        )
