@@ -187,7 +187,6 @@ class HeatPump(AssetAbstract):
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-
         # Primary side output
         self.outputs[1][-1].update(
             {
