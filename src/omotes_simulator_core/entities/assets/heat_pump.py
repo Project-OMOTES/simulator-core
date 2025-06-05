@@ -1,4 +1,4 @@
-#  Copyright (c) 2023. Deltares & TNO
+#  Copyright (c) 2025. Deltares & TNO
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -19,12 +19,14 @@ from typing import Dict
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
+    PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_HEAT_POWER_PRIMARY,
+    PROPERTY_HEAT_POWER_SECONDARY,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
@@ -48,9 +50,6 @@ class HeatPump(AssetAbstract):
     temperature_out_secondary: float
     """The outlet temperature of the heat pump on the secondary side [K]."""
 
-    mass_flow_primary: float
-    """The mass flow of the heat pump on the primary side [kg/s]."""
-
     mass_flow_secondary: float
     """The mass flow of the heat pump on the secondary side [kg/s]."""
 
@@ -63,7 +62,13 @@ class HeatPump(AssetAbstract):
     coefficient_of_performance: float
     """Coefficient of perfomance for the heat pump."""
 
-    def __init__(self, asset_name: str, asset_id: str, connected_ports: list[str]):
+    def __init__(
+        self,
+        asset_name: str,
+        asset_id: str,
+        connected_ports: list[str],
+        coefficient_of_performance: float = 1 - 1 / 4.0,
+    ) -> None:
         """Initialize a new HeatPump instance.
 
         :param asset_name: The name of the asset.
@@ -75,16 +80,8 @@ class HeatPump(AssetAbstract):
             asset_id=asset_id,
             connected_ports=connected_ports,
         )
-
-        # Set default values for the temperatures
-        # TODO: What are the default values for the temperatures?
-
-        # Set default values for the mass flows
-        # TODO: What are the default values for the mass flows?
-
         # Set the coefficient of performance
-        # TODO: Include default value for the coefficient of performance
-        self.coefficient_of_performance = 1 - 1 / 4.0
+        self.coefficient_of_performance = coefficient_of_performance
 
         # Define solver asset
         self.solver_asset = HeatTransferAsset(
@@ -93,18 +90,6 @@ class HeatPump(AssetAbstract):
             pre_scribe_mass_flow_secondary=False,
             pressure_set_point_secondary=DEFAULT_PRESSURE,
             heat_transfer_coefficient=self.coefficient_of_performance,
-        )
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The ESDL asset object containing the physical data.
-        :return:
-        """
-        # TODO: Do we want to set the coefficient of performance here?
-        self.coefficient_of_performance, _ = esdl_asset.get_property(
-            esdl_property_name="coefficient_of_performance",
-            default_value=self.coefficient_of_performance,
         )
 
     def _set_setpoints_secondary(self, setpoints_secondary: Dict) -> None:
@@ -158,7 +143,6 @@ class HeatPump(AssetAbstract):
         The necessary setpoints are:
         - PROPERTY_TEMPERATURE_IN
         - PROPERTY_TEMPERATURE_OUT
-        - PROPERTY_HEAT_DEMAND
 
         :param Dict setpoints_primary: The setpoints of the primary side of the heat pump.
         """
@@ -168,7 +152,6 @@ class HeatPump(AssetAbstract):
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
             PROPERTY_TEMPERATURE_OUT,
-            PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
         setpoints_set = set(setpoints_primary.keys())
@@ -182,16 +165,10 @@ class HeatPump(AssetAbstract):
         # Assign setpoints to the HeatPump asset
         self.temperature_in_primary = setpoints_primary[PROPERTY_TEMPERATURE_IN]
         self.temperature_out_primary = setpoints_primary[PROPERTY_TEMPERATURE_OUT]
-        self.mass_flow_primary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_primary[PROPERTY_HEAT_DEMAND],
-            temperature_in=self.temperature_in_primary,
-            temperature_out=self.temperature_out_primary,
-        )
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_primary = self.temperature_in_primary  # type: ignore
         self.solver_asset.temperature_out_primary = self.temperature_out_primary  # type: ignore
-        self.solver_asset.mass_flow_rate_primary = self.mass_flow_primary  # type: ignore
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -205,9 +182,29 @@ class HeatPump(AssetAbstract):
         self._set_setpoints_secondary(setpoints_secondary=setpoints)
 
     def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
+        """Get output power and electricity consumption of the asset.
 
         The output list is a list of dictionaries, where each dictionary
         represents the output of its asset for a specific timestep.
         """
-        pass
+
+        # Primary side output
+        self.outputs[1][-1].update(
+            {
+                PROPERTY_HEAT_POWER_PRIMARY: (
+                    self.solver_asset.get_heat_power_primary()  # type: ignore
+                ),
+                PROPERTY_ELECTRICITY_CONSUMPTION: (
+                    self.solver_asset.get_electric_power_consumption()  # type: ignore
+                ),
+            }
+        )
+
+        # Secondary side output
+        self.outputs[0][-1].update(
+            {
+                PROPERTY_HEAT_POWER_SECONDARY: (
+                    self.solver_asset.get_heat_power_secondary()  # type: ignore
+                )
+            }
+        )
