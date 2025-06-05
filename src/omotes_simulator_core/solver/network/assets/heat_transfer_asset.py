@@ -43,7 +43,6 @@ class HeatTransferAsset(BaseAsset):
         _id: str,
         primary_side: Optional[List[int]] = None,
         temperature_out_primary: float = 293.15,
-        mass_flow_rate_set_point_primary: float = -20.0,
         heat_transfer_coefficient: float = 1.0,
         pre_scribe_mass_flow_secondary: bool = False,
         temperature_out_secondary: float = 293.15,
@@ -64,9 +63,6 @@ class HeatTransferAsset(BaseAsset):
         temperature_out_primary: float, optional
             The outlet temperature of the asset on the primary side (i.e., hot side).
             The default value is 293.15 K.
-        mass_flow_rate_set_point_primary: float, optional
-            The mass flow rate set point for the asset on the primary side.
-            The default is -20.0 kg/s.
         heat_transfer_coefficient : float, optional
             The heat transfer coefficient between the primary and secondary side.
             The default value is 1.0.
@@ -101,8 +97,6 @@ class HeatTransferAsset(BaseAsset):
         self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
         # Define the mass flow rate set point for the asset on the secondary side
         self.mass_flow_rate_rate_set_point_secondary = mass_flow_rate_set_point_secondary
-        # Define the mass flow rate set point for the asset on the primary side
-        self.mass_flow_rate_rate_set_point_primary = mass_flow_rate_set_point_primary
         # Define the pressure set point for the asset
         self.pressure_set_point_secondary = pressure_set_point_secondary
         # Define the primary side of the heat transfer asset
@@ -394,7 +388,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=primary_side_inflow,
-                    mass_flow_value=self.mass_flow_rate_rate_set_point_primary,
+                    mass_flow_value=0.0,
                 )
             )
         # Return the equations
@@ -591,3 +585,87 @@ class HeatTransferAsset(BaseAsset):
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = pressure_value
         return equation_object
+
+    def get_heat_power_primary(self) -> float:
+        """Calculate the heat power on the primary side of the heat transfer asset.
+
+        The heat power is calculated as the product of the mass flow rate and the internal energy
+        difference between the inlet and outlet of the primary side.
+
+        :return: float
+            The heat power on the primary side of the heat transfer asset.
+        """
+        return float(
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.primary_side_inflow,
+                    use_relative_indexing=False,
+                )
+            ]
+            * (
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=self.primary_side_outflow,
+                        use_relative_indexing=False,
+                    )
+                ]
+                - self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=self.primary_side_inflow,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+        )
+
+    def get_heat_power_secondary(self) -> float:
+        """Calculate the heat power on the secondary side of the heat transfer asset.
+
+        The heat power is calculated as the product of the mass flow rate and the internal energy
+        difference between the inlet and outlet of the secondary side.
+
+        :return: float
+            The heat power on the secondary side of the heat transfer asset.
+        """
+        return float(
+            self.prev_sol[
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.secondary_side_inflow,
+                    use_relative_indexing=False,
+                )
+            ]
+            * (
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=self.secondary_side_outflow,
+                        use_relative_indexing=False,
+                    )
+                ]
+                - self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=self.secondary_side_inflow,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+        )
+
+    def get_electric_power_consumption(self) -> float:
+        """Calculate the electric power consumption of the heat transfer asset.
+
+        The electric power consumption is calculated as the absolute difference between the
+        heat power on the primary and secondary side, divided by the heat transfer coefficient.
+
+        :return: float
+            The electric power consumption of the heat transfer asset.
+        """
+        return (
+            abs(self.get_heat_power_primary() - self.get_heat_power_secondary())
+            / self.heat_transfer_coefficient
+        )
