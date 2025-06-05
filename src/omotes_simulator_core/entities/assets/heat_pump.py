@@ -143,7 +143,6 @@ class HeatPump(AssetAbstract):
         The necessary setpoints are:
         - PROPERTY_TEMPERATURE_IN
         - PROPERTY_TEMPERATURE_OUT
-        - PROPERTY_HEAT_DEMAND
 
         :param Dict setpoints_primary: The setpoints of the primary side of the heat pump.
         """
@@ -153,7 +152,6 @@ class HeatPump(AssetAbstract):
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
             PROPERTY_TEMPERATURE_OUT,
-            PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
         setpoints_set = set(setpoints_primary.keys())
@@ -193,14 +191,20 @@ class HeatPump(AssetAbstract):
         # Primary side output
         self.outputs[1][-1].update(
             {
-                PROPERTY_HEAT_POWER_PRIMARY: self.solver_asset.get_heat_power_primary(),  # type: ignore
-                PROPERTY_ELECTRICITY_CONSUMPTION: self.solver_asset.get_electric_power_consumption(),  # type: ignore
+                PROPERTY_HEAT_POWER_PRIMARY: (
+                    self.solver_asset.get_heat_power_primary()  # type: ignore
+                ),
+                PROPERTY_ELECTRICITY_CONSUMPTION: (
+                    self.solver_asset.get_electric_power_consumption()  # type: ignore
+                ),
             }
         )
 
         # Secondary side output
         self.outputs[0][-1].update(
             {
-                PROPERTY_HEAT_POWER_SECONDARY: self.solver_asset.get_heat_power_secondary(),  # type: ignore
+                PROPERTY_HEAT_POWER_SECONDARY: (
+                    self.solver_asset.get_heat_power_secondary()  # type: ignore
+                )
             }
         )

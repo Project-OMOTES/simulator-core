@@ -159,10 +159,10 @@ class HeatTransferAsset(BaseAsset):
         else:
             return FlowDirection.ZERO
 
-    def get_connection_point_list(
+    def get_ordered_connection_point_list(
         self, flow_direction_primary: FlowDirection, flow_direction_secondary: FlowDirection
     ) -> List[int]:
-        """Determine the list of connection points based on the flow direction.
+        """Determine the order of connection points based on the flow direction.
 
         The method returns the connection points based on the flow direction of the primary and
         secondary side of the heat transfer asset.
@@ -212,12 +212,10 @@ class HeatTransferAsset(BaseAsset):
         ):
             return [0, 1, 3, 2]
         else:
-            return [
-                self.primary_side_inflow,
-                self.primary_side_outflow,
-                self.secondary_side_inflow,
-                self.secondary_side_outflow,
-            ]
+            raise ValueError(
+                "Invalid flow direction combination: "
+                f"{flow_direction_primary}, {flow_direction_secondary}"
+            )
 
     def get_equations_from_connection_point_list(self) -> List[EquationObject]:
         r"""Return the heat transfer equations.
@@ -269,7 +267,7 @@ class HeatTransferAsset(BaseAsset):
         flow_direction_secondary = self.flow_direction(connection_point=self.secondary_side[1])
         # Determine the connection points based on the flow direction
         primary_side_inflow, primary_side_outflow, secondary_side_inflow, secondary_side_outflow = (
-            self.get_connection_point_list(
+            self.get_ordered_connection_point_list(
                 flow_direction_primary=flow_direction_primary,
                 flow_direction_secondary=flow_direction_secondary,
             )
@@ -378,7 +376,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=primary_side_inflow,
-                    mass_flow_value=self.get_mass_flow_setpoint_from_prev_solution(),
+                    mass_flow_value=self.get_mass_flow_from_prev_solution(),
                 )
             )
         # If the mass flow at the inflow node of the primary and secondary side is zero,
@@ -394,10 +392,10 @@ class HeatTransferAsset(BaseAsset):
         # Return the equations
         return equations
 
-    def get_mass_flow_setpoint_from_prev_solution(self) -> float:
-        r"""Determine the mass flow rate set point from the previous solution.
+    def get_mass_flow_from_prev_solution(self) -> float:
+        r"""Determine the mass flow rate from the previous solution.
 
-        Method uses the following equation to determine the mass flow rate set point:
+        Method uses the following equation to determine the mass flow rate:
 
         .. math::
             \dot{m}_{primary_inflow} =
