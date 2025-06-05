@@ -359,10 +359,14 @@ class HeatTransferAsset(BaseAsset):
             )
         # -- Pressure (4x) --
         # Connect the pressure at the nodes to the asset
-        equations.append(self.get_press_to_node_equation(connection_point=primary_side_inflow))
-        equations.append(self.get_press_to_node_equation(connection_point=primary_side_outflow))
-        equations.append(self.get_press_to_node_equation(connection_point=secondary_side_inflow))
-        equations.append(self.get_press_to_node_equation(connection_point=secondary_side_outflow))
+        for connection_point in [
+            primary_side_inflow,
+            primary_side_outflow,
+            secondary_side_inflow,
+            secondary_side_outflow,
+        ]:
+            equations.append(self.get_press_to_node_equation(connection_point=connection_point))
+
         # -- Internal continuity (1x) --
         # Add the internal continuity equation at the primary side.
         equations.append(
@@ -461,36 +465,6 @@ class HeatTransferAsset(BaseAsset):
             ]
         )
         return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
-
-    def add_mass_flow_to_node_equation(self, connection_point: int) -> EquationObject:
-        r"""Links the mass flow rate at the connection point to the node.
-
-        .. math::
-
-            \dot{m}_{asset} - \dot{m}_{node} = 0
-
-        :param int connection_point: The index of the connection point.
-        :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side value
-            of the equation.
-        """
-        # Add the equations
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=connection_point,
-                    use_relative_indexing=True,
-                ),
-                self.connected_nodes[connection_point].get_index_matrix(
-                    property_name="mass_flow_rate", use_relative_indexing=True
-                ),
-            ]
-        )
-        equation_object.coefficients = np.array([1, -1])
-        equation_object.rhs = 0.0
-        return equation_object
 
     def add_continuity_equation(
         self, connection_point_1: int, connection_point_2: int
@@ -617,9 +591,3 @@ class HeatTransferAsset(BaseAsset):
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = pressure_value
         return equation_object
-
-    def update_loss_coefficient(self) -> None:
-        """Basic function which does not do anything, but can be overwritten in derived classes."""
-
-    def update_heat_supplied(self) -> None:
-        """Basic function which does not do anything, but can be overwritten in derived classes."""
