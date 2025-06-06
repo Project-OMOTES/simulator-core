@@ -14,18 +14,19 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Plot result on the map for debugging."""
 import esdl
-import plotly.express as px
 import geopandas as gpd
-from pandas import DataFrame
 import numpy as np
-from shapely.geometry import LineString
+import plotly.express as px
 from numpy.typing import NDArray
-from omotes_simulator_core.entities.esdl_object import EsdlObject
+from pandas import DataFrame
+from shapely.geometry import LineString
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
     PROPERTY_TEMPERATURE,
 )
+from omotes_simulator_core.entities.esdl_object import EsdlObject
 
 
 class Plotting:

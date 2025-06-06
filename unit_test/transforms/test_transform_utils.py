@@ -15,12 +15,13 @@
 
 
 import unittest
+
 from omotes_simulator_core.adapter.transforms.transform_utils import (
-    sort_ports,
+    Port,
+    PortType,
     order_prim_sec_ports,
     reverse_dict,
-    PortType,
-    Port,
+    sort_ports,
 )
 
 

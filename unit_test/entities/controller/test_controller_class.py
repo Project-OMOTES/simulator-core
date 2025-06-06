@@ -14,19 +14,25 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller class."""
 import unittest
-from unittest.mock import Mock
 from datetime import datetime
+from unittest.mock import Mock
 
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
-from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PROPERTY_SET_PRESSURE,
 )
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.network_controller import NetworkController
 
 
 class ControllerTest(unittest.TestCase):

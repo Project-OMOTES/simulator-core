@@ -15,9 +15,10 @@
 """Module containing the classes for the controller."""
 
 import datetime
+import logging
 
 import pandas as pd
-import logging
+
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
