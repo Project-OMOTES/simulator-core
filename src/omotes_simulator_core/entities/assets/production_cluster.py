@@ -22,13 +22,13 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PRIMARY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,

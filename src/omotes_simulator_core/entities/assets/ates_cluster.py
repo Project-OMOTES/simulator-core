@@ -22,13 +22,13 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PRIMARY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
