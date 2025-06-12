@@ -18,6 +18,7 @@ import unittest
 from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PRIMARY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
@@ -25,7 +26,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PRIMARY,
     PROPERTY_VOLUMEFLOW,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
