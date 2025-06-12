@@ -28,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
@@ -163,8 +164,8 @@ class AtesCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_IN,
-            PROPERTY_TEMPERATURE_OUT,
+            PRIMARY + PROPERTY_TEMPERATURE_IN,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -172,8 +173,8 @@ class AtesCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            self.temperature_in = setpoints[PRIMARY + PROPERTY_TEMPERATURE_IN]
+            self.temperature_out = setpoints[PRIMARY + PROPERTY_TEMPERATURE_OUT]
 
             self._calculate_massflowrate()
             self._run_rosim()
@@ -198,8 +199,8 @@ class AtesCluster(AssetAbstract):
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
             PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(1),
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(0),
+            PRIMARY + PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(1),
         }
         self.output.append(output_dict)
 

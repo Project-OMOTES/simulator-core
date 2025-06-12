@@ -28,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -177,8 +178,8 @@ class ProductionCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_IN,
-            PROPERTY_TEMPERATURE_OUT,
+            PRIMARY + PROPERTY_TEMPERATURE_IN,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
             PROPERTY_SET_PRESSURE,
         }
@@ -188,8 +189,8 @@ class ProductionCluster(AssetAbstract):
         if necessary_setpoints.issubset(setpoints_set):
             # Set the setpoints
             self._set_pressure_or_mass_flow_control(setpoints[PROPERTY_SET_PRESSURE])
-            self._set_out_temperature(setpoints[PROPERTY_TEMPERATURE_OUT])
-            self._set_in_temperature(setpoints[PROPERTY_TEMPERATURE_IN])
+            self._set_out_temperature(setpoints[PRIMARY + PROPERTY_TEMPERATURE_OUT])
+            self._set_in_temperature(setpoints[PRIMARY + PROPERTY_TEMPERATURE_IN])
             self._set_heat_demand(setpoints[PROPERTY_HEAT_DEMAND])
         else:
             # Print missing setpoints

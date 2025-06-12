@@ -27,6 +27,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND_SET_POINT,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -67,8 +68,8 @@ class DemandCluster(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_IN,
-            PROPERTY_TEMPERATURE_OUT,
+            PRIMARY + PROPERTY_TEMPERATURE_IN,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
@@ -85,13 +86,13 @@ class DemandCluster(AssetAbstract):
             )
         self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
 
-        self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+        self.temperature_out = setpoints[PRIMARY + PROPERTY_TEMPERATURE_OUT]
 
         # First time step: use default setpoint temperature
         # TODO replace this by adding intial temperature to the consumer
         #  similar to the production_asset implementation.
         if self.first_time_step:
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+            self.temperature_in = setpoints[PRIMARY + PROPERTY_TEMPERATURE_IN]
             self.first_time_step = False
         else:
             # After the first time step: use solver temperature

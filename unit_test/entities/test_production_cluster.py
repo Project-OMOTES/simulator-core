@@ -25,6 +25,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
     PROPERTY_VOLUMEFLOW,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
@@ -62,16 +63,16 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
         self.production_cluster.set_setpoints(setpoints=setpoints)
 
         # Act
         mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
-            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
+            temperature_out=setpoints[PRIMARY + PROPERTY_TEMPERATURE_OUT],
+            temperature_in=setpoints[PRIMARY + PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
@@ -92,11 +93,15 @@ class ProductionClusterTest(unittest.TestCase):
         """Test raise ValueError with missing setpoint."""
         # Arrange
         necessary_setpoints = set(
-            [PROPERTY_HEAT_DEMAND, PROPERTY_TEMPERATURE_OUT, PROPERTY_TEMPERATURE_IN]
+            [
+                PROPERTY_HEAT_DEMAND,
+                PRIMARY + PROPERTY_TEMPERATURE_OUT,
+                PRIMARY + PROPERTY_TEMPERATURE_IN,
+            ]
         )
         setpoints = {
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
@@ -116,15 +121,15 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
         mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
-            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
+            temperature_out=setpoints[PRIMARY + PROPERTY_TEMPERATURE_OUT],
+            temperature_in=setpoints[PRIMARY + PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
@@ -144,8 +149,8 @@ class ProductionClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: True,
         }
 

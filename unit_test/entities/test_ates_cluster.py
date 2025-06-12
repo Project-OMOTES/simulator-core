@@ -21,6 +21,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 
@@ -68,8 +69,8 @@ class AtesClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 313.15,
         }
 
         # Act
@@ -84,8 +85,8 @@ class AtesClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 353.15,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 313.15,
         }
 
         # Act

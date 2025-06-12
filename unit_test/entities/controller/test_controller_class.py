@@ -22,6 +22,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import (
     ControllerConsumer,
@@ -200,22 +201,22 @@ class ControllerTest(unittest.TestCase):
         # Assert
         self.assertEqual(producers[self.producer1.id][PROPERTY_HEAT_DEMAND], self.producer1.power)
         self.assertEqual(
-            producers[self.producer1.id][PROPERTY_TEMPERATURE_IN],
+            producers[self.producer1.id][PRIMARY + PROPERTY_TEMPERATURE_IN],
             self.consumer1.temperature_out,
         )
         self.assertEqual(
-            producers[self.producer1.id][PROPERTY_TEMPERATURE_OUT],
+            producers[self.producer1.id][PRIMARY + PROPERTY_TEMPERATURE_OUT],
             self.consumer1.temperature_in,
         )
         self.assertTrue(producers[self.producer1.id][PROPERTY_SET_PRESSURE])
 
         self.assertEqual(producers[self.producer2.id][PROPERTY_HEAT_DEMAND], self.producer2.power)
         self.assertEqual(
-            producers[self.producer2.id][PROPERTY_TEMPERATURE_IN],
+            producers[self.producer2.id][PRIMARY + PROPERTY_TEMPERATURE_IN],
             self.consumer2.temperature_out,
         )
         self.assertEqual(
-            producers[self.producer2.id][PROPERTY_TEMPERATURE_OUT],
+            producers[self.producer2.id][PRIMARY + PROPERTY_TEMPERATURE_OUT],
             self.consumer2.temperature_in,
         )
         self.assertFalse(producers[self.producer2.id][PROPERTY_SET_PRESSURE])
@@ -239,11 +240,11 @@ class ControllerTest(unittest.TestCase):
             consumers[self.consumer1.id][PROPERTY_HEAT_DEMAND], self.consumer1.get_heat_demand()
         )
         self.assertEqual(
-            consumers[self.consumer1.id][PROPERTY_TEMPERATURE_IN],
+            consumers[self.consumer1.id][PRIMARY + PROPERTY_TEMPERATURE_IN],
             self.consumer1.temperature_in,
         )
         self.assertEqual(
-            consumers[self.consumer1.id][PROPERTY_TEMPERATURE_OUT],
+            consumers[self.consumer1.id][PRIMARY + PROPERTY_TEMPERATURE_OUT],
             self.consumer1.temperature_out,
         )
 
@@ -251,11 +252,11 @@ class ControllerTest(unittest.TestCase):
             consumers[self.consumer2.id][PROPERTY_HEAT_DEMAND], self.consumer2.get_heat_demand()
         )
         self.assertEqual(
-            consumers[self.consumer2.id][PROPERTY_TEMPERATURE_IN],
+            consumers[self.consumer2.id][PRIMARY + PROPERTY_TEMPERATURE_IN],
             self.consumer2.temperature_in,
         )
         self.assertEqual(
-            consumers[self.consumer2.id][PROPERTY_TEMPERATURE_OUT],
+            consumers[self.consumer2.id][PRIMARY + PROPERTY_TEMPERATURE_OUT],
             self.consumer2.temperature_out,
         )
 
