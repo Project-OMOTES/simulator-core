@@ -50,6 +50,9 @@ class HeatPump(AssetAbstract):
     temperature_out_secondary: float
     """The outlet temperature of the heat pump on the secondary side [K]."""
 
+    mass_flow_primary: float
+    """The mass flow of the heat pump on the primary side [kg/s]."""
+
     mass_flow_secondary: float
     """The mass flow of the heat pump on the secondary side [kg/s]."""
 
@@ -143,6 +146,7 @@ class HeatPump(AssetAbstract):
         The necessary setpoints are:
         - PROPERTY_TEMPERATURE_IN
         - PROPERTY_TEMPERATURE_OUT
+        - PROPERTY_HEAT_DEMAND
 
         :param Dict setpoints_primary: The setpoints of the primary side of the heat pump.
         """
@@ -152,6 +156,7 @@ class HeatPump(AssetAbstract):
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
             PROPERTY_TEMPERATURE_OUT,
+            PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
         setpoints_set = set(setpoints_primary.keys())
@@ -165,10 +170,18 @@ class HeatPump(AssetAbstract):
         # Assign setpoints to the HeatPump asset
         self.temperature_in_primary = setpoints_primary[PROPERTY_TEMPERATURE_IN]
         self.temperature_out_primary = setpoints_primary[PROPERTY_TEMPERATURE_OUT]
+        self.mass_flow_initialization_primary = heat_demand_and_temperature_to_mass_flow(
+            thermal_demand=setpoints_primary[PROPERTY_HEAT_DEMAND],
+            temperature_in=self.temperature_in_primary,
+            temperature_out=self.temperature_out_primary,
+        )
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_primary = self.temperature_in_primary  # type: ignore
         self.solver_asset.temperature_out_primary = self.temperature_out_primary  # type: ignore
+        self.solver_asset.mass_flow_initialization_primary = (  # type: ignore
+            self.mass_flow_initialization_primary
+        )
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
