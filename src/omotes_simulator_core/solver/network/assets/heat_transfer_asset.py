@@ -367,7 +367,6 @@ class HeatTransferAsset(BaseAsset):
                     pressure_value=pset_in,
                 )
             )
-            # TODO: Why is the pressure above divided by 2?
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=self.secondary_side_outflow,
