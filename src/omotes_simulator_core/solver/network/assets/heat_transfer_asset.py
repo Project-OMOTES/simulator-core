@@ -45,7 +45,7 @@ class HeatTransferAsset(BaseAsset):
         heat_transfer_coefficient: float = 1.0,
         pre_scribe_mass_flow_secondary: bool = False,
         temperature_out_secondary: float = 293.15,
-        mass_flow_rate_set_point_secondary: float = 80.0,
+        mass_flow_rate_set_point_secondary: float = -80.0,
         pressure_set_point_secondary: float = 10000.0,
     ):
         """
