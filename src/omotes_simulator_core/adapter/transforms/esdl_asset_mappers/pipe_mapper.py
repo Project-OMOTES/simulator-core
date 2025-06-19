@@ -15,8 +15,6 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import numpy as np
-import json
-import importlib.resources as resources
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -26,6 +24,7 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
 )
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+from omotes_simulator_core.esdl.edr_pipes import PIPE_DATABASE
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
@@ -97,12 +96,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         if temp_diameter == 0:
             if temp_dn_diameter is not None:
                 try:
-                    # Load EDR pipe data from JSON in the esdl package
-                    with resources.files("omotes_simulator_core.esdl").joinpath(
-                        "_edr_pipes.json"
-                    ).open("r") as f:
-                        pipe_data = json.load(f)
-
+                    pipe_data = PIPE_DATABASE
                     # Match DN format and return the inner diameter
                     dn_key_suffix = str(temp_dn_diameter).replace("DN", "DN-")
 
