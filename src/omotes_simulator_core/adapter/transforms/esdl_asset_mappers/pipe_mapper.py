@@ -90,7 +90,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """Retrieve the diameter of the pipe and convert it if necessary."""
         # Check if the property is available
         # Retrieve the diameter
-        temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
+        temp_diameter = esdl_asset.get_property("innerDiameter", 0)
         # Check if the diameter is 0, if so return the default diameter!
         if temp_diameter == 0:
             return PIPE_DEFAULTS.diameter
