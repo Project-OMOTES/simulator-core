@@ -15,7 +15,8 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import numpy as np
-
+import json
+import importlib.resources as resources
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -90,9 +91,30 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """Retrieve the diameter of the pipe and convert it if necessary."""
         # Check if the property is available
         # Retrieve the diameter
-        temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
+        temp_diameter = esdl_asset.get_property("innerDiameter", 0)
+        temp_dn_diameter = esdl_asset.get_property("diameter", None)
         # Check if the diameter is 0, if so return the default diameter!
         if temp_diameter == 0:
-            return PIPE_DEFAULTS.diameter
+            if temp_dn_diameter is not None:
+                try:
+                    # Load EDR pipe data from JSON in the esdl package
+                    with resources.files("omotes_simulator_core.esdl").joinpath(
+                        "_edr_pipes.json"
+                    ).open("r") as f:
+                        pipe_data = json.load(f)
+
+                    # Match DN format and return the inner diameter
+                    dn_key_suffix = str(temp_dn_diameter).replace("DN", "DN-")
+
+                    for key, values in pipe_data.items():
+                        if key.endswith(dn_key_suffix):
+                            return float(values.get("inner_diameter"))
+                except Exception as e:
+                    print(f"[EDR PIPE LOOKUP ERROR]: {e}")
+                    return PIPE_DEFAULTS.diameter
+            else:
+                return PIPE_DEFAULTS.diameter
         else:
             return float(temp_diameter)
+        # Fallback return to ensure all code paths return a float
+        return float(PIPE_DEFAULTS.diameter)
