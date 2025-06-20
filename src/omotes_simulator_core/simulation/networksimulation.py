@@ -21,10 +21,11 @@ from typing import Callable
 from pandas import DataFrame
 
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.network_controller import NetworkController
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
+from datetime import timedelta, timezone
+
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ MAX_NUMBER_MESSAGES = 15
 class NetworkSimulation:
     """NetworkSimulation connects the controller and HeatNetwork (incl. assets)."""
 
-    def __init__(self, network: HeatNetwork, controller: NetworkController):
+    def __init__(self, network: HeatNetwork, controller: NetworkControllerNew):
         """Instantiate the NetworkSimulation object."""
         self.network = network
         self.controller = controller
@@ -73,6 +74,7 @@ class NetworkSimulation:
                 )
                 is_converged = self.network.check_convergence()
                 iteration += 1
+            logger.debug("Convergence time step reached after %d iterations", iteration)
             self.network.store_output()
 
             if (time_step % progress_interval) == 0:

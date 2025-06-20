@@ -37,7 +37,8 @@ class StringEsdlAssetMapper:
         esdl.Transport: "transport",
         esdl.Joint: "joint",
         esdl.ATES: "storage",
-        esdl.HeatPump: "pump",
+        esdl.HeatPump: "heat_transfer",
+        esdl.HeatExchange: "heat_transfer",
     }
 
     str_to_type_dict = reverse_dict(original_dict=type_to_str_dict)
