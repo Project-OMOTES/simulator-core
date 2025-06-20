@@ -1,4 +1,4 @@
-#  Copyright (c) 2023. Deltares & TNO
+#  Copyright (c) 2025. Deltares & TNO
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 """Module containing the Esdl to HeatPump asset mapper class."""
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.asset_defaults import HeatPumpDefaults
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
@@ -36,7 +37,10 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
         heatpump_entity = HeatPump(
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
-            port_ids=esdl_asset.get_port_ids(),
+            connected_ports=esdl_asset.get_port_ids(),
+            coefficient_of_performance=esdl_asset.get_property(
+                "COP", HeatPumpDefaults.coefficient_of_performance
+            ),
         )
 
         return heatpump_entity

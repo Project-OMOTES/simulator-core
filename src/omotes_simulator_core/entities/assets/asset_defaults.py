@@ -68,6 +68,16 @@ class AtesDefaults:
     maximum_flow_discharge: float = 200.0  # m3/h
 
 
+@dataclass
+class HeatPumpDefaults:
+    """Class containing the default values for a heat pump.
+
+    :param float coefficient_of_performance: The coefficient of performance of the heat pump [-].
+    """
+
+    coefficient_of_performance: float = 1 - 1 / 4.0
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_HEAT_DEMAND_SET_POINT = "heat_demand_set_point"
@@ -93,6 +103,9 @@ PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
 PROPERTY_HEAT_LOSS = "heat_loss"
 PROPERTY_HEAT_SUPPLIED = "heat_supplied"
 PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
+PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
+PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
+PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
