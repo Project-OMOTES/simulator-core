@@ -20,8 +20,8 @@ import logging
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
@@ -204,8 +204,8 @@ class NetworkControllerNew(NetworkControllerAbstract):
                     if producer.id not in producers:
                         producers[producer.id] = {
                             PROPERTY_HEAT_DEMAND: 0,
-                            PROPERTY_TEMPERATURE_RETURN: producer.temperature_return,
-                            PROPERTY_TEMPERATURE_SUPPLY: producer.temperature_supply,
+                            PROPERTY_TEMPERATURE_IN: producer.temperature_in,
+                            PROPERTY_TEMPERATURE_OUT: producer.temperature_out,
                             PROPERTY_SET_PRESSURE: False,
                         }
         return producers

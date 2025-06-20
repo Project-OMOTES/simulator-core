@@ -74,6 +74,7 @@ class NetworkSimulation:
                 )
                 is_converged = self.network.check_convergence()
                 iteration += 1
+            logger.debug("Convergence time step reached after %d iterations", iteration)
             self.network.store_output()
 
             if (time_step % progress_interval) == 0:
