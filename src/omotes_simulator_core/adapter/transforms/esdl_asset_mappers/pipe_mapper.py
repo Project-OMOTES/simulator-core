@@ -97,7 +97,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             if temp_dn_diameter is not None:
                 try:
                     pipe_data = PIPE_DATABASE
-                    # Match DN format and return the inner diameter
+                    # Match DN format and return the inner diameter.
                     dn_key_suffix = str(temp_dn_diameter).replace("DN", "DN-")
 
                     for key, values in pipe_data.items():
