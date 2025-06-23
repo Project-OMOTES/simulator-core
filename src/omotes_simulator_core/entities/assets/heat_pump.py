@@ -181,8 +181,8 @@ class HeatPump(AssetAbstract):
             temperature_in=self.temperature_in_primary,
             temperature_out=self.temperature_out_primary,
         )
-        if self.mass_flow_initialization_primary == 0:
-            logger.info("mass flow rate became zero")
+        # if self.mass_flow_initialization_primary == 0:
+        #    logger.info("mass flow rate became zero")
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_primary = self.temperature_in_primary  # type: ignore

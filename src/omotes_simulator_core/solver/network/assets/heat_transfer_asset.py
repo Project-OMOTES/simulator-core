@@ -269,7 +269,7 @@ class HeatTransferAsset(BaseAsset):
             self.secondary_side_outflow,
         ) = self.get_ordered_connection_point_list()
 
-        if np.all(self.prev_sol == 0):
+        if np.all(np.abs(self.prev_sol[0:-1:3]) < 1e-3):
             iteration_flow_direction_primary = self.flow_direction(
                 self.prev_sol[
                     self.get_index_matrix(

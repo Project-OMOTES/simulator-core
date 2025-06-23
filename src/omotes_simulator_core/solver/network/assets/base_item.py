@@ -50,6 +50,10 @@ class BaseItem(ABC):
         """Returns the string representation of the item."""
         return str(self.name)
 
+    def reset_prev_sol(self) -> None:
+        """Resets the previous solution to an array of zeros with the length of number_of_unknowns."""
+        self.prev_sol = np.zeros(self.number_of_unknowns)
+
     def set_matrix_index(self, index: int) -> None:
         """Sets the matrix index of the item.
 

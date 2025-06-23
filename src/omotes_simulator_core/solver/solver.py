@@ -65,6 +65,10 @@ class Solver:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
+        for asset in self.network.assets:
+            self.network.get_asset(asset).reset_prev_sol()
+        for node in self.network.nodes:
+            self.network.get_node(node).reset_prev_sol()
         while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
