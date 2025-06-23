@@ -27,6 +27,8 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
+    SECONDARY,
+    PRIMARY,
 )
 
 
@@ -97,8 +99,8 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=50,
             marginal_costs=1,
             priority=2,
@@ -106,8 +108,8 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=40,
             marginal_costs=1,
             priority=3,
@@ -115,20 +117,20 @@ class ControllerTest(unittest.TestCase):
         consumer1 = Mock(spec=ControllerConsumer)
         consumer1.id = "consumer1"
         consumer1.get_heat_demand = Mock(return_value=10)
-        consumer1.temperature_supply = 50
-        consumer1.temperature_return = 40
+        consumer1.temperature_in = 50
+        consumer1.temperature_out = 40
         consumer2 = Mock(spec=ControllerConsumer)
         consumer2.id = "consumer2"
         consumer2.get_heat_demand = Mock(return_value=20)
-        consumer2.temperature_supply = 50
-        consumer2.temperature_return = 40
+        consumer2.temperature_in = 50
+        consumer2.temperature_out = 40
 
         self.storage1 = Mock(spec=ControllerStorage)
         self.storage1.id = "storage1"
         self.storage1.max_discharge_power = 10
         self.storage1.max_charge_power = 20
-        self.storage1.temperature_supply = 50
-        self.storage1.temperature_return = 40
+        self.storage1.temperature_out = 50
+        self.storage1.temperature_in = 40
 
         heatpump = ControllerHeatTransferAsset(name="heatpump1", identifier="heatpump1", factor=5.0)
         heatpump2 = ControllerHeatTransferAsset(
@@ -172,8 +174,10 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0)
         self.assertEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0)
         self.assertEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0)
-        self.assertEqual(result["heatpump1"][PROPERTY_HEAT_DEMAND], 30.0)
-        self.assertEqual(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 30.0)
+        self.assertEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 150.0)
+        self.assertEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20.0)
 
         # to test:
         # enough supply one source off : done
@@ -193,8 +197,14 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0, places=3)
         self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
         self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 50.0, places=3)
-        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 50.0, places=3)
+        self.assertAlmostEquals(
+            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 250.0, places=3
+        )
+        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(
+            result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20.0, places=3
+        )
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
 
     def test_update_setpoints_two_source(self):
@@ -208,8 +218,10 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 20.0)
         self.assertEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0)
         self.assertEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0)
-        self.assertEqual(result["heatpump1"][PROPERTY_HEAT_DEMAND], 10.0)
-        self.assertEqual(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 10.0)
+        self.assertEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0)
+        self.assertEqual(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20.0)
 
     def test_update_setpoints_storage_discharge(self):
         # arrange
@@ -225,8 +237,14 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], 25.0, places=3)
         self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
         self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 25.0, places=3)
-        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 25.0, places=3)
+        self.assertAlmostEquals(
+            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 25.0, places=3
+        )
+        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEquals(
+            result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20.0, places=3
+        )
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -5.0, places=3)
 
     def test_update_stetpoints_cap_demand(self):
@@ -244,8 +262,10 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
         self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 15, places=3)
         self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 15, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 10, places=3)
-        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEquals(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEquals(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 15, places=3)
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
 
     def test_update_stetpoints_cap_storage(self):
@@ -261,8 +281,10 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 40.0, places=3)
         self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10, places=3)
         self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PROPERTY_HEAT_DEMAND], 50, places=3)
-        self.assertAlmostEquals(result["heatpump2"][PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 50, places=3)
+        self.assertAlmostEquals(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 50, places=3)
+        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEquals(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20, places=3)
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 60.0, places=3)
 
     def test__set_producers_to_max(self):
@@ -362,8 +384,8 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=50,
             marginal_costs=1,
             priority=2,
@@ -371,8 +393,8 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=40,
             marginal_costs=1,
             priority=3,
@@ -380,8 +402,8 @@ class ControllerTest(unittest.TestCase):
         producer3 = ControllerProducer(
             name="producer3",
             identifier="producer3",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=40,
             marginal_costs=1,
             priority=1,
@@ -389,8 +411,8 @@ class ControllerTest(unittest.TestCase):
         producer4 = ControllerProducer(
             name="producer4",
             identifier="producer4",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=20,
             marginal_costs=1,
             priority=3,
@@ -431,8 +453,8 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=50,
             marginal_costs=1,
             priority=2,
@@ -440,8 +462,8 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=40,
             marginal_costs=1,
             priority=3,
@@ -449,8 +471,8 @@ class ControllerTest(unittest.TestCase):
         producer3 = ControllerProducer(
             name="producer3",
             identifier="producer3",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=40,
             marginal_costs=1,
             priority=1,
@@ -458,8 +480,8 @@ class ControllerTest(unittest.TestCase):
         producer4 = ControllerProducer(
             name="producer4",
             identifier="producer4",
-            temperature_supply=50,
-            temperature_return=40,
+            temperature_out=50,
+            temperature_in=40,
             power=20,
             marginal_costs=1,
             priority=3,
