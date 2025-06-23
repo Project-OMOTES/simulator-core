@@ -14,13 +14,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """HeatPump class."""
-from typing import Dict
-
 import logging
+from typing import Dict
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
+    PRIMARY,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -28,7 +28,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PRIMARY,
     SECONDARY,
 )
 from omotes_simulator_core.entities.assets.utils import (

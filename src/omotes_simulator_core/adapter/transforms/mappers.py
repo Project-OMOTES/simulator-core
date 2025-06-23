@@ -14,23 +14,34 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper classes."""
 import dataclasses
+
 from esdl.esdl import Joint as esdl_junction
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
+    ControllerHeatTransferMapper,
     ControllerProducerMapper,
     ControllerStorageMapper,
-    ControllerHeatTransferMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
+from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
+from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
 )
-from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_network import (
+    ControllerNetwork,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
@@ -38,8 +49,6 @@ from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
-from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
-from omotes_simulator_core.adapter.utility.graph import Graph
 
 
 def replace_joint_in_connected_assets(

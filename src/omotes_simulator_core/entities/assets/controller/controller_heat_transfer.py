@@ -14,16 +14,16 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the class for a heat trasnfer asset."""
 
-from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-    AssetControllerAbstract,
-)
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
+    PRIMARY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
-    PRIMARY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
+)
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
 )
 
 

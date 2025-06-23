@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module for solving the network class."""
 import logging
+
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.matrix import Matrix
 from omotes_simulator_core.solver.network.network import Network
