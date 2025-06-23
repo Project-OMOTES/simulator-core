@@ -51,7 +51,7 @@ class BaseItem(ABC):
         return str(self.name)
 
     def reset_prev_sol(self) -> None:
-        """Resets the previous solution to an array of zeros with the length of number_of_unknowns."""
+        """Resets the previous solution to zero."""
         self.prev_sol = np.zeros(self.number_of_unknowns)
 
     def set_matrix_index(self, index: int) -> None:

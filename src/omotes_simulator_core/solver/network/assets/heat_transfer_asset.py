@@ -480,13 +480,15 @@ class HeatTransferAsset(BaseAsset):
             ]
         )
         if (internal_energy_difference_primary == 0) | (energy_secondary_side == 0):
-            return self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=self.primary_side_inflow,
-                    use_relative_indexing=False,
-                )
-            ]
+            return float(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=self.primary_side_inflow,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
         return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
 
     def add_continuity_equation(
