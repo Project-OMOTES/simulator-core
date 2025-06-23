@@ -17,9 +17,7 @@
 
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.simulation.mappers.mappers import (
-    EsdlMapperAbstract,
-)
+from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class EsdlGraphMapper(EsdlMapperAbstract):
