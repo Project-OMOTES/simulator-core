@@ -88,9 +88,15 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
 
     @staticmethod
     def _get_diameter(esdl_asset: EsdlAssetObject) -> float:
-        """Retrieve the diameter of the pipe and convert it if necessary."""
-        # Check if the property is available
-        # Retrieve the diameter
+        """Retrieve the diameter of the pipe and convert it if necessary.
+
+        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
+            current pipe object.
+        :return: The inner diameter of the pipe if specified, otherwise it uses the nominal
+        diameter to determine the diameter from the EDR list. If both values are not available,
+        then the default diameter is returned.
+
+        """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
         dn_diameter = esdl_asset.get_property("diameter", None)
         temp_schedule = esdl_asset.get_property("schedule", None)
@@ -107,4 +113,3 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
                 return PIPE_DEFAULTS.diameter
         else:
             return float(inner_diameter)
-        return float(PIPE_DEFAULTS.diameter)
