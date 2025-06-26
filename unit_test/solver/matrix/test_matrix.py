@@ -152,7 +152,7 @@ class MatrixTest(unittest.TestCase):
 
         # assert
         self.assertIsInstance(cm.exception, RuntimeError)
-        self.assertEqual(str(cm.exception), "Matrix is singular")
+        self.assertEqual(str(cm.exception), "Matrix is singular, matrix is dumped to file.")
         # assert
 
     def test_is_converged_false(self) -> None:

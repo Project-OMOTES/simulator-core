@@ -13,9 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module for solving the network class."""
+import logging
+
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.matrix import Matrix
 from omotes_simulator_core.solver.network.network import Network
+
+logger = logging.getLogger(__name__)
 
 
 class Solver:
@@ -62,14 +66,19 @@ class Solver:
         """Method to solve the network."""
         iteration = 0
         self.matrix.reset_solution()
+        for asset in self.network.assets:
+            self.network.get_asset(asset).reset_prev_sol()
+        for node in self.network.nodes:
+            self.network.get_node(node).reset_prev_sol()
         while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
             self.matrix.solve(equations, dump=False)
             self.results_to_assets()
             if iteration > self._iteration_limit:
-                print("No converged solution reached")
+                logger.warning("No converged solution reached")
                 break
+        logger.debug("Solver finished after %d iterations", iteration)
 
     def get_results(self) -> None:
         """Method to get the results of the network."""

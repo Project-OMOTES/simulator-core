@@ -77,7 +77,8 @@ class Matrix:
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
         if np.isnan(self.sol_new).any():
-            raise RuntimeError("Matrix is singular")
+            self.dump_matrix(matrix=matrix, rhs_array=rhs)
+            raise RuntimeError("Matrix is singular, matrix is dumped to file.")
         result: list[float] = self.sol_new.tolist()
         return result
 

@@ -179,12 +179,12 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = 10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = -10.0
         # -- Set temperatures to override zero value check
         self.asset.prev_sol[
             self.asset.get_index_matrix(
@@ -263,12 +263,12 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = -10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = -10.0
         # -- Set temperatures to override zero value check
         self.asset.prev_sol[
             self.asset.get_index_matrix(

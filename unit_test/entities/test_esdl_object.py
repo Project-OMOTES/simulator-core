@@ -291,6 +291,17 @@ class EsdlObjectTest(unittest.TestCase):
             f"port: {pipe.get_port_ids()[0]}",
         )
 
+    def test_get_asset_by_id(self):
+        # Arrange
+        producers = self.esdl_object.get_all_assets_of_type("producer")
+        producer = producers[0]
+
+        # Act
+        asset = self.esdl_object.get_asset_by_id(producer.get_id())
+
+        # Assert
+        self.assertEqual(asset.esdl_asset, producer.esdl_asset)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
@@ -305,6 +316,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.pipe = esdl.Pipe
         self.transport = esdl.Transport
         self.joint = esdl.Joint
+        self.heat_pump = esdl.HeatPump
+        self.heat_exchange = esdl.HeatExchange
         self.asset_str = "asset"
         self.producer_str = "producer"
         self.consumer_str = "consumer"
@@ -313,6 +326,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.pipe_str = "pipe"
         self.transport_str = "transport"
         self.joint_str = "joint"
+        self.heat_tranfer_str = "heat_transfer"
 
     def test_to_string(self):
         """Test for conversion from esdl asset to string."""
@@ -326,6 +340,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         conversion_str = StringEsdlAssetMapper().to_entity(self.conversion)
         pipe_str = StringEsdlAssetMapper().to_entity(self.pipe)
         transport_str = StringEsdlAssetMapper().to_entity(self.transport)
+        heat_tranfer_str = StringEsdlAssetMapper().to_entity(self.heat_pump)
+        heat_tranfer_str2 = StringEsdlAssetMapper().to_entity(self.heat_exchange)
 
         joint_str = StringEsdlAssetMapper().to_entity(self.joint)  # act
 
@@ -338,6 +354,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.assertTrue(pipe_str == self.pipe_str)
         self.assertTrue(transport_str == self.transport_str)
         self.assertTrue(joint_str == self.joint_str)
+        self.assertTrue(heat_tranfer_str == self.heat_tranfer_str)
+        self.assertTrue(heat_tranfer_str2 == self.heat_tranfer_str)
 
     def test_to_esdl(self):
         """Test for mapping back to esdl assets."""
@@ -351,6 +369,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
         transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
         joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
+        heat_transfer = StringEsdlAssetMapper().to_esdl(self.heat_tranfer_str)[0]
+        heat_transfer2 = StringEsdlAssetMapper().to_esdl(self.heat_tranfer_str)[1]
 
         geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]  # act
 
@@ -363,6 +383,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.assertTrue(transport == self.transport)
         self.assertTrue(joint == self.joint)
         self.assertTrue(geothermal == self.geothermal_source)
+        self.assertTrue(heat_transfer == self.heat_pump)
+        self.assertTrue(heat_transfer2 == self.heat_exchange)
 
     def test_raise_error(self):
         """Test to test if an error is raised for unknown component in ESDL."""
