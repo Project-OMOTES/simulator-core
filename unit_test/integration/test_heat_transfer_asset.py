@@ -158,7 +158,6 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         """
         # Arrange
         # Connect assets
-        # TODO need to discuss with Mike what is the prupose of this test it seems not to be correct implemented
 
         primary_in = self.network.connect_assets(
             asset1_id=self.heat_transfer_asset.name,
