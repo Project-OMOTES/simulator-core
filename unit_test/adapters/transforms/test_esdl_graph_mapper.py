@@ -17,10 +17,11 @@
 
 import unittest
 from pathlib import Path
+
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
+from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
-from omotes_simulator_core.adapter.utility.graph import Graph
 
 
 class TestEsdlGraphMapper(unittest.TestCase):

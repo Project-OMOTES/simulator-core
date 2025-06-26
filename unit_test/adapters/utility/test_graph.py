@@ -16,6 +16,7 @@
 """Test ates mapper."""
 
 import unittest
+
 from omotes_simulator_core.adapter.utility.graph import Graph
 
 

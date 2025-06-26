@@ -16,20 +16,28 @@
 import datetime
 import unittest
 from unittest.mock import Mock
-from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
-from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PRIMARY,
+    PROPERTY_HEAT_DEMAND,
+    SECONDARY,
+)
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
 )
-
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_HEAT_DEMAND,
-    SECONDARY,
-    PRIMARY,
+from omotes_simulator_core.entities.assets.controller.controller_network import (
+    ControllerNetwork,
 )
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
+from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 
 
 class ControllerTest(unittest.TestCase):

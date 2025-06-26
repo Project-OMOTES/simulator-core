@@ -17,12 +17,14 @@ import datetime
 import unittest
 from unittest.mock import Mock
 
-from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
+)
+from omotes_simulator_core.entities.assets.controller.controller_network import (
+    ControllerNetwork,
 )
 
 
