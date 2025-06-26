@@ -158,6 +158,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         """
         # Arrange
         # Connect assets
+        # TODO need to discuss with Mike what is the prupose of this test it seems not to be correct implemented
+
         primary_in = self.network.connect_assets(
             asset1_id=self.heat_transfer_asset.name,
             connection_point_1=0,
@@ -189,12 +191,12 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
-        self.heat_transfer_asset.mass_flow_initialization_primary = +1
-        self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -1
+        self.heat_transfer_asset.mass_flow_initialization_primary = -1
+        self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = 1
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
-        self.demand_asset.mass_flow_rate_set_point = 38.76
+        self.demand_asset.mass_flow_rate_set_point = -38.76
         self.demand_asset.pre_scribe_mass_flow = True
 
         # Set the temperature of the production
@@ -202,10 +204,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.production_asset.supply_temperature = 30 + 273.15
 
         # -- Set associated node temperature
-        self.network.get_node(primary_in).initial_temperature = 20 + 273.15
-        self.network.get_node(primary_out).initial_temperature = 30 + 273.15
-        self.network.get_node(secondary_in).initial_temperature = 40 + 273.15
-        self.network.get_node(secondary_out).initial_temperature = 70 + 273.15
+        self.network.get_node(primary_in).initial_temperature = 30 + 273.15
+        self.network.get_node(primary_out).initial_temperature = 20 + 273.15
+        self.network.get_node(secondary_in).initial_temperature = 70 + 273.15
+        self.network.get_node(secondary_out).initial_temperature = 40 + 273.15
 
         # Act
         solver.solve()
@@ -217,7 +219,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            77.55,
+            -77.55,
             2,
         )
         self.assertAlmostEqual(
@@ -226,7 +228,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
                 )
             ],
-            -38.76,
+            38.76,
             2,
         )
         self.assertAlmostEqual(
