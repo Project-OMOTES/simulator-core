@@ -15,6 +15,7 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import numpy as np
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -24,7 +25,7 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
 )
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from omotes_simulator_core.esdl.edr_pipes import PIPE_DATABASE
+from esdl.edr.client import EDRClient
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
@@ -90,25 +91,20 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """Retrieve the diameter of the pipe and convert it if necessary."""
         # Check if the property is available
         # Retrieve the diameter
-        temp_diameter = esdl_asset.get_property("innerDiameter", 0)
-        temp_dn_diameter = esdl_asset.get_property("diameter", None)
+        inner_diameter = esdl_asset.get_property("innerDiameter", 0)
+        dn_diameter = esdl_asset.get_property("diameter", None)
+        temp_schedule = esdl_asset.get_property("schedule", None)
         # Check if the diameter is 0, if so return the default diameter!
-        if temp_diameter == 0:
-            if temp_dn_diameter is not None:
-                try:
-                    pipe_data = PIPE_DATABASE
-                    # Match DN format and return the inner diameter.
-                    dn_key_suffix = str(temp_dn_diameter).replace("DN", "DN-")
-
-                    for key, values in pipe_data.items():
-                        if key.endswith(dn_key_suffix):
-                            return float(values.get("inner_diameter"))
-                except Exception as e:
-                    print(f"[EDR PIPE LOOKUP ERROR]: {e}")
-                    return PIPE_DEFAULTS.diameter
+        if inner_diameter == 0:
+            if dn_diameter is not None:
+                schedule = 1 if temp_schedule is None else int(temp_schedule)
+                diameter = int(dn_diameter.name.replace("DN", ""))
+                title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
+                edr_client = EDRClient()
+                esdl_object = edr_client.get_object_esdl(title)
+                return float(esdl_object.innerDiameter)
             else:
                 return PIPE_DEFAULTS.diameter
         else:
-            return float(temp_diameter)
-        # Fallback return to ensure all code paths return a float
+            return float(inner_diameter)
         return float(PIPE_DEFAULTS.diameter)
