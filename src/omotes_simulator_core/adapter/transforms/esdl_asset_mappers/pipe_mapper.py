@@ -15,6 +15,7 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import numpy as np
+from esdl.edr.client import EDRClient
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
@@ -25,7 +26,6 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
 )
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-from esdl.edr.client import EDRClient
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
