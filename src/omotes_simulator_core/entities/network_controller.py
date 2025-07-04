@@ -75,6 +75,20 @@ class NetworkController(NetworkControllerAbstract):
         for producer in self.producers:
             producer.priority = unique_sorted_values.index(producer.marginal_costs) + 1
 
+    def _set_priority_from_control_strategy(self) -> None:
+        """Sets the priority of the producers based on piority control strategy.
+
+        The priority of the producers is set based on the priority values specified through
+        the esdl priority strategy. The producer with the lowest priority value has the 
+        highest priority.
+        """
+        # Created a sorted list of unique priorities.
+        unique_sorted_values = sorted(set([producer.priority for producer in self.producers])) # TODO: If priority is None (no priority was assigned), set it to the lowest possible priority. Generate a message.
+        
+        # TODO: Check where this and the previous function are called from to add a flag to call this one or the other.
+        
+        pass
+
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
 

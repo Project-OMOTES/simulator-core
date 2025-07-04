@@ -54,6 +54,13 @@ class EsdlAssetObject:
     def get_id(self) -> str:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
+    
+    def get_priority(self) -> int:
+        """Get the control strategy priority value."""
+        if hasattr(self.esdl_asset.controlStrategy, 'priority'):
+            return self.esdl_asset.controlStrategy.priority
+        else:
+            return None
 
     def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
         """Get property value from the esdl_asset based on the 'ESDL' name.
