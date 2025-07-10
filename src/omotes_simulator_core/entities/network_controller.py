@@ -65,17 +65,15 @@ class NetworkController(NetworkControllerAbstract):
             self._set_priority_from_control_strategy()
         else:
             self._set_priority_from_marginal_costs()
-        a = 1
-    
+
     def _check_strategy_priority(self) -> bool:
-        """Checks whether at least one of the producer assets has a control strategy priority
-        value assigned to it. """
-        Flag = False
+        """Check if at least one asset has a control strategy priority assigned."""
+        strategy_flag = False
         for producer in self.producers:
-            if producer.priority is not None: 
-                Flag = True
+            if producer.priority is not None:
+                strategy_flag = True
                 break
-        return Flag
+        return strategy_flag
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
@@ -94,28 +92,32 @@ class NetworkController(NetworkControllerAbstract):
         """Sets the priority of the producers based on piority control strategy.
 
         The priority of the producers is set based on the priority values specified through
-        the esdl priority strategy. The producer with the lowest priority value has the 
+        the esdl priority strategy. The producer with the lowest priority value has the
         highest priority.
         """
         # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
-        lowest_priority = min([producer.priority for producer in self.producers if producer.priority is not None])
+        lowest_priority = min(
+            [producer.priority for producer in self.producers if producer.priority is not None])
         # For assets that have no priority assingned, give them the lowest priority.
         for producer in self.producers:
             if producer.priority is None:
                 producer.priority = lowest_priority + 1
                 logger.warning(
-                f"No priority found for asset. "
-                f"{producer.name} assigned the lowest priority value.",
-                extra={"esdl_object_id": producer.id},
-            )
-        
+                    f"No priority found for asset. "
+                    f"{producer.name} assigned the lowest priority value.",
+                    extra={"esdl_object_id": producer.id},
+                )
+
         # Arrange producers in a list based on priority
-        producers_sorted = sorted(set([producer for producer in self.producers]), \
+        producers_sorted = sorted(set([producer for producer in self.producers]),
                                   key=lambda obj: obj.priority)
-        
-        # Reassign priorities to all producers so they all have a unique value (avoid producers with same priority value).
+
+        # Reassign priorities to all producers so they all have a unique value
+        # (avoid producers with same priority value).
         for producer in self.producers:
-            priority_idx = next((i for i, producer_sorted in enumerate(producers_sorted) if producer_sorted.name == producer.name))
+            priority_idx = next(
+                (i for i, producer_sorted in enumerate(producers_sorted) if
+                 producer_sorted.name == producer.name))
             producer.priority = priority_idx + 1
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
