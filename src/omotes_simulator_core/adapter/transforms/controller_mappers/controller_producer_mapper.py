@@ -50,6 +50,6 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             power=power,
             marginal_costs=marginal_costs,
-            priority=strategy_priority
+            priority=strategy_priority,
         )
         return contr_producer

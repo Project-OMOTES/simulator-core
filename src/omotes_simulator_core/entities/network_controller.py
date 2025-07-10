@@ -97,7 +97,8 @@ class NetworkController(NetworkControllerAbstract):
         """
         # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
         lowest_priority = min(
-            [producer.priority for producer in self.producers if producer.priority is not None])
+            [producer.priority for producer in self.producers if producer.priority is not None]
+        )
         # For assets that have no priority assingned, give them the lowest priority.
         for producer in self.producers:
             if producer.priority is None:
@@ -109,15 +110,20 @@ class NetworkController(NetworkControllerAbstract):
                 )
 
         # Arrange producers in a list based on priority
-        producers_sorted = sorted(set([producer for producer in self.producers]),
-                                  key=lambda obj: obj.priority)
+        producers_sorted = sorted(
+            set([producer for producer in self.producers]), key=lambda obj: obj.priority
+        )
 
         # Reassign priorities to all producers so they all have a unique value
         # (avoid producers with same priority value).
         for producer in self.producers:
             priority_idx = next(
-                (i for i, producer_sorted in enumerate(producers_sorted) if
-                 producer_sorted.name == producer.name))
+                (
+                    i
+                    for i, producer_sorted in enumerate(producers_sorted)
+                    if producer_sorted.name == producer.name
+                )
+            )
             producer.priority = priority_idx + 1
 
     def update_setpoints(self, time: datetime.datetime) -> dict:

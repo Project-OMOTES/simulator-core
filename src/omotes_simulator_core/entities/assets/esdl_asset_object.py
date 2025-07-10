@@ -57,7 +57,7 @@ class EsdlAssetObject:
 
     def get_strategy_priority(self) -> Any:
         """Get the control strategy priority value."""
-        if hasattr(self.esdl_asset.controlStrategy, 'priority'):
+        if hasattr(self.esdl_asset.controlStrategy, "priority"):
             return self.esdl_asset.controlStrategy.priority
         else:
             return None
