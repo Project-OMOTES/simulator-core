@@ -42,7 +42,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_in = esdl_asset.get_temperature("In", "Return")
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
-        priority = esdl_asset.get_priority()
+        strategy_priority = esdl_asset.get_strategy_priority()
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -50,6 +50,6 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             power=power,
             marginal_costs=marginal_costs,
-            priority=priority
+            priority=strategy_priority
         )
         return contr_producer

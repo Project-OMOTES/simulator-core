@@ -60,7 +60,22 @@ class NetworkController(NetworkControllerAbstract):
         self.producers = producers
         self.consumers = consumers
         self.storages = storages
-        self._set_priority_from_marginal_costs()
+        strategy_priority = self._check_strategy_priority()
+        if strategy_priority:
+            self._set_priority_from_control_strategy()
+        else:
+            self._set_priority_from_marginal_costs()
+        a = 1
+    
+    def _check_strategy_priority(self) -> bool:
+        """Checks whether at least one of the producer assets has a control strategy priority
+        value assigned to it. """
+        Flag = False
+        for producer in self.producers:
+            if producer.priority is not None: 
+                Flag = True
+                break
+        return Flag
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
@@ -82,12 +97,26 @@ class NetworkController(NetworkControllerAbstract):
         the esdl priority strategy. The producer with the lowest priority value has the 
         highest priority.
         """
-        # Created a sorted list of unique priorities.
-        unique_sorted_values = sorted(set([producer.priority for producer in self.producers])) # TODO: If priority is None (no priority was assigned), set it to the lowest possible priority. Generate a message.
+        # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
+        lowest_priority = min([producer.priority for producer in self.producers if producer.priority is not None])
+        # For assets that have no priority assingned, give them the lowest priority.
+        for producer in self.producers:
+            if producer.priority is None:
+                producer.priority = lowest_priority + 1
+                logger.warning(
+                f"No priority found for asset. "
+                f"{producer.name} assigned the lowest priority value.",
+                extra={"esdl_object_id": producer.id},
+            )
         
-        # TODO: Check where this and the previous function are called from to add a flag to call this one or the other.
+        # Arrange producers in a list based on priority
+        producers_sorted = sorted(set([producer for producer in self.producers]), \
+                                  key=lambda obj: obj.priority)
         
-        pass
+        # Reassign priorities to all producers so they all have a unique value (avoid producers with same priority value).
+        for producer in self.producers:
+            priority_idx = next((i for i, producer_sorted in enumerate(producers_sorted) if producer_sorted.name == producer.name))
+            producer.priority = priority_idx + 1
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
