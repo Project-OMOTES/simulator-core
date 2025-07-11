@@ -62,7 +62,7 @@ class EsdlAssetObject:
         else:
             return None
 
-    def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
+    def get_property(self, esdl_property_name: str, default_value: Any) -> int | None:
         """Get property value from the esdl_asset based on the 'ESDL' name.
 
         :param esdl_property_name: The name of the property in the ESDL asset.
