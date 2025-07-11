@@ -53,7 +53,7 @@ class ControllerProducerTest(unittest.TestCase):
         self.assertEqual(producer.priority, 1)
 
     def test_controller_producer_none_priority(self) -> None:
-        """Test to ensure a None priority does not break the CotrollerProducer
+        """Test to ensure a None priority does not break the CotrollerProducer.
 
         A None priority can be generated when an esdl with a priority control strategy has a
         producer with no priority assigned to it.
