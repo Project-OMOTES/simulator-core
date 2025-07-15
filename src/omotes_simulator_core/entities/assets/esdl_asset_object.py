@@ -54,6 +54,10 @@ class EsdlAssetObject:
     def get_id(self) -> str:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
+    
+    def get_state(self) -> str:
+        """Get state of the asset."""
+        return str(self.esdl_asset.state)
 
     def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
         """Get property value from the esdl_asset based on the 'ESDL' name.

@@ -162,13 +162,15 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         :param Network network: network to add the components to.
         :return: List of pyassets.
         """
+
         py_assets_list = []
-        for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"):
+        for esdl_asset in self.esdl_object.get_all_assets_of_type("asset"): 
             # Esdl Junctions need to be skipped in this method, they are added in another method.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
-            py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
-            network.add_existing_asset(py_assets_list[-1].solver_asset)
+            if esdl_asset.get_state() == "ENABLED": # Only use asset if it is enabled.
+                py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
+                network.add_existing_asset(py_assets_list[-1].solver_asset)
 
         return py_assets_list
 
