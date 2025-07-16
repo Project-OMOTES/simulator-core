@@ -119,7 +119,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         :param network: network to add the junctions to.
         :param py_assets_list: list of assets to connect to the junctions.
-        :param py_joint_dict: dictionary with all jints in the esdl.
+        :param py_joint_dict: dictionary with all joints in the esdl.
 
         :return: List of junctions that are created and connected to the assets.
         """
