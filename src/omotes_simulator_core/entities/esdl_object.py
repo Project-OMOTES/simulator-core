@@ -75,11 +75,15 @@ class EsdlObject:
         connected_assets = []
         for esdl_port in esdl_asset.port:
             if esdl_port.id == port_id:
-                connected_ports = esdl_port.connectedTo #TODO: try to maybe only use assets that are enabled here.
+                connected_ports = (
+                    esdl_port.connectedTo
+                )  # TODO: try to maybe only use assets that are enabled here.
                 break
         for port in connected_ports:
             port_asset = port.energyasset
-            if str(port_asset.state) == 'ENABLED': # Check if the asset the port is connected to is enabled.
+            if (
+                str(port_asset.state) == "ENABLED"
+            ):  # Check if the asset the port is connected to is enabled.
                 connected_assets.append((port_asset.id, port.id))
         if not connected_ports or not connected_assets:
             raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")

@@ -54,7 +54,7 @@ class EsdlAssetObject:
     def get_id(self) -> str:
         """Get the id of the asset."""
         return str(self.esdl_asset.id)
-    
+
     def get_state(self) -> str:
         """Get state of the asset."""
         return str(self.esdl_asset.state)
