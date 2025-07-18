@@ -51,7 +51,7 @@ class NetworkController(NetworkControllerAbstract):
         """Constructor for controller for a heat network.
 
         The priority of the producers is set either on the the marginal costs or its priority
-        if a priority control strategy was defined. If at least one asset has a priority 
+        if a priority control strategy was defined. If at least one asset has a priority
         assigned to it, the controller uses the priority based system.
          - Marginal cost: The lowest marginal costs has the highest priority.
          - Priority: The lowest priority value has the highest priority. I an asset has no
@@ -115,9 +115,9 @@ class NetworkController(NetworkControllerAbstract):
 
         # Arrange producers in a list based on priority
         producers_sorted = sorted(
-            set([producer for producer in self.producers]), key=lambda obj: obj.priority 
+            set([producer for producer in self.producers]), key=lambda obj: obj.priority
             if obj.priority is not None else -1
-        ) # The if inside the loop is added to avoid a typing error with mypy.
+        )  # The if inside the loop is added to avoid a typing error with mypy.
 
         # Reassign priorities to all producers so they all have a unique value
         # (avoid producers with same priority value).
