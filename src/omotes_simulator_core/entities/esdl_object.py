@@ -71,12 +71,22 @@ class EsdlObject:
         """
         esdl_asset = self.energy_system_handler.get_by_id(asset_id)
 
-        connected_port_ids = []
+        connected_ports = []
+        connected_assets = []
         for esdl_port in esdl_asset.port:
             if esdl_port.id == port_id:
-                connected_port_ids = esdl_port.connectedTo
+                connected_ports = (
+                    esdl_port.connectedTo
+                )  # TODO: try to maybe only use assets that are enabled here.
                 break
-        if not connected_port_ids:
+
+        connected_assets = [
+            (port.energyasset.id, port.id)
+            for port in connected_ports
+            if str(port.energyasset.state) == "ENABLED"
+        ]
+
+        if not connected_ports or not connected_assets:
             raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
-        connected_assets = [(port.energyasset.id, port.id) for port in connected_port_ids]
+
         return connected_assets
