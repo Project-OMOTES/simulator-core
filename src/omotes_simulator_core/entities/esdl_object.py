@@ -85,12 +85,7 @@ class EsdlObject:
             for port in connected_ports
             if str(port.energyasset.state) == "ENABLED"
         ]
-        # for port in connected_ports:
-        #     port_asset = port.energyasset
-        #     if (
-        #         str(port_asset.state) == "ENABLED"
-        #     ):  # Check if the asset the port is connected to is enabled.
-        #         connected_assets.append((port_asset.id, port.id))
+
         if not connected_ports or not connected_assets:
             raise ValueError(f"No connected assets found for asset: {asset_id} and port: {port_id}")
 
