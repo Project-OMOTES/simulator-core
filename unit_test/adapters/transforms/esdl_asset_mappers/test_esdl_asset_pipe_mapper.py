@@ -188,3 +188,20 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
         # Assert
         self.assertEqual(diameter, PIPE_DEFAULTS.diameter)
+
+    def test_get_esdl_object_from_edr(self):
+        """Test that the correct ESDL object is returned from EDR using the DN string."""
+        # Arrange
+        with patch(
+            "omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper.EDRClient"
+        ) as mock_edr_client_class:
+            mock_edr_client = mock_edr_client_class.return_value
+            expected_object = Mock()
+            mock_edr_client.get_object_esdl.return_value = expected_object
+            # Act
+            result = EsdlAssetPipeMapper._get_esdl_object_from_edr("DN100")
+            # Assert
+            mock_edr_client.get_object_esdl.assert_called_once_with(
+                "/edr/Public/Assets/Logstor/Steel-S1-DN-100.edd"
+            )
+            self.assertEqual(result, expected_object)
