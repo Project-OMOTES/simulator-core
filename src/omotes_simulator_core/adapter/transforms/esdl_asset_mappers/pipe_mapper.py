@@ -121,8 +121,15 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         :return: EsdlAssetObject from the EDR based on the DN diameter.
 
         """
-        schedule = 1  # Assumed schedule when only nominal diameter is specified
-        diameter = int(dn_diameter.replace("DN", ""))
-        title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
-        edr_client = EDRClient()
-        return edr_client.get_object_esdl(title)
+        schedule = (
+            PIPE_DEFAULTS.insulation_schedule
+        )  # Assumed schedule when only nominal diameter is specified
+        try:
+            diameter = int(dn_diameter.replace("DN", ""))
+            title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
+            edr_client = EDRClient()
+            return edr_client.get_object_esdl(title)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to retrieve ESDL object for DN diameter '{dn_diameter}': {e}"
+            )

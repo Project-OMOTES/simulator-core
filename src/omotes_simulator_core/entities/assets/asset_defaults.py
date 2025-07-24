@@ -38,6 +38,8 @@ class PipeDefaults:
     :param float minor_loss_coefficient: The minor loss coefficient of the pipe [-].
     :param float external_temperature: The external temperature of the pipe [K].
     :param float qheat_external: The external heat flow of the pipe [W].
+    :param int insulation_schedule: Assumed insulation schedule of the pipe required
+    to retrieve the inner diameter of the pipe from the EDR list[-].
     """
 
     k_value: float = 2e-3
@@ -48,6 +50,7 @@ class PipeDefaults:
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
     roughness: float = DEFAULT_ROUGHNESS
+    insulation_schedule: int = 1
 
 
 @dataclass
