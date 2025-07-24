@@ -14,9 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to Pipe asset mapper class."""
 
+from typing import Any
 import numpy as np
 from esdl.edr.client import EDRClient
-from typing import Any
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
