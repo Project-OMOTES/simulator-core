@@ -19,7 +19,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from esdl.edr.client import EDRClient
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
