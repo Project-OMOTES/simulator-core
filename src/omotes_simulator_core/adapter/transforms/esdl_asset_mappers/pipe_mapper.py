@@ -16,6 +16,7 @@
 
 import numpy as np
 from esdl.edr.client import EDRClient
+from typing import Any
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
@@ -111,7 +112,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             return float(inner_diameter)
 
     @staticmethod
-    def _get_esdl_object_from_edr(dn_diameter: str) -> EsdlAssetObject:
+    def _get_esdl_object_from_edr(dn_diameter: str) -> Any:
         """
         Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
 
