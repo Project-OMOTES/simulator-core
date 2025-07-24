@@ -93,23 +93,34 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
             current pipe object.
         :return: The inner diameter of the pipe if specified, otherwise it uses the nominal
-        diameter to determine the diameter from the EDR list. If both values are not available,
-        then the default diameter is returned.
+        diameter to retrieve the inner diameter from the EDR list. If neither is available,
+        a default diameter is returned. When only the nominal diameter is specified,
+        the insulation schedule must be provided; in this case, it is assumed to be 1.
 
         """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
         dn_diameter = esdl_asset.get_property("diameter", None)
-        temp_schedule = esdl_asset.get_property("schedule", None)
         # Check if the diameter is 0, if so return the default diameter!
         if inner_diameter == 0:
             if dn_diameter is not None:
-                schedule = 1 if temp_schedule is None else int(temp_schedule)
-                diameter = int(dn_diameter.name.replace("DN", ""))
-                title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
-                edr_client = EDRClient()
-                esdl_object = edr_client.get_object_esdl(title)
+                esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(dn_diameter.name)
                 return float(esdl_object.innerDiameter)
             else:
                 return PIPE_DEFAULTS.diameter
         else:
             return float(inner_diameter)
+
+    @staticmethod
+    def _get_esdl_object_from_edr(dn_diameter: str) -> EsdlAssetObject:
+        """
+        Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
+
+        :param dn_diameter: the nominal diameter of the pipe.
+        :return: EsdlAssetObject from the EDR based on the DN diameter.
+
+        """
+        schedule = 1  # Assumed schedule when only nominal diameter is specified
+        diameter = int(dn_diameter.replace("DN", ""))
+        title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
+        edr_client = EDRClient()
+        return edr_client.get_object_esdl(title)
