@@ -15,6 +15,7 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 from typing import Any
+
 import numpy as np
 from esdl.edr.client import EDRClient
 
