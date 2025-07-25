@@ -61,6 +61,13 @@ class EsdlAssetObject:
             return int(self.esdl_asset.controlStrategy.priority)
         else:
             return None
+    def get_state(self) -> str:
+        """Get state of the asset.
+
+        The options for the asset's state are ENABLED, DISABLED and OPTIONAL. The simulator
+        will only use assets that have an ENABLED state.
+        """
+        return str(self.esdl_asset.state)
 
     def get_property(self, esdl_property_name: str, default_value: Any) -> Any:
         """Get property value from the esdl_asset based on the 'ESDL' name.

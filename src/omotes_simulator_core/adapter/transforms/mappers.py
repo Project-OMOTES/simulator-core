@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper classes."""
 
+import logging
+
 from esdl.esdl import Joint as esdl_junction
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
@@ -29,6 +31,8 @@ from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
+
+logger = logging.getLogger(__name__)
 
 
 def replace_joint_in_connected_assets(
@@ -119,7 +123,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         :param network: network to add the junctions to.
         :param py_assets_list: list of assets to connect to the junctions.
-        :param py_joint_dict: dictionary with all jints in the esdl.
+        :param py_joint_dict: dictionary with all joints in the esdl.
 
         :return: List of junctions that are created and connected to the assets.
         """
@@ -158,7 +162,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         """Method to convert all assets from the esdl to a list of pyassets.
 
         This method loops over all assets in the esdl and converts them to pyassets.
-
         :param Network network: network to add the components to.
         :return: List of pyassets.
         """
@@ -167,8 +170,15 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             # Esdl Junctions need to be skipped in this method, they are added in another method.
             if isinstance(esdl_asset.esdl_asset, esdl_junction):
                 continue
-            py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
-            network.add_existing_asset(py_assets_list[-1].solver_asset)
+            if esdl_asset.get_state() == "ENABLED":  # Only use asset if it is enabled.
+                py_assets_list.append(EsdlAssetMapper.to_entity(esdl_asset))
+                network.add_existing_asset(py_assets_list[-1].solver_asset)
+            else:
+                logger.warning(
+                    f"The state of {esdl_asset.get_name()} is set to {esdl_asset.get_state()}. "
+                    f"This asset will be ignored by the simulator.",
+                    extra={"esdl_object_id": esdl_asset.get_id()},
+                )
 
         return py_assets_list
 
