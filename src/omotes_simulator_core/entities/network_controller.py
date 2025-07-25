@@ -72,12 +72,7 @@ class NetworkController(NetworkControllerAbstract):
 
     def _check_strategy_priority(self) -> bool:
         """Check if at least one asset has a control strategy priority assigned."""
-        strategy_flag = False
-        for producer in self.producers:
-            if producer.priority is not None:
-                strategy_flag = True
-                break
-        return strategy_flag
+        return any([asset.priority for asset in self.producers])
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
@@ -115,8 +110,8 @@ class NetworkController(NetworkControllerAbstract):
 
         # Arrange producers in a list based on priority
         producers_sorted = sorted(
-            set([producer for producer in self.producers]), key=lambda obj: obj.priority
-            if obj.priority is not None else -1
+            set([producer for producer in self.producers]),
+            key=lambda obj: obj.priority if obj.priority is not None else -1,
         )  # The if inside the loop is added to avoid a typing error with mypy.
 
         # Reassign priorities to all producers so they all have a unique value

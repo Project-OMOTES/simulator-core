@@ -61,6 +61,7 @@ class EsdlAssetObject:
             return int(self.esdl_asset.controlStrategy.priority)
         else:
             return None
+
     def get_state(self) -> str:
         """Get state of the asset.
 
