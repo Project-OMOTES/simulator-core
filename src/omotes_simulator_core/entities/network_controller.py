@@ -50,8 +50,12 @@ class NetworkController(NetworkControllerAbstract):
     ) -> None:
         """Constructor for controller for a heat network.
 
-        The priority of the producers is set based on the marginal costs. The lowest marginal
-        costs has the highest priority.
+        The priority of the producers is set either on the the marginal costs or its priority
+        if a priority control strategy was defined. If at least one asset has a priority
+        assigned to it, the controller uses the priority based system.
+         - Marginal cost: The lowest marginal costs has the highest priority.
+         - Priority: The lowest priority value has the highest priority. I an asset has no
+        priority value assigned to it, it will be assigned the highest possible priority value.
 
         :param List[ControllerProducer] producers: List of producers in the network.
         :param List[ControllerConsumer] consumers: List of consumers in the network.
@@ -60,7 +64,15 @@ class NetworkController(NetworkControllerAbstract):
         self.producers = producers
         self.consumers = consumers
         self.storages = storages
-        self._set_priority_from_marginal_costs()
+        strategy_priority = self._check_strategy_priority()
+        if strategy_priority:
+            self._set_priority_from_control_strategy()
+        else:
+            self._set_priority_from_marginal_costs()
+
+    def _check_strategy_priority(self) -> bool:
+        """Check if at least one asset has a control strategy priority assigned."""
+        return any([asset.priority for asset in self.producers])
 
     def _set_priority_from_marginal_costs(self) -> None:
         """Sets the priority of the producers based on the marginal costs.
@@ -74,6 +86,45 @@ class NetworkController(NetworkControllerAbstract):
         # set the priority based on the index of the marginal cost in the sorted list.
         for producer in self.producers:
             producer.priority = unique_sorted_values.index(producer.marginal_costs) + 1
+
+    def _set_priority_from_control_strategy(self) -> None:
+        """Sets the priority of the producers based on piority control strategy.
+
+        The priority of the producers is set based on the priority values specified through
+        the esdl priority strategy. The producer with the lowest priority value has the
+        highest priority.
+        """
+        # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
+        lowest_priority = min(
+            [producer.priority for producer in self.producers if producer.priority is not None]
+        )
+        # For assets that have no priority assingned, give them the lowest priority.
+        for producer in self.producers:
+            if producer.priority is None:
+                producer.priority = lowest_priority + 1
+                logger.warning(
+                    f"No priority found for asset. "
+                    f"{producer.name} assigned the lowest priority value.",
+                    extra={"esdl_object_id": producer.id},
+                )
+
+        # Arrange producers in a list based on priority
+        producers_sorted = sorted(
+            set([producer for producer in self.producers]),
+            key=lambda obj: obj.priority if obj.priority is not None else -1,
+        )  # The if inside the loop is added to avoid a typing error with mypy.
+
+        # Reassign priorities to all producers so they all have a unique value
+        # (avoid producers with same priority value).
+        for producer in self.producers:
+            priority_idx = next(
+                (
+                    i
+                    for i, producer_sorted in enumerate(producers_sorted)
+                    if producer_sorted.name == producer.name
+                )
+            )
+            producer.priority = priority_idx + 1
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
