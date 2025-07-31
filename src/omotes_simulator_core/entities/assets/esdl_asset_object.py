@@ -103,10 +103,12 @@ class EsdlAssetObject:
                 elif temp_type == "Return":
                     return float(esdl_port.carrier.returnTemperature) + 273.15
         logger.error(
-            f"No port found with type: {port_type} for asset: {self.esdl_asset.name}",
+            f"No port found with temperature type: {temp_type} for asset: {self.esdl_asset.name}",
             extra={"esdl_object_id": self.get_id()},
         )
-        raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
+        raise ValueError(
+            f"No port found with temperature type: {temp_type} for asset: {self.esdl_asset.name}"
+        )
 
     def get_port_ids(self) -> list[str]:
         """Returns a sorted list of the port ids of the asset."""
