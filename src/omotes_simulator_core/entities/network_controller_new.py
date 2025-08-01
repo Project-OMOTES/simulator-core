@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkControllerNew(NetworkControllerAbstract):
-    """class for the enw network controller."""
+    """class for the new network controller."""
 
     def __init__(
         self,

@@ -71,7 +71,7 @@ class NetworkSimulation:
                 self.network.run_time_step(
                     time=time, time_step=config.timestep, controller_input=controller_input
                 )
-                is_converged = True  # self.network.check_convergence()
+                is_converged = self.network.check_convergence()
                 iteration += 1
             logger.debug("Convergence time step reached after %d iterations", iteration)
             self.network.store_output()

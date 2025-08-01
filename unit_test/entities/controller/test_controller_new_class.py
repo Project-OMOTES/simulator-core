@@ -295,7 +295,7 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20, places=3)
         self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 60.0, places=3)
 
-    def test__set_producers_to_max(self):
+    def test_set_producers_to_max(self):
         # arrange
         self.controller.networks[0].set_supply_to_max = Mock(
             return_value={"id1": {"prop1": 3, "prop2": 5}}
@@ -318,7 +318,7 @@ class ControllerTest(unittest.TestCase):
             },
         )
 
-    def test__set_all_storages_discharge_to_max(self):
+    def test_set_all_storages_discharge_to_max(self):
         # arrange
         self.controller.networks[0].set_all_storages_discharge_to_max = Mock(
             return_value={"id1": {"prop1": 9, "prop2": 11}}
@@ -341,7 +341,7 @@ class ControllerTest(unittest.TestCase):
             },
         )
 
-    def test__set_all_storages_charge_to_max(self):
+    def test_set_all_storages_charge_to_max(self):
         # arrange
         self.controller.networks[0].set_all_storages_charge_to_max = Mock(
             return_value={"id1": {"prop1": 54, "prop2": 423}}
@@ -364,7 +364,7 @@ class ControllerTest(unittest.TestCase):
             },
         )
 
-    def test__set_consumer_to_demand(self):
+    def test_set_consumer_to_demand(self):
         # arrange
         self.controller.networks[0].set_consumer_to_demand = Mock(
             return_value={"id1": {"prop1": 432, "prop2": 23}}
@@ -387,7 +387,7 @@ class ControllerTest(unittest.TestCase):
             },
         )
 
-    def test__set_producers_based_on_priority(self):
+    def test_set_producers_based_on_priority(self):
         # arrange
         producer1 = ControllerProducer(
             name="producer1",
@@ -456,7 +456,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result["producer3"][PROPERTY_HEAT_DEMAND], 40)
         self.assertEqual(result["producer4"][PROPERTY_HEAT_DEMAND], 10)
 
-    def test__get_total_supply_priority(self):
+    def test_get_total_supply_priority(self):
         # arrange
         producer1 = ControllerProducer(
             name="producer1",
