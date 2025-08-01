@@ -20,6 +20,7 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_HEAT_LOSS,
     PROPERTY_HEAT_POWER_PRIMARY,
     PROPERTY_HEAT_POWER_SECONDARY,
     PROPERTY_SET_PRESSURE,
@@ -35,8 +36,7 @@ from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
 
 
 class HeatExchanger(AssetAbstract):
-    """A HeatExchanger represents an asset that transfers heat between two
-    sides of the network."""
+    """A HeatExchanger represents an asset that transfers heat between two sides of the network."""
 
     temperature_in_primary: float
     """The inlet temperature of the heat exchanger on the primary side [K]."""
@@ -207,7 +207,11 @@ class HeatExchanger(AssetAbstract):
             {
                 PROPERTY_HEAT_POWER_PRIMARY: (
                     self.solver_asset.get_heat_power_primary()  # type: ignore
-                )
+                ),
+                PROPERTY_HEAT_LOSS: (
+                    self.solver_asset.get_heat_power_primary()  # type: ignore
+                    - self.solver_asset.get_heat_power_secondary()  # type: ignore
+                ),
             }
         )
 

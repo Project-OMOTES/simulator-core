@@ -17,6 +17,7 @@
 import unittest
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_HEAT_LOSS,
     PROPERTY_HEAT_POWER_PRIMARY,
     PROPERTY_HEAT_POWER_SECONDARY,
 )
@@ -89,4 +90,5 @@ class HeatExchangerTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_exchanger.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], 10.0)
+        self.assertEqual(self.heat_exchanger.outputs[1][-1][PROPERTY_HEAT_LOSS], 5.0)
         self.assertEqual(self.heat_exchanger.outputs[0][-1][PROPERTY_HEAT_POWER_SECONDARY], 5.0)
