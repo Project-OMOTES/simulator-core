@@ -14,12 +14,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module to read the esdl profiles from an energy system."""
+import logging
+
+import esdl
+import pandas as pd
+from esdl.esdl_handler import EnergySystemHandler
 from esdl.profiles.influxdbprofilemanager import InfluxDBProfileManager
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
-import esdl
-from esdl.esdl_handler import EnergySystemHandler
-import pandas as pd
-import logging
 
 logger = logging.getLogger(__name__)
 

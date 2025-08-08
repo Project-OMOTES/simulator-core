@@ -10,4 +10,3 @@ standard matrix solver available in `numpy`_ is used.
 .. autoclass:: omotes_simulator_core.solver.matrix.matrix.Matrix
    :members:
 
-.. _numpy: https://numpy.org/

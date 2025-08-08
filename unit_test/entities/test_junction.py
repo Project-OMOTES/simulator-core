@@ -17,11 +17,11 @@
 import unittest
 from unittest.mock import Mock
 
-from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
     DEFAULT_PRESSURE,
 )
+from omotes_simulator_core.entities.assets.junction import Junction
 
 
 class JunctionTest(unittest.TestCase):

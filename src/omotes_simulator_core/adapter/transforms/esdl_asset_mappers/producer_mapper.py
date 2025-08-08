@@ -15,9 +15,9 @@
 
 """Module containing the Esdl to Producer asset mapper class."""
 
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
+from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 

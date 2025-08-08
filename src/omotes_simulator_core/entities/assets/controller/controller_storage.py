@@ -30,14 +30,14 @@ class ControllerStorage(AssetControllerAbstract):
     """Class to store the storage for the controller asset."""
 
     def __init__(
-        self,
-        name: str,
-        identifier: str,
-        temperature_supply: float,
-        temperature_return: float,
-        max_charge_power: float,
-        max_discharge_power: float,
-        profile: pd.DataFrame,
+            self,
+            name: str,
+            identifier: str,
+            temperature_in: float,
+            temperature_out: float,
+            max_charge_power: float,
+            max_discharge_power: float,
+            profile: pd.DataFrame,
     ):
         """Constructor for the storage.
 
@@ -45,8 +45,8 @@ class ControllerStorage(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         """
         super().__init__(name, identifier)
-        self.temperature_return = temperature_return
-        self.temperature_supply = temperature_supply
+        self.temperature_in = temperature_in
+        self.temperature_out = temperature_out
         self.profile: pd.DataFrame = profile
         self.start_index = 0
 
@@ -82,5 +82,6 @@ class ControllerStorage(AssetControllerAbstract):
                     return self.max_discharge_power
                 else:
                     return float(self.profile["values"][index])
-        # TODO: The loop is not complete as the asset also has a fill-level that should not surpass the maximum fill-level.
+        # TODO: The loop is not complete as the asset also has a fill-level that should not
+        #  surpass the maximum fill-level.
         return 0.0

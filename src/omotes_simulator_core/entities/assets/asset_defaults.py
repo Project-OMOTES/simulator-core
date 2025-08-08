@@ -76,11 +76,21 @@ class HeatBufferDefaults:
     fill_level: float = 0.5  # fraction 0-1
 
 
+@dataclass
+class HeatPumpDefaults:
+    """Class containing the default values for a heat pump.
+
+    :param float coefficient_of_performance: The coefficient of performance of the heat pump [-].
+    """
+
+    coefficient_of_performance: float = 1 - 1 / 4.0
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_HEAT_DEMAND_SET_POINT = "heat_demand_set_point"
-PROPERTY_TEMPERATURE_SUPPLY = "temperature_supply"
-PROPERTY_TEMPERATURE_RETURN = "temperature_return"
+PROPERTY_TEMPERATURE_IN = "temperature_in"
+PROPERTY_TEMPERATURE_OUT = "temperature_out"
 PROPERTY_TEMPERATURE = "temperature"
 PROPERTY_PRESSURE_SUPPLY = "pressure_supply"
 PROPERTY_PRESSURE_RETURN = "pressure_return"
@@ -103,6 +113,9 @@ PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
 PROPERTY_HEAT_LOSS = "heat_loss"
 PROPERTY_HEAT_SUPPLIED = "heat_supplied"
 PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
+PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
+PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
+PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()

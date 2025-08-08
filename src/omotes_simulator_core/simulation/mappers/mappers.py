@@ -18,7 +18,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-
 Entity = TypeVar("Entity")
 EsdlAssetObject = TypeVar("EsdlAssetObject")
 

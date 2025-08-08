@@ -25,8 +25,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_TEMPERATURE_RETURN,
-    PROPERTY_TEMPERATURE_SUPPLY,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
     PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -63,8 +63,7 @@ class HeatBuffer(AssetAbstract):
     """The current volume of the heat storage [m3]."""
 
     accumulation_time: float
-    """The accumulation_time of the heat storage to calculate volume during injection 
-    and production [seconds]."""
+    """The accumulation_time to calculate volume during injection and production [seconds]."""
 
     def __init__(
         self,
@@ -117,7 +116,7 @@ class HeatBuffer(AssetAbstract):
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
-            self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
+            self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
 
             self._calculate_massflowrate()
             self._calculate_fill_level_and_volume()
@@ -175,8 +174,8 @@ class HeatBuffer(AssetAbstract):
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
             PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_SUPPLY: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_RETURN: self.solver_asset.get_temperature(1),
+            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(0),
+            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
             PROPERTY_FILL_LEVEL: self.fill_level,
             PROPERTY_VOLUME: self.current_volume,
         }

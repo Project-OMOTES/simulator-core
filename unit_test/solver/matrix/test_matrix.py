@@ -20,8 +20,8 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from omotes_simulator_core.solver.matrix.matrix import Matrix
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.matrix import Matrix
 
 
 class MatrixTest(unittest.TestCase):
