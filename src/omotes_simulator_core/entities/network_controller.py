@@ -95,7 +95,7 @@ class NetworkController(NetworkControllerAbstract):
         highest priority.
         """
         # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
-        lowest_priority = min(
+        lowest_priority = max(
             [producer.priority for producer in self.producers if producer.priority is not None]
         )
         # For assets that have no priority assingned, give them the lowest priority.
