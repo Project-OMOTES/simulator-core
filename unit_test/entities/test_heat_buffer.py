@@ -33,8 +33,11 @@ class HeatBufferTest(unittest.TestCase):
         """Set up before each test case."""
         # Create a production cluster object
         self.heat_buffer = HeatBuffer(
-            asset_name="heat_buffer", asset_id="heat_buffer_id", port_ids=["test1", "test2"],
-            maximum_volume=1, fill_level=0.5
+            asset_name="heat_buffer",
+            asset_id="heat_buffer_id",
+            port_ids=["test1", "test2"],
+            maximum_volume=1,
+            fill_level=0.5,
         )
         self.heat_buffer.temperature_supply = 353.15
         self.heat_buffer.temperature_return = 313.15
