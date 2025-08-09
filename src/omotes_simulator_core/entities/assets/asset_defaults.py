@@ -69,6 +69,14 @@ class AtesDefaults:
 
 
 @dataclass
+class HeatBufferDefaults:
+    """Class containing the default values for Heat Buffer."""
+
+    maximum_volume: float = 1  # m3
+    fill_level: float = 0.5  # fraction 0-1
+
+
+@dataclass
 class HeatPumpDefaults:
     """Class containing the default values for a heat pump.
 
@@ -98,6 +106,8 @@ PROPERTY_LENGTH = "length"
 PROPERTY_DIAMETER = "diameter"
 PROPERTY_ROUGHNESS = "roughness"
 PROPERTY_ALPHA_VALUE = "alpha_value"
+PROPERTY_VOLUME = "volume"
+PROPERTY_FILL_LEVEL = "fill_level"
 PROPERTY_PRESSURE_LOSS = "pressure_loss"
 PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
 PROPERTY_HEAT_LOSS = "heat_loss"
@@ -110,3 +120,4 @@ PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()
+HEAT_BUFFER_DEFAULTS = HeatBufferDefaults()
