@@ -23,6 +23,8 @@ from omotes_simulator_core.entities.assets.heat_buffer import HeatBuffer  # noqa
 faulthandler.enable()
 from omotes_simulator_core.entities.assets.asset_defaults import (  # noqa: E402
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_TEMPERATURE_IN,
+    PROPERTY_TEMPERATURE_OUT,
 )
 
 
@@ -36,11 +38,8 @@ class HeatBufferTest(unittest.TestCase):
             asset_name="heat_buffer",
             asset_id="heat_buffer_id",
             port_ids=["test1", "test2"],
-            maximum_volume=1,
-            fill_level=0.5,
+            volume=1,
         )
-        self.heat_buffer.temperature_supply = 353.15
-        self.heat_buffer.temperature_return = 313.15
         faulthandler.disable()
 
     def tearDown(self):
@@ -52,27 +51,33 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e4,
+            PROPERTY_TEMPERATURE_IN: 363,
+            PROPERTY_TEMPERATURE_OUT: 283,
         }
 
         # Act
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
+        # charging for 1 day
+        for _ii in range(0, 24):
+            self.heat_buffer.first_time_step = True
+            self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.temperature_supply, 353.15, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.temperature_return, 313.15, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.fill_level, 0.72, delta=0.01)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[2], 350.49, delta=0.01)
 
     def test_production(self) -> None:
         """Test production from Heat Buffer."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e4,
+            PROPERTY_HEAT_DEMAND: -1e3,
+            PROPERTY_TEMPERATURE_IN: 363,
+            PROPERTY_TEMPERATURE_OUT: 283,
         }
 
         # Act
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
+        # discharging for 1 day
+        for _ii in range(0, 24):
+            self.heat_buffer.first_time_step = True
+            self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.temperature_supply, 353.15, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.temperature_return, 313.15, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.fill_level, 0.27, delta=0.01)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[2], 297.54, delta=0.01)
