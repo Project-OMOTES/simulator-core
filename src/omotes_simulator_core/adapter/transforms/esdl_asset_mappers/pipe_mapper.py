@@ -116,7 +116,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             return float(inner_diameter)
 
     @staticmethod
-    def _get_esdl_object_from_edr(dn_diameter: str, schedule: int) -> Any:
+    def _get_esdl_object_from_edr(dn_diameter: str, schedule: int | None) -> Any:
         """
         Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
 
