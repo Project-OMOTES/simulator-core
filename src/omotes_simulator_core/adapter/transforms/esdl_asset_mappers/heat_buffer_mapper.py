@@ -38,11 +38,8 @@ class EsdlAssetHeatBufferMapper(EsdlMapperAbstract):
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
             port_ids=esdl_asset.get_port_ids(),
-            maximum_volume=esdl_asset.get_property(
-                esdl_property_name="volume", default_value=HEAT_BUFFER_DEFAULTS.maximum_volume
-            )[0],
-            fill_level=esdl_asset.get_property(
-                esdl_property_name="fillLevel", default_value=HEAT_BUFFER_DEFAULTS.fill_level
+            volume=esdl_asset.get_property(
+                esdl_property_name="volume", default_value=HEAT_BUFFER_DEFAULTS.volume
             )[0],
         )
 

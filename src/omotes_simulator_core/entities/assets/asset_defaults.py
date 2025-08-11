@@ -72,7 +72,7 @@ class AtesDefaults:
 class HeatBufferDefaults:
     """Class containing the default values for Heat Buffer."""
 
-    maximum_volume: float = 1  # m3
+    volume: float = 1  # m3
     fill_level: float = 0.5  # fraction 0-1
 
 

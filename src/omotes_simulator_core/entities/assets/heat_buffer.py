@@ -13,21 +13,21 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""atesCluster class."""
+"""Heat Buffer class."""
+from cmath import isinf
 from typing import Dict
+
+import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
-    PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import (
@@ -53,14 +53,8 @@ class HeatBuffer(AssetAbstract):
     mass_flowrate: float
     """The flow rate going in or out by the asset [kg/s]."""
 
-    maximum_volume: float
-    """The maximum volume of the heat storage [m3]."""
-
-    fill_level: float
-    """The current fill level of the heat storage [fraction 0-1]."""
-
-    current_volume: float
-    """The current volume of the heat storage [m3]."""
+    volume: float
+    """The volume of the heat storage [m3]."""
 
     accumulation_time: float
     """The accumulation_time to calculate volume during injection and production [seconds]."""
@@ -70,8 +64,7 @@ class HeatBuffer(AssetAbstract):
         asset_name: str,
         asset_id: str,
         port_ids: list[str],
-        maximum_volume: float,
-        fill_level: float,
+        volume: float,
     ) -> None:
         """Initialize a HeatBuffer object.
 
@@ -81,14 +74,19 @@ class HeatBuffer(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         # Supply and return temperature of the asset [K]
-        self.temperature_supply = DEFAULT_TEMPERATURE
-        self.temperature_return = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_in = DEFAULT_TEMPERATURE
+        self.temperature_out = DEFAULT_TEMPERATURE
 
-        # Volume properties of the asset: maximum volume [m3], fill level [fraction 0-1], current
-        # volume [m3]
-        self.maximum_volume = maximum_volume
-        self.fill_level = fill_level
-        self.current_volume = fill_level * maximum_volume
+        # Volume properties of the asset: volume [m3], fill level [fraction 0-1]
+        self.tank_volume = volume
+        self.num_layer = 5
+        self.layer_volume = self.tank_volume / self.num_layer
+        self.layer_mass = self.tank_volume * fluid_props.get_density(
+            (self.temperature_in + self.temperature_out) / 2
+        )
+        self.layer_temperature = np.linspace(
+            self.temperature_in, self.temperature_out, self.num_layer
+        )
 
         # Thermal power allocation [W] for injection (positive) or production (negative) by the
         # asset and mass flowrate [kg/s] going in or out by the asset
@@ -101,6 +99,7 @@ class HeatBuffer(AssetAbstract):
 
         self.accumulation_time = 3600
         self.output: list = []
+        self.first_time_step = True
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -110,16 +109,37 @@ class HeatBuffer(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
+            PROPERTY_TEMPERATURE_IN,
+            PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
+            # negative is charging and positive is discharging
             self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
 
+            if self.first_time_step:
+                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.first_time_step = False
+            else:
+                # After the first time step: use solver temperature
+                if self.thermal_power_allocation < 0:
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                else:
+                    self.temperature_out = self.solver_asset.get_temperature(1)
+
+            if self.thermal_power_allocation < 0:
+                # when charging the output temperature is the bottom temperature of the tank
+                self.temperature_out = self.layer_temperature[-1]
+            else:
+                # when discharging the input temperature is the upper temperature of the tank
+                self.temperature_in = self.layer_temperature[0]
+
             self._calculate_massflowrate()
-            self._calculate_fill_level_and_volume()
+            self._calculate_new_temperature()
             self._set_solver_asset_setpoint()
         else:
             # Print missing setpoints
@@ -130,31 +150,51 @@ class HeatBuffer(AssetAbstract):
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_supply, self.temperature_return
+            self.thermal_power_allocation, self.temperature_in, self.temperature_out
         )
+        if isinf(self.mass_flowrate):
+            self.mass_flowrate = 0
 
-    def _calculate_fill_level_and_volume(self) -> None:
-        """Calculate fill level of the storage."""
-        density = fluid_props.get_density(self.temperature_supply)
-        original_fill_level = self.fill_level
-        new_fill_level = (
-            self.mass_flowrate / density * self.accumulation_time
-            + original_fill_level * self.maximum_volume
-        ) / self.maximum_volume
-        if new_fill_level >= 0 and new_fill_level <= 1:
-            self.fill_level = new_fill_level
-            self.current_volume = new_fill_level * self.maximum_volume
+    def _calculate_new_temperature(self) -> None:
+        """Calculate new temperature of the tank storage."""
+        # heat exchange top side
+        new_temperature = self.layer_temperature.copy()
+
+        if self.mass_flowrate > 0:
+            new_temperature[0] += min(
+                1, self.mass_flowrate * self.accumulation_time / self.layer_mass
+            ) * (self.temperature_in - self.layer_temperature[0])
+
+            # heat exchange between layer
+            for ii in range(self.num_layer - 1):
+                new_temperature[ii + 1] += min(
+                    1, self.mass_flowrate * self.accumulation_time / self.layer_mass
+                ) * (new_temperature[ii] - new_temperature[ii + 1])
+
+            self.layer_temperature = new_temperature
+
+            self.temperature_out = self.layer_temperature[-1]
         else:
-            raise ValueError(
-                f"The new fill level is {new_fill_level}. It should be between 0 and 1."
-            )
+            new_temperature[-1] += min(
+                1, abs(self.mass_flowrate) * self.accumulation_time / self.layer_mass
+            ) * (self.temperature_out - self.layer_temperature[-1])
+
+            # heat exchange between layer
+            for ii in range(self.num_layer - 1, 0, -1):
+                new_temperature[ii - 1] += min(
+                    1, abs(self.mass_flowrate) * self.accumulation_time / self.layer_mass
+                ) * (new_temperature[ii] - new_temperature[ii - 1])
+
+            self.layer_temperature = new_temperature
+
+            self.temperature_in = self.layer_temperature[0]
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
         if self.mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_return
+            self.solver_asset.supply_temperature = self.temperature_out
         else:
-            self.solver_asset.supply_temperature = self.temperature_supply
+            self.solver_asset.supply_temperature = self.temperature_in
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
@@ -176,7 +216,5 @@ class HeatBuffer(AssetAbstract):
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
             PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(0),
             PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
-            PROPERTY_FILL_LEVEL: self.fill_level,
-            PROPERTY_VOLUME: self.current_volume,
         }
         self.output.append(output_dict)
