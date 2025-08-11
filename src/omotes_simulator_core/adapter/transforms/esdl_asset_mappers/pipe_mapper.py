@@ -102,10 +102,13 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
         dn_diameter = esdl_asset.get_property("diameter", None)
+        schedule = esdl_asset.get_property("schedule", None)
         # Check if the diameter is 0, if so return the default diameter!
         if inner_diameter == 0:
             if dn_diameter is not None:
-                esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(dn_diameter.name)
+                esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(
+                    dn_diameter.name, schedule
+                )
                 return float(esdl_object.innerDiameter)
             else:
                 return PIPE_DEFAULTS.diameter
@@ -113,7 +116,7 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             return float(inner_diameter)
 
     @staticmethod
-    def _get_esdl_object_from_edr(dn_diameter: str) -> Any:
+    def _get_esdl_object_from_edr(dn_diameter: str, schedule: int) -> Any:
         """
         Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
 
@@ -121,9 +124,8 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         :return: EsdlAssetObject from the EDR based on the DN diameter.
 
         """
-        schedule = (
-            PIPE_DEFAULTS.insulation_schedule
-        )  # Assumed schedule when only nominal diameter is specified
+        if schedule is None:
+            schedule = PIPE_DEFAULTS.insulation_schedule
         try:
             diameter = int(dn_diameter.replace("DN", ""))
             title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
