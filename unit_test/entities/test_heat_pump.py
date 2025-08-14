@@ -27,9 +27,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
 
 
 class HeatPumpTest(unittest.TestCase):
@@ -97,7 +94,8 @@ class HeatPumpTest(unittest.TestCase):
         }
 
         with patch(
-            "omotes_simulator_core.entities.assets.heat_pump.heat_demand_and_temperature_to_mass_flow",
+            "omotes_simulator_core.entities.assets.heat_pump."
+            "heat_demand_and_temperature_to_mass_flow",
             return_value=321.0,
         ) as mock_calc:
             self.heat_pump._set_setpoints_secondary(setpoints)
@@ -142,7 +140,8 @@ class HeatPumpTest(unittest.TestCase):
         }
 
         with patch(
-            "omotes_simulator_core.entities.assets.heat_pump.heat_demand_and_temperature_to_mass_flow",
+            "omotes_simulator_core.entities.assets.heat_pump."
+            "heat_demand_and_temperature_to_mass_flow",
             return_value=125,
         ) as mock_calc:
             self.heat_pump._set_setpoints_primary(setpoints)
