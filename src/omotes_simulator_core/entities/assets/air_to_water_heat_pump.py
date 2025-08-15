@@ -37,6 +37,15 @@ from omotes_simulator_core.solver.network.assets.production_asset import HeatBou
 logger = logging.getLogger(__name__)
 
 class AirToWaterHeatPump(ProductionCluster):
-    def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
-        super().__init__(asset_name=asset_name, asset_id=asset_id, port_ids=port_ids)
-
+    def __init__(
+        self,
+        asset_name: str,
+        asset_id: str,
+        port_ids: list[str],
+        coefficient_of_performance: float = 1 - 1 / 4.0,
+    ) -> None:
+        super().__init__(
+            asset_name=asset_name,
+            asset_id=asset_id, 
+            port_ids=port_ids,
+            )
