@@ -40,8 +40,6 @@ class AtesClusterTest(unittest.TestCase):
         self.salinity = ATES_DEFAULTS.salinity
         self.well_casing_size = ATES_DEFAULTS.well_casing_size
         self.well_distance = ATES_DEFAULTS.well_distance
-        self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge
-        self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
@@ -57,40 +55,38 @@ class AtesClusterTest(unittest.TestCase):
             salinity=self.salinity,
             well_casing_size=self.well_casing_size,
             well_distance=self.well_distance,
-            maximum_flow_charge=self.maximum_flow_charge,
-            maximum_flow_discharge=self.maximum_flow_discharge,
         )
 
         self.ates_cluster._init_rosim()
 
-    def test_injection(self) -> None:
-        """Test injection to ATES."""
+        self.ates_cluster.set_time_step(3600 * 24 * 7)
+
+    def test_running_ates(self) -> None:
+        """Test injection and production to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PROPERTY_TEMPERATURE_OUT: 313.15,
+            PROPERTY_TEMPERATURE_IN: 353.15,
         }
 
         # Act
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 353.15, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_in, 353.39, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_out, 290.15, delta=0.1)
 
-    def test_production(self) -> None:
-        """Test production from ATES."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PROPERTY_HEAT_DEMAND: -1e5,
+            PROPERTY_TEMPERATURE_OUT: 313.15,
+            PROPERTY_TEMPERATURE_IN: 353.15,
         }
 
         # Act
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 313.15, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_in, 341.18, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_out, 298.93, delta=0.1)

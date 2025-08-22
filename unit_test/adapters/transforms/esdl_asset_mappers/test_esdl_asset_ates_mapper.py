@@ -96,26 +96,3 @@ class TestEsdlAssetAtesMapper(unittest.TestCase):
             ates_entity.well_distance,
             esdl_asset.get_property("wellDistance", ATES_DEFAULTS.well_distance),
         )
-
-        self.assertEqual(
-            ates_entity.maximum_flow_charge,
-            (
-                heat_demand_and_temperature_to_mass_flow(
-                    esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=12e7),
-                    DEFAULT_TEMPERATURE,
-                    DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
-                )
-            ),
-        )
-        self.assertEqual(
-            ates_entity.maximum_flow_discharge,
-            (
-                heat_demand_and_temperature_to_mass_flow(
-                    esdl_asset.get_property(
-                        esdl_property_name="maxDischargeRate", default_value=12e7
-                    ),
-                    DEFAULT_TEMPERATURE,
-                    DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
-                )
-            ),
-        )

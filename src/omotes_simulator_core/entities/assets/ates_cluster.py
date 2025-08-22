@@ -20,8 +20,6 @@ import os
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
@@ -83,12 +81,6 @@ class AtesCluster(AssetAbstract):
     well_distance: float
     """The distance of the well [m]."""
 
-    maximum_flow_charge: float
-    """The maximum flow charge [m3/h]."""
-
-    maximum_flow_discharge: float
-    """The maximum flow discharge [m3/h]."""
-
     pyjnius_loader: PyjniusLoader
     """Loader object to delay importing pyjnius module and Java classes."""
 
@@ -107,8 +99,6 @@ class AtesCluster(AssetAbstract):
         salinity: float,
         well_casing_size: float,
         well_distance: float,
-        maximum_flow_charge: float,
-        maximum_flow_discharge: float,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -117,8 +107,8 @@ class AtesCluster(AssetAbstract):
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
-        self.temperature_out = DEFAULT_TEMPERATURE
-        self.temperature_in = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_in = 85 + 273.15
+        self.temperature_out = 35 + 273.15
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -133,8 +123,6 @@ class AtesCluster(AssetAbstract):
         self.salinity = salinity  # ppm
         self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
-        self.maximum_flow_charge = maximum_flow_charge  # m3/h
-        self.maximum_flow_discharge = maximum_flow_discharge  # m3/h
 
         # Output list
         self.output: list = []
@@ -149,10 +137,7 @@ class AtesCluster(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_in
-        else:
-            self.solver_asset.supply_temperature = self.temperature_out
+        self.solver_asset.supply_temperature = self.temperature_in
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -171,7 +156,7 @@ class AtesCluster(AssetAbstract):
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
-            self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
+            self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
             self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
             self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
 
@@ -198,15 +183,15 @@ class AtesCluster(AssetAbstract):
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
             PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(1),
+            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(0),
+            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
         }
         self.output.append(output_dict)
 
     def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
         path = os.path.dirname(__file__)
-        xmlfile = os.path.join(path, "bin/sequentialTemplate_v0.4.2_template.xml")
+        xmlfile = os.path.join(path, "bin/sequentialTemplate_v1.2.0_template.xml")
         with open(xmlfile) as fd:
             xml_str = fd.read()
 
@@ -250,9 +235,10 @@ class AtesCluster(AssetAbstract):
             temp_xmlfile.write(xml_str)
 
         javaioFile = self.pyjnius_loader.load_class("java.io.File")
-        RosimSequential = self.pyjnius_loader.load_class("tno.calc.RosimSequential")
+        RosimSequential = self.pyjnius_loader.load_class("rosim.calc.RosimSequential")
         xmlfilejava = javaioFile(temp_xmlfile_path)
-        self.rosim = RosimSequential(xmlfilejava, False, 2)
+        logLevel = self.pyjnius_loader.load_class("org.slf4j.event.Level")
+        self.rosim = RosimSequential(xmlfilejava, logLevel, -1)
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
@@ -265,16 +251,16 @@ class AtesCluster(AssetAbstract):
         # is downward
 
         if volume_flow > 0:
-            rosim_input_temperature = [self.temperature_out - 273.15, -1]  # Celcius, -1 in
+            rosim_input_temperature = [self.temperature_in - 273.15, -1]  # Celcius, -1 in
             # injection well to make sure it is not used
         elif volume_flow < 0:
-            rosim_input_temperature = [-1, self.temperature_in - 273.15]  # Celcius, -1 in
+            rosim_input_temperature = [-1, self.temperature_out - 273.15]  # Celcius, -1 in
             # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
             # sure it is not used
 
-        ates_temperature = self.rosim.getTempsNextTimeStep(
+        ates_temperature = self.rosim.calcTimeStepAndGetTemps(
             rosim_input__flow, rosim_input_temperature, timestep
         )
 
@@ -282,5 +268,5 @@ class AtesCluster(AssetAbstract):
         cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
 
         # update supply return temperature from ATES
-        self.temperature_out = hot_well_temperature
-        self.temperature_in = cold_well_temperature
+        self.temperature_in = hot_well_temperature
+        self.temperature_out = cold_well_temperature
