@@ -21,14 +21,7 @@ from pathlib import Path
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper import (
     EsdlAssetAtesMapper,
 )
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    ATES_DEFAULTS,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
-)
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
+from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
