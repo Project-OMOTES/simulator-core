@@ -106,9 +106,10 @@ class AtesCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
-
-        self.temperature_in = 85 + 273.15
-        self.temperature_out = 35 + 273.15
+        self.hot_well_temperature = 85 + 273.15
+        self.cold_well_temperature = 35 + 273.15
+        self.temperature_in = self.hot_well_temperature
+        self.temperature_out = self.cold_well_temperature
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -127,7 +128,9 @@ class AtesCluster(AssetAbstract):
         # Output list
         self.output: list = []
         self.pyjnius_loader = PyjniusLoader.get_loader()
+
         self._init_rosim()
+        self.first_time_step = True
 
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
@@ -137,7 +140,10 @@ class AtesCluster(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        self.solver_asset.supply_temperature = self.temperature_in
+        if self.mass_flowrate > 0:
+            self.solver_asset.supply_temperature = self.temperature_in  # injection
+        else:
+            self.solver_asset.supply_temperature = self.hot_well_temperature  # production
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -157,8 +163,18 @@ class AtesCluster(AssetAbstract):
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
             self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            if self.first_time_step:
+                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.first_time_step = False
+            else:
+                # After the first time step: use solver temperature
+                if self.thermal_power_allocation < 0:
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.cold_well_temperature
+                else:
+                    self.temperature_in = self.hot_well_temperature
+                    self.temperature_out = self.solver_asset.get_temperature(1)
 
             self._calculate_massflowrate()
             self._run_rosim()
@@ -250,6 +266,7 @@ class AtesCluster(AssetAbstract):
         for i in range(12):
             print(f"charging week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
+            self.first_time_step = True  # dont get temperature from solver
             self.set_setpoints(setpoints=setpoints)
 
         self.set_time_step(3600)  # set to original timesteps
@@ -278,9 +295,5 @@ class AtesCluster(AssetAbstract):
             rosim_input__flow, rosim_input_temperature, timestep
         )
 
-        hot_well_temperature = ates_temperature[0] + 273.15  # convert to K
-        cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
-
-        # update supply return temperature from ATES
-        self.temperature_in = hot_well_temperature
-        self.temperature_out = cold_well_temperature
+        self.hot_well_temperature = ates_temperature[0] + 273.15  # convert to K
+        self.cold_well_temperature = ates_temperature[1] + 273.15  # convert to K

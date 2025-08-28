@@ -57,38 +57,38 @@ class AtesClusterTest(unittest.TestCase):
             well_distance=self.well_distance,
         )
 
-        self.ates_cluster._init_rosim()
-
-        self.ates_cluster.set_time_step(3600 * 24 * 7)
-
     def test_injection_ates(self) -> None:
         """Test injection to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 313.15,
-            PROPERTY_TEMPERATURE_IN: 353.15,
+            PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
         }
 
         # Act
+        self.ates_cluster.set_time_step(3600 * 24 * 7)
+        self.first_time_step = True  # dont get temperature from solver
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 353.17, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.15, delta=0.1)
 
     def test_production_ates(self) -> None:
         """Test production to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 313.15,
-            PROPERTY_TEMPERATURE_IN: 353.15,
+            PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
         }
 
         # Act
+        self.ates_cluster.set_time_step(3600 * 24 * 7)
+        self.first_time_step = True  # dont get temperature from solver
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 352.30, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 313.25, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.54, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)
