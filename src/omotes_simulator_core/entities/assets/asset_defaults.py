@@ -81,6 +81,18 @@ class HeatPumpDefaults:
     coefficient_of_performance: float = 1 - 1 / 4.0
 
 
+@dataclass
+class HeatExchangerDefaults:
+    """Class containing the default values for a heat exchanger.
+
+    :param float heat_transfer_efficiency: The efficiency of the heat exchanger [-].
+    Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is chosen
+    here.
+    """
+
+    heat_transfer_efficiency: float = 1.0
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_HEAT_DEMAND_SET_POINT = "heat_demand_set_point"
