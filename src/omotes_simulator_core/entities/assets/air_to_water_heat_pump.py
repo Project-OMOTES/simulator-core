@@ -18,22 +18,11 @@ import logging
 
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    DEFAULT_NODE_HEIGHT,
-    DEFAULT_PRESSURE,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
-    PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
     PROPERTY_ELECTRICITY_CONSUMPTION
 )
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
-#from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+
 from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import AirToWaterHeatPumpAsset
 
 logger = logging.getLogger(__name__)
@@ -88,10 +77,3 @@ class AirToWaterHeatPump(ProductionCluster):
 
         }
         self.outputs[1][-1].update(output_dict_temp) # Outputs appended to the out port.
-
-        # TODO: check where this outputs stuff is stored and check the actual values to see if they make sense.
-
-        # In the outputs dict, element 0 is the in port and 1 the out port.
-        # Create a dict that calculates the power consumption and update the output dict with its value.
-        # See below for the regular heat pump.
-
