@@ -14,7 +14,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to Pipe asset mapper class."""
 
+from typing import Any
+
 import numpy as np
+from esdl.edr.client import EDRClient
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
@@ -87,12 +90,48 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
 
     @staticmethod
     def _get_diameter(esdl_asset: EsdlAssetObject) -> float:
-        """Retrieve the diameter of the pipe and convert it if necessary."""
-        # Check if the property is available
-        # Retrieve the diameter
-        temp_diameter = esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter)
+        """Retrieve the diameter of the pipe and convert it if necessary.
+
+        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
+            current pipe object.
+        :return: The inner diameter of the pipe if specified, otherwise it uses the nominal
+        diameter to retrieve the inner diameter from the EDR list. If neither is available,
+        a default diameter is returned. When only the nominal diameter is specified,
+        the insulation schedule must be provided; in this case, it is assumed to be 1.
+
+        """
+        inner_diameter = esdl_asset.get_property("innerDiameter", 0)
+        dn_diameter = esdl_asset.get_property("diameter", None)
+        schedule = esdl_asset.get_property("schedule", None)
         # Check if the diameter is 0, if so return the default diameter!
-        if temp_diameter == 0:
-            return PIPE_DEFAULTS.diameter
+        if inner_diameter == 0:
+            if dn_diameter is not None:
+                esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(
+                    dn_diameter.name, schedule
+                )
+                return float(esdl_object.innerDiameter)
+            else:
+                return PIPE_DEFAULTS.diameter
         else:
-            return float(temp_diameter)
+            return float(inner_diameter)
+
+    @staticmethod
+    def _get_esdl_object_from_edr(
+        dn_diameter: str, schedule: int = PIPE_DEFAULTS.insulation_schedule
+    ) -> Any:
+        """
+        Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
+
+        :param dn_diameter: the nominal diameter of the pipe.
+        :return: EsdlAssetObject from the EDR based on the DN diameter.
+
+        """
+        try:
+            diameter = int(dn_diameter.replace("DN", ""))
+            title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
+            edr_client = EDRClient()
+            return edr_client.get_object_esdl(title)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to retrieve ESDL object for DN diameter '{dn_diameter}': {e}"
+            )
