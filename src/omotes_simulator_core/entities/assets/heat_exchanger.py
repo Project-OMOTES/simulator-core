@@ -36,7 +36,11 @@ from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
 
 
 class HeatExchanger(AssetAbstract):
-    """A HeatExchanger represents an asset that transfers heat between two sides of the network."""
+    """A HeatExchanger represents an asset that transfers heat between two sides of the network.
+
+    The heat transfer efficiency from the ESDL asset is translated to a heat transfer coefficient
+    or coefficient of performance (COP) used in the heat transfer solver asset.
+    """
 
     temperature_in_primary: float
     """The inlet temperature of the heat exchanger on the primary side [K]."""
@@ -78,7 +82,7 @@ class HeatExchanger(AssetAbstract):
         :param asset_id: The unique identifier of the asset.
         :param connected_ports: The unique identifiers of the ports of the asset.
         :param heat_transfer_efficiency: The heat transfer efficiency of the heat exchanger.
-        :type heat_transfer_coefficient: float
+        :type heat_transfer_efficiency: float
         """
         super().__init__(
             asset_name=asset_name,
@@ -88,7 +92,8 @@ class HeatExchanger(AssetAbstract):
         # Set the heat transfer efficiency
         self.heat_transfer_efficiency = heat_transfer_efficiency
 
-        # Define solver asset
+        # Define solver asset, which translates the efficiency of the ESDL asset to a
+        # COP used in the heat transfer solver asset.
         self.solver_asset = HeatTransferAsset(
             name=self.name,
             _id=self.asset_id,
