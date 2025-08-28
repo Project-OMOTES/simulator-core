@@ -28,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_ELECTRICITY_CONSUMPTION
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -50,12 +51,47 @@ class AirToWaterHeatPump(ProductionCluster):
             asset_id=asset_id, 
             port_ids=port_ids,
             )
+        self.coefficient_of_performance = coefficient_of_performance
         self.solver_asset = AirToWaterHeatPumpAsset(
             name=self.name,
             _id=self.asset_id,
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
-        
 
-# TODO: Add power requirement calculations here. Check how it is done witht he Production cluster here.
+    def get_electric_power_consumption(self) -> float:
+        """Calculate the electric power consumption of the air to water heat pump.
+
+        The electric power consumption is calculated as the ratio between the heat
+        supplied by the pump to the network and the coefficient of performance of
+        the pump.
+
+        :return: float
+            The electric power consumption of the air to water heat pump.
+        """
+        return (
+            abs(self.get_actual_heat_supplied()) / self.coefficient_of_performance
+        )
+    
+    def write_to_output(self) -> None:
+        """Method to write time step results to the output dict.
+
+        The output list is a list of dictionaries, where each dictionary
+        represents the output of the asset for a specific timestep.
+        """
+        output_dict_temp = {
+            PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
+            PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
+            PROPERTY_ELECTRICITY_CONSUMPTION: (
+                    self.get_electric_power_consumption()  # type: ignore
+                ),
+
+        }
+        self.outputs[1][-1].update(output_dict_temp) # Outputs appended to the out port.
+
+        # TODO: check where this outputs stuff is stored and check the actual values to see if they make sense.
+
+        # In the outputs dict, element 0 is the in port and 1 the out port.
+        # Create a dict that calculates the power consumption and update the output dict with its value.
+        # See below for the regular heat pump.
+
