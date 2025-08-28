@@ -240,6 +240,20 @@ class AtesCluster(AssetAbstract):
         logLevel = self.pyjnius_loader.load_class("org.slf4j.event.Level")
         self.rosim = RosimSequential(xmlfilejava, logLevel, -1)
 
+        setpoints = {
+            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_TEMPERATURE_OUT: self.temperature_out,
+            PROPERTY_TEMPERATURE_IN: self.temperature_in,
+        }
+        # initially charging 12 weeks
+        print("initializing ates")
+        for i in range(12):
+            print(f"charging week {i + 1}")
+            self.set_time_step(3600 * 24 * 7)
+            self.set_setpoints(setpoints=setpoints)
+
+        self.set_time_step(3600)  # set to original timesteps
+
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
         volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline

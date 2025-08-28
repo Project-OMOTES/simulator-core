@@ -61,8 +61,8 @@ class AtesClusterTest(unittest.TestCase):
 
         self.ates_cluster.set_time_step(3600 * 24 * 7)
 
-    def test_running_ates(self) -> None:
-        """Test injection and production to ATES."""
+    def test_injection_ates(self) -> None:
+        """Test injection to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
@@ -74,12 +74,14 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 353.39, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_in, 353.17, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.temperature_out, 290.15, delta=0.1)
 
+    def test_production_ates(self) -> None:
+        """Test production to ATES."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e5,
+            PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_OUT: 313.15,
             PROPERTY_TEMPERATURE_IN: 353.15,
         }
@@ -88,5 +90,5 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 341.18, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 298.93, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_in, 352.30, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.temperature_out, 313.25, delta=0.1)
