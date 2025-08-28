@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project>
+   <application_version>1.2.0</application_version>
+   <application_name>ROSIM</application_name>
+   <output__results__directory>%TEMP%</output__results__directory>
+   <select_output_scenario>seqScen</select_output_scenario>
+   <silent_overwrite_scenario_output>0.0</silent_overwrite_scenario_output>
+   <auto_show_static_model_in_resinsight>0.0</auto_show_static_model_in_resinsight>
+   <use_custom_grdecl_file>0.0</use_custom_grdecl_file>
+   <custom_grdecl_file/>
+   <opm_run_environment>0.0</opm_run_environment>
+   <x_minimum__edge_of_grid_cell_>0.0</x_minimum__edge_of_grid_cell_>
+   <x_spacing__grid_cell_size_>50.0</x_spacing__grid_cell_size_>
+   <x_number_of_cells>15.0</x_number_of_cells>
+   <y_minimum__edge_of_grid_cell_>0.0</y_minimum__edge_of_grid_cell_>
+   <y_spacing__grid_cell_size_>50.0</y_spacing__grid_cell_size_>
+   <y_number_of_cells>12.0</y_number_of_cells>
+   <z_number_of_cells>$NZ$</z_number_of_cells>
+   <model_top_depth>$MODEL_TOP$;0;none</model_top_depth>
+   <directory_for_layer_grids__optional_/>
+   <model3d_layers>
+      <row_1>overburden 4;1;thickness;60;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_1>
+      <row_2>overburden 3;1;thickness;25;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_2>
+      <row_3>overburden 2;1;thickness;10;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_3>
+      <row_4>overburden 1;1;thickness;5;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_4>
+      <row_5>aquifer;$NZ_AQUIFER$;thickness;$AQUIFER_THICKNESS$;1;$SURFACE_TEMPERATURE$;34;$AQUIFER_PORO$;$AQUIFER_NTG$;$AQUIFER_PERM_XY$;$AQUIFER_PERM_XY$;$AQUIFER_PERM_Z$;4.0;0.6;$SALINITY$;1000;2700</row_5>
+      <row_6>underburden 1;1;thickness;5;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_6>
+      <row_7>underburden 2;1;thickness;10;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_7>
+      <row_8>underburden 3;1;thickness;25;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_8>
+      <row_9>underburden 4;1;thickness;60;1;$SURFACE_TEMPERATURE$;34;0.1;1.0;20;20;2;4.0;0.6;$SALINITY$;1000;2700</row_9>
+   </model3d_layers>
+   <model3d_faults/>
+   <initialization_reference_depth>400.0</initialization_reference_depth>
+   <initialization_reference_pressure>40.0</initialization_reference_pressure>
+   <temperature_dependent_viscosity>1.0</temperature_dependent_viscosity>
+   <temperature_dependent_density>1.0</temperature_dependent_density>
+   <no_fluid_flow_boundary__doubletcalc_>1.0</no_fluid_flow_boundary__doubletcalc_>
+   <use__vertical_wells__wicalc__faster_>1.0</use__vertical_wells__wicalc__faster_>
+   <model_top_bottom_temperature__doubletcalc_>0.0</model_top_bottom_temperature__doubletcalc_>
+   <set_well_grid_cells_to_injection_temperature>1.0</set_well_grid_cells_to_injection_temperature>
+   <nr_of_calc_intervals_per_timestep>1.0</nr_of_calc_intervals_per_timestep>
+   <calculate_subsidence>0.0</calculate_subsidence>
+   <force_9point_scheme>0.0</force_9point_scheme>
+   <additional_3d_output>0.0</additional_3d_output>
+   <license_shape_file__optional_/>
+   <simulation_start_date>18262.0</simulation_start_date>
+   <simulation_end_date>21915.0</simulation_end_date>
+   <reporting_step_time_unit>$TIME_STEP_UNIT$</reporting_step_time_unit>
+   <reporting_step_increment____doubletcalc_calc_step_>1.0</reporting_step_increment____doubletcalc_calc_step_>
+   <well_name>well_1;well_2</well_name>
+   <well_group>G1;G1</well_group>
+   <x_coordinate_well_head>300.0;$WELL2_X$</x_coordinate_well_head>
+   <y_coordinate_well_head>300.0;300.0</y_coordinate_well_head>
+   <rotary_kelly_bushing__rkb_height_above_msl_>0.0;0.0</rotary_kelly_bushing__rkb_height_above_msl_>
+   <open_section_selection_mode>0.0;0.0</open_section_selection_mode>
+   <top_open_section_md_s__comma_separated>$AQUIFER_TOP$;$AQUIFER_TOP$</top_open_section_md_s__comma_separated>
+   <base_open_section_md_s__comma_separated>$AQUIFER_BASE$;$AQUIFER_BASE$</base_open_section_md_s__comma_separated>
+   <top_open_section_depths__comma_separated>2200;2200</top_open_section_depths__comma_separated>
+   <base_open_section_depths__comma_separated>2250;2250</base_open_section_depths__comma_separated>
+   <open_section_layer_names__comma_separated>default layer;default layer</open_section_layer_names__comma_separated>
+   <open_section_layer_margins__comma_separated>10;10</open_section_layer_margins__comma_separated>
+   <well_deviation>
+      <well_1>
+         <row_1>0;0;0;0.0;0.0</row_1>
+         <row_2>3000;0;0;3000.0;3000.0</row_2>
+      </well_1>
+      <well_2>
+         <row_1>0;0;0;0.0;0.0</row_1>
+         <row_2>3000;0;0;3000.0;3000.0</row_2>
+      </well_2>
+   </well_deviation>
+   <diameter>$CASING_SIZE$;$CASING_SIZE$</diameter>
+   <skin>0.0;0.0</skin>
+   <flow_profile>
+	  <well_1>
+         <row_1>2020;1;1;200;6;80</row_1>
+      </well_1>
+      <well_2>
+         <row_1>2020;1;1;-200;1;-1</row_1>
+      </well_2>
+   </flow_profile>
+   <xy_grid_size_target__0_no_grid_refinement_>2.0;2.0</xy_grid_size_target__0_no_grid_refinement_>
+   <grid_refinement_range>3.0;3.0</grid_refinement_range>
+   <flow_simulator_option>0.0</flow_simulator_option>
+   <opm_flow_mode>0.0</opm_flow_mode>
+   <opm_flow_custom_input_deck_file/>
+   <auto_show_3d_model_in_resinsight>1.0</auto_show_3d_model_in_resinsight>
+   <auto_show_well_plot_in_resinsight>1.0</auto_show_well_plot_in_resinsight>
+   <post_processing_input__egrid_file/>
+   <post_processing_output_name>scenario_name_post_processed</post_processing_output_name>
+   <post_processing_mode>0.0</post_processing_mode>
+   <auto_show_results_in_resinsight>1.0</auto_show_results_in_resinsight>
+   <postproc_unistress_layer_properties>
+      <row_1>1;20;0.25;1e-5;1;0.6;0.9;30;-1</row_1>
+   </postproc_unistress_layer_properties>
+   <postproc_unistress_lithostatic_gradient__mpa_km_>24.0</postproc_unistress_lithostatic_gradient__mpa_km_>
+   <subsidence_layer_compaction_properties>
+      <row_1>0;1.67</row_1>
+      <row_2>1;1.67</row_2>
+      <row_3>0;1.67</row_3>
+   </subsidence_layer_compaction_properties>
+   <subsidence_young_s_modulus>20.0</subsidence_young_s_modulus>
+   <subsidence_poisson_s_ratio>0.35</subsidence_poisson_s_ratio>
+   <subsidence_lump_sources_z_dir>1.0</subsidence_lump_sources_z_dir>
+</project>
