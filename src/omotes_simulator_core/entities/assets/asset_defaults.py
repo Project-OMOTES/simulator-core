@@ -83,6 +83,8 @@ class HeatExchangerDefaults:
     """Class containing the default values for a heat exchanger.
 
     :param float heat_transfer_efficiency: The efficiency of the heat exchanger [-].
+    Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is chosen
+    here.
     """
 
     heat_transfer_efficiency: float = 1.0
