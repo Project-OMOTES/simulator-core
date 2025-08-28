@@ -199,7 +199,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             expected_object = Mock()
             mock_edr_client.get_object_esdl.return_value = expected_object
             # Act
-            result = EsdlAssetPipeMapper._get_esdl_object_from_edr("DN100", None)
+            result = EsdlAssetPipeMapper._get_esdl_object_from_edr("DN100")
             # Assert
             mock_edr_client.get_object_esdl.assert_called_once_with(
                 "/edr/Public/Assets/Logstor/Steel-S1-DN-100.edd"
