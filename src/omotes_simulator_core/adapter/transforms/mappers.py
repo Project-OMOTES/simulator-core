@@ -240,4 +240,11 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
+
+        # TODO: This part is a bit of a hack. Needs improving. The challenge comes on how to
+        # tell the controller that the air to water hp is a producer.
+        for esdl_asset in esdl_object.get_all_assets_of_type("pump"): 
+            if hasattr(esdl_asset.esdl_asset, 'COP') and len(esdl_asset.esdl_asset.port) == 2: # These properties should point to an air to water heatpump.
+                producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
+
         return NetworkController(producers, consumers, storages)
