@@ -43,4 +43,3 @@ class AirToWaterHeatPumpAsset(HeatBoundary):
             set_pressure=set_pressure
         )
     # Check equations, see if something needs to be modified.
-    # Add a function to add th epower calculation equations. Check the heat pump asset to see how it should be done.

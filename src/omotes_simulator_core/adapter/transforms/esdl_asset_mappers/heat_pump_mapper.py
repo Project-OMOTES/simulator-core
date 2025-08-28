@@ -54,6 +54,5 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
         else:
             raise NotImplementedError(str(esdl_asset.esdl_asset) + " uncompatible number of ports for heat pump. "
             "Use 2 ports for air to water HP, or 4 for a water to water HP.")
-            # Error: wrong number of ports on heat pump.
         
         return heatpump_entity

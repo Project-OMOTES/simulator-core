@@ -32,7 +32,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
-from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+#from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import AirToWaterHeatPumpAsset
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +44,18 @@ class AirToWaterHeatPump(ProductionCluster):
         asset_id: str,
         port_ids: list[str],
         coefficient_of_performance: float = 1 - 1 / 4.0,
-    ) -> None:
+    ) -> None:  
         super().__init__(
             asset_name=asset_name,
             asset_id=asset_id, 
             port_ids=port_ids,
             )
+        self.solver_asset = AirToWaterHeatPumpAsset(
+            name=self.name,
+            _id=self.asset_id,
+            pre_scribe_mass_flow=False,
+            set_pressure=self.pressure_supply,
+        )
+        
+
+# TODO: Add power requirement calculations here. Check how it is done witht he Production cluster here.
