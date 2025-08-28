@@ -13,19 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Test Ates Cluster entities."""
-import faulthandler
+"""Test Heat Buffer entities."""
 import unittest
 
-faulthandler.disable()
-from omotes_simulator_core.entities.assets.heat_buffer import HeatBuffer  # noqa: E402
-
-faulthandler.enable()
-from omotes_simulator_core.entities.assets.asset_defaults import (  # noqa: E402
+from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.heat_buffer import HeatBuffer
 
 
 class HeatBufferTest(unittest.TestCase):
@@ -40,11 +36,6 @@ class HeatBufferTest(unittest.TestCase):
             port_ids=["test1", "test2"],
             volume=1,
         )
-        faulthandler.disable()
-
-    def tearDown(self):
-        """Clean up after each test case."""
-        faulthandler.enable()
 
     def test_injection(self) -> None:
         """Test injection to Heat Buffer."""
