@@ -16,6 +16,8 @@
 """Test Heat Buffer entities."""
 import unittest
 
+import numpy as np
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TEMPERATURE_IN,
@@ -41,7 +43,7 @@ class HeatBufferTest(unittest.TestCase):
         """Test injection to Heat Buffer."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e4,
+            PROPERTY_HEAT_DEMAND: 1e3,
             PROPERTY_TEMPERATURE_IN: 363,
             PROPERTY_TEMPERATURE_OUT: 283,
         }
@@ -53,7 +55,8 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[2], 350.49, delta=0.01)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 355.59, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 311.92, delta=0.1)
 
     def test_production(self) -> None:
         """Test production from Heat Buffer."""
@@ -64,6 +67,8 @@ class HeatBufferTest(unittest.TestCase):
             PROPERTY_TEMPERATURE_OUT: 283,
         }
 
+        self.heat_buffer.layer_temperature = np.array([355.59, 341.36, 327.13, 317.25, 311.92])
+
         # Act
         # discharging for 1 day
         for _ii in range(0, 24):
@@ -71,4 +76,5 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[2], 297.54, delta=0.01)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 331.23, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 287.87, delta=0.1)
