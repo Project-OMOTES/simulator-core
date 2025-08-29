@@ -4,5 +4,5 @@ cd /D "%~dp0"
 cd ..\..\
 call .\venv\Scripts\activate
 set PYTHONPATH=.\src\;%$PYTHONPATH%
-python -m mypy ./src/
+python -m mypy ./src/omotes_simulator_core ./unit_test/
 popd

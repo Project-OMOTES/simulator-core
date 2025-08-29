@@ -4,5 +4,5 @@ rem @echo off
 pushd .
 cd /D "%~dp0"
 cd ..\..\
-flake8 .\src\omotes_simulator_core
+flake8 .\src\omotes_simulator_core .\unit_test
 popd
