@@ -81,7 +81,7 @@ class HeatBuffer(AssetAbstract):
         self.tank_volume = volume
         self.num_layer = 5
         self.layer_volume = self.tank_volume / self.num_layer
-        self.layer_mass = self.tank_volume * fluid_props.get_density(
+        self.layer_mass = self.layer_volume * fluid_props.get_density(
             (self.temperature_in + self.temperature_out) / 2
         )
         self.layer_temperature = np.linspace(
