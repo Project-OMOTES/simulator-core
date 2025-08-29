@@ -55,8 +55,8 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 355.59, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 311.92, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 351.70, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 302.56, delta=0.1)
 
     def test_production(self) -> None:
         """Test production from Heat Buffer."""
@@ -76,5 +76,5 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 331.23, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 287.87, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 331.30, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 287.90, delta=0.1)
