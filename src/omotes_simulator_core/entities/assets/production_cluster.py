@@ -238,3 +238,18 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
         }
         self.outputs[1][-1].update(output_dict_temp)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged with accepted error of 0.1%.
+
+        The convergence criteria verifies whether the heat supplied
+        by the asset - based on the solver asset - matches the heat demand
+        set point of the asset.
+
+        In other words: |Q_calculated - Q_setpoint| < 0.1% * |Q_setpoint|
+
+        :return: True if the asset has converged, False otherwise
+        """
+        return abs(self.get_actual_heat_supplied() - (-self.heat_demand_set_point)) < (
+            abs(self.heat_demand_set_point * 0.001)
+        )
