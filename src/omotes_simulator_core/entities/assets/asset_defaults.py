@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Define default values and names for assets."""
-from enum import IntEnum
 from dataclasses import dataclass
+from enum import IntEnum
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
