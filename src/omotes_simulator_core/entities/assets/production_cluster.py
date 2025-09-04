@@ -64,6 +64,9 @@ class ProductionCluster(AssetAbstract):
     heat_demand_set_point: float
     """The heat demand set point of the asset [W]."""
 
+    first_time_step: bool
+    """Flag to indicate whether it is the first time step of the simulation."""
+
     def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a ProductionCluster object.
 
@@ -89,6 +92,8 @@ class ProductionCluster(AssetAbstract):
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
+        # Define first time step
+        self.first_time_step = True
 
     def _set_out_temperature(self, temperature_out: float) -> None:
         """Set the outlet temperature of the asset.
@@ -107,7 +112,11 @@ class ProductionCluster(AssetAbstract):
             The temperature should be supplied in Kelvin.
         """
         # Set the inlet temperature of the asset
-        self.temperature_in = temperature_in
+        if self.first_time_step:
+            self.temperature_in = temperature_in
+            self.first_time_step = False
+        else:
+            self.temperature_in = self.solver_asset.get_temperature(0)
 
     def _set_heat_demand(self, heat_demand: float) -> None:
         """Set the heat demand of the asset.
