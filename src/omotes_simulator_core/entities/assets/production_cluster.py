@@ -250,6 +250,6 @@ class ProductionCluster(AssetAbstract):
 
         :return: True if the asset has converged, False otherwise
         """
-        return abs(self.get_actual_heat_supplied() - (-self.heat_demand_set_point)) < (
+        return abs(self.get_actual_heat_supplied() - self.heat_demand_set_point) < (
             abs(self.heat_demand_set_point * 0.001)
         )
