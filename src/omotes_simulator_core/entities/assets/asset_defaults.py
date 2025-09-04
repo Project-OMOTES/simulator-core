@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Define default values and names for assets."""
+from enum import IntEnum
 from dataclasses import dataclass
 
 # Default values
@@ -50,7 +51,19 @@ class PipeDefaults:
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
     roughness: float = DEFAULT_ROUGHNESS
-    insulation_schedule: int = 1
+
+    @property
+    def default_schedule(self) -> "PipeSchedules":
+        """Get the default schedule as a PipeSchedules enum."""
+        return PipeSchedules.S1
+
+
+class PipeSchedules(IntEnum):
+    """Enum for pipe insulation schedules."""
+
+    S1 = 1
+    S2 = 2
+    S3 = 3
 
 
 @dataclass
