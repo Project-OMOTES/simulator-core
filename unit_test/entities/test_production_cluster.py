@@ -295,6 +295,8 @@ class ProductionClusterTest(unittest.TestCase):
             "ProductionCluster.get_actual_heat_supplied",
             get_actual_heat_supplied,
         ):
+            self.production_cluster.solver_asset.pre_scribe_mass_flow = True  # type: ignore
+
             # Act
             is_converged = self.production_cluster.is_converged()
 
@@ -317,6 +319,8 @@ class ProductionClusterTest(unittest.TestCase):
             "ProductionCluster.get_actual_heat_supplied",
             get_actual_heat_supplied,
         ):
+            self.production_cluster.solver_asset.pre_scribe_mass_flow = True  # type: ignore
+
             # Act
             is_converged = self.production_cluster.is_converged()
 
