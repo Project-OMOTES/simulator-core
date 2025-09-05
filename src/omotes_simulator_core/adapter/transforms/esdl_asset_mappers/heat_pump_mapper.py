@@ -14,11 +14,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to HeatPump asset mapper class."""
 
+from omotes_simulator_core.entities.assets.air_to_water_heat_pump import (
+    AirToWaterHeatPump,
+)
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import HeatPumpDefaults
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
-from omotes_simulator_core.entities.assets.air_to_water_heat_pump import AirToWaterHeatPump
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 

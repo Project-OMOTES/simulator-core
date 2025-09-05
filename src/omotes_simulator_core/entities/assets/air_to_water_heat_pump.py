@@ -16,13 +16,12 @@
 """ProductionCluster class."""
 import logging
 
-from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    PROPERTY_ELECTRICITY_CONSUMPTION,
 )
-
+from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import (
     AirToWaterHeatPumpAsset,
 )

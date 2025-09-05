@@ -17,6 +17,9 @@
 import unittest
 from unittest.mock import patch
 
+from omotes_simulator_core.entities.assets.air_to_water_heat_pump import (
+    AirToWaterHeatPump,
+)
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
@@ -27,7 +30,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
     PROPERTY_VOLUMEFLOW,
 )
-from omotes_simulator_core.entities.assets.air_to_water_heat_pump import AirToWaterHeatPump
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
 )
@@ -276,20 +278,3 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             actual_heat_supplied = self.air_to_water_hp.get_actual_heat_supplied()
             # Assert
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
-
-    # TODO: Create a test that calculates and checks the power consumed by the heatpump based on its COP.
-
-
-if __name__ == "__main__":
-    Test = AirToWaterHeatPumpTest()
-    Test.setUp()
-    Test.test_air_to_water_hp_create()
-    Test.test_air_to_water_hp_set_setpoints()
-    Test.test_air_to_water_hp_set_setpoints_missing_setpoint()
-    Test.test_air_to_water_hp_set_setpoints_negative_mass_flow()
-    Test.test_air_to_water_hp_set_setpoints_pressure_or_mass_flow_control()
-    Test.test_air_to_water_hp_set_pressure_supply()
-    Test.test_air_to_water_hp_set_pressure_supply_negative()
-    Test.test_air_to_water_hp_write_to_output()
-    Test.test_get_volume_flow_rate()
-    Test.test_get_actual_heat_supplied()
