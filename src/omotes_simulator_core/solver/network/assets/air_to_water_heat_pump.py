@@ -13,12 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Implementation of the HeatBoundary class."""
-import numpy as np
 
-from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
+
 class AirToWaterHeatPumpAsset(HeatBoundary):
+    """Matrix object for the air to water heatpump asset."""
 
     def __init__(
         self,
@@ -31,15 +31,14 @@ class AirToWaterHeatPumpAsset(HeatBoundary):
         mass_flow_rate_set_point: float = 10.0,
         set_pressure: float = 10000.0,
     ):
-        
+        """Initializes the AirToWaterHeatPumpAsset object with the given parameters."""
         super().__init__(
-            name = name,
-            _id = _id,
+            name=name,
+            _id=_id,
             supply_temperature=supply_temperature,
             heat_flux=heat_flux,
             loss_coefficient=loss_coefficient,
             pre_scribe_mass_flow=pre_scribe_mass_flow,
             mass_flow_rate_set_point=mass_flow_rate_set_point,
-            set_pressure=set_pressure
+            set_pressure=set_pressure,
         )
-    # Check equations, see if something needs to be modified.

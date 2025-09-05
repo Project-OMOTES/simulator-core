@@ -20,26 +20,41 @@ from omotes_simulator_core.entities.assets.production_cluster import ProductionC
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    PROPERTY_ELECTRICITY_CONSUMPTION
+    PROPERTY_ELECTRICITY_CONSUMPTION,
 )
 
-from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import AirToWaterHeatPumpAsset
+from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import (
+    AirToWaterHeatPumpAsset,
+)
 
 logger = logging.getLogger(__name__)
 
+
 class AirToWaterHeatPump(ProductionCluster):
+    """An air to water heatpump asset.
+
+    It represents a two port heatpump that adds heat to the network by consuming electricity.
+    """
+
     def __init__(
         self,
         asset_name: str,
         asset_id: str,
         port_ids: list[str],
         coefficient_of_performance: float = 1 - 1 / 4.0,
-    ) -> None:  
+    ) -> None:
+        """
+        Initialize the AirToWaterHeatPump assset.
+
+        :param str asset_name: The name of the asset.
+        :param str asset_id: The unique identifier of the asset.
+        :param List[str] port_ids: List of ids of the connected ports.
+        """
         super().__init__(
             asset_name=asset_name,
-            asset_id=asset_id, 
+            asset_id=asset_id,
             port_ids=port_ids,
-            )
+        )
         self.coefficient_of_performance = coefficient_of_performance
         self.solver_asset = AirToWaterHeatPumpAsset(
             name=self.name,
@@ -58,10 +73,8 @@ class AirToWaterHeatPump(ProductionCluster):
         :return: float
             The electric power consumption of the air to water heat pump.
         """
-        return (
-            abs(self.get_actual_heat_supplied()) / self.coefficient_of_performance
-        )
-    
+        return abs(self.get_actual_heat_supplied()) / self.coefficient_of_performance
+
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
 
@@ -72,8 +85,7 @@ class AirToWaterHeatPump(ProductionCluster):
             PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
             PROPERTY_ELECTRICITY_CONSUMPTION: (
-                    self.get_electric_power_consumption()  # type: ignore
-                ),
-
+                self.get_electric_power_consumption()  # type: ignore
+            ),
         }
-        self.outputs[1][-1].update(output_dict_temp) # Outputs appended to the out port.
+        self.outputs[1][-1].update(output_dict_temp)  # Outputs appended to the out port.

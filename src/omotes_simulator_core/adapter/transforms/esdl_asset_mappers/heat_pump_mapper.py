@@ -45,14 +45,16 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
                     "COP", HeatPumpDefaults.coefficient_of_performance
                 ),
             )
-        elif len(hp_ports) == 2: # Air to water heat pump case.
-            heatpump_entity = AirToWaterHeatPump(
-                    asset_name=esdl_asset.esdl_asset.name,
-                    asset_id=esdl_asset.esdl_asset.id,
-                    port_ids=esdl_asset.get_port_ids()
-                    )
+        elif len(hp_ports) == 2:  # Air to water heat pump case.
+            heatpump_entity = AirToWaterHeatPump(  # type:ignore
+                asset_name=esdl_asset.esdl_asset.name,
+                asset_id=esdl_asset.esdl_asset.id,
+                port_ids=esdl_asset.get_port_ids(),
+            )
         else:
-            raise NotImplementedError(str(esdl_asset.esdl_asset) + " uncompatible number of ports for heat pump. "
-            "Use 2 ports for air to water HP, or 4 for a water to water HP.")
-        
+            raise NotImplementedError(
+                str(esdl_asset.esdl_asset) + " uncompatible number of ports for heat pump. "
+                "Use 2 ports for air to water HP, or 4 for a water to water HP."
+            )
+
         return heatpump_entity
