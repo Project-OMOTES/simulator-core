@@ -46,7 +46,6 @@ from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
-from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
 
@@ -259,30 +258,6 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
         :return: NetworkController, which is the converted EsdlObject object.
         """
-        consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
-        ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
-        return NetworkController(producers, consumers, storages)
-
-    def to_entity_new(self, esdl_object: EsdlObject) -> NetworkControllerNew:
-        """Method to convert esdl to NetworkController object.
-
-        This method first converts all assets into a list of assets.
-        Next to this a list of Junctions is created. This is then used
-        to create the NetworkController object.
-        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
-
-        :return: NetworkController, which is the converted EsdlObject object.
-        """
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
         network_list: list[NetworkItems] = []
@@ -313,7 +288,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     storages_in=storages,
                 )
             ]
-            return NetworkControllerNew(networks=networks)
+            return NetworkController(networks=networks)
         for heat_transfer_asset in heat_transfer_assets:
             # First check if the heat transfer asset is connected to a network that already
             # is in the list
@@ -389,7 +364,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                 raise RuntimeError(
                     "The network is connected via more then two stages which is not supported."
                 )
-        return NetworkControllerNew(networks=networks)
+        return NetworkController(networks=networks)
 
 
 def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
