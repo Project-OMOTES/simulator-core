@@ -96,7 +96,7 @@ class ControllerNetwork:
         )
 
     def get_total_discharge_storage(self) -> float:
-        """Method to get the total storage discharge power of the network corrected to the first network.
+        """Method to get the total storage discharge of the network corrected to the first network.
 
         :return float: Total heat discharge of all storages.
         """
@@ -107,7 +107,7 @@ class ControllerNetwork:
         )
 
     def get_total_charge_storage(self) -> float:
-        """Method to get the total storage charge power of the network corrected to the first network.
+        """Method to get the total storage charge of the network corrected to the first network.
 
         :return float: Total heat charge of all storages.
         """

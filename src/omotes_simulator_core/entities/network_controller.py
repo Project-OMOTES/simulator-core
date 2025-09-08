@@ -47,18 +47,18 @@ class NetworkController(NetworkControllerAbstract):
         """Method to update the factor of the networks taken into account the changing COP."""
         for network in self.networks:
             current_network = network
-            network.factor = 1
+            network.factor_to_first_network = 1
             for step in network.path:
                 if current_network == self.networks[int(step)]:
                     continue
                 for asset in current_network.heat_transfer_assets_prim:
                     if self.networks[int(step)].exists(asset.id):
-                        network.factor *= asset.factor
+                        network.factor_to_first_network *= asset.factor
                         current_network = self.networks[int(step)]
                         break
                 for asset in current_network.heat_transfer_assets_sec:
                     if self.networks[int(step)].exists(asset.id):
-                        network.factor /= asset.factor
+                        network.factor_to_first_network /= asset.factor
                         current_network = self.networks[int(step)]
                         break
 
