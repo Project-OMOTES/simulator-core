@@ -19,7 +19,7 @@ import unittest
 from pathlib import Path
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
-    ControllerHeatTransferMapper,
+    ControllerHeatPumpMapper,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
@@ -35,7 +35,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         )
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # Create a ControllerConsumerMapper object
-        mapper = ControllerHeatTransferMapper()
+        mapper = ControllerHeatPumpMapper()
         heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
 
         # Act
@@ -56,7 +56,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         )
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # Create a ControllerConsumerMapper object
-        mapper = ControllerHeatTransferMapper()
+        mapper = ControllerHeatPumpMapper()
         heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
 
         # Act

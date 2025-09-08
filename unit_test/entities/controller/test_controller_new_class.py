@@ -37,7 +37,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorage,
 )
-from omotes_simulator_core.entities.network_controller import NetworkControllerNew
+from omotes_simulator_core.entities.network_controller import NetworkController
 
 
 class ControllerTest(unittest.TestCase):
