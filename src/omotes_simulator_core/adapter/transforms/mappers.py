@@ -16,36 +16,12 @@
 import dataclasses
 
 from esdl.esdl import Joint as esdl_junction
-
-from omotes_simulator_core.adapter.transforms.controller_mappers import (
-    ControllerConsumerMapper,
-    ControllerHeatTransferMapper,
-    ControllerProducerMapper,
-    ControllerStorageMapper,
-)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
-from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.controller.controller_consumer import (
-    ControllerConsumer,
-)
-from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
-    ControllerHeatTransferAsset,
-)
-from omotes_simulator_core.entities.assets.controller.controller_network import (
-    ControllerNetwork,
-)
-from omotes_simulator_core.entities.assets.controller.controller_producer import (
-    ControllerProducer,
-)
-from omotes_simulator_core.entities.assets.controller.controller_storage import (
-    ControllerStorage,
-)
+
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
 
@@ -93,28 +69,6 @@ def replace_joint_in_connected_assets(
         raise RuntimeError("Error in replacing joint in connected assets.")
     else:
         return connected_py_assets
-
-
-@dataclasses.dataclass
-class NetworkItems:
-    """Dataclass to hold the different network items."""
-
-    heat_transfer_primary: list[ControllerHeatTransferAsset]
-    heat_transfer_secondary: list[ControllerHeatTransferAsset]
-    consumer: list[ControllerConsumer]
-    producer: list[ControllerProducer]
-    storage: list[ControllerStorage]
-
-    def add(self, asset: ControllerStorage | ControllerProducer | ControllerConsumer) -> None:
-        """Add the asset to the correct list."""
-        if isinstance(asset, ControllerConsumer):
-            self.consumer.append(asset)
-        elif isinstance(asset, ControllerProducer):
-            self.producer.append(asset)
-        elif isinstance(asset, ControllerStorage):
-            self.storage.append(asset)
-        else:
-            raise ValueError("Asset type not recognized.")
 
 
 class EsdlEnergySystemMapper(EsdlMapperAbstract):
@@ -231,154 +185,3 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             ]
             py_joint_dict[esdl_joint.get_id()] = [item for sublist in temp_list for item in sublist]
         return py_joint_dict
-
-
-class EsdlControllerMapper(EsdlMapperAbstract):
-    """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
-
-    def __init__(self) -> None:
-        """Constructor for esdl to heat network mapper."""
-
-    def to_esdl(self, entity: NetworkController) -> EsdlObject:
-        """Method to convert a NetworkController object to an esdlobject.
-
-        For now this method is not implemented.
-        :param NetworkController entity: NetworkController object to be converted to esdl object
-        :return: EsdlObject, which is the converted NetworkController object.
-        """
-        raise NotImplementedError("EsdlControllerMapper.to_esdl()")
-
-    def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
-        """Method to convert esdl to NetworkController object.
-
-        This method first converts all assets into a list of assets.
-        Next to this a list of Junctions is created. This is then used
-        to create the NetworkController object.
-        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
-
-        :return: NetworkController, which is the converted EsdlObject object.
-        """
-        # create graph to be able to check for connectivity
-        graph = EsdlGraphMapper().to_entity(esdl_object)
-        network_list: list[NetworkItems] = []
-        heat_transfer_assets = [
-            ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
-        ]
-        consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
-        ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
-        # if there are no heat transfer assets, all assets can be stored into one network.
-        if not heat_transfer_assets:
-            networks = [
-                ControllerNetwork(
-                    heat_transfer_assets_prim_in=[],
-                    heat_transfer_assets_sec_in=[],
-                    consumers_in=consumers,
-                    producers_in=producers,
-                    storages_in=storages,
-                )
-            ]
-            return NetworkController(networks=networks)
-        for heat_transfer_asset in heat_transfer_assets:
-            # First check if the heat transfer asset is connected to a network that already
-            # is in the list
-            belongs = False
-            for network in network_list:
-                if belongs_to_network(heat_transfer_asset.id + "_primary", network, graph):
-                    network.heat_transfer_primary.append(heat_transfer_asset)
-                    belongs = True
-                    break
-            if not belongs:
-                network_list.append(
-                    NetworkItems(
-                        heat_transfer_primary=[heat_transfer_asset],
-                        heat_transfer_secondary=[],
-                        consumer=[],
-                        producer=[],
-                        storage=[],
-                    )
-                )
-            belongs = False
-            for network in network_list:
-                if belongs_to_network(heat_transfer_asset.id + "_secondary", network, graph):
-                    network.heat_transfer_primary.append(heat_transfer_asset)
-                    belongs = True
-                    break
-            if not belongs:
-                network_list.append(
-                    NetworkItems(
-                        heat_transfer_primary=[],
-                        heat_transfer_secondary=[heat_transfer_asset],
-                        consumer=[],
-                        producer=[],
-                        storage=[],
-                    )
-                )
-        for asset in consumers + producers + storages:
-            for network in network_list:
-                if belongs_to_network(asset.id, network, graph):
-                    network.add(asset)
-                    continue
-        # creating network controller classes
-        networks = []
-        for network in network_list:
-            networks.append(
-                ControllerNetwork(
-                    heat_transfer_assets_prim_in=network.heat_transfer_primary,
-                    heat_transfer_assets_sec_in=network.heat_transfer_secondary,
-                    consumers_in=network.consumer,
-                    producers_in=network.producer,
-                    storages_in=network.storage,
-                )
-            )
-        # storing the path from network to the main network (number 0). We use a graph for this.
-        graph = Graph()
-        for i in range(len(networks)):
-            graph.add_node(str(i))
-        for i in range(len(networks)):
-            for heat_transfer_asset in networks[i].heat_transfer_assets_prim:
-                for j in range(len(networks)):
-                    if i == j:
-                        continue
-                    if networks[j].exists(heat_transfer_asset.id):
-                        graph.connect(str(i), str(j))
-        if not (graph.is_tree()):
-            raise RuntimeError(
-                "The network is looped via the heat pumps and heat exchangers, "
-                "which is not supported."
-            )
-
-        for i in range(1, len(networks)):
-            networks[i].path = graph.get_path(str(i), "0")
-            if len(networks[i].path) > 3:
-                raise RuntimeError(
-                    "The network is connected via more then two stages which is not supported."
-                )
-        return NetworkController(networks=networks)
-
-
-def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
-    """Check if the id is connected to a heat transfer asset in the network.
-
-    :param id: id to check if it belongs to the network.
-    :param network: NetworkItems to check if the id belongs to the network.
-    :param graph: for checking connectivity.
-    :return: bool, which is True if the id belongs to the network.
-    """
-    if network.heat_transfer_primary:
-        if graph.is_connected(network.heat_transfer_primary[0].id + "_primary", id):
-            return True
-    if network.heat_transfer_secondary:
-        if graph.is_connected(network.heat_transfer_secondary[0].id + "_secondary", id):
-            return True
-    return False
