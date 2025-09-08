@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""Mapper class to convert ESDL objects to internal controller objects."""
 import dataclasses
 from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
@@ -83,7 +84,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
-        network_list: list[NetworkItems] = []
+
         heat_transfer_assets = [
             ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
@@ -112,6 +113,85 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                 )
             ]
             return NetworkController(networks=networks)
+        network_list = self.heat_transfer_assets_to_network(graph, heat_transfer_assets)
+        self.assets_to_networks(graph, network_list, consumers + producers + storages)
+        # creating network controller classes
+        networks = []
+        for network in network_list:
+            networks.append(
+                ControllerNetwork(
+                    heat_transfer_assets_prim_in=network.heat_transfer_primary,
+                    heat_transfer_assets_sec_in=network.heat_transfer_secondary,
+                    consumers_in=network.consumer,
+                    producers_in=network.producer,
+                    storages_in=network.storage,
+                )
+            )
+        # storing the path from network to the main network (number 0). We use a graph for this.
+        graph = self.networks_to_graph(networks)
+        if not (graph.is_tree()):
+            raise RuntimeError(
+                "The network is looped via the heat pumps and heat exchangers, "
+                "which is not supported."
+            )
+
+        for i in range(1, len(networks)):
+            networks[i].path = graph.get_path(str(i), "0")
+            if len(networks[i].path) > 3:
+                raise RuntimeError(
+                    "The network is connected via more then two stages which is not supported."
+                )
+        return NetworkController(networks=networks)
+
+    def networks_to_graph(self, networks: list[ControllerNetwork]) -> Graph:
+        """Create a graph from the networks.
+
+        This graph is used to check the connectivity between the networks.
+        The networks are simply named 0,1 etc.
+
+        :param networks: list of networks to create the graph from.
+        :return: Graph, which is the created graph from the networks.
+        """
+        graph = Graph()
+        for i in range(len(networks)):
+            graph.add_node(str(i))
+        for i in range(len(networks)):
+            for heat_transfer_asset in networks[i].heat_transfer_assets_prim:
+                for j in range(len(networks)):
+                    if i == j:
+                        continue
+                    if networks[j].exists(heat_transfer_asset.id):
+                        graph.connect(str(i), str(j))
+        return graph
+
+    def assets_to_networks(
+        self,
+        graph: Graph,
+        network_list: list[NetworkItems],
+        assets: list[ControllerConsumer | ControllerProducer | ControllerStorage],
+    ) -> None:
+        """Method to move assets to networks.
+
+        :param graph: for checking connectivity.
+        :param network_list: list of NetworkItems to add the assets to.
+        :param assets: list of assets to be added to networks.
+        """
+        for asset in assets:
+            for network in network_list:
+                if belongs_to_network(asset.id, network, graph):
+                    network.add(asset)
+                    continue
+
+    def heat_transfer_assets_to_network(
+        self, graph: Graph, heat_transfer_assets: list[ControllerHeatTransferAsset]
+    ) -> list[NetworkItems]:
+        """Method to move heat transfer assets to networks. or create new networks.
+
+        :param graph: for checking connectivity.
+        :param heat_transfer_assets: list of heat transfer assets to be added to networks.
+        :return: list of NetworkItems, which are the networks with the heat transfer assets.
+        """
+        network_list: list[NetworkItems] = []
         for heat_transfer_asset in heat_transfer_assets:
             # First check if the heat transfer asset is connected to a network that already
             # is in the list
@@ -147,47 +227,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                         storage=[],
                     )
                 )
-        for asset in consumers + producers + storages:
-            for network in network_list:
-                if belongs_to_network(asset.id, network, graph):
-                    network.add(asset)
-                    continue
-        # creating network controller classes
-        networks = []
-        for network in network_list:
-            networks.append(
-                ControllerNetwork(
-                    heat_transfer_assets_prim_in=network.heat_transfer_primary,
-                    heat_transfer_assets_sec_in=network.heat_transfer_secondary,
-                    consumers_in=network.consumer,
-                    producers_in=network.producer,
-                    storages_in=network.storage,
-                )
-            )
-        # storing the path from network to the main network (number 0). We use a graph for this.
-        graph = Graph()
-        for i in range(len(networks)):
-            graph.add_node(str(i))
-        for i in range(len(networks)):
-            for heat_transfer_asset in networks[i].heat_transfer_assets_prim:
-                for j in range(len(networks)):
-                    if i == j:
-                        continue
-                    if networks[j].exists(heat_transfer_asset.id):
-                        graph.connect(str(i), str(j))
-        if not (graph.is_tree()):
-            raise RuntimeError(
-                "The network is looped via the heat pumps and heat exchangers, "
-                "which is not supported."
-            )
-
-        for i in range(1, len(networks)):
-            networks[i].path = graph.get_path(str(i), "0")
-            if len(networks[i].path) > 3:
-                raise RuntimeError(
-                    "The network is connected via more then two stages which is not supported."
-                )
-        return NetworkController(networks=networks)
+        return network_list
 
 
 def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
