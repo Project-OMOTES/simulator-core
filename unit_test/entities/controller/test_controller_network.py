@@ -44,7 +44,7 @@ class TestControllerNetwork(unittest.TestCase):
             consumers_in=self.consumers,
             producers_in=self.producers,
             storages_in=self.storages,
-            factor=self.factor,
+            factor_to_first_network=self.factor,
         )
 
     def test_init(self):
@@ -63,7 +63,7 @@ class TestControllerNetwork(unittest.TestCase):
         self.assertEqual(self.controller_network.consumers, self.consumers)
         self.assertEqual(self.controller_network.producers, self.producers)
         self.assertEqual(self.controller_network.storages, self.storages)
-        self.assertEqual(self.controller_network.factor, self.factor)
+        self.assertEqual(self.controller_network.factor_to_first_network, self.factor)
         self.assertEqual(self.controller_network.path, [])
 
     def test_exists(self):
