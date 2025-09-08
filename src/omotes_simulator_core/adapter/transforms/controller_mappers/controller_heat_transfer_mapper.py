@@ -25,7 +25,7 @@ from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObj
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
-class ControllerHeatTransferMapper(EsdlMapperAbstract):
+class ControllerHeatPumpMapper(EsdlMapperAbstract):
     """Class to map an EsdlAsset to a ControllerHeatTransferAsset."""
 
     def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
@@ -41,6 +41,31 @@ class ControllerHeatTransferMapper(EsdlMapperAbstract):
         """
         coefficient_of_performance = esdl_asset.get_property(
             esdl_property_name="COP", default_value=1
+        )
+        contr_heat_transfer = ControllerHeatTransferAsset(
+            name=esdl_asset.esdl_asset.name,
+            identifier=esdl_asset.esdl_asset.id,
+            factor=coefficient_of_performance,
+        )
+        return contr_heat_transfer
+
+
+class ControllerHeatExchangeMapper(EsdlMapperAbstract):
+    """Class to map an EsdlAsset to a ControllerHeatTransferAsset."""
+
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
+
+    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerHeatTransferAsset:
+        """Method to map an EsdlAsset to a ControllerHeatTransferAsset.
+
+        :param EsdlAssetObject model: Object to be converted to an asset entity.
+
+        :return: Entity object.
+        """
+        coefficient_of_performance = esdl_asset.get_property(
+            esdl_property_name="Efficiency", default_value=1
         )
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,

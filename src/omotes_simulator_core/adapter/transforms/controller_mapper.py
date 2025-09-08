@@ -17,7 +17,8 @@ import dataclasses
 from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
-    ControllerHeatTransferMapper,
+    ControllerHeatExchangeMapper,
+    ControllerHeatPumpMapper,
     ControllerProducerMapper,
     ControllerStorageMapper,
 )
@@ -86,8 +87,11 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         graph = EsdlGraphMapper().to_entity(esdl_object)
 
         heat_transfer_assets = [
-            ControllerHeatTransferMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_transfer")
+            ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump")
+        ] + [
+            ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("heat_exchanger")
         ]
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
