@@ -28,37 +28,65 @@ class EsdlGraphMapper(EsdlMapperAbstract):
         pass
 
     def to_entity(self, model: EsdlObject) -> Graph:
-        """Convert the esdl asset object to an entity."""
+        """Convert the esdl asset object to an entity.
+
+        Args:
+            model (EsdlObject): The esdl model to convert.
+        """
         graph = Graph()
-        for asset in model.get_all_assets_of_type("heat_transfer"):
-            # for heat pumps and heat exchangers, we need to add two nodes one for
-            # the primary side and one for the secondary.
-            graph.add_node(asset.get_id() + "_primary")
-            graph.add_node(asset.get_id() + "_secondary")
-
-        for asset in model.get_all_assets_of_type("asset"):
-            if asset.is_heat_exchange_asset():
-                continue
-            graph.add_node(asset.get_id())
-
-        for asset in model.get_all_assets_of_type("heat_transfer"):
-            port_ids = asset.get_port_ids()
-            for i in range(len(port_ids)):
-                # get ports ids gives an order list of first primary then secondary ports.
-                port_str = "_primary" if i < 2 else "_secondary"
-                for connected_asset_id in asset.get_connected_assets(port_ids[i]):
-                    graph.connect(asset.get_id() + port_str, connected_asset_id)
-
-        for esdl_asset in model.get_all_assets_of_type("asset"):
-            if esdl_asset.is_heat_exchange_asset():
-                continue
-            for port in esdl_asset.get_port_ids():
-                for connected_asset_id in esdl_asset.get_connected_assets(port):
-                    if model.get_asset_by_id(connected_asset_id).is_heat_exchange_asset():
-                        continue
-                    graph.connect(esdl_asset.get_id(), connected_asset_id)
+        assets_to_graph(graph=graph, model=model)
+        create_graph_nodes(graph=graph, model=model)
         return graph
 
     def to_esdl(self, entity: Graph) -> EsdlObject:
         """Convert the entity to an esdl asset object."""
         raise NotImplementedError("EsdlEnergySystemMapper.to_esdl()")
+
+
+def create_graph_nodes(graph: Graph, model: EsdlObject) -> None:
+    """Creates the connections between the nodes in the graph based on the connection in the model.
+
+    For heat transfer assets, connections are made from the primary and secondary nodes to the
+    connected assets. Please note that the assets first have to be added to the graph with the
+    assets_to_graph function.
+
+    Args:
+        graph (Graph): The graph to add the connections to.
+        model (EsdlObject): The esdl model to get the assets from.
+    """
+    for esdl_asset in model.get_all_assets_of_type("asset"):
+        if esdl_asset.is_heat_transfer_asset():
+            if not graph.node_exists(esdl_asset.get_id() + "_primary"):
+                raise ValueError(f"Graph does not contain node {esdl_asset.get_id() + '_primary'}")
+            port_ids = esdl_asset.get_port_ids()
+            for i in range(len(port_ids)):
+                # get ports ids gives an order list of first primary then secondary ports.
+                port_str = "_primary" if i < 2 else "_secondary"
+                for connected_asset_id in esdl_asset.get_connected_assets(port_ids[i]):
+                    graph.connect(esdl_asset.get_id() + port_str, connected_asset_id)
+            continue
+        for port in esdl_asset.get_port_ids():
+            if not graph.node_exists(esdl_asset.get_id()):
+                raise ValueError(f"Graph does not contain node {esdl_asset.get_id()}")
+            for connected_asset_id in esdl_asset.get_connected_assets(port):
+                if model.get_asset_by_id(connected_asset_id).is_heat_transfer_asset():
+                    continue
+                graph.connect(esdl_asset.get_id(), connected_asset_id)
+
+
+def assets_to_graph(graph: Graph, model: EsdlObject) -> None:
+    """Converts all assets in the esdl object to nodes in the graph.
+
+    For heat exchangers and heat pumps, two nodes are added, one for the primary
+    side and one for the secondary side. All other assets are added as a single node.
+
+    Args:
+        graph (Graph): The graph to add the nodes to.
+        model (EsdlObject): The esdl model to get the assets from.
+    """
+    for asset in model.get_all_assets_of_type("asset"):
+        if asset.is_heat_transfer_asset():
+            graph.add_node(asset.get_id() + "_primary")
+            graph.add_node(asset.get_id() + "_secondary")
+            continue
+        graph.add_node(asset.get_id())
