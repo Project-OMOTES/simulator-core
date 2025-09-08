@@ -36,7 +36,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # Create a ControllerConsumerMapper object
         mapper = ControllerHeatPumpMapper()
-        heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
+        heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_pump")
 
         # Act
         mapper.to_entity(heat_transfer_assets[0])
@@ -57,7 +57,7 @@ class TestControllerHeatTransferMapper(unittest.TestCase):
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # Create a ControllerConsumerMapper object
         mapper = ControllerHeatPumpMapper()
-        heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_transfer")
+        heat_transfer_assets = esdl_object.get_all_assets_of_type("heat_exchanger")
 
         # Act
         mapper.to_entity(heat_transfer_assets[0])

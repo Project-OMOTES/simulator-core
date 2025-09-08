@@ -326,7 +326,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.pipe_str = "pipe"
         self.transport_str = "transport"
         self.joint_str = "joint"
-        self.heat_tranfer_str = "heat_transfer"
+        self.heat_pump_str = "heat_pump"
+        self.heat_exchanger_str = "heat_exchanger"
 
     def test_to_string(self):
         """Test for conversion from esdl asset to string."""
@@ -340,22 +341,22 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         conversion_str = StringEsdlAssetMapper().to_entity(self.conversion)
         pipe_str = StringEsdlAssetMapper().to_entity(self.pipe)
         transport_str = StringEsdlAssetMapper().to_entity(self.transport)
-        heat_tranfer_str = StringEsdlAssetMapper().to_entity(self.heat_pump)
-        heat_tranfer_str2 = StringEsdlAssetMapper().to_entity(self.heat_exchange)
+        heat_pump_str = StringEsdlAssetMapper().to_entity(self.heat_pump)
+        heat_exchanger_str = StringEsdlAssetMapper().to_entity(self.heat_exchange)
 
         joint_str = StringEsdlAssetMapper().to_entity(self.joint)  # act
 
         # Assert
-        self.assertTrue(asset_str == self.asset_str)
-        self.assertTrue(producer_str == self.producer_str)
-        self.assertTrue(consumer_str == self.consumer_str)
-        self.assertTrue(geothermal_source_str == self.geothermal_source_str)
-        self.assertTrue(conversion_str == self.conversion_str)
-        self.assertTrue(pipe_str == self.pipe_str)
-        self.assertTrue(transport_str == self.transport_str)
-        self.assertTrue(joint_str == self.joint_str)
-        self.assertTrue(heat_tranfer_str == self.heat_tranfer_str)
-        self.assertTrue(heat_tranfer_str2 == self.heat_tranfer_str)
+        self.assertEqual(asset_str, self.asset_str)
+        self.assertEqual(producer_str, self.producer_str)
+        self.assertEqual(consumer_str, self.consumer_str)
+        self.assertEqual(geothermal_source_str, self.geothermal_source_str)
+        self.assertEqual(conversion_str, self.conversion_str)
+        self.assertEqual(pipe_str, self.pipe_str)
+        self.assertEqual(transport_str, self.transport_str)
+        self.assertEqual(joint_str, self.joint_str)
+        self.assertEqual(heat_pump_str, self.heat_pump_str)
+        self.assertEqual(heat_exchanger_str, self.heat_exchanger_str)
 
     def test_to_esdl(self):
         """Test for mapping back to esdl assets."""
@@ -369,22 +370,22 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
         transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
         joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
-        heat_transfer = StringEsdlAssetMapper().to_esdl(self.heat_tranfer_str)[0]
-        heat_transfer2 = StringEsdlAssetMapper().to_esdl(self.heat_tranfer_str)[1]
+        heat_pump = StringEsdlAssetMapper().to_esdl(self.heat_pump_str)[0]
+        heat_exchanger = StringEsdlAssetMapper().to_esdl(self.heat_exchanger_str)[0]
 
         geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]  # act
 
         # Assert
-        self.assertTrue(asset == self.asset)
-        self.assertTrue(producer == self.producer)
-        self.assertTrue(consumer == self.consumer)
-        self.assertTrue(conversion == self.conversion)
-        self.assertTrue(pipe == self.pipe)
-        self.assertTrue(transport == self.transport)
-        self.assertTrue(joint == self.joint)
-        self.assertTrue(geothermal == self.geothermal_source)
-        self.assertTrue(heat_transfer == self.heat_pump)
-        self.assertTrue(heat_transfer2 == self.heat_exchange)
+        self.assertEqual(asset, self.asset)
+        self.assertEqual(producer, self.producer)
+        self.assertEqual(consumer, self.consumer)
+        self.assertEqual(conversion, self.conversion)
+        self.assertEqual(pipe, self.pipe)
+        self.assertEqual(transport, self.transport)
+        self.assertEqual(joint, self.joint)
+        self.assertEqual(geothermal, self.geothermal_source)
+        self.assertEqual(heat_pump, self.heat_pump)
+        self.assertEqual(heat_exchanger, self.heat_exchange)
 
     def test_raise_error(self):
         """Test to test if an error is raised for unknown component in ESDL."""
