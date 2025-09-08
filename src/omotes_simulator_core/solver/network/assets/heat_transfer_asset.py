@@ -269,7 +269,7 @@ class HeatTransferAsset(BaseAsset):
             self.secondary_side_outflow,
         ) = self.get_ordered_connection_point_list()
 
-        if np.all(np.abs(self.prev_sol[0:-1:3]) < 1e-3):
+        if np.all(np.abs(self.prev_sol[0:-1:3]) < MASSFLOW_ZERO_LIMIT):
             iteration_flow_direction_primary = self.flow_direction(
                 self.prev_sol[
                     self.get_index_matrix(
@@ -409,7 +409,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=self.primary_side_inflow,
-                    mass_flow_value=self.mass_flow_initialization_primary,
+                    mass_flow_value=0,  # self.mass_flow_initialization_primary,
                 )
             )
         # Return the equations

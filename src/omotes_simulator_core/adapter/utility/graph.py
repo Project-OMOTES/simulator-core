@@ -90,15 +90,10 @@ class Graph:
         :param str node1: Name of the first node.
         :param str node2: Name of the second node.
         """
-        if not self.node_exists(node1):
-            raise ValueError(f"Node {node1} does not exist in the graph.")
-        if not self.node_exists(node2):
-            raise ValueError(f"Node {node2} does not exist in the graph.")
-        try:
-            nx.shortest_path(self.graph, node1, node2)
-            return True
-        except nx.NetworkXNoPath:
+        if not self.get_path(node1=node1, node2=node2):
             return False
+        else:
+            return True
 
     def get_path(self, node1: str, node2: str) -> list[str]:
         """Method to get the path between two nodes in the graph.
@@ -113,6 +108,9 @@ class Graph:
         if not self.node_exists(node2):
             raise ValueError(f"Node {node2} does not exist in the graph.")
         try:
+            # Method to look up the shortest path between two nodes, using
+            # Dijkstra's algorithm. The method only returns a single
+            # shortest path, so it is not guaranteed to return all paths.
             return nx.shortest_path(self.graph, node1, node2)  # type: ignore
         except nx.NetworkXNoPath:
             return []
