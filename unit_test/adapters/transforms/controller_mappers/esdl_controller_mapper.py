@@ -18,7 +18,7 @@ from pathlib import Path
 
 from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.network_controller_new import NetworkControllerNew
+from omotes_simulator_core.entities.network_controller import NetworkControllerNew
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
