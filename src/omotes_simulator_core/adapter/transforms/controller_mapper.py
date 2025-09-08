@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper class to convert ESDL objects to internal controller objects."""
 import dataclasses
-from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
+
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
     ControllerHeatExchangeMapper,
@@ -23,10 +23,8 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerStorageMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
+from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.utility.graph import Graph
-
-from omotes_simulator_core.entities.network_controller import NetworkController
-from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.assets.controller import (
     ControllerConsumer,
     ControllerHeatTransferAsset,
@@ -34,6 +32,8 @@ from omotes_simulator_core.entities.assets.controller import (
     ControllerProducer,
     ControllerStorage,
 )
+from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.entities.network_controller import NetworkController
 
 
 @dataclasses.dataclass
