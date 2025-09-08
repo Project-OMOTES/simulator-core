@@ -58,7 +58,7 @@ class ControllerTest(unittest.TestCase):
         self.network2.heat_transfer_assets_sec = []
         self.network3.heat_transfer_assets_sec = []
         self.networks = [self.network1, self.network2, self.network3]
-        self.controller = NetworkControllerNew(networks=self.networks)
+        self.controller = NetworkController(networks=self.networks)
 
     def test_init(self):
         # arrange
