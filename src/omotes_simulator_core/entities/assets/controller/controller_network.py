@@ -42,6 +42,21 @@ class ControllerNetwork:
     This class is used to be able to cope with heat exchangers and heat pumps.
     """
 
+    heat_transfer_assets_prim: list[ControllerHeatTransferAsset]
+    """List of all heat transfer assets connected with the primary side to the network."""
+    heat_transfer_assets_sec: list[ControllerHeatTransferAsset]
+    """List of all heat transfer assets connected with the secondary side to the network."""
+    consumers: list[ControllerConsumer]
+    """List of all consumers in the network."""
+    producers: list[ControllerProducer]
+    """List of all producers in the network."""
+    storages: list[ControllerStorage]
+    """List of all storages in the network."""
+    factor_to_first_network: float
+    """Factor to calculate power in the first network in the list of networks."""
+    path: list[str]
+    """Path from this network to the first network in the total system."""
+
     def __init__(
         self,
         heat_transfer_assets_prim_in: list[ControllerHeatTransferAsset],
@@ -49,7 +64,7 @@ class ControllerNetwork:
         consumers_in: list[ControllerConsumer],
         producers_in: list[ControllerProducer],
         storages_in: list[ControllerStorage],
-        factor: float = 1,
+        factor_to_first_network: float = 1,
     ) -> None:
         """Constructor of the class, which sets all attributes."""
         self.heat_transfer_assets_prim = heat_transfer_assets_prim_in
@@ -57,14 +72,14 @@ class ControllerNetwork:
         self.consumers = consumers_in
         self.producers = producers_in
         self.storages = storages_in
-        self.factor = factor
+        self.factor_to_first_network = factor_to_first_network
         self.path: list[str] = []
 
-    def exists(self, id: str) -> bool:
+    def exists(self, identifier: str) -> bool:
         """Method to check an asset is in the network."""
         return any(
             [
-                asset.id == id
+                asset.id == identifier
                 for asset in self.heat_transfer_assets_prim
                 + self.heat_transfer_assets_sec
                 + self.consumers
@@ -74,31 +89,43 @@ class ControllerNetwork:
         )
 
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
-        """Method which the total heat demand at the given time."""
-        return sum([consumer.get_heat_demand(time) for consumer in self.consumers]) * self.factor
+        """Method which the total heat demand at the given time corrected to the first network."""
+        return (
+            sum([consumer.get_heat_demand(time) for consumer in self.consumers])
+            * self.factor_to_first_network
+        )
 
     def get_total_discharge_storage(self) -> float:
-        """Method to get the total storage discharge power of the network.
+        """Method to get the total storage discharge power of the network corrected to the first network.
 
         :return float: Total heat discharge of all storages.
         """
         # TODO add limit based on state of charge
-        return float(sum([storage.max_discharge_power for storage in self.storages])) * self.factor
+        return (
+            float(sum([storage.max_discharge_power for storage in self.storages]))
+            * self.factor_to_first_network
+        )
 
     def get_total_charge_storage(self) -> float:
-        """Method to get the total storage charge power of the network.
+        """Method to get the total storage charge power of the network corrected to the first network.
 
         :return float: Total heat charge of all storages.
         """
         # TODO add limit based on state of charge
-        return float(sum([storage.max_charge_power for storage in self.storages])) * self.factor
+        return (
+            float(sum([storage.max_charge_power for storage in self.storages]))
+            * self.factor_to_first_network
+        )
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
 
         :return float: Total heat supply of all producers.
         """
-        return float(sum([producer.power for producer in self.producers])) * self.factor
+        return (
+            float(sum([producer.power for producer in self.producers]))
+            * self.factor_to_first_network
+        )
 
     def set_supply_to_max(self, priority: int = 0) -> dict:
         """Method to set the producers to the max power.
@@ -108,7 +135,10 @@ class ControllerNetwork:
         return self.set_supply(factor=1, priority=priority)
 
     def set_supply(self, factor: float = 1, priority: int = 0) -> dict:
-        """Method to set the producers to the max power.
+        """Method to set the producers with the given priority to max power times the factor.
+
+        :param float factor: Factor to multiply the max power with.
+        :param int priority: Priority of the producers to set. When 0 all producers are set.
 
         :return dict: Dict with key= asset-id and value=setpoints for the producers.
         """
@@ -127,8 +157,9 @@ class ControllerNetwork:
         return producers
 
     def set_storage_charge_power(self, factor: float = 1) -> dict:
-        """Method to set the producers to the max power.
+        """Method to set the producers to the max power times the given factor.
 
+        :param float factor: Factor to multiply the max charge power with.
         :return dict: Dict with key= asset-id and value=setpoints for the producers.
         """
         storage_settings = {}
@@ -142,8 +173,9 @@ class ControllerNetwork:
         return storage_settings
 
     def set_storage_discharge_power(self, factor: float = 1) -> dict:
-        """Method to set the producers to the max power.
+        """Method to set the producers to the max power times the given factor.
 
+        :param float factor: Factor to multiply the max discharge power with.
         :return dict: Dict with key= asset-id and value=setpoints for the producers.
         """
         storage_settings = {}
@@ -161,31 +193,17 @@ class ControllerNetwork:
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.
         """
-        storages = {}
-        for storage in self.storages:
-            storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-            }
-        return storages
+        return self.set_storage_discharge_power()
 
     def set_all_storages_charge_to_max(self) -> dict:
         """Method to set all the storages to the max discharge power.
 
         :return dict: Dict with key= asset-id and value=setpoints for the storages.
         """
-        storages = {}
-        for storage in self.storages:
-            storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-            }
-        return storages
+        return self.set_storage_charge_power()
 
     def set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:
-        """Method to set the consumer to the demand.
+        """Method to set the consumer to the demand multiplied by the given factor.
 
         :param datetime.datetime time: Time for which to set the consumer to the demand.
         :param float factor: Factor to multiply the heat demand with.
@@ -203,7 +221,11 @@ class ControllerNetwork:
         return consumers
 
     def get_total_supply_priority(self, priority: int) -> float:
-        """Method to get the total supply of the network for all sources with a certain priority."""
+        """Method to get the total supply of the network for all sources with a certain priority.
+
+        :param int priority: Priority of the producers to get the total supply for.
+        :return float: Total heat supply of all producers with the given priority.
+        """
         return float(
             sum([producer.power for producer in self.producers if producer.priority == priority])
         )
