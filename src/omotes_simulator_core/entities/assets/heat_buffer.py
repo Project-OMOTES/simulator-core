@@ -100,6 +100,7 @@ class HeatBuffer(AssetAbstract):
         self.accumulation_time = 3600
         self.output: list = []
         self.first_time_step = True
+        self.energy = 0
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -174,6 +175,7 @@ class HeatBuffer(AssetAbstract):
             self.layer_temperature = new_temperature
 
             self.temperature_out = self.layer_temperature[-1]
+
         else:
             new_temperature[-1] += min(
                 1, abs(self.mass_flowrate) * self.accumulation_time / self.layer_mass
@@ -188,6 +190,10 @@ class HeatBuffer(AssetAbstract):
             self.layer_temperature = new_temperature
 
             self.temperature_in = self.layer_temperature[0]
+
+        self.energy = self.energy + self.mass_flowrate * self.accumulation_time / 3600 * 4180 * (
+            self.temperature_in - self.temperature_out
+        )
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
