@@ -278,3 +278,51 @@ class ProductionClusterTest(unittest.TestCase):
             actual_heat_supplied = self.production_cluster.get_actual_heat_supplied()
             # Assert
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
+
+    def test_is_converged_pass(self):
+        """Test the convergence criteria of a production cluster.
+
+        The convergence criteria is set to 0.1% of the heat demand set point.
+        """
+        # Arrange
+        self.production_cluster.heat_demand_set_point = 100.0
+
+        def get_actual_heat_supplied(_):
+            return self.production_cluster.heat_demand_set_point * (1 - 0.001)
+
+        with patch(
+            "omotes_simulator_core.entities.assets.production_cluster."
+            "ProductionCluster.get_actual_heat_supplied",
+            get_actual_heat_supplied,
+        ):
+            self.production_cluster.solver_asset.pre_scribe_mass_flow = True  # type: ignore
+
+            # Act
+            is_converged = self.production_cluster.is_converged()
+
+            # Assert
+            self.assertTrue(is_converged)
+
+    def test_is_converged_fail(self):
+        """Test the convergence criteria of a production cluster.
+
+        The convergence criteria is set to 0.1% of the heat demand set point.
+        """
+        # Arrange
+        self.production_cluster.heat_demand_set_point = 100.0
+
+        def get_actual_heat_supplied(_):
+            return self.production_cluster.heat_demand_set_point * (1 - 0.01)
+
+        with patch(
+            "omotes_simulator_core.entities.assets.production_cluster."
+            "ProductionCluster.get_actual_heat_supplied",
+            get_actual_heat_supplied,
+        ):
+            self.production_cluster.solver_asset.pre_scribe_mass_flow = True  # type: ignore
+
+            # Act
+            is_converged = self.production_cluster.is_converged()
+
+            # Assert
+            self.assertFalse(is_converged)
