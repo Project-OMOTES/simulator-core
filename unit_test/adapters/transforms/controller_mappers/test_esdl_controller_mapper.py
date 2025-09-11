@@ -16,9 +16,9 @@
 import unittest
 from pathlib import Path
 
-from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
+from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.network_controller import NetworkControllerNew
+from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
@@ -38,9 +38,9 @@ class TestEsdlControllerMapper(unittest.TestCase):
         mapper = EsdlControllerMapper()
 
         # Act
-        result = mapper.to_entity_new(esdl_object)
+        result = mapper.to_entity(esdl_object)
         # Assert
-        self.assertIsInstance(result, NetworkControllerNew)
+        self.assertIsInstance(result, NetworkController)
         self.assertEqual(len(result.networks), 3)
         self.assertEqual(result.networks[0].path, [])
         self.assertEqual(result.networks[1].path, ["1", "0"])

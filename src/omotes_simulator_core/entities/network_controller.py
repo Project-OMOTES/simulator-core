@@ -104,7 +104,7 @@ class NetworkController(NetworkControllerAbstract):
             else:
                 # there is a deficit of supply we can discharge the storage, storage becomes
                 # producer.
-                deficit_supply = total_supply - total_demand
+                deficit_supply = total_demand - total_supply
                 storages = self._set_storages_discharge_power(deficit_supply)
                 producers = self._set_producers_to_max()
             producers.update(consumers)
