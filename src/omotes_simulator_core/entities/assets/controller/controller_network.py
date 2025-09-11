@@ -168,7 +168,6 @@ class ControllerNetwork:
                 PROPERTY_HEAT_DEMAND: storage.max_charge_power * factor,
                 PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
                 PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 
@@ -181,10 +180,9 @@ class ControllerNetwork:
         storage_settings = {}
         for storage in self.storages:
             storage_settings[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_discharge_power * factor,
+                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power * factor,
                 PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
                 PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 

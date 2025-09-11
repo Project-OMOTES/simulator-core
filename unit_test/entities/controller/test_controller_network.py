@@ -128,7 +128,7 @@ class TestControllerNetwork(unittest.TestCase):
         producer1.power = 10
         producer2 = Mock()
         producer2.power = 20
-        self.controller_network.factor = 2.0
+        self.controller_network.factor_to_first_network = 2.0
         self.controller_network.producers = [producer1, producer2]
         # act
         res = self.controller_network.get_total_supply()
