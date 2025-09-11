@@ -51,3 +51,33 @@ class ControllerProducerTest(unittest.TestCase):
         self.assertEqual(producer.power, 1000)
         self.assertEqual(producer.marginal_costs, 0.1)
         self.assertEqual(producer.priority, 1)
+
+    def test_controller_producer_none_priority(self) -> None:
+        """Test to ensure a None priority does not break the CotrollerProducer.
+
+        A None priority can be generated when an esdl with a priority control strategy has a
+        producer with no priority assigned to it.
+        """
+        # Arrange
+        producer = ControllerProducer(
+            "producer",
+            "id",
+            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperature_in=DEFAULT_TEMPERATURE,
+            power=1000,
+            marginal_costs=0.1,
+            priority=None,
+        )
+
+        # Act
+
+        # Assert
+        self.assertEqual(producer.name, "producer")
+        self.assertEqual(producer.id, "id")
+        self.assertEqual(producer.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(
+            producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+        )
+        self.assertEqual(producer.power, 1000)
+        self.assertEqual(producer.marginal_costs, 0.1)
+        self.assertEqual(producer.priority, None)

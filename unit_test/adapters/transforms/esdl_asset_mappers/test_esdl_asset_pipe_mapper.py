@@ -17,7 +17,7 @@
 import typing
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
@@ -99,19 +99,6 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             esdl_asset.get_property("qheat_external", PIPE_DEFAULTS.qheat_external),
         )
 
-    def test_pipe_get_property_diameter(self) -> None:
-        """Evaluate the get property diameter method to retrieve diameters."""
-        # Arrange
-        esdl_asset_mock = Mock()
-        esdl_asset_mock.get_property.return_value = 1.0
-        esdl_asset_mock.has_property.return_value = True
-
-        # Act
-        pass
-
-        # Assert
-        self.assertEqual(EsdlAssetPipeMapper._get_diameter(esdl_asset=esdl_asset_mock), 1.0)
-
     def test_pipe_get_heat_transfer_coefficient(self) -> None:
         """Evaluate the get heat transfer coefficient method."""
         # Arrange
@@ -136,3 +123,85 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
 
         # Assert
         self.assertEqual(alpha_value, 0.8901927763663371)
+
+    def test_pipe_get_diameter_with_inner_diameter(self):
+        """Returns the innerDiameter if it is specified and non-zero."""
+        # Arrange
+        esdl_asset_mock = Mock()
+
+        def mock_get_property(key, default=None):
+            if key == "innerDiameter":
+                return 0.5
+            return None
+
+        esdl_asset_mock.get_property = mock_get_property
+
+        # Act
+        diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
+
+        # Assert
+        self.assertEqual(diameter, 0.5)
+
+    def test_get_diameter_with_nominal_diameter_uses_edr(self):
+        """Returns converted diameter from EDR when innerDiameter is zero and DN is provided."""
+        # Arrange
+        esdl_asset_mock = Mock()
+        dn_mock = Mock()
+        dn_mock.name = "DN50"
+
+        def mock_get_property(key, default=None):
+            if key == "innerDiameter":
+                return 0
+            if key == "diameter":
+                return dn_mock
+            return default
+
+        esdl_asset_mock.get_property = mock_get_property
+        edr_object_mock = Mock()
+        edr_object_mock.innerDiameter = 0.42
+
+        with patch.object(
+            EsdlAssetPipeMapper, "_get_esdl_object_from_edr", return_value=edr_object_mock
+        ):
+            # Act
+            diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
+
+            # Assert
+            self.assertEqual(diameter, 0.42)
+
+    def test_get_diameter_default_when_none_provided(self):
+        """Returns default diameter when both innerDiameter is 0 and diameter is None."""
+        # Arrange
+        esdl_asset_mock = Mock()
+
+        def mock_get_property(key, default=None):
+            if key == "innerDiameter":
+                return 0
+            if key == "diameter":
+                return None
+            return default
+
+        esdl_asset_mock.get_property = mock_get_property
+
+        # Act
+        diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
+
+        # Assert
+        self.assertEqual(diameter, PIPE_DEFAULTS.diameter)
+
+    def test_get_esdl_object_from_edr(self):
+        """Test that the correct ESDL object is returned from EDR using the DN string."""
+        # Arrange
+        with patch(
+            "omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper.EDRClient"
+        ) as mock_edr_client_class:
+            mock_edr_client = mock_edr_client_class.return_value
+            expected_object = Mock()
+            mock_edr_client.get_object_esdl.return_value = expected_object
+            # Act
+            result = EsdlAssetPipeMapper._get_esdl_object_from_edr("DN100")
+            # Assert
+            mock_edr_client.get_object_esdl.assert_called_once_with(
+                "/edr/Public/Assets/Logstor/Steel-S1-DN-100.edd"
+            )
+            self.assertEqual(result, expected_object)

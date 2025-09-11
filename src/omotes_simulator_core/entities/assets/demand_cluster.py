@@ -87,10 +87,8 @@ class DemandCluster(AssetAbstract):
 
         self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
 
-        # First time step: use default setpoint temperature
-        # TODO replace this by adding initial temperature to the consumer
-        #  similar to the production_asset implementation.
         if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
+
             self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
             self.first_time_step = False
         else:
