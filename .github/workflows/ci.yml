@@ -77,11 +77,10 @@ jobs:
       matrix:
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout incl. LFS
+        uses: actions/checkout@v3
         with:
           lfs: 'true'
-      - name: checkoutLFS
-        uses: actions/checkout@v3
       - name: Restore venv
         uses: actions/download-artifact@v4
         with:
