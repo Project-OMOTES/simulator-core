@@ -16,7 +16,9 @@
 import unittest
 from pathlib import Path
 
-from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
+from omotes_simulator_core.adapter.transforms.controller_mapper import (
+    EsdlControllerMapper,
+)
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
