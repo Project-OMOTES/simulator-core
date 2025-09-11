@@ -56,8 +56,8 @@ class HeatBuffer(AssetAbstract):
     volume: float
     """The volume of the heat storage [m3]."""
 
-    accumulation_time: float
-    """The accumulation_time to calculate volume during injection and production [seconds]."""
+    energy: float
+    """The stored energy in the storage [Wh]."""
 
     def __init__(
         self,
@@ -97,10 +97,9 @@ class HeatBuffer(AssetAbstract):
         # positive flow is discharge and negative flow is charge
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
 
-        self.accumulation_time = 3600
         self.output: list = []
         self.first_time_step = True
-        self.energy = 0
+        self.energy = 0.0
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -128,16 +127,11 @@ class HeatBuffer(AssetAbstract):
             else:
                 # After the first time step: use solver temperature
                 if self.thermal_power_allocation < 0:
-                    self.temperature_in = self.solver_asset.get_temperature(0)
-                else:
+                    self.temperature_in = self.layer_temperature[0]
                     self.temperature_out = self.solver_asset.get_temperature(1)
-
-            if self.thermal_power_allocation < 0:
-                # when charging the output temperature is the bottom temperature of the tank
-                self.temperature_out = self.layer_temperature[-1]
-            else:
-                # when discharging the input temperature is the upper temperature of the tank
-                self.temperature_in = self.layer_temperature[0]
+                else:
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.layer_temperature[-1]
 
             self._calculate_massflowrate()
             self._calculate_new_temperature()
@@ -162,36 +156,36 @@ class HeatBuffer(AssetAbstract):
         new_temperature = self.layer_temperature.copy()
 
         if self.mass_flowrate > 0:
-            new_temperature[0] += min(
-                1, self.mass_flowrate * self.accumulation_time / self.layer_mass
-            ) * (self.temperature_in - self.layer_temperature[0])
+            new_temperature[0] += min(1, self.mass_flowrate * self.time_step / self.layer_mass) * (
+                self.temperature_in - new_temperature[0]
+            )
 
             # heat exchange between layer
             for ii in range(self.num_layer - 1):
                 new_temperature[ii + 1] += min(
-                    1, self.mass_flowrate * self.accumulation_time / self.layer_mass
+                    1, self.mass_flowrate * self.time_step / self.layer_mass
                 ) * (new_temperature[ii] - new_temperature[ii + 1])
 
             self.layer_temperature = new_temperature
 
-            self.temperature_out = self.layer_temperature[-1]
+            self.temperature_out = float(self.layer_temperature[-1])
 
         else:
             new_temperature[-1] += min(
-                1, abs(self.mass_flowrate) * self.accumulation_time / self.layer_mass
-            ) * (self.temperature_out - self.layer_temperature[-1])
+                1, abs(self.mass_flowrate) * self.time_step / self.layer_mass
+            ) * (self.temperature_out - new_temperature[-1])
 
             # heat exchange between layer
             for ii in range(self.num_layer - 1, 0, -1):
                 new_temperature[ii - 1] += min(
-                    1, abs(self.mass_flowrate) * self.accumulation_time / self.layer_mass
+                    1, abs(self.mass_flowrate) * self.time_step / self.layer_mass
                 ) * (new_temperature[ii] - new_temperature[ii - 1])
 
             self.layer_temperature = new_temperature
 
-            self.temperature_in = self.layer_temperature[0]
+            self.temperature_in = float(self.layer_temperature[0])
 
-        self.energy = self.energy + self.mass_flowrate * self.accumulation_time / 3600 * 4180 * (
+        self.energy = self.energy + self.mass_flowrate * self.time_step / 3600 * 4180 * (
             self.temperature_in - self.temperature_out
         )
 

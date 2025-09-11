@@ -36,16 +36,16 @@ class HeatBufferTest(unittest.TestCase):
             asset_name="heat_buffer",
             asset_id="heat_buffer_id",
             port_ids=["test1", "test2"],
-            volume=1,
+            volume=25,
         )
 
     def test_injection(self) -> None:
         """Test injection to Heat Buffer."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e3,
-            PROPERTY_TEMPERATURE_IN: 363,
-            PROPERTY_TEMPERATURE_OUT: 283,
+            PROPERTY_HEAT_DEMAND: 5e3,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
+            PROPERTY_TEMPERATURE_OUT: 25 + 273.15,
         }
 
         # Act
@@ -55,19 +55,21 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 351.70, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 302.56, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 358.14, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 357.54, delta=0.1)
 
     def test_production(self) -> None:
         """Test production from Heat Buffer."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e3,
-            PROPERTY_TEMPERATURE_IN: 363,
-            PROPERTY_TEMPERATURE_OUT: 283,
+            PROPERTY_HEAT_DEMAND: -5e3,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
+            PROPERTY_TEMPERATURE_OUT: 25 + 273.15,
         }
 
-        self.heat_buffer.layer_temperature = np.array([355.59, 341.36, 327.13, 317.25, 311.92])
+        self.heat_buffer.layer_temperature = np.array(
+            [358.14869781, 358.13745031, 358.08685218, 357.92903466, 357.54565629]
+        )
 
         # Act
         # discharging for 1 day
@@ -76,5 +78,5 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 331.30, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 287.90, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 298.76, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 298.15, delta=0.1)
