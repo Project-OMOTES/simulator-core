@@ -94,8 +94,9 @@ class NetworkController(NetworkControllerAbstract):
         the esdl priority strategy. The producer with the lowest priority value has the
         highest priority.
         """
-        # Check to see if any of the producers has no priority assigned, if so set it to the lowest.
-        lowest_priority = min(
+        # Check to see if any of the producers has no priority assigned, if so set it to
+        # the lowest priority (= highest number).
+        lowest_priority = max(
             [producer.priority for producer in self.producers if producer.priority is not None]
         )
         # For assets that have no priority assingned, give them the lowest priority.
