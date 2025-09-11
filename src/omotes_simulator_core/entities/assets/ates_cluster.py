@@ -26,10 +26,14 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
+    celcius_to_kelvin,
+    kelvin_to_celcius,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
@@ -106,10 +110,10 @@ class AtesCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
-        self.hot_well_temperature = 85 + 273.15
-        self.cold_well_temperature = 35 + 273.15
-        self.temperature_in = self.hot_well_temperature
-        self.temperature_out = self.cold_well_temperature
+        self.temperature_in = DEFAULT_TEMPERATURE
+        self.temperature_out = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.hot_well_temperature = self.temperature_in
+        self.cold_well_temperature = self.temperature_out
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -258,13 +262,13 @@ class AtesCluster(AssetAbstract):
 
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: self.temperature_out,
-            PROPERTY_TEMPERATURE_IN: self.temperature_in,
+            PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
+            PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
         }
-        # initially charging 12 weeks
-        print("initializing ates")
+        # initially charging 12 weeks with 85-35 temperature 1 MW
+        logger.info("initializing ates with charging for 12 weeks")
         for i in range(12):
-            print(f"charging week {i + 1}")
+            logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.first_time_step = True  # dont get temperature from solver
             self.set_setpoints(setpoints=setpoints)
@@ -282,10 +286,13 @@ class AtesCluster(AssetAbstract):
         # is downward
 
         if volume_flow > 0:
-            rosim_input_temperature = [self.temperature_in - 273.15, -1]  # Celcius, -1 in
+            rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
             # injection well to make sure it is not used
         elif volume_flow < 0:
-            rosim_input_temperature = [-1, self.temperature_out - 273.15]  # Celcius, -1 in
+            rosim_input_temperature = [
+                -1,
+                kelvin_to_celcius(self.temperature_out),
+            ]  # Celcius, -1 in
             # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
@@ -295,5 +302,5 @@ class AtesCluster(AssetAbstract):
             rosim_input__flow, rosim_input_temperature, timestep
         )
 
-        self.hot_well_temperature = ates_temperature[0] + 273.15  # convert to K
-        self.cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
+        self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
+        self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
