@@ -20,19 +20,19 @@ import os
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
     celcius_to_kelvin,
+    heat_demand_and_temperature_to_mass_flow,
     kelvin_to_celcius,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary

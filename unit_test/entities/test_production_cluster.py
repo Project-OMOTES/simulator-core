@@ -28,9 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_VOLUMEFLOW,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
+from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
