@@ -60,7 +60,7 @@ class EsdlAssetObject:
         if hasattr(self.esdl_asset.controlStrategy, "priority"):
             return int(self.esdl_asset.controlStrategy.priority)
         else:
-            return None
+            return 1
 
     def get_state(self) -> str:
         """Get state of the asset.
