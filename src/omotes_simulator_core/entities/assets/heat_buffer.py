@@ -15,9 +15,10 @@
 
 """Heat Buffer class."""
 from cmath import isinf
-from typing import Dict
+from typing import Dict, no_type_check
 
 import numpy as np
+from scipy.integrate import solve_ivp
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -81,9 +82,8 @@ class HeatBuffer(AssetAbstract):
         self.tank_volume = volume
         self.num_layer = 5
         self.layer_volume = self.tank_volume / self.num_layer
-        self.layer_mass = self.layer_volume * fluid_props.get_density(
-            (self.temperature_in + self.temperature_out) / 2
-        )
+        self.density = fluid_props.get_density((self.temperature_in + self.temperature_out) / 2)
+        self.layer_mass = self.layer_volume * self.density
         self.layer_temperature = np.linspace(
             self.temperature_in, self.temperature_out, self.num_layer
         )
@@ -126,12 +126,12 @@ class HeatBuffer(AssetAbstract):
                 self.first_time_step = False
             else:
                 # After the first time step: use solver temperature
-                if self.thermal_power_allocation < 0:
-                    self.temperature_in = self.layer_temperature[0]
+                if self.thermal_power_allocation > 0:
+                    self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
                     self.temperature_out = self.solver_asset.get_temperature(1)
                 else:
                     self.temperature_in = self.solver_asset.get_temperature(0)
-                    self.temperature_out = self.layer_temperature[-1]
+                    self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
 
             self._calculate_massflowrate()
             self._calculate_new_temperature()
@@ -152,36 +152,61 @@ class HeatBuffer(AssetAbstract):
 
     def _calculate_new_temperature(self) -> None:
         """Calculate new temperature of the tank storage."""
-        # heat exchange top side
-        new_temperature = self.layer_temperature.copy()
+
+        @no_type_check
+        def tank_ode_charge(t, T):
+            """ODE 1D tank storage for charging.
+
+            T: array of layer temperatures [°K]
+            Returns: dT/dt for each layer
+            """
+            dTdt = np.zeros_like(T)
+
+            frac = abs(self.mass_flowrate) / (self.density * self.layer_volume)
+
+            # --- Layer 0 (top layer) mixes with inlet flow ---
+            dTdt[0] = frac * (self.temperature_in - T[0])
+
+            # --- Remaining layers: plug-flow approximation ---
+            for i in range(1, self.num_layer):
+                dTdt[i] = frac * (T[i - 1] - T[i])
+            return dTdt
+
+        @no_type_check
+        def tank_ode_discharge(t, T):
+            """ODE 1D tank storage for discharging.
+
+            T: array of layer temperatures [°K]
+            Returns: dT/dt for each layer
+            """
+            dTdt = np.zeros_like(T)
+
+            frac = abs(self.mass_flowrate) / (self.density * self.layer_volume)
+
+            # --- Layer -1 (bottom layer) mixes with inlet flow ---
+            dTdt[-1] = frac * (self.temperature_out - T[-1])
+
+            # --- Remaining layers: plug-flow approximation ---
+            for i in reversed(range(0, self.num_layer - 1)):
+                dTdt[i] = frac * (T[i + 1] - T[i])
+            return dTdt
 
         if self.mass_flowrate > 0:
-            new_temperature[0] += min(1, self.mass_flowrate * self.time_step / self.layer_mass) * (
-                self.temperature_in - new_temperature[0]
+
+            sol = solve_ivp(
+                tank_ode_charge, (0, self.time_step), self.layer_temperature, method="RK45"
             )
-
-            # heat exchange between layer
-            for ii in range(self.num_layer - 1):
-                new_temperature[ii + 1] += min(
-                    1, self.mass_flowrate * self.time_step / self.layer_mass
-                ) * (new_temperature[ii] - new_temperature[ii + 1])
-
-            self.layer_temperature = new_temperature
+            for i in range(self.num_layer):
+                self.layer_temperature[i] = sol.y[i][-1]
 
             self.temperature_out = float(self.layer_temperature[-1])
 
         else:
-            new_temperature[-1] += min(
-                1, abs(self.mass_flowrate) * self.time_step / self.layer_mass
-            ) * (self.temperature_out - new_temperature[-1])
-
-            # heat exchange between layer
-            for ii in range(self.num_layer - 1, 0, -1):
-                new_temperature[ii - 1] += min(
-                    1, abs(self.mass_flowrate) * self.time_step / self.layer_mass
-                ) * (new_temperature[ii] - new_temperature[ii - 1])
-
-            self.layer_temperature = new_temperature
+            sol = solve_ivp(
+                tank_ode_discharge, (0, self.time_step), self.layer_temperature, method="RK45"
+            )
+            for i in range(self.num_layer):
+                self.layer_temperature[i] = sol.y[i][-1]
 
             self.temperature_in = float(self.layer_temperature[0])
 
@@ -191,10 +216,11 @@ class HeatBuffer(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate > 0:
+        if self.mass_flowrate >= 0:
             self.solver_asset.supply_temperature = self.temperature_out
         else:
             self.solver_asset.supply_temperature = self.temperature_in
+
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:

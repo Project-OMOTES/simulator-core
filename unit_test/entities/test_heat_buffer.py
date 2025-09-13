@@ -36,7 +36,7 @@ class HeatBufferTest(unittest.TestCase):
             asset_name="heat_buffer",
             asset_id="heat_buffer_id",
             port_ids=["test1", "test2"],
-            volume=25,
+            volume=1,
         )
 
     def test_injection(self) -> None:
@@ -56,7 +56,7 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 358.14, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 357.54, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 354.16, delta=0.1)
 
     def test_production(self) -> None:
         """Test production from Heat Buffer."""
@@ -78,5 +78,5 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 298.76, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 302.23, delta=0.1)
         self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 298.15, delta=0.1)
