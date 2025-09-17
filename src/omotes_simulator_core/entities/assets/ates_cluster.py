@@ -17,6 +17,7 @@
 import logging
 import math
 import os
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -133,6 +134,7 @@ class AtesCluster(AssetAbstract):
         self.output: list = []
         self.pyjnius_loader = PyjniusLoader.get_loader()
 
+        self.current_time = datetime.now()
         self._init_rosim()
         self.first_time_step = True
 
@@ -144,8 +146,8 @@ class AtesCluster(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_in  # injection
+        if self.mass_flowrate >= 0:
+            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
         else:
             self.solver_asset.supply_temperature = self.hot_well_temperature  # production
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
@@ -156,6 +158,9 @@ class AtesCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
+        if self.current_time == self.time:
+            return
+        self.current_time = self.time
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
@@ -173,12 +178,12 @@ class AtesCluster(AssetAbstract):
                 self.first_time_step = False
             else:
                 # After the first time step: use solver temperature
-                if self.thermal_power_allocation < 0:
-                    self.temperature_in = self.solver_asset.get_temperature(0)
-                    self.temperature_out = self.cold_well_temperature
-                else:
+                if self.thermal_power_allocation >= 0:
                     self.temperature_in = self.hot_well_temperature
                     self.temperature_out = self.solver_asset.get_temperature(1)
+                else:
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.cold_well_temperature
 
             self._calculate_massflowrate()
             self._run_rosim()
@@ -270,6 +275,7 @@ class AtesCluster(AssetAbstract):
         for i in range(12):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
+            self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
             self.first_time_step = True  # dont get temperature from solver
             self.set_setpoints(setpoints=setpoints)
 

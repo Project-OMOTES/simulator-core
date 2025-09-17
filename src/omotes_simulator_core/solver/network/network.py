@@ -20,7 +20,9 @@ import numpy.typing as npt
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.boundary import BaseBoundary
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
-from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
+    HeatTransferAsset,
+)
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe

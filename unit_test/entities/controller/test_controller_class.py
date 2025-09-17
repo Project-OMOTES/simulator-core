@@ -23,9 +23,15 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
 from omotes_simulator_core.entities.network_controller import NetworkController
 
 

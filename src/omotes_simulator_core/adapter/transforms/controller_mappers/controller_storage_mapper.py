@@ -20,7 +20,9 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorage,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 

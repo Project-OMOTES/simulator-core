@@ -21,7 +21,10 @@ from unittest.mock import Mock
 import esdl
 from esdl.esdl_handler import EnergySystemHandler
 
-from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile, get_unit
+from omotes_simulator_core.entities.utility.influxdb_reader import (
+    get_data_from_profile,
+    get_unit,
+)
 
 
 class InfluxdbTest(unittest.TestCase):

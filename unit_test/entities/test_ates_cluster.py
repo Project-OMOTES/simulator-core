@@ -15,6 +15,7 @@
 
 """Test Ates Cluster entities."""
 import unittest
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
@@ -68,7 +69,8 @@ class AtesClusterTest(unittest.TestCase):
 
         # Act
         self.ates_cluster.set_time_step(3600 * 24 * 7)
-        self.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.set_time(datetime(2023, 1, 1, 0, 0, 0))
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
@@ -86,7 +88,8 @@ class AtesClusterTest(unittest.TestCase):
 
         # Act
         self.ates_cluster.set_time_step(3600 * 24 * 7)
-        self.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.set_time(datetime(2023, 2, 1, 0, 0, 0))
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert

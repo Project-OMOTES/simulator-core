@@ -120,7 +120,6 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
-line_length = 100
 
 [tool.mypy]
 python_version = "3.11"
