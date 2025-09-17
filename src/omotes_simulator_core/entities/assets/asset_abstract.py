@@ -16,9 +16,9 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from pandas import DataFrame, concat
-from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
@@ -66,7 +66,7 @@ class AssetAbstract(ABC):
         self.connected_ports = connected_ports
         self.outputs = [[] for _ in range(len(self.connected_ports))]
         self.time_step: float = 3600  # s
-        self.time = None
+        self.time = datetime.now()
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""

@@ -19,6 +19,7 @@ from typing import Dict, no_type_check
 
 import numpy as np
 from scipy.integrate import solve_ivp
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -95,7 +96,7 @@ class HeatBuffer(AssetAbstract):
         self.output: list = []
         self.first_time_step = True
         self.energy_stored = 0.0
-        self.current_time = None
+        self.current_time = datetime.now()
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
