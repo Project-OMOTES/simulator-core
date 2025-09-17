@@ -40,7 +40,7 @@ class EsdlAssetHeatBufferMapper(EsdlMapperAbstract):
             port_ids=esdl_asset.get_port_ids(),
             volume=esdl_asset.get_property(
                 esdl_property_name="volume", default_value=HEAT_BUFFER_DEFAULTS.volume
-            )[0],
+            ),
         )
 
         return heat_buffer_entity

@@ -84,22 +84,18 @@ class HeatBuffer(AssetAbstract):
         self.layer_volume = self.tank_volume / self.num_layer
         self.density = fluid_props.get_density((self.temperature_in + self.temperature_out) / 2)
         self.layer_mass = self.layer_volume * self.density
-        self.layer_temperature = np.linspace(
-            self.temperature_in, self.temperature_out, self.num_layer
-        )
+        self.layer_temperature = np.ones(self.num_layer) * (DEFAULT_TEMPERATURE)
 
         # Thermal power allocation [W] for injection (positive) or production (negative) by the
         # asset and mass flowrate [kg/s] going in or out by the asset
         self.thermal_power_allocation = 0
         self.mass_flowrate = 0
-
-        # HeatBoundary since heat buffer acts either as producer or consumer,
-        # positive flow is discharge and negative flow is charge
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
 
         self.output: list = []
         self.first_time_step = True
-        self.energy = 0.0
+        self.energy_stored = 0.0
+        self.current_time = None
 
     def set_setpoints(self, setpoints: Dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -107,6 +103,10 @@ class HeatBuffer(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
         The keys of the dictionary are the names of the setpoints and the values are the values
         """
+        # don't do any calculation if the time is still the same to avoid storage's state problem
+        if self.current_time == self.time:
+            return
+        self.current_time = self.time
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
@@ -126,7 +126,7 @@ class HeatBuffer(AssetAbstract):
                 self.first_time_step = False
             else:
                 # After the first time step: use solver temperature
-                if self.thermal_power_allocation > 0:
+                if self.thermal_power_allocation >= 0:
                     self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
                     self.temperature_out = self.solver_asset.get_temperature(1)
                 else:
@@ -191,7 +191,7 @@ class HeatBuffer(AssetAbstract):
                 dTdt[i] = frac * (T[i + 1] - T[i])
             return dTdt
 
-        if self.mass_flowrate > 0:
+        if self.mass_flowrate >= 0:
 
             sol = solve_ivp(
                 tank_ode_charge, (0, self.time_step), self.layer_temperature, method="RK45"
@@ -210,8 +210,13 @@ class HeatBuffer(AssetAbstract):
 
             self.temperature_in = float(self.layer_temperature[0])
 
-        self.energy = self.energy + self.mass_flowrate * self.time_step / 3600 * 4180 * (
-            self.temperature_in - self.temperature_out
+        self.energy_stored = (
+            self.energy_stored
+            + self.mass_flowrate
+            * self.time_step
+            / 3600
+            * 4180
+            * (self.temperature_in - self.temperature_out)
         )
 
     def _set_solver_asset_setpoint(self) -> None:

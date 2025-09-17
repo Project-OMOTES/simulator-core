@@ -18,6 +18,7 @@
 from abc import ABC, abstractmethod
 
 from pandas import DataFrame, concat
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
@@ -65,6 +66,7 @@ class AssetAbstract(ABC):
         self.connected_ports = connected_ports
         self.outputs = [[] for _ in range(len(self.connected_ports))]
         self.time_step: float = 3600  # s
+        self.time = None
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""
@@ -145,6 +147,13 @@ class AssetAbstract(ABC):
         :param float time_step: The time step to set for the asset.
         """
         self.time_step = time_step
+
+    def set_time(self, time: datetime) -> None:
+        """Placeholder to set the time for the asset.
+
+        :param float time: The time to set for the asset.
+        """
+        self.time = time
 
     def is_converged(self) -> bool:
         """Check if the asset has converged.
