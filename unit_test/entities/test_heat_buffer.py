@@ -15,6 +15,7 @@
 
 """Test Heat Buffer entities."""
 import unittest
+from datetime import datetime
 
 import numpy as np
 
@@ -52,6 +53,7 @@ class HeatBufferTest(unittest.TestCase):
         # charging for 1 day
         for _ii in range(0, 24):
             self.heat_buffer.first_time_step = True
+            self.heat_buffer.set_time(datetime(2023, 1, 1, _ii, 0, 0))
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
@@ -75,8 +77,9 @@ class HeatBufferTest(unittest.TestCase):
         # discharging for 1 day
         for _ii in range(0, 24):
             self.heat_buffer.first_time_step = True
+            self.heat_buffer.set_time(datetime(2023, 1, 1, _ii, 0, 0))
             self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
         self.assertAlmostEqual(self.heat_buffer.layer_temperature[0], 302.23, delta=0.1)
-        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 298.15, delta=0.1)
+        self.assertAlmostEqual(self.heat_buffer.layer_temperature[-1], 298.16, delta=0.1)

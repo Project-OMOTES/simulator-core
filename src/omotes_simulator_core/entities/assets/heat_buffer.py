@@ -15,11 +15,11 @@
 
 """Heat Buffer class."""
 from cmath import isinf
+from datetime import datetime
 from typing import Dict, no_type_check
 
 import numpy as np
 from scipy.integrate import solve_ivp
-from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
