@@ -16,7 +16,7 @@
 """Heat Buffer class."""
 from cmath import isinf
 from datetime import datetime
-from typing import Dict, no_type_check
+from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -154,8 +154,7 @@ class HeatBuffer(AssetAbstract):
     def _calculate_new_temperature(self) -> None:
         """Calculate new temperature of the tank storage."""
 
-        @no_type_check
-        def tank_ode_charge(t, T):
+        def tank_ode_charge(t: float, T: np.ndarray) -> np.ndarray:
             """ODE 1D tank storage for charging.
 
             T: array of layer temperatures [°K]
@@ -173,8 +172,7 @@ class HeatBuffer(AssetAbstract):
                 dTdt[i] = frac * (T[i - 1] - T[i])
             return dTdt
 
-        @no_type_check
-        def tank_ode_discharge(t, T):
+        def tank_ode_discharge(t: float, T: np.ndarray) -> np.ndarray:
             """ODE 1D tank storage for discharging.
 
             T: array of layer temperatures [°K]
