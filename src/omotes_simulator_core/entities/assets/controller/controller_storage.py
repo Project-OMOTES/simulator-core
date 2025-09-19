@@ -49,6 +49,8 @@ class ControllerStorage(AssetControllerAbstract):
         self.temperature_out = temperature_out
         self.profile: pd.DataFrame = profile
         self.start_index = 0
+
+        # Theoretical maximum charge and discharge power of the storage.
         self.max_charge_power: float = max_charge_power
         self.max_discharge_power: float = max_discharge_power
 
@@ -58,21 +60,28 @@ class ControllerStorage(AssetControllerAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
+        # Check if the selected time is in the profile.
+        # TODO: Current implementation loops over the entire profile; should be improved!
+        # TODO: Unclear why there is a timestep of 1 hour in the profile.
         for index in range(self.start_index, len(self.profile)):
             if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
                 self.start_index = index
                 if self.profile["values"][index] > self.max_charge_power:
                     logging.warning(
-                        f"Storage of {self.name} is higher than maximum charge power of asset"
-                        f" at time {time}."
+                        "Storage of %s is higher than maximum charge power of asset at time %s.",
+                        self.name,
+                        time,
                     )
                     return self.max_charge_power
                 elif self.profile["values"][index] < self.max_discharge_power:
                     logging.warning(
-                        f"Storage of {self.name} is higher than maximum discharge power of asset"
-                        f" at time {time}."
+                        "Storage of %s is higher than maximum discharge power of asset at time %s.",
+                        self.name,
+                        time,
                     )
                     return self.max_discharge_power
                 else:
                     return float(self.profile["values"][index])
-        return 0
+        # TODO: The loop is not complete as the asset also has a fill-level that should not
+        #  surpass the maximum fill-level.
+        return 0.0

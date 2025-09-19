@@ -182,7 +182,6 @@ class NetworkController(NetworkControllerAbstract):
 
         :return float: Total heat discharge of all storages.
         """
-        # TODO add limit based on state of charge
         return float(sum([storage.max_discharge_power for storage in self.storages]))
 
     def get_total_charge_storage(self) -> float:
