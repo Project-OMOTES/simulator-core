@@ -76,7 +76,10 @@ class ControllerNetwork:
         self.path: list[str] = []
 
     def exists(self, identifier: str) -> bool:
-        """Method to check an asset is in the network."""
+        """Method to check an asset is in the network.
+
+        :param str identifier: Identifier of the asset to check.
+        :return bool: True when the asset is in the network, False otherwise."""
         return any(
             [
                 asset.id == identifier
