@@ -79,7 +79,8 @@ class ControllerNetwork:
         """Method to check an asset is in the network.
 
         :param str identifier: Identifier of the asset to check.
-        :return bool: True when the asset is in the network, False otherwise."""
+        :return bool: True when the asset is in the network, False otherwise.
+        """
         return any(
             [
                 asset.id == identifier
