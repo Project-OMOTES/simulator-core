@@ -15,6 +15,7 @@
 
 
 """Module containing the Esdl to asset mapper class."""
+from omotes_simulator_core.entities.assets.asset_defaults import HeatExchangerDefaults
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -65,7 +66,8 @@ class ControllerHeatExchangeMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         coefficient_of_performance = esdl_asset.get_property(
-            esdl_property_name="Efficiency", default_value=1
+            esdl_property_name="Efficiency",
+            default_value=HeatExchangerDefaults.heat_transfer_efficiency,
         )
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
