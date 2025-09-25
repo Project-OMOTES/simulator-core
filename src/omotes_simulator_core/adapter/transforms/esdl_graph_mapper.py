@@ -85,6 +85,8 @@ def assets_to_graph(graph: Graph, model: EsdlObject) -> None:
         model (EsdlObject): The esdl model to get the assets from.
     """
     for asset in model.get_all_assets_of_type("asset"):
+        # heat transfer assets have two sides, so we add two nodes to the graph a primary
+        # and secondary one
         if asset.is_heat_transfer_asset():
             graph.add_node(asset.get_id() + "_primary")
             graph.add_node(asset.get_id() + "_secondary")
