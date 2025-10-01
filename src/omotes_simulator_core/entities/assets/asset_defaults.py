@@ -113,9 +113,11 @@ PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
 PROPERTY_HEAT_LOSS = "heat_loss"
 PROPERTY_HEAT_SUPPLIED = "heat_supplied"
 PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
+PROPERTY_TIMESTEP = "time_step"
 PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
+
 
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
