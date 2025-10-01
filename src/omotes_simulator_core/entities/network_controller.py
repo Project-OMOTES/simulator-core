@@ -12,8 +12,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""Module for new controller which can also cope with Heat pumps and heat exchangers."""
 
-"""NetworkController entity."""
 import datetime
 import logging
 
@@ -23,14 +23,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.controller.controller_consumer import (
-    ControllerConsumer,
-)
-from omotes_simulator_core.entities.assets.controller.controller_producer import (
-    ControllerProducer,
-)
-from omotes_simulator_core.entities.assets.controller.controller_storage import (
-    ControllerStorage,
+from omotes_simulator_core.entities.assets.controller.controller_network import (
+    ControllerNetwork,
 )
 from omotes_simulator_core.entities.network_controller_abstract import (
     NetworkControllerAbstract,
@@ -40,319 +34,197 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkController(NetworkControllerAbstract):
-    """Class to store the network controller."""
+    """class for the new network controller."""
 
     def __init__(
         self,
-        producers: list[ControllerProducer],
-        consumers: list[ControllerConsumer],
-        storages: list[ControllerStorage],
+        networks: list[ControllerNetwork],
     ) -> None:
-        """Constructor for controller for a heat network.
+        """Constructor of the class, which sets all attributes."""
+        self.networks = networks
 
-        The priority of the producers is set either on the the marginal costs or its priority
-        if a priority control strategy was defined. If at least one asset has a priority
-        assigned to it, the controller uses the priority based system.
-         - Marginal cost: The lowest marginal costs has the highest priority.
-         - Priority: The lowest priority value has the highest priority. I an asset has no
-        priority value assigned to it, it will be assigned the highest possible priority value.
-
-        :param List[ControllerProducer] producers: List of producers in the network.
-        :param List[ControllerConsumer] consumers: List of consumers in the network.
-        :param List[ControllerStorage] storages: List of storages in the network.
-        """
-        self.producers = producers
-        self.consumers = consumers
-        self.storages = storages
-        strategy_priority = self._check_strategy_priority()
-        if strategy_priority:
-            self._set_priority_from_control_strategy()
-        else:
-            self._set_priority_from_marginal_costs()
-
-    def _check_strategy_priority(self) -> bool:
-        """Check if at least one asset has a control strategy priority assigned."""
-        return any([asset.priority for asset in self.producers])
-
-    def _set_priority_from_marginal_costs(self) -> None:
-        """Sets the priority of the producers based on the marginal costs.
-
-        The priority of the producers is set based on the marginal costs. The producer with the
-        lowest marginal costs has the highest priority (lowest value).
-        """
-        # Created a sorted list of unique marginal costs.
-        unique_sorted_values = sorted(set([producer.marginal_costs for producer in self.producers]))
-
-        # set the priority based on the index of the marginal cost in the sorted list.
-        for producer in self.producers:
-            producer.priority = unique_sorted_values.index(producer.marginal_costs) + 1
-
-    def _set_priority_from_control_strategy(self) -> None:
-        """Sets the priority of the producers based on piority control strategy.
-
-        The priority of the producers is set based on the priority values specified through
-        the esdl priority strategy. The producer with the lowest priority value has the
-        highest priority.
-        """
-        # Check to see if any of the producers has no priority assigned, if so set it to
-        # the lowest priority (= highest number).
-        lowest_priority = max(
-            [producer.priority for producer in self.producers if producer.priority is not None]
-        )
-        # For assets that have no priority assingned, give them the lowest priority.
-        for producer in self.producers:
-            if producer.priority is None:
-                producer.priority = lowest_priority + 1
-                logger.warning(
-                    f"No priority found for asset. "
-                    f"{producer.name} assigned the lowest priority value.",
-                    extra={"esdl_object_id": producer.id},
-                )
-
-        # Arrange producers in a list based on priority
-        producers_sorted = sorted(
-            set([producer for producer in self.producers]),
-            key=lambda obj: obj.priority if obj.priority is not None else -1,
-        )  # The if inside the loop is added to avoid a typing error with mypy.
-
-        # Reassign priorities to all producers so they all have a unique value
-        # (avoid producers with same priority value).
-        for producer in self.producers:
-            priority_idx = next(
-                (
-                    i
-                    for i, producer_sorted in enumerate(producers_sorted)
-                    if producer_sorted.name == producer.name
-                )
-            )
-            producer.priority = priority_idx + 1
+    def update_networks_factor(self) -> None:
+        """Method to update the factor of the networks taken into account the changing COP."""
+        for network in self.networks:
+            current_network = network
+            network.factor_to_first_network = 1
+            for step in network.path:
+                if current_network == self.networks[int(step)]:
+                    continue
+                for asset in current_network.heat_transfer_assets_prim:
+                    if self.networks[int(step)].exists(asset.id):
+                        network.factor_to_first_network *= asset.factor
+                        current_network = self.networks[int(step)]
+                        break
+                for asset in current_network.heat_transfer_assets_sec:
+                    if self.networks[int(step)].exists(asset.id):
+                        network.factor_to_first_network /= asset.factor
+                        current_network = self.networks[int(step)]
+                        break
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
 
+        This method is used to determine the set points for all assets in the network.
+        This is done in the following steps:
+        1. Set the conversion factor for all networks based on the heat exchangers/heat pumps.
+        2. Calculate the total demand and supply of the network converted to the first network in
+            the list.
+        3. Based on these results the set points for demand, supply and storage can be set.
+        4. Finally, the heat transfer assets are set based on the set points of the producers,
+            consumers and stroages
+
         :param float time: Time step for which to run the controller.
         :return: dict with the key the asset id and the heat demand for that asset.
         """
-        # TODO add also the possibility to return mass flow rate instead of heat demand.
-        if (
-            self.get_total_supply() + (self.get_total_discharge_storage())
-        ) <= self.get_total_demand(time):
+        self.update_networks_factor()
+        total_demand = sum([network.get_total_heat_demand(time) for network in self.networks])
+        total_supply = sum([network.get_total_supply() for network in self.networks])
+        total_charge_storage = sum(
+            [network.get_total_charge_storage() for network in self.networks]
+        )
+        total_discharge_storage = sum(
+            [network.get_total_discharge_storage() for network in self.networks]
+        )
+
+        if (total_supply + total_discharge_storage) <= total_demand:
             logger.warning(
                 f"Total supply + storage is lower than total demand at time: {time}"
                 f"Consumers are capped to the available power."
             )
+            factor = (total_supply + total_discharge_storage) / total_demand
             producers = self._set_producers_to_max()
-            storages = self._set_all_storages_discharge_to_max()
-            consumers = self._set_consumer_capped(time)
+            producers.update(self._set_all_storages_discharge_to_max())
+            producers.update(self._set_consumer_to_demand(time, factor=factor))
         else:
-            # Consumers can meet their demand
             consumers = self._set_consumer_to_demand(time)
-            if self.get_total_supply() >= self.get_total_demand(time):
+            if total_supply >= total_demand:
                 # there is a surplus of supply we can charge the storage, storage becomes consumer.
-                surplus_supply = self.get_total_supply() - self.get_total_demand(time)
-                if surplus_supply <= self.get_total_charge_storage():
-                    storages = self._set_storages_power(surplus_supply)
+                surplus_supply = total_supply - total_demand
+                if surplus_supply <= total_charge_storage:
+                    storages = self._set_storages_charge_power(surplus_supply)
                     producers = self._set_producers_to_max()
                 else:
                     # need to cap the power of the source based on priority
-                    storages = self._set_storages_power(self.get_total_charge_storage())
-                    producers = self._set_producers_based_on_priority(time)
-
+                    storages = self._set_storages_charge_power(total_charge_storage)
+                    producers = self._set_producers_based_on_priority(
+                        total_demand + total_charge_storage
+                    )
             else:
                 # there is a deficit of supply we can discharge the storage, storage becomes
                 # producer.
-                deficit_supply = self.get_total_supply() - self.get_total_demand(time)
-                storages = self._set_storages_power(deficit_supply)
+                deficit_supply = total_demand - total_supply
+                storages = self._set_storages_discharge_power(deficit_supply)
                 producers = self._set_producers_to_max()
+            producers.update(consumers)
+            producers.update(storages)
+        # Getting the settings for the heat transfer assets
 
-        producers.update(consumers)
-        producers.update(storages)
+        heat_transfer = {}
+        # Set all the networks where there is only on primary or secondary heat exchanger.
+        # Everything will then be set, since all heat transfer assets belong to a network where
+        # they are the only one.
+        for network in self.networks:
+            number_of_heat_exchangers = len(network.heat_transfer_assets_prim) + len(
+                network.heat_transfer_assets_sec
+            )
+            if number_of_heat_exchangers != 1:
+                continue
+            total_heat_supply = 0
+            for producer in network.producers:
+                total_heat_supply += producers[producer.id][PROPERTY_HEAT_DEMAND]
+            for consumer in network.consumers:
+                total_heat_supply -= producers[consumer.id][PROPERTY_HEAT_DEMAND]
+            for storage in network.storages:
+                total_heat_supply += producers[storage.id][PROPERTY_HEAT_DEMAND]
+            # this might look weird, but we know there is only one primary or secondary asset.
+            # So we can directly set it.
+            for asset in network.heat_transfer_assets_prim:
+                heat_transfer.update(asset.set_asset(total_heat_supply * asset.factor))
+            for asset in network.heat_transfer_assets_sec:
+                heat_transfer.update(asset.set_asset(-total_heat_supply))
+        producers.update(heat_transfer)
+        for network in self.networks:
+            pressure_set_asset = network.set_pressure()
+            producers[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
         return producers
-
-    def get_total_demand(self, time: datetime.datetime) -> float:
-        """Method to get the total heat demand of the network.
-
-        :param datetime.datetime time: Time for which to get the total heat demand.
-        :return float: Total heat demand of all consumers.
-        """
-        return sum([consumer.get_heat_demand(time) for consumer in self.consumers])
-
-    def get_total_discharge_storage(self) -> float:
-        """Method to get the total storage discharge power of the network.
-
-        :return float: Total heat discharge of all storages.
-        """
-        # TODO add limit based on state of charge
-        return float(sum([storage.max_discharge_power for storage in self.storages]))
-
-    def get_total_charge_storage(self) -> float:
-        """Method to get the total storage charge power of the network.
-
-        :return float: Total heat charge of all storages.
-        """
-        # TODO add limit based on state of charge
-        return float(sum([storage.max_charge_power for storage in self.storages]))
-
-    def get_total_supply(self) -> float:
-        """Method to get the total heat supply of the network.
-
-        :return float: Total heat supply of all producers.
-        """
-        return float(sum([producer.power for producer in self.producers]))
-
-    def get_total_supply_priority(self, priority: int) -> float:
-        """Method to get the total supply of the network for all sources with a certain priority.
-
-        :param int priority: The priority of the sources.
-        :return float: Total heat supply of all producers with a certain priority.
-        """
-        return float(
-            sum([producer.power for producer in self.producers if producer.priority == priority])
-        )
 
     def _set_producers_to_max(self) -> dict:
-        """Method to set the producers to the max power.
-
-        :return dict: Dict with key= asset-id and value=setpoints for the producers.
-        """
-        producers = {}
-        for source in self.producers:
-            producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.power,
-                PROPERTY_TEMPERATURE_IN: source.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: source.temperature_out,
-                PROPERTY_SET_PRESSURE: False,
-            }
-        # setting the first producer to set the pressure.
-        producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
-        return producers
-
-    def _get_basic_producers(self) -> dict:
-        """Method to get the basic dict with setting for the producers.
-
-        :return dict: Dict with key= asset-id and value=setpoints for the producers.
-        """
-        producers = {}
-        for source in self.producers:
-            producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: 0.0,
-                PROPERTY_TEMPERATURE_IN: source.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: source.temperature_out,
-                PROPERTY_SET_PRESSURE: False,
-            }
-        return producers
+        result = {}
+        for network in self.networks:
+            result.update(network.set_supply_to_max())
+        return result
 
     def _set_all_storages_discharge_to_max(self) -> dict:
-        """Method to set all the storages to the max discharge power.
-
-        :return dict: Dict with key= asset-id and value=setpoints for the storages.
-        """
-        storages = {}
-        for storage in self.storages:
-            storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-            }
-        return storages
+        result = {}
+        for network in self.networks:
+            result.update(network.set_all_storages_discharge_to_max())
+        return result
 
     def _set_all_storages_charge_to_max(self) -> dict:
-        """Method to set all the storages to the max charge power.
+        result = {}
+        for network in self.networks:
+            result.update(network.set_all_storages_charge_to_max())
+        return result
 
-        :return dict: Dict with key= asset-id and value=setpoints for the storages.
-        """
-        storages = {}
-        for storage in self.storages:
-            storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-            }
-        return storages
+    def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1) -> dict:
+        result = {}
+        for network in self.networks:
+            result.update(network.set_consumer_to_demand(time, factor=factor))
+        return result
 
-    def _set_storages_power(self, power: float = 0) -> dict:
-        """Method to set the storages to power. discharge (-), charge (+).
+    def _set_storages_charge_power(self, power: float) -> dict:
+        results: dict = {}
+        total_power = sum([network.get_total_charge_storage() for network in self.networks])
+        if total_power == 0:
+            return results
+        factor = power / total_power
+        for network in self.networks:
+            results.update(network.set_storage_charge_power(factor=factor))
+        return results
 
-        :return dict: Dict with key= asset-id and value=setpoints for the storages.
-        """
-        storages = {}
-        for storage in self.storages:
-            storages[storage.id] = {
-                PROPERTY_HEAT_DEMAND: power / len(self.storages),
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-            }
-        return storages
+    def _set_storages_discharge_power(self, power: float) -> dict:
+        results: dict = {}
+        total_power = sum([network.get_total_discharge_storage() for network in self.networks])
+        if total_power == 0:
+            return results
+        factor = power / total_power
+        for network in self.networks:
+            results.update(network.set_storage_discharge_power(factor=factor))
+        return results
 
-    def _set_consumer_capped(self, time: datetime.datetime) -> dict:
-        """Method to set the consumer to the max available power of the producers.
-
-        :param datetime.datetime time: Time for which to cap the heat demand based on available
-        power.
-
-        :return: dict with the key the asset id and the value a dict with the set points for the
-        consumers.
-        """
-        factor = (
-            self.get_total_supply() + self.get_total_discharge_storage()
-        ) / self.get_total_demand(time)
-        return self._set_consumer_to_demand(time=time, factor=factor)
-
-    def _set_consumer_to_demand(self, time: datetime.datetime, factor: float = 1.0) -> dict:
-        """Method to set the consumer to the demand.
-
-        :param datetime.datetime time: Time for which to set the consumer to the demand.
-        :param float factor: Factor to multiply the heat demand with.
-
-        :return: dict with the key the asset id and the value a dict with the set points for the
-        consumers.
-        """
-        consumers = {}
-        for consumer in self.consumers:
-            consumers[consumer.id] = {
-                PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
-                PROPERTY_TEMPERATURE_IN: consumer.temperature_in,
-                PROPERTY_TEMPERATURE_OUT: consumer.temperature_out,
-            }
-        return consumers
-
-    def _set_producers_based_on_priority(self, time: datetime.datetime) -> dict:
-        """Method to set the producers based on priority.
-
-        :param datetime.datetime time: Time for which to set the producers based on priority.
-
-        :return: dict with the key the asset id and the value a dict with the set points for the
-        producers.
-        """
-        producers = self._get_basic_producers()
-        total_demand = self.get_total_demand(time) + self.get_total_charge_storage()
-        if total_demand > self.get_total_supply():
-            logger.warning(
-                "Total demand is higher than total supply. Cannot set producers based on priority."
-            )
-
+    def _set_producers_based_on_priority(self, required_supply: float) -> dict:
+        """Method to set the producers based on the priority of the source."""
+        producers = {}
         priority = 0
-        set_pressure = True
-        while total_demand > 0:
+        while required_supply > 0:
             priority += 1
-            total_supply = self.get_total_supply_priority(priority)
-            priority_producers = [
-                producer for producer in self.producers if producer.priority == priority
-            ]
-            if total_supply > total_demand:
-                factor = total_demand / total_supply
-                for source in priority_producers:
-                    producers[source.id][PROPERTY_HEAT_DEMAND] = source.power * factor
-                    if set_pressure:
-                        producers[source.id][PROPERTY_SET_PRESSURE] = True
-                        set_pressure = False
-                total_demand = 0
+            max_supply_priority = self._get_total_supply_priority(priority)
+            required_supply -= max_supply_priority
+            if required_supply > 0:
+                # set the producers with the priority to the max
+                for network in self.networks:
+                    producers.update(network.set_supply_to_max(priority))
             else:
-                for source in priority_producers:
-                    producers[source.id][PROPERTY_HEAT_DEMAND] = source.power
-                total_demand -= total_supply
-        if set_pressure:
-            # set pressure has not been set and it needs to be set. This is set for the first
-            # producer
-            producers[self.producers[0].id][PROPERTY_SET_PRESSURE] = True
+                # set the producers with the priority with a factor.
+                factor = 1 + required_supply / max_supply_priority
+                for network in self.networks:
+                    producers.update(network.set_supply(factor=factor, priority=priority))
+        if len(producers) < sum([len(network.producers) for network in self.networks]):
+            # not al producers are set need to set the remaining to zero.
+            for network in self.networks:
+                for producer in network.producers:
+                    if producer.id not in producers:
+                        producers[producer.id] = {
+                            PROPERTY_HEAT_DEMAND: 0,
+                            PROPERTY_TEMPERATURE_IN: producer.temperature_in,
+                            PROPERTY_TEMPERATURE_OUT: producer.temperature_out,
+                            PROPERTY_SET_PRESSURE: False,
+                        }
         return producers
+
+    def _get_total_supply_priority(self, priority: int) -> float:
+        """Method to get the total supply of the network based on priority."""
+        return float(
+            sum([network.get_total_supply_priority(priority) for network in self.networks])
+        )

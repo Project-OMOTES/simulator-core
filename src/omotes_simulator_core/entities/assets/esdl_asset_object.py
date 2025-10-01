@@ -60,7 +60,7 @@ class EsdlAssetObject:
         if hasattr(self.esdl_asset.controlStrategy, "priority"):
             return int(self.esdl_asset.controlStrategy.priority)
         else:
-            return None
+            return 1
 
     def get_state(self) -> str:
         """Get state of the asset.
@@ -159,3 +159,29 @@ class EsdlAssetObject:
             )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)
+
+    def get_connected_assets(self, port_id: str) -> list[str]:
+        """Get the connected assets of the asset."""
+        connected_assets = []
+        for esdl_port in self.esdl_asset.port:
+            if esdl_port.id == port_id:
+                for connection in esdl_port.connectedTo:
+                    connected_assets.append(connection.energyasset.id)
+                return connected_assets
+        raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
+
+    def is_heat_transfer_asset(self) -> bool:
+        """Check if the asset is a heat exchange asset."""
+        return isinstance(self.esdl_asset, esdl.HeatPump) or isinstance(
+            self.esdl_asset, esdl.HeatExchange
+        )
+
+
+def get_return_temperature(esdl_port: esdl.Port) -> float:
+    """Get the temperature of the port."""
+    return float(esdl_port.carrier.returnTemperature) + 273.15
+
+
+def get_supply_temperature(esdl_port: esdl.Port) -> float:
+    """Get the temperature of the port."""
+    return float(esdl_port.carrier.supplyTemperature) + 273.15

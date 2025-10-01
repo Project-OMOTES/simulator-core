@@ -37,7 +37,7 @@ class StringEsdlAssetMapper:
         esdl.Transport: "transport",
         esdl.Joint: "joint",
         esdl.ATES: "storage",
-        esdl.HeatPump: "pump",
+        esdl.HeatPump: "heat_pump",
         esdl.HeatExchange: "heat_exchanger",
     }
 

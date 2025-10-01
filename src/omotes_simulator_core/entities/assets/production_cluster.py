@@ -112,7 +112,7 @@ class ProductionCluster(AssetAbstract):
             The temperature should be supplied in Kelvin.
         """
         # Set the inlet temperature of the asset
-        if self.first_time_step:
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
             self.temperature_in = temperature_in
             self.first_time_step = False
         else:

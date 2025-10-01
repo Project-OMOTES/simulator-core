@@ -39,6 +39,10 @@ class BaseNodeItem(ABC):
         self.massflow_zero_limit = MASSFLOW_ZERO_LIMIT
         self.prev_sol: list[float] = [0.0] * self.number_of_unknowns
 
+    def reset_prev_sol(self) -> None:
+        """Resets the previous solution to zero."""
+        self.prev_sol = [0.0] * self.number_of_unknowns
+
     def set_matrix_index(self, index: int) -> None:
         """Sets the matrix index of the item.
 
