@@ -43,7 +43,7 @@ class ControllerNetworkCouplingTest(unittest.TestCase):
 
         self.controller = EsdlControllerMapper().to_entity(self.esdl_object)
         # - Replace all controllers in each network with mocks to be able to test the coupling
-        for index, network in enumerate(self.controller.networks):
+        for _, network in enumerate(self.controller.networks):
             for index_producer, producer in enumerate(network.producers):
                 mock_producer = Mock(wraps=producer)
                 mock_producer.id = producer.id
