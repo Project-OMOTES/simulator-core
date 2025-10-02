@@ -86,6 +86,14 @@ class AssetAbstract(ABC):
         """
         return {}
 
+    def get_state(self) -> dict[str, float]:
+        """Placeholder to get the state attributes of an asset.
+
+        :return Dict: The state of the asset. The keys of the dictionary are the names of the
+            states and the values are the values.
+        """
+        return {}
+
     def write_standard_output(self) -> None:
         """Write the standard time step results of the asset to the output list.
 

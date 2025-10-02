@@ -26,6 +26,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.controller_network import (
     ControllerNetwork,
 )
+from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import (
     NetworkControllerAbstract,
 )
@@ -42,6 +43,13 @@ class NetworkController(NetworkControllerAbstract):
     ) -> None:
         """Constructor of the class, which sets all attributes."""
         self.networks = networks
+
+    def update_network_state(self, heat_network: HeatNetwork) -> None:
+        """Method to update the network state."""
+        for network in self.networks:
+            # Update the state of all controllers in the network
+            for controller in network.producers + network.consumers + network.storages:
+                controller.set_state(heat_network.get_asset_by_id(controller.id).get_state())
 
     def update_networks_factor(self) -> None:
         """Method to update the factor of the networks taken into account the changing COP."""
@@ -173,6 +181,7 @@ class NetworkController(NetworkControllerAbstract):
             result.update(network.set_consumer_to_demand(time, factor=factor))
         return result
 
+    # TODO: Limit charge to effecitve charge
     def _set_storages_charge_power(self, power: float) -> dict:
         results: dict = {}
         total_power = sum([network.get_total_charge_storage() for network in self.networks])
@@ -183,6 +192,7 @@ class NetworkController(NetworkControllerAbstract):
             results.update(network.set_storage_charge_power(factor=factor))
         return results
 
+    # TODO: Limit discharge to effecitve discharge
     def _set_storages_discharge_power(self, power: float) -> dict:
         results: dict = {}
         total_power = sum([network.get_total_discharge_storage() for network in self.networks])
