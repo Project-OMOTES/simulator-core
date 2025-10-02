@@ -54,11 +54,20 @@ class NetworkSimulation:
         # time loop
         number_of_time_steps = int((config.stop - config.start).total_seconds() / config.timestep)
         logger.info("Number of time steps: " + str(number_of_time_steps))
+
+        # Set interval for progress messages
         progress_interval = max(round(number_of_time_steps / max_number_messages), 1)
+
         for time_step in range(number_of_time_steps):
+            # Update time to current time step
             time = (config.start + timedelta(seconds=time_step * config.timestep)).replace(
                 tzinfo=timezone.utc
             )
+
+            # Link controller to network
+            self.controller.update_network_state(heat_network=self.network)
+
+            # Update controller to current time
             controller_input = self.controller.update_setpoints(time)
             logger.debug("Simulating for timestep " + str(time))
 
@@ -68,11 +77,16 @@ class NetworkSimulation:
             is_converged = False
 
             while not is_converged and iteration < max_iterations:
+                # Run time step
                 self.network.run_time_step(
                     time=time, time_step=config.timestep, controller_input=controller_input
                 )
+
+                # Check convergence
                 is_converged = self.network.check_convergence()
                 iteration += 1
+
+            # Log warning if not converged
             logger.debug("Convergence time step reached after %d iterations", iteration)
             self.network.store_output()
 
