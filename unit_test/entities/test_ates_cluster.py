@@ -15,6 +15,7 @@
 
 """Test Ates Cluster entities."""
 import unittest
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
@@ -40,8 +41,6 @@ class AtesClusterTest(unittest.TestCase):
         self.salinity = ATES_DEFAULTS.salinity
         self.well_casing_size = ATES_DEFAULTS.well_casing_size
         self.well_distance = ATES_DEFAULTS.well_distance
-        self.maximum_flow_charge = ATES_DEFAULTS.maximum_flow_charge
-        self.maximum_flow_discharge = ATES_DEFAULTS.maximum_flow_discharge
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
@@ -57,40 +56,42 @@ class AtesClusterTest(unittest.TestCase):
             salinity=self.salinity,
             well_casing_size=self.well_casing_size,
             well_distance=self.well_distance,
-            maximum_flow_charge=self.maximum_flow_charge,
-            maximum_flow_discharge=self.maximum_flow_discharge,
         )
 
-        self.ates_cluster._init_rosim()
-
-    def test_injection(self) -> None:
+    def test_injection_ates(self) -> None:
         """Test injection to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
         }
 
         # Act
+        self.ates_cluster.set_time_step(3600 * 24 * 7)
+        self.ates_cluster.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.set_time(datetime(2023, 1, 1, 0, 0, 0))
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 353.15, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.15, delta=0.1)
 
-    def test_production(self) -> None:
-        """Test production from ATES."""
+    def test_production_ates(self) -> None:
+        """Test production to ATES."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 313.15,
+            PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
+            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
         }
 
         # Act
+        self.ates_cluster.set_time_step(3600 * 24 * 7)
+        self.ates_cluster.first_time_step = True  # dont get temperature from solver
+        self.ates_cluster.set_time(datetime(2023, 2, 1, 0, 0, 0))
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.temperature_in, 313.15, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.temperature_out, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.54, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)

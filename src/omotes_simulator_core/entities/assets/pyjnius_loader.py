@@ -45,7 +45,8 @@ class PyjniusLoader:
         import jnius_config  # noqa
 
         jnius_config.add_classpath(os.path.join(path, "bin/jfxrt.jar"))
-        jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-0.4.2.jar"))
+        jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-1.2.0.jar"))
+        # jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-0.4.2.jar"))
 
         self.loaded_classes = {}
 
