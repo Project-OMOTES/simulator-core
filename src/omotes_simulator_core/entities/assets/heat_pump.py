@@ -14,11 +14,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """HeatPump class."""
+import logging
 from typing import Dict
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
+    PRIMARY,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -26,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    SECONDARY,
 )
 from omotes_simulator_core.entities.assets.utils import (
     heat_demand_and_temperature_to_mass_flow,
@@ -33,6 +36,8 @@ from omotes_simulator_core.entities.assets.utils import (
 from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
     HeatTransferAsset,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class HeatPump(AssetAbstract):
@@ -106,9 +111,9 @@ class HeatPump(AssetAbstract):
         """
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_IN,
-            PROPERTY_TEMPERATURE_OUT,
-            PROPERTY_HEAT_DEMAND,
+            SECONDARY + PROPERTY_TEMPERATURE_IN,
+            SECONDARY + PROPERTY_TEMPERATURE_OUT,
+            SECONDARY + PROPERTY_HEAT_DEMAND,
             PROPERTY_SET_PRESSURE,
         }
         # Dict to set
@@ -121,14 +126,14 @@ class HeatPump(AssetAbstract):
             )
 
         # Assign setpoints to the HeatPump asset
-        self.temperature_in_secondary = setpoints_secondary[PROPERTY_TEMPERATURE_IN]
-        self.temperature_out_secondary = setpoints_secondary[PROPERTY_TEMPERATURE_OUT]
+        self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
+        self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_secondary[PROPERTY_HEAT_DEMAND],
+            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
-        self.control_mass_flow_secondary = setpoints_secondary[PROPERTY_SET_PRESSURE]
+        self.control_mass_flow_secondary = not (setpoints_secondary[PROPERTY_SET_PRESSURE])
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_secondary = self.temperature_in_secondary  # type: ignore
@@ -154,9 +159,9 @@ class HeatPump(AssetAbstract):
         #          in the DefaultAsset class and call this method here.
         # Default keys required
         necessary_setpoints = {
-            PROPERTY_TEMPERATURE_IN,
-            PROPERTY_TEMPERATURE_OUT,
-            PROPERTY_HEAT_DEMAND,
+            PRIMARY + PROPERTY_TEMPERATURE_IN,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT,
+            PRIMARY + PROPERTY_HEAT_DEMAND,
         }
         # Dict to set
         setpoints_set = set(setpoints_primary.keys())
@@ -168,10 +173,10 @@ class HeatPump(AssetAbstract):
             )
 
         # Assign setpoints to the HeatPump asset
-        self.temperature_in_primary = setpoints_primary[PROPERTY_TEMPERATURE_IN]
-        self.temperature_out_primary = setpoints_primary[PROPERTY_TEMPERATURE_OUT]
+        self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
+        self.temperature_out_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_OUT]
         self.mass_flow_initialization_primary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_primary[PROPERTY_HEAT_DEMAND],
+            thermal_demand=setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_primary,
             temperature_out=self.temperature_out_primary,
         )

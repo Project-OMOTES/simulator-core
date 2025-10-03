@@ -122,6 +122,8 @@ PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
+PRIMARY = "primary"
+SECONDARY = "secondary"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()

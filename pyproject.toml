@@ -27,6 +27,7 @@ dependencies = [
     "influxdb~=5.3.2",
     "pyjnius~=1.6.1",
     "CoolProp~=6.6.0",
+    "NetworkX~=2.7.0",
 ]
 
 [project.optional-dependencies]

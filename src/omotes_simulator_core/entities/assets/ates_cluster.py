@@ -279,8 +279,6 @@ class AtesCluster(AssetAbstract):
             self.first_time_step = True  # dont get temperature from solver
             self.set_setpoints(setpoints=setpoints)
 
-        self.set_time_step(3600)  # set to original timesteps
-
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
         volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline

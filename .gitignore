@@ -226,3 +226,4 @@ doc/_build
 # test output
 map.html
 ates_sequential_temp.xml
+dump.csv
