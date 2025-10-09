@@ -15,7 +15,7 @@
 
 """Define default values and names for assets."""
 from dataclasses import dataclass
-from enum import IntEnum
+from enum import Enum
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
@@ -58,7 +58,7 @@ class PipeDefaults:
         return PipeSchedules.S1
 
 
-class PipeSchedules(IntEnum):
+class PipeSchedules(Enum):
     """Enum for pipe insulation schedules."""
 
     S1 = 1

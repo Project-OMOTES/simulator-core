@@ -105,15 +105,10 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
         dn_diameter = esdl_asset.get_property("diameter", None)
-        schedule_value = esdl_asset.get_property("schedule", int(PIPE_DEFAULTS.default_schedule))
-        try:
-            schedule = PipeSchedules(schedule_value)
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to retrieve ESDL object for schedule '{schedule_value}': {e}"
-            )
+        # Use default schedule since schedule is not a valid ESDL Pipe attribute
+        # TODO add method to get schedule from esdl if it becomes available.
+        schedule = PIPE_DEFAULTS.default_schedule
 
-        # Check if the diameter is 0, if so return the default diameter!
         if inner_diameter == 0:
             if dn_diameter is not None:
                 esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(
@@ -133,16 +128,13 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
 
         :param dn_diameter: the nominal diameter of the pipe.
-        :param schedule: the insulation schedule (must be 1, 2, or 3).
+        :param schedule: the insulation schedule (PipeSchedules enum: S1, S2, or S3).
         :return: EsdlAssetObject from the EDR based on the DN diameter.
 
         """
-        # Convert to int for the path construction
-        schedule_value = int(schedule)
-
         try:
             diameter = int(dn_diameter.replace("DN", ""))
-            title = f"/edr/Public/Assets/Logstor/Steel-S{schedule_value}-DN-{diameter}.edd"
+            title = f"/edr/Public/Assets/Logstor/Steel-{schedule.name}-DN-{diameter}.edd"
             edr_client = EDRClient()
             return edr_client.get_object_esdl(title)
         except Exception as e:

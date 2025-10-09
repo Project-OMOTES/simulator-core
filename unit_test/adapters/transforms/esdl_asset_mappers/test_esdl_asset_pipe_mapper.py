@@ -212,7 +212,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             self.assertEqual(result, expected_object)
 
     def test_get_diameter_with_specified_diameter_and_default_pipe_schedule(self):
-        """Test that _get_diameter uses default schedule when none provided in ESDL asset."""
+        """Test that _get_diameter uses default schedule."""
         # Arrange
         esdl_asset_mock = Mock()
         dn_mock = Mock()
@@ -257,25 +257,3 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
                 "/edr/Public/Assets/Logstor/Steel-S3-DN-100.edd"
             )
             self.assertEqual(result, expected_object)
-
-    def test_get_diameter_with_invalid_schedule_raises_runtime_error(self):
-        """Test that _get_diameter raises RuntimeError for invalid schedule values."""
-        # Arrange
-        esdl_asset_mock = Mock()
-
-        def mock_get_property(key, default=None):
-            if key == "innerDiameter":
-                return 0
-            if key == "diameter":
-                return None
-            if key == "schedule":
-                return 999  # Invalid schedule value
-            return default
-
-        esdl_asset_mock.get_property = mock_get_property
-
-        # Act & Assert
-        with self.assertRaises(RuntimeError) as context:
-            EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
-
-        self.assertIn("Failed to retrieve ESDL object for schedule '999'", str(context.exception))
