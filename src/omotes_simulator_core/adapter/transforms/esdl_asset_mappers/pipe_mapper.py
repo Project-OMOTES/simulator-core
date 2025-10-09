@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to Pipe asset mapper class."""
-
+import logging
 from typing import Any
 
 import numpy as np
@@ -31,6 +31,8 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
 )
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+
+logger = logging.getLogger(__name__)
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
@@ -113,6 +115,10 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             if dn_diameter is not None:
                 esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(
                     dn_diameter.name, schedule
+                )
+                logger.info(
+                    f"Property innerDiameter is not set for: {esdl_asset.get_name()}, "
+                    f"Schedule S1 is assumed for retrieval of pipe diameter from EDR list."
                 )
                 return float(esdl_object.innerDiameter)
             else:
