@@ -35,7 +35,7 @@ dev = [
     "setuptools ~= 75.6.0",
     "wheel ~= 0.45.1",
     "setuptools-git-versioning >= 2.0, < 3",
-    "black ~= 24.10.0",
+    "black == 24.10.0",
     "flake8 == 7.1.1",
     "flake8-pyproject ~= 1.2.3",
     "flake8-docstrings ~= 1.7.0",
@@ -46,7 +46,7 @@ dev = [
     "pytest ~= 8.3.4",
     "pytest-cov ~= 6.0.0",
     "mypy ~= 1.13.0",
-    "isort == 5.13.2",
+    "isort == 6.1.0",
     "build ~= 1.2.2",
     "sphinx~=8.0.2",
     "furo~=2024.8.6",
@@ -121,6 +121,7 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+line_length = 100
 
 [tool.mypy]
 python_version = "3.11"
