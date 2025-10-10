@@ -13,14 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to Pipe asset mapper class."""
-
+import logging
 from typing import Any
 
 import numpy as np
 from esdl.edr.client import EDRClient
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PIPE_DEFAULTS,
+    PipeSchedules,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.utils import (
@@ -28,6 +31,8 @@ from omotes_simulator_core.entities.assets.utils import (
     get_thermal_conductivity_table,
 )
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+
+logger = logging.getLogger(__name__)
 
 
 class EsdlAssetPipeMapper(EsdlMapperAbstract):
@@ -102,12 +107,18 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
         dn_diameter = esdl_asset.get_property("diameter", None)
-        schedule = esdl_asset.get_property("schedule", None)
-        # Check if the diameter is 0, if so return the default diameter!
+        # Use default schedule since schedule is not a valid ESDL Pipe attribute
+        # TODO add method to get schedule from esdl if it becomes available.
+        schedule = PIPE_DEFAULTS.default_schedule
+
         if inner_diameter == 0:
             if dn_diameter is not None:
                 esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(
                     dn_diameter.name, schedule
+                )
+                logger.info(
+                    f"Property innerDiameter is not set for: {esdl_asset.get_name()}, "
+                    f"Schedule S1 is assumed for retrieval of pipe diameter from EDR list."
                 )
                 return float(esdl_object.innerDiameter)
             else:
@@ -117,18 +128,19 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
 
     @staticmethod
     def _get_esdl_object_from_edr(
-        dn_diameter: str, schedule: int = PIPE_DEFAULTS.insulation_schedule
+        dn_diameter: str, schedule: PipeSchedules = PIPE_DEFAULTS.default_schedule
     ) -> Any:
         """
         Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
 
         :param dn_diameter: the nominal diameter of the pipe.
+        :param schedule: the insulation schedule (PipeSchedules enum: S1, S2, or S3).
         :return: EsdlAssetObject from the EDR based on the DN diameter.
 
         """
         try:
             diameter = int(dn_diameter.replace("DN", ""))
-            title = f"/edr/Public/Assets/Logstor/Steel-S{schedule}-DN-{diameter}.edd"
+            title = f"/edr/Public/Assets/Logstor/Steel-{schedule.name}-DN-{diameter}.edd"
             edr_client = EDRClient()
             return edr_client.get_object_esdl(title)
         except Exception as e:
