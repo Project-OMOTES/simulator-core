@@ -60,6 +60,7 @@ class HeatNetwork:
         for py_asset in self.assets:
             if py_asset.asset_id in controller_input:
                 py_asset.set_time_step(time_step)
+                py_asset.set_time(time)
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
 
         self.solver.solve()

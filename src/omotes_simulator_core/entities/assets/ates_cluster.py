@@ -17,6 +17,7 @@
 import logging
 import math
 import os
+from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -31,7 +32,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
+    celcius_to_kelvin,
     heat_demand_and_temperature_to_mass_flow,
+    kelvin_to_celcius,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
@@ -83,12 +86,6 @@ class AtesCluster(AssetAbstract):
     well_distance: float
     """The distance of the well [m]."""
 
-    maximum_flow_charge: float
-    """The maximum flow charge [m3/h]."""
-
-    maximum_flow_discharge: float
-    """The maximum flow discharge [m3/h]."""
-
     pyjnius_loader: PyjniusLoader
     """Loader object to delay importing pyjnius module and Java classes."""
 
@@ -107,8 +104,6 @@ class AtesCluster(AssetAbstract):
         salinity: float,
         well_casing_size: float,
         well_distance: float,
-        maximum_flow_charge: float,
-        maximum_flow_discharge: float,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -116,9 +111,10 @@ class AtesCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
-
-        self.temperature_out = DEFAULT_TEMPERATURE
-        self.temperature_in = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_in = DEFAULT_TEMPERATURE
+        self.temperature_out = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.hot_well_temperature = self.temperature_in
+        self.cold_well_temperature = self.temperature_out
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -133,13 +129,14 @@ class AtesCluster(AssetAbstract):
         self.salinity = salinity  # ppm
         self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
-        self.maximum_flow_charge = maximum_flow_charge  # m3/h
-        self.maximum_flow_discharge = maximum_flow_discharge  # m3/h
 
         # Output list
         self.output: list = []
         self.pyjnius_loader = PyjniusLoader.get_loader()
+
+        self.current_time = datetime.now()
         self._init_rosim()
+        self.first_time_step = True
 
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
@@ -149,10 +146,10 @@ class AtesCluster(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate > 0:
-            self.solver_asset.supply_temperature = self.temperature_in
+        if self.mass_flowrate >= 0:
+            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
         else:
-            self.solver_asset.supply_temperature = self.temperature_out
+            self.solver_asset.supply_temperature = self.hot_well_temperature  # production
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -161,6 +158,9 @@ class AtesCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
+        if self.current_time == self.time:
+            return
+        self.current_time = self.time
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
@@ -171,9 +171,19 @@ class AtesCluster(AssetAbstract):
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
-            self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
+            if self.first_time_step:
+                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.first_time_step = False
+            else:
+                # After the first time step: use solver temperature
+                if self.thermal_power_allocation >= 0:
+                    self.temperature_in = self.hot_well_temperature
+                    self.temperature_out = self.solver_asset.get_temperature(1)
+                else:
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.cold_well_temperature
 
             self._calculate_massflowrate()
             self._run_rosim()
@@ -198,15 +208,15 @@ class AtesCluster(AssetAbstract):
             PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
             PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
             PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(1),
+            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(0),
+            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
         }
         self.output.append(output_dict)
 
     def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
         path = os.path.dirname(__file__)
-        xmlfile = os.path.join(path, "bin/sequentialTemplate_v0.4.2_template.xml")
+        xmlfile = os.path.join(path, "bin/sequentialTemplate_v1.2.0_template.xml")
         with open(xmlfile) as fd:
             xml_str = fd.read()
 
@@ -250,9 +260,24 @@ class AtesCluster(AssetAbstract):
             temp_xmlfile.write(xml_str)
 
         javaioFile = self.pyjnius_loader.load_class("java.io.File")
-        RosimSequential = self.pyjnius_loader.load_class("tno.calc.RosimSequential")
+        RosimSequential = self.pyjnius_loader.load_class("rosim.calc.RosimSequential")
         xmlfilejava = javaioFile(temp_xmlfile_path)
-        self.rosim = RosimSequential(xmlfilejava, False, 2)
+        logLevel = self.pyjnius_loader.load_class("org.slf4j.event.Level")
+        self.rosim = RosimSequential(xmlfilejava, logLevel, -1)
+
+        setpoints = {
+            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
+            PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
+        }
+        # initially charging 12 weeks with 85-35 temperature 1 MW
+        logger.info("initializing ates with charging for 12 weeks")
+        for i in range(12):
+            logger.info(f"charging ates week {i + 1}")
+            self.set_time_step(3600 * 24 * 7)
+            self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
+            self.first_time_step = True  # dont get temperature from solver
+            self.set_setpoints(setpoints=setpoints)
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
@@ -265,22 +290,21 @@ class AtesCluster(AssetAbstract):
         # is downward
 
         if volume_flow > 0:
-            rosim_input_temperature = [self.temperature_out - 273.15, -1]  # Celcius, -1 in
+            rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
             # injection well to make sure it is not used
         elif volume_flow < 0:
-            rosim_input_temperature = [-1, self.temperature_in - 273.15]  # Celcius, -1 in
+            rosim_input_temperature = [
+                -1,
+                kelvin_to_celcius(self.temperature_out),
+            ]  # Celcius, -1 in
             # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
             # sure it is not used
 
-        ates_temperature = self.rosim.getTempsNextTimeStep(
+        ates_temperature = self.rosim.calcTimeStepAndGetTemps(
             rosim_input__flow, rosim_input_temperature, timestep
         )
 
-        hot_well_temperature = ates_temperature[0] + 273.15  # convert to K
-        cold_well_temperature = ates_temperature[1] + 273.15  # convert to K
-
-        # update supply return temperature from ATES
-        self.temperature_out = hot_well_temperature
-        self.temperature_in = cold_well_temperature
+        self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
+        self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
