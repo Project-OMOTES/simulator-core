@@ -86,7 +86,7 @@ influxdb==5.3.2
     #   omotes-simulator-core (..\..\pyproject.toml)
 iniconfig==2.1.0
     # via pytest
-isort==5.13.2
+isort==6.1.0
     # via omotes-simulator-core (..\..\pyproject.toml)
 jinja2==3.1.6
     # via sphinx
@@ -102,7 +102,7 @@ msgpack==1.1.2
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
-mypy==1.13.0
+mypy==1.18.2
     # via omotes-simulator-core (..\..\pyproject.toml)
 mypy-extensions==1.1.0
     # via
@@ -156,7 +156,7 @@ pyecore==0.13.2
     # via
     #   -c ..\..\requirements.txt
     #   pyesdl
-pyesdl==25.5.1
+pyesdl==25.7
     # via
     #   -c ..\..\requirements.txt
     #   omotes-simulator-core (..\..\pyproject.toml)

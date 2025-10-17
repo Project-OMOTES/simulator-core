@@ -35,7 +35,7 @@ pandas==2.2.3
     # via omotes-simulator-core (..\..\pyproject.toml)
 pyecore==0.13.2
     # via pyesdl
-pyesdl==25.5.1
+pyesdl==25.7
     # via omotes-simulator-core (..\..\pyproject.toml)
 pyjnius==1.6.1
     # via omotes-simulator-core (..\..\pyproject.toml)
