@@ -102,7 +102,7 @@ msgpack==1.1.2
     # via
     #   -c ..\..\requirements.txt
     #   influxdb
-mypy==1.13.0
+mypy==1.18.2
     # via omotes-simulator-core (..\..\pyproject.toml)
 mypy-extensions==1.1.0
     # via
