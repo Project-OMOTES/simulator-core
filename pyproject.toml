@@ -82,8 +82,8 @@ zip-safe = false
 "omotes_simulator_core" = [
     "entities/assets/bin/ates_sequential_temp.xml",
     "entities/assets/bin/jfxrt.jar",
-    "entities/assets/bin/rosim-batch-0.4.2.jar",
-    "entities/assets/bin/sequentialTemplate_v0.4.2_template.xml",
+    "entities/assets/bin/rosim-batch-1.2.0.jar",
+    "entities/assets/bin/sequentialTemplate_v1.2.0_template.xml",
 ]
 
 [tool.pytest.ini_options]
