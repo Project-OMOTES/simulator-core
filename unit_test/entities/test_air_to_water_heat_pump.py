@@ -46,6 +46,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             asset_name="air_to_water_hp",
             asset_id="air_to_water_hp_id",
             port_ids=["test1", "test2"],
+            coefficient_of_performance=2
         )
 
     def test_air_to_water_hp_create(self) -> None:
@@ -58,6 +59,8 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
         self.assertIsInstance(self.air_to_water_hp, AirToWaterHeatPump)
         self.assertEqual(self.air_to_water_hp.name, "air_to_water_hp")
         self.assertEqual(self.air_to_water_hp.asset_id, "air_to_water_hp_id")
+        self.assertEqual(self.air_to_water_hp.connected_ports, ["test1", "test2"])
+        self.assertEqual(self.air_to_water_hp.coefficient_of_performance, 2)
 
     def test_air_to_water_hp_set_setpoints(self) -> None:
         """Test setting setpoints of a air to water heatpump."""
@@ -68,14 +71,15 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
-        self.air_to_water_hp.set_setpoints(setpoints=setpoints)
 
-        # Act
         mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
+
+        # Act
+        self.air_to_water_hp.set_setpoints(setpoints=setpoints)
 
         # Assert
         self.assertEqual(self.air_to_water_hp.temperature_out, 353.15)
@@ -278,3 +282,38 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             actual_heat_supplied = self.air_to_water_hp.get_actual_heat_supplied()
             # Assert
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
+
+    def test_get_electric_consumption(self):
+        """Test getting the electric power consumed by the heatpump"""
+        # Arrange
+        def get_internal_energy(_, i: int):
+            if i == 0:
+                return 1.0e6
+            if i == 1:
+                return 2.0e6
+
+        def get_mass_flow_rate(_, i: int):
+            return 0.5
+
+        with (
+            patch(
+                "omotes_simulator_core.solver.network.assets.base_asset."
+                "BaseAsset.get_internal_energy",
+                get_internal_energy,
+            ),
+            patch(
+                "omotes_simulator_core.solver.network.assets.base_asset."
+                "BaseAsset.get_mass_flow_rate",
+                get_mass_flow_rate,
+            ),
+        ):
+            # Act
+            power_consumed = abs(self.air_to_water_hp.get_actual_heat_supplied()) / self.air_to_water_hp.coefficient_of_performance
+            actual_power_consumed = self.air_to_water_hp.get_electric_power_consumption()
+            # Assert
+            self.assertEqual(actual_power_consumed, power_consumed)
+
+if __name__=="__main__":
+    test = AirToWaterHeatPumpTest()
+    test.setUp()
+
