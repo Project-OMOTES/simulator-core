@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""ProductionCluster class."""
+"""AirToWaterHeatPump class."""
 import logging
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -22,9 +22,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_SUPPLY_SET_POINT,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.solver.network.assets.air_to_water_heat_pump import (
-    AirToWaterHeatPumpAsset,
-)
+from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.entities.assets.asset_defaults import HeatPumpDefaults
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +34,15 @@ class AirToWaterHeatPump(ProductionCluster):
     It represents a two port heatpump that adds heat to the network by consuming electricity.
     """
 
+    coefficient_of_performance : float
+    """The coeficcient of performance of the heat pump [-]."""
+
     def __init__(
         self,
         asset_name: str,
         asset_id: str,
         port_ids: list[str],
-        coefficient_of_performance: float = 1 - 1 / 4.0,
+        coefficient_of_performance: float = HeatPumpDefaults.coefficient_of_performance,
     ) -> None:
         """
         Initialize the AirToWaterHeatPump assset.
@@ -55,7 +57,7 @@ class AirToWaterHeatPump(ProductionCluster):
             port_ids=port_ids,
         )
         self.coefficient_of_performance = coefficient_of_performance
-        self.solver_asset = AirToWaterHeatPumpAsset(
+        self.solver_asset = HeatBoundary(
             name=self.name,
             _id=self.asset_id,
             pre_scribe_mass_flow=False,
@@ -84,7 +86,7 @@ class AirToWaterHeatPump(ProductionCluster):
             PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
             PROPERTY_ELECTRICITY_CONSUMPTION: (
-                self.get_electric_power_consumption()  # type: ignore
+                self.get_electric_power_consumption()
             ),
         }
         self.outputs[1][-1].update(output_dict_temp)  # Outputs appended to the out port.

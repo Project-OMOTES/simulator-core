@@ -37,8 +37,8 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a heatpump entity.
         :return: HeatPump object.
         """
-        hp_ports = esdl_asset.esdl_asset.port
-        if len(hp_ports) == 4:  # Water to water heat pump case
+        hp_ports = esdl_asset.get_number_of_ports()
+        if hp_ports == 4:  # Water to water heat pump case
             heatpump_entity = HeatPump(
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
@@ -47,11 +47,14 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
                     "COP", HeatPumpDefaults.coefficient_of_performance
                 ),
             )
-        elif len(hp_ports) == 2:  # Air to water heat pump case.
+        elif hp_ports == 2:  # Air to water heat pump case.
             heatpump_entity = AirToWaterHeatPump(  # type:ignore
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
                 port_ids=esdl_asset.get_port_ids(),
+                coefficient_of_performance=esdl_asset.get_property(
+                    "COP", HeatPumpDefaults.coefficient_of_performance
+                )
             )
         else:
             raise NotImplementedError(
