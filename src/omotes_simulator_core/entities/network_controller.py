@@ -148,7 +148,7 @@ class NetworkController(NetworkControllerAbstract):
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
-                heat_transfer.update(asset.set_asset(total_heat_supply * asset.factor))
+                heat_transfer.update(asset.set_asset(total_heat_supply))
             for asset in network.heat_transfer_assets_sec:
                 heat_transfer.update(asset.set_asset(-total_heat_supply))
         producers.update(heat_transfer)

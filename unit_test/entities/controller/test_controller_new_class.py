@@ -182,8 +182,8 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0)
         self.assertEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0)
         self.assertEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0)
-        self.assertEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 30.0)
-        self.assertEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 150.0)
+        self.assertEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 6.0)
+        self.assertEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 30.0)
         self.assertEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0)
         self.assertEqual(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], 20.0)
 
@@ -205,9 +205,9 @@ class ControllerTest(unittest.TestCase):
         self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0, places=3)
         self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
         self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 50.0, places=3)
+        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10.0, places=3)
         self.assertAlmostEquals(
-            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 250.0, places=3
+            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], 50.0, places=3
         )
         self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
         self.assertAlmostEquals(

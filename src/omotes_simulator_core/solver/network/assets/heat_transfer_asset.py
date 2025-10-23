@@ -275,7 +275,7 @@ class HeatTransferAsset(BaseAsset):
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=self.primary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -284,7 +284,7 @@ class HeatTransferAsset(BaseAsset):
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=self.secondary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )
