@@ -225,7 +225,7 @@ class ProductionCluster(AssetAbstract):
         """
         return (
             self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
-        ) * self.solver_asset.get_mass_flow_rate(0)
+        ) * self.solver_asset.get_mass_flow_rate(1)
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
