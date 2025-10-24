@@ -26,8 +26,8 @@ from omotes_simulator_core.adapter.transforms.transform_utils import (
     sort_ports,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileSamplingMethod,
     ProfileInterpolationMethod,
+    ProfileSamplingMethod,
 )
 
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
@@ -107,14 +107,12 @@ class EsdlAssetObject:
 
     def get_sampling_method(self) -> ProfileSamplingMethod:
         """Get the interpolation method of the asset."""
-
         # Default for now
         # TODO check where will the input of the interpolation method come from
         return ProfileSamplingMethod.DEFAULT
 
     def get_interpolation_method(self) -> ProfileInterpolationMethod:
         """Get the interpolation method of the asset."""
-
         # Default for now
         # TODO check where will the input of the interpolation method come from
         return ProfileInterpolationMethod.DEFAULT

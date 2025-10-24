@@ -23,9 +23,9 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolationMethod,
     ProfileInterpolator,
     ProfileSamplingMethod,
-    ProfileInterpolationMethod,
 )
 
 logger = logging.getLogger(__name__)

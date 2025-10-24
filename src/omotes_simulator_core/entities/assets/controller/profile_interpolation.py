@@ -35,10 +35,12 @@ def set_interpolation_timestep(timestep: float) -> None:
 
 
 class ProfileSamplingMethod(Enum):
-    """Enumeration for different sampling methods
+    """Enumeration for different sampling methods.
+
     :param actual : return actual value at the time step
-    :param average : return average value between time steps
-    :
+    :param average : return average value from the window time
+    :param maximum : return maximum value from the window time
+    :param minimum : return minimum value from the window time
     """
 
     DEFAULT = "actual"
@@ -49,7 +51,8 @@ class ProfileSamplingMethod(Enum):
 
 
 class ProfileInterpolationMethod(Enum):
-    """Enumeration for different interpolation methods
+    """Enumeration for different interpolation methods.
+
     :param Linear : linear interpolation
     :param Zero : zeroth-order spline interpolation
     :param Slinear : first-order spline interpolation
@@ -81,12 +84,12 @@ class ProfileInterpolator:
         :param ProfileInterpolationMethod interpolation_method: Method to use for
         profile interpolation
         """
-
         self.profile = profile
         self.sampling_method = sampling_method
         self.interpolation_method = interpolation_method
         self.simulation_timestep = _simulation_timestep
         self.start_index = 0
+        self._interpolator: Optional[interp1d] = None
         self.resampled_profile = self._resample_profile_if_needed()
 
     def _resample_profile_if_needed(self) -> pd.DataFrame:
@@ -183,9 +186,9 @@ class ProfileInterpolator:
         return 0.0
 
     def _get_values_in_window(self, time: datetime.datetime) -> pd.Series:
-        """
-        Collect values from the ORIGINAL profile within (t-Δt, t),
-        and always include the two window edges evaluated via the interpolant.
+        """Collect values from the ORIGINAL profile within (t-Δt, t).
+
+        Always include the two window edges evaluated via the interpolant.
         """
         target_time = pd.Timestamp(time)
         window_size = pd.Timedelta(seconds=self.simulation_timestep)
@@ -218,7 +221,7 @@ class ProfileInterpolator:
 
     def _get_interpolator(self) -> interp1d:
         """Lazily build an interpolator over the ORIGINAL profile."""
-        if hasattr(self, "_interpolator"):
+        if self._interpolator is not None:
             return self._interpolator
         dates = pd.to_datetime(self.profile["date"])
         ts_sec = dates.astype(int) // 10**9

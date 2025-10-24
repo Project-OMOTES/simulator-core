@@ -26,8 +26,8 @@ from omotes_simulator_core.entities.assets.controller.controller_consumer import
     ControllerConsumer,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileSamplingMethod,
     ProfileInterpolationMethod,
+    ProfileSamplingMethod,
 )
 
 
