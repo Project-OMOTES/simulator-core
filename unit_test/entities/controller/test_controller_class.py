@@ -33,8 +33,8 @@ from omotes_simulator_core.entities.assets.controller.controller_storage import 
     ControllerStorage,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileSamplingMethod,
     ProfileInterpolationMethod,
+    ProfileSamplingMethod,
 )
 from omotes_simulator_core.entities.network_controller import NetworkController
 

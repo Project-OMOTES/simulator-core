@@ -19,9 +19,9 @@ import logging
 from enum import Enum
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

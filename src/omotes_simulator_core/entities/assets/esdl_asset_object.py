@@ -29,7 +29,6 @@ from omotes_simulator_core.entities.assets.controller.profile_interpolation impo
     ProfileInterpolationMethod,
     ProfileSamplingMethod,
 )
-
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
