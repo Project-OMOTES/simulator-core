@@ -409,7 +409,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=self.primary_side_inflow,
-                    mass_flow_value=self.mass_flow_initialization_primary,
+                    mass_flow_value=0,
                 )
             )
         # Return the equations
