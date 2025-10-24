@@ -22,6 +22,11 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolator,
+    ProfileSamplingMethod,
+    ProfileInterpolationMethod,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +42,18 @@ class ControllerConsumer(AssetControllerAbstract):
         temperature_out: float,
         max_power: float,
         profile: pd.DataFrame,
+        sampling_method: ProfileSamplingMethod,
+        interpolation_method: ProfileInterpolationMethod,
     ):
         """Constructor for the consumer.
 
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
+        :param float temperature_in: Temperature input of the consumer.
+        :param float temperature_out: Temperature output of the consumer.
+        :param float max_power: Maximum power of the consumer.
+        :param ProfileSamplingMethod sampling_method: Method for profile sampling.
+        :param ProfileInterpolationMethod interpolation_method: Method for profile interpolation.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
@@ -50,21 +62,28 @@ class ControllerConsumer(AssetControllerAbstract):
         self.start_index = 0
         self.max_power: float = max_power
 
+        # Create profile interpolator
+        self.profile_interpolator = ProfileInterpolator(
+            profile=profile,
+            sampling_method=sampling_method,
+            interpolation_method=interpolation_method,
+        )
+
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
 
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        for index in range(self.start_index, len(self.profile)):
-            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
-                self.start_index = index
-                if self.profile["values"][index] > self.max_power:
-                    logging.warning(
-                        f"Demand of {self.name} is higher than maximum power of asset"
-                        f" at time {time}."
-                    )
-                    return self.max_power
-                else:
-                    return float(self.profile["values"][index])
-        return 0
+        demand = self.profile_interpolator.get_value(time)
+
+        if demand > self.max_power:
+            logging.warning(
+                f"Demand of {self.name} is higher than maximum power of asset" f" at time {time}."
+            )
+            return self.max_power
+
+        return demand
+
+
+# TODO: The max_power constraint check may never fail because max_power is inf by default

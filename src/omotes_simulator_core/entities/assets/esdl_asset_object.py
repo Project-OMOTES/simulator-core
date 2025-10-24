@@ -25,6 +25,11 @@ from omotes_simulator_core.adapter.transforms.transform_utils import (
     PortType,
     sort_ports,
 )
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileSamplingMethod,
+    ProfileInterpolationMethod,
+)
+
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
@@ -99,6 +104,20 @@ class EsdlAssetObject:
             extra={"esdl_object_id": self.get_id()},
         )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
+
+    def get_sampling_method(self) -> ProfileSamplingMethod:
+        """Get the interpolation method of the asset."""
+
+        # Default for now
+        # TODO check where will the input of the interpolation method come from
+        return ProfileSamplingMethod.DEFAULT
+
+    def get_interpolation_method(self) -> ProfileInterpolationMethod:
+        """Get the interpolation method of the asset."""
+
+        # Default for now
+        # TODO check where will the input of the interpolation method come from
+        return ProfileInterpolationMethod.DEFAULT
 
     # make a function to check temperature for both in and out ports
     def get_temperature(self, port_type: str, temp_type: str) -> float:

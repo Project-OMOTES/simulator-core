@@ -51,6 +51,9 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Return")
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
         profile = pd.DataFrame()  # esdl_asset.get_profile()
+        sampling_method = esdl_asset.get_sampling_method()
+        interpolation_method = esdl_asset.get_interpolation_method()
+        # TODO: Extract interpolation method from ESDL properties if available
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -59,5 +62,7 @@ class ControllerStorageMapper(EsdlMapperAbstract):
             max_charge_power=charge_power,
             max_discharge_power=discharge_power,
             profile=profile,
+            sampling_method=sampling_method,
+            interpolation_method=interpolation_method,
         )
         return contr_storage

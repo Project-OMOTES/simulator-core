@@ -32,6 +32,10 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorage,
 )
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileSamplingMethod,
+    ProfileInterpolationMethod,
+)
 from omotes_simulator_core.entities.network_controller import NetworkController
 
 
@@ -86,6 +90,8 @@ class ControllerTest(unittest.TestCase):
             temperature_in=30.0,
             max_power=1.0,
             profile=Mock(),
+            sampling_method=ProfileSamplingMethod.ACTUAL,
+            interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
         producer = ControllerProducer(
             "producer",
@@ -104,6 +110,8 @@ class ControllerTest(unittest.TestCase):
             max_charge_power=0.0,
             max_discharge_power=0.0,
             profile=Mock(),
+            sampling_method=ProfileSamplingMethod.ACTUAL,
+            interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
 
         # Act
