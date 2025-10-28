@@ -284,8 +284,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
 
     def test_get_electric_consumption(self):
-        """Test getting the electric power consumed by the heatpump"""
-
+        """Test getting the electric power consumed by the heatpump."""
         # Arrange
         def get_internal_energy(_, i: int):
             if i == 0:
