@@ -66,16 +66,16 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
-        
+
         mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
-        
+
         # Act
         self.production_cluster.set_setpoints(setpoints=setpoints)
-        
+
         # Assert
         self.assertEqual(self.production_cluster.temperature_out, 353.15)
         self.assertEqual(self.production_cluster.temperature_in, 333.15)

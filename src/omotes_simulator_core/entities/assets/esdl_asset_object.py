@@ -159,10 +159,9 @@ class EsdlAssetObject:
             )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)
-    
+
     def get_number_of_ports(self) -> int:
-        """Get the number of ports of the asset"""
+        """Get the number of ports of the asset."""
         number_of_ports = len(self.esdl_asset.port)
 
         return number_of_ports
-

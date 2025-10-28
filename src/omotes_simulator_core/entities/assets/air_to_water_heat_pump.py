@@ -20,10 +20,10 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
+    HeatPumpDefaults,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
-from omotes_simulator_core.entities.assets.asset_defaults import HeatPumpDefaults
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class AirToWaterHeatPump(ProductionCluster):
     It represents a two port heatpump that adds heat to the network by consuming electricity.
     """
 
-    coefficient_of_performance : float
+    coefficient_of_performance: float
     """The coeficcient of performance of the heat pump [-]."""
 
     def __init__(
@@ -85,8 +85,6 @@ class AirToWaterHeatPump(ProductionCluster):
         output_dict_temp = {
             PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
-            PROPERTY_ELECTRICITY_CONSUMPTION: (
-                self.get_electric_power_consumption()
-            ),
+            PROPERTY_ELECTRICITY_CONSUMPTION: (self.get_electric_power_consumption()),
         }
         self.outputs[1][-1].update(output_dict_temp)  # Outputs appended to the out port.

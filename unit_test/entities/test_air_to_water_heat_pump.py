@@ -46,7 +46,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             asset_name="air_to_water_hp",
             asset_id="air_to_water_hp_id",
             port_ids=["test1", "test2"],
-            coefficient_of_performance=2
+            coefficient_of_performance=2,
         )
 
     def test_air_to_water_hp_create(self) -> None:
@@ -285,6 +285,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
 
     def test_get_electric_consumption(self):
         """Test getting the electric power consumed by the heatpump"""
+
         # Arrange
         def get_internal_energy(_, i: int):
             if i == 0:
@@ -308,12 +309,15 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             ),
         ):
             # Act
-            power_consumed = abs(self.air_to_water_hp.get_actual_heat_supplied()) / self.air_to_water_hp.coefficient_of_performance
+            power_consumed = (
+                abs(self.air_to_water_hp.get_actual_heat_supplied())
+                / self.air_to_water_hp.coefficient_of_performance
+            )
             actual_power_consumed = self.air_to_water_hp.get_electric_power_consumption()
             # Assert
             self.assertEqual(actual_power_consumed, power_consumed)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     test = AirToWaterHeatPumpTest()
     test.setUp()
-

@@ -54,7 +54,7 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
                 port_ids=esdl_asset.get_port_ids(),
                 coefficient_of_performance=esdl_asset.get_property(
                     "COP", HeatPumpDefaults.coefficient_of_performance
-                )
+                ),
             )
         else:
             raise NotImplementedError(
