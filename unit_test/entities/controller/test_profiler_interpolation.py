@@ -68,7 +68,8 @@ class TestProfileInterpolator(unittest.TestCase):
         )
 
     def test_warns_and_returns_original_if_no_sim_start_time(self):
-        """If simulation_start_time is None and resampling would be needed, keep original with WARNING."""
+        """If simulation_start_time is None and resampling would be needed,
+        keep original with WARNING."""
         # Force a non-hourly timestep to trigger resampling, but leave sim_start None
         set_interpolation_timestep_and_simulation_start_time(
             timestep=1800, simulation_start_time=None
