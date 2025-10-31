@@ -104,6 +104,18 @@ class ProfileInterpolator:
 
         :return: Resampled DataFrame with the desired timestep or original if no resampling needed
         """
+        # Use default timestep if none provided
+        if self.simulation_timestep is None:
+            logger.warning(
+                "No simulation timestep provided, using default of 3600 seconds (1 hour)"
+            )
+            timestep = 3600.0
+        else:
+            timestep = self.simulation_timestep
+
+        # Return empty profile if it has no data
+        if len(self.profile) < 2:
+            return self.profile
 
         profile_timestep = float(
             (
@@ -112,7 +124,7 @@ class ProfileInterpolator:
             ).total_seconds()
         )
 
-        if abs(profile_timestep - self.simulation_timestep) < 1e-6:
+        if abs(profile_timestep - timestep) < 1e-6:
             return self.profile
 
         return self._interpolate_profile()
@@ -122,6 +134,16 @@ class ProfileInterpolator:
 
         :return: Interpolated profile
         """
+        # Use default timestep if none provided
+        timestep = self.simulation_timestep if self.simulation_timestep is not None else 3600.0
+
+        # Return original profile if no simulation start time is set
+        if self.simulation_start_time is None:
+            logger.warning(
+                "Could not interpolate because simulation start time not available, "
+                "using original profile"
+            )
+            return self.profile
 
         dates = pd.to_datetime(self.profile["date"])
         timestamps = (dates.view("int64") // 1_000_000_000).astype(np.int64)
@@ -138,7 +160,7 @@ class ProfileInterpolator:
         new_times = pd.date_range(
             start=pd.Timestamp(self.simulation_start_time).tz_localize(dates.iloc[0].tz),
             end=dates.iloc[-1],
-            freq=f"{int(self.simulation_timestep)}s",
+            freq=f"{int(timestep)}s",
         )
         new_timestamps = (new_times.view("int64") // 1_000_000_000).astype(np.int64)
         new_values = interpolator(new_timestamps)
@@ -185,8 +207,11 @@ class ProfileInterpolator:
 
         Always include the two window edges evaluated via the interpolant.
         """
+        # Use default timestep if none provided
+        timestep = self.simulation_timestep if self.simulation_timestep is not None else 3600.0
+
         current_time = pd.Timestamp(time)
-        window_size = pd.Timedelta(seconds=self.simulation_timestep)
+        window_size = pd.Timedelta(seconds=timestep)
 
         # Data points inside the time window retrieved from original profile
         mask = (self.profile["date"] >= current_time) & (

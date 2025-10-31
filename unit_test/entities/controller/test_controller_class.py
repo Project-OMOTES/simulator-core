@@ -17,6 +17,8 @@ import unittest
 from datetime import datetime
 from unittest.mock import Mock
 
+import pandas as pd
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
@@ -83,13 +85,19 @@ class ControllerTest(unittest.TestCase):
     def test_controller_init(self):
         """Test to initialize the controller."""
         # Arrange
+        # Create a test profile DataFrame
+        test_profile = pd.DataFrame({
+            'date': pd.date_range('2019-01-01', periods=24, freq='h'),
+            'values': [1.0] * 24
+        })
+        
         consumer = ControllerConsumer(
             name="consumer",
             identifier="id",
             temperature_out=20.0,
             temperature_in=30.0,
             max_power=1.0,
-            profile=Mock(),
+            profile=test_profile,
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
@@ -109,7 +117,7 @@ class ControllerTest(unittest.TestCase):
             temperature_in=30.0,
             max_charge_power=0.0,
             max_discharge_power=0.0,
-            profile=Mock(),
+            profile=test_profile,
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
