@@ -102,11 +102,8 @@ class ProfileInterpolator:
     def _resample_profile_if_needed(self) -> pd.DataFrame:
         """Resample the profile to match the desired timestep using SciPy interpolation.
 
-        :return: Resampled DataFrame with the desired timestep
+        :return: Resampled DataFrame with the desired timestep or original if no resampling needed
         """
-        # If no simulation timestep is set, use original profile
-        if self.simulation_timestep is None:
-            return self.profile
 
         profile_timestep = float(
             (
@@ -115,23 +112,19 @@ class ProfileInterpolator:
             ).total_seconds()
         )
 
-        if abs(profile_timestep - self.simulation_timestep) == 0.0:
+        if abs(profile_timestep - self.simulation_timestep) < 1e-6:
             return self.profile
 
-        return self._interpolate_profile_to_timestep()
+        return self._interpolate_profile()
 
-    def _interpolate_profile_to_timestep(self) -> pd.DataFrame:
+    def _interpolate_profile(self) -> pd.DataFrame:
         """Use SciPy to interpolate profile using the given timestep.
 
         :return: Interpolated profile
         """
-        # If no simulation timestep is set, use original profile
-        if self.simulation_timestep is None:
-            return self.profile
 
-        # Convert dates to timestamps for interpolation
         dates = pd.to_datetime(self.profile["date"])
-        timestamps = dates.astype(int) // 10**9
+        timestamps = (dates.view("int64") // 1_000_000_000).astype(np.int64)
         values = self.profile["values"].values
 
         interpolator = interp1d(
@@ -142,49 +135,17 @@ class ProfileInterpolator:
             fill_value=np.nan,
         )
 
-        # Find starting point for resampling
-        if self.simulation_start_time is not None:
-            # Find first simulation time step that is >= simulation start time
-            sim_start = pd.Timestamp(self.simulation_start_time)
-            timestep_seconds = int(self.simulation_timestep)
-
-            # Ensure timezone compatibility
-            profile_end = dates.iloc[-1]
-            profile_start = dates.iloc[0]
-
-            # Make sim_start timezone-compatible with the profile dates
-            if profile_start.tz is not None and sim_start.tz is None:
-                sim_start = sim_start.tz_localize(profile_start.tz)
-            elif profile_start.tz is None and sim_start.tz is not None:
-                sim_start = sim_start.tz_localize(None)
-
-            # Generate simulation time steps starting from sim_start
-            current_time = sim_start
-            while current_time <= profile_end:  # Continue until we cover the profile
-                if current_time >= profile_start:  # Start from first time >= profile start
-                    break
-                current_time += pd.Timedelta(seconds=timestep_seconds)
-
-            # Generate resampled times from this point
-            new_times = pd.date_range(
-                start=current_time, end=profile_end, freq=f"{timestep_seconds}s"
-            )
-        else:
-            # Original behavior: start from profile start
-            new_times = pd.date_range(
-                start=dates.iloc[0], end=dates.iloc[-1], freq=f"{int(self.simulation_timestep)}s"
-            )
-
-        # Convert to timestamps for interpolation
-        new_timestamps = new_times.astype(int) // 10**9
-
-        # Interpolate values
+        new_times = pd.date_range(
+            start=pd.Timestamp(self.simulation_start_time).tz_localize(dates.iloc[0].tz),
+            end=dates.iloc[-1],
+            freq=f"{int(self.simulation_timestep)}s",
+        )
+        new_timestamps = (new_times.view("int64") // 1_000_000_000).astype(np.int64)
         new_values = interpolator(new_timestamps)
 
-        # Create new DataFrame
         return pd.DataFrame({"date": new_times, "values": new_values})
 
-    def get_value(self, time: datetime.datetime) -> float:  # TODO this should be improved.
+    def get_value(self, time: datetime.datetime) -> float:
         """Get interpolated value at the specified time.
 
         :param datetime.datetime time: Time for which to get the value
@@ -207,9 +168,8 @@ class ProfileInterpolator:
                     ProfileSamplingMethod.MAXIMUM,
                     ProfileSamplingMethod.MINIMUM,
                 ]:
-                    # Get filtered values in the time window for pandas-based methods
-                    values_in_window = self._get_values_in_window(time)
 
+                    values_in_window = self._get_values_in_window(time)
                     if self.sampling_method == ProfileSamplingMethod.AVERAGE:
                         return float(values_in_window.mean()) if len(values_in_window) > 0 else 0.0
                     elif self.sampling_method == ProfileSamplingMethod.MAXIMUM:
@@ -225,59 +185,27 @@ class ProfileInterpolator:
 
         Always include the two window edges evaluated via the interpolant.
         """
-        if self.simulation_timestep is None:
-            raise ValueError("Simulation timestep must be set to use window-based sampling methods")
-
-        target_time = pd.Timestamp(time)
+        current_time = pd.Timestamp(time)
         window_size = pd.Timedelta(seconds=self.simulation_timestep)
 
-        profile_timestep = pd.to_datetime(self.profile["date"].iloc[1]) - pd.to_datetime(
-            self.profile["date"].iloc[0]
+        # Data points inside the time window retrieved from original profile
+        mask = (self.profile["date"] >= current_time) & (
+            self.profile["date"] < current_time + window_size
         )
+        inner_values = self.profile.loc[mask, "values"].astype(float).to_list()
 
-        # 1) take original points strictly inside (t-Δt, t)
-        mask = (self.profile["date"] > target_time - window_size) & (
-            self.profile["date"] < target_time
-        )
-        inner_vals = self.profile.loc[mask, "values"].astype(float).to_list()
-        inner_times = pd.to_datetime(self.profile.loc[mask, "date"])
+        # Take point if it lies outside the original profile
+        has_left_sample = (pd.to_datetime(self.profile["date"]) == current_time).any()
 
-        # 2) include window edges using interpolation of the ORIGINAL profile
-        left_edge = self._eval_at(target_time - window_size)
-        left_edge_time = target_time + profile_timestep - window_size
-        right_edge = self._eval_at(target_time)
-        if (
-            not inner_times.empty
-            and abs((inner_times.iloc[0] - left_edge_time).total_seconds()) < 1e-6
-        ):
-            left_edge = np.nan  # ignore duplicate (will be skipped in mean/max/min)
+        vals = []
+        if not has_left_sample:
+            vals.append(
+                float(
+                    self.resampled_profile.loc[
+                        (self.resampled_profile["date"] == current_time), "values"
+                    ].iloc[0]
+                )
+            )
+        vals.extend(inner_values)
 
-        # 3) return as a Series (edges first so max/min/avg see boundaries)
-        return pd.Series([left_edge, *inner_vals, right_edge], dtype=float)
-
-    # --- add these small helpers inside ProfileInterpolator ---
-
-    def _get_interpolator(self) -> interp1d:
-        """Build an interpolator over the ORIGINAL profile."""
-        if self._interpolator is not None:
-            return self._interpolator
-        dates = pd.to_datetime(self.profile["date"])
-        ts_sec = dates.astype(int) // 10**9
-
-        vals = self.profile["values"].to_numpy(dtype=float)
-
-        self._interpolator = interp1d(
-            ts_sec,
-            vals,
-            kind=self.interpolation_method.value,
-            bounds_error=False,
-            fill_value=np.nan,
-            assume_sorted=True,
-        )
-        return self._interpolator
-
-    def _eval_at(self, t: pd.Timestamp) -> float:
-        """Evaluate interpolant at timestamp t (seconds)."""
-        f = self._get_interpolator()
-        ts = int(t.value // 1_000_000_000)
-        return float(f(ts))
+        return pd.Series(vals, dtype=float)
