@@ -26,12 +26,16 @@ from scipy.interpolate import interp1d
 logger = logging.getLogger(__name__)
 
 _simulation_timestep: Optional[float] = None
+_simulation_start_time: Optional[datetime.datetime] = None
 
 
-def set_interpolation_timestep(timestep: float) -> None:
+def set_interpolation_timestep_and_simulation_start_time(
+    timestep: float, simulation_start_time: datetime.datetime
+) -> None:
     """Set the global configuration for all ProfileInterpolator instances."""
-    global _simulation_timestep
+    global _simulation_timestep, _simulation_start_time
     _simulation_timestep = timestep
+    _simulation_start_time = simulation_start_time
 
 
 class ProfileSamplingMethod(Enum):
@@ -83,12 +87,15 @@ class ProfileInterpolator:
         :param ProfileSamplingMethod sampling_method: Method to use for profile sampling
         :param ProfileInterpolationMethod interpolation_method: Method to use for
         profile interpolation
+        :param simulation_start_time: Optional start time to align the resampled profile with
         """
         self.profile = profile
         self.sampling_method = sampling_method
         self.interpolation_method = interpolation_method
         self.simulation_timestep = _simulation_timestep
+        self.simulation_start_time = _simulation_start_time
         self.start_index = 0
+        self.start_index_resampled = 0
         self._interpolator: Optional[interp1d] = None
         self.resampled_profile = self._resample_profile_if_needed()
 
@@ -135,10 +142,38 @@ class ProfileInterpolator:
             fill_value=np.nan,
         )
 
-        # Generate new time points
-        new_times = pd.date_range(
-            start=dates.iloc[0], end=dates.iloc[-1], freq=f"{int(self.simulation_timestep)}S"
-        )
+        # Find starting point for resampling
+        if self.simulation_start_time is not None:
+            # Find first simulation time step that is >= simulation start time
+            sim_start = pd.Timestamp(self.simulation_start_time)
+            timestep_seconds = int(self.simulation_timestep)
+
+            # Ensure timezone compatibility
+            profile_end = dates.iloc[-1]
+            profile_start = dates.iloc[0]
+
+            # Make sim_start timezone-compatible with the profile dates
+            if profile_start.tz is not None and sim_start.tz is None:
+                sim_start = sim_start.tz_localize(profile_start.tz)
+            elif profile_start.tz is None and sim_start.tz is not None:
+                sim_start = sim_start.tz_localize(None)
+
+            # Generate simulation time steps starting from sim_start
+            current_time = sim_start
+            while current_time <= profile_end:  # Continue until we cover the profile
+                if current_time >= profile_start:  # Start from first time >= profile start
+                    break
+                current_time += pd.Timedelta(seconds=timestep_seconds)
+
+            # Generate resampled times from this point
+            new_times = pd.date_range(
+                start=current_time, end=profile_end, freq=f"{timestep_seconds}s"
+            )
+        else:
+            # Original behavior: start from profile start
+            new_times = pd.date_range(
+                start=dates.iloc[0], end=dates.iloc[-1], freq=f"{int(self.simulation_timestep)}s"
+            )
 
         # Convert to timestamps for interpolation
         new_timestamps = new_times.astype(int) // 10**9
@@ -155,18 +190,18 @@ class ProfileInterpolator:
         :param datetime.datetime time: Time for which to get the value
         :return: Interpolated value
         """
-        for index in range(self.start_index, len(self.resampled_profile)):
+        for index_resampled in range(self.start_index_resampled, len(self.resampled_profile)):
             if (
                 abs(
                     (
-                        self.resampled_profile["date"].iloc[index].to_pydatetime() - time
+                        self.resampled_profile["date"].iloc[index_resampled].to_pydatetime() - time
                     ).total_seconds()
                 )
-                < 3600
+                < 1e-6
             ):
-                self.start_index = index
+                self.start_index_resampled = index_resampled
                 if self.sampling_method == ProfileSamplingMethod.ACTUAL:
-                    return float(self.resampled_profile["values"].iloc[index])
+                    return float(self.resampled_profile["values"].iloc[index_resampled])
                 elif self.sampling_method in [
                     ProfileSamplingMethod.AVERAGE,
                     ProfileSamplingMethod.MAXIMUM,
@@ -181,8 +216,8 @@ class ProfileInterpolator:
                         return float(values_in_window.max()) if len(values_in_window) > 0 else 0.0
                     elif self.sampling_method == ProfileSamplingMethod.MINIMUM:
                         return float(values_in_window.min()) if len(values_in_window) > 0 else 0.0
-            else:
-                logging.error(f"Unknown sampling method: {self.sampling_method.value}")
+                else:
+                    logging.error(f"Unknown sampling method: {self.sampling_method.value}")
         return 0.0
 
     def _get_values_in_window(self, time: datetime.datetime) -> pd.Series:
@@ -190,6 +225,9 @@ class ProfileInterpolator:
 
         Always include the two window edges evaluated via the interpolant.
         """
+        if self.simulation_timestep is None:
+            raise ValueError("Simulation timestep must be set to use window-based sampling methods")
+
         target_time = pd.Timestamp(time)
         window_size = pd.Timedelta(seconds=self.simulation_timestep)
 
@@ -220,7 +258,7 @@ class ProfileInterpolator:
     # --- add these small helpers inside ProfileInterpolator ---
 
     def _get_interpolator(self) -> interp1d:
-        """Lazily build an interpolator over the ORIGINAL profile."""
+        """Build an interpolator over the ORIGINAL profile."""
         if self._interpolator is not None:
             return self._interpolator
         dates = pd.to_datetime(self.profile["date"])

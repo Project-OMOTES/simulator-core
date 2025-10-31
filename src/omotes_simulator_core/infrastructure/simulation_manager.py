@@ -24,7 +24,7 @@ from omotes_simulator_core.adapter.transforms.mappers import (
     EsdlEnergySystemMapper,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    set_interpolation_timestep,
+    set_interpolation_timestep_and_simulation_start_time,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
@@ -57,7 +57,9 @@ class SimulationManager:
         """
         try:
             # Pass back timestep for ProfileInterpolation usage
-            set_interpolation_timestep(self.config.timestep)
+            set_interpolation_timestep_and_simulation_start_time(
+                self.config.timestep, self.config.start
+            )
             # convert ESDL to Heat Network, NetworkController
             network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
             controller = EsdlControllerMapper().to_entity(self.esdl)
