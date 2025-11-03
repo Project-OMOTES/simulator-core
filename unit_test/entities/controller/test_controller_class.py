@@ -86,11 +86,9 @@ class ControllerTest(unittest.TestCase):
         """Test to initialize the controller."""
         # Arrange
         # Create a test profile DataFrame
-        test_profile = pd.DataFrame({
-            'date': pd.date_range('2019-01-01', periods=24, freq='h'),
-            'values': [1.0] * 24
-        })
-        
+        test_profile = pd.DataFrame(
+            {"date": pd.date_range("2019-01-01", periods=24, freq="h"), "values": [1.0] * 24}
+        )
         consumer = ControllerConsumer(
             name="consumer",
             identifier="id",

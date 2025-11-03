@@ -199,7 +199,8 @@ class ProfileInterpolator:
                     elif self.sampling_method == ProfileSamplingMethod.MINIMUM:
                         return float(values_in_window.min()) if len(values_in_window) > 0 else 0.0
                 else:
-                    logging.error(f"Unknown sampling method: {self.sampling_method.value}")
+                    logger.error(f"Unknown sampling method: {self.sampling_method.value}")
+                    raise ValueError(f"Unknown sampling method: {self.sampling_method.value}")
         return 0.0
 
     def _get_values_in_window(self, time: datetime.datetime) -> pd.Series:
