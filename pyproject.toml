@@ -22,11 +22,12 @@ dependencies = [
     "numpy~=2.1.0",
     "pandas~=2.2.2",
     "scipy~=1.14.1",
-    "pyesdl~=25.5.1",
+    "pyesdl~=25.7",
     "dataclass-wizard~=0.22.3",
     "influxdb~=5.3.2",
     "pyjnius~=1.6.1",
     "CoolProp~=6.6.0",
+    "NetworkX~=2.7.0",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +35,7 @@ dev = [
     "setuptools ~= 75.6.0",
     "wheel ~= 0.45.1",
     "setuptools-git-versioning >= 2.0, < 3",
-    "black ~= 24.10.0",
+    "black == 24.10.0",
     "flake8 == 7.1.1",
     "flake8-pyproject ~= 1.2.3",
     "flake8-docstrings ~= 1.7.0",
@@ -45,7 +46,7 @@ dev = [
     "pytest ~= 8.3.4",
     "pytest-cov ~= 6.0.0",
     "mypy ~= 1.13.0",
-    "isort == 5.13.2",
+    "isort == 6.1.0",
     "build ~= 1.2.2",
     "sphinx~=8.0.2",
     "furo~=2024.8.6",
@@ -81,8 +82,8 @@ zip-safe = false
 "omotes_simulator_core" = [
     "entities/assets/bin/ates_sequential_temp.xml",
     "entities/assets/bin/jfxrt.jar",
-    "entities/assets/bin/rosim-batch-0.4.2.jar",
-    "entities/assets/bin/sequentialTemplate_v0.4.2_template.xml",
+    "entities/assets/bin/rosim-batch-1.2.0.jar",
+    "entities/assets/bin/sequentialTemplate_v1.2.0_template.xml",
 ]
 
 [tool.pytest.ini_options]
@@ -120,6 +121,7 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+line_length = 100
 
 [tool.mypy]
 python_version = "3.11"

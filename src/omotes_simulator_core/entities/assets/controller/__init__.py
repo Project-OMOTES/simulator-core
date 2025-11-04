@@ -13,3 +13,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the classes for the controller."""
+from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    ControllerHeatTransferAsset,
+)
+from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
+from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage

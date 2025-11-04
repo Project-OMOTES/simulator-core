@@ -15,6 +15,7 @@
 
 """Define default values and names for assets."""
 from dataclasses import dataclass
+from enum import Enum
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
@@ -38,6 +39,8 @@ class PipeDefaults:
     :param float minor_loss_coefficient: The minor loss coefficient of the pipe [-].
     :param float external_temperature: The external temperature of the pipe [K].
     :param float qheat_external: The external heat flow of the pipe [W].
+    :param int insulation_schedule: Assumed insulation schedule of the pipe required
+    to retrieve the inner diameter of the pipe from the EDR list[-].
     """
 
     k_value: float = 2e-3
@@ -48,6 +51,19 @@ class PipeDefaults:
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
     roughness: float = DEFAULT_ROUGHNESS
+
+    @property
+    def default_schedule(self) -> "PipeSchedules":
+        """Get the default schedule as a PipeSchedules enum."""
+        return PipeSchedules.S1
+
+
+class PipeSchedules(Enum):
+    """Enum for pipe insulation schedules."""
+
+    S1 = 1
+    S2 = 2
+    S3 = 3
 
 
 @dataclass
@@ -76,6 +92,18 @@ class HeatPumpDefaults:
     """
 
     coefficient_of_performance: float = 1 - 1 / 4.0
+
+
+@dataclass
+class HeatExchangerDefaults:
+    """Class containing the default values for a heat exchanger.
+
+    :param float heat_transfer_efficiency: The efficiency of the heat exchanger [-].
+    Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is chosen
+    here.
+    """
+
+    heat_transfer_efficiency: float = 1.0
 
 
 # Default names
@@ -107,6 +135,8 @@ PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
+PRIMARY = "primary"
+SECONDARY = "secondary"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()

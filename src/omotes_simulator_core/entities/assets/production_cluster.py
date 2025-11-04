@@ -64,6 +64,9 @@ class ProductionCluster(AssetAbstract):
     heat_demand_set_point: float
     """The heat demand set point of the asset [W]."""
 
+    first_time_step: bool
+    """Flag to indicate whether it is the first time step of the simulation."""
+
     def __init__(self, asset_name: str, asset_id: str, port_ids: list[str]):
         """Initialize a ProductionCluster object.
 
@@ -89,6 +92,8 @@ class ProductionCluster(AssetAbstract):
             pre_scribe_mass_flow=False,
             set_pressure=self.pressure_supply,
         )
+        # Define first time step
+        self.first_time_step = True
 
     def _set_out_temperature(self, temperature_out: float) -> None:
         """Set the outlet temperature of the asset.
@@ -107,7 +112,11 @@ class ProductionCluster(AssetAbstract):
             The temperature should be supplied in Kelvin.
         """
         # Set the inlet temperature of the asset
-        self.temperature_in = temperature_in
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
+            self.temperature_in = temperature_in
+            self.first_time_step = False
+        else:
+            self.temperature_in = self.solver_asset.get_temperature(0)
 
     def _set_heat_demand(self, heat_demand: float) -> None:
         """Set the heat demand of the asset.
@@ -216,7 +225,7 @@ class ProductionCluster(AssetAbstract):
         """
         return (
             self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
-        ) * self.solver_asset.get_mass_flow_rate(0)
+        ) * self.solver_asset.get_mass_flow_rate(1)
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
@@ -229,3 +238,21 @@ class ProductionCluster(AssetAbstract):
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
         }
         self.outputs[1][-1].update(output_dict_temp)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged with accepted error of 0.1%.
+
+        The convergence criteria verifies whether the heat supplied
+        by the asset - based on the solver asset - matches the heat demand
+        set point of the asset.
+
+        In other words: |Q_calculated - Q_setpoint| < 0.1% * |Q_setpoint|
+
+        :return: True if the asset has converged, False otherwise
+        """
+        if self.solver_asset.pre_scribe_mass_flow:  # type: ignore
+            return abs(self.get_actual_heat_supplied() - self.heat_demand_set_point) < (
+                abs(self.heat_demand_set_point * 0.001)
+            )
+        else:
+            return True

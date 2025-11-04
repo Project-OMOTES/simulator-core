@@ -19,10 +19,10 @@ from typing import Callable
 
 import pandas as pd
 
-from omotes_simulator_core.adapter.transforms.mappers import (
+from omotes_simulator_core.adapter.transforms.controller_mapper import (
     EsdlControllerMapper,
-    EsdlEnergySystemMapper,
 )
+from omotes_simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.simulation_configuration import (

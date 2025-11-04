@@ -269,13 +269,13 @@ class HeatTransferAsset(BaseAsset):
             self.secondary_side_outflow,
         ) = self.get_ordered_connection_point_list()
 
-        if np.all(self.prev_sol == 0):
+        if np.all(np.abs(self.prev_sol[0:-1:3]) < MASSFLOW_ZERO_LIMIT):
             iteration_flow_direction_primary = self.flow_direction(
                 self.prev_sol[
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=self.primary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -284,7 +284,7 @@ class HeatTransferAsset(BaseAsset):
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=self.secondary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -409,7 +409,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=self.primary_side_inflow,
-                    mass_flow_value=0 * self.flow_direction_primary.value,
+                    mass_flow_value=0,
                 )
             )
         # Return the equations
@@ -437,14 +437,14 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="internal_energy",
                     connection_point=self.primary_side_inflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             - self.prev_sol[
                 self.get_index_matrix(
                     property_name="internal_energy",
                     connection_point=self.primary_side_outflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
         )
@@ -454,31 +454,41 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=self.secondary_side_inflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
                     property_name="internal_energy",
                     connection_point=self.secondary_side_inflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             + self.prev_sol[
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=self.secondary_side_outflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
                     property_name="internal_energy",
                     connection_point=self.secondary_side_outflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
         )
+        if (internal_energy_difference_primary == 0) | (energy_secondary_side == 0):
+            return float(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=self.primary_side_inflow,
+                        use_relative_indexing=True,
+                    )
+                ]
+            )
         return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
 
     def add_continuity_equation(
@@ -508,12 +518,12 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=connection_point_1,
-                    use_relative_indexing=True,
+                    use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=connection_point_2,
-                    use_relative_indexing=True,
+                    use_relative_indexing=False,
                 ),
             ]
         )
@@ -544,7 +554,7 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="internal_energy",
                     connection_point=connection_point,
-                    use_relative_indexing=True,
+                    use_relative_indexing=False,
                 )
             ]
         )
@@ -571,7 +581,7 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=connection_point,
-                    use_relative_indexing=True,
+                    use_relative_indexing=False,
                 )
             ]
         )
@@ -599,7 +609,7 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="pressure",
                     connection_point=connection_point,
-                    use_relative_indexing=True,
+                    use_relative_indexing=False,
                 )
             ]
         )
@@ -621,7 +631,7 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=self.primary_side_inflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             * (
@@ -629,14 +639,14 @@ class HeatTransferAsset(BaseAsset):
                     self.get_index_matrix(
                         property_name="internal_energy",
                         connection_point=self.primary_side_outflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
                 - self.prev_sol[
                     self.get_index_matrix(
                         property_name="internal_energy",
                         connection_point=self.primary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )
@@ -656,7 +666,7 @@ class HeatTransferAsset(BaseAsset):
                 self.get_index_matrix(
                     property_name="mass_flow_rate",
                     connection_point=self.secondary_side_inflow,
-                    use_relative_indexing=False,
+                    use_relative_indexing=True,
                 )
             ]
             * (
@@ -664,14 +674,14 @@ class HeatTransferAsset(BaseAsset):
                     self.get_index_matrix(
                         property_name="internal_energy",
                         connection_point=self.secondary_side_outflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
                 - self.prev_sol[
                     self.get_index_matrix(
                         property_name="internal_energy",
                         connection_point=self.secondary_side_inflow,
-                        use_relative_indexing=False,
+                        use_relative_indexing=True,
                     )
                 ]
             )

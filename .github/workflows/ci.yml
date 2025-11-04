@@ -11,12 +11,18 @@ jobs:
         python-version: ["3.11"]
     name: Setup
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - run: |
           ./ci/linux/create_venv.sh
           ./ci/linux/install_dev.sh
@@ -37,7 +43,7 @@ jobs:
       matrix:
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore venv
         uses: actions/download-artifact@v4
         with:
@@ -77,7 +83,9 @@ jobs:
       matrix:
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          lfs: 'true'
       - name: Restore venv
         uses: actions/download-artifact@v4
         with:
@@ -119,7 +127,7 @@ jobs:
       matrix:
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore venv
         uses: actions/download-artifact@v4
         with:
@@ -141,7 +149,7 @@ jobs:
       matrix:
         python-version: [ "3.11" ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore venv
         uses: actions/download-artifact@v4
         with:

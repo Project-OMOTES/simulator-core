@@ -15,16 +15,9 @@
 """Module containing the Esdl to Ates asset mapper class."""
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    ATES_DEFAULTS,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
-)
+from omotes_simulator_core.entities.assets.asset_defaults import ATES_DEFAULTS
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
@@ -78,16 +71,6 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             ),
             well_distance=esdl_asset.get_property(
                 esdl_property_name="wellDistance", default_value=ATES_DEFAULTS.well_distance
-            ),
-            maximum_flow_charge=heat_demand_and_temperature_to_mass_flow(
-                esdl_asset.get_property(esdl_property_name="maxChargeRate", default_value=12e7),
-                DEFAULT_TEMPERATURE,
-                DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
-            ),
-            maximum_flow_discharge=heat_demand_and_temperature_to_mass_flow(
-                esdl_asset.get_property(esdl_property_name="maxDischargeRate", default_value=12e7),
-                DEFAULT_TEMPERATURE,
-                DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
             ),
         )
 

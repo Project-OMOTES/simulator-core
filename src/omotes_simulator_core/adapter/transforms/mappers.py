@@ -18,17 +18,11 @@ import logging
 
 from esdl.esdl import Joint as esdl_junction
 
-from omotes_simulator_core.adapter.transforms.controller_mappers import (
-    ControllerConsumerMapper,
-    ControllerProducerMapper,
-    ControllerStorageMapper,
-)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 from omotes_simulator_core.solver.network.network import Network
 
@@ -123,7 +117,6 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
 
         :param network: network to add the junctions to.
         :param py_assets_list: list of assets to connect to the junctions.
-        :param py_joint_dict: dictionary with all joints in the esdl.
 
         :return: List of junctions that are created and connected to the assets.
         """
@@ -202,49 +195,50 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
             py_joint_dict[esdl_joint.get_id()] = [item for sublist in temp_list for item in sublist]
         return py_joint_dict
 
+###############################
 
-class EsdlControllerMapper(EsdlMapperAbstract):
-    """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
+# class EsdlControllerMapper(EsdlMapperAbstract):
+#     """Creates a NetworkController entity object based on a PyESDL EnergySystem object."""
 
-    def __init__(self) -> None:
-        """Constructor for esdl to heat network mapper."""
+#     def __init__(self) -> None:
+#         """Constructor for esdl to heat network mapper."""
 
-    def to_esdl(self, entity: NetworkController) -> EsdlObject:
-        """Method to convert a NetworkController object to an esdlobject.
+#     def to_esdl(self, entity: NetworkController) -> EsdlObject:
+#         """Method to convert a NetworkController object to an esdlobject.
 
-        For now this method is not implemented.
-        :param NetworkController entity: NetworkController object to be converted to esdl object
-        :return: EsdlObject, which is the converted NetworkController object.
-        """
-        raise NotImplementedError("EsdlControllerMapper.to_esdl()")
+#         For now this method is not implemented.
+#         :param NetworkController entity: NetworkController object to be converted to esdl object
+#         :return: EsdlObject, which is the converted NetworkController object.
+#         """
+#         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
-        """Method to convert esdl to NetworkController object.
+#     def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
+#         """Method to convert esdl to NetworkController object.
 
-        This method first converts all assets into a list of assets.
-        Next to this a list of Junctions is created. This is then used
-        to create the NetworkController object.
-        :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
+#         This method first converts all assets into a list of assets.
+#         Next to this a list of Junctions is created. This is then used
+#         to create the NetworkController object.
+#         :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
 
-        :return: NetworkController, which is the converted EsdlObject object.
-        """
-        consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
-        ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
-        ]
+#         :return: NetworkController, which is the converted EsdlObject object.
+#         """
+#         consumers = [
+#             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+#             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+#         ]
+#         producers = [
+#             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+#             for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+#         ]
+#         storages = [
+#             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+#             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+#         ]
 
-        for esdl_asset in esdl_object.get_all_assets_of_type("pump"):
-            if (
-                hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
-            ):  # These properties should point to an air to water heatpump.
-                producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
+#         for esdl_asset in esdl_object.get_all_assets_of_type("pump"):
+#             if (
+#                 hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
+#             ):  # These properties should point to an air to water heatpump.
+#                 producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
 
-        return NetworkController(producers, consumers, storages)
+#         return NetworkController(producers, consumers, storages)

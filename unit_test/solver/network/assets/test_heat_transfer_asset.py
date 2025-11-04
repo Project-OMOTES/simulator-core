@@ -216,9 +216,9 @@ class HeatTransferTest(unittest.TestCase):
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
         self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
         self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
-        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
-        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
                 mock_add_continuity_equation.call_count
@@ -263,12 +263,12 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = -10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
-        ] = 0.0
+        ] = -10.0
         # -- Set temperatures to override zero value check
         self.asset.prev_sol[
             self.asset.get_index_matrix(

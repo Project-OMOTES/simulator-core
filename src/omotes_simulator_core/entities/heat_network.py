@@ -40,6 +40,11 @@ class HeatNetwork:
         self.assets, self.junctions = conversion_factory(self.network)
         self.solver = Solver(self.network)
 
+        # Mapping from asset id to asset object for easy access
+        self._asset_id_to_asset: dict[str, AssetAbstract] = {
+            asset.asset_id: asset for asset in self.assets
+        }
+
     def run_time_step(
         self, time: datetime.datetime, time_step: float, controller_input: dict
     ) -> None:
@@ -55,6 +60,7 @@ class HeatNetwork:
         for py_asset in self.assets:
             if py_asset.asset_id in controller_input:
                 py_asset.set_time_step(time_step)
+                py_asset.set_time(time)
                 py_asset.set_setpoints(controller_input[py_asset.asset_id])
 
         self.solver.solve()
@@ -98,3 +104,11 @@ class HeatNetwork:
             if not py_asset.is_converged():
                 return False
         return True
+
+    def get_asset_by_id(self, asset_id: str) -> AssetAbstract:
+        """Method to get an asset by its ID.
+
+        :param str asset_id: The ID of the asset to get.
+        :return: The asset with the given ID.
+        """
+        return self._asset_id_to_asset[asset_id]

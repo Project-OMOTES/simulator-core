@@ -16,6 +16,7 @@
 """Abstract class for asset."""
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from pandas import DataFrame, concat
 
@@ -65,6 +66,7 @@ class AssetAbstract(ABC):
         self.connected_ports = connected_ports
         self.outputs = [[] for _ in range(len(self.connected_ports))]
         self.time_step: float = 3600  # s
+        self.time = datetime.now()
 
     def __repr__(self) -> str:
         """Method to print string with the name of the asset."""
@@ -83,6 +85,14 @@ class AssetAbstract(ABC):
 
         :return Dict: The setpoints of the asset. The keys of the dictionary are the names of the
             setpoints and the values are the values.
+        """
+        return {}
+
+    def get_state(self) -> dict[str, float]:
+        """Placeholder to get the state attributes of an asset.
+
+        :return Dict: The state of the asset. The keys of the dictionary are the names of the
+            states and the values are the values.
         """
         return {}
 
@@ -145,6 +155,13 @@ class AssetAbstract(ABC):
         :param float time_step: The time step to set for the asset.
         """
         self.time_step = time_step
+
+    def set_time(self, time: datetime) -> None:
+        """Placeholder to set the time for the asset.
+
+        :param float time: The time to set for the asset.
+        """
+        self.time = time
 
     def is_converged(self) -> bool:
         """Check if the asset has converged.

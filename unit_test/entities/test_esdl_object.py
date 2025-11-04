@@ -18,6 +18,7 @@ import unittest
 from pathlib import Path
 
 import esdl
+from pandas.testing import assert_frame_equal
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.adapter.transforms.string_to_esdl import (
@@ -27,6 +28,7 @@ from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.esdl_object import EsdlObject
+from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
@@ -95,6 +97,39 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertEqual(connected_assets1, test_list2)
         self.assertEqual(connected_assets2, test_list1)
 
+    def test_get_name(self):
+        """Test get_name method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        name = asset.get_name()
+
+        # Assert
+        self.assertEqual(name, asset.esdl_asset.name)
+
+    def test_get_id(self):
+        """Test get_id method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        asset_id = asset.get_id()
+
+        # Assert
+        self.assertEqual(asset_id, asset.esdl_asset.id)
+
+    def test_get_state(self):
+        """Test get_state method."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        state = asset.get_state()
+
+        # Assert
+        self.assertEqual(state, str(asset.esdl_asset.state))
+
     def test_get_property(self):
         """Test get_property method."""
         # Arrange
@@ -131,91 +166,107 @@ class EsdlObjectTest(unittest.TestCase):
         )
         self.assertEqual(len(port_ids), 2)
 
-    def test_get_out_temperature_in(self):
-        """Test get_out_temperature method."""
+    def test_get_supply_temperature_in(self):
+        """Test get_supply_temperature_in method."""
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
         # Act
-        out_temperature = asset.get_temperature("In", "Supply")
+        supply_temperature_in = asset.get_temperature("In", "Supply")
 
         # Assert
-        self.assertEqual(out_temperature, 353.15)
+        self.assertEqual(supply_temperature_in, 353.15)
 
-    def test_get_out_temperature_out(self):
-        """Test get_out_temperature method."""
+    def test_get_supply_temperature_out(self):
+        """Test get_supply_temperature_out method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
 
         # Act
-        out_temperature = asset.get_temperature("Out", "Supply")
+        supply_temperature_out = asset.get_temperature("Out", "Supply")
 
         # Assert
-        self.assertEqual(out_temperature, 353.15)
+        self.assertEqual(supply_temperature_out, 353.15)
 
-    def test_get_in_temperature_in(self):
-        """Test get_in_temperature method."""
+    def test_get_return_temperature_in(self):
+        """Test get_return_temperature_in method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        in_temperature = asset.get_temperature("In", "Return")
+        return_temperature_in = asset.get_temperature("In", "Return")
 
         # Assert
-        self.assertEqual(in_temperature, 313.15)
+        self.assertEqual(return_temperature_in, 313.15)
 
-    def test_get_in_temperature_out(self):
-        """Test get_in_temperature method."""
+    def test_get_return_temperature_out(self):
+        """Test get_return_temperature_out method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("pipe")[1]
 
         # Act
-        in_temperature = asset.get_temperature("Out", "Return")
+        return_temperature_out = asset.get_temperature("Out", "Return")
 
         # Assert
-        self.assertEqual(in_temperature, 313.15)
+        self.assertEqual(return_temperature_out, 313.15)
 
-    def test_get_out_temperature_consumer(self):
-        """Test get_temperature method."""
+    def test_get_return_temperature_out_consumer(self):
+        """Test get_return_temperature_out method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        out_temperature = asset.get_temperature("Out", "Return")
+        return_temperature_out = asset.get_temperature("Out", "Return")
 
         # Assert
-        self.assertEqual(out_temperature, 313.15)
+        self.assertEqual(return_temperature_out, 313.15)
 
-    def test_get_in_temperature_consumer(self):
-        """Test get_out_temperature method."""
+    def test_get_supply_temperature_in_consumer(self):
+        """Test get_supply_temperature_in method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
 
         # Act
-        out_temperature = asset.get_temperature("In", "Supply")
+        supply_temperature_in = asset.get_temperature("In", "Supply")
 
         # Assert
-        self.assertEqual(out_temperature, 353.15)
+        self.assertEqual(supply_temperature_in, 353.15)
 
-    def test_get_out_temperature_producer(self):
+    def test_get_supply_temperature_out_producer(self):
         """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        out_temperature = asset.get_temperature("Out", "Supply")
+        supply_temperature_out = asset.get_temperature("Out", "Supply")
 
         # Assert
-        self.assertEqual(out_temperature, 353.15)
+        self.assertEqual(supply_temperature_out, 353.15)
 
-    def test_get_in_temperature_producer(self):
+    def test_get_return_temperature_in_producer(self):
         """Test get_out_temperature method."""
         # Arrange
         asset = self.esdl_object.get_all_assets_of_type("producer")[0]
 
         # Act
-        out_temperature = asset.get_temperature("In", "Return")
+        return_temperature_in = asset.get_temperature("In", "Return")
 
         # Assert
-        self.assertEqual(out_temperature, 313.15)
+        self.assertEqual(return_temperature_in, 313.15)
+
+    def test_get_temperature_invalid_temperature_type(self):
+        """Test get_temperature method with invalid temperature type."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        with self.assertRaises(ValueError) as message:
+            asset.get_temperature("In", "Invalid")
+
+        # Assert
+        self.assertIsInstance(message.exception, ValueError)
+        self.assertEqual(
+            str(message.exception),
+            f"No port found with temperature type: Invalid for asset: {asset.esdl_asset.name}",
+        )
 
     def test_get_port_type_in(self):
         """Test get_port_type method."""
@@ -227,6 +278,75 @@ class EsdlObjectTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(port_type, esdl.InPort)
+
+    def test_get_profile(self):
+        """Test get_profile if profile exists."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("consumer")[0]
+        ports = asset.esdl_asset.port
+        port_with_profile = None
+        for p in ports:
+            if p.profile:
+                port_with_profile = p
+                break
+        # Act
+        profile = asset.get_profile()
+
+        # Assert
+        assert_frame_equal(profile, get_data_from_profile(port_with_profile.profile[0]))
+
+    def test_get_profile_raises_if_no_profile(self):
+        """Test get_profile if profile doesn't exist."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        with self.assertRaises(ValueError) as message:
+            asset.get_profile()
+
+        # Assert
+        self.assertIn(
+            str(message.exception), f"No profile found for asset: {asset.esdl_asset.name}"
+        )
+
+    def test_get_marginal_costs_no_cost_information(self):
+        """Test get_marginal_costs method when costInformation is None."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+        # Set costInformation to None to test the first condition
+        asset.esdl_asset.costInformation = None  # type: ignore
+
+        # Act
+        marginal_costs = asset.get_marginal_costs()
+
+        # Assert
+        self.assertEqual(marginal_costs, 0.0)
+
+    def test_get_marginal_costs_no_marginal_costs(self):
+        """Test get_marginal_costs method when marginalCosts is None."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        asset.esdl_asset.costInformation = esdl.CostInformation()
+        asset.esdl_asset.costInformation.marginalCosts = None
+        marginal_costs = asset.get_marginal_costs()
+
+        # Assert
+        self.assertEqual(marginal_costs, 0.0)
+
+    def test_get_marginal_costs_with_value(self):
+        """Test get_marginal_costs method when marginalCosts has a value."""
+        # Arrange
+        asset = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        # Act
+        asset.esdl_asset.costInformation = esdl.CostInformation()
+        asset.esdl_asset.costInformation.marginalCosts = esdl.SingleValue(value=25.5)
+        marginal_costs = asset.get_marginal_costs()
+
+        # Assert
+        self.assertEqual(marginal_costs, 25.5)
 
     def test_get_port_type_out(self):
         """Test get_port_type method."""
@@ -291,6 +411,17 @@ class EsdlObjectTest(unittest.TestCase):
             f"port: {pipe.get_port_ids()[0]}",
         )
 
+    def test_get_asset_by_id(self):
+        # Arrange
+        producers = self.esdl_object.get_all_assets_of_type("producer")
+        producer = producers[0]
+
+        # Act
+        asset = self.esdl_object.get_asset_by_id(producer.get_id())
+
+        # Assert
+        self.assertEqual(asset.esdl_asset, producer.esdl_asset)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""
@@ -305,6 +436,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.pipe = esdl.Pipe
         self.transport = esdl.Transport
         self.joint = esdl.Joint
+        self.heat_pump = esdl.HeatPump
+        self.heat_exchange = esdl.HeatExchange
         self.asset_str = "asset"
         self.producer_str = "producer"
         self.consumer_str = "consumer"
@@ -313,6 +446,8 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.pipe_str = "pipe"
         self.transport_str = "transport"
         self.joint_str = "joint"
+        self.heat_pump_str = "heat_pump"
+        self.heat_exchanger_str = "heat_exchanger"
 
     def test_to_string(self):
         """Test for conversion from esdl asset to string."""
@@ -326,18 +461,22 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         conversion_str = StringEsdlAssetMapper().to_entity(self.conversion)
         pipe_str = StringEsdlAssetMapper().to_entity(self.pipe)
         transport_str = StringEsdlAssetMapper().to_entity(self.transport)
+        heat_pump_str = StringEsdlAssetMapper().to_entity(self.heat_pump)
+        heat_exchanger_str = StringEsdlAssetMapper().to_entity(self.heat_exchange)
 
         joint_str = StringEsdlAssetMapper().to_entity(self.joint)  # act
 
         # Assert
-        self.assertTrue(asset_str == self.asset_str)
-        self.assertTrue(producer_str == self.producer_str)
-        self.assertTrue(consumer_str == self.consumer_str)
-        self.assertTrue(geothermal_source_str == self.geothermal_source_str)
-        self.assertTrue(conversion_str == self.conversion_str)
-        self.assertTrue(pipe_str == self.pipe_str)
-        self.assertTrue(transport_str == self.transport_str)
-        self.assertTrue(joint_str == self.joint_str)
+        self.assertEqual(asset_str, self.asset_str)
+        self.assertEqual(producer_str, self.producer_str)
+        self.assertEqual(consumer_str, self.consumer_str)
+        self.assertEqual(geothermal_source_str, self.geothermal_source_str)
+        self.assertEqual(conversion_str, self.conversion_str)
+        self.assertEqual(pipe_str, self.pipe_str)
+        self.assertEqual(transport_str, self.transport_str)
+        self.assertEqual(joint_str, self.joint_str)
+        self.assertEqual(heat_pump_str, self.heat_pump_str)
+        self.assertEqual(heat_exchanger_str, self.heat_exchanger_str)
 
     def test_to_esdl(self):
         """Test for mapping back to esdl assets."""
@@ -351,18 +490,22 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         pipe = StringEsdlAssetMapper().to_esdl(self.pipe_str)[0]
         transport = StringEsdlAssetMapper().to_esdl(self.transport_str)[0]
         joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
+        heat_pump = StringEsdlAssetMapper().to_esdl(self.heat_pump_str)[0]
+        heat_exchanger = StringEsdlAssetMapper().to_esdl(self.heat_exchanger_str)[0]
 
         geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]  # act
 
         # Assert
-        self.assertTrue(asset == self.asset)
-        self.assertTrue(producer == self.producer)
-        self.assertTrue(consumer == self.consumer)
-        self.assertTrue(conversion == self.conversion)
-        self.assertTrue(pipe == self.pipe)
-        self.assertTrue(transport == self.transport)
-        self.assertTrue(joint == self.joint)
-        self.assertTrue(geothermal == self.geothermal_source)
+        self.assertEqual(asset, self.asset)
+        self.assertEqual(producer, self.producer)
+        self.assertEqual(consumer, self.consumer)
+        self.assertEqual(conversion, self.conversion)
+        self.assertEqual(pipe, self.pipe)
+        self.assertEqual(transport, self.transport)
+        self.assertEqual(joint, self.joint)
+        self.assertEqual(geothermal, self.geothermal_source)
+        self.assertEqual(heat_pump, self.heat_pump)
+        self.assertEqual(heat_exchanger, self.heat_exchange)
 
     def test_raise_error(self):
         """Test to test if an error is raised for unknown component in ESDL."""
