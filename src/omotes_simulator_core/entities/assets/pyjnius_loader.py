@@ -50,25 +50,30 @@ class PyjniusLoader:
         jnius_config.add_classpath(os.path.join(path, "bin", self.rosim_jar))
         self.loaded_classes = {}
 
+    @staticmethod
     def download_rosim_jar(self) -> str:
         """Download the Rosim JAR files.
 
         This function will download the required Rosim JAR files into the `bin` folder.
+        It will download it from the latest release on github of the simulator-core repository.
+        If there is already a rosim jar in the bin folder it will not download it and use that one.
+        If you want the downloaded the latest one, simply delete your local copy.
+        We have implemented this to bypass the 100 mb size limit on pypi.
         It returns the name of the downloaded JAR file.
         """
-        # the jar is already pessent so no need to download it.
         import glob
         import urllib.request
 
         import requests
 
+        # First a check if there are already jar files present.
         base_path = os.path.dirname(__file__)
         bin_path = os.path.join(base_path, "bin")
 
         jar_files = glob.glob(os.path.join(bin_path, "rosim*.jar"))
-
         if jar_files:
             logger.debug("Rosim JAR files already present, skipping download.")
+            logger.debug(f"Using Rosim JAR file: {jar_files[0]}")
             return jar_files[0]
 
         repo = "Project-OMOTES/simulator-core"
