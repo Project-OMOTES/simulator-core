@@ -56,10 +56,10 @@ class PyjniusLoader:
         This function will download the required Rosim JAR files into the `bin` folder.
         It returns the name of the downloaded JAR file.
         """
-
         # the jar is already pessent so no need to download it.
         import glob
         import urllib.request
+
         import requests
 
         base_path = os.path.dirname(__file__)
