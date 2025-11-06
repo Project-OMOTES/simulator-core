@@ -83,11 +83,11 @@ class PyjniusLoader:
                 logger.debug("Downloading Rosim JAR files from GitHub")
                 url = asset["browser_download_url"]
                 jar_file = os.path.join(bin_path, asset["name"])
-                response = urllib.request.urlretrieve(
+                response_url = urllib.request.urlretrieve(
                     url,
                     jar_file,
                 )
-                if response is None:
+                if response_url is None:
                     raise RuntimeError("Failed to download Rosim JAR files.")
                 return str(asset["name"])
         raise RuntimeError("Failed to find Rosim JAR files in GitHub releases.")
