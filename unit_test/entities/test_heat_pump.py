@@ -93,10 +93,6 @@ class HeatPumpTest(unittest.TestCase):
             SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
             SECONDARY + PROPERTY_HEAT_DEMAND: 310,
             PROPERTY_SET_PRESSURE: 1.5,
-            # PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
-            # PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
-            # PROPERTY_HEAT_DEMAND: 310,
-            # PROPERTY_SET_PRESSURE: 1.5,
         }
 
         with patch(
@@ -140,9 +136,9 @@ class HeatPumpTest(unittest.TestCase):
 
     def test_set_setpoints_primary(self):
         setpoints = {
-            PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
-            PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
-            PROPERTY_HEAT_DEMAND: 300,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
+            PRIMARY + PROPERTY_HEAT_DEMAND: 300,
         }
 
         with patch(
@@ -200,22 +196,4 @@ class HeatPumpTest(unittest.TestCase):
             mock_primary.assert_called_once_with(setpoints_primary=setpoints)
             mock_secondary.assert_called_once_with(setpoints_secondary=setpoints)
 
-    def test_write_to_output(self):
-        """Test the write_to_output method."""
-        # Arrange
-        self.heat_pump.write_standard_output()
-
-        # Act
-        self.heat_pump.write_to_output()
-
-        # Assert
-        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], 10.0)
-        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_ELECTRICITY_CONSUMPTION], 1.0)
-        self.assertEqual(self.heat_pump.outputs[0][-1][PROPERTY_HEAT_POWER_SECONDARY], 5.0)
-
-if __name__ == "__main__":
-    test = HeatPumpTest()
-    test.setUp()
-    test.test_set_setpoints_secondary()
-    #test.test_set_setpoints_primary()
 

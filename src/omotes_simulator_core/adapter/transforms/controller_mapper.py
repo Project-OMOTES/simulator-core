@@ -86,6 +86,11 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
 
+        producers = [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+        ]
+
         water_to_water_hps = []
         heat_exchangers = []
         for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump"):
@@ -93,37 +98,28 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                 hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 4
             ):  # These properties should point to an air to water heatpump.
                 water_to_water_hps.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
+
+            if (
+                hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
+            ):  # These properties should point to an air to water heatpump.
+                producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
+
         heat_exchangers = [
             ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("heat_exchanger")
         ]
         heat_transfer_assets = water_to_water_hps + heat_exchangers
 
-        # heat_transfer_assets = [
-        #     ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
-        #     for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump")
-        # ] + [
-        #     ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
-        #     for esdl_asset in esdl_object.get_all_assets_of_type("heat_exchanger")
-        # ]
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
         ]
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
+    
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
-        for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump"):
-            if (
-                hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
-            ):  # These properties should point to an air to water heatpump.
-                producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
-
+    
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
             networks = [
