@@ -89,7 +89,7 @@ class PyjniusLoader:
                 )
                 if response is None:
                     raise RuntimeError("Failed to download Rosim JAR files.")
-                return asset["name"]
+                return str(asset["name"])
         raise RuntimeError("Failed to find Rosim JAR files in GitHub releases.")
 
     def load_class(self, classpath: str) -> JavaClass:
