@@ -18,6 +18,7 @@ import unittest
 from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PRIMARY,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -25,6 +26,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    SECONDARY,
 )
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
@@ -87,10 +89,10 @@ class HeatPumpTest(unittest.TestCase):
 
     def test_set_setpoints_secondary(self):
         setpoints = {
-            PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
-            PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
-            PROPERTY_HEAT_DEMAND: 310,
-            PROPERTY_SET_PRESSURE: 1.5,
+            SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
+            SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
+            SECONDARY + PROPERTY_HEAT_DEMAND: 310,
+            PROPERTY_SET_PRESSURE: True,  # Boolean value
         }
 
         with patch(
@@ -104,39 +106,43 @@ class HeatPumpTest(unittest.TestCase):
             self.assertEqual(self.heat_pump.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.temperature_out_secondary, 273.15 + 25.0)
             self.assertEqual(self.heat_pump.mass_flow_secondary, 321.0)
-            self.assertEqual(self.heat_pump.control_mass_flow_secondary, 1.5)
+            self.assertEqual(self.heat_pump.control_mass_flow_secondary, False)
 
             # Solver asset attributes
             self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 273.15 + 25.0)
             self.assertEqual(self.heat_pump.solver_asset.mass_flow_rate_secondary, 321.0)
-            self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, 1.5)
+            self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, False)
 
             mock_calc.assert_called_once_with(
                 thermal_demand=310, temperature_in=273.15 + 15.0, temperature_out=273.15 + 25.0
             )
 
     def test_set_setpoints_secondary_missing_key(self):
+        # Arrange
         base_setpoints = {
-            PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
-            PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
-            PROPERTY_HEAT_DEMAND: 310,
-            PROPERTY_SET_PRESSURE: 1.5,
+            SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
+            SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
+            SECONDARY + PROPERTY_HEAT_DEMAND: 310,
+            PROPERTY_SET_PRESSURE: True,  # Boolean value
         }
 
+        # Act & Assert
         for missing_key in base_setpoints.keys():
             with self.subTest(missing_key=missing_key):
                 setpoints = dict(base_setpoints)
                 setpoints.pop(missing_key)
                 with self.assertRaises(ValueError) as cm:
                     self.heat_pump._set_setpoints_secondary(setpoints)
-                self.assertIn(missing_key, str(cm.exception))
+                self.assertEqual(
+                    "The setpoints {'" + missing_key + "'} are missing.", str(cm.exception)
+                )
 
     def test_set_setpoints_primary(self):
         setpoints = {
-            PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
-            PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
-            PROPERTY_HEAT_DEMAND: 300,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
+            PRIMARY + PROPERTY_HEAT_DEMAND: 300,
         }
 
         with patch(
@@ -162,9 +168,9 @@ class HeatPumpTest(unittest.TestCase):
 
     def test_set_setpoints_primary_missing_key(self):
         base_setpoints = {
-            PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
-            PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
-            PROPERTY_HEAT_DEMAND: 300,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
+            PRIMARY + PROPERTY_HEAT_DEMAND: 300,
         }
 
         for missing_key in base_setpoints.keys():
@@ -173,23 +179,39 @@ class HeatPumpTest(unittest.TestCase):
                 setpoints.pop(missing_key)
                 with self.assertRaises(ValueError) as cm:
                     self.heat_pump._set_setpoints_primary(setpoints)
-                self.assertIn(missing_key, str(cm.exception))
+                self.assertEqual(
+                    "The setpoints {'" + missing_key + "'} are missing.", str(cm.exception)
+                )
 
     def test_set_setpoints_calls_both_primary_and_secondary(self):
+        # Arrange
         setpoints = {
-            PROPERTY_TEMPERATURE_IN: 300.0,
-            PROPERTY_TEMPERATURE_OUT: 290.0,
-            PROPERTY_HEAT_DEMAND: 1500,
-            PROPERTY_SET_PRESSURE: 1.5,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 300.0,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 290.0,
+            SECONDARY + PROPERTY_TEMPERATURE_IN: 280.0,
+            SECONDARY + PROPERTY_TEMPERATURE_OUT: 270.0,
+            PRIMARY + PROPERTY_HEAT_DEMAND: 1500,
+            SECONDARY + PROPERTY_HEAT_DEMAND: 1000,
+            PROPERTY_SET_PRESSURE: False,
         }
 
-        with patch.object(self.heat_pump, "_set_setpoints_primary") as mock_primary, patch.object(
-            self.heat_pump, "_set_setpoints_secondary"
-        ) as mock_secondary:
+        # Act
+        with patch(
+            "omotes_simulator_core.entities.assets.heat_pump."
+            "heat_demand_and_temperature_to_mass_flow",
+            return_value=125,
+        ) as mock_calc:
             self.heat_pump.set_setpoints(setpoints)
 
-            mock_primary.assert_called_once_with(setpoints_primary=setpoints)
-            mock_secondary.assert_called_once_with(setpoints_secondary=setpoints)
+        # Assert
+        self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 300.0)
+        self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 290.0)
+        self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
+        self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)
+        self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, True)
+        self.assertEqual(self.heat_pump.mass_flow_initialization_primary, 125)
+        self.assertEqual(self.heat_pump.mass_flow_secondary, 125)
+        self.assertEqual(mock_calc.call_count, 2)
 
     def test_write_to_output(self):
         """Test the write_to_output method."""
