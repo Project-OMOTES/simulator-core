@@ -14,11 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Binding to Rosim through Pyjnius."""
-
+import logging
 import os
 from typing import Callable
 
 JavaClass = Callable
+logger = logging.getLogger(__name__)
 
 
 class PyjniusLoader:
@@ -44,11 +45,52 @@ class PyjniusLoader:
         path = os.path.dirname(__file__)
         import jnius_config  # noqa
 
+        self.rosim_jar = self.download_rosim_jar()
         jnius_config.add_classpath(os.path.join(path, "bin/jfxrt.jar"))
-        jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-1.2.0.jar"))
-        # jnius_config.add_classpath(os.path.join(path, "bin/rosim-batch-0.4.2.jar"))
-
+        jnius_config.add_classpath(os.path.join(path, "bin", self.rosim_jar))
         self.loaded_classes = {}
+
+    def download_rosim_jar(self) -> str:
+        """Download the Rosim JAR files.
+
+        This function will download the required Rosim JAR files into the `bin` folder.
+        It returns the name of the downloaded JAR file.
+        """
+
+        # the jar is already pessent so no need to download it.
+        import glob
+        import urllib.request
+        import requests
+
+        base_path = os.path.dirname(__file__)
+        bin_path = os.path.join(base_path, "bin")
+
+        jar_files = glob.glob(os.path.join(bin_path, "rosim*.jar"))
+
+        if jar_files:
+            logger.debug("Rosim JAR files already present, skipping download.")
+            return jar_files[0]
+
+        repo = "Project-OMOTES/simulator-core"
+        api_url = f"https://api.github.com/repos/{repo}/releases/latest"
+
+        response = requests.get(api_url)
+        release_data = response.json()
+        assets = release_data["assets"]
+        for asset in assets:
+            if "rosim" in asset["name"]:
+                # downloading the jar file from github releeases
+                logger.debug("Downloading Rosim JAR files from GitHub")
+                url = asset["browser_download_url"]
+                jar_file = os.path.join(bin_path, asset["name"])
+                response = urllib.request.urlretrieve(
+                    url,
+                    jar_file,
+                )
+                if response is None:
+                    raise RuntimeError("Failed to download Rosim JAR files.")
+                return asset["name"]
+        raise RuntimeError("Failed to find Rosim JAR files in GitHub releases.")
 
     def load_class(self, classpath: str) -> JavaClass:
         """Load a Java class.
@@ -59,8 +101,11 @@ class PyjniusLoader:
         """
         from jnius import autoclass  # noqa
 
-        if classpath not in self.loaded_classes:
-            self.loaded_classes[classpath] = autoclass(classpath)
+        try:
+            if classpath not in self.loaded_classes:
+                self.loaded_classes[classpath] = autoclass(classpath)
+        except Exception as exc:
+            logger.error(f"Failed to load Java class {classpath}: {exc}")
 
         return self.loaded_classes[classpath]
 
