@@ -20,11 +20,7 @@ from typing import Any
 import pandas as pd
 from esdl import esdl
 
-from omotes_simulator_core.adapter.transforms.transform_utils import (
-    Port,
-    PortType,
-    sort_ports,
-)
+from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
@@ -167,6 +163,7 @@ class EsdlAssetObject:
         number_of_ports = len(self.esdl_asset.port)
 
         return number_of_ports
+
     def get_connected_assets(self, port_id: str) -> list[str]:
         """Get the connected assets of the asset."""
         connected_assets = []

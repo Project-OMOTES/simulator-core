@@ -17,9 +17,7 @@
 import unittest
 from unittest.mock import patch
 
-from omotes_simulator_core.entities.assets.air_to_water_heat_pump import (
-    AirToWaterHeatPump,
-)
+from omotes_simulator_core.entities.assets.air_to_water_heat_pump import AirToWaterHeatPump
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_MASSFLOW,
@@ -30,9 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
     PROPERTY_VOLUMEFLOW,
 )
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
+from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -285,6 +281,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
 
     def test_get_electric_consumption(self):
         """Test getting the electric power consumed by the heatpump."""
+
         # Arrange
         def get_internal_energy(_, i: int):
             if i == 0:

@@ -24,9 +24,7 @@ from datetime import datetime
 import pandas as pd
 
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
@@ -65,7 +63,7 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
     )
     t1 = datetime.now()
-    result1 = run(r".\testdata\test1.esdl")
+    result1 = run(r".\testdata\simple_heat_pump.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result1.shape})")

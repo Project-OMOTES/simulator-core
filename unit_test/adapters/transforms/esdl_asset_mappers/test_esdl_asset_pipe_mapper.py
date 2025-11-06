@@ -22,10 +22,7 @@ from unittest.mock import Mock, patch
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    PIPE_DEFAULTS,
-    PipeSchedules,
-)
+from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS, PipeSchedules
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file

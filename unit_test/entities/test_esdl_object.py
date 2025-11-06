@@ -21,9 +21,7 @@ import esdl
 from pandas.testing import assert_frame_equal
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
-from omotes_simulator_core.adapter.transforms.string_to_esdl import (
-    StringEsdlAssetMapper,
-)
+from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster

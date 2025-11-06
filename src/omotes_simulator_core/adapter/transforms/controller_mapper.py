@@ -96,8 +96,10 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump"):
             if (
                 hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 4
-            ):  # These properties should point to an air to water heatpump.
-                water_to_water_hps.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
+            ):  # These properties should point to an water to water heatpump.
+                water_to_water_hps.append(
+                    ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
+                )
 
             if (
                 hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
@@ -114,12 +116,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
         ]
-    
+
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type("storage")
         ]
-    
+
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
             networks = [
