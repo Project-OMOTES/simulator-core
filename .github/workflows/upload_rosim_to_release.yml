@@ -16,6 +16,6 @@ jobs:
       - name: Upload .jar to release
         uses: softprops/action-gh-release@v1
         with:
-          files: src/omotes_simulator_core/entities/assets/bin/rosim-batch-1.2.0.jar
+          files: src/omotes_simulator_core/entities/assets/bin/rosim-batch-*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
