@@ -39,8 +39,8 @@ class TestEsdlAssetHeatPumpMapper(unittest.TestCase):
     def test_to_entity_method(self):
         """Test for to_entity method."""
         # Arrange
-        pumps = self.esdl_object.get_all_assets_of_type("pump")
-        esdl_asset = pumps[0]
+        heat_pumps = self.esdl_object.get_all_assets_of_type("heat_pump")
+        esdl_asset = heat_pumps[0]
 
         # Act
         heatpump_entity = self.mapper.to_entity(esdl_asset)

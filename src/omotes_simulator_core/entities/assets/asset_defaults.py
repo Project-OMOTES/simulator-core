@@ -15,6 +15,7 @@
 
 """Define default values and names for assets."""
 from dataclasses import dataclass
+from enum import Enum
 
 # Default values
 DEFAULT_DIAMETER = 1.2  # [m]
@@ -50,7 +51,19 @@ class PipeDefaults:
     length: float = 1.0
     diameter: float = DEFAULT_DIAMETER
     roughness: float = DEFAULT_ROUGHNESS
-    insulation_schedule: int = 1
+
+    @property
+    def default_schedule(self) -> "PipeSchedules":
+        """Get the default schedule as a PipeSchedules enum."""
+        return PipeSchedules.S1
+
+
+class PipeSchedules(Enum):
+    """Enum for pipe insulation schedules."""
+
+    S1 = 1
+    S2 = 2
+    S3 = 3
 
 
 @dataclass
@@ -122,6 +135,8 @@ PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
+PRIMARY = "primary"
+SECONDARY = "secondary"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()

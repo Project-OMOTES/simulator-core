@@ -24,7 +24,9 @@ import esdl
 import numpy as np
 import pandas as pd
 
-from omotes_simulator_core.adapter.transforms.mappers import EsdlControllerMapper
+from omotes_simulator_core.adapter.transforms.controller_mapper import (
+    EsdlControllerMapper,
+)
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.simulation_configuration import (
     SimulationConfiguration,
@@ -108,7 +110,7 @@ class HeatDemandTest(unittest.TestCase):
         q_dot_demand_computed = dict()
         temp_in_dict, temp_out_dict = self._get_demand_in_out_temperatures(self.in_out_demand_dict)
         q_dot_demand_esdl = dict()
-        consumers_object = self.controller.consumers
+        consumers_object = self.controller.networks[0].consumers
 
         for demand in self.demands:
             in_port_id = self.in_out_demand_dict[demand.id]["InPort"]

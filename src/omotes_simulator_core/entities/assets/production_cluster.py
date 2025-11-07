@@ -112,7 +112,7 @@ class ProductionCluster(AssetAbstract):
             The temperature should be supplied in Kelvin.
         """
         # Set the inlet temperature of the asset
-        if self.first_time_step:
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
             self.temperature_in = temperature_in
             self.first_time_step = False
         else:
@@ -225,7 +225,7 @@ class ProductionCluster(AssetAbstract):
         """
         return (
             self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
-        ) * self.solver_asset.get_mass_flow_rate(0)
+        ) * self.solver_asset.get_mass_flow_rate(1)
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.

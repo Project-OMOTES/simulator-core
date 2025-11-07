@@ -22,7 +22,10 @@ from unittest.mock import Mock, patch
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
-from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PIPE_DEFAULTS,
+    PipeSchedules,
+)
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
@@ -132,7 +135,9 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         def mock_get_property(key, default=None):
             if key == "innerDiameter":
                 return 0.5
-            return None
+            if key == "diameter":
+                return None
+            return default
 
         esdl_asset_mock.get_property = mock_get_property
 
@@ -190,7 +195,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         self.assertEqual(diameter, PIPE_DEFAULTS.diameter)
 
     def test_get_esdl_object_from_edr(self):
-        """Test that the correct ESDL object is returned from EDR using the DN string."""
+        """Test that the correct ESDL object is returned from EDR using DN and default schedule."""
         # Arrange
         with patch(
             "omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper.EDRClient"
@@ -203,5 +208,52 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             # Assert
             mock_edr_client.get_object_esdl.assert_called_once_with(
                 "/edr/Public/Assets/Logstor/Steel-S1-DN-100.edd"
+            )
+            self.assertEqual(result, expected_object)
+
+    def test_get_diameter_with_specified_diameter_and_default_pipe_schedule(self):
+        """Test that _get_diameter uses default schedule."""
+        # Arrange
+        esdl_asset_mock = Mock()
+        dn_mock = Mock()
+        dn_mock.name = "DN50"
+
+        def mock_get_property(key, default=None):
+            if key == "innerDiameter":
+                return 0
+            if key == "diameter":
+                return dn_mock
+            return default
+
+        esdl_asset_mock.get_property = mock_get_property
+        edr_object_mock = Mock()
+        edr_object_mock.innerDiameter = 0.08
+
+        with patch.object(
+            EsdlAssetPipeMapper, "_get_esdl_object_from_edr", return_value=edr_object_mock
+        ) as mock_edr:
+            # Act
+            diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
+
+            # Assert
+            self.assertEqual(diameter, 0.08)
+            mock_edr.assert_called_once_with("DN50", PipeSchedules.S1)
+
+    def test_get_esdl_object_from_edr_with_schedule_specified(self):
+        """Test for when a schedule is filled in."""
+        # Arrange
+        with patch(
+            "omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper.EDRClient"
+        ) as mock_edr_client_class:
+            mock_edr_client = mock_edr_client_class.return_value
+            expected_object = Mock()
+            mock_edr_client.get_object_esdl.return_value = expected_object
+
+            # Act
+            result = EsdlAssetPipeMapper._get_esdl_object_from_edr("DN100", PipeSchedules.S3)
+
+            # Assert
+            mock_edr_client.get_object_esdl.assert_called_once_with(
+                "/edr/Public/Assets/Logstor/Steel-S3-DN-100.edd"
             )
             self.assertEqual(result, expected_object)
