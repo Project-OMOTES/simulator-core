@@ -93,4 +93,3 @@ def assets_to_graph(graph: Graph, model: EsdlObject) -> None:
             graph.add_node(asset.get_id() + "_secondary")
             continue
         graph.add_node(asset.get_id())
-        graph.add_node(asset.get_id())
