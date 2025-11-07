@@ -44,6 +44,7 @@ class StringEsdlAssetMapper:
     """
 
     def __init__(self) -> None:
+        """Initialize the maps from string to esdl type and vica-versa."""
         # Label to type map, where the first entry of each type list is the most generic or
         # representative type.
         self.label_to_type_map: dict[OmotesAssetLabels, list[Type[esdl.Asset]]] = {
