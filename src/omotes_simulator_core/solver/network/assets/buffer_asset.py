@@ -41,11 +41,15 @@ class HeatBufferAsset(FallType):
     outlet_temperature: float
     """The outlet temperature for the asset, set by the controller."""
 
+    inlet_temperature: float
+    """The inlet temperature for the asset, set by the controller."""
+
     def __init__(
         self,
         name: str,
         _id: str,
         outlet_temperature: float = 293.15,
+        inlet_temperature: float = 293.15,
         inlet_massflow: float = 10.0,
     ):
         """
@@ -63,6 +67,10 @@ class HeatBufferAsset(FallType):
             the inlet and outlet.
         """
         self.inlet_massflow = inlet_massflow
+
+        # Set inlet and outlet temperatures
+        self.inlet_temperature = inlet_temperature
+        self.outlet_temperature = outlet_temperature
 
         # Initialize the FallType parent class
         super().__init__(
@@ -110,31 +118,9 @@ class HeatBufferAsset(FallType):
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
         """
-        # Get internal energy at connection point 0 and 1
-        # TODO: Check if this should use prev_sol or current state?
-        ie_0 = self.prev_sol[
-            self.get_index_matrix(
-                property_name="internal_energy",
-                connection_point=0,
-                use_relative_indexing=True,
-            )
-        ]
-
-        ie_1 = self.prev_sol[
-            self.get_index_matrix(
-                property_name="internal_energy",
-                connection_point=1,
-                use_relative_indexing=True,
-            )
-        ]
-
-        # Get temperature at connection point 0 and 1
-        temp_0 = fluid_props.get_t(ie_0)
-        temp_1 = fluid_props.get_t(ie_1)
-
         # Get density at connection point 0 and 1
-        rho_0 = fluid_props.get_density(temp_0)
-        rho_1 = fluid_props.get_density(temp_1)
+        rho_0 = fluid_props.get_density(self.inlet_temperature)
+        rho_1 = fluid_props.get_density(self.outlet_temperature)
 
         # Create equation object
         equation_object = EquationObject()

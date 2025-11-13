@@ -31,9 +31,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-from omotes_simulator_core.entities.assets.utils import (
-    heat_demand_and_temperature_to_mass_flow,
-)
+from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.buffer_asset import HeatBufferAsset
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -131,12 +129,13 @@ class HeatBuffer(AssetAbstract):
 
         # Set charge state based on heat demand
         self.set_charge_state(setpoints[PROPERTY_HEAT_DEMAND])
+
         # Set temperatures based on charge state
         self.set_temperature_setpoints(setpoints)
 
         # Massflow rate based on heat demand and temperature setpoints
         mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_in, self.temperature_out
+            setpoints[PROPERTY_HEAT_DEMAND], self.temperature_in, self.temperature_out
         )
 
         # TODO: Move below to controller
@@ -150,6 +149,7 @@ class HeatBuffer(AssetAbstract):
             available_volume = self.max_volume * self.fill_level
         else:  # IDLE
             available_volume = 0
+
         max_volumetric_flow_rate = available_volume / self.accumulation_time
 
         if abs(volumetric_flow_rate) > abs(max_volumetric_flow_rate):
@@ -159,6 +159,7 @@ class HeatBuffer(AssetAbstract):
         # Set solver asset setpoints
         self.solver_asset.inlet_massflow = mass_flowrate  # type: ignore
         self.solver_asset.outlet_temperature = self.temperature_out  # type: ignore
+        self.solver_asset.inlet_temperature = self.temperature_in  # type: ignore
 
     def check_setpoints(self, setpoints: Dict) -> None:
         """Check if all necessary setpoints are provided.
@@ -174,7 +175,7 @@ class HeatBuffer(AssetAbstract):
         # Create set of keys in the provided setpoints
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
-        if not necessary_setpoints.difference(setpoints_set):
+        if any(necessary_setpoints.difference(setpoints_set)):
             # Print missing setpoints
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
