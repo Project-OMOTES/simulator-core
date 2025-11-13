@@ -83,9 +83,16 @@ class HeatBufferAsset(FallType):
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
         """
+        # Check if there are two nodes connected to the asset
+        if len(self.connected_nodes) != 2:
+            raise ValueError("The number of connected nodes must be 2!")
+        # Check if the number of unknowns is 6
+        if self.number_of_unknowns != 6:
+            raise ValueError("The number of unknowns must be 6!")
+
         equations = [
-            super().get_press_to_node_equation(0),  # Pressure balance at inlet (conn. pt -> node)
-            super().get_press_to_node_equation(1),  # Pressure balance at outlet (conn. pt -> node)
+            self.get_press_to_node_equation(0),  # Pressure balance at inlet (conn. pt -> node)
+            self.get_press_to_node_equation(1),  # Pressure balance at outlet (conn. pt -> node)
             self.get_volumetric_continuity_equation(),  # Volumetric continuity equation
             self.get_mass_flow_equation(0),  # Prescribed mass flow at inlet
             self.get_thermal_equations(0),  # Thermal equation at inlet
@@ -104,8 +111,22 @@ class HeatBufferAsset(FallType):
             value of the equation.
         """
         # Get internal energy at connection point 0 and 1
-        ie_0 = fluid_props.get_ie(self.supply_temperature)
-        ie_1 = fluid_props.get_ie(self.outlet_temperature)
+        # TODO: Check if this should use prev_sol or current state?
+        ie_0 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=0,
+                use_relative_indexing=True,
+            )
+        ]
+
+        ie_1 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=1,
+                use_relative_indexing=True,
+            )
+        ]
 
         # Get temperature at connection point 0 and 1
         temp_0 = fluid_props.get_t(ie_0)
