@@ -20,6 +20,7 @@ from unittest.mock import Mock
 
 import numpy as np
 
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.assets.utils import (
     calculate_inverse_heat_transfer_coefficient,
     get_thermal_conductivity_table,
@@ -41,7 +42,7 @@ class UtilFunctionTest(unittest.TestCase):
             Path(__file__).parent / ".." / ".." / "testdata" / "test_pipe_material.esdl"
         )
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        pipes = esdl_object.get_all_assets_of_type("pipe")
+        pipes = esdl_object.get_all_assets_of_type(OmotesAssetLabels.PIPE)
         self.pipe_with_material = [
             pipe for pipe in pipes if pipe.esdl_asset.name == "pipe_with_material"
         ][0]
@@ -160,4 +161,5 @@ class UtilFunctionTest(unittest.TestCase):
         sign = sign_output(port_number)
 
         # Assert
+        self.assertEqual(sign, 1)
         self.assertEqual(sign, 1)

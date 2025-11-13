@@ -22,6 +22,7 @@ from pandas.testing import assert_frame_equal
 
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    OmotesAssetLabels,
     StringEsdlAssetMapper,
 )
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
@@ -44,9 +45,9 @@ class EsdlObjectTest(unittest.TestCase):
     def test_get_all_assets_of_type(self):
         """Test to get a list of all assets of a certain type."""
         # Arrange
-        producer = "producer"
-        consumer = "consumer"
-        pipe = "pipe"
+        producer = OmotesAssetLabels.PRODUCER
+        consumer = OmotesAssetLabels.CONSUMER
+        pipe = OmotesAssetLabels.PIPE
 
         # Act
         producers = self.esdl_object.get_all_assets_of_type(producer)
@@ -428,8 +429,9 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Arranging of the data for the tests."""
+        # Define generic esdl assets
         self.asset = esdl.Asset
-        self.producer = esdl.Producer
+        self.producer = esdl.GenericProducer
         self.consumer = esdl.GenericConsumer
         self.geothermal_source = esdl.GeothermalSource
         self.conversion = esdl.Conversion
@@ -438,16 +440,17 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.joint = esdl.Joint
         self.heat_pump = esdl.HeatPump
         self.heat_exchange = esdl.HeatExchange
-        self.asset_str = "asset"
-        self.producer_str = "producer"
-        self.consumer_str = "consumer"
-        self.geothermal_source_str = "geothermal"
-        self.conversion_str = "conversion"
-        self.pipe_str = "pipe"
-        self.transport_str = "transport"
-        self.joint_str = "joint"
-        self.heat_pump_str = "heat_pump"
-        self.heat_exchanger_str = "heat_exchanger"
+        # Retrieve corresponding OmotesAssetLabels
+        self.asset_str = OmotesAssetLabels.ASSET
+        self.producer_str = OmotesAssetLabels.PRODUCER
+        self.consumer_str = OmotesAssetLabels.CONSUMER
+        self.geothermal_source_str = OmotesAssetLabels.GEOTHERMAL
+        self.conversion_str = OmotesAssetLabels.CONVERSION
+        self.pipe_str = OmotesAssetLabels.PIPE
+        self.transport_str = OmotesAssetLabels.TRANSPORT
+        self.joint_str = OmotesAssetLabels.JOINT
+        self.heat_pump_str = OmotesAssetLabels.HEAT_PUMP
+        self.heat_exchanger_str = OmotesAssetLabels.HEAT_EXCHANGER
 
     def test_to_string(self):
         """Test for conversion from esdl asset to string."""
@@ -479,7 +482,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         self.assertEqual(heat_exchanger_str, self.heat_exchanger_str)
 
     def test_to_esdl(self):
-        """Test for mapping back to esdl assets."""
+        """Test for mapping back to generic esdl assets."""
         # Arrange
 
         # Act
@@ -492,8 +495,7 @@ class StringEsdlAssetMapperTest(unittest.TestCase):
         joint = StringEsdlAssetMapper().to_esdl(self.joint_str)[0]
         heat_pump = StringEsdlAssetMapper().to_esdl(self.heat_pump_str)[0]
         heat_exchanger = StringEsdlAssetMapper().to_esdl(self.heat_exchanger_str)[0]
-
-        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]  # act
+        geothermal = StringEsdlAssetMapper().to_esdl(self.geothermal_source_str)[0]
 
         # Assert
         self.assertEqual(asset, self.asset)
