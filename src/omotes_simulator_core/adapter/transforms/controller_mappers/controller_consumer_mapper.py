@@ -46,6 +46,9 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Supply")
         temperature_out = esdl_asset.get_temperature("Out", "Return")
         profile = esdl_asset.get_profile()
+        sampling_method = esdl_asset.get_sampling_method()
+        interpolation_method = esdl_asset.get_interpolation_method()
+        # TODO: Extract interpolation method from ESDL properties if available
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -53,5 +56,7 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             max_power=power,
             profile=profile,
+            sampling_method=sampling_method,
+            interpolation_method=interpolation_method,
         )
         return contr_consumer
