@@ -281,6 +281,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
 
     def test_get_electric_consumption(self):
         """Test getting the electric power consumed by the heatpump."""
+
         # Arrange
         def get_internal_energy(_, i: int):
             if i == 0:
