@@ -39,6 +39,8 @@ class PipeDefaults:
     :param float minor_loss_coefficient: The minor loss coefficient of the pipe [-].
     :param float external_temperature: The external temperature of the pipe [K].
     :param float qheat_external: The external heat flow of the pipe [W].
+    :param int insulation_schedule: Assumed insulation schedule of the pipe required
+    to retrieve the inner diameter of the pipe from the EDR list[-].
     """
 
     k_value: float = 2e-3
@@ -83,14 +85,6 @@ class AtesDefaults:
 
 
 @dataclass
-class HeatBufferDefaults:
-    """Class containing the default values for Heat Buffer."""
-
-    volume: float = 1  # m3
-    fill_level: float = 0.5  # fraction 0-1
-
-
-@dataclass
 class HeatPumpDefaults:
     """Class containing the default values for a heat pump.
 
@@ -98,6 +92,18 @@ class HeatPumpDefaults:
     """
 
     coefficient_of_performance: float = 1 - 1 / 4.0
+
+
+@dataclass
+class HeatExchangerDefaults:
+    """Class containing the default values for a heat exchanger.
+
+    :param float heat_transfer_efficiency: The efficiency of the heat exchanger [-].
+    Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is chosen
+    here.
+    """
+
+    heat_transfer_efficiency: float = 1.0
 
 
 # Default names
@@ -120,20 +126,17 @@ PROPERTY_LENGTH = "length"
 PROPERTY_DIAMETER = "diameter"
 PROPERTY_ROUGHNESS = "roughness"
 PROPERTY_ALPHA_VALUE = "alpha_value"
-PROPERTY_VOLUME = "volume"
-PROPERTY_FILL_LEVEL = "fill_level"
 PROPERTY_PRESSURE_LOSS = "pressure_loss"
 PROPERTY_PRESSURE_LOSS_PER_LENGTH = "pressure_loss_per_length"
 PROPERTY_HEAT_LOSS = "heat_loss"
 PROPERTY_HEAT_SUPPLIED = "heat_supplied"
 PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
-PROPERTY_TIMESTEP = "time_step"
 PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 
-
+PRIMARY = "primary"
+SECONDARY = "secondary"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()
-HEAT_BUFFER_DEFAULTS = HeatBufferDefaults()
