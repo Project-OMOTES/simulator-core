@@ -311,8 +311,3 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             actual_power_consumed = self.air_to_water_hp.get_electric_power_consumption()
             # Assert
             self.assertEqual(actual_power_consumed, power_consumed)
-
-
-if __name__ == "__main__":
-    test = AirToWaterHeatPumpTest()
-    test.setUp()

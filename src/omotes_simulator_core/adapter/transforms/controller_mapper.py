@@ -95,14 +95,14 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         heat_exchangers = []
         for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump"):
             if (
-                hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 4
+                esdl_asset.get_number_of_ports() == 4
             ):  # These properties should point to an water to water heatpump.
                 water_to_water_hps.append(
                     ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
                 )
 
             if (
-                hasattr(esdl_asset.esdl_asset, "COP") and esdl_asset.get_number_of_ports() == 2
+                esdl_asset.get_number_of_ports() == 2
             ):  # These properties should point to an air to water heatpump.
                 producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
 
