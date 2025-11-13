@@ -22,6 +22,7 @@ from unittest.mock import Mock, patch
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS, PipeSchedules
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.esdl_object import EsdlObject
@@ -57,7 +58,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
     def test_to_entity_method(self) -> None:
         """Test for to_entity method."""
         # Arrange
-        pipes = self.esdl_object.get_all_assets_of_type("pipe")
+        pipes = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PIPE)
         self.assertGreater(len(pipes), 0, "No pipes found in the ESDL file.")
         self.esdl_asset = pipes[0]
         esdl_asset = pipes[0]
@@ -113,7 +114,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             / "test_pipe_material.esdl"
         )
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        esdl_pipes = esdl_object.get_all_assets_of_type("pipe")
+        esdl_pipes = esdl_object.get_all_assets_of_type(OmotesAssetLabels.PIPE)
         esdl_pipe = [pipe for pipe in esdl_pipes if pipe.esdl_asset.name == "pipe_with_material"][0]
 
         # Act

@@ -24,6 +24,7 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
 )
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
 from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.controller import (
     ControllerConsumer,
@@ -86,40 +87,29 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         # create graph to be able to check for connectivity
         graph = EsdlGraphMapper().to_entity(esdl_object)
 
-        producers = [
-            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
-        ]
-
-        water_to_water_hps = []
-        heat_exchangers = []
-        for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump"):
-            if (
-                esdl_asset.get_number_of_ports() == 4
-            ):  # These properties should point to an water to water heatpump.
-                water_to_water_hps.append(
-                    ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
-                )
-
-            if (
-                esdl_asset.get_number_of_ports() == 2
-            ):  # These properties should point to an air to water heatpump.
-                producers.append(ControllerProducerMapper().to_entity(esdl_asset=esdl_asset))
-
-        heat_exchangers = [
+        heat_transfer_assets = [
+            ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP) if esdl_asset.get_number_of_ports() == 4
+        ] + [
             ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_exchanger")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_EXCHANGER)
         ]
-        heat_transfer_assets = water_to_water_hps + heat_exchangers
 
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)
+        ]
+        producers = [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)
+        ] + [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP) if esdl_asset.get_number_of_ports() == 2
         ]
 
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
         ]
 
         # if there are no heat transfer assets, all assets can be stored into one network.
