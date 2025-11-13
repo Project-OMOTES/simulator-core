@@ -26,13 +26,10 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
-    PROPERTY_SET_PRESSURE,
-    PROPERTY_TEMPERATURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PROPERTY_VOLUMEFLOW,
 )
-from omotes_simulator_core.entities.assets.ideal_buffer import ChargeState, HeatBuffer
+from omotes_simulator_core.entities.assets.ideal_heat_storage import ChargeState, IdealHeatStorage
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -43,7 +40,7 @@ class HeatBufferTest(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test case."""
         # Create a heat buffer object
-        self.heat_buffer = HeatBuffer(
+        self.heat_buffer = IdealHeatStorage(
             asset_name="heat_buffer",
             asset_id="heat_buffer_id",
             port_ids=["test1", "test2"],

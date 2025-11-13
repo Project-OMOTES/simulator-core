@@ -135,7 +135,7 @@ class FallTypeTest(unittest.TestCase):
         -m_in * EI_in + m_out * EI_out - Q_supplied = 0
         """
         # Arrange
-        self.asset.prev_sol = numpy.array(
+        self.asset.prev_sol = np.array(
             [
                 1.0,  # discharge 0
                 2.0,  # pressure 0
@@ -203,7 +203,7 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = numpy.array(
+        self.asset.prev_sol = np.array(
             [
                 1.0,  # mass_flow_rate 0
                 2.0,  # pressure 0
@@ -258,7 +258,7 @@ class FallTypeTest(unittest.TestCase):
         abs(Mass flow rate) = 0
         """
         # Arrange
-        self.asset.prev_sol = numpy.array([0.0, 2.0, 3.0, 0.0, 5.0, 6.0])
+        self.asset.prev_sol = np.array([0.0, 2.0, 3.0, 0.0, 5.0, 6.0])
         self.asset.update_loss_coefficient()
 
         # Act

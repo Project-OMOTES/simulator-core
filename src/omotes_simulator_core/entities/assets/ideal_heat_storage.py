@@ -44,7 +44,7 @@ class ChargeState(Enum):
     IDLE = 3
 
 
-class HeatBuffer(AssetAbstract):
+class IdealHeatStorage(AssetAbstract):
     """A HeatBuffer represents an asset that stores heat. Thus, it has the possibility to supply \
     heat or consume heat for storage."""
 
