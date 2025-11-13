@@ -25,6 +25,9 @@ from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper import (
     EsdlAssetHeatPumpMapper,
 )
+from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ideal_heat_storage_mapper import (
+    EsdlIdealHeatStorageMapper,
+)
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
@@ -50,6 +53,7 @@ conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
     esdl.Pipe: EsdlAssetPipeMapper,
     esdl.HeatPump: EsdlAssetHeatPumpMapper,
     esdl.HeatExchange: EsdlAssetHeatPumpMapper,
+    esdl.HeatStorage: EsdlIdealHeatStorageMapper,
     esdl.ATES: EsdlAssetAtesMapper,
 }
 

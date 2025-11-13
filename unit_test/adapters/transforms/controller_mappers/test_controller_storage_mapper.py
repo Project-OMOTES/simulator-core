@@ -18,13 +18,14 @@
 import unittest
 from pathlib import Path
 
-from omotes_simulator_core.adapter.transforms.controller_mappers import ControllerStorageMapper
+from omotes_simulator_core.adapter.transforms.controller_mappers import ControllerAtesStorageMapper
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
-class TestControllerStorageMapper(unittest.TestCase):
-    """Test ControllerStorageMapper."""
+class TestControllerAtesStorageMapper(unittest.TestCase):
+    """Test ControllerAtesStorageMapper."""
 
     def setUp(self) -> None:
         """Set up test case."""
@@ -33,13 +34,13 @@ class TestControllerStorageMapper(unittest.TestCase):
             Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_ates.esdl"
         )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-        # Create a ControllerStorageMapper object
-        self.mapper = ControllerStorageMapper()
+        # Create a ControllerAtesStorageMapper object
+        self.mapper = ControllerAtesStorageMapper()
 
     def test_to_entity_method(self):
         """Test settings of controller for Storage."""
         # Arrange
-        storage_assets = self.esdl_object.get_all_assets_of_type("storage")
+        storage_assets = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.ATES)
 
         # Act
         controller_storage = self.mapper.to_entity(storage_assets[0])

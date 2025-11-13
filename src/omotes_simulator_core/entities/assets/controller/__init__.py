@@ -19,4 +19,8 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
 )
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerAtestStorage,
+    ControllerIdealHeatStorage,
+    ControllerStorageAbstract,
+)

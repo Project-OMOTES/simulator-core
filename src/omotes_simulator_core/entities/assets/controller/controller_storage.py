@@ -32,8 +32,26 @@ from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 logger = logging.getLogger(__name__)
 
 
-class ControllerStorage(AssetControllerAbstract):
-    """Class to store the storage for the controller asset."""
+class ControllerStorageAbstract(AssetControllerAbstract):
+    """Abstract class to store the storage for the controller asset."""
+
+    effective_max_charge_power: float
+    """The effective maximum charge power of the storage."""
+
+    effective_max_discharge_power: float
+    """The effective maximum discharge power of the storage."""
+
+    timestep: float
+    """The timestep of the simulation or asset."""
+
+    _delta_temperature: float
+    """The temperature difference between the supply and return temperature."""
+
+    _average_temperature: float
+    """The average temperature of the storage."""
+
+    start_index: int
+    """The start index for the profile lookup."""
 
     def __init__(
         self,
@@ -43,17 +61,19 @@ class ControllerStorage(AssetControllerAbstract):
         temperature_out: float,
         max_charge_power: float,
         max_discharge_power: float,
-        fill_level: float,
-        max_volume: float,
         profile: pd.DataFrame,
     ):
         """Constructor for the storage.
 
         :param str name: Name of the storage.
         :param str identifier: Unique identifier of the consumer.
+        :param float temperature_in: Temperature of the inlet.
+        :param float temperature_out: Temperature of the outlet.
+        :param float max_charge_power: Maximum charge power of the storage.
+        :param float max_discharge_power: Maximum discharge power of the storage.
+        :param pd.DataFrame profile: Profile of the storage.
         """
         super().__init__(name, identifier)
-
         self.temperature_out = temperature_out
         self.temperature_in = temperature_in
         self.profile: pd.DataFrame = profile
@@ -70,14 +90,140 @@ class ControllerStorage(AssetControllerAbstract):
         self.max_charge_power: float = max_charge_power
         self.max_discharge_power: float = max_discharge_power
 
+        # Effective maximum charge and discharge power of the storage.
+        self.effective_max_charge_power: float = max_charge_power
+        self.effective_max_discharge_power: float = max_discharge_power
+
+    def set_state(self, state: dict[str, float]) -> None:
+        """Set the state of the controller.
+
+        :param dict[str, float] state: State of the controller from the asset_abstract
+            get_state method.
+        """
+
+    def get_heat_power(self, time: datetime.datetime) -> float:
+        """Method to get the heat power of the storage. + is injection and - is production.
+
+        :param datetime.datetime time: Time for which to get the heat demand.
+        :return: float with the heat demand.
+        """
+        return 0.0
+
+    def get_max_discharge_power(
+        self,
+    ) -> float:
+        """Determine the effective maximum discharge power of the asset.
+
+        The effective maximum discharge power is the maximum discharge power of the asset minus the
+        volume of the asset. The effective maximum discharge power is calculated by dividing the
+        available volume by the time step of the simulation. The available volume is the maximum
+        volume of the asset minus the current volume. The effective maximum discharge power is
+        limited by the maximum discharge power of the asset.
+        """
+        return 0.0
+
+    def get_max_charge_power(
+        self,
+    ) -> float:
+        """Determine the effective maximum charge power of the asset.
+
+        The effective maximum charge power is the maximum charge power of the asset minus the volume
+        of the asset. The effective maximum charge power is calculated by dividing the available
+        volume by the time step of the simulation. The available volume is the maximum volume of
+        the asset minus the current volume. The effective maximum charge power is limited by the
+        maximum charge power of the asset.
+        """
+        return 0.0
+
+
+class ControllerAtestStorage(ControllerStorageAbstract):
+    """Class to store the storage for the controller asset."""
+
+    def __init__(
+        self,
+        name: str,
+        identifier: str,
+        temperature_in: float,
+        temperature_out: float,
+        max_charge_power: float,
+        max_discharge_power: float,
+        profile: pd.DataFrame,
+    ):
+        """Constructor for the storage.
+
+        :param str name: Name of the storage.
+        :param str identifier: Unique identifier of the consumer.
+        """
+        super().__init__(
+            name=name,
+            identifier=identifier,
+            temperature_in=temperature_in,
+            temperature_out=temperature_out,
+            max_charge_power=max_charge_power,
+            max_discharge_power=max_discharge_power,
+            profile=profile,
+        )
+
+    def get_heat_power(self, time: datetime.datetime) -> float:
+        """Method to get the heat power of the storage. + is injection and - is production.
+
+        :param datetime.datetime time: Time for which to get the heat demand.
+        :return: float with the heat demand.
+        """
+        for index in range(self.start_index, len(self.profile)):
+            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
+                self.start_index = index
+                if self.profile["values"][index] > self.max_charge_power:
+                    logging.warning(
+                        f"Storage of {self.name} is higher than maximum charge power of asset"
+                        f" at time {time}."
+                    )
+                    return self.max_charge_power
+                elif self.profile["values"][index] < self.max_discharge_power:
+                    logging.warning(
+                        f"Storage of {self.name} is higher than maximum discharge power of asset"
+                        f" at time {time}."
+                    )
+                    return self.max_discharge_power
+                else:
+                    return float(self.profile["values"][index])
+        return 0
+
+
+class ControllerIdealHeatStorage(ControllerStorageAbstract):
+    """Class to store the storage for the controller asset."""
+
+    def __init__(
+        self,
+        name: str,
+        identifier: str,
+        temperature_in: float,
+        temperature_out: float,
+        max_charge_power: float,
+        max_discharge_power: float,
+        profile: pd.DataFrame,
+        fill_level: float,
+        max_volume: float,
+    ):
+        """Constructor for the storage.
+
+        :param str name: Name of the storage.
+        :param str identifier: Unique identifier of the consumer.
+        """
+        super().__init__(
+            name=name,
+            identifier=identifier,
+            temperature_in=temperature_in,
+            temperature_out=temperature_out,
+            max_charge_power=max_charge_power,
+            max_discharge_power=max_discharge_power,
+            profile=profile,
+        )
+
         # Fill level and max volume of the storage.
         self.fill_level: float = fill_level
         self.max_volume: float = max_volume
         self.current_volume: float = fill_level * max_volume
-
-        # Effective maximum charge and discharge power of the storage.
-        self.effective_max_charge_power: float = max_charge_power
-        self.effective_max_discharge_power: float = max_discharge_power
 
     def get_heat_power(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.

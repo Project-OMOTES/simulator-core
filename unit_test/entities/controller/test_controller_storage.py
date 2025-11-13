@@ -22,7 +22,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
 )
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerAtestStorage,
+)
 
 
 class StorageControllerTest(unittest.TestCase):
@@ -37,7 +39,7 @@ class StorageControllerTest(unittest.TestCase):
                 "values": self.values,
             }
         )
-        self.storage = ControllerStorage(
+        self.storage = ControllerAtestStorage(
             "storage",
             "id",
             temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,

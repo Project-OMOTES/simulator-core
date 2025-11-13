@@ -28,7 +28,9 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
 )
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerStorageAbstract,
+)
 from omotes_simulator_core.entities.network_controller import NetworkController
 
 
@@ -125,7 +127,7 @@ class ControllerTest(unittest.TestCase):
         consumer2.temperature_in = 50
         consumer2.temperature_out = 40
 
-        self.storage1 = Mock(spec=ControllerStorage)
+        self.storage1 = Mock(spec=ControllerStorageAbstract)
         self.storage1.id = "storage1"
         self.storage1.max_discharge_power = 10
         self.storage1.max_charge_power = 20
