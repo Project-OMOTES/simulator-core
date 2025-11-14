@@ -18,7 +18,10 @@
 import unittest
 from pathlib import Path
 
-from omotes_simulator_core.adapter.transforms.controller_mappers import ControllerAtesStorageMapper
+from omotes_simulator_core.adapter.transforms.controller_mappers import (
+    ControllerAtesStorageMapper,
+    ControllerIdealHeatStorageMapper,
+)
 from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
@@ -38,7 +41,7 @@ class TestControllerAtesStorageMapper(unittest.TestCase):
         self.mapper = ControllerAtesStorageMapper()
 
     def test_to_entity_method(self):
-        """Test settings of controller for Storage."""
+        """Test settings of controller for ATES."""
         # Arrange
         storage_assets = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.ATES)
 
@@ -50,3 +53,41 @@ class TestControllerAtesStorageMapper(unittest.TestCase):
         self.assertEqual(controller_storage.temperature_out, 313.15)
         self.assertEqual(controller_storage.max_charge_power, 11.61e6)
         self.assertEqual(controller_storage.max_discharge_power, 11.61e6)
+        self.assertEqual(controller_storage.effective_max_charge_power, 11.61e6)
+        self.assertEqual(controller_storage.effective_max_discharge_power, 11.61e6)
+
+
+class TestControllerIdealHeatStorageMapper(unittest.TestCase):
+    """Test ControllerIdealHeatStorageMapper."""
+
+    def setUp(self) -> None:
+        """Set up test case."""
+        # Load the test esdl file
+        esdl_file_path = (
+            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_buffer.esdl"
+        )
+        self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        # Create a ControllerIdealHeatStorageMapper object
+        self.mapper = ControllerIdealHeatStorageMapper()
+
+    def test_to_entity_method(self):
+        """Test settings of controller for IdealHeatStorage."""
+        # Arrange
+        storage_assets = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
+
+        # Act
+        controller_storage = self.mapper.to_entity(storage_assets[0])
+
+        # Assert
+        # - Temperature related properties
+        self.assertEqual(controller_storage.temperature_in, 353.15)
+        self.assertEqual(controller_storage.temperature_out, 323.15)
+        # - Volume related properties
+        self.assertEqual(controller_storage.fill_level, 0.5)
+        self.assertEqual(controller_storage.max_volume, 1.0)
+        self.assertEqual(controller_storage.current_volume, 0.5 * 1.0)
+        # - Power related properties
+        self.assertEqual(controller_storage.max_charge_power, 100.0)
+        self.assertEqual(controller_storage.max_discharge_power, 100.0)
+        self.assertEqual(controller_storage.effective_max_charge_power, 100.0)
+        self.assertEqual(controller_storage.effective_max_discharge_power, 100.0)

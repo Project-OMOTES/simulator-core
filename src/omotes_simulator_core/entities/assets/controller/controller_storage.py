@@ -170,24 +170,50 @@ class ControllerAtestStorage(ControllerStorageAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        for index in range(self.start_index, len(self.profile)):
-            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
-                self.start_index = index
-                if self.profile["values"][index] > self.max_charge_power:
-                    logging.warning(
-                        f"Storage of {self.name} is higher than maximum charge power of asset"
-                        f" at time {time}."
-                    )
-                    return self.max_charge_power
-                elif self.profile["values"][index] < self.max_discharge_power:
-                    logging.warning(
-                        f"Storage of {self.name} is higher than maximum discharge power of asset"
-                        f" at time {time}."
-                    )
-                    return self.max_discharge_power
-                else:
-                    return float(self.profile["values"][index])
-        return 0
+        # Calculate time differences in seconds from the start_index onwards
+        time_diffs = (
+            (
+                self.profile["date"].iloc[self.start_index :].apply(lambda x: x.to_pydatetime())
+                - time
+            )  # type: ignore
+            .abs()
+            .dt.total_seconds()
+        )
+
+        # Find the closest time within 1 hour (3600 seconds)
+        mask = time_diffs < 3600
+        if not mask.any():
+            logging.warning(
+                "No profile value found for storage %s at time %s. Returning 0.0 power.",
+                self.name,
+                time,
+            )
+            return 0.0
+
+        # Get the index of the closest match
+        closest_idx = time_diffs[mask].idxmin()
+        self.start_index = closest_idx
+
+        # Get the power value
+        power_value = float(self.profile["values"].iloc[closest_idx])
+
+        # Check bounds and return appropriate value
+        if power_value > self.max_charge_power:
+            logging.warning(
+                "Storage of %s is higher than maximum charge power of asset" " at time %s.",
+                self.name,
+                time,
+            )
+            return self.max_charge_power
+        elif power_value < self.max_discharge_power:
+            logging.warning(
+                "Storage of %s is higher than maximum discharge power of asset" " at time %s.",
+                self.name,
+                time,
+            )
+            return self.max_discharge_power
+        else:
+            return power_value
 
 
 class ControllerIdealHeatStorage(ControllerStorageAbstract):
@@ -231,33 +257,81 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        # Check if the selected time is in the profile.
-        # TODO: Current implementation loops over the entire profile; should be improved!
-        # TODO: Unclear why there is a timestep of 1 hour in the profile.
-        for index in range(self.start_index, len(self.profile)):
-            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
-                self.start_index = index
-                if self.profile["values"][index] > self.effective_max_charge_power:
-                    logging.warning(
-                        "Supply to storage %s is higher than maximum charge power of asset"
-                        + " at time %s.",
-                        self.name,
-                        time,
-                    )
-                    return self.effective_max_charge_power
-                elif self.profile["values"][index] < self.effective_max_discharge_power:
-                    logging.warning(
-                        "Demand from storage %s is higher than maximum discharge power of asset"
-                        + " at time %s.",
-                        self.name,
-                        time,
-                    )
-                    return self.effective_max_discharge_power
-                else:
-                    return float(self.profile["values"][index])
-        # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
-        # the maximum fill-level.
-        return 0.0
+        # Calculate time differences in seconds from the start_index onwards
+        time_diffs = (
+            (
+                self.profile["date"].iloc[self.start_index :].apply(lambda x: x.to_pydatetime())
+                - time
+            )  # type: ignore
+            .abs()
+            .dt.total_seconds()
+        )
+
+        # Find the closest time within 1 hour (3600 seconds)
+        mask = time_diffs < 3600
+        if not mask.any():
+            # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
+            # the maximum fill-level.
+            logging.warning(
+                "No profile value found for storage %s at time %s. Returning 0.0 power.",
+                self.name,
+                time,
+            )
+            return 0.0
+
+        # Get the index of the closest match
+        closest_idx = time_diffs[mask].idxmin()
+        self.start_index = closest_idx
+
+        # Get the power value
+        power_value = float(self.profile["values"].iloc[closest_idx])
+
+        # Check bounds and return appropriate value
+        if power_value > self.effective_max_charge_power:
+            logging.warning(
+                "Supply to storage %s is higher than maximum charge power of asset" " at time %s.",
+                self.name,
+                time,
+            )
+            return self.effective_max_charge_power
+        elif power_value < self.effective_max_discharge_power:
+            logging.warning(
+                "Demand from storage %s is higher than maximum discharge power of asset"
+                " at time %s.",
+                self.name,
+                time,
+            )
+            return self.effective_max_discharge_power
+        else:
+            return power_value
+
+        # # Check if the selected time is in the profile.
+        # # TODO: Current implementation loops over the entire profile; should be improved!
+        # # TODO: Unclear why there is a timestep of 1 hour in the profile.
+        # for index in range(self.start_index, len(self.profile)):
+        #     if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
+        #         self.start_index = index
+        #         if self.profile["values"][index] > self.effective_max_charge_power:
+        #             logging.warning(
+        #                 "Supply to storage %s is higher than maximum charge power of asset"
+        #                 + " at time %s.",
+        #                 self.name,
+        #                 time,
+        #             )
+        #             return self.effective_max_charge_power
+        #         elif self.profile["values"][index] < self.effective_max_discharge_power:
+        #             logging.warning(
+        #                 "Demand from storage %s is higher than maximum discharge power of asset"
+        #                 + " at time %s.",
+        #                 self.name,
+        #                 time,
+        #             )
+        #             return self.effective_max_discharge_power
+        #         else:
+        #             return float(self.profile["values"][index])
+        # # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
+        # # the maximum fill-level.
+        # return 0.0
 
     def get_max_discharge_power(
         self,
@@ -327,18 +401,30 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         # Check available state keys
         available_state_keys = {
             PROPERTY_FILL_LEVEL,
-            PROPERTY_VOLUME,
             PROPERTY_TIMESTEP,
         }
 
         if available_state_keys.issubset(state.keys()):
-            self.fill_level = state[PROPERTY_FILL_LEVEL]
-            self.current_volume = state[PROPERTY_VOLUME]
+            # Check limits fill level
+            self._set_fill_level(state[PROPERTY_FILL_LEVEL])
             self.timestep = state[PROPERTY_TIMESTEP]
         else:
             missing_keys = sorted(available_state_keys.difference(state.keys()))
-            raise ValueError(f"State keys {missing_keys} are missing.")
+            raise KeyError(f"State keys {missing_keys} are missing for storage {self.name}.")
 
         # Update the effective maximum charge and discharge power of the asset.
         self.effective_max_charge_power = self.get_max_charge_power()
         self.effective_max_discharge_power = self.get_max_discharge_power()
+
+    def _set_fill_level(self, fill_level: float) -> None:
+        """Set the fill level of the storage.
+
+        :param float fill_level: Fill level of the storage between 0 and 1.
+        """
+        if 0.0 <= fill_level <= 1.0:
+            self.fill_level = fill_level
+            self.current_volume = fill_level * self.max_volume
+        else:
+            raise ValueError(
+                f"Fill level {fill_level} for storage {self.name} is out of bounds [0, 1]."
+            )
