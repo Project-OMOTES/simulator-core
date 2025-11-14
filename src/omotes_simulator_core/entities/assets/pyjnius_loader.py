@@ -51,7 +51,7 @@ class PyjniusLoader:
         self.loaded_classes = {}
 
     @staticmethod
-    def download_rosim_jar(self) -> str:
+    def download_rosim_jar() -> str:
         """Download the Rosim JAR files.
 
         This function will download the required Rosim JAR files into the `bin` folder.
