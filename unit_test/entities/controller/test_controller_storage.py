@@ -161,7 +161,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
             max_charge_power=1000000,
             max_discharge_power=-1000000,
             fill_level=0.5,
-            max_volume=1000,
+            volume=1000,
             profile=PROFILE,
         )
 
@@ -180,7 +180,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.assertEqual(self.storage.max_charge_power, 1000000)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
         self.assertEqual(self.storage.fill_level, 0.5)
-        self.assertEqual(self.storage.max_volume, 1000)
+        self.assertEqual(self.storage.volume, 1000)
         self.assertEqual(self.storage.current_volume, 0.5 * 1000)
 
     def test_controller_storage_get_heat_power(self) -> None:
@@ -292,7 +292,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         # Arrange
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
-        self.storage.max_volume = 1.0  # m3
+        self.storage.volume = 1.0  # m3
         self.storage.current_volume = 0.0  # m3
         self.storage._delta_temperature = 1.0
         self.storage.timestep = 1.0
@@ -307,7 +307,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
     def test_storage_get_max_charge_power_filled(self):
         """Test to get the max charge power of the storage."""
         # Arrange
-        self.storage.max_volume = 1.0  # m3
+        self.storage.volume = 1.0  # m3
         self.storage.current_volume = 1.0  # m3
 
         # Act
@@ -348,7 +348,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         }
         patch_max_charge_power.return_value = 1.0
         patch_max_discharge_power.return_value = -1.0
-        self.storage.max_volume = 2000
+        self.storage.volume = 2000
 
         # Act
         self.storage.set_state(state)
@@ -382,7 +382,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
     def test_set_fill_level(self):
         """Test to set the fill level of the storage."""
         # Arrange
-        self.storage.max_volume = 2000
+        self.storage.volume = 2000
 
         # Act
         self.storage._set_fill_level(0.75)

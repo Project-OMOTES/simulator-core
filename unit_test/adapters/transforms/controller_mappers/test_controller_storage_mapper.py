@@ -84,7 +84,7 @@ class TestControllerIdealHeatStorageMapper(unittest.TestCase):
         self.assertEqual(controller_storage.temperature_out, 323.15)
         # - Volume related properties
         self.assertEqual(controller_storage.fill_level, 0.5)
-        self.assertEqual(controller_storage.max_volume, 1.0)
+        self.assertEqual(controller_storage.volume, 1.0)
         self.assertEqual(controller_storage.current_volume, 0.5 * 1.0)
         # - Power related properties
         self.assertEqual(controller_storage.max_charge_power, 100.0)

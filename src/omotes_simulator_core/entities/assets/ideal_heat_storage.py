@@ -29,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
@@ -235,5 +236,6 @@ class IdealHeatStorage(AssetAbstract):
         """
         state = {
             PROPERTY_FILL_LEVEL: self.fill_level,
+            PROPERTY_TIMESTEP: self.time_step,  # accumulation time
         }
         return state

@@ -229,12 +229,14 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         max_discharge_power: float,
         profile: pd.DataFrame,
         fill_level: float,
-        max_volume: float,
+        volume: float,
     ):
         """Constructor for the storage.
 
         :param str name: Name of the storage.
         :param str identifier: Unique identifier of the consumer.
+        :param float fill_level: Fill level of the storage [0-1].
+        :param float volume: Volume of the storage [m3].
         """
         super().__init__(
             name=name,
@@ -248,8 +250,8 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
 
         # Fill level and max volume of the storage.
         self.fill_level: float = fill_level
-        self.max_volume: float = max_volume
-        self.current_volume: float = fill_level * max_volume
+        self.volume: float = volume
+        self.current_volume: float = fill_level * volume
 
     def get_heat_power(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.
@@ -377,7 +379,7 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         :param float timestep: The time step of the simulation in seconds. Default is 3600 seconds.
         """
         # Calculate the effective maximum charge power of the asset.
-        available_volume = self.max_volume - self.current_volume
+        available_volume = self.volume - self.current_volume
         if available_volume > 0:
             effective_max_charge_power = min(
                 self.max_charge_power,
@@ -423,7 +425,7 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         """
         if 0.0 <= fill_level <= 1.0:
             self.fill_level = fill_level
-            self.current_volume = fill_level * self.max_volume
+            self.current_volume = fill_level * self.volume
         else:
             raise ValueError(
                 f"Fill level {fill_level} for storage {self.name} is out of bounds [0, 1]."

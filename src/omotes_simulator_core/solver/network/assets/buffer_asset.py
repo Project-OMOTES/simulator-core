@@ -139,7 +139,7 @@ class HeatBufferAsset(FallType):
                 ),
             ]
         )
-        equation_object.coefficients = np.array([1 / rho_0, -1 / rho_1])
+        equation_object.coefficients = np.array([rho_1, -1 * rho_0])
         equation_object.rhs = 0.0
 
         return equation_object
@@ -173,7 +173,7 @@ class HeatBufferAsset(FallType):
                 )
             ]
         )
-        equation_object.coefficients = np.array([connection_point])
+        equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
         equation_object.rhs = self.inlet_massflow
 
         return equation_object

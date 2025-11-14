@@ -81,5 +81,5 @@ class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
             max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
             profile=profile,
             fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
-            max_volume=esdl_asset.get_property("maxVolume", HeatBufferDefaults.volume),
+            volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
         )
