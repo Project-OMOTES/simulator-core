@@ -90,10 +90,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         heat_transfer_assets = [
             ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)
+            if esdl_asset.get_number_of_ports() == 4
         ] + [
             ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_EXCHANGER)
         ]
+
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)
@@ -101,11 +103,17 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         producers = [
             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)
+        ] + [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)
+            if esdl_asset.get_number_of_ports() == 2
         ]
+
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
         ]
+
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
             networks = [

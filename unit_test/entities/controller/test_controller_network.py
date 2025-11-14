@@ -23,9 +23,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.controller.controller_network import (
-    ControllerNetwork,
-)
+from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 
 
 class TestControllerNetwork(unittest.TestCase):

@@ -24,13 +24,9 @@ from unittest.mock import Mock
 import esdl
 import numpy as np
 
-from omotes_simulator_core.adapter.transforms.controller_mapper import (
-    EsdlControllerMapper,
-)
+from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 

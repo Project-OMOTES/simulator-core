@@ -24,13 +24,9 @@ import esdl
 import numpy as np
 import pandas as pd
 
-from omotes_simulator_core.adapter.transforms.controller_mapper import (
-    EsdlControllerMapper,
-)
+from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
