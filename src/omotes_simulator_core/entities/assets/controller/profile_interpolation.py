@@ -16,10 +16,10 @@
 
 import datetime
 import logging
+import math
 from enum import Enum
 from typing import Optional
 
-import math
 import pandas as pd
 from scipy.interpolate import interp1d
 

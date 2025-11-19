@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper class to convert ESDL objects to internal controller objects."""
 import dataclasses
-
 from typing import Optional
+
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
     ControllerHeatExchangeMapper,

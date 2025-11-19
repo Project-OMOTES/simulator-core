@@ -227,16 +227,14 @@ class ProfileInterpolationTest(unittest.TestCase):
 
     def test_unknown_sampling_method_raises_exception(self):
         """Test that an unknown sampling method raises ValueError."""
-
         # Arrange
-        class MockSamplingMethod:
-            value = "unknown_method"
+        unknown_method = type("obj", (object,), {"value": "unknown_method"})()
 
         # Act
         with self.assertRaises(ValueError) as context:
             ProfileInterpolator(
                 profile=self.profile_data,
-                sampling_method=MockSamplingMethod(),  # type: ignore
+                sampling_method=unknown_method,  # type: ignore
                 interpolation_method=ProfileInterpolationMethod.LINEAR,
                 timestep=3600,
             )
@@ -265,7 +263,7 @@ class ProfileInterpolationTest(unittest.TestCase):
         self.assertEqual(
             log_context.output[0],
             "INFO:omotes_simulator_core.entities.assets.controller.profile_interpolation:"
-            "No sampling method provided, using default: actual",
+            "No sampling method provided, using default sampling method: actual",
         )
 
     def test_default_interpolation_method_logs_info(self):
@@ -289,7 +287,7 @@ class ProfileInterpolationTest(unittest.TestCase):
         self.assertEqual(
             log_context.output[0],
             "INFO:omotes_simulator_core.entities.assets.controller.profile_interpolation:"
-            "No interpolation method provided, using default: linear",
+            "No interpolation method provided, using default interpolation method: linear",
         )
 
     def test_no_simulation_timestep_uses_default(self):

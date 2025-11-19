@@ -16,9 +16,10 @@
 
 import datetime
 import logging
+from typing import Optional
+
 import pandas as pd
 
-from typing import Optional
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
