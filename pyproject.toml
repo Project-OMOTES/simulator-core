@@ -54,6 +54,7 @@ dev = [
     "plotly~=5.24.0",
     "shapely~=2.0.6",
     "snakeviz==2.2.0",
+    "types-requests ~= 2.28.11",
 ]
 
 [project.urls]
@@ -82,7 +83,6 @@ zip-safe = false
 "omotes_simulator_core" = [
     "entities/assets/bin/ates_sequential_temp.xml",
     "entities/assets/bin/jfxrt.jar",
-    "entities/assets/bin/rosim-batch-1.2.0.jar",
     "entities/assets/bin/sequentialTemplate_v1.2.0_template.xml",
 ]
 

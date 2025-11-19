@@ -19,15 +19,11 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from omotes_simulator_core.adapter.transforms.controller_mapper import (
-    EsdlControllerMapper,
-)
+from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
 from omotes_simulator_core.adapter.transforms.mappers import EsdlEnergySystemMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 from omotes_simulator_core.infrastructure.plotting import Plotting
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 from omotes_simulator_core.simulation.networksimulation import NetworkSimulation

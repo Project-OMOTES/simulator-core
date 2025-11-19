@@ -20,6 +20,7 @@ import logging
 from esdl.esdl_handler import EnergySystemHandler
 
 from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    OmotesAssetLabels,
     StringEsdlAssetMapper,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -44,19 +45,18 @@ class EsdlObject:
         """Returns a string describing the esdl file object."""
         return str(self.energy_system_handler)
 
-    def get_all_assets_of_type(self, esdl_asset_type: str) -> list[EsdlAssetObject]:
+    def get_all_assets_of_type(self, esdl_asset_type: OmotesAssetLabels) -> list[EsdlAssetObject]:
         """
         Returns a list of all the esdl assets of the specified type in the esdl file.
 
         If the type is not found an empty list is returned.
-        :param esdl_asset_type: str of the asset type assets need to be gathered.
+        :param OmotesAssetLabels esdl_asset_type: Type of asset to return
+        :return: List of EsdlAssetObject of the specified type
         """
         output_list = []
         for asset_type in StringEsdlAssetMapper().to_esdl(esdl_asset_type):
-            output_list += [
-                EsdlAssetObject(asset)
-                for asset in self.energy_system_handler.get_all_instances_of_type(asset_type)
-            ]
+            esdl_assets = self.energy_system_handler.get_all_instances_of_type(asset_type)
+            output_list += [EsdlAssetObject(asset) for asset in esdl_assets]
         return output_list
 
     def get_connected_assets(self, asset_id: str, port_id: str) -> list[tuple[str, str]]:

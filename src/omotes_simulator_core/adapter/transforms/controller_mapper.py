@@ -25,6 +25,7 @@ from omotes_simulator_core.adapter.transforms.controller_mappers import (
 )
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
 from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.controller import (
     ControllerConsumer,
@@ -92,23 +93,31 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
         heat_transfer_assets = [
             ControllerHeatPumpMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_pump")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)
+            if esdl_asset.get_number_of_ports() == 4
         ] + [
             ControllerHeatExchangeMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("heat_exchanger")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_EXCHANGER)
         ]
+
         consumers = [
             ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset, timestep=timestep)
-            for esdl_asset in esdl_object.get_all_assets_of_type("consumer")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)
         ]
         producers = [
             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type("producer")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)
+        ] + [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)
+            if esdl_asset.get_number_of_ports() == 2
         ]
+
         storages = [
             ControllerStorageMapper().to_entity(esdl_asset=esdl_asset, timestep=timestep)
-            for esdl_asset in esdl_object.get_all_assets_of_type("storage")
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
         ]
+
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
             networks = [

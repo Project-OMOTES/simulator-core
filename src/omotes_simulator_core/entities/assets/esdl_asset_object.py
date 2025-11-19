@@ -20,11 +20,7 @@ from typing import Any
 import pandas as pd
 from esdl import esdl
 
-from omotes_simulator_core.adapter.transforms.transform_utils import (
-    Port,
-    PortType,
-    sort_ports,
-)
+from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolationMethod,
     ProfileSamplingMethod,
@@ -175,6 +171,12 @@ class EsdlAssetObject:
             )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)
+
+    def get_number_of_ports(self) -> int:
+        """Get the number of ports of the asset."""
+        number_of_ports = len(self.esdl_asset.port)
+
+        return number_of_ports
 
     def get_connected_assets(self, port_id: str) -> list[str]:
         """Get the connected assets of the asset."""

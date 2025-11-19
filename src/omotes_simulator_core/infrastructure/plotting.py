@@ -21,6 +21,7 @@ from numpy.typing import NDArray
 from pandas import DataFrame
 from shapely.geometry import LineString
 
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE,
@@ -64,7 +65,7 @@ class Plotting:
             crs="EPSG:4326",
         )
 
-        assets = self.esdl_object.get_all_assets_of_type("pipe")
+        assets = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PIPE)
 
         for asset_object in assets:
             asset = asset_object.esdl_asset
