@@ -16,6 +16,7 @@
 
 import datetime
 import logging
+from typing import Optional
 
 import pandas as pd
 
@@ -43,8 +44,9 @@ class ControllerStorage(AssetControllerAbstract):
         max_charge_power: float,
         max_discharge_power: float,
         profile: pd.DataFrame,
-        sampling_method: ProfileSamplingMethod,
-        interpolation_method: ProfileInterpolationMethod,
+        sampling_method: Optional[ProfileSamplingMethod] = None,
+        interpolation_method: Optional[ProfileInterpolationMethod] = None,
+        timestep: Optional[int] = None,
     ):
         """Constructor for the storage.
 
@@ -56,6 +58,7 @@ class ControllerStorage(AssetControllerAbstract):
         :param float max_discharge_power: Maximum discharge power of the storage.
         :param ProfileSamplingMethod sampling_method: Method for profile sampling.
         :param ProfileInterpolationMethod interpolation_method: Method for profile interpolation.
+        :param Optional[int] timestep: The simulation timestep in seconds.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
@@ -70,6 +73,7 @@ class ControllerStorage(AssetControllerAbstract):
             profile=profile,
             sampling_method=sampling_method,
             interpolation_method=interpolation_method,
+            timestep=timestep,
         )
 
     def get_heat_power(self, time: datetime.datetime) -> float:

@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+from typing import Optional
+
 import numpy as np
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -33,10 +35,13 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerConsumer:
+    def to_entity(
+        self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    ) -> ControllerConsumer:
         """Method to map an esdl asset to a consumer entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
@@ -48,7 +53,6 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         profile = esdl_asset.get_profile()
         sampling_method = esdl_asset.get_sampling_method()
         interpolation_method = esdl_asset.get_interpolation_method()
-        # TODO: Extract interpolation method from ESDL properties if available
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -58,5 +62,6 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
             profile=profile,
             sampling_method=sampling_method,
             interpolation_method=interpolation_method,
+            timestep=timestep,
         )
         return contr_consumer

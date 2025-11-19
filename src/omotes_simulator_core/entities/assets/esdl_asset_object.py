@@ -106,14 +106,12 @@ class EsdlAssetObject:
 
     def get_sampling_method(self) -> ProfileSamplingMethod:
         """Get the interpolation method of the asset."""
-        # Default for now
-        # TODO check where will the input of the interpolation method come from
+        # TODO: Get sampling method from ESDL properties if available
         return ProfileSamplingMethod.DEFAULT
 
     def get_interpolation_method(self) -> ProfileInterpolationMethod:
         """Get the interpolation method of the asset."""
-        # Default for now
-        # TODO check where will the input of the interpolation method come from
+        # TODO: Get interpolation method from ESDL properties if available
         return ProfileInterpolationMethod.DEFAULT
 
     # make a function to check temperature for both in and out ports

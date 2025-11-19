@@ -25,10 +25,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.controller_consumer import (
     ControllerConsumer,
 )
-from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileInterpolationMethod,
-    ProfileSamplingMethod,
-)
 
 
 class ConsumerControllerTest(unittest.TestCase):
@@ -50,8 +46,6 @@ class ConsumerControllerTest(unittest.TestCase):
             temperature_out=DEFAULT_TEMPERATURE,
             max_power=20000,
             profile=self.profile,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
 
     def test_consumer_init(self):

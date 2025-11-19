@@ -16,9 +16,9 @@
 
 import datetime
 import logging
-
 import pandas as pd
 
+from typing import Optional
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -42,8 +42,9 @@ class ControllerConsumer(AssetControllerAbstract):
         temperature_out: float,
         max_power: float,
         profile: pd.DataFrame,
-        sampling_method: ProfileSamplingMethod,
-        interpolation_method: ProfileInterpolationMethod,
+        sampling_method: Optional[ProfileSamplingMethod] = None,
+        interpolation_method: Optional[ProfileInterpolationMethod] = None,
+        timestep: Optional[int] = None,
     ):
         """Constructor for the consumer.
 
@@ -54,6 +55,7 @@ class ControllerConsumer(AssetControllerAbstract):
         :param float max_power: Maximum power of the consumer.
         :param ProfileSamplingMethod sampling_method: Method for profile sampling.
         :param ProfileInterpolationMethod interpolation_method: Method for profile interpolation.
+        :param Optional[int] timestep: The simulation timestep in seconds.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
@@ -67,6 +69,7 @@ class ControllerConsumer(AssetControllerAbstract):
             profile=profile,
             sampling_method=sampling_method,
             interpolation_method=interpolation_method,
+            timestep=timestep,
         )
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
@@ -79,7 +82,7 @@ class ControllerConsumer(AssetControllerAbstract):
 
         if demand > self.max_power:
             logging.warning(
-                f"Demand of {self.name} is higher than maximum power of asset" f" at time {time}."
+                f"Demand of {self.name} is higher than maximum power of asset at time {time}."
             )
             return self.max_power
 

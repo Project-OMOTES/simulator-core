@@ -1,4 +1,4 @@
-#  Copyright (c) 2024. Deltares & TNO
+#  Copyright (c) 2025. Deltares & TNO
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 """Test profile interpolation module."""
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import patch
 
 import pandas as pd
 
@@ -23,7 +22,6 @@ from omotes_simulator_core.entities.assets.controller.profile_interpolation impo
     ProfileInterpolationMethod,
     ProfileInterpolator,
     ProfileSamplingMethod,
-    set_interpolation_timestep_and_simulation_start_time,
 )
 
 
@@ -46,23 +44,20 @@ class ProfileInterpolationTest(unittest.TestCase):
             }
         )
 
-        # Set global configuration
-        set_interpolation_timestep_and_simulation_start_time(3600.0, self.start_time)
-
         self.interpolator = ProfileInterpolator(
             profile=self.profile_data,
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
+            timestep=3600,
         )
 
     def test_profile_interpolator_init(self):
         """Test to initialize the profile interpolator."""
-        # Act & Assert
+        # Assert
         self.assertIsNotNone(self.interpolator.profile)
         self.assertEqual(self.interpolator.sampling_method, ProfileSamplingMethod.ACTUAL)
         self.assertEqual(self.interpolator.interpolation_method, ProfileInterpolationMethod.LINEAR)
-        self.assertEqual(self.interpolator.simulation_timestep, 3600.0)
-        self.assertEqual(self.interpolator.simulation_start_time, self.start_time)
+        self.assertEqual(self.interpolator.simulation_timestep, 3600)
         self.assertEqual(self.interpolator.start_index, 0)
         pd.testing.assert_frame_equal(self.interpolator.profile, self.profile_data)
 
@@ -80,77 +75,90 @@ class ProfileInterpolationTest(unittest.TestCase):
     def test_get_value_linear_interpolation(self):
         """Test linear interpolation between data points."""
         # Arrange
-        set_interpolation_timestep_and_simulation_start_time(1800.0, self.start_time)
         interpolator = ProfileInterpolator(
             profile=self.profile_data,
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
+            timestep=1800,
         )
-        test_time = self.start_time + timedelta(minutes=30)  # Halfway between first two points
+        test_time = self.start_time + timedelta(minutes=30)
 
         # Act
         value = interpolator.get_value(test_time)
 
         # Assert
-        expected_value = 250.0  # Linear interpolation between 100 and 400
-        self.assertAlmostEqual(value, expected_value, places=1)
+        self.assertAlmostEqual(value, 250.0, places=1)
 
-    def test_get_value_average_sampling(self):
-        """Test getting values with average sampling method."""
+    def test_all_interpolation_methods(self):
+        """Test all interpolation methods against pandas interpolation."""
         # Arrange
-        set_interpolation_timestep_and_simulation_start_time(7200.0, self.start_time)
-        interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.AVERAGE,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
+        timestep = 600
+        test_methods = [
+            ProfileInterpolationMethod.LINEAR,
+            ProfileInterpolationMethod.ZERO,
+            ProfileInterpolationMethod.SLINEAR,
+            ProfileInterpolationMethod.QUADRATIC,
+            ProfileInterpolationMethod.CUBIC,
+        ]
+
+        for interpolation_method in test_methods:
+            with self.subTest(method=interpolation_method.value):
+                # Act - Create ProfileInterpolator with 10-minute timestep
+                interpolator = ProfileInterpolator(
+                    profile=self.profile_data,
+                    sampling_method=ProfileSamplingMethod.ACTUAL,
+                    interpolation_method=interpolation_method,
+                    timestep=timestep,
+                )
+                profile_indexed = self.profile_data.set_index("date")
+                freq = pd.Timedelta(seconds=timestep)
+                expected_index = pd.date_range(
+                    start=self.profile_data["date"].iloc[0],
+                    end=self.profile_data["date"].iloc[-1],
+                    freq=freq,
+                )
+                expected_profile = profile_indexed.reindex(expected_index).interpolate(
+                    method=interpolation_method.value
+                )
+                expected_profile.index.name = "date"
+
+                # Assert
+                pd.testing.assert_frame_equal(
+                    interpolator.resampled_profile.set_index("date"),
+                    expected_profile,
+                    check_dtype=False,
+                    check_freq=False,
+                    check_exact=True,
+                )
+
+    def test_all_sampling_methods(self):
+        """Test all sampling methods with appropriate window sizes."""
+        # Arrange
         test_time = self.start_time
 
+        test_cases = [
+            (ProfileSamplingMethod.ACTUAL, 3600, 100.0, "testing actual value at time step"),
+            (ProfileSamplingMethod.AVERAGE, 7200, 250.0, "testing average in 2-hour window"),
+            (ProfileSamplingMethod.MAXIMUM, 10800, 400.0, "testing maximum in 3-hour window"),
+            (ProfileSamplingMethod.MINIMUM, 10800, 100.0, "testing minimum in 3-hour window"),
+        ]
         # Act
-        value = interpolator.get_value(test_time)
+        for sampling_method, timestep, expected_value, description in test_cases:
+            with self.subTest(method=sampling_method.value, description=description):
 
-        # Assert
-        self.assertIsInstance(value, float)
-        self.assertEqual(value, (100.0 + 400.0) / 2)
+                interpolator = ProfileInterpolator(
+                    profile=self.profile_data,
+                    sampling_method=sampling_method,
+                    interpolation_method=ProfileInterpolationMethod.LINEAR,
+                    timestep=timestep,
+                )
+                value = interpolator.get_value(test_time)
 
-    def test_get_value_maximum_sampling(self):
-        """Test getting values with maximum sampling method."""
-        # Arrange
-        set_interpolation_timestep_and_simulation_start_time(3600 * 3, self.start_time)
-        interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.MAXIMUM,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
-        test_time = self.start_time
+                # Assert
+                self.assertIsInstance(value, float)
+                self.assertEqual(value, expected_value)
 
-        # Act
-        value = interpolator.get_value(test_time)
-
-        # Assert
-        self.assertIsInstance(value, float)
-        self.assertEqual(value, 400.0)
-
-    def test_get_value_minimum_sampling(self):
-        """Test getting values with minimum sampling method."""
-        # Arrange
-        set_interpolation_timestep_and_simulation_start_time(3600 * 3, self.start_time)
-        interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.MINIMUM,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
-        test_time = self.start_time
-
-        # Act
-        value = interpolator.get_value(test_time)
-
-        # Assert
-        # Should return minimum of values in the window
-        self.assertIsInstance(value, float)
-        self.assertEqual(value, 100.0)
-
-    def test_get_value_time_not_found(self):
+    def test_get_value_returns_zero(self):
         """Test getting values for a time not in the profile."""
         # Arrange
         test_time = datetime(2022, 1, 1, 0, 0, 0)
@@ -160,36 +168,6 @@ class ProfileInterpolationTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(value, 0.0)
-
-    def test_different_interpolation_methods(self):
-        """Test different interpolation methods."""
-        # Test zero-order interpolation
-        zero_interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.ZERO,
-        )
-
-        # Test quadratic interpolation
-        quadratic_interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.QUADRATIC,
-        )
-
-        # Test cubic interpolation
-        cubic_interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.CUBIC,
-        )
-
-        # Act & Assert - just verify they initialize without errors
-        self.assertEqual(zero_interpolator.interpolation_method, ProfileInterpolationMethod.ZERO)
-        self.assertEqual(
-            quadratic_interpolator.interpolation_method, ProfileInterpolationMethod.QUADRATIC
-        )
-        self.assertEqual(cubic_interpolator.interpolation_method, ProfileInterpolationMethod.CUBIC)
 
     def test_empty_profile(self):
         """Test handling of empty profile."""
@@ -226,39 +204,7 @@ class ProfileInterpolationTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(interpolator.profile), 1)
-        # Should return original profile when less than 2 points
         pd.testing.assert_frame_equal(interpolator.resampled_profile, single_point_profile)
-
-    def test_profile_with_matching_timestep(self):
-        """Test profile that already matches the simulation timestep."""
-        # Arrange - profile already has 1-hour timestep
-        # Act
-        value = self.interpolator.get_value(self.start_time)
-
-        # Assert
-        self.assertEqual(value, 100.0)
-        # Should use original profile when timesteps match
-        pd.testing.assert_frame_equal(self.interpolator.resampled_profile, self.profile_data)
-
-    def test_set_global_configuration(self):
-        """Test setting global configuration for interpolation."""
-        # Arrange
-        new_timestep = 1800.0  # 30 minutes
-        new_start_time = datetime(2021, 2, 1, 0, 0, 0)
-
-        # Act
-        set_interpolation_timestep_and_simulation_start_time(new_timestep, new_start_time)
-
-        # Create new interpolator after setting global config
-        interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
-
-        # Assert
-        self.assertEqual(interpolator.simulation_timestep, new_timestep)
-        self.assertEqual(interpolator.simulation_start_time, new_start_time)
 
     def test_profile_sampling_method_enums(self):
         """Test ProfileSamplingMethod enum values."""
@@ -279,92 +225,94 @@ class ProfileInterpolationTest(unittest.TestCase):
         self.assertEqual(ProfileInterpolationMethod.QUADRATIC.value, "quadratic")
         self.assertEqual(ProfileInterpolationMethod.CUBIC.value, "cubic")
 
-    @patch("omotes_simulator_core.entities.assets.controller.profile_interpolation.logger")
-    def test_unknown_sampling_method_logs_error_and_raises_exception(self, mock_logger):
-        """Test that an unknown sampling method logs an error and raises ValueError."""
-        # Arrange
-        interpolator = ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
+    def test_unknown_sampling_method_raises_exception(self):
+        """Test that an unknown sampling method raises ValueError."""
 
-        # Create a mock sampling method with unknown value
+        # Arrange
         class MockSamplingMethod:
             value = "unknown_method"
 
-        # Directly assign the mock sampling method
-        interpolator.sampling_method = MockSamplingMethod()  # type: ignore
-
-        # Act & Assert
+        # Act
         with self.assertRaises(ValueError) as context:
-            interpolator.get_value(self.start_time)
+            ProfileInterpolator(
+                profile=self.profile_data,
+                sampling_method=MockSamplingMethod(),  # type: ignore
+                interpolation_method=ProfileInterpolationMethod.LINEAR,
+                timestep=3600,
+            )
 
-        # Assert the exception message
+        # Assert
         self.assertEqual(str(context.exception), "Unknown sampling method: unknown_method")
 
-        # Assert the error was logged
-        mock_logger.error.assert_called_once_with("Unknown sampling method: unknown_method")
-
-    @patch("omotes_simulator_core.entities.assets.controller.profile_interpolation.logger")
-    def test_no_simulation_timestep_logs_warning(self, mock_logger):
-        """Test that missing simulation timestep logs a warning."""
-        # Arrange - Temporarily set global configuration to None by directly modifying module vars
-        import omotes_simulator_core.entities.assets.controller.profile_interpolation as pi_module
-
-        original_timestep = pi_module._simulation_timestep
-        pi_module._simulation_timestep = None
+    def test_default_sampling_method_logs_info(self):
+        """Test that missing sampling method logs info and uses default."""
+        # Arrange
 
         # Act
-        ProfileInterpolator(
-            profile=self.profile_data,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
-
-        # Restore original value
-        pi_module._simulation_timestep = original_timestep
+        with self.assertLogs(
+            "omotes_simulator_core.entities.assets.controller.profile_interpolation",
+            level="INFO",
+        ) as log_context:
+            interpolator = ProfileInterpolator(
+                profile=self.profile_data,
+                sampling_method=None,
+                interpolation_method=ProfileInterpolationMethod.LINEAR,
+                timestep=3600,
+            )
 
         # Assert
-        mock_logger.warning.assert_called_once_with(
-            "No simulation timestep provided, using default of 3600 seconds (1 hour)"
+        self.assertEqual(interpolator.sampling_method, ProfileSamplingMethod.DEFAULT)
+        self.assertEqual(
+            log_context.output[0],
+            "INFO:omotes_simulator_core.entities.assets.controller.profile_interpolation:"
+            "No sampling method provided, using default: actual",
         )
 
-    @patch("omotes_simulator_core.entities.assets.controller.profile_interpolation.logger")
-    def test_no_simulation_start_time_logs_warning(self, mock_logger):
-        """Test that missing simulation start time logs a warning during interpolation."""
-        # Arrange - Create profile that needs interpolation (different timestep)
-        profile_30min = pd.DataFrame(
-            {
-                "date": [
-                    self.start_time,
-                    self.start_time + timedelta(minutes=30),
-                    self.start_time + timedelta(hours=1),
-                ],
-                "values": [100.0, 150.0, 200.0],
-            }
-        )
-
-        # Temporarily set start time to None by directly modifying module vars
-        import omotes_simulator_core.entities.assets.controller.profile_interpolation as pi_module
-
-        original_start_time = pi_module._simulation_start_time
-        pi_module._simulation_start_time = None
+    def test_default_interpolation_method_logs_info(self):
+        """Test that missing interpolation method logs info and uses default."""
+        # Arrange
 
         # Act
-        interpolator = ProfileInterpolator(
-            profile=profile_30min,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
-        )
-
-        # Restore original value
-        pi_module._simulation_start_time = original_start_time
+        with self.assertLogs(
+            "omotes_simulator_core.entities.assets.controller.profile_interpolation",
+            level="INFO",
+        ) as log_context:
+            interpolator = ProfileInterpolator(
+                profile=self.profile_data,
+                sampling_method=ProfileSamplingMethod.ACTUAL,
+                interpolation_method=None,
+                timestep=3600,
+            )
 
         # Assert
-        mock_logger.warning.assert_called_with(
-            "Could not interpolate because simulation start time not available, "
-            "using original profile"
+        self.assertEqual(interpolator.interpolation_method, ProfileInterpolationMethod.DEFAULT)
+        self.assertEqual(
+            log_context.output[0],
+            "INFO:omotes_simulator_core.entities.assets.controller.profile_interpolation:"
+            "No interpolation method provided, using default: linear",
         )
-        # Should use original profile when interpolation fails
-        pd.testing.assert_frame_equal(interpolator.resampled_profile, profile_30min)
+
+    def test_no_simulation_timestep_uses_default(self):
+        """Test that missing simulation timestep logs warning and uses default value."""
+        # Arrange
+
+        # Act
+        with self.assertLogs(
+            "omotes_simulator_core.entities.assets.controller.profile_interpolation",
+            level="WARNING",
+        ) as log_context:
+            interpolator = ProfileInterpolator(
+                profile=self.profile_data,
+                sampling_method=ProfileSamplingMethod.ACTUAL,
+                interpolation_method=ProfileInterpolationMethod.LINEAR,
+                timestep=None,
+            )
+
+        # Assert
+        self.assertEqual(interpolator.simulation_timestep, None)
+        self.assertIsNotNone(interpolator.resampled_profile)
+        self.assertEqual(
+            log_context.output[0],
+            "WARNING:omotes_simulator_core.entities.assets.controller.profile_interpolation:"
+            "No simulation timestep provided, using default of 3600 seconds (1 hour)",
+        )

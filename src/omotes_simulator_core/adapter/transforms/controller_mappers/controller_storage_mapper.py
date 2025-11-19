@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 
@@ -34,10 +36,13 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerStorageMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerStorage:
+    def to_entity(
+        self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    ) -> ControllerStorage:
         """Method to map an esdl asset to a storage entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
@@ -64,5 +69,6 @@ class ControllerStorageMapper(EsdlMapperAbstract):
             profile=profile,
             sampling_method=sampling_method,
             interpolation_method=interpolation_method,
+            timestep=timestep,
         )
         return contr_storage

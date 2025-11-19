@@ -25,10 +25,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorage,
 )
-from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileInterpolationMethod,
-    ProfileSamplingMethod,
-)
 
 
 class StorageControllerTest(unittest.TestCase):
@@ -51,8 +47,6 @@ class StorageControllerTest(unittest.TestCase):
             max_charge_power=1000000,
             max_discharge_power=-1000000,
             profile=self.profile,
-            sampling_method=ProfileSamplingMethod.ACTUAL,
-            interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
 
     def test_storage_init(self):
