@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="Untitled EnergySystem with return network" description="" id="e7b009e1-8e4a-46d0-bb70-d08af7e17be3_with_return_network" esdlVersion="v2507" version="4">
+<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="Untitled EnergySystem with return network" description="" id="e7b009e1-8e4a-46d0-bb70-d08af7e17be3_with_return_network" esdlVersion="v2507" version="6">
   <instance xsi:type="esdl:Instance" id="e0c9b698-3bf3-47fe-aea0-9a120fa6ee89" name="Untitled Instance">
     <area xsi:type="esdl:Area" id="919c382f-a01d-492a-8290-daa942d03efa" name="Untitled Area">
       <asset xsi:type="esdl:HeatStorage" id="11cc503d-534c-45f6-89dc-d2a3f47299ff" name="HeatStorage_11cc" fillLevel="0.5" maxDischargeRate="100.0" maxChargeRate="100.0" volume="100.0">
@@ -7,20 +7,20 @@
         <port xsi:type="esdl:InPort" id="47d7c914-90cc-40b0-96e2-4c03634f6d6c" name="In" connectedTo="41e751f5-3c52-4e7d-be91-c7c7c3425c6e" carrier="db75dded-49f5-4d9c-8172-f837b714476e"/>
         <port xsi:type="esdl:OutPort" id="65c5f555-f82e-4410-96d4-37575a73888d" name="Out" carrier="db75dded-49f5-4d9c-8172-f837b714476e_ret" connectedTo="9c6a60d6-915c-4cd7-b7fe-7977249fc8e6"/>
       </asset>
-      <asset xsi:type="esdl:HeatProducer" id="6ebb7d15-2e8b-467c-b9f7-2946be37930c" name="HeatProducer_6ebb">
+      <asset xsi:type="esdl:HeatProducer" id="6ebb7d15-2e8b-467c-b9f7-2946be37930c" name="HeatProducer_6ebb" power="12500000.0">
         <geometry xsi:type="esdl:Point" lat="51.93532908025873" lon="4.240947961807252" CRS="WGS84"/>
         <port xsi:type="esdl:OutPort" id="f80344b3-40e3-4e82-8b6c-50efd6194b0e" name="Out" connectedTo="2417963f-bdde-42df-9d38-859b23887cfb" carrier="db75dded-49f5-4d9c-8172-f837b714476e">
-          <profile xsi:type="esdl:InfluxDBProfile" measurement="WarmingUp default profiles" field="demand5_MW" host="https://profiles.warmingup.info" database="energy_profiles" filters="" startDate="2018-12-31T23:00:00.000000+0000" endDate="2019-12-31T22:00:00.000000+0000" id="6ac02ff2-d16d-4e8d-a6cf-108da713f97d" profileType="INPUT">
-            <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="93aa23ea-4c5d-4969-97d4-2a4b2720e523"/>
+          <profile xsi:type="esdl:InfluxDBProfile" multiplier="2.0" measurement="WarmingUp default profiles" field="demand5_MW" host="https://profiles.warmingup.info" database="energy_profiles" filters="" startDate="2018-12-31T23:00:00.000000+0000" endDate="2019-12-31T22:00:00.000000+0000" id="c3ff8d4d-68d0-45a5-9c39-6ebe7379178b" profileType="INPUT">
+            <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="e9405fc8-5e57-4df5-8584-4babee7cdf1b"/>
           </profile>
         </port>
         <port xsi:type="esdl:InPort" id="401d9e5d-938d-4dac-9432-13051992ae5d" name="In" carrier="db75dded-49f5-4d9c-8172-f837b714476e_ret" connectedTo="98ea8582-a3d8-44a3-a0a2-c558a9c9352c"/>
       </asset>
-      <asset xsi:type="esdl:HeatingDemand" id="77bf3478-421f-43fc-bbcc-bb6105d5bb95" name="HeatingDemand_77bf">
+      <asset xsi:type="esdl:HeatingDemand" id="77bf3478-421f-43fc-bbcc-bb6105d5bb95" name="HeatingDemand_77bf" power="7500000.0">
         <geometry xsi:type="esdl:Point" lat="51.93405900733476" lon="4.247696399688722" CRS="WGS84"/>
         <port xsi:type="esdl:InPort" id="8e7a5b13-9d0e-4702-8167-2d661b29ea4a" name="In" connectedTo="ccfaacc6-2c7d-4fb9-819e-642f83b26eaa" carrier="db75dded-49f5-4d9c-8172-f837b714476e">
-          <profile xsi:type="esdl:InfluxDBProfile" multiplier="0.5" measurement="WarmingUp default profiles" field="demand5_MW" host="https://profiles.warmingup.info" database="energy_profiles" filters="" startDate="2018-12-31T23:00:00.000000+0000" endDate="2019-12-31T22:00:00.000000+0000" id="fff21788-142c-478c-872c-5e7de62a4bd5" profileType="INPUT">
-            <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="93aa23ea-4c5d-4969-97d4-2a4b2720e523"/>
+          <profile xsi:type="esdl:InfluxDBProfile" multiplier="1.5" measurement="WarmingUp default profiles" field="demand5_MW" host="https://profiles.warmingup.info" database="energy_profiles" filters="" startDate="2018-12-31T23:00:00.000000+0000" endDate="2019-12-31T22:00:00.000000+0000" id="0646c37c-1f61-4379-aa8d-df2369f39eb1" profileType="INPUT">
+            <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="e9405fc8-5e57-4df5-8584-4babee7cdf1b"/>
           </profile>
         </port>
         <port xsi:type="esdl:OutPort" id="cf404e50-34ad-459c-8b3b-9c9a14eaf1a3" name="Out" carrier="db75dded-49f5-4d9c-8172-f837b714476e_ret" connectedTo="692db8a2-6ec5-4afd-b35e-d6c2da3cec0e"/>
@@ -141,8 +141,8 @@
       <carrier xsi:type="esdl:HeatCommodity" id="db75dded-49f5-4d9c-8172-f837b714476e" name="Heat" supplyTemperature="80.0"/>
       <carrier xsi:type="esdl:HeatCommodity" returnTemperature="50.0" name="Heat_ret" id="db75dded-49f5-4d9c-8172-f837b714476e_ret"/>
     </carriers>
-    <quantityAndUnits xsi:type="esdl:QuantityAndUnits" id="5bb55027-3f0d-4cc1-b4b0-3c3d9d1cd19c">
-      <quantityAndUnit xsi:type="esdl:QuantityAndUnitType" id="93aa23ea-4c5d-4969-97d4-2a4b2720e523" description="Energy in MWh" physicalQuantity="ENERGY" multiplier="MEGA" unit="WATTHOUR"/>
+    <quantityAndUnits xsi:type="esdl:QuantityAndUnits" id="5bb55027-3f0d-4cc1-b4b0-3c3d9d1cd19c">      
+      <quantityAndUnit xsi:type="esdl:QuantityAndUnitType" id="e9405fc8-5e57-4df5-8584-4babee7cdf1b" description="Power in MW" physicalQuantity="POWER" multiplier="MEGA" unit="WATT"/>
     </quantityAndUnits>
   </energySystemInformation>
 </esdl:EnergySystem>

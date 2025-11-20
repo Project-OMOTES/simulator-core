@@ -50,9 +50,15 @@ class HeatBufferAssetTest(unittest.TestCase):
     @patch.object(HeatBufferAsset, "get_thermal_equations")
     @patch.object(HeatBufferAsset, "get_press_to_node_equation")
     @patch.object(HeatBufferAsset, "get_volumetric_continuity_equation")
+    @patch.object(HeatBufferAsset, "get_internal_cont_equation")
     @patch.object(HeatBufferAsset, "get_mass_flow_equation")
     def test_get_equations(
-        self, mass_flow_eq_patch, volumetric_cont_eq_patch, press_to_node_eq_patch, thermal_eq_patch
+        self,
+        mass_flow_eq_patch,
+        internal_cont_eq_patch,
+        volumetric_cont_eq_patch,
+        press_to_node_eq_patch,
+        thermal_eq_patch,
     ) -> None:
         """Evaluate the retrieval of equations from the HeatBufferAsset object."""
         # Arrange
@@ -63,7 +69,8 @@ class HeatBufferAssetTest(unittest.TestCase):
         # Assert
         self.assertEqual(thermal_eq_patch.call_count, 2)
         self.assertEqual(press_to_node_eq_patch.call_count, 2)
-        self.assertEqual(volumetric_cont_eq_patch.call_count, 1)
+        self.assertEqual(volumetric_cont_eq_patch.call_count, 0)
+        self.assertEqual(internal_cont_eq_patch.call_count, 1)
         self.assertEqual(mass_flow_eq_patch.call_count, 1)
         self.assertEqual(len(equations), 6)
 

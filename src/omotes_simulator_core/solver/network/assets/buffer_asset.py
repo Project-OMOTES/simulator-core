@@ -101,7 +101,8 @@ class HeatBufferAsset(FallType):
         equations = [
             self.get_press_to_node_equation(0),  # Pressure balance at inlet (conn. pt -> node)
             self.get_press_to_node_equation(1),  # Pressure balance at outlet (conn. pt -> node)
-            self.get_volumetric_continuity_equation(),  # Volumetric continuity equation
+            self.get_internal_cont_equation(),  # Internal continuity equation
+            # self.get_volumetric_continuity_equation(),  # Volumetric continuity equation
             self.get_mass_flow_equation(0),  # Prescribed mass flow at inlet
             self.get_thermal_equations(0),  # Thermal equation at inlet
             self.get_thermal_equations(1),  # Thermal equation at outlet
@@ -139,7 +140,7 @@ class HeatBufferAsset(FallType):
                 ),
             ]
         )
-        equation_object.coefficients = np.array([rho_1, -1 * rho_0])
+        equation_object.coefficients = np.array([1 / rho_0, -1 / rho_1])
         equation_object.rhs = 0.0
 
         return equation_object
@@ -178,8 +179,41 @@ class HeatBufferAsset(FallType):
 
         return equation_object
 
+    def get_prescribe_temp_equation(self, connection_point: int) -> EquationObject:
+        """Gets a prescribed temperature equation for a connection point of the asset.
+
+        :param connection_point: The index of the connection point to get the equation for.
+        :type connection_point: int
+        :return: An equation object representing the prescribed temperature equation.
+        :rtype: EquationObject
+        """
+        if not self.is_connected(connection_point=connection_point):
+            raise ValueError(
+                f"Connection point {connection_point} of asset {self.name} is not connected to a"
+                + " node."
+            )
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=connection_point,
+                    use_relative_indexing=False,
+                )
+            ]
+        )
+        equation_object.coefficients = np.array([1.0])
+        equation_object.rhs = fluid_props.get_ie(
+            self.outlet_temperature if connection_point == 1 else self.inlet_temperature
+        )
+        return equation_object
+
     def get_thermal_equations(self, connection_point: int) -> EquationObject:
         """Gets a thermal equation for a connection point of the asset.
+
+        If the mass flow rate at the connection point is greater than the
+        massflow_zero_limit, a prescribed temperature equation is returned. Otherwise,
+        an internal energy to node equation is returned.
 
         :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int

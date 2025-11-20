@@ -88,18 +88,18 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
         self.network.get_node(node_cold).initial_temperature = self.temperature_cold
 
         # Set default mass flow for production and demand assets
-        self.mass_flow_production = 20.0 - 0.07394 / 2  # kg/s
+        self.mass_flow_production = 20.0  # kg/s
         self.mass_flow_demand = 15.0  # kg/s
-        self.mass_flow_storage = self.mass_flow_production - self.mass_flow_demand
+        self.mass_flow_storage = self.mass_flow_production - self.mass_flow_demand  # kg/s
 
         # - Heat buffer
-        self.heat_buffer_asset.inlet_massflow = -self.mass_flow_storage
+        self.heat_buffer_asset.inlet_massflow = self.mass_flow_storage
         self.heat_buffer_asset.inlet_temperature = self.temperature_hot
         self.heat_buffer_asset.outlet_temperature = self.temperature_cold
 
         # - Production asset
         self.production_asset.pre_scribe_mass_flow = False
-        self.production_asset.mass_flow_rate_set_point = -self.mass_flow_production
+        self.production_asset.mass_flow_rate_set_point = self.mass_flow_production
         self.production_asset.supply_temperature = self.temperature_hot
 
         # - Demand asset
@@ -160,11 +160,11 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             self.production_asset.prev_sol[
                 self.production_asset.get_index_matrix(
                     property_name="mass_flow_rate",
-                    connection_point=0,
+                    connection_point=1,
                     use_relative_indexing=True,
                 )
             ],
-            -self.mass_flow_production,
+            self.mass_flow_production,
             places=2,
         )
 
@@ -244,10 +244,10 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             self.heat_buffer_asset.prev_sol[
                 self.heat_buffer_asset.get_index_matrix(
                     property_name="mass_flow_rate",
-                    connection_point=0,
+                    connection_point=1,
                     use_relative_indexing=True,
                 )
             ],
-            -self.mass_flow_storage,
+            self.mass_flow_storage,
             places=2,
         )
