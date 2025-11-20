@@ -77,7 +77,7 @@ class ControllerStorage(AssetControllerAbstract):
                     return float(self.profile["values"][index])
         return 0
 
-    def set_state(self, state):
+    def set_state(self, state: dict[str, float]) -> None:
         """Update maximum charge and discharge power."""
         if bool(state):
             self.max_charge_power = state["max_charge_power"]

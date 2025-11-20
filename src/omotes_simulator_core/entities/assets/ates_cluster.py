@@ -130,9 +130,9 @@ class AtesCluster(AssetAbstract):
         self.salinity = salinity  # ppm
         self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
-        self.wellbore_diameter = 31  # inch
-        self.max_charge_volume_flow = 500
-        self.max_discharge_volume_flow = 500
+        self.wellbore_diameter = 31.0  # inch
+        self.max_charge_volume_flow = 500.0
+        self.max_discharge_volume_flow = 500.0
 
         # Output list
         self.output: list = []
@@ -322,7 +322,7 @@ class AtesCluster(AssetAbstract):
         self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
 
-    def get_state(self):
+    def get_state(self) -> dict[str, float]:
         """Function to calculate the maximum charge and discharge rate based on NVOE."""
         P = self.aquifer_depth * 0.1  # bar assume pressure increase 1 bar per 10 m depth
 
@@ -369,7 +369,7 @@ class AtesCluster(AssetAbstract):
 
         return {"max_charge_power": max_charge_power, "max_discharge_power": max_discharge_power}
 
-    def _get_max_flowrate_extraction_norm(self, P, T) -> float:
+    def _get_max_flowrate_extraction_norm(self, P: float, T: float) -> float:
         """Function to calculate the maximum flowrate of production in norm."""
         grav_accel = 9.81  # m/s2
         saline_density = self._get_saline_density(P, T)
@@ -391,7 +391,7 @@ class AtesCluster(AssetAbstract):
 
         return max_flowrate
 
-    def _get_max_flowrate_injection_norm(self, P, T) -> float:
+    def _get_max_flowrate_injection_norm(self, P: float, T: float) -> float:
         """Function to calculate the maximum flowrate of injection in norm."""
         grav_accel = 9.81  # m/s2
         saline_density = self._get_saline_density(P, T)
@@ -417,7 +417,7 @@ class AtesCluster(AssetAbstract):
 
         return max_flowrate
 
-    def _get_saline_density(self, P, T) -> float:
+    def _get_saline_density(self, P: float, T: float) -> float:
         """Function to calculate the saline density."""
         P = P * 1e5 * 1e-6  # Bar to MPa
         S = self.salinity * 1e-6  # ppm to kg/kg
@@ -449,7 +449,7 @@ class AtesCluster(AssetAbstract):
 
         return density
 
-    def _get_saline_viscosity(self, P, T) -> float:
+    def _get_saline_viscosity(self, P: float, T: float) -> float:
         """Function to calculate the saline viscosity."""
         P = P * 1e5 * 1e-6  # Bar to MPa
         S = self.salinity * 1e-6  # ppm to kg/kg
