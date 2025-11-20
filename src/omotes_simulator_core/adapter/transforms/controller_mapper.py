@@ -34,7 +34,9 @@ from omotes_simulator_core.entities.assets.controller import (
     ControllerIdealHeatStorage,
     ControllerNetwork,
     ControllerProducer,
-    ControllerStorageAbstract,
+)
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
@@ -48,17 +50,20 @@ class NetworkItems:
     heat_transfer_secondary: list[ControllerHeatTransferAsset]
     consumer: list[ControllerConsumer]
     producer: list[ControllerProducer]
-    storage: list[ControllerStorageAbstract]
+    storage: list[ControllerAtestStorage | ControllerIdealHeatStorage]
 
     def add(
-        self, asset: ControllerStorageAbstract | ControllerProducer | ControllerConsumer
+        self,
+        asset: AssetControllerAbstract,
     ) -> None:
         """Add the asset to the correct list."""
         if isinstance(asset, ControllerConsumer):
             self.consumer.append(asset)
         elif isinstance(asset, ControllerProducer):
             self.producer.append(asset)
-        elif isinstance(asset, ControllerStorageAbstract):
+        elif isinstance(asset, ControllerAtestStorage) or isinstance(
+            asset, ControllerIdealHeatStorage
+        ):
             self.storage.append(asset)
         else:
             raise ValueError("Asset type not recognized.")
@@ -189,7 +194,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         self,
         graph: Graph,
         network_list: list[NetworkItems],
-        assets: list[ControllerConsumer | ControllerProducer | ControllerStorageAbstract],
+        assets: list[
+            ControllerConsumer
+            | ControllerProducer
+            | ControllerAtestStorage
+            | ControllerIdealHeatStorage
+        ],
     ) -> None:
         """Method to move assets to networks.
 

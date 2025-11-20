@@ -64,7 +64,7 @@ class PyjniusLoader:
         import glob
         import urllib.request
 
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         # First a check if there are already jar files present.
         base_path = os.path.dirname(__file__)

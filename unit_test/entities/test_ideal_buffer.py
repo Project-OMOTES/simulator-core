@@ -15,7 +15,6 @@
 
 """Test Ideal Buffer."""
 import unittest
-from unittest.mock import patch
 
 import numpy as np
 
@@ -216,7 +215,10 @@ class HeatBufferTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.CHARGING)
         self.assertEqual(self.heat_buffer.temperature_in, 333.15)
-        self.assertEqual(self.heat_buffer.temperature_out, self.heat_buffer.solver_asset.get_temperature(1))  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.temperature_out,
+            self.heat_buffer.solver_asset.get_temperature(1),  # type: ignore
+        )
 
     def test_set_temperature_setpoints_discharging(self) -> None:
         """Test setting temperature setpoints of a HeatBuffer when discharging."""
@@ -232,7 +234,10 @@ class HeatBufferTest(unittest.TestCase):
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertEqual(self.heat_buffer.temperature_in, self.heat_buffer.solver_asset.get_temperature(0))  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.temperature_in,
+            self.heat_buffer.solver_asset.get_temperature(0),  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_out, 353.15)
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.DISCHARGING)
 
@@ -250,8 +255,14 @@ class HeatBufferTest(unittest.TestCase):
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertEqual(self.heat_buffer.temperature_in, self.heat_buffer.solver_asset.get_temperature(0))  # type: ignore
-        self.assertEqual(self.heat_buffer.temperature_out, self.heat_buffer.solver_asset.get_temperature(1))  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.temperature_in,
+            self.heat_buffer.solver_asset.get_temperature(0),  # type: ignore
+        )
+        self.assertEqual(
+            self.heat_buffer.temperature_out,
+            self.heat_buffer.solver_asset.get_temperature(1),  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.IDLE)
 
     def test_get_state(self) -> None:

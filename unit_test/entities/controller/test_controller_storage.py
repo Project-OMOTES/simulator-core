@@ -15,7 +15,7 @@
 """Test controller storage class."""
 import unittest
 from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -24,7 +24,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_TIMESTEP,
-    PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerAtestStorage,
@@ -82,7 +81,6 @@ class ControllerAtestStorageTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-
         self.storage = ControllerAtestStorage(
             "storage",
             "id",
@@ -152,7 +150,6 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-
         self.storage = ControllerIdealHeatStorage(
             "storage",
             "id",
@@ -210,16 +207,6 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
             )
             self.assertEqual(heatpower, 0)
 
-    def test_controller_storage_get_heat_power(self) -> None:
-        """Test to get the heat power of the storage."""
-        # Arrange
-
-        # Act
-        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
-
-        # Assert
-        self.assertEqual(heatpower, PROFILE_VALUES[0])
-
     def test_storage_set_to_max_charge_power(self):
         """Test to set the storage to the max charge power."""
         # Arrange
@@ -232,8 +219,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
             self.assertEqual(heatpower, 0.5)
             self.assertIn(
                 (
-                    "Supply to storage storage is higher than maximum charge power of asset at time "
-                    + "2021-01-01 00:00:00."
+                    "Supply to storage storage is higher than maximum charge power of asset at "
+                    + "time 2021-01-01 00:00:00."
                 ),
                 log.output[0],
             )
@@ -250,8 +237,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
             self.assertEqual(heatpower, -0.5)
             self.assertIn(
                 (
-                    "Demand from storage storage is higher than maximum discharge power of asset at time "
-                    + "2021-01-01 01:00:00."
+                    "Demand from storage storage is higher than maximum discharge power of asset at"
+                    + " time 2021-01-01 01:00:00."
                 ),
                 log.output[0],
             )

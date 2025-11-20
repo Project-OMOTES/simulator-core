@@ -75,7 +75,7 @@ class HeatBufferAssetTest(unittest.TestCase):
         self.assertEqual(len(equations), 6)
 
     def test_get_equation_insufficient_nodes(self) -> None:
-        """Evaluate the retrieval of equations from the HeatBufferAsset object with insufficient nodes."""
+        """Retrieval of equations from the HeatBufferAsset object with insufficient nodes."""
         # Arrange
         self.asset.connected_nodes = {}
 
@@ -88,7 +88,7 @@ class HeatBufferAssetTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "The number of connected nodes must be 2!")
 
     def test_get_equations_invalid_number_of_unknowns(self) -> None:
-        """Evaluate the retrieval of equations from the HeatBufferAsset object with more unknowns."""
+        """Retrieval of equations from the HeatBufferAsset object with more unknowns."""
         # Arrange
         self.asset.number_of_unknowns = 4
 
@@ -101,7 +101,7 @@ class HeatBufferAssetTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "The number of unknowns must be 6!")
 
     def test_get_equations_less_unknowns(self) -> None:
-        """Evaluate the retrieval of equations from the HeatBufferAsset object with less unknowns."""
+        """Retrieval of equations from the HeatBufferAsset object with less unknowns."""
         # Arrange
         self.asset.number_of_unknowns = 2
 
@@ -218,7 +218,7 @@ class HeatBufferAssetTest(unittest.TestCase):
             + self.asset.heat_flux,
         )
 
-    @patch.object(FallType, "get_prescribe_temp_equation")
+    @patch.object(HeatBufferAsset, "get_prescribe_temp_equation")
     def test_get_thermal_equations_higher_than_massflow_threshold(self, mock_energy_eq) -> None:
         """Evaluate thermal equations higher than threshold massflow.
 

@@ -22,7 +22,6 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_FILL_LEVEL,
     PROPERTY_TIMESTEP,
-    PROPERTY_VOLUME,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
@@ -272,8 +271,8 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         # Find the closest time within 1 hour (3600 seconds)
         mask = time_diffs < 3600
         if not mask.any():
-            # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
-            # the maximum fill-level.
+            # TODO: The loop is not complete as the asset also has a fill-level that should not
+            # surpass the maximum fill-level.
             logging.warning(
                 "No profile value found for storage %s at time %s. Returning 0.0 power.",
                 self.name,
@@ -306,34 +305,6 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
             return self.effective_max_discharge_power
         else:
             return power_value
-
-        # # Check if the selected time is in the profile.
-        # # TODO: Current implementation loops over the entire profile; should be improved!
-        # # TODO: Unclear why there is a timestep of 1 hour in the profile.
-        # for index in range(self.start_index, len(self.profile)):
-        #     if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
-        #         self.start_index = index
-        #         if self.profile["values"][index] > self.effective_max_charge_power:
-        #             logging.warning(
-        #                 "Supply to storage %s is higher than maximum charge power of asset"
-        #                 + " at time %s.",
-        #                 self.name,
-        #                 time,
-        #             )
-        #             return self.effective_max_charge_power
-        #         elif self.profile["values"][index] < self.effective_max_discharge_power:
-        #             logging.warning(
-        #                 "Demand from storage %s is higher than maximum discharge power of asset"
-        #                 + " at time %s.",
-        #                 self.name,
-        #                 time,
-        #             )
-        #             return self.effective_max_discharge_power
-        #         else:
-        #             return float(self.profile["values"][index])
-        # # TODO: The loop is not complete as the asset also has a fill-level that should not surpass
-        # # the maximum fill-level.
-        # return 0.0
 
     def get_max_discharge_power(
         self,

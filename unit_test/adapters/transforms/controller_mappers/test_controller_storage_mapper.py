@@ -83,11 +83,29 @@ class TestControllerIdealHeatStorageMapper(unittest.TestCase):
         self.assertEqual(controller_storage.temperature_in, 353.15)
         self.assertEqual(controller_storage.temperature_out, 323.15)
         # - Volume related properties
-        self.assertEqual(controller_storage.fill_level, 0.5)
-        self.assertEqual(controller_storage.volume, 1.0)
-        self.assertEqual(controller_storage.current_volume, 0.5 * 1.0)
+        self.assertEqual(
+            controller_storage.fill_level, storage_assets[0].get_property("fillLevel", 9999)
+        )
+        self.assertEqual(controller_storage.volume, storage_assets[0].get_property("volume", 9999))
+        self.assertEqual(
+            controller_storage.current_volume,
+            storage_assets[0].get_property("fillLevel", 9999)
+            * storage_assets[0].get_property("volume", 9999),
+        )
         # - Power related properties
-        self.assertEqual(controller_storage.max_charge_power, 100.0)
-        self.assertEqual(controller_storage.max_discharge_power, 100.0)
-        self.assertEqual(controller_storage.effective_max_charge_power, 100.0)
-        self.assertEqual(controller_storage.effective_max_discharge_power, 100.0)
+        self.assertEqual(
+            controller_storage.max_charge_power,
+            storage_assets[0].get_property("maxChargeRate", 9999),
+        )
+        self.assertEqual(
+            controller_storage.max_discharge_power,
+            storage_assets[0].get_property("maxDischargeRate", 9999),
+        )
+        self.assertEqual(
+            controller_storage.effective_max_charge_power,
+            storage_assets[0].get_property("maxChargeRate", 9999),
+        )
+        self.assertEqual(
+            controller_storage.effective_max_discharge_power,
+            storage_assets[0].get_property("maxDischargeRate", 9999),
+        )
