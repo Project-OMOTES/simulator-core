@@ -42,13 +42,16 @@ class ControllerConsumer(AssetControllerAbstract):
 
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
+        :param float temperature_in: Temperature input of the consumer.
+        :param float temperature_out: Temperature output of the consumer.
+        :param float max_power: Maximum power of the consumer.
+        :param pd.DataFrame profile: Resampled profile based on interpolation and sampling methods.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
         self.temperature_out = temperature_out
-        self.profile: pd.DataFrame = profile
-        self.start_index = 0
         self.max_power: float = max_power
+        self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -56,15 +59,18 @@ class ControllerConsumer(AssetControllerAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        for index in range(self.start_index, len(self.profile)):
-            if abs((self.profile["date"][index].to_pydatetime() - time).total_seconds()) < 3600:
-                self.start_index = index
-                if self.profile["values"][index] > self.max_power:
-                    logging.warning(
-                        f"Demand of {self.name} is higher than maximum power of asset"
-                        f" at time {time}."
-                    )
-                    return self.max_power
-                else:
-                    return float(self.profile["values"][index])
-        return 0
+        if self.profile.empty:
+            return 0.0
+
+        try:
+            demand = float(self.profile.loc[time, "values"])
+        except KeyError:
+            return 0.0
+
+        if demand > self.max_power:
+            logging.warning(
+                f"Demand of {self.name} is higher than maximum power of asset at time {time}."
+            )
+            return self.max_power
+        else:
+            return demand
