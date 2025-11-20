@@ -37,6 +37,7 @@ from omotes_simulator_core.entities.assets.utils import (
     kelvin_to_celcius,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,9 @@ class AtesCluster(AssetAbstract):
         self.salinity = salinity  # ppm
         self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
+        self.wellbore_diameter = 31.0  # inch
+        self.max_charge_volume_flow = 500.0
+        self.max_discharge_volume_flow = 500.0
 
         # Output list
         self.output: list = []
@@ -237,7 +241,7 @@ class AtesCluster(AssetAbstract):
         AQUIFER_PERM_Z = AQUIFER_PERM_XY / self.aquifer_anisotropy
         SALINITY = self.salinity
         WELL2_X = self.well_distance + 300
-        CASING_SIZE = self.well_casing_size
+        CASING_SIZE = self.wellbore_diameter
 
         xml_str = xml_str.replace("$NZ$", str(NZ))
         xml_str = xml_str.replace("$MODEL_TOP$", str(MODEL_TOP))
@@ -281,30 +285,184 @@ class AtesCluster(AssetAbstract):
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
-        volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline
-        # density needs to change with PVT calculation
+        saline_density = self._get_saline_density(
+            20, kelvin_to_celcius((self.hot_well_temperature + self.cold_well_temperature) / 2)
+        )
+
+        volume_flow = self.mass_flowrate * 3600 / saline_density  # convert to second and
+        if volume_flow > 0:
+            volume_flow = min(volume_flow, self.max_charge_volume_flow)
+        if volume_flow < 0:
+            volume_flow = -1 * min(abs(volume_flow), self.max_discharge_volume_flow)
+
+        # hardcoded saline
         timestep = self.time_step / 3600  # convert to hours
 
-        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
-        # and second element is for injection well, positive flow is going upward and negative flow
-        # is downward
+        rosim_input_flow = [volume_flow, -1 * volume_flow]  # the first-element is for hot well
+        # and the second-element is for cold well. positive flow is charge and negative flow
+        # is discharge
 
         if volume_flow > 0:
             rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
-            # injection well to make sure it is not used
+        # injection well to make sure it is not used
         elif volume_flow < 0:
             rosim_input_temperature = [
                 -1,
                 kelvin_to_celcius(self.temperature_out),
             ]  # Celcius, -1 in
-            # producer well to make sure it is not used
+        # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
-            # sure it is not used
+        # sure it is not used
 
         ates_temperature = self.rosim.calcTimeStepAndGetTemps(
-            rosim_input__flow, rosim_input_temperature, timestep
+            rosim_input_flow, rosim_input_temperature, timestep
         )
 
         self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
+
+    def get_state(self) -> dict[str, float]:
+        """Function to calculate the maximum charge and discharge rate based on NVOE."""
+        P = self.aquifer_depth * 0.1  # bar assume pressure increase 1 bar per 10 m depth
+
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        water_density = fluid_props.get_density(average_temperature)
+        water_heat_capacity = fluid_props.get_heat_capacity(average_temperature)
+
+        max_extraction_flow_cold_well = self._get_max_flowrate_extraction_norm(
+            P, kelvin_to_celcius(self.cold_well_temperature)
+        )
+        max_injection_flow_cold_well = self._get_max_flowrate_injection_norm(
+            P, kelvin_to_celcius(self.cold_well_temperature)
+        )
+
+        max_extraction_flow_hot_well = self._get_max_flowrate_extraction_norm(
+            P, kelvin_to_celcius(self.hot_well_temperature)
+        )
+        max_injection_flow_hot_well = self._get_max_flowrate_injection_norm(
+            P, kelvin_to_celcius(self.hot_well_temperature)
+        )
+
+        self.max_charge_volume_flow = min(
+            max_extraction_flow_cold_well, max_injection_flow_hot_well
+        )
+        self.max_discharge_volume_flow = min(
+            max_injection_flow_cold_well, max_extraction_flow_hot_well
+        )
+
+        max_charge_power = (
+            (self.hot_well_temperature - self.cold_well_temperature)
+            * self.max_charge_volume_flow
+            * water_density
+            / 3600
+            * water_heat_capacity
+        )
+
+        max_discharge_power = (
+            (self.hot_well_temperature - self.cold_well_temperature)
+            * self.max_discharge_volume_flow
+            * water_density
+            / 3600
+            * water_heat_capacity
+        )
+
+        return {"max_charge_power": max_charge_power, "max_discharge_power": max_discharge_power}
+
+    def _get_max_flowrate_extraction_norm(self, P: float, T: float) -> float:
+        """Function to calculate the maximum flowrate of production in norm."""
+        grav_accel = 9.81  # m/s2
+        saline_density = self._get_saline_density(P, T)
+        saline_viscosity = self._get_saline_viscosity(P, T)
+        aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        # diameter
+        well_radius = 0.5 * self.wellbore_diameter * 0.0254  # m
+
+        max_extract_flow_velocity = (
+            2 * 60 * 60 * aquifer_permeability * saline_density * grav_accel / saline_viscosity
+        )  # m/h
+
+        max_flowrate = (
+            2 * math.pi * well_radius * self.aquifer_thickness * max_extract_flow_velocity
+        )
+
+        max_flowrate = max_flowrate * self.aquifer_depth * 0.01  # using depth factor because ATES
+        # is deeper than WKO
+
+        return max_flowrate
+
+    def _get_max_flowrate_injection_norm(self, P: float, T: float) -> float:
+        """Function to calculate the maximum flowrate of injection in norm."""
+        grav_accel = 9.81  # m/s2
+        saline_density = self._get_saline_density(P, T)
+        saline_viscosity = self._get_saline_viscosity(P, T)
+        aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        # diameter
+        well_radius = 0.5 * self.wellbore_diameter * 0.0254  # m
+
+        cloggingVel = 0.3
+        membraneFilterIndex = 0.1
+        equivLoadHoursPerYear = 3500
+        max_infiltrate_flow_velocity = (
+            1000
+            * math.pow(
+                576 * aquifer_permeability * saline_density * grav_accel / saline_viscosity, 0.6
+            )
+            * math.sqrt(cloggingVel / (2 * membraneFilterIndex * equivLoadHoursPerYear))
+        )
+
+        max_flowrate = (
+            2 * math.pi * well_radius * self.aquifer_thickness * max_infiltrate_flow_velocity
+        )  # m/h
+
+        return max_flowrate
+
+    def _get_saline_density(self, P: float, T: float) -> float:
+        """Function to calculate the saline density."""
+        P = P * 1e5 * 1e-6  # Bar to MPa
+        S = self.salinity * 1e-6  # ppm to kg/kg
+
+        density_fresh = 1 + 1e-6 * (
+            -80.0 * T
+            - 3.3 * T * T
+            + 0.00175 * T * T * T
+            + 489.0 * P
+            - 2.0 * T * P
+            + 0.016 * T * T * P
+            - 1.3e-5 * T * T * T * P
+            - 0.333 * P * P
+            - 0.002 * T * P * P
+        )
+
+        density = density_fresh + S * (
+            0.668
+            + 0.44 * S
+            + 1e-6
+            * (
+                300.0 * P
+                - 2400.0 * P * S
+                + T * (80.0 + 3.0 * T - 3300.0 * S - 13.0 * P + 47.0 * P * S)
+            )
+        )
+
+        density = density * 1000  # g/cm3 to kg/m3
+
+        return density
+
+    def _get_saline_viscosity(self, P: float, T: float) -> float:
+        """Function to calculate the saline viscosity."""
+        P = P * 1e5 * 1e-6  # Bar to MPa
+        S = self.salinity * 1e-6  # ppm to kg/kg
+
+        viscosity = (
+            0.1
+            + 0.333 * S
+            + (1.65 + 91.90 * S * S * S)
+            * math.exp(
+                -(0.42 * math.pow((math.pow(S, 0.8) - 0.17), 2.0) + 0.045) * math.pow(T, 0.8)
+            )
+        )
+
+        viscosity = viscosity * 1e-3  # cP to Pas
+
+        return viscosity
