@@ -20,7 +20,6 @@ from enum import Enum
 from typing import Optional
 
 import pandas as pd
-from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
 
