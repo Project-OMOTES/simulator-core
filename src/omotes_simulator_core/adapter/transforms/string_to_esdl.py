@@ -31,6 +31,7 @@ class OmotesAssetLabels(str, Enum):
     TRANSPORT = "transport"
     JOINT = "joint"
     STORAGE = "storage"
+    ATES = "ates"
     HEAT_PUMP = "heat_pump"
     HEAT_EXCHANGER = "heat_exchanger"
 
@@ -64,7 +65,8 @@ class StringEsdlAssetMapper:
             OmotesAssetLabels.PIPE: [esdl.Pipe],
             OmotesAssetLabels.TRANSPORT: [esdl.Transport],
             OmotesAssetLabels.JOINT: [esdl.Joint],
-            OmotesAssetLabels.STORAGE: [esdl.ATES],
+            OmotesAssetLabels.STORAGE: [esdl.HeatStorage],
+            OmotesAssetLabels.ATES: [esdl.ATES],
             OmotesAssetLabels.HEAT_PUMP: [esdl.HeatPump],
             OmotesAssetLabels.HEAT_EXCHANGER: [esdl.HeatExchange],
         }

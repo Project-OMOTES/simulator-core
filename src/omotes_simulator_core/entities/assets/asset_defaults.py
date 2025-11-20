@@ -106,6 +106,14 @@ class HeatExchangerDefaults:
     heat_transfer_efficiency: float = 1.0
 
 
+@dataclass
+class HeatBufferDefaults:
+    """Class containing the default values for Heat Buffer."""
+
+    volume: float = 1  # m3
+    fill_level: float = 0.5  # fraction 0-1
+
+
 # Default names
 PROPERTY_HEAT_DEMAND = "heat_demand"
 PROPERTY_HEAT_DEMAND_SET_POINT = "heat_demand_set_point"
@@ -134,9 +142,13 @@ PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
 PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
+PROPERTY_VOLUME = "volume"
+PROPERTY_FILL_LEVEL = "fill_level"
+PROPERTY_TIMESTEP = "time_step"
 
 PRIMARY = "primary"
 SECONDARY = "secondary"
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()
+HEAT_BUFFER_DEFAULTS = HeatBufferDefaults()
