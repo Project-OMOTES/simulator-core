@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing classes for profile data sampling and interpolation."""
 
-import datetime
 import logging
 import math
 from enum import Enum
@@ -93,12 +92,8 @@ class ProfileInterpolator:
         self.sampling_method = sampling_method
         self.interpolation_method = interpolation_method
         self.simulation_timestep = timestep
-        self.start_index = 0
-        self.start_index_resampled = 0
-        self._interpolator: Optional[interp1d] = None
-        self.resampled_profile = self._resample_profile()
 
-    def _resample_profile(self) -> pd.DataFrame:
+    def get_resampled_profile(self) -> pd.DataFrame:
         """Resample the profile to match the desired timestep using SciPy interpolation.
 
         :return: Resampled profile.
@@ -112,8 +107,11 @@ class ProfileInterpolator:
         else:
             timestep = self.simulation_timestep
 
-        # Return empty profile if it has no data
+        # Return original profile if it has only one data point
         if len(self.profile) < 2:
+            logger.warning(
+                "Profile has less than 2 data points, profile resampling is not applied."
+            )
             return self.profile
 
         profile_timestep = float(
@@ -123,7 +121,9 @@ class ProfileInterpolator:
             ).total_seconds()
         )
 
-        # Sample to greatest common divider - workaround the limitation of the rolling function
+        # Sample to greatest common divider (GCD) - workaround the limitation of the rolling
+        # function: if rolling window uses large timestep then the data points in between
+        # will not be accounted for in the sampling. Hence, sampling with GCD is needed.
         gcd_seconds = math.gcd(int(profile_timestep), int(timestep))
         minor_step = pd.to_timedelta(gcd_seconds, unit="s")
         index_minor = pd.date_range(
@@ -136,6 +136,7 @@ class ProfileInterpolator:
         )
 
         points_in_window = int(timestep / gcd_seconds)
+        # Indexer to carry out a forward rolling step. It follows the example in the pandas api.
         indexer = pd.api.indexers.FixedForwardWindowIndexer(window_size=points_in_window)
 
         # Map sampling methods to their corresponding pandas rolling functions
@@ -148,28 +149,5 @@ class ProfileInterpolator:
             ProfileSamplingMethod.MINIMUM: lambda: rolling.min(),
         }
 
-        if self.sampling_method not in profile_sampling_methods:
-            logger.error(f"Unknown sampling method: {self.sampling_method.value}")
-            raise ValueError(f"Unknown sampling method: {self.sampling_method.value}")
-
         df_indexer = profile_sampling_methods[self.sampling_method]()
         return pd.DataFrame({"date": df_indexer.index, "values": df_indexer.values})
-
-    def get_value(self, time: datetime.datetime) -> float:
-        """Get interpolated value at the specified time.
-
-        :param datetime.datetime time: Time for which to get the value
-        :return: Interpolated value
-        """
-        for index_resampled in range(self.start_index_resampled, len(self.resampled_profile)):
-            if (
-                abs(
-                    (
-                        self.resampled_profile["date"].iloc[index_resampled].to_pydatetime() - time
-                    ).total_seconds()
-                )
-                < 1e-6
-            ):
-                self.start_index_resampled = index_resampled
-                return float(self.resampled_profile["values"].iloc[index_resampled])
-        return 0.0

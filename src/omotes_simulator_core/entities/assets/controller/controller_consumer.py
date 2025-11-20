@@ -16,17 +16,11 @@
 
 import datetime
 import logging
-from typing import Optional
 
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
-)
-from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileInterpolationMethod,
-    ProfileInterpolator,
-    ProfileSamplingMethod,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,9 +37,6 @@ class ControllerConsumer(AssetControllerAbstract):
         temperature_out: float,
         max_power: float,
         profile: pd.DataFrame,
-        sampling_method: Optional[ProfileSamplingMethod] = None,
-        interpolation_method: Optional[ProfileInterpolationMethod] = None,
-        timestep: Optional[int] = None,
     ):
         """Constructor for the consumer.
 
@@ -54,24 +45,13 @@ class ControllerConsumer(AssetControllerAbstract):
         :param float temperature_in: Temperature input of the consumer.
         :param float temperature_out: Temperature output of the consumer.
         :param float max_power: Maximum power of the consumer.
-        :param ProfileSamplingMethod sampling_method: Method for profile sampling.
-        :param ProfileInterpolationMethod interpolation_method: Method for profile interpolation.
-        :param Optional[int] timestep: The simulation timestep in seconds.
+        :param pd.DataFrame profile: Resampled profile based on interpolation and sampling methods.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
         self.temperature_out = temperature_out
-        self.profile: pd.DataFrame = profile
-        self.start_index = 0
         self.max_power: float = max_power
-
-        # Create profile interpolator
-        self.profile_interpolator = ProfileInterpolator(
-            profile=profile,
-            sampling_method=sampling_method,
-            interpolation_method=interpolation_method,
-            timestep=timestep,
-        )
+        self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -79,15 +59,18 @@ class ControllerConsumer(AssetControllerAbstract):
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
         """
-        demand = self.profile_interpolator.get_value(time)
+        if self.profile.empty:
+            return 0.0
+
+        try:
+            demand = float(self.profile.loc[time, "values"])
+        except KeyError:
+            return 0.0
 
         if demand > self.max_power:
             logging.warning(
                 f"Demand of {self.name} is higher than maximum power of asset at time {time}."
             )
             return self.max_power
-
-        return demand
-
-
-# TODO: The max_power constraint check may never fail because max_power is inf by default
+        else:
+            return demand

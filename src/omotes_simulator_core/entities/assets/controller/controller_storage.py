@@ -23,11 +23,7 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
-from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
-    ProfileInterpolationMethod,
-    ProfileInterpolator,
-    ProfileSamplingMethod,
-)
+
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +40,6 @@ class ControllerStorage(AssetControllerAbstract):
         max_charge_power: float,
         max_discharge_power: float,
         profile: pd.DataFrame,
-        sampling_method: Optional[ProfileSamplingMethod] = None,
-        interpolation_method: Optional[ProfileInterpolationMethod] = None,
-        timestep: Optional[int] = None,
     ):
         """Constructor for the storage.
 
@@ -56,25 +49,14 @@ class ControllerStorage(AssetControllerAbstract):
         :param float temperature_out: Temperature output of the storage.
         :param float max_charge_power: Maximum charge power of the storage.
         :param float max_discharge_power: Maximum discharge power of the storage.
-        :param ProfileSamplingMethod sampling_method: Method for profile sampling.
-        :param ProfileInterpolationMethod interpolation_method: Method for profile interpolation.
-        :param Optional[int] timestep: The simulation timestep in seconds.
+        :param pd.DataFrame profile: Resampled profile based on interpolation and sampling methods.
         """
         super().__init__(name, identifier)
         self.temperature_in = temperature_in
         self.temperature_out = temperature_out
-        self.profile: pd.DataFrame = profile
-        self.start_index = 0
+        self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
         self.max_charge_power: float = max_charge_power
         self.max_discharge_power: float = max_discharge_power
-
-        # Create profile interpolator
-        self.profile_interpolator = ProfileInterpolator(
-            profile=profile,
-            sampling_method=sampling_method,
-            interpolation_method=interpolation_method,
-            timestep=timestep,
-        )
 
     def get_heat_power(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.
@@ -82,7 +64,13 @@ class ControllerStorage(AssetControllerAbstract):
         :param datetime.datetime time: Time for which to get the heat power.
         :return: float with the heat power.
         """
-        power = self.profile_interpolator.get_value(time)
+        if self.profile.empty:
+            return 0.0
+
+        try:
+            power = float(self.profile.loc[time, "values"])
+        except KeyError:
+            return 0.0
 
         if power > self.max_charge_power:
             logging.warning(
@@ -96,5 +84,5 @@ class ControllerStorage(AssetControllerAbstract):
                 f" at time {time}."
             )
             return self.max_discharge_power
-
-        return power
+        else:
+            return power

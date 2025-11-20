@@ -22,6 +22,9 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolator,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
@@ -49,17 +52,20 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Supply")
         temperature_out = esdl_asset.get_temperature("Out", "Return")
         profile = esdl_asset.get_profile()
-        sampling_method = esdl_asset.get_sampling_method()
-        interpolation_method = esdl_asset.get_interpolation_method()
+        self.profile_interpolator = ProfileInterpolator(
+            profile=profile,
+            sampling_method=esdl_asset.get_sampling_method(),
+            interpolation_method=esdl_asset.get_interpolation_method(),
+            timestep=timestep,
+        )
+        resampled_profile = self.profile_interpolator.get_resampled_profile()
+
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             temperature_in=temperature_in,
             temperature_out=temperature_out,
             max_power=power,
-            profile=profile,
-            sampling_method=sampling_method,
-            interpolation_method=interpolation_method,
-            timestep=timestep,
+            profile=resampled_profile,
         )
         return contr_consumer

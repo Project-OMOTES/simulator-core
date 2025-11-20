@@ -51,6 +51,8 @@ class ProfileInterpolationTest(unittest.TestCase):
             timestep=3600,
         )
 
+        self.resampled_profile = self.interpolator.get_resampled_profile().set_index("date")
+
     def test_profile_interpolator_init(self):
         """Test to initialize the profile interpolator."""
         # Assert
@@ -58,7 +60,6 @@ class ProfileInterpolationTest(unittest.TestCase):
         self.assertEqual(self.interpolator.sampling_method, ProfileSamplingMethod.ACTUAL)
         self.assertEqual(self.interpolator.interpolation_method, ProfileInterpolationMethod.LINEAR)
         self.assertEqual(self.interpolator.simulation_timestep, 3600)
-        self.assertEqual(self.interpolator.start_index, 0)
         pd.testing.assert_frame_equal(self.interpolator.profile, self.profile_data)
 
     def test_get_value_actual_sampling(self):
@@ -67,7 +68,7 @@ class ProfileInterpolationTest(unittest.TestCase):
         test_time = self.start_time
 
         # Act
-        value = self.interpolator.get_value(test_time)
+        value = float(self.resampled_profile.loc[test_time, "values"])
 
         # Assert
         self.assertEqual(value, 100.0)
@@ -82,9 +83,10 @@ class ProfileInterpolationTest(unittest.TestCase):
             timestep=1800,
         )
         test_time = self.start_time + timedelta(minutes=30)
+        resampled_profile = interpolator.get_resampled_profile().set_index("date")
 
         # Act
-        value = interpolator.get_value(test_time)
+        value = float(resampled_profile.loc[test_time, "values"])  # type: ignore[call-overload]
 
         # Assert
         self.assertAlmostEqual(value, 250.0, places=1)
@@ -110,6 +112,7 @@ class ProfileInterpolationTest(unittest.TestCase):
                     interpolation_method=interpolation_method,
                     timestep=timestep,
                 )
+                resampled_profile = interpolator.get_resampled_profile().set_index("date")
                 profile_indexed = self.profile_data.set_index("date")
                 freq = pd.Timedelta(seconds=timestep)
                 expected_index = pd.date_range(
@@ -124,7 +127,7 @@ class ProfileInterpolationTest(unittest.TestCase):
 
                 # Assert
                 pd.testing.assert_frame_equal(
-                    interpolator.resampled_profile.set_index("date"),
+                    resampled_profile,
                     expected_profile,
                     check_dtype=False,
                     check_freq=False,
@@ -152,22 +155,12 @@ class ProfileInterpolationTest(unittest.TestCase):
                     interpolation_method=ProfileInterpolationMethod.LINEAR,
                     timestep=timestep,
                 )
-                value = interpolator.get_value(test_time)
+                resampled_profile = interpolator.get_resampled_profile().set_index("date")
+                value = float(resampled_profile.loc[test_time, "values"])
 
                 # Assert
                 self.assertIsInstance(value, float)
                 self.assertEqual(value, expected_value)
-
-    def test_get_value_returns_zero(self):
-        """Test getting values for a time not in the profile."""
-        # Arrange
-        test_time = datetime(2022, 1, 1, 0, 0, 0)
-
-        # Act
-        value = self.interpolator.get_value(test_time)
-
-        # Assert
-        self.assertEqual(value, 0.0)
 
     def test_empty_profile(self):
         """Test handling of empty profile."""
@@ -180,10 +173,11 @@ class ProfileInterpolationTest(unittest.TestCase):
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
+        resampled_profile = interpolator.get_resampled_profile()
 
         # Assert
         self.assertEqual(len(interpolator.profile), 0)
-        self.assertEqual(len(interpolator.resampled_profile), 0)
+        self.assertEqual(len(resampled_profile), 0)
 
     def test_single_point_profile(self):
         """Test handling of profile with single data point."""
@@ -201,10 +195,11 @@ class ProfileInterpolationTest(unittest.TestCase):
             sampling_method=ProfileSamplingMethod.ACTUAL,
             interpolation_method=ProfileInterpolationMethod.LINEAR,
         )
+        resampled_profile = interpolator.get_resampled_profile()
 
         # Assert
         self.assertEqual(len(interpolator.profile), 1)
-        pd.testing.assert_frame_equal(interpolator.resampled_profile, single_point_profile)
+        pd.testing.assert_frame_equal(resampled_profile, single_point_profile)
 
     def test_profile_sampling_method_enums(self):
         """Test ProfileSamplingMethod enum values."""
@@ -224,23 +219,6 @@ class ProfileInterpolationTest(unittest.TestCase):
         self.assertEqual(ProfileInterpolationMethod.SLINEAR.value, "slinear")
         self.assertEqual(ProfileInterpolationMethod.QUADRATIC.value, "quadratic")
         self.assertEqual(ProfileInterpolationMethod.CUBIC.value, "cubic")
-
-    def test_unknown_sampling_method_raises_exception(self):
-        """Test that an unknown sampling method raises ValueError."""
-        # Arrange
-        unknown_method = type("obj", (object,), {"value": "unknown_method"})()
-
-        # Act
-        with self.assertRaises(ValueError) as context:
-            ProfileInterpolator(
-                profile=self.profile_data,
-                sampling_method=unknown_method,  # type: ignore
-                interpolation_method=ProfileInterpolationMethod.LINEAR,
-                timestep=3600,
-            )
-
-        # Assert
-        self.assertEqual(str(context.exception), "Unknown sampling method: unknown_method")
 
     def test_default_sampling_method_logs_info(self):
         """Test that missing sampling method logs info and uses default."""
@@ -305,10 +283,11 @@ class ProfileInterpolationTest(unittest.TestCase):
                 interpolation_method=ProfileInterpolationMethod.LINEAR,
                 timestep=None,
             )
+            resampled_profile = interpolator.get_resampled_profile()
 
         # Assert
         self.assertEqual(interpolator.simulation_timestep, None)
-        self.assertIsNotNone(interpolator.resampled_profile)
+        self.assertIsNotNone(resampled_profile)
         self.assertEqual(
             log_context.output[0],
             "WARNING:omotes_simulator_core.entities.assets.controller.profile_interpolation:"

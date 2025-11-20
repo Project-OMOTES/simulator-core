@@ -23,6 +23,9 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolator,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
@@ -54,9 +57,13 @@ class ControllerStorageMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Supply")
         temperature_out = esdl_asset.get_temperature("Out", "Return")
         profile = pd.DataFrame()  # esdl_asset.get_profile()
-        sampling_method = esdl_asset.get_sampling_method()
-        interpolation_method = esdl_asset.get_interpolation_method()
-        # TODO: Extract interpolation method from ESDL properties if available
+        self.profile_interpolator = ProfileInterpolator(
+            profile=profile,
+            sampling_method=esdl_asset.get_sampling_method(),
+            interpolation_method=esdl_asset.get_interpolation_method(),
+            timestep=timestep,
+        )
+        resampled_profile = self.profile_interpolator.get_resampled_profile()
         contr_storage = ControllerStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -64,9 +71,6 @@ class ControllerStorageMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             max_charge_power=charge_power,
             max_discharge_power=discharge_power,
-            profile=profile,
-            sampling_method=sampling_method,
-            interpolation_method=interpolation_method,
-            timestep=timestep,
+            profile=resampled_profile,
         )
         return contr_storage

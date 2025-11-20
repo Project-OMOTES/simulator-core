@@ -126,7 +126,7 @@ class HeatDemandTest(unittest.TestCase):
         # Obtain demand profiles from the esdl
         for demand in consumers_object:
             demand_id = demand.id
-            profile_dates = demand.profile["date"]
+            profile_dates = demand.profile.index
             profile_vals = demand.profile["values"]
             start_timestamp = pd.Timestamp(self.start_time).tz_localize("UTC")
             end_timestamp = pd.Timestamp(self.end_time).tz_localize("UTC")
