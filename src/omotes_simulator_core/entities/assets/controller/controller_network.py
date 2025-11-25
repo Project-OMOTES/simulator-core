@@ -22,9 +22,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-    AssetControllerAbstract,
-)
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
