@@ -316,8 +316,6 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         available volume by the time step of the simulation. The available volume is the maximum
         volume of the asset minus the current volume. The effective maximum discharge power is
         limited by the maximum discharge power of the asset.
-
-        :param float timestep: The time step of the simulation in seconds. Default is 3600 seconds.
         """
         # Calculate the effective maximum discharge power of the asset.
         available_volume = self.current_volume
@@ -346,8 +344,6 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         volume by the time step of the simulation. The available volume is the maximum volume of
         the asset minus the current volume. The effective maximum charge power is limited by the
         maximum charge power of the asset.
-
-        :param float timestep: The time step of the simulation in seconds. Default is 3600 seconds.
         """
         # Calculate the effective maximum charge power of the asset.
         available_volume = self.volume - self.current_volume
