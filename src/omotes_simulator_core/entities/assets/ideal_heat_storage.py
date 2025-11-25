@@ -24,9 +24,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     PROPERTY_TIMESTEP,
@@ -205,28 +202,6 @@ class IdealHeatStorage(AssetAbstract):
         else:  # IDLE
             self.temperature_in = self.solver_asset.get_temperature(0)
             self.temperature_out = self.solver_asset.get_temperature(1)
-
-    def add_physical_data(self, esdl_asset: EsdlAssetObject) -> None:
-        """Method to add physical data to the asset.
-
-        :param EsdlAssetObject esdl_asset: The esdl asset object to add the physical data from.
-         :return:
-        """
-
-    def write_to_output(self) -> None:
-        """Placeholder to write the asset to the output.
-
-        The output list is a list of dictionaries, where each dictionary
-        represents the output of its asset for a specific timestep.
-        """
-        output_dict = {
-            PROPERTY_MASSFLOW: self.solver_asset.get_mass_flow_rate(1),
-            PROPERTY_PRESSURE_SUPPLY: self.solver_asset.get_pressure(0),
-            PROPERTY_PRESSURE_RETURN: self.solver_asset.get_pressure(1),
-            PROPERTY_TEMPERATURE_IN: self.solver_asset.get_temperature(0),
-            PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
-        }
-        self.output.append(output_dict)
 
     def get_state(self) -> dict[str, float]:
         """Get the state of the asset.
