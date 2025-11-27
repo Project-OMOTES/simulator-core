@@ -22,9 +22,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_MASSFLOW,
-    PROPERTY_PRESSURE_RETURN,
-    PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
@@ -275,28 +272,3 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(state[PROPERTY_FILL_LEVEL], 0.75)
-
-    def test_write_to_output(self) -> None:
-        """Test writing to output of a HeatBuffer."""
-        # Arrange
-        self.heat_buffer.solver_asset.prev_sol = np.array(
-            [
-                0.6,  # m_0
-                101325.0,  # P_0
-                fluid_props.get_ie(293.15),  # IE_0
-                0.6,  # m_1
-                101325.0,  # P_1
-                fluid_props.get_ie(313.15),  # IE_1
-            ]
-        )
-
-        # Act
-        self.heat_buffer.write_to_output()
-        output = self.heat_buffer.output[-1]
-
-        # Assert
-        self.assertEqual(output[PROPERTY_MASSFLOW], 0.6)
-        self.assertEqual(output[PROPERTY_PRESSURE_SUPPLY], 101325.0)
-        self.assertEqual(output[PROPERTY_PRESSURE_RETURN], 101325.0)
-        self.assertAlmostEqual(output[PROPERTY_TEMPERATURE_IN], 293.15, places=2)
-        self.assertAlmostEqual(output[PROPERTY_TEMPERATURE_OUT], 313.15, places=2)

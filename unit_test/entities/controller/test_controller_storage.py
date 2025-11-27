@@ -106,43 +106,42 @@ class ControllerAtestStorageTest(unittest.TestCase):
         self.assertEqual(self.storage.max_charge_power, 1000000)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
 
-    def test_controller_storage_get_heat_power(self) -> None:
-        """Test to get the heat power of the storage."""
+    def test_controller_storage_get_heat_demand(self) -> None:
+        """Test to get the heat demand of the storage."""
         # Arrange
 
         # Act
-        heatpower1 = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
-        heatpower2 = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+        heatdemand1 = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
+        heatdemand2 = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
 
         # Assert
-        self.assertEqual(heatpower1, PROFILE_VALUES[0])
-        self.assertEqual(heatpower2, PROFILE_VALUES[1])
+        self.assertEqual(heatdemand1, PROFILE_VALUES[0])
+        self.assertEqual(heatdemand2, PROFILE_VALUES[1])
 
     def test_storage_set_to_max_charge_power(self):
         """Test to set the storage to the max charge power."""
         # Arrange
         self.storage.max_charge_power = 1.0
         # Act
-        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
+        heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
         # Assert
-        self.assertEqual(heatpower, 1.0)
+        self.assertEqual(heatdemand, 1.0)
 
     def test_storage_set_to_max_discharge_power(self):
         """Test to set the storage to the max discharge power."""
         # Arrange
         self.storage.max_discharge_power = -1.0
         # Act
-        heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+        heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
         # Assert
-        self.assertEqual(heatpower, -1.0)
+        self.assertEqual(heatdemand, -1.0)
 
     def test_date_not_in_profile_storage(self):
         """Test to get the heat power when the date is not in the profile."""
         # Act
-        heatpower = self.storage.get_heat_power(datetime(2021, 3, 2, 0, 0))
+        heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0))
         # Assert
-        self.assertEqual(heatpower, 0)
-        self.assertEqual(heatpower, 0)
+        self.assertEqual(heatdemand, 0)
 
 
 class ControllerIdealHeatStorageTest(unittest.TestCase):
@@ -180,32 +179,32 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.assertEqual(self.storage.volume, 1000)
         self.assertEqual(self.storage.current_volume, 0.5 * 1000)
 
-    def test_controller_storage_get_heat_power(self) -> None:
-        """Test to get the heat power of the storage."""
+    def test_controller_storage_get_heat_demand(self) -> None:
+        """Test to get the heat demand of the storage."""
         # Arrange
 
         # Act
-        heatpower1 = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
-        heatpower2 = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+        heatdemand1 = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
+        heatdemand2 = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
 
         # Assert
-        self.assertEqual(heatpower1, PROFILE_VALUES[0])
-        self.assertEqual(heatpower2, PROFILE_VALUES[1])
+        self.assertEqual(heatdemand1, PROFILE_VALUES[0])
+        self.assertEqual(heatdemand2, PROFILE_VALUES[1])
 
-    def test_controller_storage_get_heat_power_not_in_profile(self) -> None:
-        """Test to get the heat power of the storage when date not in profile."""
+    def test_controller_storage_get_heat_demand_not_in_profile(self) -> None:
+        """Test to get the heat demand of the storage when date not in profile."""
         # Arrange
 
         # Act
         with self.assertLogs(level="WARNING") as log:
-            heatpower = self.storage.get_heat_power(datetime(2021, 3, 2, 0, 0, 0))
+            heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0, 0))
             # Assert
             self.assertIn(
                 "No profile value found for storage storage at time 2021-03-02 00:00:00. "
                 "Returning 0.0 power.",
                 log.output[0],
             )
-            self.assertEqual(heatpower, 0)
+            self.assertEqual(heatdemand, 0)
 
     def test_storage_set_to_max_charge_power(self):
         """Test to set the storage to the max charge power."""
@@ -214,9 +213,9 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.effective_max_charge_power = 0.5
         # Act
         with self.assertLogs(level="WARNING") as log:
-            heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 0, 0, 0))
+            heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
             # Assert
-            self.assertEqual(heatpower, 0.5)
+            self.assertEqual(heatdemand, 0.5)
             self.assertIn(
                 (
                     "Supply to storage storage is higher than maximum charge power of asset at "
@@ -232,9 +231,9 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.effective_max_discharge_power = -0.5
         # Act
         with self.assertLogs(level="WARNING") as log:
-            heatpower = self.storage.get_heat_power(datetime(2021, 1, 1, 1, 0, 0))
+            heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
             # Assert
-            self.assertEqual(heatpower, -0.5)
+            self.assertEqual(heatdemand, -0.5)
             self.assertIn(
                 (
                     "Demand from storage storage is higher than maximum discharge power of asset at"

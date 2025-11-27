@@ -28,7 +28,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
     PROPERTY_TIMESTEP,
 )
-from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.buffer_asset import HeatBufferAsset
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props

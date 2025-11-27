@@ -100,7 +100,7 @@ class ControllerStorageAbstract(AssetControllerAbstract):
             get_state method.
         """
 
-    def get_heat_power(self, time: datetime.datetime) -> float:
+    def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.
 
         :param datetime.datetime time: Time for which to get the heat demand.
@@ -163,8 +163,8 @@ class ControllerAtestStorage(ControllerStorageAbstract):
             profile=profile,
         )
 
-    def get_heat_power(self, time: datetime.datetime) -> float:
-        """Method to get the heat power of the storage. + is injection and - is production.
+    def get_heat_demand(self, time: datetime.datetime) -> float:
+        """Method to get the heat demand of the storage. + is injection and - is production.
 
         :param datetime.datetime time: Time for which to get the heat demand.
         :return: float with the heat demand.
@@ -252,7 +252,7 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         self.volume: float = volume
         self.current_volume: float = fill_level * volume
 
-    def get_heat_power(self, time: datetime.datetime) -> float:
+    def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat power of the storage. + is injection and - is production.
 
         :param datetime.datetime time: Time for which to get the heat demand.
