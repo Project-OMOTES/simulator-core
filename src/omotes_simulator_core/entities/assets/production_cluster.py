@@ -254,3 +254,10 @@ class ProductionCluster(AssetAbstract):
             )
         else:
             return True
+
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """
+        pass

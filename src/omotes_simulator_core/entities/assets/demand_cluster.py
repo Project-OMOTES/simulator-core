@@ -113,6 +113,13 @@ class DemandCluster(AssetAbstract):
         }
         self.outputs[1][-1].update(output_dict_temp)
 
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """
+        pass
+
     def get_heat_supplied(self) -> float:
         """Get the actual heat supplied by the asset.
 
