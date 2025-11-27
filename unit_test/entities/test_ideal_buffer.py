@@ -74,9 +74,13 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_0, 333.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_1, 353.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        )
         self.assertEqual(
             self.heat_buffer.solver_asset.inlet_massflow, max_mass_flow_rate  # type: ignore
         )
@@ -102,9 +106,13 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_0, 333.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_1, 353.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        )
         self.assertEqual(
             self.heat_buffer.solver_asset.inlet_massflow, -1.0 * max_mass_flow_rate  # type: ignore
         )
@@ -130,9 +138,13 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_0, 333.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_1, 353.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, mass_flow)  # type: ignore
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.DISCHARGING)
 
@@ -156,9 +168,13 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_0, 333.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_1, 353.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, mass_flow)  # type: ignore
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.CHARGING)
 
@@ -174,9 +190,13 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_0, 333.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(self.heat_buffer.solver_asset.temperature_connection_1, 353.15)  # type: ignore
+        self.assertEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        )
         self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, 0.0)  # type: ignore
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.IDLE)
 
