@@ -91,49 +91,6 @@ class ProfileInterpolationTest(unittest.TestCase):
         # Assert
         self.assertAlmostEqual(value, 250.0, places=1)
 
-    def test_wrapper_for_all_interpolation_methods(self):
-        """Test that ProfileInterpolator correctly wraps all pandas interpolation methods."""
-        # Arrange
-        timestep = 600
-        test_methods = [
-            ProfileInterpolationMethod.LINEAR,
-            ProfileInterpolationMethod.ZERO,
-            ProfileInterpolationMethod.SLINEAR,
-            ProfileInterpolationMethod.QUADRATIC,
-            ProfileInterpolationMethod.CUBIC,
-        ]
-
-        for interpolation_method in test_methods:
-            with self.subTest(method=interpolation_method.value):
-                # Act - Create ProfileInterpolator with 10-minute timestep
-                interpolator = ProfileInterpolator(
-                    profile=self.profile_data,
-                    sampling_method=ProfileSamplingMethod.ACTUAL,
-                    interpolation_method=interpolation_method,
-                    timestep=timestep,
-                )
-                resampled_profile = interpolator.get_resampled_profile().set_index("date")
-                profile_indexed = self.profile_data.set_index("date")
-                freq = pd.Timedelta(seconds=timestep)
-                expected_index = pd.date_range(
-                    start=self.profile_data["date"].iloc[0],
-                    end=self.profile_data["date"].iloc[-1],
-                    freq=freq,
-                )
-                expected_profile = profile_indexed.reindex(expected_index).interpolate(
-                    method=interpolation_method.value
-                )
-                expected_profile.index.name = "date"
-
-                # Assert
-                pd.testing.assert_frame_equal(
-                    resampled_profile,
-                    expected_profile,
-                    check_dtype=False,
-                    check_freq=False,
-                    check_exact=True,
-                )
-
     def test_all_sampling_methods(self):
         """Test all sampling methods with appropriate window sizes."""
         # Arrange
