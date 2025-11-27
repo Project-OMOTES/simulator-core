@@ -280,3 +280,51 @@ class HeatBufferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(state[PROPERTY_FILL_LEVEL], 0.75)
+
+    def test_postprocess(self) -> None:
+        """Test postprocessing of a HeatBuffer."""
+        # Arrange
+        inflow_temperature = 293.15  # K
+        outflow_temperature = 273.15  # K
+        mass_flow = 2.0  # kg/s
+
+        self.heat_buffer.max_volume = 100.0  # m3
+        self.heat_buffer.fill_level = 0.5
+        self.heat_buffer.current_volume_hot = (
+            self.heat_buffer.max_volume * self.heat_buffer.fill_level
+        )
+        self.heat_buffer.time_step = 3600.0  # 1 hour
+        self.heat_buffer.buffer_temperature_hot = inflow_temperature
+        self.heat_buffer.buffer_temperature_cold = outflow_temperature
+
+        self.heat_buffer.solver_asset.prev_sol = np.array(
+            [
+                -mass_flow,
+                1e5,
+                fluid_props.get_ie(inflow_temperature),
+                +mass_flow,
+                1e5,
+                fluid_props.get_ie(outflow_temperature),
+            ]
+        )
+
+        # Act
+        self.heat_buffer.postprocess()
+
+        # Assert
+        self.assertAlmostEqual(
+            self.heat_buffer.buffer_temperature_hot, inflow_temperature, places=2
+        )
+        self.assertAlmostEqual(
+            self.heat_buffer.buffer_temperature_cold, outflow_temperature, places=2
+        )
+        self.assertAlmostEqual(
+            self.heat_buffer.fill_level,
+            0.572,
+            places=3,
+        )
+        self.assertAlmostEqual(
+            self.heat_buffer.current_volume_hot,
+            57.2,
+            places=1,
+        )

@@ -43,12 +43,6 @@ class ControllerStorageAbstract(AssetControllerAbstract):
     timestep: float
     """The timestep of the simulation or asset."""
 
-    _delta_temperature: float
-    """The temperature difference between the supply and return temperature."""
-
-    _average_temperature: float
-    """The average temperature of the storage."""
-
     start_index: int
     """The start index for the profile lookup."""
 
@@ -78,10 +72,6 @@ class ControllerStorageAbstract(AssetControllerAbstract):
         self.profile: pd.DataFrame = profile
         self.start_index = 0
 
-        # The temperature difference between the supply and return temperature.
-        self._delta_temperature = temperature_in - temperature_out
-        self._average_temperature = (temperature_in + temperature_out) / 2.0
-
         # Timestep of the simulation or asset.
         self.timestep: float = 3600  # [s]
 
@@ -107,6 +97,20 @@ class ControllerStorageAbstract(AssetControllerAbstract):
         :return: float with the heat demand.
         """
         return 0.0
+
+    def delta_temperature(self) -> float:
+        """Get the temperature difference between the inlet and outlet.
+
+        :return: float with the temperature difference.
+        """
+        return self.temperature_in - self.temperature_out
+
+    def average_temperature(self) -> float:
+        """Get the average temperature of the storage.
+
+        :return: float with the average temperature.
+        """
+        return (self.temperature_in + self.temperature_out) / 2.0
 
     def get_max_discharge_power(
         self,
@@ -325,9 +329,9 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
                 (
                     -1
                     * (available_volume / self.timestep)
-                    * fluid_props.get_density(self._average_temperature)
-                    * fluid_props.get_heat_capacity(self._average_temperature)
-                    * self._delta_temperature
+                    * fluid_props.get_density(self.average_temperature())
+                    * fluid_props.get_heat_capacity(self.average_temperature())
+                    * self.delta_temperature()
                 ),
             )
         else:
@@ -352,9 +356,9 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
                 self.max_charge_power,
                 (
                     (available_volume / self.timestep)
-                    * fluid_props.get_density(self._average_temperature)
-                    * fluid_props.get_heat_capacity(self._average_temperature)
-                    * self._delta_temperature
+                    * fluid_props.get_density(self.average_temperature())
+                    * fluid_props.get_heat_capacity(self.average_temperature())
+                    * self.delta_temperature()
                 ),
             )
         else:

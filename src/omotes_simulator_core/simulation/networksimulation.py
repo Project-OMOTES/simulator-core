@@ -86,6 +86,11 @@ class NetworkSimulation:
 
             # Log warning if not converged
             logger.debug("Convergence time step reached after %d iterations", iteration)
+
+            # Post-process asset properties after time step
+            self.network.post_process_assets()
+
+            # Store output of time step
             self.network.store_output()
 
             if (time_step % progress_interval) == 0:

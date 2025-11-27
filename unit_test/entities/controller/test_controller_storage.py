@@ -250,7 +250,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
         self.storage.current_volume = 1.0  # m3
-        self.storage._delta_temperature = 1.0
+        self.storage.temperature_in = 2.0
+        self.storage.temperature_out = 1.0
         self.storage.timestep = 1.0
         self.storage.max_discharge_power = -1e9
 
@@ -280,7 +281,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         patch_rho.return_value = 1.0  # kg/m3
         self.storage.volume = 1.0  # m3
         self.storage.current_volume = 0.0  # m3
-        self.storage._delta_temperature = 1.0
+        self.storage.temperature_in = 2.0
+        self.storage.temperature_out = 1.0
         self.storage.timestep = 1.0
         self.storage.max_charge_power = 1e9
 

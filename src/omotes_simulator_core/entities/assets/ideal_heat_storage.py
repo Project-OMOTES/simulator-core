@@ -226,7 +226,7 @@ class IdealHeatStorage(AssetAbstract):
         :return: None
         """
         # Volume change over time (dV/dt = m_dot / rho)
-        dVdt = self.solver_asset.get_mass_flow_rate(0) / fluid_props.get_density(
+        dVdt = (-1 * self.solver_asset.get_mass_flow_rate(0)) / fluid_props.get_density(
             self.temperature_connection_0
         )
         # Update fill level (fill_level = level_previous + dV/dt * time_step / max_volume)
@@ -240,16 +240,31 @@ class IdealHeatStorage(AssetAbstract):
         # Get internal energies and mass flows at connection points
         u_connection_0 = self.solver_asset.get_internal_energy(0)
         u_connection_1 = self.solver_asset.get_internal_energy(1)
-        mass_flow_0 = self.solver_asset.get_mass_flow_rate(0)
-        mass_flow_1 = self.solver_asset.get_mass_flow_rate(1)
+        mass_flow_0 = -1 * self.solver_asset.get_mass_flow_rate(0)
+        mass_flow_1 = -1 * self.solver_asset.get_mass_flow_rate(1)
+
+        rho_hot = fluid_props.get_density(self.buffer_temperature_hot)
+        rho_cold = fluid_props.get_density(self.buffer_temperature_cold)
+
+        # Compute masses
+        mass_hot = self.current_volume_hot * rho_hot
+        mass_cold = (self.max_volume - self.current_volume_hot) * rho_cold
+        mass_0 = mass_flow_0 * self.time_step
+        mass_1 = mass_flow_1 * self.time_step
 
         # Get internal energy in buffer
         u_buffer_hot_old = fluid_props.get_ie(self.buffer_temperature_hot)
         u_buffer_cold_old = fluid_props.get_ie(self.buffer_temperature_cold)
 
-        # Calculate new internal energies
-        u_buffer_hot_new = u_buffer_hot_old + (u_connection_0 * mass_flow_0 * self.time_step)
-        u_buffer_cold_new = u_buffer_cold_old + (u_connection_1 * mass_flow_1 * self.time_step)
+        # Calculate new specific internal energies (J/kg)
+        # Energy: u_old * mass_old + u_in * m_dot * time_step
+        # Divide by new mass: mass_old + m_dot * time_step to get new specific internal energy
+        u_buffer_hot_new = (
+            u_buffer_hot_old * mass_hot + (u_connection_0 * mass_flow_0 * self.time_step)
+        ) / (mass_hot + mass_0)
+        u_buffer_cold_new = (
+            u_buffer_cold_old * mass_cold + (u_connection_1 * mass_flow_1 * self.time_step)
+        ) / (mass_cold + mass_1)
 
         # Update buffer temperatures based on new internal energies
         self.buffer_temperature_hot = fluid_props.get_t(u_buffer_hot_new)
