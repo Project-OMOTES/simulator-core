@@ -91,8 +91,8 @@ class ProfileInterpolationTest(unittest.TestCase):
         # Assert
         self.assertAlmostEqual(value, 250.0, places=1)
 
-    def test_all_interpolation_methods(self):
-        """Test all interpolation methods against pandas interpolation."""
+    def test_wrapper_for_all_interpolation_methods(self):
+        """Test that ProfileInterpolator correctly wraps all pandas interpolation methods."""
         # Arrange
         timestep = 600
         test_methods = [
@@ -176,8 +176,8 @@ class ProfileInterpolationTest(unittest.TestCase):
         resampled_profile = interpolator.get_resampled_profile()
 
         # Assert
-        self.assertEqual(len(interpolator.profile), 0)
-        self.assertEqual(len(resampled_profile), 0)
+        self.assertTrue(interpolator.profile.empty)
+        self.assertTrue(resampled_profile.empty)
 
     def test_single_point_profile(self):
         """Test handling of profile with single data point."""
