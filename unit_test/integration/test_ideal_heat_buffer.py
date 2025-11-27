@@ -93,9 +93,9 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
         self.mass_flow_storage = self.mass_flow_production - self.mass_flow_demand  # kg/s
 
         # - Heat buffer
-        self.heat_buffer_asset.inlet_massflow = self.mass_flow_storage
-        self.heat_buffer_asset.inlet_temperature = self.temperature_hot
-        self.heat_buffer_asset.outlet_temperature = self.temperature_cold
+        self.heat_buffer_asset.massflow_connection_0 = self.mass_flow_storage
+        self.heat_buffer_asset.temperature_connection_0 = self.temperature_hot
+        self.heat_buffer_asset.temperature_connection_1 = self.temperature_cold
 
         # - Production asset
         self.production_asset.pre_scribe_mass_flow = False

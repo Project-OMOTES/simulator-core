@@ -35,22 +35,22 @@ class HeatBufferAsset(FallType):
         The number of connection points for the asset.
     """
 
-    inlet_massflow: float
-    """The inlet (connection point 0) mass flow rate for the asset (based on volumetric flow)."""
+    massflow_connection_0: float
+    """The mass flow rate of the asset at connection point 0."""
 
-    outlet_temperature: float
-    """The outlet temperature for the asset, set by the controller."""
+    temperature_connection_0: float
+    """The temperature at connection point 0 of the asset."""
 
-    inlet_temperature: float
-    """The inlet temperature for the asset, set by the controller."""
+    temperature_connection_1: float
+    """The temperature at connection point 1 of the asset."""
 
     def __init__(
         self,
         name: str,
         _id: str,
-        outlet_temperature: float = 293.15,
-        inlet_temperature: float = 293.15,
-        inlet_massflow: float = 10.0,
+        temperature_connection_0: float = 293.15,
+        temperature_connection_1: float = 293.15,
+        massflow_connection_0: float = 10.0,
     ):
         """
         Initializes the HeatBuffer object with the given parameters.
@@ -66,17 +66,16 @@ class HeatBufferAsset(FallType):
             The number of connection points for the asset. The default is 2, which corresponds to
             the inlet and outlet.
         """
-        self.inlet_massflow = inlet_massflow
+        self.massflow_connection_0 = massflow_connection_0
 
         # Set inlet and outlet temperatures
-        self.inlet_temperature = inlet_temperature
-        self.outlet_temperature = outlet_temperature
-
+        self.temperature_connection_0 = temperature_connection_0
+        self.temperature_connection_1 = temperature_connection_1
         # Initialize the FallType parent class
         super().__init__(
             name=name,
             _id=_id,
-            supply_temperature=outlet_temperature,
+            supply_temperature=temperature_connection_1,
         )
 
     def get_equations(self) -> list[EquationObject]:
@@ -120,8 +119,8 @@ class HeatBufferAsset(FallType):
             value of the equation.
         """
         # Get density at connection point 0 and 1
-        rho_0 = fluid_props.get_density(self.inlet_temperature)
-        rho_1 = fluid_props.get_density(self.outlet_temperature)
+        rho_0 = fluid_props.get_density(self.temperature_connection_0)
+        rho_1 = fluid_props.get_density(self.temperature_connection_1)
 
         # Create equation object
         equation_object = EquationObject()
@@ -175,7 +174,7 @@ class HeatBufferAsset(FallType):
             ]
         )
         equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
-        equation_object.rhs = self.inlet_massflow
+        equation_object.rhs = self.massflow_connection_0
 
         return equation_object
 
@@ -204,7 +203,9 @@ class HeatBufferAsset(FallType):
         )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = fluid_props.get_ie(
-            self.outlet_temperature if connection_point == 1 else self.inlet_temperature
+            self.temperature_connection_1
+            if connection_point == 1
+            else self.temperature_connection_0
         )
         return equation_object
 

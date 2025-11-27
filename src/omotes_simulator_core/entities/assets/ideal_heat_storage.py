@@ -79,13 +79,17 @@ class IdealHeatStorage(AssetAbstract):
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
 
         # Supply and return temperature of the asset [K]
-        self.temperature_in = DEFAULT_TEMPERATURE
-        self.temperature_out = DEFAULT_TEMPERATURE
+        self.temperature_connection_0 = DEFAULT_TEMPERATURE
+        self.temperature_connection_1 = DEFAULT_TEMPERATURE
+
+        # Temperature states
+        self.buffer_temperature_hot = DEFAULT_TEMPERATURE
+        self.buffer_temperature_cold = DEFAULT_TEMPERATURE
 
         # Volume properties of the asset: volume [m3], fill level [fraction 0-1]
         self.max_volume = volume
         self.fill_level = initial_fill_level
-        self.current_volume = self.max_volume * self.fill_level
+        self.current_volume_hot = self.max_volume * self.fill_level
         self.charge_state = ChargeState.IDLE
 
         # HeatBoundary since heat buffer acts either as producer or consumer,
@@ -132,12 +136,16 @@ class IdealHeatStorage(AssetAbstract):
 
         # Massflow rate based on heat demand and temperature setpoints
         mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            setpoints[PROPERTY_HEAT_DEMAND], self.temperature_in, self.temperature_out
+            setpoints[PROPERTY_HEAT_DEMAND],
+            self.temperature_connection_0,
+            self.temperature_connection_1,
         )
 
         # TODO: Move below to controller
         # Volumetric flow rate based on mass flow rate and density of the inlet temperature
-        volumetric_flow_rate = mass_flowrate / fluid_props.get_density(self.temperature_in)
+        volumetric_flow_rate = mass_flowrate / fluid_props.get_density(
+            self.temperature_connection_0
+        )
 
         # Limit volumetric flow rate based on fill level and accumulation time
         if self.charge_state == ChargeState.CHARGING:
@@ -151,12 +159,14 @@ class IdealHeatStorage(AssetAbstract):
 
         if abs(volumetric_flow_rate) > abs(max_volumetric_flow_rate):
             volumetric_flow_rate = np.sign(volumetric_flow_rate) * max_volumetric_flow_rate
-            mass_flowrate = volumetric_flow_rate * fluid_props.get_density(self.temperature_in)
+            mass_flowrate = volumetric_flow_rate * fluid_props.get_density(
+                self.temperature_connection_0
+            )
 
         # Set solver asset setpoints
         self.solver_asset.inlet_massflow = mass_flowrate  # type: ignore
-        self.solver_asset.outlet_temperature = self.temperature_out  # type: ignore
-        self.solver_asset.inlet_temperature = self.temperature_in  # type: ignore
+        self.solver_asset.temperature_connection_0 = self.temperature_connection_0  # type: ignore
+        self.solver_asset.temperature_connection_1 = self.temperature_connection_1  # type: ignore
 
     def check_setpoints(self, setpoints: Dict) -> None:
         """Check if all necessary setpoints are provided.
@@ -185,22 +195,65 @@ class IdealHeatStorage(AssetAbstract):
         The keys of the dictionary are the names of the setpoints and the values are the values
         """
         if self.first_time_step:
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            self.temperature_connection_0 = setpoints[PROPERTY_TEMPERATURE_IN]
+            self.temperature_connection_1 = setpoints[PROPERTY_TEMPERATURE_OUT]
+            # Initialize state of buffer temperatures
+            self.buffer_temperature_hot = self.temperature_connection_0
+            self.buffer_temperature_cold = self.temperature_connection_1
+            # Set first time step to False
             self.first_time_step = False
             # Exit the function after the first time step
             return
 
         # Define temperatures based on charge state
         if self.charge_state == ChargeState.CHARGING:
-            self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-            self.temperature_out = self.solver_asset.get_temperature(1)
+            # Massflow from connection point 0 to 1
+            self.temperature_connection_0 = self.solver_asset.get_temperature(0)
+            self.temperature_connection_1 = self.buffer_temperature_cold
         elif self.charge_state == ChargeState.DISCHARGING:
-            self.temperature_in = self.solver_asset.get_temperature(0)
-            self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            # Massflow from connection point 1 to 0
+            self.temperature_connection_0 = self.buffer_temperature_hot
+            self.temperature_connection_1 = self.solver_asset.get_temperature(1)
         else:  # IDLE
-            self.temperature_in = self.solver_asset.get_temperature(0)
-            self.temperature_out = self.solver_asset.get_temperature(1)
+            self.temperature_connection_0 = self.buffer_temperature_hot
+            self.temperature_connection_1 = self.buffer_temperature_cold
+
+    def _update_fill_level(self) -> None:
+        """Update the fill level of the heat buffer based on mass flow rate and time step.
+
+        math: fill_level = fill_level_previous + (m_dot / rho) * time_step / max_volume
+
+        :return: None
+        """
+        # Volume change over time (dV/dt = m_dot / rho)
+        dVdt = self.solver_asset.get_mass_flow_rate(0) / fluid_props.get_density(
+            self.temperature_connection_0
+        )
+        # Update fill level (fill_level = level_previous + dV/dt * time_step / max_volume)
+        self.fill_level = self.fill_level + (dVdt * self.time_step) / self.max_volume
+
+    def _update_buffer_temperatures(self) -> None:
+        """Update buffer temperature using a simple energy balance.
+
+        :return: None
+        """
+        # Get internal energies and mass flows at connection points
+        u_connection_0 = self.solver_asset.get_internal_energy(0)
+        u_connection_1 = self.solver_asset.get_internal_energy(1)
+        mass_flow_0 = self.solver_asset.get_mass_flow_rate(0)
+        mass_flow_1 = self.solver_asset.get_mass_flow_rate(1)
+
+        # Get internal energy in buffer
+        u_buffer_hot_old = fluid_props.get_ie(self.buffer_temperature_hot)
+        u_buffer_cold_old = fluid_props.get_ie(self.buffer_temperature_cold)
+
+        # Calculate new internal energies
+        u_buffer_hot_new = u_buffer_hot_old + (u_connection_0 * mass_flow_0 * self.time_step)
+        u_buffer_cold_new = u_buffer_cold_old + (u_connection_1 * mass_flow_1 * self.time_step)
+
+        # Update buffer temperatures based on new internal energies
+        self.buffer_temperature_hot = fluid_props.get_t(u_buffer_hot_new)
+        self.buffer_temperature_cold = fluid_props.get_t(u_buffer_cold_new)
 
     def get_state(self) -> dict[str, float]:
         """Get the state of the asset.
@@ -208,8 +261,30 @@ class IdealHeatStorage(AssetAbstract):
         :return: dict[str, float]
             A dictionary containing the state of the asset.
         """
+        # Return the fill level and time step
         state = {
             PROPERTY_FILL_LEVEL: self.fill_level,
             PROPERTY_TIMESTEP: self.time_step,  # accumulation time
         }
         return state
+
+    def write_to_output(self) -> None:
+        """Write additional output properties of the asset."""
+        pass
+
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        Method updates:
+        - Buffer temperatures based on charge state
+        - Fill level based on mass flow rate and time step
+        - Current volume hot based on fill level
+
+        :return: None
+        """
+        # Update buffer temperatures based on charge state
+        self._update_buffer_temperatures()
+        # Update fill level
+        self._update_fill_level()
+        # Update current volume hot
+        self.current_volume_hot = self.max_volume * self.fill_level
