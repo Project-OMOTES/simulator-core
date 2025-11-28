@@ -288,8 +288,7 @@ class AtesCluster(AssetAbstract):
         # per 10 m depth
 
         saline_density = self._get_saline_density(
-            downhole_pressure, kelvin_to_celcius((self.hot_well_temperature
-                                                  + self.cold_well_temperature) / 2))
+            downhole_pressure, (self.hot_well_temperature + self.cold_well_temperature) / 2)
 
         volume_flow = self.mass_flowrate * 3600 / saline_density  # convert to second and
         if volume_flow > 0:
@@ -325,7 +324,13 @@ class AtesCluster(AssetAbstract):
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
 
     def get_state(self) -> dict[str, float]:
-        """Function to calculate the maximum charge and discharge rate based on NVOE."""
+        """Function to get the state of ATES at current timestep."""
+        max_charge_power, max_discharge_power = self._calculate_max_charge_discharge_power()
+
+        return {"max_charge_power": max_charge_power, "max_discharge_power": max_discharge_power}
+
+    def _calculate_max_charge_discharge_power(self) -> tuple[float, float]:
+        """Function to calculate the maximum charge power and discharge power based on NVOE."""
         downhole_pressure = self.aquifer_depth * 1e4  # Pa - assume pressure increase 1e4 Pa
         # per 10 m depth
 
@@ -334,17 +339,17 @@ class AtesCluster(AssetAbstract):
         water_heat_capacity = fluid_props.get_heat_capacity(average_temperature)
 
         max_extraction_flow_cold_well = self._get_max_flowrate_extraction_norm(
-            downhole_pressure, kelvin_to_celcius(self.cold_well_temperature)
+            downhole_pressure, self.cold_well_temperature
         )
         max_injection_flow_cold_well = self._get_max_flowrate_injection_norm(
-            downhole_pressure, kelvin_to_celcius(self.cold_well_temperature)
+            downhole_pressure, self.cold_well_temperature
         )
 
         max_extraction_flow_hot_well = self._get_max_flowrate_extraction_norm(
-            downhole_pressure, kelvin_to_celcius(self.hot_well_temperature)
+            downhole_pressure, self.hot_well_temperature
         )
         max_injection_flow_hot_well = self._get_max_flowrate_injection_norm(
-            downhole_pressure, kelvin_to_celcius(self.hot_well_temperature)
+            downhole_pressure, self.hot_well_temperature
         )
 
         self.max_charge_volume_flow = min(
@@ -370,7 +375,7 @@ class AtesCluster(AssetAbstract):
             * water_heat_capacity
         )
 
-        return {"max_charge_power": max_charge_power, "max_discharge_power": max_discharge_power}
+        return max_charge_power, max_discharge_power
 
     def _get_max_flowrate_extraction_norm(self, P: float, T: float) -> float:
         """Function to calculate the maximum flowrate of production in norm.
@@ -429,24 +434,25 @@ class AtesCluster(AssetAbstract):
 
         return max_flowrate
 
-    def _get_saline_density(self, P: float, T: float) -> float:
+    def _get_saline_density(self, P_Pa: float, T_K: float) -> float:
         """Function to calculate the saline density.
 
         Input is pressure in Pa and temperature in Celsius. Output is density in kg/m3.
         """
-        P_MPa = P * 1e-6  # Bar to MPa
+        P = P_Pa * 1e-6  # Pa to MPa
+        T = kelvin_to_celcius(T_K)  #K to C
         S = self.salinity * 1e-6  # ppm to kg/kg
 
         density_fresh = 1 + 1e-6 * (
             -80.0 * T
             - 3.3 * T * T
             + 0.00175 * T * T * T
-            + 489.0 * P_MPa
-            - 2.0 * T * P_MPa
-            + 0.016 * T * T * P_MPa
-            - 1.3e-5 * T * T * T * P_MPa
-            - 0.333 * P_MPa * P_MPa
-            - 0.002 * T * P_MPa * P_MPa
+            + 489.0 * P
+            - 2.0 * T * P
+            + 0.016 * T * T * P
+            - 1.3e-5 * T * T * T * P
+            - 0.333 * P * P
+            - 0.002 * T * P * P
         )
 
         density = density_fresh + S * (
@@ -454,9 +460,9 @@ class AtesCluster(AssetAbstract):
             + 0.44 * S
             + 1e-6
             * (
-                300.0 * P_MPa
-                - 2400.0 * P_MPa * S
-                + T * (80.0 + 3.0 * T - 3300.0 * S - 13.0 * P_MPa + 47.0 * P_MPa * S)
+                300.0 * P
+                - 2400.0 * P * S
+                + T * (80.0 + 3.0 * T - 3300.0 * S - 13.0 * P + 47.0 * P * S)
             )
         )
 
@@ -464,12 +470,13 @@ class AtesCluster(AssetAbstract):
 
         return density
 
-    def _get_saline_viscosity(self, P: float, T: float) -> float:
+    def _get_saline_viscosity(self, P_Pa: float, T_K: float) -> float:
         """Function to calculate the saline viscosity using Batzle-Wang correlation.
 
         Input is pressure in Pa and temperature in Celsius. Output is viscosity in Pas.
         """
         S = self.salinity * 1e-6  # ppm to kg/kg
+        T = kelvin_to_celcius(T_K)  #K to C
 
         viscosity = (
             0.1
