@@ -21,6 +21,7 @@ from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
@@ -29,7 +30,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    ATES_DEFAULTS
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
@@ -288,7 +288,8 @@ class AtesCluster(AssetAbstract):
         # per 10 m depth
 
         saline_density = self._get_saline_density(
-            downhole_pressure, (self.hot_well_temperature + self.cold_well_temperature) / 2)
+            downhole_pressure, (self.hot_well_temperature + self.cold_well_temperature) / 2
+        )
 
         volume_flow = self.mass_flowrate * 3600 / saline_density  # convert to second and
         if volume_flow > 0:
@@ -440,7 +441,7 @@ class AtesCluster(AssetAbstract):
         Input is pressure in Pa and temperature in Celsius. Output is density in kg/m3.
         """
         P = P_Pa * 1e-6  # Pa to MPa
-        T = kelvin_to_celcius(T_K)  #K to C
+        T = kelvin_to_celcius(T_K)  # K to C
         S = self.salinity * 1e-6  # ppm to kg/kg
 
         density_fresh = 1 + 1e-6 * (
@@ -476,7 +477,7 @@ class AtesCluster(AssetAbstract):
         Input is pressure in Pa and temperature in Celsius. Output is viscosity in Pas.
         """
         S = self.salinity * 1e-6  # ppm to kg/kg
-        T = kelvin_to_celcius(T_K)  #K to C
+        T = kelvin_to_celcius(T_K)  # K to C
 
         viscosity = (
             0.1
