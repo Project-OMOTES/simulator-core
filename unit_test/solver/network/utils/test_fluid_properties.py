@@ -19,10 +19,7 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from omotes_simulator_core.solver.utils.fluid_properties import (
-    Interpolation,
-    OmotesFluidProperties,
-)
+from omotes_simulator_core.solver.utils.fluid_properties import Interpolation, OmotesFluidProperties
 
 
 class InterpolationTest(unittest.TestCase):

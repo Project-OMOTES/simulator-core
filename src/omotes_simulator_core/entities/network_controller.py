@@ -23,13 +23,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.controller.controller_network import (
-    ControllerNetwork,
-)
+from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.network_controller_abstract import (
-    NetworkControllerAbstract,
-)
+from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 
 logger = logging.getLogger(__name__)
 

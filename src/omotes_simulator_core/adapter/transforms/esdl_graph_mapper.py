@@ -15,6 +15,7 @@
 
 """Module with class to map and esdl file to an internal graph representation."""
 
+from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
@@ -54,7 +55,7 @@ def create_graph_nodes(graph: Graph, model: EsdlObject) -> None:
         graph (Graph): The graph to add the connections to.
         model (EsdlObject): The esdl model to get the assets from.
     """
-    for esdl_asset in model.get_all_assets_of_type("asset"):
+    for esdl_asset in model.get_all_assets_of_type(OmotesAssetLabels.ASSET):
         if esdl_asset.is_heat_transfer_asset():
             if not graph.node_exists(esdl_asset.get_id() + "_primary"):
                 raise ValueError(f"Graph does not contain node {esdl_asset.get_id() + '_primary'}")
@@ -84,7 +85,7 @@ def assets_to_graph(graph: Graph, model: EsdlObject) -> None:
         graph (Graph): The graph to add the nodes to.
         model (EsdlObject): The esdl model to get the assets from.
     """
-    for asset in model.get_all_assets_of_type("asset"):
+    for asset in model.get_all_assets_of_type(OmotesAssetLabels.ASSET):
         # heat transfer assets have two sides, so we add two nodes to the graph a primary
         # and secondary one
         if asset.is_heat_transfer_asset():

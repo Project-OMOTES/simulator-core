@@ -20,10 +20,7 @@ import numpy as np
 from esdl.edr.client import EDRClient
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    PIPE_DEFAULTS,
-    PipeSchedules,
-)
+from omotes_simulator_core.entities.assets.asset_defaults import PIPE_DEFAULTS, PipeSchedules
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.utils import (

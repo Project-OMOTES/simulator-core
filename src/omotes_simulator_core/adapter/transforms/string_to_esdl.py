@@ -13,9 +13,26 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing class to convert a string to asdl class type and vica-versa."""
+from enum import Enum
+from typing import Type
+
 import esdl
 
-from omotes_simulator_core.adapter.transforms.transform_utils import reverse_dict
+
+class OmotesAssetLabels(str, Enum):
+    """Enum class containing the omotes asset labels."""
+
+    ASSET = "asset"
+    PRODUCER = "producer"
+    CONSUMER = "consumer"
+    GEOTHERMAL = "geothermal"
+    CONVERSION = "conversion"
+    PIPE = "pipe"
+    TRANSPORT = "transport"
+    JOINT = "joint"
+    STORAGE = "storage"
+    HEAT_PUMP = "heat_pump"
+    HEAT_EXCHANGER = "heat_exchanger"
 
 
 class StringEsdlAssetMapper:
@@ -26,32 +43,47 @@ class StringEsdlAssetMapper:
     Otherwise asset might be selected twice, since a HeatingDemand is also and Consumer.
     """
 
-    type_to_str_dict = {
-        esdl.Asset: "asset",
-        esdl.Producer: "producer",
-        esdl.GenericConsumer: "consumer",
-        esdl.HeatingDemand: "consumer",
-        esdl.GeothermalSource: "geothermal",
-        esdl.Conversion: "conversion",
-        esdl.Pipe: "pipe",
-        esdl.Transport: "transport",
-        esdl.Joint: "joint",
-        esdl.ATES: "storage",
-        esdl.HeatPump: "heat_pump",
-        esdl.HeatExchange: "heat_exchanger",
-    }
+    def __init__(self) -> None:
+        """Initialize the maps from string to esdl type and vica-versa."""
+        # Label to type map, where the first entry of each type list is the most generic or
+        # representative type.
+        self.label_to_type_map: dict[OmotesAssetLabels, list[Type[esdl.Asset]]] = {
+            OmotesAssetLabels.ASSET: [esdl.Asset],
+            OmotesAssetLabels.PRODUCER: [
+                esdl.GenericProducer,
+                esdl.HeatProducer,
+                # esdl.Producer, # Same as above, avoid selecting twice
+            ],
+            OmotesAssetLabels.CONSUMER: [
+                esdl.GenericConsumer,
+                esdl.HeatingDemand,
+                # esdl.Consumer, # Same as above, avoid selecting twice
+            ],
+            OmotesAssetLabels.GEOTHERMAL: [esdl.GeothermalSource],
+            OmotesAssetLabels.CONVERSION: [esdl.Conversion],
+            OmotesAssetLabels.PIPE: [esdl.Pipe],
+            OmotesAssetLabels.TRANSPORT: [esdl.Transport],
+            OmotesAssetLabels.JOINT: [esdl.Joint],
+            OmotesAssetLabels.STORAGE: [esdl.ATES],
+            OmotesAssetLabels.HEAT_PUMP: [esdl.HeatPump],
+            OmotesAssetLabels.HEAT_EXCHANGER: [esdl.HeatExchange],
+        }
 
-    str_to_type_dict = reverse_dict(original_dict=type_to_str_dict)
+        self.type_to_label_map: dict[Type[esdl.Asset], OmotesAssetLabels] = {
+            asset_type: label
+            for label, asset_types in self.label_to_type_map.items()
+            for asset_type in asset_types
+        }
 
-    def to_esdl(self, entity: str) -> list[type]:
-        """Method to convert a string to esdl class type.
+    def to_esdl(self, entity: OmotesAssetLabels) -> list[type]:
+        """Method to convert an OmotesAssetLabels to one or more esdl class types.
 
-        :param str entity: String to be converted to an esdl class type object.
-        :return: ESDL class described in the string.
+        :param OmotesAssetLabels entity: Enum to be converted to an esdl class type object.
+        :return: ESDL class described in the enum.
         """
-        if entity not in self.str_to_type_dict:
+        if entity not in self.label_to_type_map:
             raise NotImplementedError(entity + " not implemented in StringESDLAssetMapper class")
-        return self.str_to_type_dict[entity]
+        return self.label_to_type_map[entity]
 
     def to_entity(self, entity: type) -> str:
         """Method to convert esdl type class to a string.
@@ -61,8 +93,8 @@ class StringEsdlAssetMapper:
         :param type entity: ESDl object clas to be converted to a string
         :return: str belonging to the entity.
         """
-        if entity not in self.type_to_str_dict:
+        if entity not in self.type_to_label_map:
             raise NotImplementedError(
                 str(entity) + " not implemented in StringESDLAssetMapper class"
             )
-        return self.type_to_str_dict[entity]
+        return self.type_to_label_map[entity]

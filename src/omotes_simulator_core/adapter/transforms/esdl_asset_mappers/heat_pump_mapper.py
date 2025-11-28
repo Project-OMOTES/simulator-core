@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the Esdl to HeatPump asset mapper class."""
 
+from omotes_simulator_core.entities.assets.air_to_water_heat_pump import AirToWaterHeatPump
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import HeatPumpDefaults
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -34,13 +35,29 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a heatpump entity.
         :return: HeatPump object.
         """
-        heatpump_entity = HeatPump(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
-            connected_ports=esdl_asset.get_port_ids(),
-            coefficient_of_performance=esdl_asset.get_property(
-                "COP", HeatPumpDefaults.coefficient_of_performance
-            ),
-        )
+        hp_ports = esdl_asset.get_number_of_ports()
+        if hp_ports == 4:  # Water to water heat pump case
+            heatpump_entity = HeatPump(
+                asset_name=esdl_asset.esdl_asset.name,
+                asset_id=esdl_asset.esdl_asset.id,
+                connected_ports=esdl_asset.get_port_ids(),
+                coefficient_of_performance=esdl_asset.get_property(
+                    "COP", HeatPumpDefaults.coefficient_of_performance
+                ),
+            )
+        elif hp_ports == 2:  # Air to water heat pump case.
+            heatpump_entity = AirToWaterHeatPump(  # type:ignore
+                asset_name=esdl_asset.esdl_asset.name,
+                asset_id=esdl_asset.esdl_asset.id,
+                port_ids=esdl_asset.get_port_ids(),
+                coefficient_of_performance=esdl_asset.get_property(
+                    "COP", HeatPumpDefaults.coefficient_of_performance
+                ),
+            )
+        else:
+            raise NotImplementedError(
+                str(esdl_asset.esdl_asset) + " uncompatible number of ports for heat pump. "
+                "Use 2 ports for air to water HP, or 4 for a water to water HP."
+            )
 
         return heatpump_entity

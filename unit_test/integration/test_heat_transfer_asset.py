@@ -17,9 +17,7 @@
 import unittest
 from uuid import uuid4
 
-from omotes_simulator_core.solver.network.assets.heat_transfer_asset import (
-    HeatTransferAsset,
-)
+from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.network import Network
 from omotes_simulator_core.solver.solver import Solver

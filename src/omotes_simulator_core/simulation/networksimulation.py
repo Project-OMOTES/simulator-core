@@ -22,9 +22,7 @@ from pandas import DataFrame
 
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller import NetworkController
-from omotes_simulator_core.entities.simulation_configuration import (
-    SimulationConfiguration,
-)
+from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
 
 logger = logging.getLogger(__name__)
 

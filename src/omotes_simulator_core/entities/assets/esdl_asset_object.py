@@ -20,11 +20,7 @@ from typing import Any
 import pandas as pd
 from esdl import esdl
 
-from omotes_simulator_core.adapter.transforms.transform_utils import (
-    Port,
-    PortType,
-    sort_ports,
-)
+from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
@@ -110,10 +106,12 @@ class EsdlAssetObject:
                 elif temp_type == "Return":
                     return float(esdl_port.carrier.returnTemperature) + 273.15
         logger.error(
-            f"No port found with type: {port_type} for asset: {self.esdl_asset.name}",
+            f"No port found with temperature type: {temp_type} for asset: {self.esdl_asset.name}",
             extra={"esdl_object_id": self.get_id()},
         )
-        raise ValueError(f"No port found with type: {port_type} for asset: {self.esdl_asset.name}")
+        raise ValueError(
+            f"No port found with temperature type: {temp_type} for asset: {self.esdl_asset.name}"
+        )
 
     def get_port_ids(self) -> list[str]:
         """Returns a sorted list of the port ids of the asset."""
@@ -159,6 +157,12 @@ class EsdlAssetObject:
             )
             return 0
         return float(self.esdl_asset.costInformation.marginalCosts.value)
+
+    def get_number_of_ports(self) -> int:
+        """Get the number of ports of the asset."""
+        number_of_ports = len(self.esdl_asset.port)
+
+        return number_of_ports
 
     def get_connected_assets(self, port_id: str) -> list[str]:
         """Get the connected assets of the asset."""
