@@ -54,7 +54,6 @@ class AtesClusterTest(unittest.TestCase):
             aquifer_permeability=self.aquifer_permeability,
             aquifer_anisotropy=self.aquifer_anisotropy,
             salinity=self.salinity,
-            well_casing_size=self.well_casing_size,
             well_distance=self.well_distance,
         )
 

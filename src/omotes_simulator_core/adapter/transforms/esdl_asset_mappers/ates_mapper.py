@@ -66,9 +66,6 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             salinity=esdl_asset.get_property(
                 esdl_property_name="salinity", default_value=ATES_DEFAULTS.salinity
             ),
-            well_casing_size=esdl_asset.get_property(
-                esdl_property_name="wellCasingSize", default_value=ATES_DEFAULTS.well_casing_size
-            ),
             well_distance=esdl_asset.get_property(
                 esdl_property_name="wellDistance", default_value=ATES_DEFAULTS.well_distance
             ),
