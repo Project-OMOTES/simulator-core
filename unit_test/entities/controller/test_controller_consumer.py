@@ -57,9 +57,8 @@ class ConsumerControllerTest(unittest.TestCase):
         self.assertEqual(
             self.consumer.temperature_in, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
-        self.assertEqual(self.consumer.start_index, 0)
         self.assertEqual(self.consumer.max_power, 20000)
-        pd.testing.assert_frame_equal(self.consumer.profile, self.profile)
+        pd.testing.assert_frame_equal(self.consumer.profile, self.profile.set_index("date"))
 
     def test_controller_consumer_get_heat_demand(self) -> None:
         """Test to get the heat demand of the consumer."""
