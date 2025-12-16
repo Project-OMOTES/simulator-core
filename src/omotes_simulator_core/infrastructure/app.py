@@ -63,7 +63,7 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
     )
     t1 = datetime.now()
-    result = run(r".\testdata\test_dtk_1.esdl")
+    result = run(r".\testdata\test_dtk_4.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")
