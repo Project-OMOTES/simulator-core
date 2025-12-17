@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapper class to convert ESDL objects to internal controller objects."""
 import dataclasses
+from typing import Optional
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
     ControllerConsumerMapper,
@@ -74,13 +75,16 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         """
         raise NotImplementedError("EsdlControllerMapper.to_esdl()")
 
-    def to_entity(self, esdl_object: EsdlObject) -> NetworkController:
+    def to_entity(
+        self, esdl_object: EsdlObject, timestep: Optional[int] = None
+    ) -> NetworkController:
         """Method to convert esdl to NetworkController object.
 
         This method first converts all assets into a list of assets.
         Next to this a list of Junctions is created. This is then used
         to create the NetworkController object.
         :param EsdlObject esdl_object: esdl object to convert to NetworkController object.
+        :param int timestep: Simulation timestep in seconds.
 
         :return: NetworkController, which is the converted EsdlObject object.
         """
@@ -97,7 +101,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         ]
 
         consumers = [
-            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset)
+            ControllerConsumerMapper().to_entity(esdl_asset=esdl_asset, timestep=timestep)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)
         ]
         producers = [
@@ -110,7 +114,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         ]
 
         storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset)
+            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset, timestep=timestep)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
         ]
 

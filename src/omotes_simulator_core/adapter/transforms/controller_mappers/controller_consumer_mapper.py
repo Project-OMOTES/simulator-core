@@ -14,12 +14,17 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+from typing import Optional
+
 import numpy as np
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolator,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
@@ -31,10 +36,13 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerConsumer:
+    def to_entity(
+        self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    ) -> ControllerConsumer:
         """Method to map an esdl asset to a consumer entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
@@ -44,12 +52,20 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Supply")
         temperature_out = esdl_asset.get_temperature("Out", "Return")
         profile = esdl_asset.get_profile()
+        self.profile_interpolator = ProfileInterpolator(
+            profile=profile,
+            sampling_method=esdl_asset.get_sampling_method(),
+            interpolation_method=esdl_asset.get_interpolation_method(),
+            timestep=timestep,
+        )
+        resampled_profile = self.profile_interpolator.get_resampled_profile()
+
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             temperature_in=temperature_in,
             temperature_out=temperature_out,
             max_power=power,
-            profile=profile,
+            profile=resampled_profile,
         )
         return contr_consumer

@@ -58,9 +58,8 @@ class StorageControllerTest(unittest.TestCase):
         self.assertEqual(
             self.storage.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
-        self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
-        pd.testing.assert_frame_equal(self.storage.profile, self.profile)
+        pd.testing.assert_frame_equal(self.storage.profile, self.profile.set_index("date"))
 
     def test_controller_storage_get_heat_power(self) -> None:
         """Test to get the heat power of the storage."""

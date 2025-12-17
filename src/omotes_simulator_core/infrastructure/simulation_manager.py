@@ -51,7 +51,7 @@ class SimulationManager:
         try:
             # convert ESDL to Heat Network, NetworkController
             network = HeatNetwork(EsdlEnergySystemMapper(self.esdl).to_entity)
-            controller = EsdlControllerMapper().to_entity(self.esdl)
+            controller = EsdlControllerMapper().to_entity(self.esdl, timestep=self.config.timestep)
 
             worker = NetworkSimulation(network, controller)
             worker.run(self.config, progress_calback)
