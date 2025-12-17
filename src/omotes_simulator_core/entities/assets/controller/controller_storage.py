@@ -90,4 +90,3 @@ class ControllerStorage(AssetControllerAbstract):
         if bool(state):
             self.max_charge_power = state["max_charge_power"]
             self.max_discharge_power = state["max_discharge_power"]
-            
