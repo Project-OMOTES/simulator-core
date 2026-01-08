@@ -51,7 +51,6 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-
         self.profile_interpolator = ProfileInterpolator(
             profile=pd.DataFrame(),
             sampling_method=esdl_asset.get_sampling_method(),
