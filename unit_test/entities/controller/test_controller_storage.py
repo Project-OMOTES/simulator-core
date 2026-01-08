@@ -38,7 +38,7 @@ PROFILE = pd.DataFrame(
         "date": [datetime(2021, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 1, 0, 0)],
         "values": PROFILE_VALUES,
     }
-)
+).set_index("date")
 
 
 # Abstract class

@@ -98,40 +98,24 @@ class ControllerStorageAbstract(AssetControllerAbstract):
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the storage. + is injection and - is production.
 
-        :param datetime.datetime time: Time for which to get the heat demand.
-        :return: float with the heat demand.
+        :param datetime.datetime time: Time for which to get the heat power.
+        :return: float with the heat power.
         """
         # Check for empty profile
         if self.profile.empty:
             logging.warning("No profile found for storage %s. Returning 0.0 power.", self.name)
             return 0.0
 
-        # Calculate time differences in seconds from the start_index onwards
-        time_diffs = (
-            (
-                self.profile["date"].iloc[self.start_index :].apply(lambda x: x.to_pydatetime())
-                - time
-            )  # type: ignore
-            .abs()
-            .dt.total_seconds()
-        )
-
-        # Find the closest time within 1 hour (3600 seconds)
-        mask = time_diffs < 3600
-        if not mask.any():
+        # Get power value from profile at given time or return 0.0 if not found
+        try:
+            power_value = float(self.profile.loc[time, "values"])
+        except KeyError:
             logging.warning(
                 "No profile value found for storage %s at time %s. Returning 0.0 power.",
                 self.name,
                 time,
             )
             return 0.0
-
-        # Get the index of the closest match
-        closest_idx = time_diffs[mask].idxmin()
-        self.start_index = closest_idx
-
-        # Get the power value
-        power_value = float(self.profile["values"].iloc[closest_idx])
 
         # Check bounds and return appropriate value
         if power_value > self.effective_max_charge_power:
