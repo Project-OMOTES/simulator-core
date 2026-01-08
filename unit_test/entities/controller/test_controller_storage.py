@@ -75,6 +75,21 @@ class ControllerStorageAbstractTest(unittest.TestCase):
         self.assertEqual(self.storage.effective_max_discharge_power, -1e6)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
 
+    def test_get_heat_demand_empty_profile(self) -> None:
+        """Test to get the heat demand when the profile is empty."""
+        # Arrange
+        self.storage.profile = pd.DataFrame(columns=["date", "values"])
+
+        # Act
+        with self.assertLogs(level="WARNING") as log:
+            heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0, 0))
+            # Assert
+            self.assertIn(
+                "No profile found for storage storage. Returning 0.0 power.",
+                log.output[0],
+            )
+            self.assertEqual(heatdemand, 0.0)
+
 
 class ControllerAtestStorageTest(unittest.TestCase):
     """Testcase for ControllerAtestStorage."""
@@ -121,7 +136,8 @@ class ControllerAtestStorageTest(unittest.TestCase):
     def test_storage_set_to_max_charge_power(self):
         """Test to set the storage to the max charge power."""
         # Arrange
-        self.storage.max_charge_power = 1.0
+        self.storage.effective_max_charge_power = 1.0
+
         # Act
         heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
         # Assert
@@ -130,7 +146,7 @@ class ControllerAtestStorageTest(unittest.TestCase):
     def test_storage_set_to_max_discharge_power(self):
         """Test to set the storage to the max discharge power."""
         # Arrange
-        self.storage.max_discharge_power = -1.0
+        self.storage.effective_max_discharge_power = -1.0
         # Act
         heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
         # Assert
@@ -256,7 +272,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.max_discharge_power = -1e9
 
         # Act
-        max_discharge_power = self.storage.get_max_discharge_power()
+        max_discharge_power = self.storage.get_effective_max_discharge_power()
 
         # Assert
         self.assertEqual(max_discharge_power, -1.0)  # W
@@ -267,7 +283,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.current_volume = 0.0  # m3
 
         # Act
-        max_discharge_power = self.storage.get_max_discharge_power()
+        max_discharge_power = self.storage.get_effective_max_discharge_power()
 
         # Assert
         self.assertEqual(max_discharge_power, 0.0)  # W
@@ -287,7 +303,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.max_charge_power = 1e9
 
         # Act
-        max_charge_power = self.storage.get_max_charge_power()
+        max_charge_power = self.storage.get_effective_max_charge_power()
 
         # Assert
         self.assertEqual(max_charge_power, 1.0)  # W
@@ -299,7 +315,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage.current_volume = 1.0  # m3
 
         # Act
-        max_charge_power = self.storage.get_max_charge_power()
+        max_charge_power = self.storage.get_effective_max_charge_power()
 
         # Assert
         self.assertEqual(max_charge_power, 0.0)  # W
@@ -325,8 +341,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
                     str(cm.exception),
                 )
 
-    @patch.object(ControllerIdealHeatStorage, "get_max_charge_power")
-    @patch.object(ControllerIdealHeatStorage, "get_max_discharge_power")
+    @patch.object(ControllerIdealHeatStorage, "get_effective_max_charge_power")
+    @patch.object(ControllerIdealHeatStorage, "get_effective_max_discharge_power")
     def test_set_state(self, patch_max_discharge_power, patch_max_charge_power):
         """Test to set the state of the storage."""
         # Arrange

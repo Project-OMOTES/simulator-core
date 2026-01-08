@@ -120,10 +120,9 @@ class IdealHeatStorage(AssetAbstract):
         raise NotImplementedError("Method not implemented yet.")
 
     def set_setpoints(self, setpoints: Dict) -> None:
-        """Placeholder to set the setpoints of an asset prior to a simulation.
+        """Controller input to the asset for each iteration until convergence.
 
-        :param Dict setpoints: The setpoints that should be set for the asset.
-        The keys of the dictionary are the names of the setpoints and the values are the values
+        :param Dict setpoints: Controller setpoints for the asset.
         """
         # Check if all necessary setpoints are provided
         self.check_setpoints(setpoints)
