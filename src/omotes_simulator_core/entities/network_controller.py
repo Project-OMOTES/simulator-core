@@ -83,7 +83,7 @@ class NetworkController(NetworkControllerAbstract):
         """
         self.update_networks_factor()
         total_demand = sum([network.get_total_heat_demand(time) for network in self.networks])
-        total_supply = sum([network.get_total_supply() for network in self.networks])
+        total_supply = sum([network.get_total_supply(time) for network in self.networks])
         total_charge_storage = sum(
             [network.get_total_charge_storage() for network in self.networks]
         )
@@ -97,7 +97,7 @@ class NetworkController(NetworkControllerAbstract):
                 f"Consumers are capped to the available power."
             )
             factor = (total_supply + total_discharge_storage) / total_demand
-            producers = self._set_producers_to_max()
+            producers = self._set_producers_to_max(time)
             producers.update(self._set_all_storages_discharge_to_max())
             producers.update(self._set_consumer_to_demand(time, factor=factor))
         else:
@@ -107,11 +107,12 @@ class NetworkController(NetworkControllerAbstract):
                 surplus_supply = total_supply - total_demand
                 if surplus_supply <= total_charge_storage:
                     storages = self._set_storages_charge_power(surplus_supply)
-                    producers = self._set_producers_to_max()
+                    producers = self._set_producers_to_max(time)
                 else:
                     # need to cap the power of the source based on priority
                     storages = self._set_storages_charge_power(total_charge_storage)
                     producers = self._set_producers_based_on_priority(
+                        time,
                         total_demand + total_charge_storage
                     )
             else:
@@ -119,7 +120,7 @@ class NetworkController(NetworkControllerAbstract):
                 # producer.
                 deficit_supply = total_demand - total_supply
                 storages = self._set_storages_discharge_power(deficit_supply)
-                producers = self._set_producers_to_max()
+                producers = self._set_producers_to_max(time)
             producers.update(consumers)
             producers.update(storages)
         # Getting the settings for the heat transfer assets
@@ -153,10 +154,10 @@ class NetworkController(NetworkControllerAbstract):
             producers[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
         return producers
 
-    def _set_producers_to_max(self) -> dict:
+    def _set_producers_to_max(self, time: datetime.datetime) -> dict:
         result = {}
         for network in self.networks:
-            result.update(network.set_supply_to_max())
+            result.update(network.set_supply_to_max(time))
         return result
 
     def _set_all_storages_discharge_to_max(self) -> dict:
@@ -199,7 +200,7 @@ class NetworkController(NetworkControllerAbstract):
             results.update(network.set_storage_discharge_power(factor=factor))
         return results
 
-    def _set_producers_based_on_priority(self, required_supply: float) -> dict:
+    def _set_producers_based_on_priority(self, time: datetime.datetime, required_supply: float) -> dict:
         """Method to set the producers based on the priority of the source."""
         producers = {}
         priority = 0
@@ -210,12 +211,12 @@ class NetworkController(NetworkControllerAbstract):
             if required_supply > 0:
                 # set the producers with the priority to the max
                 for network in self.networks:
-                    producers.update(network.set_supply_to_max(priority))
+                    producers.update(network.set_supply_to_max(time, priority))
             else:
                 # set the producers with the priority with a factor.
                 factor = 1 + required_supply / max_supply_priority
                 for network in self.networks:
-                    producers.update(network.set_supply(factor=factor, priority=priority))
+                    producers.update(network.set_supply(time, factor=factor, priority=priority))
         if len(producers) < sum([len(network.producers) for network in self.networks]):
             # not al producers are set need to set the remaining to zero.
             for network in self.networks:

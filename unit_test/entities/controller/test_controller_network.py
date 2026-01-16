@@ -124,12 +124,14 @@ class TestControllerNetwork(unittest.TestCase):
         # arrange
         producer1 = Mock()
         producer1.power = 10
+        producer1.get_max_power = Mock(return_value=10)
         producer2 = Mock()
         producer2.power = 20
+        producer1.get_max_power = Mock(return_value=20)
         self.controller_network.factor_to_first_network = 2.0
         self.controller_network.producers = [producer1, producer2]
         # act
-        res = self.controller_network.get_total_supply()
+        res = self.controller_network.get_total_supply(datetime.datetime.now())
         # assert
         self.assertEqual(res, 60)
 

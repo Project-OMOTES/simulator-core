@@ -115,24 +115,24 @@ class ControllerNetwork:
             * self.factor_to_first_network
         )
 
-    def get_total_supply(self) -> float:
+    def get_total_supply(self, time: datetime.datetime) -> float:
         """Method to get the total heat supply of the network.
 
         :return float: Total heat supply of all producers.
         """
         return (
-            float(sum([producer.power for producer in self.producers]))
+            float(sum([producer.get_max_power(time) for producer in self.producers]))
             * self.factor_to_first_network
         )
 
-    def set_supply_to_max(self, priority: int = 0) -> dict:
+    def set_supply_to_max(self, time: datetime.datetime, priority: int = 0) -> dict:
         """Method to set the producers to the max power.
 
         :return dict: Dict with key= asset-id and value=setpoints for the producers.
         """
-        return self.set_supply(factor=1, priority=priority)
+        return self.set_supply(time, factor=1, priority=priority)
 
-    def set_supply(self, factor: float = 1, priority: int = 0) -> dict:
+    def set_supply(self, time: datetime.datetime, factor: float = 1, priority: int = 0) -> dict:
         """Method to set the producers with the given priority to max power times the factor.
 
         :param float factor: Factor to multiply the max power with.
@@ -147,7 +147,7 @@ class ControllerNetwork:
             elif source.priority != priority:
                 continue
             producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.power * factor,
+                PROPERTY_HEAT_DEMAND: source.get_max_power(time) * factor,
                 PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_TEMPERATURE_IN: source.temperature_in,
                 PROPERTY_SET_PRESSURE: False,

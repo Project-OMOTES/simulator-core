@@ -64,9 +64,10 @@ if __name__ == "__main__":
     )
     t1 = datetime.now()
     #result = run(r".\testdata\test1_prod_profile.esdl")
-    result = run(r".\testdata\test1.esdl")
+    result = run(r".\testdata\test1_prod_profile.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")
     logger.info(f"Execution time: {t2 - t1}")
     logger.debug(result.head())
+    producer_id = "cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"

@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
+import datetime
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -53,5 +54,18 @@ class ControllerProducer(AssetControllerAbstract):
         self.priority: None | int = priority
         self.profile: pd.DataFrame = \
             profile.set_index("date") if not profile.empty else profile
-
-    # TODO: add function get_max_power that depends on whether there is a profile or not.
+        
+    def get_max_power(self, time: datetime.datetime) -> float:
+        """Gets the maximum producer power at the given timestep. If
+        there is a profile, it will look it up, otherwise it returns the
+        maximum power defined in the esdl parameter."""
+        
+        if self.profile.empty:
+            max_power = self.power
+        else:
+            try:
+                max_power = float(self.profile.loc[time, "values"])
+            except KeyError:
+                max_power = self.power
+        
+        return max_power
