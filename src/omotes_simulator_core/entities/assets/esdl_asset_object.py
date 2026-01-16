@@ -194,6 +194,13 @@ class EsdlAssetObject:
             self.esdl_asset, esdl.HeatExchange
         )
 
+    def has_profile(self) -> bool:
+        """Checks if an asset has a profile assigned to it"""
+        for esdl_port in self.esdl_asset.port:
+            if esdl_port.profile:
+                return True
+        return False
+
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:
     """Get the temperature of the port."""

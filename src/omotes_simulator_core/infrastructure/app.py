@@ -63,6 +63,7 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
     )
     t1 = datetime.now()
+    #result = run(r".\testdata\test1_prod_profile.esdl")
     result = run(r".\testdata\test1.esdl")
     t2 = datetime.now()
 

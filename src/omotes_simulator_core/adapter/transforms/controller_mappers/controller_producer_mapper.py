@@ -14,8 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+import pandas as pd
+
+from typing import Optional
+
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
+)
+from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
+    ProfileInterpolator,
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
@@ -29,7 +36,8 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerProducer:
+    def to_entity(self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    ) -> ControllerProducer:
         """Method to map an esdl asset to a producer entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
@@ -41,6 +49,19 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         temperature_in = esdl_asset.get_temperature("In", "Return")
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
         strategy_priority = esdl_asset.get_strategy_priority()
+
+        if esdl_asset.has_profile():
+            profile = esdl_asset.get_profile()
+            self.profile_interpolator = ProfileInterpolator(
+                profile=profile,
+                sampling_method=esdl_asset.get_sampling_method(),
+                interpolation_method=esdl_asset.get_interpolation_method(),
+                timestep=timestep,
+            )
+            resampled_profile = self.profile_interpolator.get_resampled_profile()
+        else:
+            profile = pd.DataFrame()
+
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
@@ -48,6 +69,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             power=power,
             marginal_costs=marginal_costs,
+            profile=resampled_profile if not profile.empty else profile,
             priority=strategy_priority,
         )
         return contr_producer

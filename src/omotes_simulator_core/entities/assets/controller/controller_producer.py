@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
+import pandas as pd
+
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -30,6 +32,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_out: float,
         power: float,
         marginal_costs: float,
+        profile: pd.DataFrame,
         priority: None | int = 1,
     ):
         """Constructor for the source.
@@ -48,3 +51,7 @@ class ControllerProducer(AssetControllerAbstract):
         self.power: float = power
         self.marginal_costs: float = marginal_costs
         self.priority: None | int = priority
+        self.profile: pd.DataFrame = \
+            profile.set_index("date") if not profile.empty else profile
+
+    # TODO: add function get_max_power that depends on whether there is a profile or not.
