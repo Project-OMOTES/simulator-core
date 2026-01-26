@@ -50,8 +50,8 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
         strategy_priority = esdl_asset.get_strategy_priority()
 
-        if esdl_asset.has_profile():
-            profile = esdl_asset.get_profile()
+        if esdl_asset.has_constraint():
+            profile = esdl_asset.get_constraint_profile()
             self.profile_interpolator = ProfileInterpolator(
                 profile=profile,
                 sampling_method=esdl_asset.get_sampling_method(),

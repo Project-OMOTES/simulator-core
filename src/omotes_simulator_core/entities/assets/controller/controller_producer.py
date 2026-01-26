@@ -33,7 +33,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_out: float,
         power: float,
         marginal_costs: float,
-        profile: pd.DataFrame,
+        profile: pd.DataFrame, # TODO: find where this is called and replace by the constraint.
         priority: None | int = 1,
     ):
         """Constructor for the source.
@@ -65,7 +65,7 @@ class ControllerProducer(AssetControllerAbstract):
         else:
             try:
                 max_power = float(self.profile.loc[time, "values"])
-            except KeyError:
+            except KeyError: #TODO: Test to make sure this works when there is no profile in the selected date.
                 max_power = self.power
         
         return max_power

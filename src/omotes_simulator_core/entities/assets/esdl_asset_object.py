@@ -90,7 +90,7 @@ class EsdlAssetObject:
             return getattr(self.esdl_asset, esdl_property_name, default_value)
 
     def get_profile(self) -> pd.DataFrame:
-        """Get the profile of the asset."""
+        """Get the profile of the asset's ports."""
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return get_data_from_profile(esdl_port.profile[0])
@@ -99,6 +99,11 @@ class EsdlAssetObject:
             extra={"esdl_object_id": self.get_id()},
         )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
+    
+    def get_constraint_profile(self) -> pd.DataFrame:
+        """Get the profile from the asset's constraint."""
+        profile = self.esdl_asset.constraint[0].maximum
+        return get_data_from_profile(profile)
 
     def get_sampling_method(self) -> ProfileSamplingMethod:
         """Get the interpolation method of the asset."""
@@ -200,6 +205,14 @@ class EsdlAssetObject:
             if esdl_port.profile:
                 return True
         return False
+    
+    def has_constraint(self) -> bool:
+        """Checks if an asset has a constraint assigned to it"""
+        if self.esdl_asset.constraint.items:
+            return True
+        else:
+            return False
+
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:

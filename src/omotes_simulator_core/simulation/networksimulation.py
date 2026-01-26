@@ -62,13 +62,6 @@ class NetworkSimulation:
                 tzinfo=timezone.utc
             )
 
-            #### REMOVE AFTER TESTING ########
-            producer = self.controller.networks[0].producers[0]
-            print(f'Current time: {time}')
-            print(f'Current max power producer: {producer.get_max_power(time)}')
-            print(f'Current producer profile: {producer.profile.loc[time, "values"]}')
-            ##################################
-
             # Link controller to network
             self.controller.update_network_state(heat_network=self.network)
 
