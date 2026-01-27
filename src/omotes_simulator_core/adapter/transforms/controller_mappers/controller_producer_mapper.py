@@ -14,17 +14,17 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
-import pandas as pd
-
 from typing import Optional
+
+import pandas as pd
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolator,
 )
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
@@ -36,7 +36,8 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         """Map an Entity to a EsdlAsset."""
         raise NotImplementedError("EsdlAssetControllerProducerMapper.to_esdl()")
 
-    def to_entity(self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    def to_entity(
+        self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
     ) -> ControllerProducer:
         """Method to map an esdl asset to a producer entity class.
 

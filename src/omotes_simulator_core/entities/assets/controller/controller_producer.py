@@ -15,7 +15,9 @@
 """Module containing the classes for the controller."""
 
 import datetime
+
 import pandas as pd
+from typing import Optional
 
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
@@ -33,7 +35,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_out: float,
         power: float,
         marginal_costs: float,
-        profile: pd.DataFrame = pd.DataFrame(),
+        profile: Optional[pd.DataFrame] = None,
         priority: None | int = 1,
     ):
         """Constructor for the source.
@@ -52,20 +54,22 @@ class ControllerProducer(AssetControllerAbstract):
         self.power: float = power
         self.marginal_costs: float = marginal_costs
         self.priority: None | int = priority
-        self.profile: pd.DataFrame = \
-            profile.set_index("date") if not profile.empty else profile
-        
+        self.profile: pd.DataFrame = (
+            pd.DataFrame() if profile is None or profile.empty else profile.set_index("date")
+        )
+
     def get_max_power(self, time: datetime.datetime) -> float:
-        """Gets the maximum producer power at the given timestep. If
-        there is a profile, it will look it up, otherwise it returns the
-        maximum power defined in the esdl parameter."""
-        
+        """Gets the maximum producer power at the given timestep.
+
+        If there is a profile, it will look it up, otherwise it returns the
+        maximum power defined in the esdl parameter.
+        """
         if self.profile.empty:
             max_power = self.power
         else:
             try:
                 max_power = float(self.profile.loc[time, "values"])
-            except KeyError: #TODO: Test to make sure this works when there is no profile in the selected date.
+            except KeyError:
                 max_power = self.power
-        
+
         return max_power

@@ -99,7 +99,7 @@ class EsdlAssetObject:
             extra={"esdl_object_id": self.get_id()},
         )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
-    
+
     def get_constraint_profile(self) -> pd.DataFrame:
         """Get the profile from the asset's constraint."""
         profile = self.esdl_asset.constraint[0].maximum
@@ -200,19 +200,18 @@ class EsdlAssetObject:
         )
 
     def has_profile(self) -> bool:
-        """Checks if an asset has a profile assigned to it"""
+        """Checks if an asset has a profile assigned to any of its ports."""
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return True
         return False
-    
+
     def has_constraint(self) -> bool:
-        """Checks if an asset has a constraint assigned to it"""
+        """Checks if an asset has a constraint assigned to it."""
         if self.esdl_asset.constraint.items:
             return True
         else:
             return False
-
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:

@@ -28,8 +28,6 @@ from omotes_simulator_core.entities.simulation_configuration import SimulationCo
 from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
-import matplotlib.pyplot as plt
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,29 +63,10 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
     )
     t1 = datetime.now()
-    #result = run(r".\testdata\test1.esdl")
-    result = run(r".\testdata\test1_prod_profile.esdl")
+    # result = run(r".\testdata\test1.esdl")
+    result = run(r".\testdata\test1.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")
     logger.info(f"Execution time: {t2 - t1}")
     logger.debug(result.head())
-    producer_id = "cf3d4b5e-437f-4c1b-a7f9-7fd7e8a269b4"
-
-    # Producer in and out ports: "9c258b9d-3149-4720-8931-f4bef1080ec1", "2d818e3d-8a39-4cec-afa0-f6dbbfd50696", carrier in: "0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret", carrier out: "0bd9cb08-2f69-4e97-8ac8-bd87b07e466a".
-    prod_massfl_in = result["9c258b9d-3149-4720-8931-f4bef1080ec1", "mass_flow"].values
-    prod_massfl_out = result["2d818e3d-8a39-4cec-afa0-f6dbbfd50696", "mass_flow"].values
-    prod_temp_in = result["9c258b9d-3149-4720-8931-f4bef1080ec1", "temperature"].values
-    prod_temp_out = result["2d818e3d-8a39-4cec-afa0-f6dbbfd50696", "temperature"].values
-    # Consumer in and out ports: "af0904f7-ba1f-4e79-9040-71e08041601b", "e890f65f-80e7-46fa-8c52-5385324bf686", carrier in: "0bd9cb08-2f69-4e97-8ac8-bd87b07e466a", carrier out: "0bd9cb08-2f69-4e97-8ac8-bd87b07e466a_ret".
-    cons_massfl_in = result["af0904f7-ba1f-4e79-9040-71e08041601b", "mass_flow"].values
-    cons_massfl_out = result["e890f65f-80e7-46fa-8c52-5385324bf686", "mass_flow"].values
-    cons_temp_in = result["af0904f7-ba1f-4e79-9040-71e08041601b", "temperature"].values
-    cons_temp_out = result["e890f65f-80e7-46fa-8c52-5385324bf686", "temperature"].values
-    
-    prod_power = 4180 * prod_massfl_in * (prod_temp_out - prod_temp_in)
-    cons_power = 4180 * cons_massfl_in * (cons_temp_in - cons_temp_out)
-
-    plt.figure()
-    plt.plot(prod_power)
-    plt.show()

@@ -112,8 +112,7 @@ class NetworkController(NetworkControllerAbstract):
                     # need to cap the power of the source based on priority
                     storages = self._set_storages_charge_power(total_charge_storage)
                     producers = self._set_producers_based_on_priority(
-                        time,
-                        total_demand + total_charge_storage
+                        time, total_demand + total_charge_storage
                     )
             else:
                 # there is a deficit of supply we can discharge the storage, storage becomes
@@ -200,7 +199,9 @@ class NetworkController(NetworkControllerAbstract):
             results.update(network.set_storage_discharge_power(factor=factor))
         return results
 
-    def _set_producers_based_on_priority(self, time: datetime.datetime, required_supply: float) -> dict:
+    def _set_producers_based_on_priority(
+        self, time: datetime.datetime, required_supply: float
+    ) -> dict:
         """Method to set the producers based on the priority of the source."""
         producers = {}
         priority = 0
