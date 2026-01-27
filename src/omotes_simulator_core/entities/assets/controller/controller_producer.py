@@ -33,7 +33,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_out: float,
         power: float,
         marginal_costs: float,
-        profile: pd.DataFrame, # TODO: find where this is called and replace by the constraint.
+        profile: pd.DataFrame = pd.DataFrame(),
         priority: None | int = 1,
     ):
         """Constructor for the source.

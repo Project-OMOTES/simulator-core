@@ -299,7 +299,7 @@ class ControllerTest(unittest.TestCase):
             return_value={"id3": {"prop1": 9, "prop2": 15}}
         )
         # act
-        result = self.controller._set_producers_to_max()
+        result = self.controller._set_producers_to_max(datetime.datetime.now())
         # assert
         self.assertEqual(
             result,
@@ -440,7 +440,7 @@ class ControllerTest(unittest.TestCase):
             storages_in=[],
         )
         # act
-        result = self.controller._set_producers_based_on_priority(120)
+        result = self.controller._set_producers_based_on_priority(datetime.datetime.now(), 120)
 
         # assert
         self.assertEqual(result["producer1"][PROPERTY_HEAT_DEMAND], 50)
