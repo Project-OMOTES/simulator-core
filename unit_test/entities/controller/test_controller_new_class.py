@@ -15,6 +15,7 @@
 """Test controller class."""
 import datetime
 import unittest
+import pandas as pd
 from unittest.mock import Mock
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -104,6 +105,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -113,6 +115,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         consumer1 = Mock(spec=ControllerConsumer)
         consumer1.id = "consumer1"
@@ -389,6 +392,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -398,6 +402,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         producer3 = ControllerProducer(
             name="producer3",
@@ -407,6 +412,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=1,
+            profile=pd.DataFrame(),
         )
         producer4 = ControllerProducer(
             name="producer4",
@@ -416,6 +422,7 @@ class ControllerTest(unittest.TestCase):
             power=20,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         self.controller.networks[0] = ControllerNetwork(
             heat_transfer_assets_prim_in=[],
@@ -458,6 +465,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -467,6 +475,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         producer3 = ControllerProducer(
             name="producer3",
@@ -476,6 +485,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=1,
+            profile=pd.DataFrame(),
         )
         producer4 = ControllerProducer(
             name="producer4",
@@ -485,6 +495,7 @@ class ControllerTest(unittest.TestCase):
             power=20,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         self.controller.networks[0] = ControllerNetwork(
             heat_transfer_assets_prim_in=[],

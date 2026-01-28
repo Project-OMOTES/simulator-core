@@ -100,9 +100,11 @@ class EsdlAssetObject:
         )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
 
-    def get_constraint_profile(self) -> pd.DataFrame:
-        """Get the profile from the asset's constraint."""
-        profile = self.esdl_asset.constraint[0].maximum
+    def get_constraint_max_profile(self) -> pd.DataFrame:
+        """Get the profile from the asset's maximum constraint."""
+        for constraint in self.esdl_asset.constraint:
+            if constraint.maximum:
+                profile = constraint.maximum
         return get_data_from_profile(profile)
 
     def get_sampling_method(self) -> ProfileSamplingMethod:

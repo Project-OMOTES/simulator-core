@@ -52,7 +52,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         strategy_priority = esdl_asset.get_strategy_priority()
 
         if esdl_asset.has_constraint():
-            profile = esdl_asset.get_constraint_profile()
+            profile = esdl_asset.get_constraint_max_profile()
             self.profile_interpolator = ProfileInterpolator(
                 profile=profile,
                 sampling_method=esdl_asset.get_sampling_method(),
@@ -61,7 +61,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             )
             resampled_profile = self.profile_interpolator.get_resampled_profile()
         else:
-            profile = pd.DataFrame()
+            resampled_profile = pd.DataFrame()
 
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
@@ -70,7 +70,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             temperature_out=temperature_out,
             power=power,
             marginal_costs=marginal_costs,
-            profile=resampled_profile if not profile.empty else profile,
+            profile=resampled_profile,  # Empty DataFrame is added if there is no profile.
             priority=strategy_priority,
         )
         return contr_producer

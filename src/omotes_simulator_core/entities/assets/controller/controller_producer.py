@@ -35,7 +35,7 @@ class ControllerProducer(AssetControllerAbstract):
         temperature_out: float,
         power: float,
         marginal_costs: float,
-        profile: Optional[pd.DataFrame] = None,
+        profile: pd.DataFrame,
         priority: None | int = 1,
     ):
         """Constructor for the source.
@@ -54,9 +54,7 @@ class ControllerProducer(AssetControllerAbstract):
         self.power: float = power
         self.marginal_costs: float = marginal_costs
         self.priority: None | int = priority
-        self.profile: pd.DataFrame = (
-            pd.DataFrame() if profile is None or profile.empty else profile.set_index("date")
-        )
+        self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
 
     def get_max_power(self, time: datetime.datetime) -> float:
         """Gets the maximum producer power at the given timestep.

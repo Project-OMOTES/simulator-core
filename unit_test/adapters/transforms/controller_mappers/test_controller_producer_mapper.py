@@ -17,6 +17,7 @@
 
 import unittest
 from pathlib import Path
+from datetime import datetime
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import ControllerProducerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
@@ -26,8 +27,9 @@ from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 class TestControllerProducerMapper(unittest.TestCase):
     """Test ControllerProducerMapper."""
 
-    def setUp(self) -> None:
-        """Set up test case."""
+    def test_to_entity_method(self):
+        """Test settings of controller for producer."""
+        # Arrange
         # Load the test esdl file
         esdl_file_path = (
             Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_ates.esdl"
@@ -35,10 +37,6 @@ class TestControllerProducerMapper(unittest.TestCase):
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         # Create a ControllerProducerMapper object
         self.mapper = ControllerProducerMapper()
-
-    def test_to_entity_method(self):
-        """Test settings of controller for producer."""
-        # Arrange
         producer_assets = self.esdl_object.get_all_assets_of_type("producer")
 
         # Act
@@ -49,3 +47,21 @@ class TestControllerProducerMapper(unittest.TestCase):
         self.assertEqual(controller_producer.temperature_out, 353.15)
         self.assertEqual(controller_producer.power, 1e8)
         self.assertEqual(controller_producer.marginal_costs, 0)
+
+    def test_get_max_constraint(self) -> None:
+        """Test to check if the maximum constraint is grabbed correctly.
+        """
+        # Arrange
+        esdl_file_path_constraint = (
+            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test1_prod_profile.esdl"
+        )
+        self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path_constraint))
+        self.mapper = ControllerProducerMapper()
+        producer_assets = self.esdl_object.get_all_assets_of_type("producer")
+
+        # Act
+        constraint_profile = producer_assets[0].get_constraint_max_profile()
+
+        # Assert
+        self.assertEqual(producer_assets[0].has_constraint(), True)
+        self.assertEqual(constraint_profile.iloc[0].values[1],  143277.6298)

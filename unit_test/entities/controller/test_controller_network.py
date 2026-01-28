@@ -317,8 +317,3 @@ class TestControllerNetwork(unittest.TestCase):
         # assert
         pass
 
-
-if __name__ == "__main__":
-    test = TestControllerNetwork()
-    test.setUp()
-    test.test_set_supply_to_max_priority()
