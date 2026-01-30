@@ -14,9 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
-import pandas as pd
-
 from datetime import datetime
+
+import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
@@ -73,23 +73,21 @@ class ControllerProducerTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.producer.priority, None)
-    
+
     def test_get_max_power_profile(self) -> None:
         """Test to check if get_max_power returns the profile value or the power esdl value if
         no profile is present.
         """
-        
+
         # Arrange
         time = datetime(2021, 1, 1, 0, 0, 0)
 
         # Act
         self.producer.profile = pd.DataFrame()
-        max_power_1 = self.producer.get_max_power(time)
+        max_power_1 = self.producer.get_max_power(time) # No constraint profile present.
         self.producer.profile = self.profile.set_index("date")
         max_power_2 = self.producer.get_max_power(time)
 
         # Assert
         self.assertEqual(max_power_1, self.producer.power)
         self.assertEqual(max_power_2, self.values[0])
-
-    

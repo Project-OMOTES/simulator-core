@@ -17,7 +17,6 @@
 
 import unittest
 from pathlib import Path
-from datetime import datetime
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import ControllerProducerMapper
 from omotes_simulator_core.entities.esdl_object import EsdlObject
@@ -49,11 +48,16 @@ class TestControllerProducerMapper(unittest.TestCase):
         self.assertEqual(controller_producer.marginal_costs, 0)
 
     def test_get_max_constraint(self) -> None:
-        """Test to check if the maximum constraint is grabbed correctly.
-        """
+        """Test to check if the maximum constraint is grabbed correctly."""
         # Arrange
         esdl_file_path_constraint = (
-            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test1_prod_profile.esdl"
+            Path(__file__).parent
+            / ".."
+            / ".."
+            / ".."
+            / ".."
+            / "testdata"
+            / "test1_prod_profile.esdl"
         )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path_constraint))
         self.mapper = ControllerProducerMapper()
@@ -64,4 +68,4 @@ class TestControllerProducerMapper(unittest.TestCase):
 
         # Assert
         self.assertEqual(producer_assets[0].has_constraint(), True)
-        self.assertEqual(constraint_profile.iloc[0].values[1],  143277.6298)
+        self.assertEqual(constraint_profile.iloc[0].values[1], 143277.6298)

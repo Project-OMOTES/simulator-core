@@ -15,7 +15,6 @@
 """Module containing the classes for the controller."""
 
 import datetime
-from typing import Optional
 
 import pandas as pd
 

@@ -15,8 +15,9 @@
 """Test controller class."""
 import datetime
 import unittest
-import pandas as pd
 from unittest.mock import Mock
+
+import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,

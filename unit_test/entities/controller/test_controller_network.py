@@ -316,4 +316,3 @@ class TestControllerNetwork(unittest.TestCase):
 
         # assert
         pass
-

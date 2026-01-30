@@ -87,8 +87,3 @@ class ConsumerControllerTest(unittest.TestCase):
         demand = self.consumer.get_heat_demand(datetime(2021, 3, 2, 0, 0))
         # Assert
         self.assertEqual(demand, 0)
-
-if __name__ == "__main__":
-    test = ConsumerControllerTest()
-    test.setUp()
-    test.test_controller_consumer_get_heat_demand()

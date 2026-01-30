@@ -105,6 +105,8 @@ class EsdlAssetObject:
         for constraint in self.esdl_asset.constraint:
             if constraint.maximum:
                 profile = constraint.maximum
+            else:
+                return pd.DataFrame()
         return get_data_from_profile(profile)
 
     def get_sampling_method(self) -> ProfileSamplingMethod:
