@@ -50,7 +50,6 @@ class ControllerProducerTest(unittest.TestCase):
 
     def test_controller_producer_init(self) -> None:
         """Init test for ControllerProducer."""
-
         # Assert
         self.assertEqual(self.producer.name, "producer")
         self.assertEqual(self.producer.id, "id")
@@ -75,10 +74,7 @@ class ControllerProducerTest(unittest.TestCase):
         self.assertEqual(self.producer.priority, None)
 
     def test_get_max_power_profile(self) -> None:
-        """Test to check if get_max_power returns the profile value or the power esdl value if
-        no profile is present.
-        """
-
+        """Test to check if get_max_power returns the profile value or the power esdl value."""
         # Arrange
         time = datetime(2021, 1, 1, 0, 0, 0)
 

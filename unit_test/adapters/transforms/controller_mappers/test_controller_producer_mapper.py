@@ -47,7 +47,7 @@ class TestControllerProducerMapper(unittest.TestCase):
         self.assertEqual(controller_producer.power, 1e8)
         self.assertEqual(controller_producer.marginal_costs, 0)
 
-    def test_get_max_constraint(self) -> None:
+    def test_get_max_constraint(self):
         """Test to check if the maximum constraint is grabbed correctly."""
         # Arrange
         esdl_file_path_constraint = (
