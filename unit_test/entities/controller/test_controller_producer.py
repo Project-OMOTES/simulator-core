@@ -84,7 +84,7 @@ class ControllerProducerTest(unittest.TestCase):
 
         # Act
         self.producer.profile = pd.DataFrame()
-        max_power_1 = self.producer.get_max_power(time) # No constraint profile present.
+        max_power_1 = self.producer.get_max_power(time)  # No constraint profile present.
         self.producer.profile = self.profile.set_index("date")
         max_power_2 = self.producer.get_max_power(time)
 
