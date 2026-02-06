@@ -69,6 +69,12 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             well_distance=esdl_asset.get_property(
                 esdl_property_name="wellDistance", default_value=ATES_DEFAULTS.well_distance
             ),
+            well_casing_size=esdl_asset.get_property(
+                esdl_property_name="wellCasingSize", default_value=ATES_DEFAULTS.well_casing_size
+            ),
+            maximum_flowrate=esdl_asset.get_property(
+                esdl_property_name="maximumFlowRate", default_value=ATES_DEFAULTS.maximum_flow_rate
+            ),
         )
 
         return ates_entity

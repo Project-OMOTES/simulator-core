@@ -83,10 +83,13 @@ class AtesCluster(AssetAbstract):
     """The salinity of the aquifer [ppm]."""
 
     well_casing_size: float
-    """The casing size of the well [inch]."""
+    """The casing size of the well [m]."""
 
     well_distance: float
     """The distance of the well [m]."""
+
+    maximum_flowrate: float
+    """The maximum flowrate of ATES [m3/h]."""
 
     pyjnius_loader: PyjniusLoader
     """Loader object to delay importing pyjnius module and Java classes."""
@@ -105,6 +108,8 @@ class AtesCluster(AssetAbstract):
         aquifer_anisotropy: float,
         salinity: float,
         well_distance: float,
+        well_casing_size: float,
+        maximum_flowrate: float,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -129,9 +134,9 @@ class AtesCluster(AssetAbstract):
         self.aquifer_anisotropy = aquifer_anisotropy  # -
         self.salinity = salinity  # ppm
         self.well_distance = well_distance  # meters
-        self.wellbore_diameter = ATES_DEFAULTS.wellbore_size  # meters
-        self.max_charge_volume_flow = 500.0
-        self.max_discharge_volume_flow = 500.0
+        self.well_casing_size = well_casing_size  # meters
+        self.max_charge_volume_flow = maximum_flowrate
+        self.max_discharge_volume_flow = maximum_flowrate
 
         # Output list
         self.output: list = []
@@ -240,7 +245,7 @@ class AtesCluster(AssetAbstract):
         aquifer_perm_z = aquifer_perm_xy / self.aquifer_anisotropy
         salinity = self.salinity
         well2_x = self.well_distance + 300
-        wellbore_diameter = self.wellbore_diameter / 0.0254  # convert to inch
+        well_casing_size = self.well_casing_size / 0.0254  # convert to inch
 
         xml_str = xml_str.replace("$NZ$", str(nz))
         xml_str = xml_str.replace("$MODEL_TOP$", str(model_top))
@@ -248,7 +253,7 @@ class AtesCluster(AssetAbstract):
         xml_str = xml_str.replace("$WELL2_X$", str(well2_x))
         xml_str = xml_str.replace("$AQUIFER_TOP$", str(aquifer_top))
         xml_str = xml_str.replace("$AQUIFER_BASE$", str(aquifer_base))
-        xml_str = xml_str.replace("$CASING_SIZE$", str(wellbore_diameter))
+        xml_str = xml_str.replace("$CASING_SIZE$", str(well_casing_size))
         xml_str = xml_str.replace("$SURFACE_TEMPERATURE$", str(surface_temperature))
         xml_str = xml_str.replace("$SALINITY$", str(salinity))
         xml_str = xml_str.replace("$NZ_AQUIFER$", str(nz_aquifer))
@@ -389,7 +394,7 @@ class AtesCluster(AssetAbstract):
         saline_viscosity = self._get_saline_viscosity(P, T)
         aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
         # diameter
-        well_radius = 0.5 * self.wellbore_diameter  # m
+        well_radius = 0.5 * self.well_casing_size  # m
 
         max_extract_flow_velocity = (
             2 * 60 * 60 * aquifer_permeability * saline_density * grav_accel / saline_viscosity
@@ -416,7 +421,7 @@ class AtesCluster(AssetAbstract):
         saline_viscosity = self._get_saline_viscosity(P, T)
         aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
         # diameter
-        well_radius = 0.5 * self.wellbore_diameter  # m, radius is half of diameter
+        well_radius = 0.5 * self.well_casing_size  # m, radius is half of diameter
 
         cloggingVel = 0.3  # meter/year
         membraneFilterIndex = 0.1  # s/l2
