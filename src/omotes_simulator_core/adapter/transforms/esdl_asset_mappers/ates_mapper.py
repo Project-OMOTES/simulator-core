@@ -73,7 +73,7 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
                 esdl_property_name="wellCasingSize", default_value=ATES_DEFAULTS.well_casing_size
             ),
             maximum_flowrate=esdl_asset.get_property(
-                esdl_property_name="maximumFlowRate", default_value=ATES_DEFAULTS.maximum_flow_rate
+                esdl_property_name="maximumFlowRate", default_value=ATES_DEFAULTS.maximum_flowrate
             ),
         )
 

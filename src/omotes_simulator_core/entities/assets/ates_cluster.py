@@ -21,7 +21,6 @@ from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
