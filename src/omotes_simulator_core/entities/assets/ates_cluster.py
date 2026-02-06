@@ -21,6 +21,7 @@ from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_GRAVITY_ACCELERATION,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
@@ -388,7 +389,6 @@ class AtesCluster(AssetAbstract):
         reference equation: NVOE Richtlijnen Ondergrondse Energieopslag, november 2006
         parameters value: https://www.thermogis.nl/doublet-en-economische-parameters-hto
         """
-        grav_accel = 9.81  # m/s2
         saline_density = self._get_saline_density(P, T)
         saline_viscosity = self._get_saline_viscosity(P, T)
         aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
@@ -396,7 +396,13 @@ class AtesCluster(AssetAbstract):
         well_radius = 0.5 * self.well_casing_size  # m
 
         max_extract_flow_velocity = (
-            2 * 60 * 60 * aquifer_permeability * saline_density * grav_accel / saline_viscosity
+            2
+            * 60
+            * 60
+            * aquifer_permeability
+            * saline_density
+            * DEFAULT_GRAVITY_ACCELERATION
+            / saline_viscosity
         )  # m3/h
 
         max_flowrate = (
@@ -415,7 +421,6 @@ class AtesCluster(AssetAbstract):
         reference equation: NVOE Richtlijnen Ondergrondse Energieopslag, november 2006
         parameters value: https://www.thermogis.nl/doublet-en-economische-parameters-hto
         """
-        grav_accel = 9.81  # m/s2
         saline_density = self._get_saline_density(P, T)
         saline_viscosity = self._get_saline_viscosity(P, T)
         aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
@@ -428,7 +433,12 @@ class AtesCluster(AssetAbstract):
         max_infiltrate_flow_velocity = (
             1000
             * math.pow(
-                576 * aquifer_permeability * saline_density * grav_accel / saline_viscosity, 0.6
+                576
+                * aquifer_permeability
+                * saline_density
+                * DEFAULT_GRAVITY_ACCELERATION
+                / saline_viscosity,
+                0.6,
             )
             * math.sqrt(cloggingVel / (2 * membraneFilterIndex * equivLoadHoursPerYear))
         )
