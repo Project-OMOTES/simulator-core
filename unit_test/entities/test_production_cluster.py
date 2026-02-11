@@ -59,13 +59,13 @@ class ProductionClusterTest(unittest.TestCase):
         """Test setting setpoints of a production cluster."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
+        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
@@ -114,14 +114,14 @@ class ProductionClusterTest(unittest.TestCase):
         """Test raise ValueError with negative mass flow."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e6,
+            PROPERTY_HEAT_DEMAND: +1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
+        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
@@ -142,7 +142,7 @@ class ProductionClusterTest(unittest.TestCase):
         """Test setting pressure setpoint of a production cluster."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: True,
