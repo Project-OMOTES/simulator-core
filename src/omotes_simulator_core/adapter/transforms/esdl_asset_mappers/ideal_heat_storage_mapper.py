@@ -40,4 +40,6 @@ class EsdlIdealHeatStorageMapper(EsdlMapperAbstract):
             port_ids=esdl_asset.get_port_ids(),
             volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
             initial_fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
+            temperature_in=esdl_asset.get_temperature("In", "Supply"),
+            temperature_out=esdl_asset.get_temperature("Out", "Return"),
         )

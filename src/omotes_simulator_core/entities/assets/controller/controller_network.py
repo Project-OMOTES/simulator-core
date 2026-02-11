@@ -101,9 +101,8 @@ class ControllerNetwork:
 
         :return float: Total heat discharge of all storages.
         """
-        # TODO add limit based on state of charge
         return (
-            float(sum([storage.max_discharge_power for storage in self.storages]))
+            float(sum([storage.effective_max_discharge_power for storage in self.storages]))
             * self.factor_to_first_network
         )
 
@@ -112,9 +111,8 @@ class ControllerNetwork:
 
         :return float: Total heat charge of all storages.
         """
-        # TODO add limit based on state of charge
         return (
-            float(sum([storage.max_charge_power for storage in self.storages]))
+            float(sum([storage.effective_max_charge_power for storage in self.storages]))
             * self.factor_to_first_network
         )
 
@@ -149,8 +147,9 @@ class ControllerNetwork:
                 pass
             elif source.priority != priority:
                 continue
+            # Discharging (e.g., heat from component/system to the network) is negative.
             producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.power * factor,
+                PROPERTY_HEAT_DEMAND: -1 * source.power * factor,
                 PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_TEMPERATURE_IN: source.temperature_in,
                 PROPERTY_SET_PRESSURE: False,
@@ -166,9 +165,7 @@ class ControllerNetwork:
         storage_settings = {}
         for storage in self.storages:
             storage_settings[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
             }
         return storage_settings
 
@@ -180,10 +177,9 @@ class ControllerNetwork:
         """
         storage_settings = {}
         for storage in self.storages:
+            # Discharging is negative (e.g., heat from component/system to the network)
             storage_settings[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
             }
         return storage_settings
 
@@ -212,8 +208,9 @@ class ControllerNetwork:
         """
         consumers = {}
         for consumer in self.consumers:
+            # Charging (e.g., heat from network to compontent) is positive.
             consumers[consumer.id] = {
-                PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
+                PROPERTY_HEAT_DEMAND: +1 * consumer.get_heat_demand(time) * factor,
                 PROPERTY_TEMPERATURE_OUT: consumer.temperature_out,
                 PROPERTY_TEMPERATURE_IN: consumer.temperature_in,
             }

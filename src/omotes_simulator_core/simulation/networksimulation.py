@@ -56,6 +56,7 @@ class NetworkSimulation:
         # Set interval for progress messages
         progress_interval = max(round(number_of_time_steps / max_number_messages), 1)
 
+        # Loop over time steps
         for time_step in range(number_of_time_steps):
             # Update time to current time step
             time = (config.start + timedelta(seconds=time_step * config.timestep)).replace(

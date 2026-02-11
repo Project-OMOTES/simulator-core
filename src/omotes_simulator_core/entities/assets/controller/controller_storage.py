@@ -14,13 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the classes for the controller."""
 
-import datetime
 import logging
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    PROPERTY_BUFFER_COLD_TEMPERATURE,
+    PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_TIMESTEP,
 )
@@ -94,47 +96,6 @@ class ControllerStorageAbstract(AssetControllerAbstract):
         :param dict[str, float] state: State of the controller from the asset_abstract
             get_state method.
         """
-
-    def get_heat_demand(self, time: datetime.datetime) -> float:
-        """Method to get the heat demand of the storage. + is injection and - is production.
-
-        :param datetime.datetime time: Time for which to get the heat power.
-        :return: float with the heat power.
-        """
-        # Check for empty profile
-        if self.profile.empty:
-            logging.warning("No profile found for storage %s. Returning 0.0 power.", self.name)
-            return 0.0
-
-        # Get power value from profile at given time or return 0.0 if not found
-        try:
-            power_value = float(self.profile.loc[time, "values"])
-        except KeyError:
-            logging.warning(
-                "No profile value found for storage %s at time %s. Returning 0.0 power.",
-                self.name,
-                time,
-            )
-            return 0.0
-
-        # Check bounds and return appropriate value
-        if power_value > self.effective_max_charge_power:
-            logging.warning(
-                "Supply to storage %s is higher than maximum charge power of asset" " at time %s.",
-                self.name,
-                time,
-            )
-            return self.effective_max_charge_power
-        elif power_value < self.effective_max_discharge_power:
-            logging.warning(
-                "Demand from storage %s is higher than maximum discharge power of asset"
-                " at time %s.",
-                self.name,
-                time,
-            )
-            return self.effective_max_discharge_power
-        else:
-            return power_value
 
     def delta_temperature(self) -> float:
         """Get the temperature difference between the inlet and outlet.
@@ -252,7 +213,11 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         # Fill level and max volume of the storage.
         self.fill_level: float = fill_level
         self.volume: float = volume
-        self.current_volume: float = fill_level * volume
+        self.volume_hot: float = fill_level * volume
+
+        # Buffer temperatures
+        self.buffer_temperature_hot: float = temperature_in
+        self.buffer_temperature_cold: float = temperature_out
 
     def _calculate_power_from_volume(self, volume: float, is_discharge: bool) -> float:
         """Calculate power from available volume.
@@ -261,18 +226,15 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         :param bool is_discharge: True for discharge, False for charge.
         :return: Calculated power in W.
         """
-        if volume <= 0:
-            return 0.0
-
         power = (
-            (volume / self.timestep)
-            * fluid_props.get_density(self.average_temperature())
-            * fluid_props.get_heat_capacity(self.average_temperature())
-            * self.delta_temperature()
-        )
+            (volume / self.timestep)  # (m3/s)
+            * fluid_props.get_density(self.average_temperature())  # (kg/m3)
+            * fluid_props.get_heat_capacity(self.average_temperature())  # (J/(kg K))
+            * self.delta_temperature()  # (K)
+        )  # W
 
         if is_discharge:
-            return -1 * power
+            return 1 * power
         return power
 
     def get_effective_max_discharge_power(
@@ -286,12 +248,22 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         volume of the asset minus the current volume. The effective maximum discharge power is
         limited by the maximum discharge power of the asset.
         """
-        power_from_volume = self._calculate_power_from_volume(
-            self.current_volume, is_discharge=True
-        )
-        if power_from_volume == 0.0:
+        # Calculate available volume
+        available_volume = self.volume_hot
+
+        if available_volume <= 0:
             return 0.0
-        return max(self.max_discharge_power, power_from_volume)
+
+        # Calculate power from available volume if dT > 0
+        if (self.delta_temperature() == 0) and (self.fill_level > 0) and (self.fill_level < 1):
+            return self.max_discharge_power
+        elif self.delta_temperature() == 0:
+            return 0.0
+        else:
+            power_from_volume = self._calculate_power_from_volume(
+                available_volume, is_discharge=True
+            )
+            return min(self.max_discharge_power, power_from_volume)
 
     def get_effective_max_charge_power(
         self,
@@ -304,11 +276,22 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         the asset minus the current volume. The effective maximum charge power is limited by the
         maximum charge power of the asset.
         """
-        available_volume = self.volume - self.current_volume
-        power_from_volume = self._calculate_power_from_volume(available_volume, is_discharge=False)
-        if power_from_volume == 0.0:
+        # Calculate available volume
+        available_volume = self.volume - self.volume_hot
+
+        if available_volume <= 0 or self.fill_level >= 1.0:
             return 0.0
-        return min(self.max_charge_power, power_from_volume)
+
+        # Calculate power from available volume if dT > 0
+        # if (self.delta_temperature() == 0) and (self.fill_level > 0) and (self.fill_level < 1):
+        #     return self.max_charge_power
+        if self.delta_temperature() == 0:
+            return 0.0
+        else:
+            power_from_volume = self._calculate_power_from_volume(
+                available_volume, is_discharge=False
+            )
+            return min(self.max_charge_power, power_from_volume)
 
     def set_state(self, state: dict[str, float]) -> None:
         """Set the state of the controller.
@@ -319,6 +302,8 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         # Check available state keys
         available_state_keys = {
             PROPERTY_FILL_LEVEL,
+            PROPERTY_BUFFER_HOT_TEMPERATURE,
+            PROPERTY_BUFFER_COLD_TEMPERATURE,
             PROPERTY_TIMESTEP,
         }
 
@@ -326,6 +311,12 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
             # Check limits fill level
             self._set_fill_level(state[PROPERTY_FILL_LEVEL])
             self.timestep = state[PROPERTY_TIMESTEP]
+            # Set buffer temperatures
+            self.buffer_temperature_hot = state[PROPERTY_BUFFER_HOT_TEMPERATURE]
+            self.buffer_temperature_cold = state[PROPERTY_BUFFER_COLD_TEMPERATURE]
+            # Update derived properties
+            self.temperature_in = self.buffer_temperature_hot
+            self.temperature_out = self.buffer_temperature_cold
         else:
             missing_keys = sorted(available_state_keys.difference(state.keys()))
             raise KeyError(f"State keys {missing_keys} are missing for storage {self.name}.")
@@ -339,9 +330,9 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
 
         :param float fill_level: Fill level of the storage between 0 and 1.
         """
-        if 0.0 <= fill_level <= 1.0:
-            self.fill_level = fill_level
-            self.current_volume = fill_level * self.volume
+        if 0.0 <= np.round(fill_level, 2) <= (1.0 + 0.01):
+            self.fill_level = np.min([fill_level, 1.0])
+            self.volume_hot = self.fill_level * self.volume
         else:
             raise ValueError(
                 f"Fill level {fill_level} for storage {self.name} is out of bounds [0, 1]."

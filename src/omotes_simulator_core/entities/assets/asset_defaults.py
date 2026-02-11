@@ -145,9 +145,13 @@ PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
 PROPERTY_VOLUME = "volume"
 PROPERTY_FILL_LEVEL = "fill_level"
 PROPERTY_TIMESTEP = "time_step"
-
 PRIMARY = "primary"
 SECONDARY = "secondary"
+
+# Buffer names
+PROPERTY_BUFFER_HOT_TEMPERATURE = "buffer_hot_temperature"
+PROPERTY_BUFFER_COLD_TEMPERATURE = "buffer_cold_temperature"
+
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()
