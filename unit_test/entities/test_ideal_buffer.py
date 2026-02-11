@@ -20,10 +20,11 @@ import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
+    PROPERTY_BUFFER_COLD_TEMPERATURE,
+    PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.ideal_heat_storage import ChargeState, IdealHeatStorage
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
@@ -40,9 +41,26 @@ class HeatBufferTest(unittest.TestCase):
             asset_name="heat_buffer",
             asset_id="heat_buffer_id",
             port_ids=["test1", "test2"],
+            temperature_in=DEFAULT_TEMPERATURE + 50.0,  # K
+            temperature_out=DEFAULT_TEMPERATURE,  # K
             volume=10.0,  # m3
             initial_fill_level=0.5,  # 50%
         )
+        # Ensure prev_sol is set for selected temp.
+        self.heat_buffer.solver_asset.prev_sol[
+            self.heat_buffer.solver_asset.get_index_matrix(
+                property_name="internal_energy", connection_point=0, use_relative_indexing=False
+            )
+        ] = fluid_props.get_ie(
+            self.heat_buffer.temperature_connection_0
+        )  # type: ignore
+        self.heat_buffer.solver_asset.prev_sol[
+            self.heat_buffer.solver_asset.get_index_matrix(
+                property_name="internal_energy", connection_point=1, use_relative_indexing=False
+            )
+        ] = fluid_props.get_ie(
+            self.heat_buffer.temperature_connection_1
+        )  # type: ignore
 
     def test_create_heat_buffer(self):
         """Test creation of HeatBuffer."""
@@ -51,131 +69,96 @@ class HeatBufferTest(unittest.TestCase):
         self.assertEqual(self.heat_buffer.max_volume, 10.0)
         self.assertEqual(self.heat_buffer.fill_level, 0.5)
         self.assertEqual(self.heat_buffer.current_volume_hot, 5.0)
-        self.assertEqual(self.heat_buffer.temperature_connection_0, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.heat_buffer.temperature_connection_0, DEFAULT_TEMPERATURE + 50.0)
         self.assertEqual(self.heat_buffer.temperature_connection_1, DEFAULT_TEMPERATURE)
 
-    def test_heatbuffer_set_setpoints_clipped_discharging_volumetric_flowrate(self) -> None:
-        """Test setting setpoints of a HeatBuffer when discharging clipped."""
-        # Arrange
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
-        }
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Act
-        max_volumetric_flow_rate = (
-            self.heat_buffer.max_volume * self.heat_buffer.fill_level
-        ) / self.heat_buffer.accumulation_time
-        max_mass_flow_rate = max_volumetric_flow_rate * fluid_props.get_density(
-            self.heat_buffer.temperature_connection_0
-        )
-
-        # Assert
-        self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
-        )
-        self.assertEqual(
-            self.heat_buffer.solver_asset.inlet_massflow, max_mass_flow_rate  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.charge_state, ChargeState.DISCHARGING)
-
-    def test_heatbuffer_set_setpoints_clipped_charging_volumetric_flowrate(self) -> None:
-        """Test setting setpoints of a HeatBuffer when charging clipped."""
+    def test_heatbuffer_set_setpoints_discharging(self) -> None:
+        """Test setpoints of a HeatBuffer when discharging."""
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
-        }
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Act
-        max_volumetric_flow_rate = (
-            self.heat_buffer.max_volume * (1 - self.heat_buffer.fill_level)
-        ) / self.heat_buffer.accumulation_time
-        max_mass_flow_rate = max_volumetric_flow_rate * fluid_props.get_density(
-            self.heat_buffer.temperature_connection_0
-        )
-
-        # Assert
-        self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
-        )
-        self.assertEqual(
-            self.heat_buffer.solver_asset.inlet_massflow, -1.0 * max_mass_flow_rate  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.charge_state, ChargeState.CHARGING)
-
-    def test_heatbuffer_set_setpoints_discharging(self) -> None:
-        """Test setting setpoints of a HeatBuffer."""
-        # Arrange
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
         }
         self.heat_buffer.max_volume = 100.0  # m3
+        self.heat_buffer.first_time_step = False
+        self.heat_buffer.buffer_temperature_hot = DEFAULT_TEMPERATURE + 50.0
+        self.heat_buffer.buffer_temperature_cold = DEFAULT_TEMPERATURE
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Act
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
-            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
+        mass_flow = -heat_demand_and_temperature_to_mass_flow(
+            temperature_out=DEFAULT_TEMPERATURE,
+            temperature_in=DEFAULT_TEMPERATURE + 50.0,
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
         # Assert
-        self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
+        # - Evaluate temperature inflow
+        self.assertEqual(self.heat_buffer.temperature_connection_0, DEFAULT_TEMPERATURE + 50.0)
         self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+            self.heat_buffer.solver_asset.temperature_connection_0,  # type: ignore
+            DEFAULT_TEMPERATURE + 50.0,
         )
-        self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        # - Evaluate temperature outflow
+        self.assertAlmostEqual(
+            self.heat_buffer.temperature_connection_1, DEFAULT_TEMPERATURE, places=2
         )
-        self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, mass_flow)  # type: ignore
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1,  # type: ignore
+            DEFAULT_TEMPERATURE,
+            places=2,
+        )
+        # - Evaluate mass flow rate
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.massflow_connection_0,  # type: ignore
+            mass_flow,
+            places=2,
+        )
+        # - Evaluate charge state
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.DISCHARGING)
 
     def test_heatbuffer_set_setpoints_charging(self) -> None:
-        """Test setting setpoints of a HeatBuffer."""
+        """Test setpoints of a HeatBuffer when charging."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
+            PROPERTY_HEAT_DEMAND: 1e6,
         }
         self.heat_buffer.max_volume = 100.0  # m3
+        self.heat_buffer.first_time_step = False
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Act
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
-            temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
-            temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
+        mass_flow = -heat_demand_and_temperature_to_mass_flow(
+            temperature_out=DEFAULT_TEMPERATURE,
+            temperature_in=DEFAULT_TEMPERATURE + 50.0,
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
 
         # Assert
-        self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        # - Evaluate temperature inflow
+        self.assertAlmostEqual(
+            self.heat_buffer.temperature_connection_0, DEFAULT_TEMPERATURE + 50, places=2
         )
-        self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0,  # type: ignore
+            DEFAULT_TEMPERATURE + 50,
+            places=2,
         )
-        self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, mass_flow)  # type: ignore
+        # - Evaluate temperature outflow
+        self.assertAlmostEqual(
+            self.heat_buffer.temperature_connection_1, DEFAULT_TEMPERATURE, places=2
+        )
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1,  # type: ignore
+            DEFAULT_TEMPERATURE,
+            places=2,
+        )
+        # - Evaluate mass flow rate
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.massflow_connection_0,  # type: ignore
+            mass_flow,
+            places=2,
+        )
+        # - Evaluate charge state
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.CHARGING)
 
     def test_idle_set_setpoints(self) -> None:
@@ -183,123 +166,69 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 0.0,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-            PROPERTY_TEMPERATURE_IN: 333.15,
         }
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
-        # Assert
-        self.assertEqual(self.heat_buffer.temperature_connection_0, 333.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_0, 333.15  # type: ignore
+        # - Evaluate temperature inflow
+        self.assertAlmostEqual(
+            self.heat_buffer.temperature_connection_0, DEFAULT_TEMPERATURE + 50, places=2
         )
-        self.assertEqual(self.heat_buffer.temperature_connection_1, 353.15)
-        self.assertEqual(
-            self.heat_buffer.solver_asset.temperature_connection_1, 353.15  # type: ignore
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.temperature_connection_0,  # type: ignore
+            DEFAULT_TEMPERATURE + 50,
+            places=2,
         )
-        self.assertEqual(self.heat_buffer.solver_asset.inlet_massflow, 0.0)  # type: ignore
+        # - Evaluate temperature outflow
+        self.assertAlmostEqual(
+            self.heat_buffer.temperature_connection_1, DEFAULT_TEMPERATURE, places=2
+        )
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.temperature_connection_1,  # type: ignore
+            DEFAULT_TEMPERATURE,
+            places=2,
+        )
+        # - Evaluate mass flow rate
+        self.assertAlmostEqual(
+            self.heat_buffer.solver_asset.massflow_connection_0,  # type: ignore
+            0.0,
+            places=2,
+        )
+        # - Evaluate charge state
         self.assertEqual(self.heat_buffer.charge_state, ChargeState.IDLE)
 
     def test_heatbuffer_set_setpoints_missing_setpoint(self) -> None:
         """Test setting setpoints of a HeatBuffer with missing setpoint."""
         # Arrange
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-        }
+        setpoints = {}
 
         # Act / Assert
         with self.assertRaises(ValueError) as context:
             self.heat_buffer.set_setpoints(setpoints=setpoints)
         self.assertEqual(
             str(context.exception),
-            "The setpoints {'temperature_in'} are missing.",
+            "The setpoints {'heat_demand'} are missing.",
         )
-
-    def test_set_temperature_setpoints_charging(self) -> None:
-        """Test setting temperature setpoints of a HeatBuffer when charging."""
-        # Arrange
-        self.heat_buffer.first_time_step = False
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_IN: 333.15,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-        }
-
-        # Act
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Assert
-        self.assertEqual(self.heat_buffer.charge_state, ChargeState.CHARGING)
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_0,
-            self.heat_buffer.solver_asset.get_temperature(0),  # type: ignore
-        )
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_1,
-            self.heat_buffer.buffer_temperature_cold,  # type: ignore
-        )
-
-    def test_set_temperature_setpoints_discharging(self) -> None:
-        """Test setting temperature setpoints of a HeatBuffer when discharging."""
-        # Arrange
-        self.heat_buffer.first_time_step = False
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_IN: 333.15,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-        }
-
-        # Act
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Assert
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_0,
-            self.heat_buffer.buffer_temperature_hot,  # type: ignore
-        )
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_1,
-            self.heat_buffer.solver_asset.temperature_connection_1,  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.charge_state, ChargeState.DISCHARGING)
-
-    def test_set_temperature_setpoints_idle(self) -> None:
-        """Test setting temperature setpoints of a HeatBuffer when idle."""
-        # Arrange
-        self.heat_buffer.first_time_step = False
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 0.0,
-            PROPERTY_TEMPERATURE_IN: 333.15,
-            PROPERTY_TEMPERATURE_OUT: 353.15,
-        }
-        self.heat_buffer.buffer_temperature_hot = setpoints[PROPERTY_TEMPERATURE_IN]
-        self.heat_buffer.buffer_temperature_cold = setpoints[PROPERTY_TEMPERATURE_OUT]
-
-        # Act
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Assert
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_0,
-            self.heat_buffer.solver_asset.temperature_connection_0,  # type: ignore
-        )
-        self.assertEqual(
-            self.heat_buffer.temperature_connection_1,
-            self.heat_buffer.solver_asset.temperature_connection_1,  # type: ignore
-        )
-        self.assertEqual(self.heat_buffer.charge_state, ChargeState.IDLE)
 
     def test_get_state(self) -> None:
         """Test getting state of a HeatBuffer."""
         # Arrange
         self.heat_buffer.fill_level = 0.75
+        self.heat_buffer.buffer_temperature_hot = DEFAULT_TEMPERATURE + 50.0
+        self.heat_buffer.buffer_temperature_cold = DEFAULT_TEMPERATURE
 
         # Act
         state = self.heat_buffer.get_state()
 
         # Assert
-        self.assertEqual(state[PROPERTY_FILL_LEVEL], 0.75)
+        self.assertEqual(
+            {
+                PROPERTY_FILL_LEVEL: 0.75,
+                PROPERTY_BUFFER_HOT_TEMPERATURE: DEFAULT_TEMPERATURE + 50.0,
+                PROPERTY_BUFFER_COLD_TEMPERATURE: DEFAULT_TEMPERATURE,
+                PROPERTY_TIMESTEP: self.heat_buffer.time_step,
+            },
+            state,
+        )
 
     def test_postprocess(self) -> None:
         """Test postprocessing of a HeatBuffer."""
@@ -316,6 +245,7 @@ class HeatBufferTest(unittest.TestCase):
         self.heat_buffer.time_step = 3600.0  # 1 hour
         self.heat_buffer.buffer_temperature_hot = inflow_temperature
         self.heat_buffer.buffer_temperature_cold = outflow_temperature
+        self.heat_buffer.charge_state = ChargeState.CHARGING
 
         self.heat_buffer.solver_asset.prev_sol = np.array(
             [
@@ -340,11 +270,11 @@ class HeatBufferTest(unittest.TestCase):
         )
         self.assertAlmostEqual(
             self.heat_buffer.fill_level,
-            0.572,
+            0.574,
             places=3,
         )
         self.assertAlmostEqual(
             self.heat_buffer.current_volume_hot,
-            57.2,
+            57.4,
             places=1,
         )
