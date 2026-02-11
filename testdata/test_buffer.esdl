@@ -2,7 +2,7 @@
 <esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="Untitled EnergySystem with return network" description="" id="e7b009e1-8e4a-46d0-bb70-d08af7e17be3_with_return_network" esdlVersion="v2507" version="6">
   <instance xsi:type="esdl:Instance" id="e0c9b698-3bf3-47fe-aea0-9a120fa6ee89" name="Untitled Instance">
     <area xsi:type="esdl:Area" id="919c382f-a01d-492a-8290-daa942d03efa" name="Untitled Area">
-      <asset xsi:type="esdl:HeatStorage" id="11cc503d-534c-45f6-89dc-d2a3f47299ff" name="HeatStorage_11cc" fillLevel="0.5" maxDischargeRate="100.0" maxChargeRate="100.0" volume="100.0">
+      <asset xsi:type="esdl:HeatStorage" id="11cc503d-534c-45f6-89dc-d2a3f47299ff" name="HeatStorage_11cc" fillLevel="0.25" maxDischargeRate="500000.0" maxChargeRate="500000.0" volume="100.0">
         <geometry xsi:type="esdl:Point" lat="51.935712741050864" lon="4.244440197944642" CRS="WGS84"/>
         <port xsi:type="esdl:InPort" id="47d7c914-90cc-40b0-96e2-4c03634f6d6c" name="In" connectedTo="41e751f5-3c52-4e7d-be91-c7c7c3425c6e" carrier="db75dded-49f5-4d9c-8172-f837b714476e"/>
         <port xsi:type="esdl:OutPort" id="65c5f555-f82e-4410-96d4-37575a73888d" name="Out" carrier="db75dded-49f5-4d9c-8172-f837b714476e_ret" connectedTo="9c6a60d6-915c-4cd7-b7fe-7977249fc8e6"/>
