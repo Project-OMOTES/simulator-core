@@ -150,10 +150,6 @@ class IdealHeatStorage(AssetAbstract):
             temperature_in=self.temperature_connection_0,
             temperature_out=self.temperature_connection_1,
         )
-        # if self.charge_state == ChargeState.CHARGING:
-        #     mass_flowrate = mass_flowrate
-
-        print(f"Mass flow rate for heat buffer: {mass_flowrate:.4f} kg/s")
 
         # Set solver asset setpoints
         self.solver_asset.massflow_connection_0 = mass_flowrate  # type: ignore
