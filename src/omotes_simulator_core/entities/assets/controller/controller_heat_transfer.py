@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the class for a heat trasnfer asset."""
 
+import numpy as np
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
     PROPERTY_HEAT_DEMAND,
@@ -51,7 +53,12 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
                 PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
                 PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
                 PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
-                SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * self.factor,
+                SECONDARY
+                + PROPERTY_HEAT_DEMAND: np.abs(heat_demand)
+                * self.factor
+                * (
+                    np.sign(heat_demand) * -1
+                ),  # Invert sign of secondary heat demand, as it is opposite to primary side.
                 SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                 SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
                 PROPERTY_SET_PRESSURE: False,
