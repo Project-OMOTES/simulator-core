@@ -88,7 +88,7 @@ class TestControllerIdealHeatStorageMapper(unittest.TestCase):
         )
         self.assertEqual(controller_storage.volume, storage_assets[0].get_property("volume", 9999))
         self.assertEqual(
-            controller_storage.current_volume,
+            controller_storage.volume_hot,
             storage_assets[0].get_property("fillLevel", 9999)
             * storage_assets[0].get_property("volume", 9999),
         )
