@@ -15,7 +15,6 @@
 """Test controller class."""
 import datetime
 import unittest
-from typing import List
 from unittest.mock import Mock
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -58,7 +57,7 @@ class ControllerTest(unittest.TestCase):
         self.network2.heat_transfer_assets_sec = []
         self.network3.heat_transfer_assets_sec = []
         # Overall network and controller
-        self.networks: List[ControllerNetwork] = [self.network1, self.network2, self.network3]
+        self.networks = [self.network1, self.network2, self.network3]
         self.controller = NetworkController(networks=self.networks)
 
     def test_init(self):

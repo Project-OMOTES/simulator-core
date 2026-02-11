@@ -199,7 +199,7 @@ class HeatBufferTest(unittest.TestCase):
     def test_heatbuffer_set_setpoints_missing_setpoint(self) -> None:
         """Test setting setpoints of a HeatBuffer with missing setpoint."""
         # Arrange
-        setpoints = {}
+        setpoints: dict[str, float] = {}
 
         # Act / Assert
         with self.assertRaises(ValueError) as context:

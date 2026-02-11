@@ -16,7 +16,6 @@
 
 import datetime
 import logging
-from typing import DefaultDict
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -113,8 +112,8 @@ class NetworkController(NetworkControllerAbstract):
         else:
             # Set consumer to requested demand.
             consumer_setpoints = self._set_consumer_to_demand(time, factor=1.0)
-            # Set producers and storages based on the supply and demand, and the charge and discharge
-            # capacity of the storage.
+            # Set producers and storages based on the supply and demand, and the charge and
+            # discharge capacity of the storage.
             if total_supply >= total_demand:
                 # there is a surplus of supply we can charge the storage, storage becomes consumer.
                 surplus_supply = total_supply - total_demand
