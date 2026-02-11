@@ -134,12 +134,12 @@ class NetworkController(NetworkControllerAbstract):
                 storage_setpoints = self._set_storages_discharge_power(deficit_supply)
                 producer_setpoints = self._set_producers_to_max()
 
-            # Update the asset setpoints with the setpoints of the producers, consumers,
-            # and storages.
-            asset_setpoints: AssetSetpointsDict = {}
-            asset_setpoints.update(producer_setpoints)
-            asset_setpoints.update(storage_setpoints)
-            asset_setpoints.update(consumer_setpoints)
+        # Update the asset setpoints with the setpoints of the producers, consumers,
+        # and storages.
+        asset_setpoints: AssetSetpointsDict = {}
+        asset_setpoints.update(producer_setpoints)
+        asset_setpoints.update(storage_setpoints)
+        asset_setpoints.update(consumer_setpoints)
 
         # Getting the settings for the heat transfer assets
         heat_transfer: AssetSetpointsDict = {}
