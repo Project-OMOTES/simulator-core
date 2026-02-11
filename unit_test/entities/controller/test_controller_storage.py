@@ -17,6 +17,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -55,7 +56,7 @@ class ControllerStorageAbstractTest(unittest.TestCase):
             temperature_in=DEFAULT_TEMPERATURE,
             temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
             max_charge_power=1e6,
-            max_discharge_power=-1e6,
+            max_discharge_power=1e6,
             profile=PROFILE,
         )
 
@@ -72,10 +73,31 @@ class ControllerStorageAbstractTest(unittest.TestCase):
         )
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1e6)
-        self.assertEqual(self.storage.max_discharge_power, -1e6)
+        self.assertEqual(self.storage.max_discharge_power, 1e6)
         self.assertEqual(self.storage.effective_max_charge_power, 1e6)
-        self.assertEqual(self.storage.effective_max_discharge_power, -1e6)
+        self.assertEqual(self.storage.effective_max_discharge_power, 1e6)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
+
+    def test_get_effective_max_charge_power(self):
+        """Test to get the effective max charge power of the storage."""
+        # Arrange
+
+        # Act
+        max_charge_power = self.storage.get_effective_max_charge_power()
+
+        # Assert
+        self.assertEqual(max_charge_power, 1e6)  # W
+
+    def test_get_effective_max_discharge_power(self):
+        """Test to get the effective max discharge power of the storage."""
+        # Arrange
+
+        # Act
+        max_discharge_power = self.storage.get_effective_max_discharge_power()
+
+        # Assert
+        self.assertEqual(max_discharge_power, 1e6)  # W
+        self.assertEqual(np.sign(max_discharge_power), 1)  # Should be positive
 
 
 class ControllerAtestStorageTest(unittest.TestCase):
