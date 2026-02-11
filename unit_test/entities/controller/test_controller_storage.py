@@ -22,6 +22,8 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_BUFFER_COLD_TEMPERATURE,
+    PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_TIMESTEP,
 )
@@ -75,21 +77,6 @@ class ControllerStorageAbstractTest(unittest.TestCase):
         self.assertEqual(self.storage.effective_max_discharge_power, -1e6)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
 
-    def test_get_heat_demand_empty_profile(self) -> None:
-        """Test to get the heat demand when the profile is empty."""
-        # Arrange
-        self.storage.profile = pd.DataFrame(columns=["date", "values"])
-
-        # Act
-        with self.assertLogs(level="WARNING") as log:
-            heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0, 0))
-            # Assert
-            self.assertIn(
-                "No profile found for storage storage. Returning 0.0 power.",
-                log.output[0],
-            )
-            self.assertEqual(heatdemand, 0.0)
-
 
 class ControllerAtestStorageTest(unittest.TestCase):
     """Testcase for ControllerAtestStorage."""
@@ -120,44 +107,6 @@ class ControllerAtestStorageTest(unittest.TestCase):
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
-
-    def test_controller_storage_get_heat_demand(self) -> None:
-        """Test to get the heat demand of the storage."""
-        # Arrange
-
-        # Act
-        heatdemand1 = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
-        heatdemand2 = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
-
-        # Assert
-        self.assertEqual(heatdemand1, PROFILE_VALUES[0])
-        self.assertEqual(heatdemand2, PROFILE_VALUES[1])
-
-    def test_storage_set_to_max_charge_power(self):
-        """Test to set the storage to the max charge power."""
-        # Arrange
-        self.storage.effective_max_charge_power = 1.0
-
-        # Act
-        heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
-        # Assert
-        self.assertEqual(heatdemand, 1.0)
-
-    def test_storage_set_to_max_discharge_power(self):
-        """Test to set the storage to the max discharge power."""
-        # Arrange
-        self.storage.effective_max_discharge_power = -1.0
-        # Act
-        heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
-        # Assert
-        self.assertEqual(heatdemand, -1.0)
-
-    def test_date_not_in_profile_storage(self):
-        """Test to get the heat power when the date is not in the profile."""
-        # Act
-        heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0))
-        # Assert
-        self.assertEqual(heatdemand, 0)
 
 
 class ControllerIdealHeatStorageTest(unittest.TestCase):
@@ -193,70 +142,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
         self.assertEqual(self.storage.fill_level, 0.5)
         self.assertEqual(self.storage.volume, 1000)
-        self.assertEqual(self.storage.current_volume, 0.5 * 1000)
-
-    def test_controller_storage_get_heat_demand(self) -> None:
-        """Test to get the heat demand of the storage."""
-        # Arrange
-
-        # Act
-        heatdemand1 = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
-        heatdemand2 = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
-
-        # Assert
-        self.assertEqual(heatdemand1, PROFILE_VALUES[0])
-        self.assertEqual(heatdemand2, PROFILE_VALUES[1])
-
-    def test_controller_storage_get_heat_demand_not_in_profile(self) -> None:
-        """Test to get the heat demand of the storage when date not in profile."""
-        # Arrange
-
-        # Act
-        with self.assertLogs(level="WARNING") as log:
-            heatdemand = self.storage.get_heat_demand(datetime(2021, 3, 2, 0, 0, 0))
-            # Assert
-            self.assertIn(
-                "No profile value found for storage storage at time 2021-03-02 00:00:00. "
-                "Returning 0.0 power.",
-                log.output[0],
-            )
-            self.assertEqual(heatdemand, 0)
-
-    def test_storage_set_to_max_charge_power(self):
-        """Test to set the storage to the max charge power."""
-        # Arrange
-        self.storage.max_charge_power = 1.0
-        self.storage.effective_max_charge_power = 0.5
-        # Act
-        with self.assertLogs(level="WARNING") as log:
-            heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 0, 0, 0))
-            # Assert
-            self.assertEqual(heatdemand, 0.5)
-            self.assertIn(
-                (
-                    "Supply to storage storage is higher than maximum charge power of asset at "
-                    + "time 2021-01-01 00:00:00."
-                ),
-                log.output[0],
-            )
-
-    def test_storage_set_to_max_discharge_power(self):
-        """Test to set the storage to the max discharge power."""
-        # Arrange
-        self.storage.max_discharge_power = -1.0
-        self.storage.effective_max_discharge_power = -0.5
-        # Act
-        with self.assertLogs(level="WARNING") as log:
-            heatdemand = self.storage.get_heat_demand(datetime(2021, 1, 1, 1, 0, 0))
-            # Assert
-            self.assertEqual(heatdemand, -0.5)
-            self.assertIn(
-                (
-                    "Demand from storage storage is higher than maximum discharge power of asset at"
-                    + " time 2021-01-01 01:00:00."
-                ),
-                log.output[0],
-            )
+        self.assertEqual(self.storage.volume_hot, 0.5 * 1000)
 
     @patch.object(fluid_props, "get_density")
     @patch.object(fluid_props, "get_heat_capacity")
@@ -265,22 +151,22 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         # Arrange
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
-        self.storage.current_volume = 1.0  # m3
+        self.storage.volume_hot = 1.0  # m3
         self.storage.temperature_in = 2.0
         self.storage.temperature_out = 1.0
         self.storage.timestep = 1.0
-        self.storage.max_discharge_power = -1e9
+        self.storage.max_discharge_power = 100
 
         # Act
         max_discharge_power = self.storage.get_effective_max_discharge_power()
 
         # Assert
-        self.assertEqual(max_discharge_power, -1.0)  # W
+        self.assertEqual(max_discharge_power, 1.0)  # W
 
     def test_storage_get_max_discharge_power_empty(self):
         """Test to get the max discharge power of the storage."""
         # Arrange
-        self.storage.current_volume = 0.0  # m3
+        self.storage.volume_hot = 0.0  # m3
 
         # Act
         max_discharge_power = self.storage.get_effective_max_discharge_power()
@@ -296,7 +182,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
         self.storage.volume = 1.0  # m3
-        self.storage.current_volume = 0.0  # m3
+        self.storage.volume_hot = 0.0  # m3
         self.storage.temperature_in = 2.0
         self.storage.temperature_out = 1.0
         self.storage.timestep = 1.0
@@ -312,7 +198,7 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         """Test to get the max charge power of the storage."""
         # Arrange
         self.storage.volume = 1.0  # m3
-        self.storage.current_volume = 1.0  # m3
+        self.storage.volume_hot = 1.0  # m3
 
         # Act
         max_charge_power = self.storage.get_effective_max_charge_power()
@@ -349,6 +235,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         state = {
             PROPERTY_FILL_LEVEL: 1.0,
             PROPERTY_TIMESTEP: 3600,
+            PROPERTY_BUFFER_COLD_TEMPERATURE: DEFAULT_TEMPERATURE,
+            PROPERTY_BUFFER_HOT_TEMPERATURE: DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
         }
         patch_max_charge_power.return_value = 1.0
         patch_max_discharge_power.return_value = -1.0
@@ -359,8 +247,13 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.storage.fill_level, 1.0)
-        self.assertEqual(self.storage.current_volume, 2000)
+        self.assertEqual(self.storage.volume_hot, 2000)
         self.assertEqual(self.storage.timestep, 3600)
+        self.assertEqual(
+            self.storage.buffer_temperature_hot,
+            DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+        )
+        self.assertEqual(self.storage.buffer_temperature_cold, DEFAULT_TEMPERATURE)
         self.assertEqual(self.storage.effective_max_charge_power, 1.0)
         self.assertEqual(self.storage.effective_max_discharge_power, -1.0)
 
@@ -393,4 +286,49 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.storage.fill_level, 0.75)
-        self.assertEqual(self.storage.current_volume, 1500)
+        self.assertEqual(self.storage.volume_hot, 1500)
+
+    def test_set_fill_level_rounding(self):
+        """Test to set the fill level of the storage with rounding."""
+        # Arrange
+        self.storage.volume = 2000
+
+        # Act
+        self.storage._set_fill_level(1.01)
+
+        # Assert
+        self.assertEqual(self.storage.fill_level, 1.0)
+        self.assertEqual(self.storage.volume_hot, 2000)
+
+        """Test to set the fill level of the storage exceeding the max."""
+        # Arrange
+        self.storage.volume = 2000
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.storage._set_fill_level(1.5)
+
+            # Assert
+            self.assertEqual(
+                f"Fill level 1.5 for storage {self.storage.name} is out of bounds [0, 1].",
+                str(cm.exception),
+            )
+
+    @patch.object(fluid_props, "get_density")
+    @patch.object(fluid_props, "get_heat_capacity")
+    def test_calculate_power_from_volume(self, patch_cp, patch_rho):
+        """Test to calculate the power from the volume of the storage."""
+        # Arrange
+        patch_cp.return_value = 1.0  # J/kg.K
+        patch_rho.return_value = 1.0  # kg/m3
+        self.storage.temperature_in = 2.0
+        self.storage.temperature_out = 1.0
+        self.storage.timestep = 1.0
+
+        # Act
+        power = self.storage._calculate_power_from_volume(volume=1.0, is_discharge=True)
+
+        # Assert
+        self.assertEqual(power, 1.0)  # W
+        self.assertEqual(self.storage.average_temperature(), 1.5)
+        self.assertEqual(self.storage.delta_temperature(), 1.0)
