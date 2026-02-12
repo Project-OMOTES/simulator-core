@@ -62,13 +62,13 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
         """Test setting setpoints of a air to water heatpump."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
+        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
@@ -117,14 +117,14 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
         """Test raise ValueError with negative mass flow."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: -1e6,
+            PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
-        mass_flow = heat_demand_and_temperature_to_mass_flow(
+        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
@@ -145,7 +145,7 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
         """Test setting pressure setpoint of an air to water heatpump."""
         # Arrange
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_HEAT_DEMAND: -1e6,
             PROPERTY_TEMPERATURE_OUT: 353.15,
             PROPERTY_TEMPERATURE_IN: 333.15,
             PROPERTY_SET_PRESSURE: True,
@@ -280,7 +280,8 @@ class AirToWaterHeatPumpTest(unittest.TestCase):
             self.assertEqual(actual_heat_supplied, 0.5 * 1e6)
 
     def test_get_electric_consumption(self):
-        """Test getting the electric power consumed by the heatpump."""
+        """Test getting the electric power consumed by the heatpump."""  # noqa: D202
+
         # Arrange
         def get_internal_energy(_, i: int):
             if i == 0:

@@ -17,22 +17,27 @@ import dataclasses
 from typing import Optional
 
 from omotes_simulator_core.adapter.transforms.controller_mappers import (
+    ControllerAtesStorageMapper,
     ControllerConsumerMapper,
     ControllerHeatExchangeMapper,
     ControllerHeatPumpMapper,
+    ControllerIdealHeatStorageMapper,
     ControllerProducerMapper,
-    ControllerStorageMapper,
 )
 from omotes_simulator_core.adapter.transforms.esdl_graph_mapper import EsdlGraphMapper
 from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.controller import (
+    ControllerAtesStorage,
     ControllerConsumer,
     ControllerHeatTransferAsset,
+    ControllerIdealHeatStorage,
     ControllerNetwork,
     ControllerProducer,
-    ControllerStorage,
+)
+from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
+    AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
@@ -46,15 +51,20 @@ class NetworkItems:
     heat_transfer_secondary: list[ControllerHeatTransferAsset]
     consumer: list[ControllerConsumer]
     producer: list[ControllerProducer]
-    storage: list[ControllerStorage]
+    storage: list[ControllerAtesStorage | ControllerIdealHeatStorage]
 
-    def add(self, asset: ControllerStorage | ControllerProducer | ControllerConsumer) -> None:
+    def add(
+        self,
+        asset: AssetControllerAbstract,
+    ) -> None:
         """Add the asset to the correct list."""
         if isinstance(asset, ControllerConsumer):
             self.consumer.append(asset)
         elif isinstance(asset, ControllerProducer):
             self.producer.append(asset)
-        elif isinstance(asset, ControllerStorage):
+        elif isinstance(asset, ControllerAtesStorage) or isinstance(
+            asset, ControllerIdealHeatStorage
+        ):
             self.storage.append(asset)
         else:
             raise ValueError("Asset type not recognized.")
@@ -113,10 +123,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             if esdl_asset.get_number_of_ports() == 2
         ]
 
-        storages = [
-            ControllerStorageMapper().to_entity(esdl_asset=esdl_asset, timestep=timestep)
-            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
-        ]
+        storages = self.convert_heat_storages_and_ates(esdl_object)
 
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
@@ -185,7 +192,12 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         self,
         graph: Graph,
         network_list: list[NetworkItems],
-        assets: list[ControllerConsumer | ControllerProducer | ControllerStorage],
+        assets: list[
+            ControllerConsumer
+            | ControllerProducer
+            | ControllerAtesStorage
+            | ControllerIdealHeatStorage
+        ],
     ) -> None:
         """Method to move assets to networks.
 
@@ -245,6 +257,27 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     )
                 )
         return network_list
+
+    def convert_heat_storages_and_ates(
+        self, esdl_object: EsdlObject
+    ) -> list[ControllerAtesStorage | ControllerIdealHeatStorage]:
+        """Method to convert heat storages and ates to controller storage objects."""
+        esdl_storages = esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
+        esdl_storages = [
+            storage
+            for storage in esdl_storages
+            if storage.get_esdl_type() == OmotesAssetLabels.STORAGE
+        ]
+        esdl_ates = esdl_object.get_all_assets_of_type(OmotesAssetLabels.ATES)
+
+        storages = [
+            ControllerIdealHeatStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_storages
+        ] + [
+            ControllerAtesStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_ates
+        ]
+        return storages
 
 
 def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:

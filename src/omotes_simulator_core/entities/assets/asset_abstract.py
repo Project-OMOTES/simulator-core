@@ -169,3 +169,7 @@ class AssetAbstract(ABC):
         :return: True if the asset has converged, False otherwise
         """
         return True
+
+    @abstractmethod
+    def postprocess(self) -> None:
+        """Placeholder for postprocessing after the simulation."""
