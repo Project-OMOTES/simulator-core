@@ -82,14 +82,14 @@ class HeatBufferTest(unittest.TestCase):
         self.heat_buffer.first_time_step = False
         self.heat_buffer.buffer_temperature_hot = DEFAULT_TEMPERATURE + 50.0
         self.heat_buffer.buffer_temperature_cold = DEFAULT_TEMPERATURE
-        self.heat_buffer.set_setpoints(setpoints=setpoints)
-
-        # Act
         mass_flow = -heat_demand_and_temperature_to_mass_flow(
             temperature_out=DEFAULT_TEMPERATURE,
             temperature_in=DEFAULT_TEMPERATURE + 50.0,
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
         )
+
+        # Act
+        self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # Assert
         # - Evaluate temperature inflow
