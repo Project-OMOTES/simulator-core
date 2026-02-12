@@ -124,8 +124,8 @@ class ProductionCluster(AssetAbstract):
         """
         # Calculate the mass flow rate
         self.heat_demand_set_point = heat_demand
-        self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=-1 * heat_demand,
+        self.controlled_mass_flow = -heat_demand_and_temperature_to_mass_flow(
+            thermal_demand=heat_demand,
             temperature_in=self.temperature_in,
             temperature_out=self.temperature_out,
         )
@@ -248,7 +248,7 @@ class ProductionCluster(AssetAbstract):
         :return: True if the asset has converged, False otherwise
         """
         if self.solver_asset.pre_scribe_mass_flow:  # type: ignore
-            return abs(self.get_actual_heat_supplied() - self.heat_demand_set_point) < (
+            return abs(self.get_actual_heat_supplied() + self.heat_demand_set_point) < (
                 abs(self.heat_demand_set_point * 0.001)
             )
         else:

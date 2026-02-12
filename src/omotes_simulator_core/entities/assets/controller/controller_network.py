@@ -16,6 +16,8 @@
 
 import datetime
 
+from numpy.ma.core import product
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
@@ -49,7 +51,7 @@ class ControllerNetwork:
     """List of all producers in the network."""
     storages: list[ControllerAtesStorage | ControllerIdealHeatStorage]
     """List of all storages in the network."""
-    factor_to_first_network: float
+    factor_to_first_network: list[float]
     """Factor to calculate power in the first network in the list of networks."""
     path: list[str]
     """Path from this network to the first network in the total system."""
@@ -69,7 +71,7 @@ class ControllerNetwork:
         self.consumers = consumers_in
         self.producers = producers_in
         self.storages = storages_in
-        self.factor_to_first_network = factor_to_first_network
+        self.factor_to_first_network = [factor_to_first_network]
         self.path: list[str] = []
 
     def exists(self, identifier: str) -> bool:
@@ -91,9 +93,8 @@ class ControllerNetwork:
 
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
         """Method which the total heat demand at the given time corrected to the first network."""
-        return (
-            sum([consumer.get_heat_demand(time) for consumer in self.consumers])
-            * self.factor_to_first_network
+        return sum([consumer.get_heat_demand(time) for consumer in self.consumers]) * product(
+            self.factor_to_first_network
         )
 
     def get_total_discharge_storage(self) -> float:
@@ -121,9 +122,8 @@ class ControllerNetwork:
 
         :return float: Total heat supply of all producers.
         """
-        return (
-            float(sum([producer.power for producer in self.producers]))
-            * self.factor_to_first_network
+        return float(sum([producer.power for producer in self.producers])) * product(
+            self.factor_to_first_network
         )
 
     def set_supply_to_max(self, priority: int = 0) -> dict:
@@ -233,8 +233,10 @@ class ControllerNetwork:
         The network can thus pass back the id for which asset the pressure needs to be set.
         The controller can then do this.
         """
-        if self.heat_transfer_assets_sec:
-            return self.heat_transfer_assets_sec[0].id
         if self.producers:
             return self.producers[0].id
+        if self.heat_transfer_assets_sec:
+            return self.heat_transfer_assets_sec[0].id
+        if self.heat_transfer_assets_prim:
+            return self.heat_transfer_assets_prim[0].id
         raise ValueError("No asset found for which the pressure can be set.")

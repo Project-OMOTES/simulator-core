@@ -158,9 +158,15 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                 "The network is looped via the heat pumps and heat exchangers, "
                 "which is not supported."
             )
+        # find first networks with no buffers
+        for j in range(len(networks)):
+            if not networks[j].storages:
+                break
 
-        for i in range(1, len(networks)):
-            networks[i].path = graph.get_path(str(i), "0")
+        for i in range(len(networks)):
+            if i == j:
+                continue
+            networks[i].path = graph.get_path(str(i), str(j))
             if len(networks[i].path) > 3:
                 raise RuntimeError(
                     "The network is connected via more then two stages which is not supported."

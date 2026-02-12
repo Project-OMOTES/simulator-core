@@ -41,26 +41,34 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         super().__init__(name, identifier)
         self.factor = factor
 
-    def set_asset(self, heat_demand: float) -> dict[str, dict[str, float]]:
+    def set_asset(self, heat_demand: float, bypass: bool = False) -> dict[str, dict[str, float]]:
         """Method to set the asset to the given heat demand.
 
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
+        :param bypass: When true the heat exchange is bypassed, so the heat demand is not reduced by the factor. Default is False.
         """
-        # TODO set correct values also for prim and secondary side.
-        return {
-            self.id: {
-                PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
-                SECONDARY
-                + PROPERTY_HEAT_DEMAND: np.abs(heat_demand)
-                * self.factor
-                * (
-                    np.sign(heat_demand) * -1
-                ),  # Invert sign of secondary heat demand, as it is opposite to primary side.
-                SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
-                PROPERTY_SET_PRESSURE: False,
+        if bypass:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 50,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 80,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * 1,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PROPERTY_SET_PRESSURE: False,
+                }
             }
-        }
+        else:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * self.factor,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PROPERTY_SET_PRESSURE: False,
+                }
+            }
