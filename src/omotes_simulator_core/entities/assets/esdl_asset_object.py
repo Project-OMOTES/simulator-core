@@ -196,6 +196,7 @@ class EsdlAssetObject:
         )
 
     def get_esdl_type(self) -> str:
+        """Returns the ESDL type of the asset as a string."""
         return StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
 
 
