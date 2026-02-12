@@ -86,9 +86,14 @@ class NetworkController(NetworkControllerAbstract):
         self.update_networks_factor()
         total_demand = sum([network.get_total_heat_demand(time) for network in self.networks])
         total_supply = sum([network.get_total_supply() for network in self.networks])
+
+        # Initialize the producer, consumer, and storage setpoints dicts.
+        producer_setpoints: AssetSetpointsDict = {}
+        consumer_setpoints: AssetSetpointsDict = {}
+        storage_setpoints: AssetSetpointsDict = {}
         if total_supply > total_demand:
             # total supply is larger than demand, so demand can be set to required demand.
-            consumers = self._set_consumer_to_demand(time)
+            consumer_setpoints = self._set_consumer_to_demand(time)
             surplus_supply = total_supply - total_demand
             # Check charge capacity from storage
             total_charge_storage = sum(
@@ -96,12 +101,12 @@ class NetworkController(NetworkControllerAbstract):
             )
             if total_charge_storage > surplus_supply:
                 # there is more charge capacity than surplus supply, so we can set source to max and storages to charge with the surplus supply.
-                producers = self._set_producers_to_max()
-                storages = self._set_storages_charge_power(surplus_supply)
+                producer_setpoints = self._set_producers_to_max()
+                storage_setpoints = self._set_storages_charge_power(surplus_supply)
             else:
                 # The storage can charge to max. The sources need to be capped.
-                storages = self._set_all_storages_charge_to_max()
-                producers = self._set_producers_based_on_priority(
+                storage_setpoints = self._set_all_storages_charge_to_max()
+                producer_setpoints = self._set_producers_based_on_priority(
                     surplus_supply + total_charge_storage
                 )
         else:
@@ -115,67 +120,16 @@ class NetworkController(NetworkControllerAbstract):
                     f"Consumers are capped to the available power."
                 )
                 factor = (total_supply + total_discharge_storage) / total_demand
-                producers = self._set_producers_to_max()
+                producer_setpoints = self._set_producers_to_max()
 
-                storages = self._set_all_storages_discharge_to_max()
-                consumers = self._set_consumer_to_demand(time, factor=factor)
+                storage_setpoints = self._set_all_storages_discharge_to_max()
+                consumer_setpoints = self._set_consumer_to_demand(time, factor=factor)
             else:
                 # there is enough supply + storage to cover the demand. sources to max and storages to deliver the rest.
-                consumers = self._set_consumer_to_demand(time)
+                consumer_setpoints = self._set_consumer_to_demand(time)
                 surplus_demand = total_supply - total_demand
-                producers = self._set_producers_to_max()
-                storages = self._set_storages_discharge_power(surplus_demand)
-        producers.update(consumers)
-        producers.update(storages)
-
-        # Getting the settings for the heat transfer assets
-        heat_transfer = {}
-        total_charge_storage = sum(
-            [network.get_total_charge_storage() for network in self.networks]
-        )
-        total_discharge_storage = sum(
-            [network.get_total_discharge_storage() for network in self.networks]
-        )
-
-        # Initialize the producer, consumer, and storage setpoints dicts.
-        producer_setpoints: AssetSetpointsDict = {}
-        consumer_setpoints: AssetSetpointsDict = {}
-        storage_setpoints: AssetSetpointsDict = {}
-
-        if (total_supply + total_discharge_storage) <= total_demand:
-            logger.warning(
-                "Total supply + storage is lower than total demand at time: %s"
-                "Consumers are capped to the available power.",
-                time,
-            )
-            factor = (total_supply + total_discharge_storage) / total_demand
-            # Define setpoints
-            producer_setpoints = self._set_producers_to_max()
-            storage_setpoints = self._set_all_storages_discharge_to_max()
-            consumer_setpoints = self._set_consumer_to_demand(time, factor=factor)
-        else:
-            # Set consumer to requested demand.
-            consumer_setpoints = self._set_consumer_to_demand(time, factor=1.0)
-            # Set producers and storages based on the supply and demand, and the charge and
-            # discharge capacity of the storage.
-            if total_supply >= total_demand:
-                # there is a surplus of supply we can charge the storage, storage becomes consumer.
-                surplus_supply = total_supply - total_demand
-                if surplus_supply <= total_charge_storage:
-                    storage_setpoints = self._set_storages_charge_power(surplus_supply)
-                    producer_setpoints = self._set_producers_to_max()
-                elif surplus_supply > total_charge_storage:
-                    # need to cap the power of the source based on priority
-                    storage_setpoints = self._set_storages_charge_power(total_charge_storage)
-                    producer_setpoints = self._set_producers_based_on_priority(
-                        total_demand + total_charge_storage
-                    )
-            else:
-                # there is a deficit of supply we can discharge the storage, storage becomes
-                # producer.
-                deficit_supply = total_demand - total_supply
-                storage_setpoints = self._set_storages_discharge_power(deficit_supply)
                 producer_setpoints = self._set_producers_to_max()
+                storage_setpoints = self._set_storages_discharge_power(surplus_demand)
 
         # Update the asset setpoints with the setpoints of the producers, consumers,
         # and storages.

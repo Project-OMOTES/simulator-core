@@ -54,7 +54,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
                     PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
                     PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 50,
                     PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 80,
-                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * 1,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * -1,
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                     SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
                     PROPERTY_SET_PRESSURE: False,
