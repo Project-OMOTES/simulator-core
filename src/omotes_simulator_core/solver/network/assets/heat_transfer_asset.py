@@ -44,6 +44,7 @@ class HeatTransferAsset(BaseAsset):
         mass_flow_initialization_primary: float = -20.0,
         heat_transfer_coefficient: float = 1.0,
         pre_scribe_mass_flow_secondary: bool = False,
+        pre_scribe_mass_flow_primary: bool = False,
         temperature_out_secondary: float = 293.15,
         mass_flow_rate_set_point_secondary: float = -80.0,
         pressure_set_point_secondary: float = 10000.0,
@@ -94,6 +95,9 @@ class HeatTransferAsset(BaseAsset):
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
         # at the hot side of the heat pump
         self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
+        # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
+        # at the cold side of the heat pump
+        self.pre_scribe_mass_flow_primary = pre_scribe_mass_flow_primary
         # Define the mass flow rate set point for the asset on the secondary side
         self.mass_flow_rate_rate_set_point_secondary = mass_flow_rate_set_point_secondary
         # Define the pressure set point for the asset
@@ -382,34 +386,57 @@ class HeatTransferAsset(BaseAsset):
             self.secondary_side_outflow,
         ]:
             equations.append(self.get_press_to_node_equation(connection_point=connection_point))
-
-        # -- Internal continuity (1x) --
-        # Add the internal continuity equation at the primary side.
-        equations.append(
-            self.add_continuity_equation(
-                connection_point_1=self.primary_side_inflow,
-                connection_point_2=self.primary_side_outflow,
-            )
-        )
-        # -- Energy balance equation for the heat transfer asset (1x) --
-        # Defines the energy balance between the primary and secondary side of the
-        # heat transfer asset.
-        # If the mass flow at the inflow node of the primary and secondary side is not zero,
-        if (iteration_flow_direction_primary != FlowDirection.ZERO) or (
-            iteration_flow_direction_secondary != FlowDirection.ZERO
-        ):
+        if self.pre_scribe_mass_flow_primary:
+            # -- Internal continuity (1x) --
+            # Add the internal continuity equation at the primary side.
             equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=self.primary_side_inflow,
-                    mass_flow_value=self.get_mass_flow_from_prev_solution(),
+                self.add_continuity_equation(
+                    connection_point_1=self.primary_side_inflow,
+                    connection_point_2=self.primary_side_outflow,
                 )
             )
-        # If the mass flow at the inflow node of the primary and secondary side is zero,
+            # -- Energy balance equation for the heat transfer asset (1x) --
+            # Defines the energy balance between the primary and secondary side of the
+            # heat transfer asset.
+            # If the mass flow at the inflow node of the primary and secondary side is not zero,
+            if (iteration_flow_direction_primary != FlowDirection.ZERO) or (
+                iteration_flow_direction_secondary != FlowDirection.ZERO
+            ):
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=self.primary_side_inflow,
+                        mass_flow_value=self.get_mass_flow_from_prev_solution(),
+                    )
+                )
+            # If the mass flow at the inflow node of the primary and secondary side is zero,
+            else:
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=self.primary_side_inflow,
+                        mass_flow_value=0,
+                    )
+                )
         else:
+            if iteration_flow_direction_secondary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                if iteration_flow_direction_secondary == FlowDirection.POSITIVE:
+                    pset_out = self.pressure_set_point_secondary / 2
+                    pset_in = self.pressure_set_point_secondary
+                else:
+                    pset_out = self.pressure_set_point_secondary
+                    pset_in = self.pressure_set_point_secondary / 2
             equations.append(
-                self.prescribe_mass_flow_at_connection_point(
+                self.prescribe_pressure_at_connection_point(
                     connection_point=self.primary_side_inflow,
-                    mass_flow_value=0,
+                    pressure_value=pset_in,
+                )
+            )
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=self.primary_side_outflow,
+                    pressure_value=pset_out,
                 )
             )
         # Return the equations

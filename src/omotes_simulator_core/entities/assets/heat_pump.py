@@ -63,6 +63,12 @@ class HeatPump(AssetAbstract):
     and the pressure is predescribed.
     """
 
+    control_mass_flow_primary: bool
+    """Flag to indicate whether the mass flow rate on the primary side is controlled.
+    If True, the mass flow rate is controlled. If False, the mass flow rate is not controlled
+    and the pressure is predescribed.
+    """
+
     coefficient_of_performance: float
     """Coefficient of perfomance for the heat pump."""
 
@@ -129,7 +135,10 @@ class HeatPump(AssetAbstract):
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
-        self.control_mass_flow_secondary = not (setpoints_secondary[PROPERTY_SET_PRESSURE])
+        self.control_mass_flow_secondary = not (
+            setpoints_secondary[PROPERTY_SET_PRESSURE]
+            & (setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND] < 0)
+        )
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_secondary = self.temperature_in_secondary  # type: ignore
@@ -176,12 +185,19 @@ class HeatPump(AssetAbstract):
             temperature_in=self.temperature_in_primary,
             temperature_out=self.temperature_out_primary,
         )
+        self.control_mass_flow_primary = not (
+            setpoints_primary[PROPERTY_SET_PRESSURE]
+            & (setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND] < 0)
+        )
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_primary = self.temperature_in_primary  # type: ignore
         self.solver_asset.temperature_out_primary = self.temperature_out_primary  # type: ignore
         self.solver_asset.mass_flow_initialization_primary = (  # type: ignore
             self.mass_flow_initialization_primary
+        )
+        self.solver_asset.pre_scribe_mass_flow_primary = (  # type: ignore
+            self.control_mass_flow_primary
         )
 
     def set_setpoints(self, setpoints: Dict) -> None:
