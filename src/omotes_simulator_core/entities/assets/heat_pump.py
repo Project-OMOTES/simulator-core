@@ -131,7 +131,7 @@ class HeatPump(AssetAbstract):
         self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
+            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND] * -1,
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
@@ -145,7 +145,7 @@ class HeatPump(AssetAbstract):
         self.solver_asset.temperature_out_secondary = (  # type: ignore
             self.temperature_out_secondary
         )
-        self.solver_asset.mass_flow_rate_secondary = self.mass_flow_secondary  # type: ignore
+        self.solver_asset.mass_flow_rate_rate_set_point_secondary = self.mass_flow_secondary  # type: ignore
         self.solver_asset.pre_scribe_mass_flow_secondary = (  # type: ignore
             self.control_mass_flow_secondary
         )
@@ -180,7 +180,7 @@ class HeatPump(AssetAbstract):
         # Assign setpoints to the HeatPump asset
         self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_OUT]
-        self.mass_flow_initialization_primary = heat_demand_and_temperature_to_mass_flow(
+        self.mass_flow_initialization_primary = -heat_demand_and_temperature_to_mass_flow(
             thermal_demand=setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_primary,
             temperature_out=self.temperature_out_primary,
