@@ -125,11 +125,10 @@ class ProductionCluster(AssetAbstract):
         # Calculate the mass flow rate
         self.heat_demand_set_point = heat_demand
         self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=heat_demand,
+            thermal_demand=-1 * heat_demand,
             temperature_in=self.temperature_in,
             temperature_out=self.temperature_out,
         )
-
         # Check if the mass flow rate is positive
         if self.controlled_mass_flow < 0.0:
             logger.error(
@@ -254,3 +253,9 @@ class ProductionCluster(AssetAbstract):
             )
         else:
             return True
+
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """

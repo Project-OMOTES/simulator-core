@@ -19,10 +19,14 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from omotes_simulator_core.entities.assets.asset_defaults import HeatBufferDefaults
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerAtestStorage,
+    ControllerIdealHeatStorage,
+)
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolator,
 )
@@ -30,47 +34,75 @@ from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObj
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
-class ControllerStorageMapper(EsdlMapperAbstract):
-    """Class to map an esdl asset to a storage entity class."""
+class ControllerAtesStorageMapper(EsdlMapperAbstract):
+    """Class to map an esdl asset to a Ates Storage entity class."""
 
     def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
-        raise NotImplementedError("EsdlAssetControllerStorageMapper.to_esdl()")
+        raise NotImplementedError("EsdlAssetAtesStorageMapper.to_esdl()")
 
     def to_entity(
         self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
-    ) -> ControllerStorage:
-        """Method to map an esdl asset to a storage entity class.
+    ) -> ControllerAtestStorage:
+        """Method to map an esdl asset to a Ates Storage entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
         :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
-        discharge_power = esdl_asset.get_property(
-            esdl_property_name="maxDischargeRate", default_value=np.inf
-        )
-
-        charge_power = esdl_asset.get_property(
-            esdl_property_name="maxChargeRate", default_value=np.inf
-        )
-        temperature_in = esdl_asset.get_temperature("In", "Supply")
-        temperature_out = esdl_asset.get_temperature("Out", "Return")
-        profile = pd.DataFrame()  # esdl_asset.get_profile()
         self.profile_interpolator = ProfileInterpolator(
-            profile=profile,
+            profile=pd.DataFrame(),
             sampling_method=esdl_asset.get_sampling_method(),
             interpolation_method=esdl_asset.get_interpolation_method(),
             timestep=timestep,
         )
         resampled_profile = self.profile_interpolator.get_resampled_profile()
-        contr_storage = ControllerStorage(
+
+        return ControllerAtestStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_in=temperature_in,
-            temperature_out=temperature_out,
-            max_charge_power=charge_power,
-            max_discharge_power=discharge_power,
+            temperature_in=esdl_asset.get_temperature("In", "Supply"),
+            temperature_out=esdl_asset.get_temperature("Out", "Return"),
+            max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
+            max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
             profile=resampled_profile,
         )
-        return contr_storage
+
+
+class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
+    """Class to map an esdl asset to a Ideal Heat Storage entity class."""
+
+    def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
+        """Map an Entity to a EsdlAsset."""
+        raise NotImplementedError("EsdlAssetIdealHeatStorageMapper.to_esdl()")
+
+    def to_entity(
+        self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
+    ) -> ControllerIdealHeatStorage:
+        """Method to map an esdl asset to a Ideal Heat Storage entity class.
+
+        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param Optional[int] timestep: Simulation timestep in seconds.
+
+        :return: Entity object.
+        """
+        self.profile_interpolator = ProfileInterpolator(
+            profile=pd.DataFrame(),
+            sampling_method=esdl_asset.get_sampling_method(),
+            interpolation_method=esdl_asset.get_interpolation_method(),
+            timestep=timestep,
+        )
+        resampled_profile = self.profile_interpolator.get_resampled_profile()
+
+        return ControllerIdealHeatStorage(
+            name=esdl_asset.esdl_asset.name,
+            identifier=esdl_asset.esdl_asset.id,
+            temperature_in=esdl_asset.get_temperature("In", "Supply"),
+            temperature_out=esdl_asset.get_temperature("Out", "Return"),
+            max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
+            max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
+            fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
+            volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
+            profile=resampled_profile,
+        )

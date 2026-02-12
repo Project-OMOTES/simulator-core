@@ -84,6 +84,14 @@ class HeatNetwork:
             py_asset.write_standard_output()
             py_asset.write_to_output()
 
+    def post_process_assets(self) -> None:
+        """Method to post-process all assets in the network.
+
+        :return: None
+        """
+        for py_asset in self.assets:
+            py_asset.postprocess()
+
     def gather_output(self) -> pd.DataFrame:
         """Method to gather output of all assets and return it as a dict.
 

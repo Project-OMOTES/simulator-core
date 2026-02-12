@@ -27,7 +27,10 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
     ControllerHeatTransferAsset,
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
-from omotes_simulator_core.entities.assets.controller.controller_storage import ControllerStorage
+from omotes_simulator_core.entities.assets.controller.controller_storage import (
+    ControllerAtestStorage,
+    ControllerIdealHeatStorage,
+)
 
 
 class ControllerNetwork:
@@ -44,7 +47,7 @@ class ControllerNetwork:
     """List of all consumers in the network."""
     producers: list[ControllerProducer]
     """List of all producers in the network."""
-    storages: list[ControllerStorage]
+    storages: list[ControllerAtestStorage | ControllerIdealHeatStorage]
     """List of all storages in the network."""
     factor_to_first_network: float
     """Factor to calculate power in the first network in the list of networks."""
@@ -57,7 +60,7 @@ class ControllerNetwork:
         heat_transfer_assets_sec_in: list[ControllerHeatTransferAsset],
         consumers_in: list[ControllerConsumer],
         producers_in: list[ControllerProducer],
-        storages_in: list[ControllerStorage],
+        storages_in: list[ControllerAtestStorage | ControllerIdealHeatStorage],
         factor_to_first_network: float = 1,
     ) -> None:
         """Constructor of the class, which sets all attributes."""
@@ -98,9 +101,8 @@ class ControllerNetwork:
 
         :return float: Total heat discharge of all storages.
         """
-        # TODO add limit based on state of charge
         return (
-            float(sum([storage.max_discharge_power for storage in self.storages]))
+            float(sum([storage.effective_max_discharge_power for storage in self.storages]))
             * self.factor_to_first_network
         )
 
@@ -109,9 +111,8 @@ class ControllerNetwork:
 
         :return float: Total heat charge of all storages.
         """
-        # TODO add limit based on state of charge
         return (
-            float(sum([storage.max_charge_power for storage in self.storages]))
+            float(sum([storage.effective_max_charge_power for storage in self.storages]))
             * self.factor_to_first_network
         )
 
@@ -146,8 +147,9 @@ class ControllerNetwork:
                 pass
             elif source.priority != priority:
                 continue
+            # Discharging (e.g., heat from component/system to the network) is negative.
             producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.power * factor,
+                PROPERTY_HEAT_DEMAND: -1 * source.power * factor,
                 PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_TEMPERATURE_IN: source.temperature_in,
                 PROPERTY_SET_PRESSURE: False,
@@ -163,9 +165,7 @@ class ControllerNetwork:
         storage_settings = {}
         for storage in self.storages:
             storage_settings[storage.id] = {
-                PROPERTY_HEAT_DEMAND: storage.max_charge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
             }
         return storage_settings
 
@@ -177,10 +177,9 @@ class ControllerNetwork:
         """
         storage_settings = {}
         for storage in self.storages:
+            # Discharging is negative (e.g., heat from component/system to the network)
             storage_settings[storage.id] = {
-                PROPERTY_HEAT_DEMAND: -storage.max_discharge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
             }
         return storage_settings
 
@@ -209,8 +208,9 @@ class ControllerNetwork:
         """
         consumers = {}
         for consumer in self.consumers:
+            # Charging (e.g., heat from network to compontent) is positive.
             consumers[consumer.id] = {
-                PROPERTY_HEAT_DEMAND: consumer.get_heat_demand(time) * factor,
+                PROPERTY_HEAT_DEMAND: +1 * consumer.get_heat_demand(time) * factor,
                 PROPERTY_TEMPERATURE_OUT: consumer.temperature_out,
                 PROPERTY_TEMPERATURE_IN: consumer.temperature_in,
             }
