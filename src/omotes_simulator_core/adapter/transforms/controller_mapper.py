@@ -123,13 +123,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             if esdl_asset.get_number_of_ports() == 2
         ]
 
-        storages = [
-            ControllerIdealHeatStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
-        ] + [
-            ControllerAtesStorageMapper().to_entity(esdl_asset=esdl_asset)
-            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.ATES)
-        ]
+        storages = self.convert_heat_storages_and_ates(esdl_object)
 
         # if there are no heat transfer assets, all assets can be stored into one network.
         if not heat_transfer_assets:
@@ -263,6 +257,27 @@ class EsdlControllerMapper(EsdlMapperAbstract):
                     )
                 )
         return network_list
+
+    def convert_heat_storages_and_ates(
+        self, esdl_object: EsdlObject
+    ) -> list[ControllerAtestStorage | ControllerIdealHeatStorage]:
+        """Method to convert heat storages and ates to controller storage objects."""
+        esdl_storages = esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
+        esdl_storages = [
+            storage
+            for storage in esdl_storages
+            if storage.get_esdl_type() == OmotesAssetLabels.STORAGE
+        ]
+        esdl_ates = esdl_object.get_all_assets_of_type(OmotesAssetLabels.ATES)
+
+        storages = [
+            ControllerIdealHeatStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_storages
+        ] + [
+            ControllerAtesStorageMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_ates
+        ]
+        return storages
 
 
 def belongs_to_network(id: str, network: NetworkItems, graph: Graph) -> bool:
