@@ -75,3 +75,23 @@ class TestEsdlControllerMapper(unittest.TestCase):
         # Assert
         self.assertEqual(len(storages), 1)
         self.assertIsInstance(storages[0], ControllerAtesStorage)
+
+    def test_ates_and_heat_storages_conversion(self):
+        # Arrange
+        esdl_file_path = (
+            Path(__file__).parent
+            / ".."
+            / ".."
+            / ".."
+            / ".."
+            / "testdata"
+            / "test_ates_and_storages.esdl"
+        )
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        mapper = EsdlControllerMapper()
+        # Act
+        storages = mapper.convert_heat_storages_and_ates(esdl_object)
+        # Assert
+        self.assertEqual(len(storages), 2)
+        self.assertIsInstance(storages[0], ControllerIdealHeatStorage)
+        self.assertIsInstance(storages[1], ControllerAtesStorage)
