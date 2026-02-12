@@ -18,8 +18,8 @@ from pathlib import Path
 
 from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
 from omotes_simulator_core.entities.assets.controller import (
-    ControllerIdealHeatStorage,
     ControllerAtesStorage,
+    ControllerIdealHeatStorage,
 )
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
