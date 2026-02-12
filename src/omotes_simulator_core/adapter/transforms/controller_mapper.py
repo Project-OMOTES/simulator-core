@@ -197,7 +197,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             | ControllerProducer
             | ControllerAtesStorage
             | ControllerIdealHeatStorage
-            ],
+        ],
     ) -> None:
         """Method to move assets to networks.
 
