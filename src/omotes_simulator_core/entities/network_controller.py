@@ -218,8 +218,6 @@ class NetworkController(NetworkControllerAbstract):
                     heat_transfer.update(asset.set_asset(-total_heat_supply, True))
                 else:
                     heat_transfer.update(asset.set_asset(-total_heat_supply))
-        producers.update(heat_transfer)
-                heat_transfer.update(asset.set_asset(-total_heat_supply))
 
         # Update the asset setpoints with the heat transfer setpoints.
         asset_setpoints.update(heat_transfer)

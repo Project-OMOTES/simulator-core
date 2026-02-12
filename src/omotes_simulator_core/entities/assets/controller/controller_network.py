@@ -102,20 +102,18 @@ class ControllerNetwork:
 
         :return float: Total heat discharge of all storages.
         """
-        return (
-            float(sum([storage.effective_max_discharge_power for storage in self.storages]))
-            * self.factor_to_first_network
-        )
+        return float(
+            sum([storage.effective_max_discharge_power for storage in self.storages])
+        ) * product(self.factor_to_first_network)
 
     def get_total_charge_storage(self) -> float:
         """Method to get the total storage charge of the network corrected to the first network.
 
         :return float: Total heat charge of all storages.
         """
-        return (
-            float(sum([storage.effective_max_charge_power for storage in self.storages]))
-            * self.factor_to_first_network
-        )
+        return float(
+            sum([storage.effective_max_charge_power for storage in self.storages])
+        ) * product(self.factor_to_first_network[:-2])
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
