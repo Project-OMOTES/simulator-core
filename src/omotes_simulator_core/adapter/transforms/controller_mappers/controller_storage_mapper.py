@@ -24,7 +24,7 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
-    ControllerAtestStorage,
+    ControllerAtesStorage,
     ControllerIdealHeatStorage,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
@@ -43,7 +43,7 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
 
     def to_entity(
         self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
-    ) -> ControllerAtestStorage:
+    ) -> ControllerAtesStorage:
         """Method to map an esdl asset to a Ates Storage entity class.
 
         :param EsdlAssetObject model: Object to be converted to an asset entity.
@@ -59,7 +59,7 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
         )
         resampled_profile = self.profile_interpolator.get_resampled_profile()
 
-        return ControllerAtestStorage(
+        return ControllerAtesStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             temperature_in=esdl_asset.get_temperature("In", "Supply"),

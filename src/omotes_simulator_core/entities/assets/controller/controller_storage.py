@@ -138,7 +138,7 @@ class ControllerStorageAbstract(AssetControllerAbstract):
         return self.effective_max_charge_power
 
 
-class ControllerAtestStorage(ControllerStorageAbstract):
+class ControllerAtesStorage(ControllerStorageAbstract):
     """Class to store the storage for the controller asset."""
 
     def __init__(
