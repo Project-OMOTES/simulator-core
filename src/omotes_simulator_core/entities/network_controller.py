@@ -158,7 +158,7 @@ class NetworkController(NetworkControllerAbstract):
             for producer in network.producers:
                 total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
             for consumer in network.consumers:
-                total_heat_supply += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
@@ -167,7 +167,7 @@ class NetworkController(NetworkControllerAbstract):
             for asset in network.heat_transfer_assets_prim:
                 heat_transfer.update(asset.set_asset(total_heat_supply))
             for asset in network.heat_transfer_assets_sec:
-                heat_transfer.update(asset.set_asset(total_heat_supply))
+                heat_transfer.update(asset.set_asset(-total_heat_supply))
 
         # Update the asset setpoints with the heat transfer setpoints.
         asset_setpoints.update(heat_transfer)
