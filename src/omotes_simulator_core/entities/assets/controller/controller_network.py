@@ -28,7 +28,7 @@ from omotes_simulator_core.entities.assets.controller.controller_heat_transfer i
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
-    ControllerAtestStorage,
+    ControllerAtesStorage,
     ControllerIdealHeatStorage,
 )
 
@@ -47,7 +47,7 @@ class ControllerNetwork:
     """List of all consumers in the network."""
     producers: list[ControllerProducer]
     """List of all producers in the network."""
-    storages: list[ControllerAtestStorage | ControllerIdealHeatStorage]
+    storages: list[ControllerAtesStorage | ControllerIdealHeatStorage]
     """List of all storages in the network."""
     factor_to_first_network: float
     """Factor to calculate power in the first network in the list of networks."""
@@ -60,7 +60,7 @@ class ControllerNetwork:
         heat_transfer_assets_sec_in: list[ControllerHeatTransferAsset],
         consumers_in: list[ControllerConsumer],
         producers_in: list[ControllerProducer],
-        storages_in: list[ControllerAtestStorage | ControllerIdealHeatStorage],
+        storages_in: list[ControllerAtesStorage | ControllerIdealHeatStorage],
         factor_to_first_network: float = 1,
     ) -> None:
         """Constructor of the class, which sets all attributes."""

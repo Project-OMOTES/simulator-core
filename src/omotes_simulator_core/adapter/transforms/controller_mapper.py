@@ -29,7 +29,7 @@ from omotes_simulator_core.adapter.transforms.mappers import EsdlMapperAbstract
 from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.adapter.utility.graph import Graph
 from omotes_simulator_core.entities.assets.controller import (
-    ControllerAtestStorage,
+    ControllerAtesStorage,
     ControllerConsumer,
     ControllerHeatTransferAsset,
     ControllerIdealHeatStorage,
@@ -51,7 +51,7 @@ class NetworkItems:
     heat_transfer_secondary: list[ControllerHeatTransferAsset]
     consumer: list[ControllerConsumer]
     producer: list[ControllerProducer]
-    storage: list[ControllerAtestStorage | ControllerIdealHeatStorage]
+    storage: list[ControllerAtesStorage | ControllerIdealHeatStorage]
 
     def add(
         self,
@@ -62,7 +62,7 @@ class NetworkItems:
             self.consumer.append(asset)
         elif isinstance(asset, ControllerProducer):
             self.producer.append(asset)
-        elif isinstance(asset, ControllerAtestStorage) or isinstance(
+        elif isinstance(asset, ControllerAtesStorage) or isinstance(
             asset, ControllerIdealHeatStorage
         ):
             self.storage.append(asset)
@@ -195,9 +195,9 @@ class EsdlControllerMapper(EsdlMapperAbstract):
         assets: list[
             ControllerConsumer
             | ControllerProducer
-            | ControllerAtestStorage
+            | ControllerAtesStorage
             | ControllerIdealHeatStorage
-        ],
+            ],
     ) -> None:
         """Method to move assets to networks.
 
@@ -260,7 +260,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
 
     def convert_heat_storages_and_ates(
         self, esdl_object: EsdlObject
-    ) -> list[ControllerAtestStorage | ControllerIdealHeatStorage]:
+    ) -> list[ControllerAtesStorage | ControllerIdealHeatStorage]:
         """Method to convert heat storages and ates to controller storage objects."""
         esdl_storages = esdl_object.get_all_assets_of_type(OmotesAssetLabels.STORAGE)
         esdl_storages = [
