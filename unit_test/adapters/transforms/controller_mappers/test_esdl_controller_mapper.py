@@ -17,6 +17,10 @@ import unittest
 from pathlib import Path
 
 from omotes_simulator_core.adapter.transforms.controller_mapper import EsdlControllerMapper
+from omotes_simulator_core.entities.assets.controller import (
+    ControllerIdealHeatStorage,
+    ControllerAtesStorage,
+)
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.network_controller import NetworkController
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
@@ -45,3 +49,29 @@ class TestEsdlControllerMapper(unittest.TestCase):
         self.assertEqual(result.networks[0].path, [])
         self.assertEqual(result.networks[1].path, ["1", "0"])
         self.assertEqual(result.networks[2].path, ["2", "1", "0"])
+
+    def test_ideal_heat_storage_conversion(self):
+        # Arrange
+        esdl_file_path = (
+            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_buffer.esdl"
+        )
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        mapper = EsdlControllerMapper()
+        # Act
+        storages = mapper.convert_heat_storages_and_ates(esdl_object)
+        # Assert
+        self.assertEqual(len(storages), 1)
+        self.assertIsInstance(storages[0], ControllerIdealHeatStorage)
+
+    def test_ates_conversion(self):
+        # Arrange
+        esdl_file_path = (
+            Path(__file__).parent / ".." / ".." / ".." / ".." / "testdata" / "test_ates.esdl"
+        )
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        mapper = EsdlControllerMapper()
+        # Act
+        storages = mapper.convert_heat_storages_and_ates(esdl_object)
+        # Assert
+        self.assertEqual(len(storages), 1)
+        self.assertIsInstance(storages[0], ControllerAtesStorage)

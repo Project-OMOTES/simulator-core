@@ -29,7 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
-    ControllerAtestStorage,
+    ControllerAtesStorage,
     ControllerIdealHeatStorage,
     ControllerStorageAbstract,
 )
@@ -105,7 +105,7 @@ class ControllerAtestStorageTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.storage = ControllerAtestStorage(
+        self.storage = ControllerAtesStorage(
             "storage",
             "id",
             temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
