@@ -20,7 +20,6 @@ from typing import Dict
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
-    HeatPumpDefaults,
     PRIMARY,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
@@ -30,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
+    HeatPumpDefaults,
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
@@ -81,7 +81,7 @@ class HeatPump(AssetAbstract):
         coefficient_of_performance: float = HeatPumpDefaults.coefficient_of_performance,
         maximum_power: float | None = None,
     ) -> None:
-        """Initialize a new HeatPump instance.
+        r"""Initialize a new HeatPump instance.
 
         The heat transfer coefficient of the heat pump is derived from the coefficient of
         performance using the relationship between the cold side (primary side) and hot
