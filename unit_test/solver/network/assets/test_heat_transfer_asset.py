@@ -455,12 +455,12 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=0, use_relative_indexing=False
             )
-        ] = 5.0
+        ] = 10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=1, use_relative_indexing=False
             )
-        ] = 10.0
+        ] = 5.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
@@ -488,4 +488,4 @@ class HeatTransferTest(unittest.TestCase):
         electric_power = self.asset.get_electric_power_consumption()
 
         # Assert
-        self.assertEqual(electric_power, 1.0)
+        self.assertEqual(electric_power, 5.0)

@@ -20,6 +20,7 @@ from typing import Dict
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
+    HeatPumpDefaults,
     PRIMARY,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
@@ -66,18 +67,49 @@ class HeatPump(AssetAbstract):
     coefficient_of_performance: float
     """Coefficient of perfomance for the heat pump."""
 
+    maximum_power: float | None
+    """Maximum electrical input power of the heat pump [W]. """
+
+    _heat_demand_secondary_capped: float | None
+    """Capped secondary heat demand setpoint [W]."""
+
     def __init__(
         self,
         asset_name: str,
         asset_id: str,
         connected_ports: list[str],
-        coefficient_of_performance: float = 1 - 1 / 4.0,
+        coefficient_of_performance: float = HeatPumpDefaults.coefficient_of_performance,
+        maximum_power: float | None = None,
     ) -> None:
         """Initialize a new HeatPump instance.
+
+        The heat transfer coefficient of the heat pump is derived from the coefficient of
+        performance using the relationship between the cold side (primary side) and hot
+        side (secondary side).
+
+        **Relationship between the COP and the heat transfer coefficient as defined in the heat
+        transfer asset:**
+
+        Starting from the energy balance and COP definition:
+
+        .. math::
+
+            Q_{hot} = W_{el} + Q_{cold}\\
+            c = \frac{Q_{cold}}{Q_{hot}} \\
+            W_{el} = \frac{Q_{hot}}{COP}\\
+            Q_{hot} = \frac{Q_{hot}}{COP} + Q_{cold}\\
+            1 = \frac{1}{COP} + c\\
+            c = 1 - \frac{1}{COP}
+
+        The dimensionless ratio :math:`c = Q_{cold}/Q_{hot}` is used in the heat transfer asset as
+        the heat transfer coefficient to couple the primary and secondary sides.
+
 
         :param asset_name: The name of the asset.
         :param asset_id: The unique identifier of the asset.
         :connected_ports: The unique identifiers of the ports of the asset.
+        :param coefficient_of_performance: The COP of the heat pump [-].
+        :param maximum_power: Maximum electrical input power [W].
         """
         super().__init__(
             asset_name=asset_name,
@@ -86,6 +118,8 @@ class HeatPump(AssetAbstract):
         )
         # Set the coefficient of performance
         self.coefficient_of_performance = coefficient_of_performance
+        self.maximum_power = maximum_power
+        self._heat_demand_secondary_capped = None
 
         # Define solver asset
         self.solver_asset = HeatTransferAsset(
@@ -93,7 +127,7 @@ class HeatPump(AssetAbstract):
             _id=self.asset_id,
             pre_scribe_mass_flow_secondary=False,
             pressure_set_point_secondary=DEFAULT_PRESSURE,
-            heat_transfer_coefficient=self.coefficient_of_performance,
+            heat_transfer_coefficient=1.0 - 1.0 / self.coefficient_of_performance,
         )
 
     def _set_setpoints_secondary(self, setpoints_secondary: Dict) -> None:
@@ -124,8 +158,23 @@ class HeatPump(AssetAbstract):
         # Assign setpoints to the HeatPump asset
         self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
+        heat_demand_secondary = setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND]
+
+        # Limit heat demand based on maximum electrical power cap
+        if self.maximum_power is not None:
+            required_electric_power = heat_demand_secondary / self.coefficient_of_performance
+            if required_electric_power > self.maximum_power:
+                capped_heat_demand_secondary = self.maximum_power * self.coefficient_of_performance
+                logger.warning(
+                    f"maximum electrical power of heat pump {self.name} exceeded. "
+                    f"maximum power input {self.maximum_power} W is used. ",
+                    extra={"esdl_object_id": self.asset_id},
+                )
+                heat_demand_secondary = capped_heat_demand_secondary
+
+        self._heat_demand_secondary_capped = heat_demand_secondary
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
+            thermal_demand=heat_demand_secondary,
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
@@ -190,10 +239,15 @@ class HeatPump(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
-        # Set the setpoints for the primary side of the heat pump
-        self._set_setpoints_primary(setpoints_primary=setpoints)
-        # Set the setpoints for the secondary side of the heat pump
+        # Set the secondary side first to apply electrical power capping if necessary.
         self._set_setpoints_secondary(setpoints_secondary=setpoints)
+        # Set primary setpoint based on capped secondary side using c=Q_cold/Q_hot = 1 - 1/COP.
+        setpoints_primary = dict(setpoints)
+        if self._heat_demand_secondary_capped is not None:
+            setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND] = (
+                self._heat_demand_secondary_capped * (1.0 - 1.0 / self.coefficient_of_performance)
+            )
+        self._set_setpoints_primary(setpoints_primary=setpoints_primary)
 
     def write_to_output(self) -> None:
         """Get output power and electricity consumption of the asset.

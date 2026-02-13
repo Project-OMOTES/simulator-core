@@ -30,14 +30,36 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
 class ControllerHeatTransferAsset(AssetControllerAbstract):
     """Class for controlling a heat transfer asset."""
 
-    def __init__(self, name: str, identifier: str, factor: float):
+    max_power: float | None
+    """Maximum electrical power of the heat pump [W]. None means no limit."""
+
+    def __init__(
+        self,
+        name: str,
+        identifier: str,
+        factor: float,
+        max_power: float | None = None,
+    ):
         """Constructor of the class, which sets all attributes.
 
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
+        :param float factor: The COP (heat pump) or efficiency (heat exchanger) factor.
+        :param float | None max_power: Maximum electrical power for heat pump [W].
         """
         super().__init__(name, identifier)
         self.factor = factor
+        self.max_power = max_power
+
+    def get_max_secondary_power(self) -> float | None:
+        """Get the maximum secondary (hot) side power output.
+
+        For heat pump: max_secondary = max_electrical_power * COP.
+        :return: Maximum secondary power [W], or None if no limit.
+        """
+        if self.max_power is None:
+            return None
+        return self.max_power * self.factor
 
     def set_asset(self, heat_demand: float) -> dict[str, dict[str, float]]:
         """Method to set the asset to the given heat demand.

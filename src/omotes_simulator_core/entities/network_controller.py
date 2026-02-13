@@ -141,6 +141,29 @@ class NetworkController(NetworkControllerAbstract):
                 total_heat_supply -= producers[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
                 total_heat_supply += producers[storage.id][PROPERTY_HEAT_DEMAND]
+
+            # Check if heat transfer asset has power limit (secondary side)
+            for asset in network.heat_transfer_assets_sec:
+                max_secondary = asset.get_max_secondary_power()
+                if max_secondary is not None:
+                    requested_secondary = abs(total_heat_supply)
+                    if requested_secondary > max_secondary:
+                        # Scale down consumers in this network proportionally
+                        scale_factor = max_secondary / requested_secondary
+                        for consumer in network.consumers:
+                            if consumer.id in producers:
+                                current = producers[consumer.id][PROPERTY_HEAT_DEMAND]
+                                scaled = current * scale_factor
+                                producers[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
+                        # Recalculate total_heat_supply after scaling
+                        total_heat_supply = 0
+                        for producer in network.producers:
+                            total_heat_supply += producers[producer.id][PROPERTY_HEAT_DEMAND]
+                        for consumer in network.consumers:
+                            total_heat_supply -= producers[consumer.id][PROPERTY_HEAT_DEMAND]
+                        for storage in network.storages:
+                            total_heat_supply += producers[storage.id][PROPERTY_HEAT_DEMAND]
+
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:

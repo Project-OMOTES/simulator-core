@@ -44,6 +44,7 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
                 coefficient_of_performance=esdl_asset.get_property(
                     "COP", HeatPumpDefaults.coefficient_of_performance
                 ),
+                maximum_power=esdl_asset.get_property("power", None),
             )
         elif hp_ports == 2:  # Air to water heat pump case.
             heatpump_entity = AirToWaterHeatPump(  # type:ignore

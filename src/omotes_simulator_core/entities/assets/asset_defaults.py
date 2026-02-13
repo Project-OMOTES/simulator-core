@@ -91,7 +91,7 @@ class HeatPumpDefaults:
     :param float coefficient_of_performance: The coefficient of performance of the heat pump [-].
     """
 
-    coefficient_of_performance: float = 1 - 1 / 4.0
+    coefficient_of_performance: float = 4.0
 
 
 @dataclass
