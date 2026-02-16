@@ -213,6 +213,13 @@ class AtesCluster(AssetAbstract):
         }
         self.output.append(output_dict)
 
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """
+        pass
+
     def _init_rosim(self) -> None:
         """Function to initailized Rosim from XML file."""
         path = os.path.dirname(__file__)

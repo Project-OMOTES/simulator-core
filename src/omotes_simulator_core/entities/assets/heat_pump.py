@@ -120,6 +120,7 @@ class HeatPump(AssetAbstract):
         self.coefficient_of_performance = coefficient_of_performance
         self.maximum_power = maximum_power
         self._heat_demand_secondary_capped = None
+        self._power_cap_warning_logged = False
 
         # Define solver asset
         self.solver_asset = HeatTransferAsset(
@@ -163,14 +164,16 @@ class HeatPump(AssetAbstract):
         # Limit heat demand based on maximum electrical power cap
         if self.maximum_power is not None:
             required_electric_power = heat_demand_secondary / self.coefficient_of_performance
-            if required_electric_power > self.maximum_power:
+            if abs(required_electric_power) > self.maximum_power:
                 capped_heat_demand_secondary = self.maximum_power * self.coefficient_of_performance
-                logger.warning(
-                    f"maximum electrical power of heat pump {self.name} exceeded. "
-                    f"maximum power input {self.maximum_power} W is used. ",
-                    extra={"esdl_object_id": self.asset_id},
-                )
-                heat_demand_secondary = capped_heat_demand_secondary
+                if not self._power_cap_warning_logged:
+                    logger.warning(
+                        f"Maximum electrical power exceeded for heat pump: {self.name}. "
+                        f"Maximum electrical power of {self.maximum_power} W is used. ",
+                        extra={"esdl_object_id": self.asset_id},
+                    )
+                    self._power_cap_warning_logged = True
+                heat_demand_secondary = -abs(capped_heat_demand_secondary)
 
         self._heat_demand_secondary_capped = heat_demand_secondary
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
@@ -275,3 +278,10 @@ class HeatPump(AssetAbstract):
                 )
             }
         )
+
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """
+        pass
