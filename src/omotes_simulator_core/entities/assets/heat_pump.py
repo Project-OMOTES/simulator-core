@@ -176,8 +176,8 @@ class HeatPump(AssetAbstract):
                     )
                     self._power_cap_warning_logged = True
                 heat_demand_secondary = -capped_heat_demand_secondary
+                self._heat_demand_secondary_capped = capped_heat_demand_secondary
 
-        self._heat_demand_secondary_capped = heat_demand_secondary
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand_secondary,
             temperature_in=self.temperature_in_secondary,
@@ -286,5 +286,6 @@ class HeatPump(AssetAbstract):
 
         :return: None
         """
-        # Reset the power cap warning flag
+        # Reset the power cap warning flag and heat demand cap for the next time step
         self._power_cap_warning_logged = False
+        self._heat_demand_secondary_capped = None

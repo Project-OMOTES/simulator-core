@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the class for a heat trasnfer asset."""
 
+from enum import Enum
+
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
@@ -29,8 +31,18 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
 )
 
 
+class HeatTransferAssetType(Enum):
+    """Enum to distinguish heat transfer asset types."""
+
+    HEAT_PUMP = "heat_pump"
+    HEAT_EXCHANGER = "heat_exchanger"
+
+
 class ControllerHeatTransferAsset(AssetControllerAbstract):
     """Class for controlling a heat transfer asset."""
+
+    heat_transfer_type: HeatTransferAssetType
+    """Type of heat transfer asset (heat pump or heat exchanger)."""
 
     max_electrical_power: float | None
     """Maximum electrical power of the heat pump [W]. None means no limit."""
@@ -40,6 +52,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         name: str,
         identifier: str,
         factor: float,
+        heat_transfer_type: HeatTransferAssetType,
         max_electrical_power: float | None = None,
     ):
         """Constructor of the class, which sets all attributes.
@@ -47,10 +60,12 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
         :param float factor: The COP (heat pump) or efficiency (heat exchanger) factor.
+        :param HeatTransferAssetType heat_transfer_type: Type of heat transfer asset.
         :param float | None max_electrical_power: Maximum electrical power for heat pump [W].
         """
         super().__init__(name, identifier)
         self.factor = factor
+        self.heat_transfer_type = heat_transfer_type
         self.max_electrical_power = max_electrical_power
 
     def set_asset(self, heat_demand: float) -> dict[str, dict[str, float]]:

@@ -23,6 +23,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    HeatTransferAssetType,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
@@ -163,8 +166,10 @@ class NetworkController(NetworkControllerAbstract):
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             for asset in network.heat_transfer_assets_sec:
-                # Heat transfer asset is a heat pump if electrical power limit is set
-                if asset.max_electrical_power is not None:
+                if (
+                    asset.heat_transfer_type == HeatTransferAssetType.HEAT_PUMP
+                    and asset.max_electrical_power is not None
+                ):
                     max_secondary = asset.max_electrical_power * asset.factor
                     requested_secondary = abs(total_heat_supply)
                     if requested_secondary > max_secondary:
