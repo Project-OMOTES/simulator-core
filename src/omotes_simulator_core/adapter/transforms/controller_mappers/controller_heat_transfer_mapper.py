@@ -46,12 +46,14 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         coefficient_of_performance = esdl_asset.get_property(
             esdl_property_name="COP", default_value=HeatPumpDefaults.coefficient_of_performance
         )
-        max_power = esdl_asset.get_property(esdl_property_name="power", default_value=None)
+        max_electrical_power = esdl_asset.get_property(
+            esdl_property_name="power", default_value=None
+        )
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             factor=coefficient_of_performance,
-            max_power=max_power,
+            max_electrical_power=max_electrical_power,
         )
         return contr_heat_transfer
 

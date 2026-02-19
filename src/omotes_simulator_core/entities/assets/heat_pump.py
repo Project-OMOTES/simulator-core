@@ -67,7 +67,7 @@ class HeatPump(AssetAbstract):
     coefficient_of_performance: float
     """Coefficient of perfomance for the heat pump."""
 
-    maximum_power: float | None
+    maximum_electrical_power: float | None
     """Maximum electrical input power of the heat pump [W]. """
 
     _heat_demand_secondary_capped: float | None
@@ -79,7 +79,7 @@ class HeatPump(AssetAbstract):
         asset_id: str,
         connected_ports: list[str],
         coefficient_of_performance: float = HeatPumpDefaults.coefficient_of_performance,
-        maximum_power: float | None = None,
+        maximum_electrical_power: float | None = None,
     ) -> None:
         r"""Initialize a new HeatPump instance.
 
@@ -109,7 +109,7 @@ class HeatPump(AssetAbstract):
         :param asset_id: The unique identifier of the asset.
         :connected_ports: The unique identifiers of the ports of the asset.
         :param coefficient_of_performance: The COP of the heat pump [-].
-        :param maximum_power: Maximum electrical input power [W].
+        :param maximum_electrical_power: Maximum electrical input power [W].
         """
         super().__init__(
             asset_name=asset_name,
@@ -118,7 +118,7 @@ class HeatPump(AssetAbstract):
         )
         # Set the coefficient of performance
         self.coefficient_of_performance = coefficient_of_performance
-        self.maximum_power = maximum_power
+        self.maximum_electrical_power = maximum_electrical_power
         self._heat_demand_secondary_capped = None
         self._power_cap_warning_logged = False
 
@@ -162,18 +162,20 @@ class HeatPump(AssetAbstract):
         heat_demand_secondary = setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND]
 
         # Limit heat demand based on maximum electrical power cap
-        if self.maximum_power is not None:
+        if self.maximum_electrical_power is not None:
             required_electric_power = heat_demand_secondary / self.coefficient_of_performance
-            if abs(required_electric_power) > self.maximum_power:
-                capped_heat_demand_secondary = self.maximum_power * self.coefficient_of_performance
+            if abs(required_electric_power) > self.maximum_electrical_power:
+                capped_heat_demand_secondary = (
+                    self.maximum_electrical_power * self.coefficient_of_performance
+                )
                 if not self._power_cap_warning_logged:
                     logger.warning(
                         f"Maximum electrical power exceeded for heat pump: {self.name}. "
-                        f"Maximum electrical power of {self.maximum_power} W is used. ",
+                        f"Maximum electrical power of {self.maximum_electrical_power} W is used. ",
                         extra={"esdl_object_id": self.asset_id},
                     )
                     self._power_cap_warning_logged = True
-                heat_demand_secondary = -abs(capped_heat_demand_secondary)
+                heat_demand_secondary = -capped_heat_demand_secondary
 
         self._heat_demand_secondary_capped = heat_demand_secondary
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
@@ -284,4 +286,5 @@ class HeatPump(AssetAbstract):
 
         :return: None
         """
-        pass
+        # Reset the power cap warning flag
+        self._power_cap_warning_logged = False

@@ -162,10 +162,10 @@ class NetworkController(NetworkControllerAbstract):
             for storage in network.storages:
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
-            # Check if heat transfer asset (HeatPump) has power limit (secondary side)
             for asset in network.heat_transfer_assets_sec:
-                max_secondary = asset.get_max_secondary_power()
-                if max_secondary is not None:
+                # Heat transfer asset is a heat pump if electrical power limit is set
+                if asset.max_electrical_power is not None:
+                    max_secondary = asset.max_electrical_power * asset.factor
                     requested_secondary = abs(total_heat_supply)
                     if requested_secondary > max_secondary:
                         # Scale down consumers in this network proportionally
