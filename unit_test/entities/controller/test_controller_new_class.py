@@ -25,6 +25,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
+    HeatTransferAssetType,
 )
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
@@ -171,9 +172,17 @@ class ControllerTest(unittest.TestCase):
         self.storage1.temperature_in = 40
 
         # Create heat transfer assets
-        heatpump = ControllerHeatTransferAsset(name="heatpump1", identifier="heatpump1", factor=5.0)
+        heatpump = ControllerHeatTransferAsset(
+            name="heatpump1",
+            identifier="heatpump1",
+            factor=5.0,
+            heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
+        )
         heatpump2 = ControllerHeatTransferAsset(
-            name="heatpump2", identifier="heatpump2", factor=1.0
+            name="heatpump2",
+            identifier="heatpump2",
+            factor=1.0,
+            heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
         )
 
         # Build basic network structure

@@ -691,12 +691,9 @@ class HeatTransferAsset(BaseAsset):
         """Calculate the electric power consumption of the heat transfer asset.
 
         The electric power consumption is calculated as the absolute difference between the
-        heat power on the primary and secondary side, divided by the heat transfer coefficient.
+        heat power on the primary and secondary side.
 
         :return: float
             The electric power consumption of the heat transfer asset.
         """
-        return (
-            abs(self.get_heat_power_primary() - self.get_heat_power_secondary())
-            / self.heat_transfer_coefficient
-        )
+        return abs(abs(self.get_heat_power_primary()) - abs(self.get_heat_power_secondary()))

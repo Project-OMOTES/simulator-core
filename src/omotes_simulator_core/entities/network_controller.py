@@ -23,6 +23,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    HeatTransferAssetType,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
@@ -161,6 +164,30 @@ class NetworkController(NetworkControllerAbstract):
                 total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+
+            for asset in network.heat_transfer_assets_sec:
+                if (
+                    asset.heat_transfer_type == HeatTransferAssetType.HEAT_PUMP
+                    and asset.max_electrical_power is not None
+                ):
+                    max_secondary = asset.max_electrical_power * asset.factor
+                    requested_secondary = abs(total_heat_supply)
+                    if requested_secondary > max_secondary:
+                        # Scale down consumers in this network proportionally
+                        scale_factor = max_secondary / requested_secondary
+                        for consumer in network.consumers:
+                            if consumer.id in asset_setpoints:
+                                current = asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                                scaled = current * scale_factor
+                                asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
+                        # Recalculate total_heat_supply after scaling
+                        total_heat_supply = 0
+                        for producer in network.producers:
+                            total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
+                        for consumer in network.consumers:
+                            total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                        for storage in network.storages:
+                            total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
