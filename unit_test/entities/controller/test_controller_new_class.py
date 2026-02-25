@@ -17,6 +17,8 @@ import datetime
 import unittest
 from unittest.mock import Mock
 
+import pandas as pd
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
     PROPERTY_HEAT_DEMAND,
@@ -140,6 +142,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -149,6 +152,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
 
         # Create consumer assets
@@ -366,7 +370,7 @@ class ControllerTest(unittest.TestCase):
             return_value={"id3": {"prop1": 9, "prop2": 15}}
         )
         # act
-        result = self.controller._set_producers_to_max()
+        result = self.controller._set_producers_to_max(datetime.datetime.now())
         # assert
         self.assertEqual(
             result,
@@ -456,6 +460,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -465,6 +470,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         producer3 = ControllerProducer(
             name="producer3",
@@ -474,6 +480,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=1,
+            profile=pd.DataFrame(),
         )
         producer4 = ControllerProducer(
             name="producer4",
@@ -483,6 +490,7 @@ class ControllerTest(unittest.TestCase):
             power=20,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         self.controller.networks[0] = ControllerNetwork(
             heat_transfer_assets_prim_in=[],
@@ -507,7 +515,7 @@ class ControllerTest(unittest.TestCase):
             storages_in=[],
         )
         # act
-        result = self.controller._set_producers_based_on_priority(120)
+        result = self.controller._set_producers_based_on_priority(datetime.datetime.now(), 120)
 
         # assert
         self.assertEqual(result["producer1"][PROPERTY_HEAT_DEMAND], -50)
@@ -525,6 +533,7 @@ class ControllerTest(unittest.TestCase):
             power=50,
             marginal_costs=1,
             priority=2,
+            profile=pd.DataFrame(),
         )
         producer2 = ControllerProducer(
             name="producer2",
@@ -534,6 +543,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         producer3 = ControllerProducer(
             name="producer3",
@@ -543,6 +553,7 @@ class ControllerTest(unittest.TestCase):
             power=40,
             marginal_costs=1,
             priority=1,
+            profile=pd.DataFrame(),
         )
         producer4 = ControllerProducer(
             name="producer4",
@@ -552,6 +563,7 @@ class ControllerTest(unittest.TestCase):
             power=20,
             marginal_costs=1,
             priority=3,
+            profile=pd.DataFrame(),
         )
         self.controller.networks[0] = ControllerNetwork(
             heat_transfer_assets_prim_in=[],
