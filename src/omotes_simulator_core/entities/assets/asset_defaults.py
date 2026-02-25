@@ -88,10 +88,14 @@ class AtesDefaults:
 class HeatPumpDefaults:
     """Class containing the default values for a heat pump.
 
+    The Coefficient of Performance (COP) is defined as the ratio of heat output to electricity
+    input: COP = Q_heat_output / electricity_in. For example, a COP of 4 means 1 unit of electricity
+    produces 4 units of heat by extracting 3 units from the source.
+
     :param float coefficient_of_performance: The coefficient of performance of the heat pump [-].
     """
 
-    coefficient_of_performance: float = 1 - 1 / 4.0
+    coefficient_of_performance: float = 4.0
 
 
 @dataclass
@@ -104,6 +108,14 @@ class HeatExchangerDefaults:
     """
 
     heat_transfer_efficiency: float = 1.0
+
+
+@dataclass
+class HeatBufferDefaults:
+    """Class containing the default values for Heat Buffer."""
+
+    volume: float = 1  # m3
+    fill_level: float = 0.5  # fraction 0-1
 
 
 # Default names
@@ -134,9 +146,17 @@ PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
 PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
-
+PROPERTY_VOLUME = "volume"
+PROPERTY_FILL_LEVEL = "fill_level"
+PROPERTY_TIMESTEP = "time_step"
 PRIMARY = "primary"
 SECONDARY = "secondary"
+
+# Buffer names
+PROPERTY_BUFFER_HOT_TEMPERATURE = "buffer_hot_temperature"
+PROPERTY_BUFFER_COLD_TEMPERATURE = "buffer_cold_temperature"
+
 # Static members
 PIPE_DEFAULTS = PipeDefaults()
 ATES_DEFAULTS = AtesDefaults()
+HEAT_BUFFER_DEFAULTS = HeatBufferDefaults()

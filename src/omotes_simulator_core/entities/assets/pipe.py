@@ -139,3 +139,10 @@ class Pipe(AssetAbstract):
         The minus sign is added to make it a loss instead of supply.
         """
         return -self.solver_asset.heat_flux
+
+    def postprocess(self) -> None:
+        """Postprocess after a simulation time step to update internal states.
+
+        :return: None
+        """
+        pass

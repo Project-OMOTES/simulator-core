@@ -57,7 +57,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 property_name="internal_energy", connection_point=0, use_relative_indexing=False
             )
-        ] = 5.0
+        ] = 10.0
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
@@ -68,7 +68,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 property_name="internal_energy", connection_point=1, use_relative_indexing=False
             )
-        ] = 10.0
+        ] = 5.0
 
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
@@ -222,6 +222,6 @@ class HeatPumpTest(unittest.TestCase):
         self.heat_pump.write_to_output()
 
         # Assert
-        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], 10.0)
-        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_ELECTRICITY_CONSUMPTION], 1.0)
+        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], -10.0)
+        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_ELECTRICITY_CONSUMPTION], 5.0)
         self.assertEqual(self.heat_pump.outputs[0][-1][PROPERTY_HEAT_POWER_SECONDARY], 5.0)

@@ -20,6 +20,7 @@ from typing import Any
 import pandas as pd
 from esdl import esdl
 
+from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
 from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolationMethod,
@@ -216,6 +217,10 @@ class EsdlAssetObject:
             return True
         else:
             return False
+
+    def get_esdl_type(self) -> str:
+        """Returns the ESDL type of the asset as a string."""
+        return StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
 
 
 def get_return_temperature(esdl_port: esdl.Port) -> float:

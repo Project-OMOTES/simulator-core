@@ -23,11 +23,16 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    HeatTransferAssetType,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
 
 logger = logging.getLogger(__name__)
+
+AssetSetpointsDict = dict[str, dict[str, float | bool]]
 
 
 class NetworkController(NetworkControllerAbstract):
@@ -91,40 +96,55 @@ class NetworkController(NetworkControllerAbstract):
             [network.get_total_discharge_storage() for network in self.networks]
         )
 
+        # Initialize the producer, consumer, and storage setpoints dicts.
+        producer_setpoints: AssetSetpointsDict = {}
+        consumer_setpoints: AssetSetpointsDict = {}
+        storage_setpoints: AssetSetpointsDict = {}
+
         if (total_supply + total_discharge_storage) <= total_demand:
             logger.warning(
-                f"Total supply + storage is lower than total demand at time: {time}"
-                f"Consumers are capped to the available power."
+                "Total supply + storage is lower than total demand at time: %s"
+                "Consumers are capped to the available power.",
+                time,
             )
             factor = (total_supply + total_discharge_storage) / total_demand
-            producers = self._set_producers_to_max(time)
-            producers.update(self._set_all_storages_discharge_to_max())
-            producers.update(self._set_consumer_to_demand(time, factor=factor))
+            producer_setpoints = self._set_producers_to_max(time)
+            storage_setpoints = self._set_all_storages_discharge_to_max()
+            consumer_setpoints = self._set_consumer_to_demand(time, factor=factor)
         else:
-            consumers = self._set_consumer_to_demand(time)
+            # Set consumer to requested demand.
+            consumer_setpoints = self._set_consumer_to_demand(time, factor=1.0)
+            # Set producers and storages based on the supply and demand, and the charge and
+            # discharge capacity of the storage.
             if total_supply >= total_demand:
                 # there is a surplus of supply we can charge the storage, storage becomes consumer.
                 surplus_supply = total_supply - total_demand
                 if surplus_supply <= total_charge_storage:
-                    storages = self._set_storages_charge_power(surplus_supply)
-                    producers = self._set_producers_to_max(time)
-                else:
+                    storage_setpoints = self._set_storages_charge_power(surplus_supply)
+                    producer_setpoints = self._set_producers_to_max(time)
+                elif surplus_supply > total_charge_storage:
                     # need to cap the power of the source based on priority
-                    storages = self._set_storages_charge_power(total_charge_storage)
-                    producers = self._set_producers_based_on_priority(
+                    storage_setpoints = self._set_storages_charge_power(total_charge_storage)
+                    producer_setpoints = self._set_producers_based_on_priority(
                         time, total_demand + total_charge_storage
                     )
             else:
                 # there is a deficit of supply we can discharge the storage, storage becomes
                 # producer.
                 deficit_supply = total_demand - total_supply
-                storages = self._set_storages_discharge_power(deficit_supply)
-                producers = self._set_producers_to_max(time)
-            producers.update(consumers)
-            producers.update(storages)
-        # Getting the settings for the heat transfer assets
+                storage_setpoints = self._set_storages_discharge_power(deficit_supply)
+                producer_setpoints = self._set_producers_to_max(time)
 
-        heat_transfer = {}
+        # Update the asset setpoints with the setpoints of the producers, consumers,
+        # and storages.
+        asset_setpoints: AssetSetpointsDict = {}
+        asset_setpoints.update(producer_setpoints)
+        asset_setpoints.update(storage_setpoints)
+        asset_setpoints.update(consumer_setpoints)
+
+        # Getting the settings for the heat transfer assets
+        heat_transfer: AssetSetpointsDict = {}
+
         # Set all the networks where there is only on primary or secondary heat exchanger.
         # Everything will then be set, since all heat transfer assets belong to a network where
         # they are the only one.
@@ -132,26 +152,58 @@ class NetworkController(NetworkControllerAbstract):
             number_of_heat_exchangers = len(network.heat_transfer_assets_prim) + len(
                 network.heat_transfer_assets_sec
             )
+
             if number_of_heat_exchangers != 1:
                 continue
-            total_heat_supply = 0
+
+            total_heat_supply: float = 0
             for producer in network.producers:
-                total_heat_supply += producers[producer.id][PROPERTY_HEAT_DEMAND]
+                total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
             for consumer in network.consumers:
-                total_heat_supply -= producers[consumer.id][PROPERTY_HEAT_DEMAND]
+                total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
-                total_heat_supply += producers[storage.id][PROPERTY_HEAT_DEMAND]
+                total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+
+            for asset in network.heat_transfer_assets_sec:
+                if (
+                    asset.heat_transfer_type == HeatTransferAssetType.HEAT_PUMP
+                    and asset.max_electrical_power is not None
+                ):
+                    max_secondary = asset.max_electrical_power * asset.factor
+                    requested_secondary = abs(total_heat_supply)
+                    if requested_secondary > max_secondary:
+                        # Scale down consumers in this network proportionally
+                        scale_factor = max_secondary / requested_secondary
+                        for consumer in network.consumers:
+                            if consumer.id in asset_setpoints:
+                                current = asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                                scaled = current * scale_factor
+                                asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
+                        # Recalculate total_heat_supply after scaling
+                        total_heat_supply = 0
+                        for producer in network.producers:
+                            total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
+                        for consumer in network.consumers:
+                            total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                        for storage in network.storages:
+                            total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
                 heat_transfer.update(asset.set_asset(total_heat_supply))
             for asset in network.heat_transfer_assets_sec:
                 heat_transfer.update(asset.set_asset(-total_heat_supply))
-        producers.update(heat_transfer)
+
+        # Update the asset setpoints with the heat transfer setpoints.
+        asset_setpoints.update(heat_transfer)
+
+        # Set the pressure.
         for network in self.networks:
             pressure_set_asset = network.set_pressure()
-            producers[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
-        return producers
+            asset_setpoints[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
+
+        return asset_setpoints
 
     def _set_producers_to_max(self, time: datetime.datetime) -> dict:
         result = {}
@@ -182,8 +234,9 @@ class NetworkController(NetworkControllerAbstract):
         results: dict = {}
         total_power = sum([network.get_total_charge_storage() for network in self.networks])
         if total_power == 0:
-            return results
-        factor = power / total_power
+            factor = 1.0
+        else:
+            factor = power / total_power
         for network in self.networks:
             results.update(network.set_storage_charge_power(factor=factor))
         return results
@@ -193,8 +246,9 @@ class NetworkController(NetworkControllerAbstract):
         results: dict = {}
         total_power = sum([network.get_total_discharge_storage() for network in self.networks])
         if total_power == 0:
-            return results
-        factor = power / total_power
+            factor = 1.0
+        else:
+            factor = power / total_power
         for network in self.networks:
             results.update(network.set_storage_discharge_power(factor=factor))
         return results
