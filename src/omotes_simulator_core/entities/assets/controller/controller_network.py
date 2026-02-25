@@ -149,7 +149,7 @@ class ControllerNetwork:
                 continue
             # Discharging (e.g., heat from component/system to the network) is negative.
             producers[source.id] = {
-                PROPERTY_HEAT_DEMAND: source.get_max_power(time) * factor,
+                PROPERTY_HEAT_DEMAND: -1 * source.get_max_power(time) * factor,
                 PROPERTY_TEMPERATURE_OUT: source.temperature_out,
                 PROPERTY_TEMPERATURE_IN: source.temperature_in,
                 PROPERTY_SET_PRESSURE: False,
