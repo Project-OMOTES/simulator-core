@@ -100,7 +100,8 @@ class NetworkController(NetworkControllerAbstract):
                 [network.get_total_charge_storage() for network in self.networks]
             )
             if total_charge_storage > surplus_supply:
-                # there is more charge capacity than surplus supply, so we can set source to max and storages to charge with the surplus supply.
+                # there is more charge capacity than surplus supply, so we can set source to
+                # max and storages to charge with the surplus supply.
                 producer_setpoints = self._set_producers_to_max()
                 storage_setpoints = self._set_storages_charge_power(surplus_supply)
             else:
@@ -110,7 +111,8 @@ class NetworkController(NetworkControllerAbstract):
                     total_demand + total_charge_storage
                 )
         else:
-            # total supply is lower than demand, so we need to check if there is enough discharge capacity from storage.
+            # total supply is lower than demand, so we need to check if there is enough discharge
+            # capacity from storage.
             total_discharge_storage = sum(
                 [network.get_total_discharge_storage() for network in self.networks]
             )
@@ -125,7 +127,8 @@ class NetworkController(NetworkControllerAbstract):
                 storage_setpoints = self._set_all_storages_discharge_to_max()
                 consumer_setpoints = self._set_consumer_to_demand(time, factor=factor)
             else:
-                # there is enough supply + storage to cover the demand. sources to max and storages to deliver the rest.
+                # there is enough supply + storage to cover the demand. sources to max and
+                # storages to deliver the rest.
                 consumer_setpoints = self._set_consumer_to_demand(time)
                 surplus_demand = total_demand - total_supply
                 producer_setpoints = self._set_producers_to_max()

@@ -279,7 +279,7 @@ class AtesCluster(AssetAbstract):
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
-        for i in range(12):
+        for i in range(0):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))

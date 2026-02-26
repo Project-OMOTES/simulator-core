@@ -14,8 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing the class for a heat trasnfer asset."""
 
-import numpy as np
-
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
     PROPERTY_HEAT_DEMAND,
@@ -46,7 +44,8 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
 
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
-        :param bypass: When true the heat exchange is bypassed, so the heat demand is not reduced by the factor. Default is False.
+        :param bypass: When true the heat exchange is bypassed, so the heat demand is not
+        reduced by the factor. Default is False.
         """
         if bypass:
             return {

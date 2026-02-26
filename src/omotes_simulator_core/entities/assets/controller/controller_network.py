@@ -93,8 +93,9 @@ class ControllerNetwork:
 
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
         """Method which the total heat demand at the given time corrected to the first network."""
-        return sum([consumer.get_heat_demand(time) for consumer in self.consumers]) * product(
-            self.factor_to_first_network
+        return float(
+            sum([consumer.get_heat_demand(time) for consumer in self.consumers])
+            * product(self.factor_to_first_network)
         )
 
     def get_total_discharge_storage(self) -> float:
@@ -104,7 +105,8 @@ class ControllerNetwork:
         """
         return float(
             sum([storage.effective_max_discharge_power for storage in self.storages])
-        ) * product(self.factor_to_first_network)
+            * product(self.factor_to_first_network)
+        )
 
     def get_total_charge_storage(self) -> float:
         """Method to get the total storage charge of the network corrected to the first network.
@@ -113,15 +115,17 @@ class ControllerNetwork:
         """
         return float(
             sum([storage.effective_max_charge_power for storage in self.storages])
-        ) * product(self.factor_to_first_network)
+            * product(self.factor_to_first_network)
+        )
 
     def get_total_supply(self) -> float:
         """Method to get the total heat supply of the network.
 
         :return float: Total heat supply of all producers.
         """
-        return float(sum([producer.power for producer in self.producers])) * product(
-            self.factor_to_first_network
+        return float(
+            sum([producer.power for producer in self.producers])
+            * product(self.factor_to_first_network)
         )
 
     def set_supply_to_max(self, priority: int = 0) -> dict:

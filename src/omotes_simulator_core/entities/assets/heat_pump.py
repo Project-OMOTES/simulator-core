@@ -145,7 +145,9 @@ class HeatPump(AssetAbstract):
         self.solver_asset.temperature_out_secondary = (  # type: ignore
             self.temperature_out_secondary
         )
-        self.solver_asset.mass_flow_rate_rate_set_point_secondary = self.mass_flow_secondary  # type: ignore
+        self.solver_asset.mass_flow_rate_rate_set_point_secondary = (
+            self.mass_flow_secondary
+        )  # type: ignore
         self.solver_asset.pre_scribe_mass_flow_secondary = (  # type: ignore
             self.control_mass_flow_secondary
         )
