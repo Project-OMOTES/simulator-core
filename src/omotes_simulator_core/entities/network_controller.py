@@ -60,12 +60,12 @@ class NetworkController(NetworkControllerAbstract):
                 for asset in current_network.heat_transfer_assets_prim:
                     if self.networks[int(step)].exists(asset.id):
                         network.factor_to_first_network.append(asset.factor)
-                        # current_network = self.networks[int(step)]
+                        current_network = self.networks[int(step)]
                         break
                 for asset in current_network.heat_transfer_assets_sec:
                     if self.networks[int(step)].exists(asset.id):
                         network.factor_to_first_network.append(1 / asset.factor)
-                        # current_network = self.networks[int(step)]
+                        current_network = self.networks[int(step)]
                         break
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
@@ -107,7 +107,7 @@ class NetworkController(NetworkControllerAbstract):
                 # The storage can charge to max. The sources need to be capped.
                 storage_setpoints = self._set_all_storages_charge_to_max()
                 producer_setpoints = self._set_producers_based_on_priority(
-                    surplus_supply + total_charge_storage
+                    total_demand + total_charge_storage
                 )
         else:
             # total supply is lower than demand, so we need to check if there is enough discharge capacity from storage.
@@ -127,7 +127,7 @@ class NetworkController(NetworkControllerAbstract):
             else:
                 # there is enough supply + storage to cover the demand. sources to max and storages to deliver the rest.
                 consumer_setpoints = self._set_consumer_to_demand(time)
-                surplus_demand = total_supply - total_demand
+                surplus_demand = total_demand - total_supply
                 producer_setpoints = self._set_producers_to_max()
                 storage_setpoints = self._set_storages_discharge_power(surplus_demand)
 
@@ -166,7 +166,7 @@ class NetworkController(NetworkControllerAbstract):
                 if total_heat_supply > 0:
                     heat_transfer.update(asset.set_asset(total_heat_supply))
                 else:
-                    heat_transfer.update(asset.set_asset(total_heat_supply, True))
+                    heat_transfer.update(asset.set_asset(-total_heat_supply, True))
             for asset in network.heat_transfer_assets_sec:
                 if total_heat_supply > 0:
                     heat_transfer.update(asset.set_asset(-total_heat_supply, True))

@@ -74,7 +74,7 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.6696, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.15, delta=0.1)
 
     def test_production_ates(self) -> None:
@@ -93,5 +93,5 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.54, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 290.1549, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)

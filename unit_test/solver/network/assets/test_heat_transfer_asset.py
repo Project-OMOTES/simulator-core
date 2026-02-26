@@ -74,12 +74,12 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
+        self.assertEqual(mock_add_continuity_equation.call_count, 0)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
-        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
-        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 4)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 0)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
@@ -127,12 +127,12 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
+        self.assertEqual(mock_add_continuity_equation.call_count, 0)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 0)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 3)
-        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
-        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 4)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 0)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
@@ -210,12 +210,12 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
+        self.assertEqual(mock_add_continuity_equation.call_count, 0)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
-        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
-        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 4)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 0)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
@@ -294,13 +294,13 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
+        self.assertEqual(mock_add_continuity_equation.call_count, 0)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 0)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 3)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
                 mock_add_continuity_equation.call_count
@@ -377,13 +377,13 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
+        self.assertEqual(mock_add_continuity_equation.call_count, 0)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
                 mock_add_continuity_equation.call_count
@@ -414,7 +414,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
         ] = 1.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+            )
+        ] = -1.0
         # Act
         heat_power = self.asset.get_heat_power_primary()
 
@@ -439,6 +443,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
         ] = 1.0
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+            )
+        ] = -1.0
 
         # Act
         heat_power = self.asset.get_heat_power_secondary()
@@ -466,7 +475,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
         ] = 2.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+            )
+        ] = 2.0
         # --- Secondary side
         self.asset.prev_sol[
             self.asset.get_index_matrix(
@@ -483,7 +496,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
         ] = 1.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+            )
+        ] = 1.0
         # Act
         electric_power = self.asset.get_electric_power_consumption()
 

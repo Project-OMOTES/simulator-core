@@ -334,7 +334,7 @@ class HeatTransferAsset(BaseAsset):
             )
         # set mass flow rate or pressure
         if self.pre_scribe_mass_flow_primary:
-            mset = self.mass_flow_rate_rate_set_point_secondary
+            mset = self.mass_flow_initialization_primary
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=0,
