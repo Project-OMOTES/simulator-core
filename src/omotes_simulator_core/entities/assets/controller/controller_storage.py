@@ -180,6 +180,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
             self.max_charge_power = state["max_charge_power"]
             self.max_discharge_power = state["max_discharge_power"]
 
+
 class ControllerIdealHeatStorage(ControllerStorageAbstract):
     """Class to store the storage for the controller asset."""
 
