@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.controller.asset_controller_abstract 
 )
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
+    HeatTransferAssetType,
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
@@ -46,10 +47,15 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         coefficient_of_performance = esdl_asset.get_property(
             esdl_property_name="COP", default_value=HeatPumpDefaults.coefficient_of_performance
         )
+        max_electrical_power = esdl_asset.get_property(
+            esdl_property_name="power", default_value=None
+        )
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             factor=coefficient_of_performance,
+            heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
+            max_electrical_power=max_electrical_power,
         )
         return contr_heat_transfer
 
@@ -76,5 +82,6 @@ class ControllerHeatExchangeMapper(EsdlMapperAbstract):
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             factor=coefficient_of_performance,
+            heat_transfer_type=HeatTransferAssetType.HEAT_EXCHANGER,
         )
         return contr_heat_transfer

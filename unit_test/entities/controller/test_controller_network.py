@@ -124,12 +124,14 @@ class TestControllerNetwork(unittest.TestCase):
         # arrange
         producer1 = Mock()
         producer1.power = 10
+        producer1.get_max_power = Mock(return_value=10)
         producer2 = Mock()
         producer2.power = 20
+        producer2.get_max_power = Mock(return_value=20)
         self.controller_network.factor_to_first_network = 2.0
         self.controller_network.producers = [producer1, producer2]
         # act
-        res = self.controller_network.get_total_supply()
+        res = self.controller_network.get_total_supply(datetime.datetime.now())
         # assert
         self.assertEqual(res, 60)
 
@@ -141,13 +143,15 @@ class TestControllerNetwork(unittest.TestCase):
         producer1.temperature_out = 50
         producer1.temperature_in = 40
         producer1.priority = 1
+        producer1.get_max_power = Mock(return_value=10)
         producer2 = Mock()
         producer2.id = "producer2"
         producer2.power = 20
         producer2.priority = 2
+        producer2.get_max_power = Mock(return_value=20)
         self.controller_network.producers = [producer1, producer2]
         # act
-        res = self.controller_network.set_supply_to_max(priority=1)
+        res = self.controller_network.set_supply_to_max(datetime.datetime.now(), priority=1)
         # assert
         self.assertEqual(
             res,
@@ -169,15 +173,17 @@ class TestControllerNetwork(unittest.TestCase):
         producer1.temperature_out = 50
         producer1.temperature_in = 40
         producer1.priority = 1
+        producer1.get_max_power = Mock(return_value=10)
         producer2 = Mock()
         producer2.id = "producer2"
         producer2.power = 20
         producer2.priority = 2
         producer2.temperature_out = 80
         producer2.temperature_in = 100
+        producer2.get_max_power = Mock(return_value=20)
         self.controller_network.producers = [producer1, producer2]
         # act
-        res = self.controller_network.set_supply_to_max(priority=0)
+        res = self.controller_network.set_supply_to_max(datetime.datetime.now(), priority=0)
         # assert
         self.assertEqual(
             res,
@@ -205,13 +211,15 @@ class TestControllerNetwork(unittest.TestCase):
         producer1.temperature_out = 50
         producer1.temperature_in = 40
         producer1.priority = 1
+        producer1.get_max_power = Mock(return_value=10)
         producer2 = Mock()
         producer2.id = "producer2"
         producer2.power = 20
         producer2.priority = 2
+        producer2.get_max_power = Mock(return_value=20)
         self.controller_network.producers = [producer1, producer2]
         # act
-        res = self.controller_network.set_supply(priority=1, factor=0.5)
+        res = self.controller_network.set_supply(datetime.datetime.now(), priority=1, factor=0.5)
         # assert
         self.assertEqual(
             res,

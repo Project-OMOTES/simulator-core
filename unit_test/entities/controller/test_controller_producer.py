@@ -14,6 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller producer class."""
 import unittest
+from datetime import datetime
+
+import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE,
@@ -25,10 +28,16 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 class ControllerProducerTest(unittest.TestCase):
     """Testcase for ControllerProducer class."""
 
-    def test_controller_producer_init(self) -> None:
-        """Init test for ControllerProducer."""
-        # Arrange
-        producer = ControllerProducer(
+    def setUp(self):
+        """Set up the test case."""
+        self.values = [100, 200]
+        self.profile = pd.DataFrame(
+            {
+                "date": [datetime(2021, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 1, 0, 0)],
+                "values": self.values,
+            }
+        )
+        self.producer = ControllerProducer(
             "producer",
             "id",
             temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
@@ -36,19 +45,21 @@ class ControllerProducerTest(unittest.TestCase):
             power=1000,
             marginal_costs=0.1,
             priority=1,
+            profile=self.profile,
         )
-        # Act
 
+    def test_controller_producer_init(self) -> None:
+        """Init test for ControllerProducer."""
         # Assert
-        self.assertEqual(producer.name, "producer")
-        self.assertEqual(producer.id, "id")
-        self.assertEqual(producer.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.producer.name, "producer")
+        self.assertEqual(self.producer.id, "id")
+        self.assertEqual(self.producer.temperature_in, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
-        self.assertEqual(producer.power, 1000)
-        self.assertEqual(producer.marginal_costs, 0.1)
-        self.assertEqual(producer.priority, 1)
+        self.assertEqual(self.producer.power, 1000)
+        self.assertEqual(self.producer.marginal_costs, 0.1)
+        self.assertEqual(self.producer.priority, 1)
 
     def test_controller_producer_none_priority(self) -> None:
         """Test to ensure a None priority does not break the CotrollerProducer.
@@ -57,25 +68,22 @@ class ControllerProducerTest(unittest.TestCase):
         producer with no priority assigned to it.
         """
         # Arrange
-        producer = ControllerProducer(
-            "producer",
-            "id",
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_in=DEFAULT_TEMPERATURE,
-            power=1000,
-            marginal_costs=0.1,
-            priority=None,
-        )
-
-        # Act
+        self.producer.priority = None
 
         # Assert
-        self.assertEqual(producer.name, "producer")
-        self.assertEqual(producer.id, "id")
-        self.assertEqual(producer.temperature_in, DEFAULT_TEMPERATURE)
-        self.assertEqual(
-            producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
-        )
-        self.assertEqual(producer.power, 1000)
-        self.assertEqual(producer.marginal_costs, 0.1)
-        self.assertEqual(producer.priority, None)
+        self.assertEqual(self.producer.priority, None)
+
+    def test_get_max_power_profile(self) -> None:
+        """Test to check if get_max_power returns the profile value or the power esdl value."""
+        # Arrange
+        time = datetime(2021, 1, 1, 0, 0, 0)
+
+        # Act
+        self.producer.profile = pd.DataFrame()
+        max_power_1 = self.producer.get_max_power(time)  # No constraint profile present.
+        self.producer.profile = self.profile.set_index("date")
+        max_power_2 = self.producer.get_max_power(time)
+
+        # Assert
+        self.assertEqual(max_power_1, self.producer.power)
+        self.assertEqual(max_power_2, self.values[0])

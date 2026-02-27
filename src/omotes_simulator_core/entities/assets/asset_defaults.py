@@ -90,10 +90,14 @@ class AtesDefaults:
 class HeatPumpDefaults:
     """Class containing the default values for a heat pump.
 
+    The Coefficient of Performance (COP) is defined as the ratio of heat output to electricity
+    input: COP = Q_heat_output / electricity_in. For example, a COP of 4 means 1 unit of electricity
+    produces 4 units of heat by extracting 3 units from the source.
+
     :param float coefficient_of_performance: The coefficient of performance of the heat pump [-].
     """
 
-    coefficient_of_performance: float = 1 - 1 / 4.0
+    coefficient_of_performance: float = 4.0
 
 
 @dataclass
