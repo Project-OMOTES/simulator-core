@@ -20,6 +20,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_BYPASS,
     SECONDARY,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -51,12 +52,13 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 50,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 80,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * -1,
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                     SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
                     PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: True,
                 }
             }
         else:
@@ -69,5 +71,6 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                     SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
                     PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: False,
                 }
             }

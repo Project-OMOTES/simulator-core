@@ -158,9 +158,7 @@ class AtesCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
-        if self.current_time == self.time:
-            return
-        self.current_time = self.time
+
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
@@ -186,8 +184,11 @@ class AtesCluster(AssetAbstract):
                     self.temperature_out = self.cold_well_temperature
 
             self._calculate_massflowrate()
-            self._run_rosim()
+            if self.current_time != self.time:
+                self._run_rosim()
+                self.current_time = self.time
             self._set_solver_asset_setpoint()
+
         else:
             # Print missing setpoints
             logger.error(
@@ -315,3 +316,21 @@ class AtesCluster(AssetAbstract):
 
         self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
+
+    def get_heat_supplied(self) -> float:
+        """Get the actual heat supplied by the asset.
+
+        :return float: The actual heat supplied by the asset [W].
+        """
+        return (
+            self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        ) * self.solver_asset.get_mass_flow_rate(0)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged with accepted error of 0.1%.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        return abs(self.get_heat_supplied() + self.thermal_power_allocation) < (
+            self.thermal_power_allocation * 0.001
+        )

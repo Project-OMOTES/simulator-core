@@ -29,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
+    PROPERTY_BYPASS,
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset
@@ -101,6 +102,7 @@ class HeatPump(AssetAbstract):
             pressure_set_point_secondary=DEFAULT_PRESSURE,
             heat_transfer_coefficient=self.coefficient_of_performance,
         )
+        self.first_time_step = True
 
     def _set_setpoints_secondary(self, setpoints_secondary: Dict) -> None:
         """The secondary side of the heat pump acts as a producer of heat.
@@ -117,6 +119,7 @@ class HeatPump(AssetAbstract):
             SECONDARY + PROPERTY_TEMPERATURE_OUT,
             SECONDARY + PROPERTY_HEAT_DEMAND,
             PROPERTY_SET_PRESSURE,
+            PROPERTY_BYPASS,
         }
         # Dict to set
         setpoints_set = set(setpoints_secondary.keys())
@@ -128,10 +131,15 @@ class HeatPump(AssetAbstract):
             )
 
         # Assign setpoints to the HeatPump asset
-        self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
+            self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
+        else:
+            self.temperature_in_secondary = self.solver_asset.get_temperature(0)
+
+        # self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
         self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
-            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND] * -1,
+            thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
@@ -151,6 +159,7 @@ class HeatPump(AssetAbstract):
         self.solver_asset.pre_scribe_mass_flow_secondary = (  # type: ignore
             self.control_mass_flow_secondary
         )
+        self.solver_asset.bypass_mode = setpoints_secondary[PROPERTY_BYPASS]  # type: ignore
 
     def _set_setpoints_primary(self, setpoints_primary: Dict) -> None:
         """The primary side of the heat pump acts as a consumer of heat.
@@ -180,7 +189,12 @@ class HeatPump(AssetAbstract):
             )
 
         # Assign setpoints to the HeatPump asset
-        self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
+            self.temperature_in_primary = setpoints_primary[SECONDARY + PROPERTY_TEMPERATURE_IN]
+        else:
+            self.temperature_in_primary = self.solver_asset.get_temperature(0)
+
+        # self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_OUT]
         self.mass_flow_initialization_primary = -heat_demand_and_temperature_to_mass_flow(
             thermal_demand=setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND],
@@ -212,6 +226,7 @@ class HeatPump(AssetAbstract):
         self._set_setpoints_primary(setpoints_primary=setpoints)
         # Set the setpoints for the secondary side of the heat pump
         self._set_setpoints_secondary(setpoints_secondary=setpoints)
+        self.first_time_step = False
 
     def write_to_output(self) -> None:
         """Get output power and electricity consumption of the asset.

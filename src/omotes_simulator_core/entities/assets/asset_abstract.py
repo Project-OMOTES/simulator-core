@@ -45,8 +45,6 @@ class AssetAbstract(ABC):
 
     connected_ports: list[str]
     """List of ids of the connected ports."""
-    solver_asset: BaseAsset
-    """The asset object use for the solver."""
     asset_type = "asset_abstract"
     """The type of the asset."""
     number_of_con_points: int = 2

@@ -116,6 +116,7 @@ class HeatTransferAsset(BaseAsset):
             self.secondary_side_inflow,
             self.secondary_side_outflow,
         ) = self.get_ordered_connection_point_list()
+        self.bypass_mode = False
 
     def flow_direction(self, mass_flow: float) -> FlowDirection:
         """Returns the flow direction of the heat transfer asset.
@@ -263,6 +264,90 @@ class HeatTransferAsset(BaseAsset):
             equations.append(self.get_press_to_node_equation(connection_point=connection_point))
 
         # Internal energy to node equations
+        if not self.bypass_mode:
+            self.set_internal_energy_equations(equations)
+        else:
+            self.set_internal_energy_equations_bypass(equations)
+
+        # set mass flow rate or pressure
+        if self.pre_scribe_mass_flow_secondary:
+            mset = self.mass_flow_rate_rate_set_point_secondary
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=2,
+                    mass_flow_value=mset,
+                )
+            )
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=3,
+                    mass_flow_value=-mset,
+                )
+            )
+        else:
+            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
+                    pset_out = self.pressure_set_point_secondary / 2
+                    pset_in = self.pressure_set_point_secondary
+                else:
+                    pset_out = self.pressure_set_point_secondary
+                    pset_in = self.pressure_set_point_secondary / 2
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=2,
+                    pressure_value=pset_in,
+                )
+            )
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=3,
+                    pressure_value=pset_out,
+                )
+            )
+        # set mass flow rate or pressure
+        if self.pre_scribe_mass_flow_primary:
+            mset = self.mass_flow_initialization_primary
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=0,
+                    mass_flow_value=mset,
+                )
+            )
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=1,
+                    mass_flow_value=mset * -1,
+                )
+            )
+        else:
+            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
+                    pset_out = self.pressure_set_point_secondary / 2
+                    pset_in = self.pressure_set_point_secondary
+                else:
+                    pset_out = self.pressure_set_point_secondary
+                    pset_in = self.pressure_set_point_secondary / 2
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=0,
+                    pressure_value=pset_in,
+                )
+            )
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=1,
+                    pressure_value=pset_out,
+                )
+            )
+        return equations
+
+    def set_internal_energy_equations(self, equations):
         if (
             self.prev_sol[
                 self.get_index_matrix(
@@ -336,83 +421,46 @@ class HeatTransferAsset(BaseAsset):
                 )
             )
 
-        # set mass flow rate or pressure
-        if self.pre_scribe_mass_flow_secondary:
-            mset = self.mass_flow_rate_rate_set_point_secondary
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=2,
-                    mass_flow_value=-mset,
-                )
-            )
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=3,
-                    mass_flow_value=mset,
-                )
-            )
-        else:
-            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
-                pset_out = self.pressure_set_point_secondary
-                pset_in = self.pressure_set_point_secondary
-            else:
-                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
-                    pset_out = self.pressure_set_point_secondary / 2
-                    pset_in = self.pressure_set_point_secondary
-                else:
-                    pset_out = self.pressure_set_point_secondary
-                    pset_in = self.pressure_set_point_secondary / 2
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=2,
-                    pressure_value=pset_in,
-                )
-            )
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=3,
-                    pressure_value=pset_out,
-                )
-            )
-        # set mass flow rate or pressure
-        if self.pre_scribe_mass_flow_primary:
-            mset = self.mass_flow_initialization_primary
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=0,
-                    mass_flow_value=mset,
-                )
-            )
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
+    def set_internal_energy_equations_bypass(self, equations):
+        equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
+        equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
+        equation_object = EquationObject()
+        # Short-circuiting the primary and secondary side of the heat transfer asset.
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="internal_energy",
                     connection_point=1,
-                    mass_flow_value=mset * -1,
-                )
-            )
-        else:
-            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
-                pset_out = self.pressure_set_point_secondary
-                pset_in = self.pressure_set_point_secondary
-            else:
-                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
-                    pset_out = self.pressure_set_point_secondary / 2
-                    pset_in = self.pressure_set_point_secondary
-                else:
-                    pset_out = self.pressure_set_point_secondary
-                    pset_in = self.pressure_set_point_secondary / 2
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=3,
+                    use_relative_indexing=False,
+                ),
+            ]
+        )
+        equation_object.coefficients = np.array([1.0, -1.0])
+        equation_object.rhs = 0.0
+        equations.append(equation_object)
+        equation_object2 = EquationObject()
+        equation_object2.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="internal_energy",
                     connection_point=0,
-                    pressure_value=pset_in,
-                )
-            )
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=1,
-                    pressure_value=pset_out,
-                )
-            )
-        return equations
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=2,
+                    use_relative_indexing=False,
+                ),
+            ]
+        )
+        equation_object2.coefficients = np.array([1.0, -1.0])
+        equation_object2.rhs = 0.0
+        equations.append(equation_object2)
 
     def get_equations_old(self) -> list[EquationObject]:
         r"""Return the heat transfer equations.
