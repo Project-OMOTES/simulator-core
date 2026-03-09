@@ -296,12 +296,11 @@ class AtesCluster(AssetAbstract):
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
-        downhole_pressure = self.aquifer_depth * 1e4  # Pa - assume pressure increase by 1e4 Pa
-        # per 10 m depth
-
-        saline_density = self._get_saline_density(
-            downhole_pressure, (self.hot_well_temperature + self.cold_well_temperature) / 2
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        topside_pressure = (
+            101325  # Pa - assume atmospheric pressure since we don't have measurement
         )
+        saline_density = self._get_saline_density(topside_pressure, average_temperature)
 
         volume_flow = self.mass_flowrate * 3600 / saline_density  # convert to second and
         if volume_flow > 0:
@@ -344,12 +343,12 @@ class AtesCluster(AssetAbstract):
 
     def _calculate_max_charge_discharge_power(self) -> tuple[float, float]:
         """Function to calculate the maximum charge power and discharge power based on NVOE."""
-        downhole_pressure = self.aquifer_depth * 1e4  # Pa - assume pressure increase 1e4 Pa
-        # per 10 m depth
-
+        # calculate primary side of heat exchanger
         average_temperature = (self.temperature_in + self.temperature_out) / 2
-        water_density = fluid_props.get_density(average_temperature)
-        water_heat_capacity = fluid_props.get_heat_capacity(average_temperature)
+        topside_pressure = 101325  # Pa assumed atmospheric pressure since we don't have measurement
+        saline_density = self._get_saline_density(topside_pressure, average_temperature)
+
+        downhole_pressure = saline_density * DEFAULT_GRAVITY_ACCELERATION * self.aquifer_depth
 
         max_extraction_flow_cold_well = self._get_max_flowrate_extraction_norm(
             downhole_pressure, self.cold_well_temperature
@@ -371,6 +370,11 @@ class AtesCluster(AssetAbstract):
         self.max_discharge_volume_flow = min(
             max_injection_flow_cold_well, max_extraction_flow_hot_well
         )
+
+        # calculate secondary side of heat exchanger
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        water_density = fluid_props.get_density(average_temperature)
+        water_heat_capacity = fluid_props.get_heat_capacity(average_temperature)
 
         max_charge_power = (
             (self.hot_well_temperature - self.cold_well_temperature)
