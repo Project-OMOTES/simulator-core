@@ -147,9 +147,9 @@ class AtesCluster(AssetAbstract):
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
         if self.mass_flowrate >= 0:
-            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
-        else:
             self.solver_asset.supply_temperature = self.hot_well_temperature  # production
+        else:
+            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -169,19 +169,23 @@ class AtesCluster(AssetAbstract):
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
         if necessary_setpoints.issubset(setpoints_set):
-            self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
+            self.thermal_power_allocation = -setpoints[PROPERTY_HEAT_DEMAND]
             if self.first_time_step:
-                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+                if self.thermal_power_allocation >= 0:
+                    self.temperature_in = setpoints[PROPERTY_TEMPERATURE_OUT]
+                    self.temperature_out = setpoints[PROPERTY_TEMPERATURE_IN]
+                else:
+                    self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+                    self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
                 self.first_time_step = False
             else:
                 # After the first time step: use solver temperature
                 if self.thermal_power_allocation >= 0:
+                    self.temperature_out = self.solver_asset.get_temperature(0)
                     self.temperature_in = self.hot_well_temperature
-                    self.temperature_out = self.solver_asset.get_temperature(1)
                 else:
-                    self.temperature_in = self.solver_asset.get_temperature(0)
-                    self.temperature_out = self.cold_well_temperature
+                    self.temperature_in = self.cold_well_temperature
+                    self.temperature_out = self.solver_asset.get_temperature(1)
 
             self._calculate_massflowrate()
             if self.current_time != self.time:
@@ -331,6 +335,6 @@ class AtesCluster(AssetAbstract):
 
         :return: True if the asset has converged, False otherwise
         """
-        return abs(self.get_heat_supplied() + self.thermal_power_allocation) < (
-            self.thermal_power_allocation * 0.001
+        return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
+            abs(self.thermal_power_allocation) * 0.001
         )

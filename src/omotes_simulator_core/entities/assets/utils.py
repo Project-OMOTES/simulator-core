@@ -35,8 +35,9 @@ def heat_demand_and_temperature_to_mass_flow(
     :param float temperature_in: The temperature that the asset receives from the
         "from_junction". The temperature should be supplied in Kelvin.
     """
-    heat_capacity = fluid_props.get_heat_capacity((temperature_in + temperature_out) / 2)
-    return thermal_demand / ((temperature_out - temperature_in) * float(heat_capacity))
+    internal_energy1 = fluid_props.get_ie(temperature_in)
+    internal_energy2 = fluid_props.get_ie(temperature_out)
+    return thermal_demand / (internal_energy2 - internal_energy1)
 
 
 def mass_flow_and_temperature_to_heat_demand(

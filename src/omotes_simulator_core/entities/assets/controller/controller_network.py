@@ -23,6 +23,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    SECONDARY,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
@@ -232,17 +234,17 @@ class ControllerNetwork:
             sum([producer.power for producer in self.producers if producer.priority == priority])
         )
 
-    def set_pressure(self) -> str:
-        """Returns the id of the asset for which the pressure can be set for this network.
+    def set_pressure(self) -> tuple[str, str]:
+        """Returns the id of the asset for which the pressure can be set for this network and the key in the set points dict.
 
         The controller needs to set per hydraulic separated part of the system the pressure.
         The network can thus pass back the id for which asset the pressure needs to be set.
         The controller can then do this.
         """
         if self.producers:
-            return self.producers[0].id
+            return (self.producers[0].id, PROPERTY_SET_PRESSURE)
         if self.heat_transfer_assets_sec:
-            return self.heat_transfer_assets_sec[0].id
+            return (self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE)
         if self.heat_transfer_assets_prim:
-            return self.heat_transfer_assets_prim[0].id
+            return (self.heat_transfer_assets_prim[0].id, PRIMARY + PROPERTY_SET_PRESSURE)
         raise ValueError("No asset found for which the pressure can be set.")

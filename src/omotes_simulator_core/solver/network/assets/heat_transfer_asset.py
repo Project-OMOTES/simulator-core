@@ -44,7 +44,6 @@ class HeatTransferAsset(BaseAsset):
         mass_flow_initialization_primary: float = -20.0,
         heat_transfer_coefficient: float = 1.0,
         pre_scribe_mass_flow_secondary: bool = False,
-        pre_scribe_mass_flow_primary: bool = False,
         temperature_out_secondary: float = 293.15,
         mass_flow_rate_set_point_secondary: float = -80.0,
         pressure_set_point_secondary: float = 10000.0,
@@ -96,8 +95,8 @@ class HeatTransferAsset(BaseAsset):
         # at the hot side of the heat pump
         self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
-        # at the cold side of the heat pump
-        self.pre_scribe_mass_flow_primary = pre_scribe_mass_flow_primary
+        # at the hot side of the heat pump
+        self.pre_scribe_mass_flow_primary = pre_scribe_mass_flow_secondary
         # Define the mass flow rate set point for the asset on the secondary side
         self.mass_flow_rate_rate_set_point_secondary = mass_flow_rate_set_point_secondary
         # Define the pressure set point for the asset
@@ -109,6 +108,7 @@ class HeatTransferAsset(BaseAsset):
             self.mass_flow_rate_rate_set_point_secondary
         )
         self.iteration_flow_direction_secondary = self.flow_direction_secondary
+
         # Define connection points
         (
             self.primary_side_inflow,
@@ -131,9 +131,9 @@ class HeatTransferAsset(BaseAsset):
             The flow direction of the heat transfer asset.
         """
         if mass_flow > MASSFLOW_ZERO_LIMIT:
-            return FlowDirection.POSITIVE
-        elif mass_flow < -MASSFLOW_ZERO_LIMIT:
             return FlowDirection.NEGATIVE
+        elif mass_flow < -MASSFLOW_ZERO_LIMIT:
+            return FlowDirection.POSITIVE
         else:
             return FlowDirection.ZERO
 
@@ -168,54 +168,290 @@ class HeatTransferAsset(BaseAsset):
         """
         # Determine the connection points based on the flow direction
         if (
-            self.iteration_flow_direction_primary == FlowDirection.NEGATIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.POSITIVE
+            self.flow_direction_primary == FlowDirection.NEGATIVE
+            and self.flow_direction_secondary == FlowDirection.POSITIVE
         ):
             return [1, 0, 2, 3]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.POSITIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.POSITIVE
+            self.flow_direction_primary == FlowDirection.POSITIVE
+            and self.flow_direction_secondary == FlowDirection.POSITIVE
         ):
             return [0, 1, 2, 3]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.POSITIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.NEGATIVE
+            self.flow_direction_primary == FlowDirection.POSITIVE
+            and self.flow_direction_secondary == FlowDirection.NEGATIVE
         ):
             return [0, 1, 3, 2]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.NEGATIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.NEGATIVE
+            self.flow_direction_primary == FlowDirection.NEGATIVE
+            and self.flow_direction_secondary == FlowDirection.NEGATIVE
         ):
             return [1, 0, 3, 2]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.ZERO
-            and self.iteration_flow_direction_secondary == FlowDirection.ZERO
+            self.flow_direction_primary == FlowDirection.ZERO
+            and self.flow_direction_secondary == FlowDirection.ZERO
         ):
             return [0, 1, 2, 3]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.ZERO
-            and self.iteration_flow_direction_secondary == FlowDirection.POSITIVE
+            self.flow_direction_primary == FlowDirection.ZERO
+            and self.flow_direction_secondary == FlowDirection.POSITIVE
         ):
             return [0, 1, 2, 3]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.ZERO
-            and self.iteration_flow_direction_secondary == FlowDirection.NEGATIVE
+            self.flow_direction_primary == FlowDirection.ZERO
+            and self.flow_direction_secondary == FlowDirection.NEGATIVE
         ):
             return [0, 1, 3, 2]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.POSITIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.ZERO
+            self.flow_direction_primary == FlowDirection.POSITIVE
+            and self.flow_direction_secondary == FlowDirection.ZERO
         ):
             return [0, 1, 2, 3]
         elif (
-            self.iteration_flow_direction_primary == FlowDirection.NEGATIVE
-            and self.iteration_flow_direction_secondary == FlowDirection.ZERO
+            self.flow_direction_primary == FlowDirection.NEGATIVE
+            and self.flow_direction_secondary == FlowDirection.ZERO
         ):
             return [1, 0, 2, 3]
         else:
             return [0, 1, 2, 3]
 
     def get_equations(self) -> list[EquationObject]:
+
+        if self.bypass_mode:
+            return self.get_equations_bypass()
+        return self.get_equations_normal()
+
+    def get_equations_normal(self) -> list[EquationObject]:
+        r"""Return the heat transfer equations.
+
+        The method returns the heat transfer equations for the heat transfer asset.
+
+        The internal energy at the connection points with mass inflow are linked to the nodes.
+
+        .. math::
+
+                u_{connection_point} = u_{node}
+
+        The temperature is prescribed through the internal energy at the outlet on the
+        primary and secondary side of the heat transfer asset.
+
+        .. math::
+
+            u_{connection_point} = u_{supply_temperature}
+
+        The mass flow rate or pressure is prescribed at the secondary side of the heat transfer
+        asset.
+
+        On the primary side, continuity of mass flow rate is enforced.
+
+        .. math::
+
+            \dot{m}_{0} + \dot{m}_{1} = 0
+
+        If the mass flow at the inflow node of the primary and secondary side is not zero, we
+         prescribe the follwoing energy balance equation for the heat transfer asset:
+
+        .. math::
+
+            \dot{m}_0 \left{ u_0 - u_1 \right} + C \left{ u_2 \dot{m}_2 + u_3 \dot{m}_3 \right} = 0
+
+        If the mass flow at the inflow node of the primary and secondary side is zero, we prescribe
+         the mass flow rate at the primary side of the heat transfer asset.
+
+        .. math::
+
+            \dot{m}_{asset} = 10.0
+
+        :return: List[EquationObject]
+        """
+        # Check if there are four nodes connected to the asset
+        if len(self.connected_nodes) != 4:
+            raise ValueError("The number of connected nodes must be 4!")
+        # Check if the number of unknowns is 12
+        if self.number_of_unknowns != 12:
+            raise ValueError("The number of unknowns must be 12!")
+        # Set connection points based on the flow direction
+        self.flow_direction_primary = self.flow_direction(self.prev_sol[0])
+        self.flow_direction_secondary = self.flow_direction(self.prev_sol[6])
+        (
+            self.primary_side_inflow,
+            self.primary_side_outflow,
+            self.secondary_side_inflow,
+            self.secondary_side_outflow,
+        ) = self.get_ordered_connection_point_list()
+
+        if np.all(np.abs(self.prev_sol[0:-1:3]) < MASSFLOW_ZERO_LIMIT):
+            self.iteration_flow_direction_primary = self.flow_direction(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=self.primary_side_inflow,
+                        use_relative_indexing=True,
+                    )
+                ]
+            )
+            self.iteration_flow_direction_secondary = self.flow_direction(
+                self.prev_sol[
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=self.secondary_side_inflow,
+                        use_relative_indexing=True,
+                    )
+                ]
+            )
+        else:
+            self.iteration_flow_direction_primary = self.flow_direction_primary
+            self.iteration_flow_direction_secondary = self.flow_direction_secondary
+        # Initialize the equations list
+        equations = []
+
+        # -- Internal energy (4x) --
+        # Add the internal energy equations at connection points 0, and 2 to define
+        # the connection with the nodes.
+        equations.append(
+            self.get_internal_energy_to_node_equation(connection_point=self.primary_side_inflow)
+        )
+        equations.append(
+            self.get_internal_energy_to_node_equation(connection_point=self.secondary_side_inflow)
+        )
+        # Add the internal energy equations at connection points 1, and 3 to set
+        # the temperature through internal energy at the outlet of the heat transfer asset.
+        if self.iteration_flow_direction_primary != FlowDirection.ZERO:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=self.primary_side_outflow,
+                    supply_temperature=self.temperature_out_primary,
+                )
+            )
+        else:
+            equations.append(
+                self.get_internal_energy_to_node_equation(
+                    connection_point=self.primary_side_outflow
+                )
+            )
+        if self.iteration_flow_direction_secondary != FlowDirection.ZERO:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=self.secondary_side_outflow,
+                    supply_temperature=self.temperature_out_secondary,
+                )
+            )
+        else:
+            equations.append(
+                self.get_internal_energy_to_node_equation(
+                    connection_point=self.secondary_side_outflow
+                )
+            )
+        # -- Mass flow rate or pressure on secondary side (2x) --
+        # Prescribe the pressure at the secondary side of the heat transfer asset.
+        if self.pre_scribe_mass_flow_secondary:
+            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
+                mset = self.mass_flow_rate_rate_set_point_secondary
+            else:
+                mset = self.mass_flow_rate_rate_set_point_secondary
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=self.secondary_side_inflow,
+                    mass_flow_value=-mset,
+                )
+            )
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=self.secondary_side_outflow,
+                    mass_flow_value=mset,
+                )
+            )
+        else:
+            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
+                    pset_out = self.pressure_set_point_secondary / 2
+                    pset_in = self.pressure_set_point_secondary
+                else:
+                    pset_out = self.pressure_set_point_secondary
+                    pset_in = self.pressure_set_point_secondary / 2
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=self.secondary_side_inflow,
+                    pressure_value=pset_in,
+                )
+            )
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=self.secondary_side_outflow,
+                    pressure_value=pset_out,
+                )
+            )
+        # -- Pressure (4x) --
+        # Connect the pressure at the nodes to the asset
+        for connection_point in [
+            self.primary_side_inflow,
+            self.primary_side_outflow,
+            self.secondary_side_inflow,
+            self.secondary_side_outflow,
+        ]:
+            equations.append(self.get_press_to_node_equation(connection_point=connection_point))
+
+        # -- Internal continuity (1x) --
+        # Add the internal continuity equation at the primary side.
+
+        # -- Energy balance equation for the heat transfer asset (1x) --
+        # Defines the energy balance between the primary and secondary side of the
+        # heat transfer asset.
+        # If the mass flow at the inflow node of the primary and secondary side is not zero,
+        if self.pre_scribe_mass_flow_primary:
+            equations.append(
+                self.add_continuity_equation(
+                    connection_point_1=self.primary_side_inflow,
+                    connection_point_2=self.primary_side_outflow,
+                )
+            )
+            if (self.iteration_flow_direction_primary != FlowDirection.ZERO) or (
+                self.iteration_flow_direction_secondary != FlowDirection.ZERO
+            ):
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=self.primary_side_inflow,
+                        mass_flow_value=self.mass_flow_initialization_primary,
+                    )
+                )
+            # If the mass flow at the inflow node of the primary and secondary side is zero,
+            else:
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=self.primary_side_inflow,
+                        mass_flow_value=self.mass_flow_initialization_primary,
+                    )
+                )
+        else:
+            if self.iteration_flow_direction_primary == FlowDirection.ZERO:
+                pset_out = self.pressure_set_point_secondary
+                pset_in = self.pressure_set_point_secondary
+            else:
+                if self.iteration_flow_direction_primary == FlowDirection.POSITIVE:
+                    pset_out = self.pressure_set_point_secondary / 2
+                    pset_in = self.pressure_set_point_secondary
+                else:
+                    pset_out = self.pressure_set_point_secondary
+                    pset_in = self.pressure_set_point_secondary / 2
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=self.primary_side_inflow,
+                    pressure_value=pset_in,
+                )
+            )
+            equations.append(
+                self.prescribe_pressure_at_connection_point(
+                    connection_point=self.primary_side_outflow,
+                    pressure_value=pset_out,
+                )
+            )
+        # Return the equations
+        return equations
+
+    def get_equations_bypass(self) -> list[EquationObject]:
         r"""Return the heat transfer equations.
 
         The method returns the heat transfer equations for the heat transfer asset.
@@ -264,10 +500,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(self.get_press_to_node_equation(connection_point=connection_point))
 
         # Internal energy to node equations
-        if not self.bypass_mode:
-            self.set_internal_energy_equations(equations)
-        else:
-            self.set_internal_energy_equations_bypass(equations)
+        self.set_internal_energy_equations_bypass(equations)
 
         # set mass flow rate or pressure
         if self.pre_scribe_mass_flow_secondary:
@@ -275,13 +508,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
-                    mass_flow_value=mset,
+                    mass_flow_value=-mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=3,
-                    mass_flow_value=-mset,
+                    mass_flow_value=mset,
                 )
             )
         else:
@@ -347,80 +580,6 @@ class HeatTransferAsset(BaseAsset):
             )
         return equations
 
-    def set_internal_energy_equations(self, equations):
-        if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=0,
-                    use_relative_indexing=True,
-                )
-            ]
-            < 0.0
-        ):
-            equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
-        else:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=0,
-                    supply_temperature=self.temperature_out_primary,
-                )
-            )
-        if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=1,
-                    use_relative_indexing=True,
-                )
-            ]
-            < 0
-        ):
-            equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
-        else:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=1,
-                    supply_temperature=self.temperature_out_primary,
-                )
-            )
-        if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=2,
-                    use_relative_indexing=True,
-                )
-            ]
-            < 0
-        ):
-            equations.append(self.get_internal_energy_to_node_equation(connection_point=2))
-        else:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=2,
-                    supply_temperature=self.temperature_out_secondary,
-                )
-            )
-        if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=3,
-                    use_relative_indexing=True,
-                )
-            ]
-            < 0
-        ):
-            equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
-        else:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=3,
-                    supply_temperature=self.temperature_out_secondary,
-                )
-            )
-
     def set_internal_energy_equations_bypass(self, equations):
         equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
         equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
@@ -461,236 +620,6 @@ class HeatTransferAsset(BaseAsset):
         equation_object2.coefficients = np.array([1.0, -1.0])
         equation_object2.rhs = 0.0
         equations.append(equation_object2)
-
-    def get_equations_old(self) -> list[EquationObject]:
-        r"""Return the heat transfer equations.
-
-        The method returns the heat transfer equations for the heat transfer asset.
-
-        The internal energy at the connection points with mass inflow are linked to the nodes.
-
-        .. math::
-
-                u_{connection_point} = u_{node}
-
-        The temperature is prescribed through the internal energy at the outlet on the
-        primary and secondary side of the heat transfer asset.
-
-        .. math::
-
-            u_{connection_point} = u_{supply_temperature}
-
-        The mass flow rate or pressure is prescribed at the secondary side of the heat transfer
-        asset.
-
-        On the primary side, continuity of mass flow rate is enforced.
-
-        .. math::
-
-            \dot{m}_{0} + \dot{m}_{1} = 0
-
-        If the mass flow at the inflow node of the primary and secondary side is not zero, we
-         prescribe the follwoing energy balance equation for the heat transfer asset:
-
-        .. math::
-
-            \dot{m}_0 \left{ u_0 - u_1 \right} + C \left{ u_2 \dot{m}_2 + u_3 \dot{m}_3 \right} = 0
-
-        If the mass flow at the inflow node of the primary and secondary side is zero, we prescribe
-         the mass flow rate at the primary side of the heat transfer asset.
-
-        .. math::
-
-            \dot{m}_{asset} = 10.0
-
-        :return: List[EquationObject]
-        """
-        # Check if there are four nodes connected to the asset
-        if len(self.connected_nodes) != 4:
-            raise ValueError("The number of connected nodes must be 4!")
-        # Check if the number of unknowns is 12
-        if self.number_of_unknowns != 12:
-            raise ValueError("The number of unknowns must be 12!")
-        # Set connection points based on the flow direction
-        self.flow_direction_primary = self.flow_direction(self.mass_flow_initialization_primary)
-        self.flow_direction_secondary = self.flow_direction(
-            self.mass_flow_rate_rate_set_point_secondary
-        )
-
-        if np.all(np.abs(self.prev_sol[0:-1:3]) > MASSFLOW_ZERO_LIMIT):
-            self.iteration_flow_direction_primary = self.flow_direction(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=self.primary_side_inflow,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
-            self.iteration_flow_direction_secondary = self.flow_direction(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=self.secondary_side_inflow,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
-        else:
-            self.iteration_flow_direction_primary = self.flow_direction_primary
-            self.iteration_flow_direction_secondary = self.flow_direction_secondary
-
-        (
-            self.primary_side_inflow,
-            self.primary_side_outflow,
-            self.secondary_side_inflow,
-            self.secondary_side_outflow,
-        ) = self.get_ordered_connection_point_list()
-        # Initialize the equations list
-        equations = []
-
-        # -- Internal energy (4x) --
-        # Add the internal energy equations at connection points 0, and 2 to define
-        # the connection with the nodes.
-        equations.append(
-            self.get_internal_energy_to_node_equation(connection_point=self.primary_side_inflow)
-        )
-        equations.append(
-            self.get_internal_energy_to_node_equation(connection_point=self.secondary_side_inflow)
-        )
-        # Add the internal energy equations at connection points 1, and 3 to set
-        # the temperature through internal energy at the outlet of the heat transfer asset.
-        if self.iteration_flow_direction_primary != FlowDirection.ZERO:
-
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=self.primary_side_outflow,
-                    supply_temperature=self.temperature_out_primary,
-                )
-            )
-        else:
-            equations.append(
-                self.get_internal_energy_to_node_equation(
-                    connection_point=self.primary_side_outflow
-                )
-            )
-        if self.iteration_flow_direction_secondary != FlowDirection.ZERO:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=self.secondary_side_outflow,
-                    supply_temperature=self.temperature_out_secondary,
-                )
-            )
-        else:
-            equations.append(
-                self.get_internal_energy_to_node_equation(
-                    connection_point=self.secondary_side_outflow
-                )
-            )
-        # -- Mass flow rate or pressure on secondary side (2x) --
-        # Prescribe the pressure at the secondary side of the heat transfer asset.
-        if self.pre_scribe_mass_flow_secondary:
-
-            mset = self.mass_flow_rate_rate_set_point_secondary
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=self.secondary_side_inflow,
-                    mass_flow_value=mset,
-                )
-            )
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=self.secondary_side_outflow,
-                    mass_flow_value=mset * -1,
-                )
-            )
-        else:
-            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
-                pset_out = self.pressure_set_point_secondary
-                pset_in = self.pressure_set_point_secondary
-            else:
-                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
-                    pset_out = self.pressure_set_point_secondary / 2
-                    pset_in = self.pressure_set_point_secondary
-                else:
-                    pset_out = self.pressure_set_point_secondary
-                    pset_in = self.pressure_set_point_secondary / 2
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=self.secondary_side_inflow,
-                    pressure_value=pset_in,
-                )
-            )
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=self.secondary_side_outflow,
-                    pressure_value=pset_out,
-                )
-            )
-        # -- Pressure (4x) --
-        # Connect the pressure at the nodes to the asset
-        for connection_point in [
-            self.primary_side_inflow,
-            self.primary_side_outflow,
-            self.secondary_side_inflow,
-            self.secondary_side_outflow,
-        ]:
-            equations.append(self.get_press_to_node_equation(connection_point=connection_point))
-        if self.pre_scribe_mass_flow_primary:
-            # -- Internal continuity (1x) --
-            # Add the internal continuity equation at the primary side.
-            equations.append(
-                self.add_continuity_equation(
-                    connection_point_1=self.primary_side_inflow,
-                    connection_point_2=self.primary_side_outflow,
-                )
-            )
-            # -- Energy balance equation for the heat transfer asset (1x) --
-            # Defines the energy balance between the primary and secondary side of the
-            # heat transfer asset.
-            # If the mass flow at the inflow node of the primary and secondary side is not zero,
-            if (self.iteration_flow_direction_primary != FlowDirection.ZERO) or (
-                self.iteration_flow_direction_secondary != FlowDirection.ZERO
-            ):
-                equations.append(
-                    self.prescribe_mass_flow_at_connection_point(
-                        connection_point=self.primary_side_inflow,
-                        mass_flow_value=-1 * self.pre_scribe_mass_flow_primary,
-                    )
-                )
-            # If the mass flow at the inflow node of the primary and secondary side is zero,
-            else:
-                equations.append(
-                    self.prescribe_mass_flow_at_connection_point(
-                        connection_point=self.primary_side_inflow,
-                        mass_flow_value=0,
-                    )
-                )
-        else:
-            if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
-                pset_out = self.pressure_set_point_secondary
-                pset_in = self.pressure_set_point_secondary
-            else:
-                if self.iteration_flow_direction_secondary == FlowDirection.POSITIVE:
-                    pset_out = self.pressure_set_point_secondary / 2
-                    pset_in = self.pressure_set_point_secondary
-                else:
-                    pset_out = self.pressure_set_point_secondary
-                    pset_in = self.pressure_set_point_secondary / 2
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=self.primary_side_inflow,
-                    pressure_value=pset_in,
-                )
-            )
-            equations.append(
-                self.prescribe_pressure_at_connection_point(
-                    connection_point=self.primary_side_outflow,
-                    pressure_value=pset_out,
-                )
-            )
-        # Return the equations
-        return equations
 
     def get_mass_flow_from_prev_solution(self) -> float:
         r"""Determine the mass flow rate from the previous solution.
@@ -968,12 +897,9 @@ class HeatTransferAsset(BaseAsset):
         """Calculate the electric power consumption of the heat transfer asset.
 
         The electric power consumption is calculated as the absolute difference between the
-        heat power on the primary and secondary side, divided by the heat transfer coefficient.
+        heat power on the primary and secondary side.
 
         :return: float
             The electric power consumption of the heat transfer asset.
         """
-        return (
-            abs(self.get_heat_power_primary() - self.get_heat_power_secondary())
-            / self.heat_transfer_coefficient
-        )
+        return abs(abs(self.get_heat_power_primary()) - abs(self.get_heat_power_secondary()))

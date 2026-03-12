@@ -57,20 +57,22 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * -1,
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                     SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
-                    PROPERTY_SET_PRESSURE: False,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: True,
                 }
             }
         else:
             return {
                 self.id: {
-                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand / self.factor,
                     PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
-                    SECONDARY + PROPERTY_HEAT_DEMAND: -heat_demand * self.factor,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: -heat_demand,
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
-                    PROPERTY_SET_PRESSURE: False,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: False,
                 }
             }

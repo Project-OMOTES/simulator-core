@@ -60,13 +60,12 @@ class NetworkController(NetworkControllerAbstract):
                 for asset in current_network.heat_transfer_assets_prim:
                     if self.networks[int(step)].exists(asset.id):
                         network.factor_to_first_network.append(asset.factor)
-                        current_network = self.networks[int(step)]
                         break
                 for asset in current_network.heat_transfer_assets_sec:
                     if self.networks[int(step)].exists(asset.id):
                         network.factor_to_first_network.append(1 / asset.factor)
-                        current_network = self.networks[int(step)]
                         break
+                current_network = self.networks[int(step)]
 
     def update_setpoints(self, time: datetime.datetime) -> dict:
         """Method to get the controller inputs for the network.
@@ -181,8 +180,8 @@ class NetworkController(NetworkControllerAbstract):
 
         # Set the pressure.
         for network in self.networks:
-            pressure_set_asset = network.set_pressure()
-            asset_setpoints[pressure_set_asset][PROPERTY_SET_PRESSURE] = True
+            pressure_set_asset, key = network.set_pressure()
+            asset_setpoints[pressure_set_asset][key] = True
 
         return asset_setpoints
 

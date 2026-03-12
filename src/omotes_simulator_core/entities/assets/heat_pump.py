@@ -118,7 +118,7 @@ class HeatPump(AssetAbstract):
             SECONDARY + PROPERTY_TEMPERATURE_IN,
             SECONDARY + PROPERTY_TEMPERATURE_OUT,
             SECONDARY + PROPERTY_HEAT_DEMAND,
-            PROPERTY_SET_PRESSURE,
+            SECONDARY + PROPERTY_SET_PRESSURE,
             PROPERTY_BYPASS,
         }
         # Dict to set
@@ -138,14 +138,13 @@ class HeatPump(AssetAbstract):
 
         # self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
-        self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
+        self.mass_flow_secondary = -heat_demand_and_temperature_to_mass_flow(
             thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
         )
         self.control_mass_flow_secondary = not (
-            setpoints_secondary[PROPERTY_SET_PRESSURE]
-            & (setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND] < 0)
+            setpoints_secondary[SECONDARY + PROPERTY_SET_PRESSURE]
         )
 
         # Assign setpoints to the HeatTransferAsset solver asset
@@ -178,6 +177,7 @@ class HeatPump(AssetAbstract):
             PRIMARY + PROPERTY_TEMPERATURE_IN,
             PRIMARY + PROPERTY_TEMPERATURE_OUT,
             PRIMARY + PROPERTY_HEAT_DEMAND,
+            PRIMARY + PROPERTY_SET_PRESSURE,
         }
         # Dict to set
         setpoints_set = set(setpoints_primary.keys())
@@ -201,10 +201,7 @@ class HeatPump(AssetAbstract):
             temperature_in=self.temperature_in_primary,
             temperature_out=self.temperature_out_primary,
         )
-        self.control_mass_flow_primary = not (
-            setpoints_primary[PROPERTY_SET_PRESSURE]
-            & (setpoints_primary[PRIMARY + PROPERTY_HEAT_DEMAND] < 0)
-        )
+        self.control_mass_flow_primary = not (setpoints_primary[PRIMARY + PROPERTY_SET_PRESSURE])
 
         # Assign setpoints to the HeatTransferAsset solver asset
         self.solver_asset.temperature_in_primary = self.temperature_in_primary  # type: ignore
