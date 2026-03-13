@@ -222,13 +222,16 @@ class EsdlAssetObject:
                 return True
         return False
     
-    def has_out_profile(self) -> bool:
-        """Checks if an asset has a profile assigned to its out port."""
-        # TODO: Additional checks will be needed to see if the correct type of profile is assigned here.
+    def has_out_optimizer_profile(self) -> bool:
+        """Checks if an asset has an optimizer profile assigned to its out port."""
         for port in self.esdl_asset.port:
-            if isinstance(port, esdl.OutPort) and port.profile.items:
-                return True
-        return False    
+            if isinstance(port, esdl.OutPort) and port.profile.items: 
+                # There is a profile on the out port
+                data_source = port.profile[0].dataSource
+                if data_source is not None:
+                    if data_source.attribution == "optimizer":
+                        return True
+        return False
 
     def has_constraint(self) -> bool:
         """Checks if an asset has a constraint assigned to it."""

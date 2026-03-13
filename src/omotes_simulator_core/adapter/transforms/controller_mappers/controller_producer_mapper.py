@@ -52,10 +52,10 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         strategy_priority = esdl_asset.get_strategy_priority()
 
         resampled_profile = None
-        # Check if there is a profile as a constraint or out port. If there is both,
-        # only the port profile is used.
-        if esdl_asset.has_out_profile() or esdl_asset.has_constraint():
-            if esdl_asset.has_out_profile():
+        # Check if there is an optimizer out port profile or a constraint profile. If there is both,
+        # only the optimizer profile is used.
+        if esdl_asset.has_out_optimizer_profile() or esdl_asset.has_constraint():
+            if esdl_asset.has_out_optimizer_profile():
                 profile = esdl_asset.get_out_port_profile()
             else:
                 profile = esdl_asset.get_constraint_max_profile()
