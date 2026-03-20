@@ -105,7 +105,9 @@ class EsdlAssetObject:
         """Get the profile of the asset's out ports."""
         for port in self.esdl_asset.port:
             if isinstance(port, esdl.OutPort) and port.profile.items:
-                return get_data_from_profile(port.profile[0])
+                for profile in port.profile:
+                    if profile.field == "HeatIn.Q":
+                        return get_data_from_profile(profile)
         logger.error(
             f"No profile found for asset: {self.esdl_asset.name}",
             extra={"esdl_object_id": self.get_id()},
@@ -227,10 +229,14 @@ class EsdlAssetObject:
         for port in self.esdl_asset.port:
             if isinstance(port, esdl.OutPort) and port.profile.items: 
                 # There is a profile on the out port
-                data_source = port.profile[0].dataSource
-                if data_source is not None:
-                    if data_source.attribution == "optimizer":
-                        return True
+                for profile in port.profile:
+                    try:
+                        data_source = profile.dataSource
+                        if data_source is not None:
+                            if data_source.attribution == "optimizer":
+                                return True
+                    except AttributeError:
+                        continue
         return False
 
     def has_constraint(self) -> bool:
