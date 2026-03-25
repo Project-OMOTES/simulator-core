@@ -210,7 +210,7 @@ class HeatExchanger(AssetAbstract):
                     self.solver_asset.get_heat_power_primary()  # type: ignore
                 ),
                 PROPERTY_HEAT_LOSS: (
-                    -self.solver_asset.get_heat_power_primary()  # type: ignore
+                      self.solver_asset.get_heat_power_primary()  # type: ignore
                     - self.solver_asset.get_heat_power_secondary()  # type: ignore
                 ),
             }

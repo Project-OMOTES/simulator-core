@@ -47,6 +47,7 @@ class HeatTransferAsset(BaseAsset):
         temperature_out_secondary: float = 293.15,
         mass_flow_rate_set_point_secondary: float = -80.0,
         pressure_set_point_secondary: float = 10000.0,
+        pre_scribe_mass_flow_primary: bool = False,
     ):
         """
         Initializes the Heat Transfer Asset with the given parameters.
@@ -72,6 +73,9 @@ class HeatTransferAsset(BaseAsset):
         pre_scribe_mass_flow_secondary : bool
             A boolean flag that indicates whether the mass flow rate or the pressure is prescribed
             at the secondary side of the heat transfer asset.
+        pre_scribe_mass_flow_primary : bool
+            A boolean flag that indicates whether the mass flow rate or the pressure is prescribed
+            at the primary side of the heat transfer asset.
         mass_flow_rate_set_point_secondary : float, optional
             The mass flow rate set point for the asset. The default is 10.0 kg/s.
         pressure_set_point_secondary : float, optional
@@ -96,7 +100,7 @@ class HeatTransferAsset(BaseAsset):
         self.pre_scribe_mass_flow_secondary = pre_scribe_mass_flow_secondary
         # Define the flag that indicates whether the mass flow rate or the pressure is prescribed
         # at the hot side of the heat pump
-        self.pre_scribe_mass_flow_primary = pre_scribe_mass_flow_secondary
+        self.pre_scribe_mass_flow_primary = pre_scribe_mass_flow_primary
         # Define the mass flow rate set point for the asset on the secondary side
         self.mass_flow_rate_rate_set_point_secondary = mass_flow_rate_set_point_secondary
         # Define the pressure set point for the asset
@@ -218,10 +222,10 @@ class HeatTransferAsset(BaseAsset):
     def get_equations(self) -> list[EquationObject]:
 
         if self.bypass_mode:
-            return self.get_equations_bypass()
-        return self.get_equations_normal()
+            return self.get_equations_bypass_mode()
+        return self.get_equations_heat_transfer_mode()
 
-    def get_equations_normal(self) -> list[EquationObject]:
+    def get_equations_heat_transfer_mode(self) -> list[EquationObject]:
         r"""Return the heat transfer equations.
 
         The method returns the heat transfer equations for the heat transfer asset.
@@ -403,28 +407,17 @@ class HeatTransferAsset(BaseAsset):
         # If the mass flow at the inflow node of the primary and secondary side is not zero,
         if self.pre_scribe_mass_flow_primary:
             equations.append(
-                self.add_continuity_equation(
-                    connection_point_1=self.primary_side_inflow,
-                    connection_point_2=self.primary_side_outflow,
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=0,
+                    mass_flow_value=-1 * self.mass_flow_initialization_primary,
                 )
             )
-            if (self.iteration_flow_direction_primary != FlowDirection.ZERO) or (
-                self.iteration_flow_direction_secondary != FlowDirection.ZERO
-            ):
-                equations.append(
-                    self.prescribe_mass_flow_at_connection_point(
-                        connection_point=self.primary_side_inflow,
-                        mass_flow_value=self.mass_flow_initialization_primary,
-                    )
+            equations.append(
+                self.prescribe_mass_flow_at_connection_point(
+                    connection_point=1,
+                    mass_flow_value=self.mass_flow_initialization_primary,
                 )
-            # If the mass flow at the inflow node of the primary and secondary side is zero,
-            else:
-                equations.append(
-                    self.prescribe_mass_flow_at_connection_point(
-                        connection_point=self.primary_side_inflow,
-                        mass_flow_value=self.mass_flow_initialization_primary,
-                    )
-                )
+            )
         else:
             if self.iteration_flow_direction_primary == FlowDirection.ZERO:
                 pset_out = self.pressure_set_point_secondary
@@ -451,7 +444,7 @@ class HeatTransferAsset(BaseAsset):
         # Return the equations
         return equations
 
-    def get_equations_bypass(self) -> list[EquationObject]:
+    def get_equations_bypass_mode(self) -> list[EquationObject]:
         r"""Return the heat transfer equations.
 
         The method returns the heat transfer equations for the heat transfer asset.

@@ -50,7 +50,7 @@ class HeatExchangerTest(unittest.TestCase):
             self.heat_exchanger.solver_asset.get_index_matrix(
                 property_name="internal_energy", connection_point=0, use_relative_indexing=False
             )
-        ] = 5.0
+        ] = 10.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
@@ -65,7 +65,7 @@ class HeatExchangerTest(unittest.TestCase):
             self.heat_exchanger.solver_asset.get_index_matrix(
                 property_name="internal_energy", connection_point=1, use_relative_indexing=False
             )
-        ] = 10.0
+        ] = 5.0
 
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
@@ -97,6 +97,6 @@ class HeatExchangerTest(unittest.TestCase):
         self.heat_exchanger.write_to_output()
 
         # Assert
-        self.assertEqual(self.heat_exchanger.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], -10.0)
+        self.assertEqual(self.heat_exchanger.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], 10.0)
         self.assertEqual(self.heat_exchanger.outputs[1][-1][PROPERTY_HEAT_LOSS], 5.0)
         self.assertEqual(self.heat_exchanger.outputs[0][-1][PROPERTY_HEAT_POWER_SECONDARY], 5.0)

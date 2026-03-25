@@ -45,6 +45,8 @@ class AssetAbstract(ABC):
 
     connected_ports: list[str]
     """List of ids of the connected ports."""
+    solver_asset: BaseAsset
+    """The asset object use for the solver."""
     asset_type = "asset_abstract"
     """The type of the asset."""
     number_of_con_points: int = 2
@@ -132,7 +134,7 @@ class AssetAbstract(ABC):
         """
 
     def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a asset.
+        """Get timeseries as a dataframe from an asset.
 
         The header is a tuple of the port id and the property name.
         """

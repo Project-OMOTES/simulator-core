@@ -108,10 +108,11 @@ class HeatPump(AssetAbstract):
         """The secondary side of the heat pump acts as a producer of heat.
 
         The necessary setpoints are:
-        - PROPERTY_TEMPERATURE_IN
-        - PROPERTY_TEMPERATURE_OUT
-        - PROPERTY_HEAT_DEMAND
-        - PROPERTY_SET_PRESSURE
+        - SECONDARY + PROPERTY_TEMPERATURE_IN
+        - SECONDARY + PROPERTY_TEMPERATURE_OUT
+        - SECONDARY +PROPERTY_HEAT_DEMAND
+        - SECONDARY + PROPERTY_SET_PRESSURE
+        - PROPERTY_BYPASS
         """
         # Default keys required
         necessary_setpoints = {
@@ -134,11 +135,11 @@ class HeatPump(AssetAbstract):
         if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
             self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         else:
-            self.temperature_in_secondary = self.solver_asset.get_temperature(0)
+            self.temperature_in_secondary = self.solver_asset.get_temperature(2)
 
         # self.temperature_in_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_secondary = setpoints_secondary[SECONDARY + PROPERTY_TEMPERATURE_OUT]
-        self.mass_flow_secondary = -heat_demand_and_temperature_to_mass_flow(
+        self.mass_flow_secondary = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=setpoints_secondary[SECONDARY + PROPERTY_HEAT_DEMAND],
             temperature_in=self.temperature_in_secondary,
             temperature_out=self.temperature_out_secondary,
@@ -164,9 +165,10 @@ class HeatPump(AssetAbstract):
         """The primary side of the heat pump acts as a consumer of heat.
 
         The necessary setpoints are:
-        - PROPERTY_TEMPERATURE_IN
-        - PROPERTY_TEMPERATURE_OUT
-        - PROPERTY_HEAT_DEMAND
+        - PRIMARY + PROPERTY_TEMPERATURE_IN
+        - PRIMARY + PROPERTY_TEMPERATURE_OUT
+        - PRIMARY + PROPERTY_HEAT_DEMAND
+        - PRIMARY + PROPERTY_SET_PRESSURE
 
         :param Dict setpoints_primary: The setpoints of the primary side of the heat pump.
         """

@@ -143,7 +143,7 @@ class NetworkController(NetworkControllerAbstract):
         # Getting the settings for the heat transfer assets
         heat_transfer: AssetSetpointsDict = {}
 
-        # Set all the networks where there is only on primary or secondary heat exchanger.
+        # Set all the networks where there is only one primary or secondary heat exchanger.
         # Everything will then be set, since all heat transfer assets belong to a network where
         # they are the only one.
         for network in self.networks:
@@ -162,18 +162,19 @@ class NetworkController(NetworkControllerAbstract):
             for storage in network.storages:
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
-            # this might look weird, but we know there is only one primary or secondary asset.
-            # So we can directly set it.
+            # this might look weird, but we know ih this network there is only one primary
+            # or one secondary heat transfer asset. So if we loop over them either there are
+            # no items to loop over or there is only one. And that one we can set directly,
             for asset in network.heat_transfer_assets_prim:
                 if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset(total_heat_supply))
+                    heat_transfer.update(asset.set_asset(total_heat_supply, bypass=False))
                 else:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply, True))
+                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=True))
             for asset in network.heat_transfer_assets_sec:
                 if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply, True))
+                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=True))
                 else:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply))
+                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=False))
 
         # Update the asset setpoints with the heat transfer setpoints.
         asset_setpoints.update(heat_transfer)
