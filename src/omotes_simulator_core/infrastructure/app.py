@@ -41,9 +41,9 @@ def run(file_path: str | None = None) -> pd.DataFrame:
     config = SimulationConfiguration(
         simulation_id=uuid.uuid1(),
         name="test run",
-        timestep=24 * 3600,
-        start=datetime.strptime("2019-01-18T00:00:00", "%Y-%m-%dT%H:%M:%S"),
-        stop=datetime.strptime("2019-02-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+        timestep=3600,
+        start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+        stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
     )
 
     esdl_file_path = sys.argv[1] if file_path is None else file_path
@@ -63,10 +63,9 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s [%(levelname)s]:%(name)s - %(message)s"
     )
     t1 = datetime.now()
-    result = run(r".\testdata\heat_pump_bypass.esdl")
+    result = run(r".\testdata\test1.esdl")
     t2 = datetime.now()
 
     logger.info(f"Results dataframe shape=({result.shape})")
-    result.to_csv(r".\testdata\heat_pump_bypass_results.csv", index=False)
     logger.info(f"Execution time: {t2 - t1}")
     logger.debug(result.head())
