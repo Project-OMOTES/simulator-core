@@ -135,5 +135,5 @@ class DemandCluster(AssetAbstract):
         :return: True if the asset has converged, False otherwise
         """
         return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
-            self.thermal_power_allocation * 0.001
+            abs(self.thermal_power_allocation) * 0.001
         )

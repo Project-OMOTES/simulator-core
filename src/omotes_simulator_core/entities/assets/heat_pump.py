@@ -190,7 +190,7 @@ class HeatPump(AssetAbstract):
 
         # Assign setpoints to the HeatPump asset
         if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
-            self.temperature_in_primary = setpoints_primary[SECONDARY + PROPERTY_TEMPERATURE_IN]
+            self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
         else:
             self.temperature_in_primary = self.solver_asset.get_temperature(0)
 

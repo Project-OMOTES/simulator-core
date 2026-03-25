@@ -479,7 +479,7 @@ class HeatTransferAsset(BaseAsset):
             \dot{m}_{0} + \dot{m}_{1} = 0
 
         If the mass flow at the inflow node of the primary and secondary side is not zero, we
-         prescribe the follwoing energy balance equation for the heat transfer asset:
+         prescribe the following energy balance equation for the heat transfer asset:
 
         .. math::
 

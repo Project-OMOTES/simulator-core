@@ -16,7 +16,7 @@
 
 import datetime
 
-from numpy.ma.core import product
+import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
@@ -97,7 +97,7 @@ class ControllerNetwork:
         """Method which the total heat demand at the given time corrected to the first network."""
         return float(
             sum([consumer.get_heat_demand(time) for consumer in self.consumers])
-            * product(self.factor_to_first_network)
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=int)))
         )
 
     def get_total_discharge_storage(self) -> float:
@@ -107,7 +107,7 @@ class ControllerNetwork:
         """
         return float(
             sum([storage.effective_max_discharge_power for storage in self.storages])
-            * product(self.factor_to_first_network)
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=int)))
         )
 
     def get_total_charge_storage(self) -> float:
@@ -117,7 +117,7 @@ class ControllerNetwork:
         """
         return float(
             sum([storage.effective_max_charge_power for storage in self.storages])
-            * product(self.factor_to_first_network)
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=int)))
         )
 
     def get_total_supply(self) -> float:
@@ -127,7 +127,7 @@ class ControllerNetwork:
         """
         return float(
             sum([producer.power for producer in self.producers])
-            * product(self.factor_to_first_network)
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=int)))
         )
 
     def set_supply_to_max(self, priority: int = 0) -> dict:
