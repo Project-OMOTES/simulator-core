@@ -146,7 +146,7 @@ class AtesCluster(AssetAbstract):
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate >= 0:
+        if self.mass_flowrate <= 0:
             self.solver_asset.supply_temperature = self.hot_well_temperature  # production
         else:
             self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
