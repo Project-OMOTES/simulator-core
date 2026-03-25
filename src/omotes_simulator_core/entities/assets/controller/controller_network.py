@@ -235,16 +235,17 @@ class ControllerNetwork:
         )
 
     def set_pressure(self) -> tuple[str, str]:
-        """Returns the id of the asset for which the pressure can be set and the key in the set points dict.
+        """Returns the id of the asset for which the pressure can be set the key
 
         The controller needs to set per hydraulic separated part of the system the pressure.
         The network can thus pass back the id for which asset the pressure needs to be set.
-        The controller can then do this.
+        The controller can then add this in the set points dicts. For heattransfer assets also the
+        controller key needs to be return, either primary or secondary.
         """
         if self.producers:
-            return (self.producers[0].id, PROPERTY_SET_PRESSURE)
+            return self.producers[0].id, PROPERTY_SET_PRESSURE
         if self.heat_transfer_assets_sec:
-            return (self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE)
+            return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
         if self.heat_transfer_assets_prim:
-            return (self.heat_transfer_assets_prim[0].id, PRIMARY + PROPERTY_SET_PRESSURE)
+            return self.heat_transfer_assets_prim[0].id, PRIMARY + PROPERTY_SET_PRESSURE
         raise ValueError("No asset found for which the pressure can be set.")
