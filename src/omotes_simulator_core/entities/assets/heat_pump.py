@@ -21,6 +21,7 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_PRESSURE,
     PRIMARY,
+    PROPERTY_BYPASS,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -29,7 +30,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
-    PROPERTY_BYPASS,
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.heat_transfer_asset import HeatTransferAsset

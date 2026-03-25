@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
+    PROPERTY_BYPASS,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -27,7 +28,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
-    PROPERTY_BYPASS,
 )
 from omotes_simulator_core.entities.assets.heat_pump import HeatPump
 
@@ -211,7 +211,7 @@ class HeatPumpTest(unittest.TestCase):
             SECONDARY + PROPERTY_HEAT_DEMAND: 1000,
             PRIMARY + PROPERTY_SET_PRESSURE: False,
             SECONDARY + PROPERTY_SET_PRESSURE: False,
-            PROPERTY_BYPASS : False,
+            PROPERTY_BYPASS: False,
         }
 
         # Act

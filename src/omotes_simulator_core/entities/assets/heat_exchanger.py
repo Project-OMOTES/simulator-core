@@ -66,11 +66,11 @@ class HeatExchanger(AssetAbstract):
     """Heat transfer efficiency of the heat exchanger [W/K]."""
 
     def __init__(
-            self,
-            asset_name: str,
-            asset_id: str,
-            connected_ports: list[str],
-            heat_transfer_efficiency: float = 1,
+        self,
+        asset_name: str,
+        asset_id: str,
+        connected_ports: list[str],
+        heat_transfer_efficiency: float = 1,
     ) -> None:
         """Initialize a new HeatExchanger instance.
 
@@ -209,9 +209,10 @@ class HeatExchanger(AssetAbstract):
                 PROPERTY_HEAT_POWER_PRIMARY: (
                     self.solver_asset.get_heat_power_primary()  # type: ignore
                 ),
-                PROPERTY_HEAT_LOSS: (self.solver_asset.get_heat_power_primary()  # type: ignore
-                                     - self.solver_asset.get_heat_power_secondary()  # type: ignore
-                                     ),
+                PROPERTY_HEAT_LOSS: (
+                    self.solver_asset.get_heat_power_primary()  # type: ignore
+                    - self.solver_asset.get_heat_power_secondary()  # type: ignore
+                ),
             }
         )
 
