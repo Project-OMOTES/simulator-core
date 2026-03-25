@@ -235,7 +235,7 @@ class ControllerNetwork:
         )
 
     def set_pressure(self) -> tuple[str, str]:
-        """Returns the id of the asset for which the pressure can be set for this network and the key in the set points dict.
+        """Returns the id of the asset for which the pressure can be set and the key in the set points dict.
 
         The controller needs to set per hydraulic separated part of the system the pressure.
         The network can thus pass back the id for which asset the pressure needs to be set.

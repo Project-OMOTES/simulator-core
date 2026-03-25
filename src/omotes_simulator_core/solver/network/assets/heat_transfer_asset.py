@@ -220,7 +220,7 @@ class HeatTransferAsset(BaseAsset):
             return [0, 1, 2, 3]
 
     def get_equations(self) -> list[EquationObject]:
-
+        r"""Returns the list of equations to be solved for the heat transfer asset."""
         if self.bypass_mode:
             return self.get_equations_bypass_mode()
         return self.get_equations_heat_transfer_mode()
@@ -573,7 +573,14 @@ class HeatTransferAsset(BaseAsset):
             )
         return equations
 
-    def set_internal_energy_equations_bypass(self, equations):
+    def set_internal_energy_equations_bypass(self, equations: list[EquationObject]) -> None:
+        r"""Sets the internal energy equations.
+
+        In bypass mode the internal energy of connecting point 0 and 3 are set equal to the node.
+        This assumes inflow from does connection points into the heat transfer asset. Furthermore,
+        since the heat transfer asset is in bypass mode the secondary outflow is set equal to
+        the primary inflow, and vice versa.
+        """
         equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
         equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
         equation_object = EquationObject()

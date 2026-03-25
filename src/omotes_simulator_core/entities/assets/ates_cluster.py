@@ -158,7 +158,6 @@ class AtesCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
-
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
@@ -172,8 +171,8 @@ class AtesCluster(AssetAbstract):
             self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
             if self.first_time_step:
                 # Depending on the sign of the power allocation the ATES is charging or discharging.
-                # If positive then charging and the Flow direction is negative, So in and out temperature
-                # are switch, since they are not set on flow direction but on port.
+                # If positive then charging and the Flow direction is negative, So in and out
+                # temperature are switch, since they are not set on flow direction but on port.
                 if self.thermal_power_allocation >= 0:
                     self.temperature_in = setpoints[PROPERTY_TEMPERATURE_OUT]
                     self.temperature_out = setpoints[PROPERTY_TEMPERATURE_IN]

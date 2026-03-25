@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="heat_pump_test with return network" id="0c234aef-e3d6-4a3f-b455-3fba2da8bb55_with_return_network" esdlVersion="v2401" description="" version="6">
+<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="heat_pump_test with return network" id="0c234aef-e3d6-4a3f-b455-3fba2da8bb55_with_return_network" esdlVersion="v2401" description="" version="7">
   <energySystemInformation xsi:type="esdl:EnergySystemInformation" id="07d4d3c9-36b7-496c-9fce-d90b46e13321">
     <carriers xsi:type="esdl:Carriers" id="6305e67d-de4f-43cc-bfd1-c5eef55f927c">
       <carrier xsi:type="esdl:HeatCommodity" id="10e5076b-f5af-45c7-85c9-f21408004f13" name="hot" supplyTemperature="80.0"/>
@@ -140,17 +140,17 @@
         <geometry xsi:type="esdl:Point" lat="52.051283102019624" lon="4.485471546649934"/>
         <port xsi:type="esdl:InPort" id="eba18ad6-2502-4c97-bd82-a1f0202015d7" name="PrimIn" connectedTo="992c2d55-d009-482a-ad19-4f2671b987ea" carrier="10e5076b-f5af-45c7-85c9-f21408004f13"/>
         <port xsi:type="esdl:OutPort" id="2c9f115c-6700-449b-a855-0a2aacbb2bf0" name="PrimOut" connectedTo="7472ac4c-ee9e-47b3-9e5f-8f546cfa8d21" carrier="10e5076b-f5af-45c7-85c9-f21408004f13_ret"/>
-        <port xsi:type="esdl:OutPort" id="51331161-87a7-4555-a996-d3ca434cfd43" name="SecOut" connectedTo="623541bb-a733-4217-8449-1c208c7e55eb" carrier="af34b568-9478-4501-a7b4-e25587843544_ret"/>
-        <port xsi:type="esdl:InPort" id="79be9054-0099-4d6b-a933-f8e4f9c5898d" name="SecIn" connectedTo="a8b0bf50-f870-4646-b915-a27b7d925f4c" carrier="af34b568-9478-4501-a7b4-e25587843544"/>
+        <port xsi:type="esdl:OutPort" id="51331161-87a7-4555-a996-d3ca434cfd43" name="SecOut" connectedTo="623541bb-a733-4217-8449-1c208c7e55eb" carrier="10e5076b-f5af-45c7-85c9-f21408004f13"/>
+        <port xsi:type="esdl:InPort" id="79be9054-0099-4d6b-a933-f8e4f9c5898d" name="SecIn" connectedTo="a8b0bf50-f870-4646-b915-a27b7d925f4c" carrier="10e5076b-f5af-45c7-85c9-f21408004f13_ret"/>
       </asset>
       <asset xsi:type="esdl:HeatingDemand" id="6edad176-4bef-44c3-a04f-5e874ad57733" name="HeatingDemand_6eda">
         <geometry xsi:type="esdl:Point" lat="52.05115774438151" lon="4.486053586006165"/>
-        <port xsi:type="esdl:InPort" id="58f6605a-4ade-4be0-b37f-3e679ca173a5" name="In" connectedTo="54ae2ee3-8733-4202-a21a-1161c8ac024f" carrier="af34b568-9478-4501-a7b4-e25587843544_ret">
+        <port xsi:type="esdl:InPort" id="58f6605a-4ade-4be0-b37f-3e679ca173a5" name="In" connectedTo="54ae2ee3-8733-4202-a21a-1161c8ac024f" carrier="10e5076b-f5af-45c7-85c9-f21408004f13">
           <profile xsi:type="esdl:InfluxDBProfile" measurement="Space Heat default profiles" multiplier="10.0" field="SpaceHeat&amp;HotWater_PowerProfile_1700_1950" host="https://profiles.warmingup.info" database="energy_profiles" filters="" startDate="2018-12-31T23:00:00.000000+0000" endDate="2019-12-31T22:00:00.000000+0000" id="77c2d33c-2e40-4756-a2d0-42258aad813a">
             <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="e9405fc8-5e57-4df5-8584-4babee7cdf1b"/>
           </profile>
         </port>
-        <port xsi:type="esdl:OutPort" id="98527751-4f18-441d-b645-5ffac1d1c19a" name="Out" connectedTo="a9c6334d-dcab-4f8b-9ee6-2144cb87309e" carrier="af34b568-9478-4501-a7b4-e25587843544"/>
+        <port xsi:type="esdl:OutPort" id="98527751-4f18-441d-b645-5ffac1d1c19a" name="Out" connectedTo="a9c6334d-dcab-4f8b-9ee6-2144cb87309e" carrier="10e5076b-f5af-45c7-85c9-f21408004f13_ret"/>
       </asset>
       <asset xsi:type="esdl:Pipe" id="3113a0a4-729e-4912-b937-d094992040e0" name="Pipe_3113" innerDiameter="0.263" outerDiameter="0.4" diameter="DN250" length="24.0">
         <dataSource xsi:type="esdl:DataSource" name="Logstor Product Catalogue Version 2020.03" attribution="https://www.logstor.com/media/6506/product-catalogue-uk-202003.pdf"/>
@@ -224,8 +224,8 @@
           <point xsi:type="esdl:Point" lat="52.05119238271141" lon="4.485511779785157"/>
           <point xsi:type="esdl:Point" lat="52.05106867426703" lon="4.485879242420197"/>
         </geometry>
-        <port xsi:type="esdl:InPort" id="623541bb-a733-4217-8449-1c208c7e55eb" name="In" connectedTo="51331161-87a7-4555-a996-d3ca434cfd43" carrier="af34b568-9478-4501-a7b4-e25587843544_ret"/>
-        <port xsi:type="esdl:OutPort" id="54ae2ee3-8733-4202-a21a-1161c8ac024f" name="Out" connectedTo="58f6605a-4ade-4be0-b37f-3e679ca173a5" carrier="af34b568-9478-4501-a7b4-e25587843544_ret"/>
+        <port xsi:type="esdl:InPort" id="623541bb-a733-4217-8449-1c208c7e55eb" name="In" connectedTo="51331161-87a7-4555-a996-d3ca434cfd43" carrier="10e5076b-f5af-45c7-85c9-f21408004f13"/>
+        <port xsi:type="esdl:OutPort" id="54ae2ee3-8733-4202-a21a-1161c8ac024f" name="Out" connectedTo="58f6605a-4ade-4be0-b37f-3e679ca173a5" carrier="10e5076b-f5af-45c7-85c9-f21408004f13"/>
       </asset>
       <asset xsi:type="esdl:Pipe" id="aef40395-1a7f-4574-9d36-53a5399af797" name="Pipe_aef4" innerDiameter="0.263" outerDiameter="0.4" diameter="DN250" length="26.3">
         <dataSource xsi:type="esdl:DataSource" name="Logstor Product Catalogue Version 2020.03" attribution="https://www.logstor.com/media/6506/product-catalogue-uk-202003.pdf"/>
@@ -249,8 +249,8 @@
           <point xsi:type="esdl:Point" lat="52.05120062992886" lon="4.48594629764557"/>
           <point xsi:type="esdl:Point" lat="52.05131938969132" lon="4.485613703727723"/>
         </geometry>
-        <port xsi:type="esdl:InPort" id="a9c6334d-dcab-4f8b-9ee6-2144cb87309e" name="In" connectedTo="98527751-4f18-441d-b645-5ffac1d1c19a" carrier="af34b568-9478-4501-a7b4-e25587843544"/>
-        <port xsi:type="esdl:OutPort" id="a8b0bf50-f870-4646-b915-a27b7d925f4c" name="Out" connectedTo="79be9054-0099-4d6b-a933-f8e4f9c5898d" carrier="af34b568-9478-4501-a7b4-e25587843544"/>
+        <port xsi:type="esdl:InPort" id="a9c6334d-dcab-4f8b-9ee6-2144cb87309e" name="In" connectedTo="98527751-4f18-441d-b645-5ffac1d1c19a" carrier="10e5076b-f5af-45c7-85c9-f21408004f13_ret"/>
+        <port xsi:type="esdl:OutPort" id="a8b0bf50-f870-4646-b915-a27b7d925f4c" name="Out" connectedTo="79be9054-0099-4d6b-a933-f8e4f9c5898d" carrier="10e5076b-f5af-45c7-85c9-f21408004f13_ret"/>
       </asset>
       <asset xsi:type="esdl:HeatPump" id="4986c63c-0e58-48a2-844d-fddd235e110a" name="HeatPump_4986" COP="5.0">
         <geometry xsi:type="esdl:Point" lat="52.05161051471814" lon="4.484561607241631" CRS="WGS84"/>
