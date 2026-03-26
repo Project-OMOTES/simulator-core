@@ -246,6 +246,6 @@ class ControllerNetwork:
             return self.producers[0].id, PROPERTY_SET_PRESSURE
         if self.heat_transfer_assets_sec:
             return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
-        if self.heat_transfer_assets_prim:
-            return self.heat_transfer_assets_prim[0].id, PRIMARY + PROPERTY_SET_PRESSURE
+        if self.storages:
+            return self.storages[0].id, PROPERTY_SET_PRESSURE
         raise ValueError("No asset found for which the pressure can be set.")

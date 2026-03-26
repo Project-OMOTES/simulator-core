@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_TIMESTEP,
+    PROPERTY_SET_PRESSURE,
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.buffer_asset import HeatBufferAsset
@@ -153,6 +154,7 @@ class IdealHeatStorage(AssetAbstract):
 
         # Set solver asset setpoints
         self.solver_asset.massflow_connection_0 = mass_flowrate  # type: ignore
+        self.solver_asset.set_massflow_rate = not (setpoints[PROPERTY_SET_PRESSURE])  # type: ignore
         self.solver_asset.temperature_connection_0 = self.temperature_connection_0  # type: ignore
         self.solver_asset.temperature_connection_1 = self.temperature_connection_1  # type: ignore
         self._prev_setpoint_heat_demand = setpoints[PROPERTY_HEAT_DEMAND]
@@ -167,6 +169,7 @@ class IdealHeatStorage(AssetAbstract):
             # PROPERTY_TEMPERATURE_IN,
             # PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
+            PROPERTY_SET_PRESSURE,
         }
         # Create set of keys in the provided setpoints
         setpoints_set = set(setpoints.keys())

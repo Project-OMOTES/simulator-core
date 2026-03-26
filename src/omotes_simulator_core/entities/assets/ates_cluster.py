@@ -29,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_SET_PRESSURE,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (
@@ -163,6 +164,7 @@ class AtesCluster(AssetAbstract):
             PROPERTY_TEMPERATURE_IN,
             PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
+            PROPERTY_SET_PRESSURE,
         }
         # Dict to set
         setpoints_set = set(setpoints.keys())
@@ -188,7 +190,7 @@ class AtesCluster(AssetAbstract):
                 else:
                     self.temperature_in = self.cold_well_temperature
                     self.temperature_out = self.solver_asset.get_temperature(1)
-
+            self.solver_asset.set_massflow_rate = not (setpoints[PROPERTY_SET_PRESSURE])
             self._calculate_massflowrate()
             if self.current_time != self.time:
                 self._run_rosim()
@@ -283,6 +285,7 @@ class AtesCluster(AssetAbstract):
             PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
             PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
+            PROPERTY_SET_PRESSURE: False,
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
