@@ -185,11 +185,11 @@ class AtesCluster(AssetAbstract):
             else:
                 # After the first time step: use solver temperature
                 if self.thermal_power_allocation >= 0:
-                    self.temperature_out = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.solver_asset.get_temperature(1)
                     self.temperature_in = self.hot_well_temperature
                 else:
-                    self.temperature_in = self.cold_well_temperature
-                    self.temperature_out = self.solver_asset.get_temperature(1)
+                    self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.cold_well_temperature
             self.solver_asset.set_massflow_rate = not (setpoints[PROPERTY_SET_PRESSURE])
             self._calculate_massflowrate()
             if self.current_time != self.time:

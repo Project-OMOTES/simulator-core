@@ -172,6 +172,7 @@ class ControllerNetwork:
                 PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
                 PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
                 PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 
@@ -188,6 +189,7 @@ class ControllerNetwork:
                 PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
                 PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
                 PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 
