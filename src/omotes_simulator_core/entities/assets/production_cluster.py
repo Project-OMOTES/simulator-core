@@ -243,7 +243,7 @@ class ProductionCluster(AssetAbstract):
         by the asset - based on the solver asset - matches the heat demand
         set point of the asset.
 
-        In other words: |Q_calculated - Q_setpoint| < 0.1% * |Q_setpoint|
+        In other words: ``|Q_calculated - Q_setpoint| < 0.001 |Q_setpoint|``
 
         :return: True if the asset has converged, False otherwise
         """

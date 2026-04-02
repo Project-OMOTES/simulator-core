@@ -15,6 +15,7 @@ This documentation is divided in the following sections:
    :caption: Contents:
 
    architecture/architecture
+   physics/physics_main
    solver/solver_main
    assets/assets
    controller/controller
