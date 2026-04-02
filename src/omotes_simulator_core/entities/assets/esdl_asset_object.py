@@ -106,7 +106,7 @@ class EsdlAssetObject:
         for port in self.esdl_asset.port:
             if isinstance(port, esdl.OutPort) and port.profile.items:
                 for profile in port.profile:
-                    if profile.field == "HeatIn.Q":
+                    if profile.field == "Heat_flow":
                         return get_data_from_profile(profile)
         logger.error(
             f"No profile found for asset: {self.esdl_asset.name}",
@@ -233,7 +233,7 @@ class EsdlAssetObject:
                     try:
                         data_source = profile.dataSource
                         if data_source is not None:
-                            if data_source.attribution == "optimizer":
+                            if data_source.name == "Optimizer":
                                 return True
                     except AttributeError:
                         continue
