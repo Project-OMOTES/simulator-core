@@ -7,9 +7,10 @@ Description
 The ``DemandCluster`` asset models a controllable heat demand unit within a thermal network.
 The asset may represent different types of heat consumers, because the simulation treats it as a
 controllable thermal boundary that extracts heat from the network.
-The asset removes heat from the circulating fluid according to time-varying temperature and heat
-setpoints. In practice, it represents the thermal behavior that a controller or supervisory input
-requests from a consumer, while the network solution determines whether that request can be met.
+The asset demands heat according to controller-provided setpoints for inlet temperature, outlet
+temperature, and heat demand.
+The asset is mapped from ESDL (Energy System Description Language) objects and receives
+controller-set values during simulation.
 
 
 Parameters
@@ -23,8 +24,28 @@ Parameters
      - Description
      - Unit
      - ESDL Asset Property
+   * - ``temperature_in``
+     - Inlet temperature (initial value from ESDL carrier)
+     - K
+     - not mapped from ESDL; set by controller
+   * - ``temperature_out``
+     - Outlet temperature (initial value from ESDL carrier)
+     - K
+     - not mapped from ESDL; set by controller
+   * - ``temperature_out_target``
+     - Outlet temperature target
+     - K
+     - not mapped from ESDL; set by controller
+   * - ``mass_flowrate``
+     - Mass flow rate
+     - kg/s
+     - not mapped from ESDL; set by controller
+   * - ``thermal_power_allocation``
+     - Heat demand set point
+     - W
+     - not mapped from ESDL; set by controller
    * - ``max_power``
-     - Maximum heat demand that can be allocated to the consumer
+     - Maximum power (control limit)
      - W
      - ``power`` property of ESDL asset
 
@@ -32,7 +53,7 @@ Parameters
 Controlled Parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
-The consumer receives the following user-relevant control signals:
+The controller (see :class:`ControllerConsumer`) supplies a setpoints dictionary containing:
 
 .. list-table::
    :header-rows: 1
@@ -42,20 +63,27 @@ The consumer receives the following user-relevant control signals:
      - Description
      - Unit
    * - :math:`T_{in}`
-     - Inlet temperature used to initialize the first timestep; afterwards the inlet temperature
-       is solved by the network and used to interpret the heat demand
+     - Inlet temperature (connection point 0)
      - K
    * - :math:`T_{out}`
-     - Target outlet temperature at the consumer return side
+     - Outlet temperature (connection point 1)
      - K
    * - :math:`Q_{set}`
-     - Requested heat demand
+     - Heat demand [#heat-demand-set-point]_
      - W
 
-The requested heat demand is typically derived from a time series or supervisory control action.
-It can be curtailed by the configured maximum power or by limited upstream heat supply. For how
-the controller coordinates demand with available production and storage, see
-:doc:`../controller/controller`.
+The heat demand of the consumer is in principle determined by the profile on *connection point 1* (outlet). 
+This profile defines the heat demand as a function of time. Interpolation is used to determine the heat 
+demand at each simulation timestep. 
+
+The controller can override this profile value when it surpasses the maximum power limit of the asset, 
+or when there is insufficient heat supply in the network to meet the demand. See **TODO: link to controller documentation**
+for more details on how the controller allocates heat supply to meet demand across the network.
+
+.. [#heat-demand-set-point] The heat demand set point defines the mass flow required to meet the
+  heat demand, given the inlet and outlet temperatures. The mass flow is calculated as:
+  :math:`\dot{m} = Q_{set}/\left(c_p (T_{out} - T_{in})\right)` where :math:`c_p` is the
+  specific heat capacity of the fluid, which is determined based on the average of the inlet and outlet temperature.
 
 
 Additional simulation outputs
@@ -72,21 +100,14 @@ the consumer asset provides the following additional outputs:
      - Description
      - Unit
    * - ``heat_demand_set_point``
-     - Requested heat demand written to the simulation output
+     - Heat demand set point
      - W
    * - ``heat_demand``
-     - Actual heat extracted from the network fluid
+     - Actual heat demanded [#heat-demanded]_
      - W
 
-The reported heat demand is evaluated as:
-
-.. math::
-
-  Q_{demanded} = \left(u_1 - u_0\right) \dot{m}_0
-
-where port 0 is the inlet and port 1 is the outlet. For a consuming asset, the outlet fluid has
-lower specific internal energy than the inlet fluid and the solved inlet mass flow is typically
-negative, so the reported heat demand is positive when the consumer removes heat from the network.
+.. [#heat-demanded] The actual heat demanded is calculated as :math:`Q_{demanded} = \left( U_1 - U_0 \right) \dot{m}_1`,
+  where :math:`U_1` and :math:`U_0` are the internal energies at the outlet and inlet, respectively, and :math:`\dot{m}_1` is the mass flow rate at the outlet.
 
 Physics and Assumptions
 -----------------------
@@ -94,7 +115,7 @@ Physics and Assumptions
 The consumer acts as a controllable heat sink. It prescribes a mass flow that extracts the
 requested heat from the network at the specified inlet and outlet temperatures. The inlet
 temperature is taken from the network solution after the first timestep, while the outlet
-temperature remains control-defined.
+temperature remains controller-defined.
 
 Mass flow
 ~~~~~~~~~
@@ -116,7 +137,7 @@ outlet temperatures:
    * - :math:`Q_{set}`
      - Heat demand set point [W]
    * - :math:`c_p`
-     - Specific heat capacity of the fluid [J/(kg K)] [#specific-heat-capacity]_
+     - Specific heat capacity of the fluid [J/(kg·K)] [#specific-heat-capacity]_
    * - :math:`T_{out}`
      - Outlet temperature [K] [#outlet-temperature]_
    * - :math:`T_{in}`
@@ -132,11 +153,11 @@ Pressure
 The consumer does not model internal pressure losses.
 Supply and return pressures are determined by the network hydraulics.
 
-Heat reporting
-~~~~~~~~~~~~~~
+Internal energy
+~~~~~~~~~~~~~~~
 
 The actual heat absorbed by the consumer is evaluated from the internal-energy difference across
-the asset and the solved inlet mass flow:
+the asset and the solved mass flow:
 
 .. math::
 
@@ -155,10 +176,8 @@ where:
    * - :math:`\dot{m}_0`
      - Mass flow rate at inlet [kg/s]
 
-This relation is used for reporting and convergence checking. For a consumer, :math:`U_1 < U_0`
-and :math:`\dot{m}_0 < 0` in the usual operating direction, so :math:`Q_{demanded}` is positive
-when heat is extracted from the network fluid. The asset itself does not include internal heat
-losses or thermal storage.
+This relation is used for reporting and convergence checking. The asset itself does not include
+internal heat losses or thermal storage.
 
 Assumptions
 -----------
@@ -174,13 +193,6 @@ Limitations
 - No modelling of part-load efficiency or startup/shutdown dynamics.
 - No explicit modelling of heat losses or environmental interactions.
 - Convergence is checked against a 0.1% tolerance between supplied and demanded heat.
-
-See Also
---------
-
-- :doc:`../controller/controller` -- Control behavior that allocates demand across the network
-- :doc:`../network/network_main` -- Network equations that determine available flow and inlet state
-- :doc:`producer_physics` — Complementary heat production asset model
 
 References
 ----------
