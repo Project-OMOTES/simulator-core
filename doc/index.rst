@@ -12,7 +12,8 @@ This documentation is divided in the following sections:
    :maxdepth: 1
    :caption: Contents:
 
-   intro/intro_main
+   architecture/architecture
+   physics/physics_main
    solver/solver_main
    network/network_main
    physics/physics_main
