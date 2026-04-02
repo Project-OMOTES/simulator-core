@@ -7,9 +7,10 @@ Description
 The ``ProductionCluster`` asset models a controllable heat production unit within a thermal network.
 The asset may represent different types of heat producers, because the simulation treats it as a
 controllable thermal boundary that injects heat into the network.
-The asset adds heat to the circulating fluid according to time-varying temperature, production,
-and operating-mode setpoints. It is intended as a generic controllable heat source whose actual
-delivery depends on both the requested operating mode and the solved network state.
+The asset supplies heat according to controller-provided setpoints for inlet temperature, outlet
+temperature, heat demand, and operating mode.
+The asset is mapped from ESDL (Energy System Description Language) objects and receives
+controller-set values during simulation.
 
 
 Parameters
@@ -25,12 +26,36 @@ Parameters
    * - ``pressure_supply``
      - Supply pressure used when the asset operates in pressure-controlled mode
      - Pa
-     - user-configured operating parameter
+     - controller-set
+   * - ``temperature_in``
+     - Inlet temperature
+     - K
+     - controller-set
+   * - ``temperature_out``
+     - Outlet temperature
+     - K
+     - controller-set
+   * - ``control_mass_flow``
+     - Boolean flag indicating whether the asset prescribes mass flow instead of pressure
+     - -
+     - controller-set
+   * - ``controlled_mass_flow``
+     - Mass flow prescribed in mass-flow-controlled mode
+     - kg/s
+     - controller-set
+   * - ``thermal_production_required``
+     - Requested thermal production derived from the controller heat-demand setpoint
+     - W
+     - controller-set
+   * - ``heat_demand_set_point``
+     - Heat supply target used to determine the required operating point
+     - W
+     - controller-set
 
 Controlled Parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
-The producer receives the following user-relevant control signals:
+The controller supplies a setpoints dictionary containing:
 
 .. list-table::
    :header-rows: 1
@@ -46,16 +71,22 @@ The producer receives the following user-relevant control signals:
      - Outlet temperature (connection point 1)
      - K
    * - :math:`Q_{set}`
-     - Requested heat production
+     - Heat demand [#heat-demand-set-point]_
      - W
-   * - ``pressure-controlled mode``
-     - If enabled, the producer fixes supply pressure. If disabled, it prescribes mass flow to
-       target the requested heat production.
+   * - ``set_pressure``
+     - Pressure-control flag [#pressure-flag]_
      - -
 
-The controller chooses between the two operating modes each timestep. For the broader control
-strategy that coordinates production with demand and storage, see
-:doc:`../controller/controller`.
+
+.. [#pressure-flag] The pressure flag determines whether the producer fixes pressure or prescribes
+  mass flow. If the flag is true, the supply pressure is fixed at ``pressure_supply`` and mass flow
+  follows from the network hydraulics. If the flag is false, the asset prescribes the mass flow
+  required to meet the requested heat demand.
+
+.. [#heat-demand-set-point] The heat demand set point defines the mass flow required to meet the
+  heat demand, given the inlet and outlet temperatures. The mass flow is calculated as:
+  :math:`\dot{m} = Q_{set}/\left(c_p (T_{out} - T_{in})\right)` where :math:`c_p` is the
+  specific heat capacity of the fluid, which is determined based on the average of the inlet and outlet temperature.
 
 
 Additional simulation outputs
@@ -72,21 +103,14 @@ the producer asset provides the following additional outputs:
      - Description
      - Unit
    * - ``heat_supply_set_point``
-     - Requested heat production written to the simulation output
+     - Heat supply set point
      - W
    * - ``heat_supplied``
-     - Actual heat added to the network fluid
+     - Actual heat supplied [#heat-supplied]_
      - W
 
-The reported heat supply is evaluated as:
-
-.. math::
-
-  Q_{supplied} = \left(u_1 - u_0\right) \dot{m}_1
-
-where port 0 is the inlet and port 1 is the outlet. In the usual operating direction,
-:math:`u_1 > u_0` and :math:`\dot{m}_1 > 0`, so the reported heat supply is positive when the
-producer injects heat into the network.
+.. [#heat-supplied] The actual heat supplied is calculated as :math:`Q_{supplied} = \left( U_1 - U_0 \right) \dot{m}_1`, 
+  where :math:`U_1` and :math:`U_0` are the internal energies at the outlet and inlet, respectively, and :math:`\dot{m}_1` is the mass flow rate at the outlet.
 
 Physics and Assumptions
 -----------------------
@@ -114,9 +138,9 @@ where:
    * - :math:`\dot{m}`
      - Mass flow rate [kg/s]
    * - :math:`Q_{set}`
-     - Requested heat production [W]
+     - Heat demand set point [W]
    * - :math:`c_p`
-     - Specific heat capacity of the fluid [J/(kg K)]
+     - Specific heat capacity of the fluid [J/(kg·K)]
    * - :math:`T_{out}`,\ :math:`T_{in}`
      - Outlet and inlet temperatures [K]
 
@@ -127,8 +151,7 @@ Pressure
 
 The producer does not model internal pressure losses. When pressure control is enabled, the supply
 pressure is prescribed and the resulting mass flow follows from the network solution. When pressure
-control is disabled, the asset prescribes mass flow directly to target the requested heat
-production.
+control is disabled, the asset prescribes mass flow directly to meet the requested heat output.
 
 
 Operating Modes
@@ -143,10 +166,9 @@ The asset supports two operating modes:
    * - Mode
      - Description
    * - **Mass flow controlled**
-     - Mass flow is set directly to target the requested heat production.
+     - Mass flow is set directly to achieve the required heat demand.
    * - **Pressure controlled**
-     - Supply pressure is fixed; mass flow and delivered heat follow from the solved network
-       hydraulics.
+     - Supply pressure is fixed; mass flow is determined by network hydraulics.
 
 The actual heat supplied is evaluated from the solved internal-energy difference and outlet mass
 flow:
@@ -184,14 +206,6 @@ Limitations
 - No modelling of part-load efficiency or startup/shutdown dynamics.
 - No explicit modelling of heat losses or environmental interactions.
 - Convergence is checked against a 0.1% tolerance between supplied and demanded heat.
-
-See Also
---------
-
-- :doc:`../controller/controller` -- Control behavior that selects production mode and targets
-- :doc:`../network/network_main` -- Network equations that determine pressure-driven operation
-- :doc:`consumer_physics` — Complementary heat demand asset model
-- :doc:`ideal_heat_storage_physics` — Heat buffering for supply stability
 
 References
 ----------
