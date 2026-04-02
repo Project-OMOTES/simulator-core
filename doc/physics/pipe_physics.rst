@@ -255,13 +255,6 @@ Limitations
 - Assumes fully developed flow and uniform fluid properties along the pipe.
 - The current documentation describes the intended physical meaning of the configured pipe parameters; if minor losses, ambient conditions, or external heat input are critical to a study, verify the active model configuration against the implementation used in the simulation setup.
 
-See Also
---------
-
-- :doc:`junction_physics` — Network connectivity and flow conservation
-- :doc:`producer_physics` — Heat source
-- :doc:`consumer_physics` — Heat sink
-
 References
 ----------
 
