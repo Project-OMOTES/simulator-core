@@ -230,13 +230,12 @@ class EsdlAssetObject:
             if isinstance(port, esdl.OutPort) and port.profile.items: 
                 # There is a profile on the out port
                 for profile in port.profile:
-                    try:
-                        data_source = profile.dataSource
-                        if data_source is not None:
-                            if data_source.name == "Optimizer":
-                                return True
-                    except AttributeError:
-                        continue
+                    if (
+                        hasattr(profile, "dataSource") and 
+                        hasattr(profile.dataSource, "name") and 
+                        profile.dataSource.name == "Optimizer"
+                    ):
+                        return True
         return False
 
     def has_constraint(self) -> bool:

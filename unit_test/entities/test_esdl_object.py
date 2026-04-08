@@ -16,6 +16,7 @@
 """Test esdl object class."""
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, Mock
 
 import esdl
 from pandas.testing import assert_frame_equal
@@ -422,6 +423,41 @@ class EsdlObjectTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(asset.esdl_asset, producer.esdl_asset)
+
+    def test_has_out_optimizer_profile(self):
+        """Test to see if the method to check for optimizer profiles works correctly."""
+        
+        # Arrange
+        asset_with_mocked_profiles = self.esdl_object.get_all_assets_of_type("producer")[0]
+
+        non_optimizer_profile = Mock()
+        non_optimizer_profile.dataSource = Mock()
+        non_optimizer_profile.dataSource.name = "NotOptimizer"
+
+        optimizer_profile = Mock()
+        optimizer_profile.dataSource = Mock()
+        optimizer_profile.dataSource.name = "Optimizer"
+
+        mocked_profiles = MagicMock()
+        mocked_profiles.items = [non_optimizer_profile, optimizer_profile]
+        mocked_profiles.__iter__.return_value = iter([non_optimizer_profile, optimizer_profile])
+
+        mocked_out_port = Mock(spec=esdl.OutPort)
+        mocked_out_port.profile = mocked_profiles
+
+        mocked_esdl_asset = Mock()
+        mocked_esdl_asset.port = [mocked_out_port]
+        asset_with_mocked_profiles.esdl_asset = mocked_esdl_asset
+
+        asset_without_profile = self.esdl_object.get_all_assets_of_type("pipe")[0]
+
+        # Act
+        has_optimizer_profile = asset_with_mocked_profiles.has_out_optimizer_profile()
+        has_no_optimizer_profile = asset_without_profile.has_out_optimizer_profile()
+
+        # Assert
+        self.assertTrue(has_optimizer_profile)
+        self.assertIs(has_no_optimizer_profile, False)
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
