@@ -108,7 +108,8 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
         fields=[profile_field],
         from_datetime=cast(datetime, esdl_profile.startDate),
         to_datetime=cast(datetime, esdl_profile.endDate),
-        filters=_normalize_influx_filters(str(esdl_profile.filters) if esdl_profile.filters else None),
+        filters=_normalize_influx_filters(str(esdl_profile.filters)
+                                          if esdl_profile.filters else None),
     )
     # Error check start and end dates of profiles
 

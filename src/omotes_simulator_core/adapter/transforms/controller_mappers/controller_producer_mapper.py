@@ -67,7 +67,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
                 timestep=timestep,
             )
             resampled_profile = self.profile_interpolator.get_resampled_profile()
-        
+
         if resampled_profile is None:
             resampled_profile = pd.DataFrame()
 

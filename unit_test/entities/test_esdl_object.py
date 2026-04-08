@@ -426,7 +426,6 @@ class EsdlObjectTest(unittest.TestCase):
 
     def test_has_out_optimizer_profile(self):
         """Test to see if the method to check for optimizer profiles works correctly."""
-        
         # Arrange
         asset_with_mocked_profiles = self.esdl_object.get_all_assets_of_type("producer")[0]
 
