@@ -24,8 +24,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_TIMESTEP,
     PROPERTY_SET_PRESSURE,
+    PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.ideal_heat_storage import ChargeState, IdealHeatStorage
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
