@@ -19,7 +19,6 @@ import datetime
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PRIMARY,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
