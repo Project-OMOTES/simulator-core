@@ -289,7 +289,7 @@ class AtesCluster(AssetAbstract):
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
-        for i in range(0):
+        for i in range(12):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
@@ -306,10 +306,10 @@ class AtesCluster(AssetAbstract):
         # and second element is for injection well, positive flow is going upward and negative flow
         # is downward
 
-        if volume_flow > 0:
+        if volume_flow < 0:
             rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
             # injection well to make sure it is not used
-        elif volume_flow < 0:
+        elif volume_flow > 0:
             rosim_input_temperature = [
                 -1,
                 kelvin_to_celcius(self.temperature_out),
@@ -320,10 +320,10 @@ class AtesCluster(AssetAbstract):
             # sure it is not used
         logger.debug("rosim input temperature %s", rosim_input_temperature)
         logger.debug("rosim input flow %s", rosim_input__flow)
-        ates_temperature = rosim_input_temperature
-        #  ates_temperature = self.rosim.calcTimeStepAndGetTemps(
-        #      rosim_input__flow, rosim_input_temperature, timestep
-        #  )
+
+        ates_temperature = self.rosim.calcTimeStepAndGetTemps(
+            rosim_input__flow, rosim_input_temperature, timestep
+        )
         if ates_temperature[1] < 0:
             logger.info("Temperature Rossim to low")
 
