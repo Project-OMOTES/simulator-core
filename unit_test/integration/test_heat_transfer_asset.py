@@ -120,7 +120,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            77.55,
+            -77.55,
             2,
         )
         self.assertAlmostEqual(
@@ -135,7 +135,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -317,7 +317,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            77.55,
+            -77.55,
             2,
         )
         self.assertAlmostEqual(
@@ -332,7 +332,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -415,7 +415,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            38.76,
+            -38.76,
             2,
         )
         self.assertAlmostEqual(
@@ -430,7 +430,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -504,7 +504,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            38.76,
+            -38.76,
             2,
         )
         self.assertAlmostEqual(
@@ -519,7 +519,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -603,7 +603,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            93.07,
+            -93.07,
             2,
         )
         self.assertAlmostEqual(
@@ -618,7 +618,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -627,7 +627,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
                 )
             ],
             fluid_props.get_ie(self.production_asset.supply_temperature),
