@@ -148,9 +148,9 @@ class AtesCluster(AssetAbstract):
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
         if self.mass_flowrate <= 0:
-            self.solver_asset.supply_temperature = self.hot_well_temperature  # production
+            self.solver_asset.supply_temperature = self.cold_well_temperature  # production
         else:
-            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
+            self.solver_asset.supply_temperature = self.hot_well_temperature  # injection
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -326,9 +326,9 @@ class AtesCluster(AssetAbstract):
         )
         if ates_temperature[1] < 0:
             logger.info("Temperature Rossim to low")
-
-        self.hot_well_temperature = celcius_to_kelvin(50.0)  # convert to K
-        self.cold_well_temperature = celcius_to_kelvin(30.0)  # convert to K
+        logger.debug("rosim output temperature %s", ates_temperature)
+        self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
+        self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
 
     def get_heat_supplied(self) -> float:
         """Get the actual heat supplied by the asset.
