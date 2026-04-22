@@ -14,12 +14,16 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+
+import logging
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+
+logger = logging.getLogger(__name__)
 
 
 class ControllerProducerMapper(EsdlMapperAbstract):
@@ -37,6 +41,10 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
+        if power == 0:
+            logger.warning(f"Power for {esdl_asset.esdl_asset.name} cannot be 0 kW, set to 1 kW")
+            power = 1000.0
+
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_in = esdl_asset.get_temperature("In", "Return")
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
