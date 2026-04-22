@@ -160,6 +160,8 @@ class HeatPump(AssetAbstract):
             self.control_mass_flow_secondary
         )
         self.solver_asset.bypass_mode = setpoints_secondary[PROPERTY_BYPASS]  # type: ignore
+        if self.solver_asset.bypass_mode:  # type: ignore
+            logger.info("bypass mode enabled")
 
     def _set_setpoints_primary(self, setpoints_primary: Dict) -> None:
         """The primary side of the heat pump acts as a consumer of heat.
@@ -194,7 +196,10 @@ class HeatPump(AssetAbstract):
         if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
             self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
         else:
-            self.temperature_in_primary = self.solver_asset.get_temperature(0)
+            if self.solver_asset.get_mass_flow_rate(0) < 0:
+                self.temperature_in_primary = self.solver_asset.get_temperature(0)
+            else:
+                self.temperature_in_primary = self.solver_asset.get_temperature(1)
 
         # self.temperature_in_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_IN]
         self.temperature_out_primary = setpoints_primary[PRIMARY + PROPERTY_TEMPERATURE_OUT]

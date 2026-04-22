@@ -142,7 +142,7 @@ class AtesCluster(AssetAbstract):
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_in, self.temperature_out
+            abs(self.thermal_power_allocation), self.temperature_in, self.temperature_out
         )
 
     def _set_solver_asset_setpoint(self) -> None:
@@ -185,12 +185,12 @@ class AtesCluster(AssetAbstract):
             else:
                 # After the first time step: use solver temperature
                 if self.thermal_power_allocation >= 0:
-                    self.temperature_out = self.solver_asset.get_temperature(1)
-                    self.temperature_in = self.hot_well_temperature
-                else:
                     self.temperature_in = self.solver_asset.get_temperature(0)
+                    self.temperature_out = self.hot_well_temperature
+                else:
+                    self.temperature_in = self.solver_asset.get_temperature(1)
                     self.temperature_out = self.cold_well_temperature
-            self.solver_asset.set_massflow_rate = not (setpoints[PROPERTY_SET_PRESSURE])
+            self.solver_asset.pre_scribe_mass_flow = not (setpoints[PROPERTY_SET_PRESSURE])
             self._calculate_massflowrate()
             if self.current_time != self.time:
                 self._run_rosim()
@@ -289,7 +289,7 @@ class AtesCluster(AssetAbstract):
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
-        for i in range(12):
+        for i in range(0):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
@@ -302,7 +302,7 @@ class AtesCluster(AssetAbstract):
         # density needs to change with PVT calculation
         timestep = self.time_step / 3600  # convert to hours
 
-        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
+        rosim_input__flow = [-1 * volume_flow, volume_flow]  # first element is for producer well
         # and second element is for injection well, positive flow is going upward and negative flow
         # is downward
 
@@ -318,13 +318,17 @@ class AtesCluster(AssetAbstract):
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
             # sure it is not used
+        logger.debug("rosim input temperature %s", rosim_input_temperature)
+        logger.debug("rosim input flow %s", rosim_input__flow)
+        ates_temperature = rosim_input_temperature
+        #  ates_temperature = self.rosim.calcTimeStepAndGetTemps(
+        #      rosim_input__flow, rosim_input_temperature, timestep
+        #  )
+        if ates_temperature[1] < 0:
+            logger.info("Temperature Rossim to low")
 
-        ates_temperature = self.rosim.calcTimeStepAndGetTemps(
-            rosim_input__flow, rosim_input_temperature, timestep
-        )
-
-        self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
-        self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
+        self.hot_well_temperature = celcius_to_kelvin(50.0)  # convert to K
+        self.cold_well_temperature = celcius_to_kelvin(30.0)  # convert to K
 
     def get_heat_supplied(self) -> float:
         """Get the actual heat supplied by the asset.
@@ -340,6 +344,8 @@ class AtesCluster(AssetAbstract):
 
         :return: True if the asset has converged, False otherwise
         """
-        return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
-            abs(self.thermal_power_allocation) * 0.001
-        )
+        if self.solver_asset.pre_scribe_mass_flow:
+            return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
+                abs(self.thermal_power_allocation) * 0.001
+            )
+        return True

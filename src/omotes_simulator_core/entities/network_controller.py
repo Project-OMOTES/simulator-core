@@ -167,14 +167,14 @@ class NetworkController(NetworkControllerAbstract):
             # no items to loop over or there is only one. And that one we can set directly,
             for asset in network.heat_transfer_assets_prim:
                 if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset(total_heat_supply, bypass=False))
+                    heat_transfer.update(asset.set_asset_prim(total_heat_supply, bypass=False))
                 else:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=True))
+                    heat_transfer.update(asset.set_asset_prim(-total_heat_supply, bypass=True))
             for asset in network.heat_transfer_assets_sec:
                 if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=True))
+                    heat_transfer.update(asset.set_asset_sec(-total_heat_supply, bypass=True))
                 else:
-                    heat_transfer.update(asset.set_asset(-total_heat_supply, bypass=False))
+                    heat_transfer.update(asset.set_asset_sec(-total_heat_supply, bypass=False))
 
         # Update the asset setpoints with the heat transfer setpoints.
         asset_setpoints.update(heat_transfer)

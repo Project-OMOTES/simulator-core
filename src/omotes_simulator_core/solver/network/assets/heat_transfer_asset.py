@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing a Heat Transfer asset."""
+import logging
 from enum import Enum
 
 import numpy as np
@@ -23,6 +24,8 @@ from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_q
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
+
+logger = logging.getLogger(__name__)
 
 
 class FlowDirection(Enum):
@@ -350,18 +353,18 @@ class HeatTransferAsset(BaseAsset):
         # Prescribe the pressure at the secondary side of the heat transfer asset.
         if self.pre_scribe_mass_flow_secondary:
             if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
-                mset = self.mass_flow_rate_rate_set_point_secondary
+                mset = abs(self.mass_flow_rate_rate_set_point_secondary)
             else:
-                mset = self.mass_flow_rate_rate_set_point_secondary
+                mset = abs(self.mass_flow_rate_rate_set_point_secondary)
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
-                    connection_point=self.secondary_side_inflow,
-                    mass_flow_value=-mset,
+                    connection_point=2,
+                    mass_flow_value=-1 * mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
-                    connection_point=self.secondary_side_outflow,
+                    connection_point=3,
                     mass_flow_value=mset,
                 )
             )
@@ -409,13 +412,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=0,
-                    mass_flow_value=-1 * self.mass_flow_initialization_primary,
+                    mass_flow_value=-1 * abs(self.mass_flow_initialization_primary),
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=1,
-                    mass_flow_value=self.mass_flow_initialization_primary,
+                    mass_flow_value=abs(self.mass_flow_initialization_primary),
                 )
             )
         else:
@@ -501,13 +504,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
-                    mass_flow_value=-mset,
+                    mass_flow_value=mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=3,
-                    mass_flow_value=mset,
+                    mass_flow_value=-mset,
                 )
             )
         else:
@@ -545,7 +548,7 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=1,
-                    mass_flow_value=mset * -1,
+                    mass_flow_value=-1 * mset,
                 )
             )
         else:
@@ -581,7 +584,7 @@ class HeatTransferAsset(BaseAsset):
         since the heat transfer asset is in bypass mode the secondary outflow is set equal to
         the primary inflow, and vice versa.
         """
-        equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
+        equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
         equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
         equation_object = EquationObject()
         # Short-circuiting the primary and secondary side of the heat transfer asset.
@@ -589,7 +592,7 @@ class HeatTransferAsset(BaseAsset):
             [
                 self.get_index_matrix(
                     property_name="internal_energy",
-                    connection_point=1,
+                    connection_point=0,
                     use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
@@ -607,7 +610,7 @@ class HeatTransferAsset(BaseAsset):
             [
                 self.get_index_matrix(
                     property_name="internal_energy",
-                    connection_point=0,
+                    connection_point=1,
                     use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
