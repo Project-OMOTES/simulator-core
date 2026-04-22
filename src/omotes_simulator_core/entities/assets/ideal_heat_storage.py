@@ -177,7 +177,7 @@ class IdealHeatStorage(AssetAbstract):
         if any(necessary_setpoints.difference(setpoints_set)):
             # Print missing setpoints
             raise ValueError(
-                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
+                f"The setpoints {sorted(necessary_setpoints.difference(setpoints_set))} are missing."
             )
 
     def set_temperature(self) -> None:
