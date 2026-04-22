@@ -160,8 +160,6 @@ class HeatPump(AssetAbstract):
             self.control_mass_flow_secondary
         )
         self.solver_asset.bypass_mode = setpoints_secondary[PROPERTY_BYPASS]  # type: ignore
-        if self.solver_asset.bypass_mode:  # type: ignore
-            logger.info("bypass mode enabled")
 
     def _set_setpoints_primary(self, setpoints_primary: Dict) -> None:
         """The primary side of the heat pump acts as a consumer of heat.
