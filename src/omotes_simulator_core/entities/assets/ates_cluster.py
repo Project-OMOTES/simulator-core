@@ -27,9 +27,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PROPERTY_SET_PRESSURE,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
 from omotes_simulator_core.entities.assets.utils import (

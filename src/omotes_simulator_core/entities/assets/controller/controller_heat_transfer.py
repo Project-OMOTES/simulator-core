@@ -16,8 +16,6 @@
 
 from enum import Enum
 
-import numpy as np
-
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
     PROPERTY_BYPASS,

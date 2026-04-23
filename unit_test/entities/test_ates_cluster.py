@@ -20,9 +20,9 @@ from datetime import datetime
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    PROPERTY_SET_PRESSURE,
 )
 from omotes_simulator_core.entities.assets.ates_cluster import AtesCluster
 
