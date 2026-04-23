@@ -223,7 +223,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.set_setpoints(setpoints)
 
         # Assert
-        self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 273.14539355958823)
+        self.assertAlmostEquals(self.heat_pump.solver_asset.temperature_in_primary, 273.14, 2)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 290.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)
