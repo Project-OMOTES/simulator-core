@@ -23,6 +23,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
+from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
+    HeatTransferAssetType,
+)
 from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
 from omotes_simulator_core.entities.heat_network import HeatNetwork
 from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
@@ -162,9 +165,32 @@ class NetworkController(NetworkControllerAbstract):
             for storage in network.storages:
                 total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
-            # this might look weird, but we know ih this network there is only one primary
-            # or one secondary heat transfer asset. So if we loop over them either there are
-            # no items to loop over or there is only one. And that one we can set directly,
+            for asset in network.heat_transfer_assets_sec:
+                if (
+                    asset.heat_transfer_type == HeatTransferAssetType.HEAT_PUMP
+                    and asset.max_electrical_power is not None
+                ):
+                    max_secondary = asset.max_electrical_power * asset.factor
+                    requested_secondary = abs(total_heat_supply)
+                    if requested_secondary > max_secondary:
+                        # Scale down consumers in this network proportionally
+                        scale_factor = max_secondary / requested_secondary
+                        for consumer in network.consumers:
+                            if consumer.id in asset_setpoints:
+                                current = asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                                scaled = current * scale_factor
+                                asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
+                        # Recalculate total_heat_supply after scaling
+                        total_heat_supply = 0
+                        for producer in network.producers:
+                            total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
+                        for consumer in network.consumers:
+                            total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                        for storage in network.storages:
+                            total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+
+            # this might look weird, but we know there is only one primary or secondary asset.
+            # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
                 if total_heat_supply > 0:
                     heat_transfer.update(asset.set_asset_prim(total_heat_supply, bypass=False))
@@ -186,10 +212,10 @@ class NetworkController(NetworkControllerAbstract):
 
         return asset_setpoints
 
-    def _set_producers_to_max(self) -> dict:
+    def _set_producers_to_max(self, time: datetime.datetime) -> dict:
         result = {}
         for network in self.networks:
-            result.update(network.set_supply_to_max())
+            result.update(network.set_supply_to_max(time))
         return result
 
     def _set_all_storages_discharge_to_max(self) -> dict:
@@ -234,7 +260,9 @@ class NetworkController(NetworkControllerAbstract):
             results.update(network.set_storage_discharge_power(factor=factor))
         return results
 
-    def _set_producers_based_on_priority(self, required_supply: float) -> dict:
+    def _set_producers_based_on_priority(
+        self, time: datetime.datetime, required_supply: float
+    ) -> dict:
         """Method to set the producers based on the priority of the source."""
         producers = {}
         priority = 0
@@ -245,12 +273,12 @@ class NetworkController(NetworkControllerAbstract):
             if required_supply > 0:
                 # set the producers with the priority to the max
                 for network in self.networks:
-                    producers.update(network.set_supply_to_max(priority))
+                    producers.update(network.set_supply_to_max(time, priority))
             else:
                 # set the producers with the priority with a factor.
                 factor = 1 + required_supply / max_supply_priority
                 for network in self.networks:
-                    producers.update(network.set_supply(factor=factor, priority=priority))
+                    producers.update(network.set_supply(time, factor=factor, priority=priority))
         if len(producers) < sum([len(network.producers) for network in self.networks]):
             # not al producers are set need to set the remaining to zero.
             for network in self.networks:

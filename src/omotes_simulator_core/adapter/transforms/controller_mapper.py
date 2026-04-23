@@ -249,7 +249,7 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             belongs = False
             for network in network_list:
                 if belongs_to_network(heat_transfer_asset.id + "_secondary", network, graph):
-                    network.heat_transfer_primary.append(heat_transfer_asset)
+                    network.heat_transfer_secondary.append(heat_transfer_asset)
                     belongs = True
                     break
             if not belongs:

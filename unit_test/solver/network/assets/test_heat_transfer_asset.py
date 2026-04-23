@@ -458,18 +458,17 @@ class HeatTransferTest(unittest.TestCase):
     def test_get_electric_power_consumption(self):
         """Test get_electric_power_consumption method."""
         # Arrange
-        self.asset.heat_transfer_coefficient = 5.0
         # --- Primary side
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=0, use_relative_indexing=False
             )
-        ] = 5.0
+        ] = 10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=1, use_relative_indexing=False
             )
-        ] = 10.0
+        ] = 5.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
@@ -485,12 +484,12 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=2, use_relative_indexing=False
             )
-        ] = 15.0
+        ] = 20.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="internal_energy", connection_point=3, use_relative_indexing=False
             )
-        ] = 20.0
+        ] = 15.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
