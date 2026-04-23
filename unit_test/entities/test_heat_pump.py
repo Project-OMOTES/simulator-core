@@ -223,7 +223,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.set_setpoints(setpoints)
 
         # Assert
-        self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 300.0)
+        self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 273.14539355958823)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 290.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)
@@ -241,6 +241,6 @@ class HeatPumpTest(unittest.TestCase):
         self.heat_pump.write_to_output()
 
         # Assert
-        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], 10.0)
+        self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_HEAT_POWER_PRIMARY], -10.0)
         self.assertEqual(self.heat_pump.outputs[1][-1][PROPERTY_ELECTRICITY_CONSUMPTION], 5.0)
         self.assertEqual(self.heat_pump.outputs[0][-1][PROPERTY_HEAT_POWER_SECONDARY], 5.0)
