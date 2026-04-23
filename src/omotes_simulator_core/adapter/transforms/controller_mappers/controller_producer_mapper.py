@@ -16,7 +16,6 @@
 """Module containing the Esdl to asset mapper class."""
 
 import logging
-
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
