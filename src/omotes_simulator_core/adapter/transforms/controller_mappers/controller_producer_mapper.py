@@ -51,8 +51,15 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
         strategy_priority = esdl_asset.get_strategy_priority()
 
-        if esdl_asset.has_constraint():
-            profile = esdl_asset.get_constraint_max_profile()
+        resampled_profile = None
+        # Check if there is an optimizer out port profile or a constraint profile. If there is both,
+        # only the optimizer profile is used.
+        if esdl_asset.has_out_optimizer_profile() or esdl_asset.has_constraint():
+            if esdl_asset.has_out_optimizer_profile():
+                profile = esdl_asset.get_out_port_profile()
+            else:
+                profile = esdl_asset.get_constraint_max_profile()
+
             self.profile_interpolator = ProfileInterpolator(
                 profile=profile,
                 sampling_method=esdl_asset.get_sampling_method(),
@@ -60,7 +67,8 @@ class ControllerProducerMapper(EsdlMapperAbstract):
                 timestep=timestep,
             )
             resampled_profile = self.profile_interpolator.get_resampled_profile()
-        else:
+
+        if resampled_profile is None:
             resampled_profile = pd.DataFrame()
 
         contr_producer = ControllerProducer(

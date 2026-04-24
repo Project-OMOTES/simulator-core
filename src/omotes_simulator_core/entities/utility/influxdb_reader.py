@@ -15,14 +15,38 @@
 
 """Module to read the esdl profiles from an energy system."""
 import logging
+from datetime import datetime
+from typing import cast
 
 import esdl
 import pandas as pd
 from esdl.esdl_handler import EnergySystemHandler
-from esdl.profiles.influxdbprofilemanager import InfluxDBProfileManager
+from esdl.profiles.influxdbprofilemanager import ConnectionSettings, InfluxDBProfileManager
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_influx_filters(filters: str | None) -> list[dict[str, str]]:
+    """Parse and normalize filters to the format expected by load_influxdb.
+
+    The upstream parser may return dictionaries with a `key` field while
+    load_influxdb expects `tag`. This shim keeps compatibility across versions.
+    """
+    parsed_filters = InfluxDBProfileManager._parse_esdl_profile_filters(filters)
+    normalized_filters: list[dict[str, str]] = []
+    for influx_filter in parsed_filters:
+        tag = influx_filter.get("tag") or influx_filter.get("key")
+        value = influx_filter.get("value")
+        if not tag or value is None:
+            continue
+        normalized_filters.append(
+            {
+                "tag": str(tag),
+                "value": str(value).strip().strip("\"").strip("'"),
+            }
+        )
+    return normalized_filters
 
 
 def parse_esdl_profiles(esh: EnergySystemHandler) -> dict[str, pd.DataFrame]:
@@ -48,7 +72,11 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     :return: pandas.DataFrame with the data
     """
     influx_cred_map: dict[str, tuple[str, str]] = {}
-    profile_host = esdl_profile.host
+    profile_host = str(esdl_profile.host)
+    profile_port = int(esdl_profile.port)
+    profile_database = str(esdl_profile.database)
+    profile_measurement = str(esdl_profile.measurement)
+    profile_field = str(esdl_profile.field)
     ssl_setting = False
     if "https" in profile_host:
         profile_host = profile_host[8:]
@@ -56,25 +84,36 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     elif "http" in profile_host:
         profile_host = profile_host[7:]
     # why is this here?
-    if esdl_profile.port == 443:
+    if profile_port == 443:
         ssl_setting = True
 
-    influx_host = f"{profile_host}:{esdl_profile.port}"
+    influx_host = f"{profile_host}:{profile_port}"
     if influx_host in influx_cred_map:
         (username, password) = influx_cred_map[influx_host]
     else:
         username = None
         password = None
-    time_series_data = InfluxDBProfileManager.create_esdl_influxdb_profile_manager(
-        esdl_profile,
-        username,
-        password,
-        ssl_setting,
-        ssl_setting,
+    conn_settings = ConnectionSettings(
+        host=profile_host,
+        port=profile_port,
+        database=profile_database,
+        username=username or "",
+        password=password or "",
+        ssl=ssl_setting,
+        verify_ssl=ssl_setting,
+    )
+    time_series_data = InfluxDBProfileManager(conn_settings)
+    time_series_data.load_influxdb(
+        measurement=profile_measurement,
+        fields=[profile_field],
+        from_datetime=cast(datetime, esdl_profile.startDate),
+        to_datetime=cast(datetime, esdl_profile.endDate),
+        filters=_normalize_influx_filters(str(esdl_profile.filters)
+                                          if esdl_profile.filters else None),
     )
     # Error check start and end dates of profiles
 
-    # I do not thing this is required since you set it in mapeditor.
+    # I do not think this is required since you set it in mapeditor.
     if time_series_data.end_datetime != esdl_profile.endDate:
         logger.error(
             f"The user input profile end datetime: {esdl_profile.endDate} does not match the end"

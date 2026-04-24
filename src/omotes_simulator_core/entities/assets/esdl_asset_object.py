@@ -101,6 +101,19 @@ class EsdlAssetObject:
         )
         raise ValueError(f"No profile found for asset: {self.esdl_asset.name}")
 
+    def get_out_port_profile(self) -> pd.DataFrame:
+        """Get the profile of the asset's out ports."""
+        for port in self.esdl_asset.port:
+            if isinstance(port, esdl.OutPort) and port.profile.items:
+                for profile in port.profile:
+                    if profile.field == "Heat_flow":
+                        return get_data_from_profile(profile)
+        logger.error(
+            f"No profile found for asset: {self.esdl_asset.name}",
+            extra={"esdl_object_id": self.get_id()},
+        )
+        raise ValueError(f"No profile found at out port for asset: {self.esdl_asset.name}")
+
     def get_constraint_max_profile(self) -> pd.DataFrame:
         """Get the profile from the asset's maximum constraint."""
         for constraint in self.esdl_asset.constraint:
@@ -209,6 +222,20 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 return True
+        return False
+
+    def has_out_optimizer_profile(self) -> bool:
+        """Checks if an asset has an optimizer profile assigned to its out port."""
+        for port in self.esdl_asset.port:
+            if isinstance(port, esdl.OutPort) and port.profile.items:
+                # There is a profile on the out port
+                for profile in port.profile:
+                    if (
+                        hasattr(profile, "dataSource")
+                        and hasattr(profile.dataSource, "name")
+                        and profile.dataSource.name == "Optimizer"
+                    ):
+                        return True
         return False
 
     def has_constraint(self) -> bool:
