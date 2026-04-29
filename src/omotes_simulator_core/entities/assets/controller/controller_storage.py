@@ -174,6 +174,12 @@ class ControllerAtesStorage(ControllerStorageAbstract):
             profile=profile,
         )
 
+    def set_state(self, state: dict[str, float]) -> None:
+        """Update maximum charge and discharge power."""
+        if bool(state):
+            self.effective_max_charge_power = state["max_charge_power"]
+            self.effective_max_discharge_power = state["max_discharge_power"]
+
 
 class ControllerIdealHeatStorage(ControllerStorageAbstract):
     """Class to store the storage for the controller asset."""

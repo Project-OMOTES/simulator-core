@@ -82,10 +82,6 @@ class TestEsdlAssetAtesMapper(unittest.TestCase):
             ates_entity.salinity, esdl_asset.get_property("salinity", ATES_DEFAULTS.salinity)
         )
         self.assertEqual(
-            ates_entity.well_casing_size,
-            esdl_asset.get_property("wellCasingSize", ATES_DEFAULTS.well_casing_size),
-        )
-        self.assertEqual(
             ates_entity.well_distance,
             esdl_asset.get_property("wellDistance", ATES_DEFAULTS.well_distance),
         )

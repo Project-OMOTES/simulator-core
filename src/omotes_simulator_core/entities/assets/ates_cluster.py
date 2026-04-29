@@ -21,6 +21,7 @@ from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_GRAVITY_ACCELERATION,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_HEAT_DEMAND,
@@ -37,6 +38,7 @@ from omotes_simulator_core.entities.assets.utils import (
     kelvin_to_celcius,
 )
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
 
@@ -81,10 +83,13 @@ class AtesCluster(AssetAbstract):
     """The salinity of the aquifer [ppm]."""
 
     well_casing_size: float
-    """The casing size of the well [inch]."""
+    """The casing size of the well [m]."""
 
     well_distance: float
     """The distance of the well [m]."""
+
+    maximum_flowrate: float
+    """The maximum flowrate of ATES [m3/h]."""
 
     pyjnius_loader: PyjniusLoader
     """Loader object to delay importing pyjnius module and Java classes."""
@@ -102,8 +107,9 @@ class AtesCluster(AssetAbstract):
         aquifer_permeability: float,
         aquifer_anisotropy: float,
         salinity: float,
-        well_casing_size: float,
         well_distance: float,
+        well_casing_size: float,
+        maximum_flowrate: float,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -127,8 +133,10 @@ class AtesCluster(AssetAbstract):
         self.aquifer_permeability = aquifer_permeability  # mD
         self.aquifer_anisotropy = aquifer_anisotropy  # -
         self.salinity = salinity  # ppm
-        self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
+        self.well_casing_size = well_casing_size  # meters
+        self.max_charge_volume_flow = maximum_flowrate
+        self.max_discharge_volume_flow = maximum_flowrate
 
         # Output list
         self.output: list = []
@@ -229,38 +237,38 @@ class AtesCluster(AssetAbstract):
 
         # overwrite template value with ESDL properties for ROSIM input
 
-        MODEL_TOP = self.aquifer_depth - 100
-        AQUIFER_THICKNESS = self.aquifer_thickness
-        NZ_AQUIFER = math.floor(AQUIFER_THICKNESS / 2)
-        NZ = NZ_AQUIFER + 8
-        AQUIFER_TOP = self.aquifer_depth
-        AQUIFER_BASE = self.aquifer_depth + self.aquifer_thickness
-        SURFACE_TEMPERATURE = self.aquifer_mid_temperature - 0.034 * (
+        model_top = self.aquifer_depth - 100
+        aquifer_thickness = self.aquifer_thickness
+        nz_aquifer = math.floor(aquifer_thickness / 2)
+        nz = nz_aquifer + 8
+        aquifer_top = self.aquifer_depth
+        aquifer_base = self.aquifer_depth + self.aquifer_thickness
+        surface_temperature = self.aquifer_mid_temperature - 0.034 * (
             self.aquifer_depth + self.aquifer_thickness / 2
         )
-        AQUIFER_NTG = self.aquifer_net_to_gross
-        AQUIFER_PORO = self.aquifer_porosity
-        AQUIFER_PERM_XY = self.aquifer_permeability
-        AQUIFER_PERM_Z = AQUIFER_PERM_XY / self.aquifer_anisotropy
-        SALINITY = self.salinity
-        WELL2_X = self.well_distance + 300
-        CASING_SIZE = self.well_casing_size
+        aquifer_ntg = self.aquifer_net_to_gross
+        aquifer_poro = self.aquifer_porosity
+        aquifer_perm_xy = self.aquifer_permeability
+        aquifer_perm_z = aquifer_perm_xy / self.aquifer_anisotropy
+        salinity = self.salinity
+        well2_x = self.well_distance + 300
+        well_casing_size = self.well_casing_size / 0.0254  # convert to inch
 
-        xml_str = xml_str.replace("$NZ$", str(NZ))
-        xml_str = xml_str.replace("$MODEL_TOP$", str(MODEL_TOP))
+        xml_str = xml_str.replace("$NZ$", str(nz))
+        xml_str = xml_str.replace("$MODEL_TOP$", str(model_top))
         xml_str = xml_str.replace("$TIME_STEP_UNIT$", str(2))
-        xml_str = xml_str.replace("$WELL2_X$", str(WELL2_X))
-        xml_str = xml_str.replace("$AQUIFER_TOP$", str(AQUIFER_TOP))
-        xml_str = xml_str.replace("$AQUIFER_BASE$", str(AQUIFER_BASE))
-        xml_str = xml_str.replace("$CASING_SIZE$", str(CASING_SIZE))
-        xml_str = xml_str.replace("$SURFACE_TEMPERATURE$", str(SURFACE_TEMPERATURE))
-        xml_str = xml_str.replace("$SALINITY$", str(SALINITY))
-        xml_str = xml_str.replace("$NZ_AQUIFER$", str(NZ_AQUIFER))
-        xml_str = xml_str.replace("$AQUIFER_THICKNESS$", str(AQUIFER_THICKNESS))
-        xml_str = xml_str.replace("$AQUIFER_PORO$", str(AQUIFER_PORO))
-        xml_str = xml_str.replace("$AQUIFER_NTG$", str(AQUIFER_NTG))
-        xml_str = xml_str.replace("$AQUIFER_PERM_XY$", str(AQUIFER_PERM_XY))
-        xml_str = xml_str.replace("$AQUIFER_PERM_Z$", str(AQUIFER_PERM_Z))
+        xml_str = xml_str.replace("$WELL2_X$", str(well2_x))
+        xml_str = xml_str.replace("$AQUIFER_TOP$", str(aquifer_top))
+        xml_str = xml_str.replace("$AQUIFER_BASE$", str(aquifer_base))
+        xml_str = xml_str.replace("$CASING_SIZE$", str(well_casing_size))
+        xml_str = xml_str.replace("$SURFACE_TEMPERATURE$", str(surface_temperature))
+        xml_str = xml_str.replace("$SALINITY$", str(salinity))
+        xml_str = xml_str.replace("$NZ_AQUIFER$", str(nz_aquifer))
+        xml_str = xml_str.replace("$AQUIFER_THICKNESS$", str(aquifer_thickness))
+        xml_str = xml_str.replace("$AQUIFER_PORO$", str(aquifer_poro))
+        xml_str = xml_str.replace("$AQUIFER_NTG$", str(aquifer_ntg))
+        xml_str = xml_str.replace("$AQUIFER_PERM_XY$", str(aquifer_perm_xy))
+        xml_str = xml_str.replace("$AQUIFER_PERM_Z$", str(aquifer_perm_z))
 
         temp_xmlfile_path = os.path.join(path, "bin/ates_sequential_temp.xml")
         with open(temp_xmlfile_path, "w") as temp_xmlfile:
@@ -288,30 +296,223 @@ class AtesCluster(AssetAbstract):
 
     def _run_rosim(self) -> None:
         """Function to calculate storage temperature after injection and production."""
-        volume_flow = self.mass_flowrate * 3600 / 1027  # convert to second and hardcoded saline
-        # density needs to change with PVT calculation
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        topside_pressure = (
+            101325  # Pa - assume atmospheric pressure since we don't have measurement
+        )
+        saline_density = self._get_saline_density(topside_pressure, average_temperature)
+
+        volume_flow = self.mass_flowrate * 3600 / saline_density  # convert to second and
+        if volume_flow > 0:
+            volume_flow = min(volume_flow, self.max_charge_volume_flow)
+        if volume_flow < 0:
+            volume_flow = -1 * min(abs(volume_flow), self.max_discharge_volume_flow)
+
+        # hardcoded saline
         timestep = self.time_step / 3600  # convert to hours
 
-        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
-        # and second element is for injection well, positive flow is going upward and negative flow
-        # is downward
+        rosim_input_flow = [volume_flow, -1 * volume_flow]  # the first element is for hot well
+        # and the second element is for cold well. positive flow is charge and negative flow
+        # is discharge
 
         if volume_flow > 0:
             rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
-            # injection well to make sure it is not used
+        # injection well to make sure it is not used
         elif volume_flow < 0:
             rosim_input_temperature = [
                 -1,
                 kelvin_to_celcius(self.temperature_out),
             ]  # Celcius, -1 in
-            # producer well to make sure it is not used
+        # producer well to make sure it is not used
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
-            # sure it is not used
+        # sure it is not used
 
         ates_temperature = self.rosim.calcTimeStepAndGetTemps(
-            rosim_input__flow, rosim_input_temperature, timestep
+            rosim_input_flow, rosim_input_temperature, timestep
         )
 
         self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
+
+    def get_state(self) -> dict[str, float]:
+        """Function to get the state of ATES at current timestep."""
+        max_charge_power, max_discharge_power = self._calculate_max_charge_discharge_power()
+
+        return {"max_charge_power": max_charge_power, "max_discharge_power": max_discharge_power}
+
+    def _calculate_max_charge_discharge_power(self) -> tuple[float, float]:
+        """Function to calculate the maximum charge power and discharge power based on NVOE."""
+        # calculate primary side of heat exchanger
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        topside_pressure = 101325  # Pa assumed atmospheric pressure since we don't have measurement
+        saline_density = self._get_saline_density(topside_pressure, average_temperature)
+
+        downhole_pressure = saline_density * DEFAULT_GRAVITY_ACCELERATION * self.aquifer_depth
+
+        max_extraction_flow_cold_well = self._get_max_flowrate_extraction_norm(
+            downhole_pressure, self.cold_well_temperature
+        )
+        max_injection_flow_cold_well = self._get_max_flowrate_injection_norm(
+            downhole_pressure, self.cold_well_temperature
+        )
+
+        max_extraction_flow_hot_well = self._get_max_flowrate_extraction_norm(
+            downhole_pressure, self.hot_well_temperature
+        )
+        max_injection_flow_hot_well = self._get_max_flowrate_injection_norm(
+            downhole_pressure, self.hot_well_temperature
+        )
+
+        self.max_charge_volume_flow = min(
+            max_extraction_flow_cold_well, max_injection_flow_hot_well
+        )
+        self.max_discharge_volume_flow = min(
+            max_injection_flow_cold_well, max_extraction_flow_hot_well
+        )
+
+        # calculate secondary side of heat exchanger
+        average_temperature = (self.temperature_in + self.temperature_out) / 2
+        water_density = fluid_props.get_density(average_temperature)
+        water_heat_capacity = fluid_props.get_heat_capacity(average_temperature)
+
+        max_charge_power = (
+            (self.hot_well_temperature - self.cold_well_temperature)
+            * self.max_charge_volume_flow
+            * water_density
+            / 3600
+            * water_heat_capacity
+        )
+
+        max_discharge_power = (
+            (self.hot_well_temperature - self.cold_well_temperature)
+            * self.max_discharge_volume_flow
+            * water_density
+            / 3600
+            * water_heat_capacity
+        )
+
+        return max_charge_power, max_discharge_power
+
+    def _get_max_flowrate_extraction_norm(self, P: float, T: float) -> float:
+        """Function to calculate the maximum flowrate of production in norm.
+
+        reference equation: NVOE Richtlijnen Ondergrondse Energieopslag, november 2006
+        parameters value: https://www.thermogis.nl/doublet-en-economische-parameters-hto
+        """
+        saline_density = self._get_saline_density(P, T)
+        saline_viscosity = self._get_saline_viscosity(P, T)
+        aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        # diameter
+        well_radius = 0.5 * self.well_casing_size  # m
+
+        max_extract_flow_velocity = (
+            2
+            * 60
+            * 60
+            * aquifer_permeability
+            * saline_density
+            * DEFAULT_GRAVITY_ACCELERATION
+            / saline_viscosity
+        )  # m3/h
+
+        max_flowrate = (
+            2 * math.pi * well_radius * self.aquifer_thickness * max_extract_flow_velocity
+        )
+
+        max_flowrate = max_flowrate * self.aquifer_depth * 0.01  # using a depth factor multiplier
+        # (0.01, based on expert judgment) as a function of depth, because ATES is deeper than WKO
+        # and therefore allows a higher flowrate.
+
+        return max_flowrate
+
+    def _get_max_flowrate_injection_norm(self, P: float, T: float) -> float:
+        """Function to calculate the maximum flowrate of injection in norm.
+
+        reference equation: NVOE Richtlijnen Ondergrondse Energieopslag, november 2006
+        parameters value: https://www.thermogis.nl/doublet-en-economische-parameters-hto
+        """
+        saline_density = self._get_saline_density(P, T)
+        saline_viscosity = self._get_saline_viscosity(P, T)
+        aquifer_permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        # diameter
+        well_radius = 0.5 * self.well_casing_size  # m, radius is half of diameter
+
+        cloggingVel = 0.3  # meter/year
+        membraneFilterIndex = 0.1  # s/l2
+        equivLoadHoursPerYear = 3500  # hours
+        max_infiltrate_flow_velocity = (
+            1000
+            * math.pow(
+                576
+                * aquifer_permeability
+                * saline_density
+                * DEFAULT_GRAVITY_ACCELERATION
+                / saline_viscosity,
+                0.6,
+            )
+            * math.sqrt(cloggingVel / (2 * membraneFilterIndex * equivLoadHoursPerYear))
+        )
+
+        max_flowrate = (
+            2 * math.pi * well_radius * self.aquifer_thickness * max_infiltrate_flow_velocity
+        )  # m3/h
+
+        return max_flowrate
+
+    def _get_saline_density(self, P_Pa: float, T_K: float) -> float:
+        """Function to calculate the saline density.
+
+        Input is pressure in Pa and temperature in Celsius. Output is density in kg/m3.
+        """
+        P = P_Pa * 1e-6  # Pa to MPa
+        T = kelvin_to_celcius(T_K)  # K to C
+        S = self.salinity * 1e-6  # ppm to kg/kg
+
+        density_fresh = 1 + 1e-6 * (
+            -80.0 * T
+            - 3.3 * T * T
+            + 0.00175 * T * T * T
+            + 489.0 * P
+            - 2.0 * T * P
+            + 0.016 * T * T * P
+            - 1.3e-5 * T * T * T * P
+            - 0.333 * P * P
+            - 0.002 * T * P * P
+        )
+
+        density = density_fresh + S * (
+            0.668
+            + 0.44 * S
+            + 1e-6
+            * (
+                300.0 * P
+                - 2400.0 * P * S
+                + T * (80.0 + 3.0 * T - 3300.0 * S - 13.0 * P + 47.0 * P * S)
+            )
+        )
+
+        density = density * 1000  # g/cm3 to kg/m3
+
+        return density
+
+    def _get_saline_viscosity(self, P_Pa: float, T_K: float) -> float:
+        """Function to calculate the saline viscosity using Batzle-Wang correlation.
+
+        Input is pressure in Pa and temperature in Celsius. Output is viscosity in Pas.
+        """
+        S = self.salinity * 1e-6  # ppm to kg/kg
+        T = kelvin_to_celcius(T_K)  # K to C
+
+        viscosity = (
+            0.1
+            + 0.333 * S
+            + (1.65 + 91.90 * S * S * S)
+            * math.exp(
+                -(0.42 * math.pow((math.pow(S, 0.8) - 0.17), 2.0) + 0.045) * math.pow(T, 0.8)
+            )
+        )
+
+        viscosity = viscosity * 1e-3  # cP to Pas
+
+        return viscosity

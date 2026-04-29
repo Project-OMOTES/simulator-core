@@ -256,9 +256,13 @@ class TestControllerNetwork(unittest.TestCase):
             {
                 storage1.id: {
                     PROPERTY_HEAT_DEMAND: -20,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_TEMPERATURE_OUT: 50,
                 },
                 storage2.id: {
                     PROPERTY_HEAT_DEMAND: -25,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_TEMPERATURE_OUT: 50,
                 },
             },
         )
@@ -286,9 +290,13 @@ class TestControllerNetwork(unittest.TestCase):
             {
                 storage1.id: {
                     PROPERTY_HEAT_DEMAND: 10,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_TEMPERATURE_OUT: 50,
                 },
                 storage2.id: {
                     PROPERTY_HEAT_DEMAND: 15,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_TEMPERATURE_OUT: 50,
                 },
             },
         )

@@ -166,6 +166,8 @@ class ControllerNetwork:
         for storage in self.storages:
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
             }
         return storage_settings
 
@@ -180,6 +182,8 @@ class ControllerNetwork:
             # Discharging is negative (e.g., heat from component/system to the network)
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
             }
         return storage_settings
 

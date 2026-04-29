@@ -41,6 +41,7 @@ class AtesClusterTest(unittest.TestCase):
         self.salinity = ATES_DEFAULTS.salinity
         self.well_casing_size = ATES_DEFAULTS.well_casing_size
         self.well_distance = ATES_DEFAULTS.well_distance
+        maximum_flowrate = ATES_DEFAULTS.maximum_flowrate
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
@@ -54,8 +55,9 @@ class AtesClusterTest(unittest.TestCase):
             aquifer_permeability=self.aquifer_permeability,
             aquifer_anisotropy=self.aquifer_anisotropy,
             salinity=self.salinity,
-            well_casing_size=self.well_casing_size,
             well_distance=self.well_distance,
+            well_casing_size=self.well_casing_size,
+            maximum_flowrate=maximum_flowrate,
         )
 
     def test_injection_ates(self) -> None:

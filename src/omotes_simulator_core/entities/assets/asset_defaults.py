@@ -28,6 +28,7 @@ DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 DEFAULT_POWER = 500000.0  # [W]
 DEFAULT_MISSING_VALUE = -9999.99  # [-]
 DEFAULT_ROUGHNESS = 1e-3  # [m]
+DEFAULT_GRAVITY_ACCELERATION = 9.81  # m/s2
 
 
 @dataclass
@@ -78,10 +79,11 @@ class AtesDefaults:
     aquifer_permeability: float = 10000.0  # mD
     aquifer_anisotropy: float = 4.0  # -
     salinity: float = 10000.0  # ppm
-    well_casing_size: float = 13.0  # inch
     well_distance: float = 150.0  # meters
     maximum_flow_charge: float = 200.0  # m3/h
     maximum_flow_discharge: float = 200.0  # m3/h
+    well_casing_size: float = 31.0 * 0.0254  # meters
+    maximum_flowrate: float = 500.0  # m3/h
 
 
 @dataclass
