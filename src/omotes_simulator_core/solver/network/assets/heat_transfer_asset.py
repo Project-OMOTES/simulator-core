@@ -563,43 +563,30 @@ class HeatTransferAsset(BaseAsset):
         """
         equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
         equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
+        equations.append(self.short_cut_internal_energy(con_point1=0, con_point2=3))
+        equations.append(self.short_cut_internal_energy(con_point1=1, con_point2=2))
+
+    def short_cut_internal_energy(self, con_point1: int, con_point2: int) -> EquationObject:
+        """Return an equation object which set the internal energy equal between both connections"""
         equation_object = EquationObject()
         # Short-circuiting the primary and secondary side of the heat transfer asset.
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
                     property_name="internal_energy",
-                    connection_point=0,
+                    connection_point=con_point1,
                     use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
                     property_name="internal_energy",
-                    connection_point=3,
+                    connection_point=con_point2,
                     use_relative_indexing=False,
                 ),
             ]
         )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
-        equations.append(equation_object)
-        equation_object2 = EquationObject()
-        equation_object2.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="internal_energy",
-                    connection_point=1,
-                    use_relative_indexing=False,
-                ),
-                self.get_index_matrix(
-                    property_name="internal_energy",
-                    connection_point=2,
-                    use_relative_indexing=False,
-                ),
-            ]
-        )
-        equation_object2.coefficients = np.array([1.0, -1.0])
-        equation_object2.rhs = 0.0
-        equations.append(equation_object2)
+        return equation_object
 
     def get_mass_flow_from_prev_solution(self) -> float:
         r"""Determine the mass flow rate from the previous solution.

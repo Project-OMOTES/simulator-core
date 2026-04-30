@@ -139,6 +139,7 @@ class HeatTransferTest(unittest.TestCase):
             12,
         )
 
+    @patch.object(HeatTransferAsset, "short_cut_internal_energy")
     @patch.object(HeatTransferAsset, "get_internal_energy_to_node_equation")
     @patch.object(HeatTransferAsset, "prescribe_temperature_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
@@ -153,6 +154,7 @@ class HeatTransferTest(unittest.TestCase):
         mock_prescribe_mass_flow_at_connection_point,
         mock_prescribe_temperature_at_connection_point,
         mock_get_internal_energy_to_node_equation,
+        mock_short_cut_internal_energy,
     ):
         """Test get_equations with default parameters and bypass mode."""
         # Arrange
@@ -169,6 +171,7 @@ class HeatTransferTest(unittest.TestCase):
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
+        self.assertEqual(mock_short_cut_internal_energy.call_count, 2)
         self.assertEqual(
             (
                 mock_get_press_to_node_equation.call_count
@@ -176,8 +179,9 @@ class HeatTransferTest(unittest.TestCase):
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
                 + mock_get_internal_energy_to_node_equation.call_count
+                + mock_short_cut_internal_energy.call_count
             ),
-            10,
+            12,
         )
 
     @patch.object(HeatTransferAsset, "get_internal_energy_to_node_equation")
