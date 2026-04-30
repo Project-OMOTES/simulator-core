@@ -677,46 +677,6 @@ class HeatTransferAsset(BaseAsset):
             )
         return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
 
-    def add_continuity_equation(
-        self, connection_point_1: int, connection_point_2: int
-    ) -> EquationObject:
-        r"""Returns an EquationObject that represents the continuity equation for the asset.
-
-        The continuity equation is given by:
-
-        .. math::
-
-            \dot{m}_1 + \dot{m}_2 = 0
-
-        where :math:`\dot{m}_1` is the mass flow rate at 'connection_point_1', and
-        :math:`\dot{m}_2` is the mass flow rate at 'connection_point_2'.
-
-        :param int connection_point_1: The index of the first connection point.
-        :param int connection_point_2: The index of the second connection point.
-        :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side value of
-            the equation.
-        """
-        # Add the equations
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=connection_point_1,
-                    use_relative_indexing=False,
-                ),
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=connection_point_2,
-                    use_relative_indexing=False,
-                ),
-            ]
-        )
-        equation_object.coefficients = np.array([1.0, 1.0])
-        equation_object.rhs = 0.0
-        return equation_object
-
     def prescribe_temperature_at_connection_point(
         self, connection_point: int, supply_temperature: float
     ) -> EquationObject:
