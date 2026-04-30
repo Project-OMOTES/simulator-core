@@ -380,7 +380,7 @@ class HeatTransferTest(unittest.TestCase):
         self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
                 +mock_get_press_to_node_equation.call_count

@@ -94,10 +94,10 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         else:
             return {
                 self.id: {
-                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
                     PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
                     PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
-                    SECONDARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand * self.factor,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * self.factor,
                     SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
                     SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
