@@ -355,9 +355,7 @@ class HeatTransferAsset(BaseAsset):
             if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
                 mset = abs(self.mass_flow_rate_rate_set_point_secondary)
             else:
-                mset = abs(
-                    self.get_mass_flow_from_prev_solution()
-                )  # abs(self.mass_flow_rate_rate_set_point_secondary)
+                mset = abs(self.mass_flow_rate_rate_set_point_secondary)
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
