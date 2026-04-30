@@ -145,6 +145,47 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
+    def test_get_equations_bypass(
+        self,
+        mock_get_mass_flow_from_prev_solution,
+        mock_get_press_to_node_equation,
+        mock_prescribe_pressure_at_connection_point,
+        mock_prescribe_mass_flow_at_connection_point,
+        mock_prescribe_temperature_at_connection_point,
+        mock_get_internal_energy_to_node_equation,
+    ):
+        """Test get_equations with default parameters and bypass mode."""
+        # Arrange
+        self.asset.bypass_mode = True
+
+        # Act
+        equations = self.asset.get_equations()  # act
+
+        # Assert
+        self.assertEqual(len(equations), 12)
+        self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
+        self.assertEqual(
+            (
+                mock_get_press_to_node_equation.call_count
+                + mock_prescribe_pressure_at_connection_point.call_count
+                + mock_prescribe_mass_flow_at_connection_point.call_count
+                + mock_prescribe_temperature_at_connection_point.call_count
+                + mock_get_internal_energy_to_node_equation.call_count
+            ),
+            10,
+        )
+
+    @patch.object(HeatTransferAsset, "get_internal_energy_to_node_equation")
+    @patch.object(HeatTransferAsset, "prescribe_temperature_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
+    @patch.object(HeatTransferAsset, "get_press_to_node_equation")
+    @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
     def test_get_equations_initial_conditions_prescribe_mass_flow_primary(
         self,
         mock_get_mass_flow_from_prev_solution,
