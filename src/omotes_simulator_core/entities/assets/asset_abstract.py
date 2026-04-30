@@ -134,7 +134,7 @@ class AssetAbstract(ABC):
         """
 
     def get_timeseries(self) -> DataFrame:
-        """Get timeseries as a dataframe from a asset.
+        """Get timeseries as a dataframe from an asset.
 
         The header is a tuple of the port id and the property name.
         """

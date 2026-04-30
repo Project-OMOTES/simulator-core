@@ -90,8 +90,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
-        self.heat_transfer_asset.mass_flow_initialization_primary = -1
+        self.heat_transfer_asset.mass_flow_initialization_primary = -77.55
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -1
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -133,10 +135,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
             2,
         )
         self.assertAlmostEqual(
@@ -187,8 +189,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
-        self.heat_transfer_asset.mass_flow_initialization_primary = +1
+        self.heat_transfer_asset.mass_flow_initialization_primary = 77.55
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -1
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -215,7 +219,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            77.55,
+            -77.55,
             2,
         )
         self.assertAlmostEqual(
@@ -233,7 +237,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="internal_energy", connection_point=0, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.production_asset.supply_temperature),
             2,
         )
         self.assertAlmostEqual(
@@ -242,7 +246,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="internal_energy", connection_point=2, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
+            fluid_props.get_ie(self.demand_asset.supply_temperature),
             2,
         )
 
@@ -283,8 +287,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 3.0
-        self.heat_transfer_asset.mass_flow_initialization_primary = -1
+        self.heat_transfer_asset.mass_flow_initialization_primary = -77.55
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = +1
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -326,10 +332,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
             2,
         )
         self.assertAlmostEqual(
@@ -380,7 +386,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 20 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 5.0
-        self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -38.76
+        self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -20.0
+        self.heat_transfer_asset.mass_flow_initialization_primary = -38.76
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -406,7 +415,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
                 )
             ],
-            -93.07,
+            -38.76,
             2,
         )
         self.assertAlmostEqual(
@@ -421,10 +430,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
             2,
         )
 
@@ -467,6 +476,9 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_secondary = 70 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0  # - 1.0 / 5.0
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -38.76
+        self.heat_transfer_asset.mass_flow_initialization_primary = -38.76
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -507,10 +519,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
             2,
         )
         self.assertAlmostEqual(
@@ -519,7 +531,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="internal_energy", connection_point=2, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
+            fluid_props.get_ie(self.demand_asset.supply_temperature),
             2,
         )
 
@@ -561,8 +573,10 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.temperature_out_primary = 30 + 273.15
         self.heat_transfer_asset.temperature_out_secondary = 40 + 273.15
         self.heat_transfer_asset.heat_transfer_coefficient = -1 * (1.0 - 1.0 / 5.0)
-        self.heat_transfer_asset.mass_flow_initialization_primary = -1
+        self.heat_transfer_asset.mass_flow_initialization_primary = -93.07
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = -1
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 70 + 273.15
@@ -604,19 +618,19 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
             2,
         )
         self.assertAlmostEqual(
             self.heat_transfer_asset.prev_sol[
                 self.heat_transfer_asset.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_out).initial_temperature),
+            fluid_props.get_ie(self.production_asset.supply_temperature),
             2,
         )
         self.assertAlmostEqual(
@@ -679,6 +693,8 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
         self.heat_transfer_asset.heat_transfer_coefficient = 1.0 - 1.0 / 5.0
         self.heat_transfer_asset.mass_flow_initialization_primary = 0.0
         self.heat_transfer_asset.mass_flow_rate_rate_set_point_secondary = 0.0
+        self.heat_transfer_asset.pre_scribe_mass_flow_primary = True
+        self.heat_transfer_asset.pre_scribe_mass_flow_secondary = False
 
         # Set the temperature of the demand
         self.demand_asset.supply_temperature = 40 + 273.15
@@ -723,7 +739,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="internal_energy", connection_point=0, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(primary_in).initial_temperature),
+            fluid_props.get_ie(30 + 273.15),
             2,
         )
         self.assertAlmostEqual(
@@ -741,7 +757,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                     property_name="internal_energy", connection_point=2, use_relative_indexing=False
                 )
             ],
-            fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
+            fluid_props.get_ie(40 + 273.15),
             2,
         )
         self.assertAlmostEqual(

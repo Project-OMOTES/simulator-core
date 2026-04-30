@@ -16,10 +16,9 @@
 
 from enum import Enum
 
-import numpy as np
-
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
+    PROPERTY_BYPASS,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
@@ -68,26 +67,80 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         self.heat_transfer_type = heat_transfer_type
         self.max_electrical_power = max_electrical_power
 
-    def set_asset(self, heat_demand: float) -> dict[str, dict[str, float]]:
+    def set_asset_prim(
+        self, heat_demand: float, bypass: bool = False
+    ) -> dict[str, dict[str, float]]:
         """Method to set the asset to the given heat demand.
 
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
+        :param bypass: When true the heat exchange is bypassed, so the heat demand is not
+        reduced by the factor. Default is False.
         """
-        # TODO set correct values also for prim and secondary side.
-        return {
-            self.id: {
-                PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
-                SECONDARY
-                + PROPERTY_HEAT_DEMAND: np.abs(heat_demand)
-                * self.factor
-                * (
-                    np.sign(heat_demand) * -1
-                ),  # Invert sign of secondary heat demand, as it is opposite to primary side.
-                SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
-                PROPERTY_SET_PRESSURE: False,
+        if bypass:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * -1,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: True,
+                }
             }
-        }
+        else:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand * self.factor,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: False,
+                }
+            }
+
+    def set_asset_sec(
+        self, heat_demand: float, bypass: bool = False
+    ) -> dict[str, dict[str, float]]:
+        """Method to set the asset to the given heat demand.
+
+        The supply and return temperatures are also set.
+        :param float heat_demand: Heat demand to set.
+        :param bypass: When true the heat exchange is bypassed, so the heat demand is not
+        reduced by the factor. Default is False.
+        """
+        if bypass:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * -1,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: True,
+                }
+            }
+        else:
+            return {
+                self.id: {
+                    PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand / self.factor,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_SET_PRESSURE: False,
+                    PRIMARY + PROPERTY_SET_PRESSURE: False,
+                    PROPERTY_BYPASS: False,
+                }
+            }

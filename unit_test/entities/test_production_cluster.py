@@ -284,10 +284,10 @@ class ProductionClusterTest(unittest.TestCase):
         The convergence criteria is set to 0.1% of the heat demand set point.
         """
         # Arrange
-        self.production_cluster.heat_demand_set_point = 100.0
+        self.production_cluster.heat_demand_set_point = -100.0
 
         def get_actual_heat_supplied(_):
-            return self.production_cluster.heat_demand_set_point * (1 - 0.001)
+            return -self.production_cluster.heat_demand_set_point * (1 - 0.001)
 
         with patch(
             "omotes_simulator_core.entities.assets.production_cluster."

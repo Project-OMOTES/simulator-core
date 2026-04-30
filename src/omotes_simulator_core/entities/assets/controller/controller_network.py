@@ -16,11 +16,14 @@
 
 import datetime
 
+import numpy as np
+
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    SECONDARY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
@@ -49,7 +52,7 @@ class ControllerNetwork:
     """List of all producers in the network."""
     storages: list[ControllerAtesStorage | ControllerIdealHeatStorage]
     """List of all storages in the network."""
-    factor_to_first_network: float
+    factor_to_first_network: list[float]
     """Factor to calculate power in the first network in the list of networks."""
     path: list[str]
     """Path from this network to the first network in the total system."""
@@ -69,7 +72,7 @@ class ControllerNetwork:
         self.consumers = consumers_in
         self.producers = producers_in
         self.storages = storages_in
-        self.factor_to_first_network = factor_to_first_network
+        self.factor_to_first_network = [factor_to_first_network]
         self.path: list[str] = []
 
     def exists(self, identifier: str) -> bool:
@@ -91,9 +94,9 @@ class ControllerNetwork:
 
     def get_total_heat_demand(self, time: datetime.datetime) -> float:
         """Method which the total heat demand at the given time corrected to the first network."""
-        return (
+        return float(
             sum([consumer.get_heat_demand(time) for consumer in self.consumers])
-            * self.factor_to_first_network
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=float)))
         )
 
     def get_total_discharge_storage(self) -> float:
@@ -101,9 +104,9 @@ class ControllerNetwork:
 
         :return float: Total heat discharge of all storages.
         """
-        return (
-            float(sum([storage.effective_max_discharge_power for storage in self.storages]))
-            * self.factor_to_first_network
+        return float(
+            sum([storage.effective_max_discharge_power for storage in self.storages])
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=float)))
         )
 
     def get_total_charge_storage(self) -> float:
@@ -111,9 +114,9 @@ class ControllerNetwork:
 
         :return float: Total heat charge of all storages.
         """
-        return (
-            float(sum([storage.effective_max_charge_power for storage in self.storages]))
-            * self.factor_to_first_network
+        return float(
+            sum([storage.effective_max_charge_power for storage in self.storages])
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=float)))
         )
 
     def get_total_supply(self, time: datetime.datetime) -> float:
@@ -121,9 +124,9 @@ class ControllerNetwork:
 
         :return float: Total heat supply of all producers.
         """
-        return (
-            float(sum([producer.get_max_power(time) for producer in self.producers]))
-            * self.factor_to_first_network
+        return float(
+            sum([producer.get_max_power(time) for producer in self.producers])
+            * float(np.prod(np.array(self.factor_to_first_network, dtype=float)))
         )
 
     def set_supply_to_max(self, time: datetime.datetime, priority: int = 0) -> dict:
@@ -166,6 +169,9 @@ class ControllerNetwork:
         for storage in self.storages:
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 
@@ -180,6 +186,9 @@ class ControllerNetwork:
             # Discharging is negative (e.g., heat from component/system to the network)
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
+                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
+                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
 
@@ -226,15 +235,18 @@ class ControllerNetwork:
             sum([producer.power for producer in self.producers if producer.priority == priority])
         )
 
-    def set_pressure(self) -> str:
-        """Returns the id of the asset for which the pressure can be set for this network.
+    def set_pressure(self) -> tuple[str, str]:
+        """Returns the id of the asset and controller key name for which the pressure can be set.
 
         The controller needs to set per hydraulic separated part of the system the pressure.
         The network can thus pass back the id for which asset the pressure needs to be set.
-        The controller can then do this.
+        The controller can then add this in the set points dicts. For heattransfer assets also the
+        controller key needs to be return, either primary or secondary.
         """
-        if self.heat_transfer_assets_sec:
-            return self.heat_transfer_assets_sec[0].id
         if self.producers:
-            return self.producers[0].id
+            return self.producers[0].id, PROPERTY_SET_PRESSURE
+        if self.heat_transfer_assets_sec:
+            return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
+        if self.storages:
+            return self.storages[0].id, PROPERTY_SET_PRESSURE
         raise ValueError("No asset found for which the pressure can be set.")
