@@ -157,13 +157,13 @@ class NetworkController(NetworkControllerAbstract):
             if number_of_heat_exchangers != 1:
                 continue
 
-            total_heat_supply: float = 0
+            total_heat_demand: float = 0
             for producer in network.producers:
-                total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
+                total_heat_demand -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
             for consumer in network.consumers:
-                total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                total_heat_demand -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
-                total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+                total_heat_demand -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             for asset in network.heat_transfer_assets_sec:
                 if (
@@ -171,7 +171,7 @@ class NetworkController(NetworkControllerAbstract):
                     and asset.max_electrical_power is not None
                 ):
                     max_secondary = asset.max_electrical_power * asset.factor
-                    requested_secondary = abs(total_heat_supply)
+                    requested_secondary = abs(total_heat_demand)
                     if requested_secondary > max_secondary:
                         # Scale down consumers in this network proportionally
                         scale_factor = max_secondary / requested_secondary
@@ -181,26 +181,26 @@ class NetworkController(NetworkControllerAbstract):
                                 scaled = current * scale_factor
                                 asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
                         # Recalculate total_heat_supply after scaling
-                        total_heat_supply = 0
+                        total_heat_demand = 0
                         for producer in network.producers:
-                            total_heat_supply -= asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
+                            total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
                         for consumer in network.consumers:
-                            total_heat_supply -= asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
+                            total_heat_demand += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
                         for storage in network.storages:
-                            total_heat_supply -= asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+                            total_heat_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             # this might look weird, but we know there is only one primary or secondary asset.
             # So we can directly set it.
             for asset in network.heat_transfer_assets_prim:
-                if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset_prim(total_heat_supply, bypass=False))
+                if total_heat_demand > 0:
+                    heat_transfer.update(asset.set_asset_prim(total_heat_demand, bypass=False))
                 else:
-                    heat_transfer.update(asset.set_asset_prim(-total_heat_supply, bypass=True))
+                    heat_transfer.update(asset.set_asset_prim(total_heat_demand, bypass=True))
             for asset in network.heat_transfer_assets_sec:
-                if total_heat_supply > 0:
-                    heat_transfer.update(asset.set_asset_sec(-total_heat_supply, bypass=True))
+                if total_heat_demand > 0:
+                    heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=True))
                 else:
-                    heat_transfer.update(asset.set_asset_sec(-total_heat_supply, bypass=False))
+                    heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=False))
 
         # Update the asset setpoints with the heat transfer setpoints.
         asset_setpoints.update(heat_transfer)

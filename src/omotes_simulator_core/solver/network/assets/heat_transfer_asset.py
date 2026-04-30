@@ -355,7 +355,9 @@ class HeatTransferAsset(BaseAsset):
             if self.iteration_flow_direction_secondary == FlowDirection.ZERO:
                 mset = abs(self.mass_flow_rate_rate_set_point_secondary)
             else:
-                mset = abs(self.mass_flow_rate_rate_set_point_secondary)
+                mset = abs(
+                    self.get_mass_flow_from_prev_solution()
+                )  # abs(self.mass_flow_rate_rate_set_point_secondary)
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
@@ -448,9 +450,9 @@ class HeatTransferAsset(BaseAsset):
         return equations
 
     def get_equations_bypass_mode(self) -> list[EquationObject]:
-        r"""Return the heat transfer equations.
+        r"""Return the heat transfer equations for bypass mode.
 
-        The method returns the heat transfer equations for the heat transfer asset.
+        The method returns the heat transfer equations for the heat transfer asset in bypass mode.
 
         The internal energy at the connection points with mass inflow are linked to the nodes.
 
@@ -458,36 +460,11 @@ class HeatTransferAsset(BaseAsset):
 
                 u_{connection_point} = u_{node}
 
-        The temperature is prescribed through the internal energy at the outlet on the
-        primary and secondary side of the heat transfer asset.
+        The temperature is prescribed through coupling the inflow connection poitn from primary
+        side to the outflow connection point of the secondary side, and vice versa.
 
-        .. math::
-
-            u_{connection_point} = u_{supply_temperature}
-
-        The mass flow rate or pressure is prescribed at the secondary side of the heat transfer
-        asset.
-
-        On the primary side, continuity of mass flow rate is enforced.
-
-        .. math::
-
-            \dot{m}_{0} + \dot{m}_{1} = 0
-
-        If the mass flow at the inflow node of the primary and secondary side is not zero, we
-         prescribe the following energy balance equation for the heat transfer asset:
-
-        .. math::
-
-            \dot{m}_0 \left{ u_0 - u_1 \right} + C \left{ u_2 \dot{m}_2 + u_3 \dot{m}_3 \right} = 0
-
-        If the mass flow at the inflow node of the primary and secondary side is zero, we prescribe
-         the mass flow rate at the primary side of the heat transfer asset.
-
-        .. math::
-
-            \dot{m}_{asset} = 10.0
-
+        The mass flow rate or pressure is prescribed at the secondary and primary side of the
+        heat transfer asset.
         :return: List[EquationObject]
         """
         equations = []

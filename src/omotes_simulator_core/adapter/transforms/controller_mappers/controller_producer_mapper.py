@@ -50,10 +50,6 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
-        if power == 0:
-            logger.warning(f"Power for {esdl_asset.esdl_asset.name} cannot be 0 kW, set to 1 kW")
-            power = 1000.0
-
         marginal_costs = esdl_asset.get_marginal_costs()
         temperature_in = esdl_asset.get_temperature("In", "Return")
         temperature_out = esdl_asset.get_temperature("Out", "Supply")
