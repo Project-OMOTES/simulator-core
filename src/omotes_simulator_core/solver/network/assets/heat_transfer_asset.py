@@ -565,7 +565,7 @@ class HeatTransferAsset(BaseAsset):
         equations.append(self.short_cut_internal_energy(con_point1=1, con_point2=2))
 
     def short_cut_internal_energy(self, con_point1: int, con_point2: int) -> EquationObject:
-        """Return an equation object which set the internal energy equal between both connections"""
+        """Return an equation object to set the internal energy equal between both connections."""
         equation_object = EquationObject()
         # Short-circuiting the primary and secondary side of the heat transfer asset.
         equation_object.indices = np.array(
