@@ -20,6 +20,7 @@ from datetime import datetime
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
@@ -65,6 +66,7 @@ class AtesClusterTest(unittest.TestCase):
             PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
             PROPERTY_TEMPERATURE_IN: 85 + 273.15,
+            PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
@@ -82,8 +84,9 @@ class AtesClusterTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
-            PROPERTY_TEMPERATURE_OUT: 35 + 273.15,
-            PROPERTY_TEMPERATURE_IN: 85 + 273.15,
+            PROPERTY_TEMPERATURE_OUT: 85 + 273.15,
+            PROPERTY_TEMPERATURE_IN: 35 + 273.15,
+            PROPERTY_SET_PRESSURE: False,
         }
 
         # Act
@@ -93,5 +96,5 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.54, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.15, delta=0.1)

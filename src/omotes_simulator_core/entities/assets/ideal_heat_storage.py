@@ -23,6 +23,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
@@ -153,6 +154,7 @@ class IdealHeatStorage(AssetAbstract):
 
         # Set solver asset setpoints
         self.solver_asset.massflow_connection_0 = mass_flowrate  # type: ignore
+        self.solver_asset.set_massflow_rate = not (setpoints[PROPERTY_SET_PRESSURE])  # type: ignore
         self.solver_asset.temperature_connection_0 = self.temperature_connection_0  # type: ignore
         self.solver_asset.temperature_connection_1 = self.temperature_connection_1  # type: ignore
         self._prev_setpoint_heat_demand = setpoints[PROPERTY_HEAT_DEMAND]
@@ -167,6 +169,7 @@ class IdealHeatStorage(AssetAbstract):
             # PROPERTY_TEMPERATURE_IN,
             # PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
+            PROPERTY_SET_PRESSURE,
         }
         # Create set of keys in the provided setpoints
         setpoints_set = set(setpoints.keys())
@@ -174,7 +177,8 @@ class IdealHeatStorage(AssetAbstract):
         if any(necessary_setpoints.difference(setpoints_set)):
             # Print missing setpoints
             raise ValueError(
-                f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
+                f"The setpoints {sorted(necessary_setpoints.difference(setpoints_set))} "
+                f"are missing."
             )
 
     def set_temperature(self) -> None:

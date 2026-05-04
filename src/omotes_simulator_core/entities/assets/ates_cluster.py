@@ -27,6 +27,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
@@ -141,15 +142,15 @@ class AtesCluster(AssetAbstract):
     def _calculate_massflowrate(self) -> None:
         """Calculate mass flowrate of the asset."""
         self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            self.thermal_power_allocation, self.temperature_in, self.temperature_out
+            abs(self.thermal_power_allocation), self.temperature_in, self.temperature_out
         )
 
     def _set_solver_asset_setpoint(self) -> None:
         """Set the setpoint of solver asset."""
-        if self.mass_flowrate >= 0:
-            self.solver_asset.supply_temperature = self.cold_well_temperature  # injection
+        if self.mass_flowrate <= 0:
+            self.solver_asset.supply_temperature = self.cold_well_temperature  # production
         else:
-            self.solver_asset.supply_temperature = self.hot_well_temperature  # production
+            self.solver_asset.supply_temperature = self.hot_well_temperature  # injection
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -158,38 +159,17 @@ class AtesCluster(AssetAbstract):
         :param Dict setpoints: The setpoints that should be set for the asset.
             The keys of the dictionary are the names of the setpoints and the values are the values
         """
-        if self.current_time == self.time:
-            return
-        self.current_time = self.time
         # Default keys required
         necessary_setpoints = {
             PROPERTY_TEMPERATURE_IN,
             PROPERTY_TEMPERATURE_OUT,
             PROPERTY_HEAT_DEMAND,
+            PROPERTY_SET_PRESSURE,
         }
         # Dict to set
         setpoints_set = set(setpoints.keys())
         # Check if all setpoints are in the setpoints
-        if necessary_setpoints.issubset(setpoints_set):
-            self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
-            if self.first_time_step:
-                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
-                self.first_time_step = False
-            else:
-                # After the first time step: use solver temperature
-                if self.thermal_power_allocation >= 0:
-                    self.temperature_in = self.hot_well_temperature
-                    self.temperature_out = self.solver_asset.get_temperature(1)
-                else:
-                    self.temperature_in = self.solver_asset.get_temperature(0)
-                    self.temperature_out = self.cold_well_temperature
-
-            self._calculate_massflowrate()
-            self._run_rosim()
-            self._set_solver_asset_setpoint()
-        else:
-            # Print missing setpoints
+        if not (necessary_setpoints.issubset(setpoints_set)):
             logger.error(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing.",
                 extra={"esdl_object_id": self.asset_id},
@@ -197,6 +177,34 @@ class AtesCluster(AssetAbstract):
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
+        self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
+        if self.first_time_step:
+            # Depending on the sign of the power allocation the ATES is charging or discharging.
+            # If positive then charging and the Flow direction is negative, So in and out
+            # temperature are switch, since they are not set on flow direction but on port.
+            if self.thermal_power_allocation >= 0:
+                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_IN]
+            else:
+                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
+                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+            self.first_time_step = False
+        else:
+            # After the first time step: use solver temperature
+            if self.thermal_power_allocation >= 0:
+                self.temperature_in = self.solver_asset.get_temperature(0)
+                self.temperature_out = self.hot_well_temperature
+            else:
+                self.temperature_in = self.solver_asset.get_temperature(1)
+                self.temperature_out = self.cold_well_temperature
+        self.solver_asset.pre_scribe_mass_flow = not (  # type: ignore
+            setpoints[PROPERTY_SET_PRESSURE]
+        )
+        self._calculate_massflowrate()
+        if self.current_time != self.time:
+            self._run_rosim()
+            self.current_time = self.time
+        self._set_solver_asset_setpoint()
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
@@ -276,6 +284,7 @@ class AtesCluster(AssetAbstract):
             PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
             PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
+            PROPERTY_SET_PRESSURE: False,
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
@@ -292,14 +301,14 @@ class AtesCluster(AssetAbstract):
         # density needs to change with PVT calculation
         timestep = self.time_step / 3600  # convert to hours
 
-        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first elemnt is for producer well
+        rosim_input__flow = [-1 * volume_flow, volume_flow]  # first element is for producer well
         # and second element is for injection well, positive flow is going upward and negative flow
         # is downward
 
-        if volume_flow > 0:
+        if volume_flow < 0:
             rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
             # injection well to make sure it is not used
-        elif volume_flow < 0:
+        elif volume_flow > 0:
             rosim_input_temperature = [
                 -1,
                 kelvin_to_celcius(self.temperature_out),
@@ -308,10 +317,34 @@ class AtesCluster(AssetAbstract):
         else:
             rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
             # sure it is not used
+        logger.debug("rosim input temperature %s", rosim_input_temperature)
+        logger.debug("rosim input flow %s", rosim_input__flow)
 
         ates_temperature = self.rosim.calcTimeStepAndGetTemps(
             rosim_input__flow, rosim_input_temperature, timestep
         )
-
+        if ates_temperature[1] < 0:
+            logger.info("Temperature Rossim to low")
+        logger.debug("rosim output temperature %s", ates_temperature)
         self.hot_well_temperature = celcius_to_kelvin(ates_temperature[0])  # convert to K
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
+
+    def get_heat_supplied(self) -> float:
+        """Get the actual heat supplied by the asset.
+
+        :return float: The actual heat supplied by the asset [W].
+        """
+        return (
+            self.solver_asset.get_internal_energy(1) - self.solver_asset.get_internal_energy(0)
+        ) * self.solver_asset.get_mass_flow_rate(0)
+
+    def is_converged(self) -> bool:
+        """Check if the asset has converged with accepted error of 0.1%.
+
+        :return: True if the asset has converged, False otherwise
+        """
+        if self.solver_asset.pre_scribe_mass_flow:  # type: ignore
+            return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
+                abs(self.thermal_power_allocation) * 0.001
+            )
+        return True

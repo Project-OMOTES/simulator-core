@@ -46,12 +46,10 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
-    @patch.object(HeatTransferAsset, "add_continuity_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
-    def test_get_equations_initial_conditions_prescribe_pressure_secondary(
+    def test_get_equations_initial_conditions_prescribe_pressure(
         self,
         mock_get_mass_flow_from_prev_solution,
-        mock_add_continuity_equation,
         mock_get_press_to_node_equation,
         mock_prescribe_pressure_at_connection_point,
         mock_prescribe_mass_flow_at_connection_point,
@@ -65,7 +63,8 @@ class HeatTransferTest(unittest.TestCase):
         secondary_out].
         - massflow at primary_in flows into the asset (m_0 < m_threshold).
         - massflow at secondary_in flow into the asset (m_2 < m_threshold).
-        - pressure at secondary side is prescribed (pre_scribe_mass_flow_secondary = False).
+        - pressure at primary and secondary side is prescribed
+        (pre_scribe_mass_flow_primary = False and pre_scribe_mass_flow_secondary = False).
         """
         # Arrange
 
@@ -74,17 +73,15 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
-                mock_add_continuity_equation.call_count
-                + mock_get_press_to_node_equation.call_count
+                mock_get_press_to_node_equation.call_count
                 + mock_prescribe_pressure_at_connection_point.call_count
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
@@ -98,12 +95,10 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
-    @patch.object(HeatTransferAsset, "add_continuity_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
     def test_get_equations_initial_conditions_prescribe_mass_flow_secondary(
         self,
         mock_get_mass_flow_from_prev_solution,
-        mock_add_continuity_equation,
         mock_get_press_to_node_equation,
         mock_prescribe_pressure_at_connection_point,
         mock_prescribe_mass_flow_at_connection_point,
@@ -127,17 +122,109 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 0)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 3)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
-                mock_add_continuity_equation.call_count
-                + mock_get_press_to_node_equation.call_count
+                +mock_get_press_to_node_equation.call_count
+                + mock_prescribe_pressure_at_connection_point.call_count
+                + mock_prescribe_mass_flow_at_connection_point.call_count
+                + mock_prescribe_temperature_at_connection_point.call_count
+                + mock_get_internal_energy_to_node_equation.call_count
+            ),
+            12,
+        )
+
+    @patch.object(HeatTransferAsset, "short_cut_internal_energy")
+    @patch.object(HeatTransferAsset, "get_internal_energy_to_node_equation")
+    @patch.object(HeatTransferAsset, "prescribe_temperature_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
+    @patch.object(HeatTransferAsset, "get_press_to_node_equation")
+    @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
+    def test_get_equations_bypass(
+        self,
+        mock_get_mass_flow_from_prev_solution,
+        mock_get_press_to_node_equation,
+        mock_prescribe_pressure_at_connection_point,
+        mock_prescribe_mass_flow_at_connection_point,
+        mock_prescribe_temperature_at_connection_point,
+        mock_get_internal_energy_to_node_equation,
+        mock_short_cut_internal_energy,
+    ):
+        """Test get_equations with default parameters and bypass mode."""
+        # Arrange
+        self.asset.bypass_mode = True
+
+        # Act
+        equations = self.asset.get_equations()  # act
+
+        # Assert
+        self.assertEqual(len(equations), 12)
+        self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
+        self.assertEqual(mock_short_cut_internal_energy.call_count, 2)
+        self.assertEqual(
+            (
+                mock_get_press_to_node_equation.call_count
+                + mock_prescribe_pressure_at_connection_point.call_count
+                + mock_prescribe_mass_flow_at_connection_point.call_count
+                + mock_prescribe_temperature_at_connection_point.call_count
+                + mock_get_internal_energy_to_node_equation.call_count
+                + mock_short_cut_internal_energy.call_count
+            ),
+            12,
+        )
+
+    @patch.object(HeatTransferAsset, "get_internal_energy_to_node_equation")
+    @patch.object(HeatTransferAsset, "prescribe_temperature_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
+    @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
+    @patch.object(HeatTransferAsset, "get_press_to_node_equation")
+    @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
+    def test_get_equations_initial_conditions_prescribe_mass_flow_primary(
+        self,
+        mock_get_mass_flow_from_prev_solution,
+        mock_get_press_to_node_equation,
+        mock_prescribe_pressure_at_connection_point,
+        mock_prescribe_mass_flow_at_connection_point,
+        mock_prescribe_temperature_at_connection_point,
+        mock_get_internal_energy_to_node_equation,
+    ):
+        """Test get_equations with default parameters.
+
+        Test assumes:
+        - connection point order [0, 1, 2, 3] corresponds to [primary_in, primary_out, secondary_in,
+        secondary_out].
+        - massflow at primary_in flows into the asset (m_0 < m_threshold).
+        - massflow at secondary_in flow into the asset (m_2 < m_threshold).
+        - massflow at secondary side is prescribed (pre_scribe_mass_flow_primary = True).
+        """
+        # Arrange
+        self.asset.pre_scribe_mass_flow_primary = True
+
+        # Act
+        equations = self.asset.get_equations()  # act
+
+        # Assert
+        self.assertEqual(len(equations), 12)
+        self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
+        self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
+        self.assertEqual(
+            (
+                +mock_get_press_to_node_equation.call_count
                 + mock_prescribe_pressure_at_connection_point.call_count
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
@@ -151,12 +238,10 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
-    @patch.object(HeatTransferAsset, "add_continuity_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
     def test_get_equations_zero_flow_prescribe_pressure_secondary(
         self,
         mock_get_mass_flow_from_prev_solution,
-        mock_add_continuity_equation,
         mock_get_press_to_node_equation,
         mock_prescribe_pressure_at_connection_point,
         mock_prescribe_mass_flow_at_connection_point,
@@ -210,17 +295,15 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 0)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 4)
         self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
-                mock_add_continuity_equation.call_count
-                + mock_get_press_to_node_equation.call_count
+                +mock_get_press_to_node_equation.call_count
                 + mock_prescribe_pressure_at_connection_point.call_count
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
@@ -234,12 +317,10 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
-    @patch.object(HeatTransferAsset, "add_continuity_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
     def test_get_equations_flow_prescribe_mass_flow_secondary(
         self,
         mock_get_mass_flow_from_prev_solution,
-        mock_add_continuity_equation,
         mock_get_press_to_node_equation,
         mock_prescribe_pressure_at_connection_point,
         mock_prescribe_mass_flow_at_connection_point,
@@ -294,17 +375,15 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 0)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 3)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 2)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
-                mock_add_continuity_equation.call_count
-                + mock_get_press_to_node_equation.call_count
+                +mock_get_press_to_node_equation.call_count
                 + mock_prescribe_pressure_at_connection_point.call_count
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
@@ -318,12 +397,10 @@ class HeatTransferTest(unittest.TestCase):
     @patch.object(HeatTransferAsset, "prescribe_mass_flow_at_connection_point")
     @patch.object(HeatTransferAsset, "prescribe_pressure_at_connection_point")
     @patch.object(HeatTransferAsset, "get_press_to_node_equation")
-    @patch.object(HeatTransferAsset, "add_continuity_equation")
     @patch.object(HeatTransferAsset, "get_mass_flow_from_prev_solution")
     def test_get_equations_with_flow_prescribe_pressure_secondary(
         self,
         mock_get_mass_flow_from_prev_solution,
-        mock_add_continuity_equation,
         mock_get_press_to_node_equation,
         mock_prescribe_pressure_at_connection_point,
         mock_prescribe_mass_flow_at_connection_point,
@@ -377,17 +454,15 @@ class HeatTransferTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(equations), 12)
-        self.assertEqual(mock_add_continuity_equation.call_count, 1)
         self.assertEqual(mock_get_press_to_node_equation.call_count, 4)
-        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 2)
-        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 1)
+        self.assertEqual(mock_prescribe_pressure_at_connection_point.call_count, 4)
+        self.assertEqual(mock_prescribe_mass_flow_at_connection_point.call_count, 0)
         self.assertEqual(mock_prescribe_temperature_at_connection_point.call_count, 2)
         self.assertEqual(mock_get_internal_energy_to_node_equation.call_count, 2)
-        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 1)
+        self.assertEqual(mock_get_mass_flow_from_prev_solution.call_count, 0)
         self.assertEqual(
             (
-                mock_add_continuity_equation.call_count
-                + mock_get_press_to_node_equation.call_count
+                mock_get_press_to_node_equation.call_count
                 + mock_prescribe_pressure_at_connection_point.call_count
                 + mock_prescribe_mass_flow_at_connection_point.call_count
                 + mock_prescribe_temperature_at_connection_point.call_count
@@ -414,7 +489,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
         ] = 1.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+            )
+        ] = -1.0
         # Act
         heat_power = self.asset.get_heat_power_primary()
 
@@ -439,6 +518,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
         ] = 1.0
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+            )
+        ] = -1.0
 
         # Act
         heat_power = self.asset.get_heat_power_secondary()
@@ -465,7 +549,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
         ] = 2.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+            )
+        ] = 2.0
         # --- Secondary side
         self.asset.prev_sol[
             self.asset.get_index_matrix(
@@ -482,7 +570,11 @@ class HeatTransferTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
         ] = 1.0
-
+        self.asset.prev_sol[
+            self.asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+            )
+        ] = 1.0
         # Act
         electric_power = self.asset.get_electric_power_consumption()
 

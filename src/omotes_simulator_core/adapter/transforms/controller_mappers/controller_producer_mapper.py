@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Esdl to asset mapper class."""
+
+import logging
 from typing import Optional
 
 import pandas as pd
@@ -27,6 +29,8 @@ from omotes_simulator_core.entities.assets.controller.profile_interpolation impo
 )
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
+
+logger = logging.getLogger(__name__)
 
 
 class ControllerProducerMapper(EsdlMapperAbstract):

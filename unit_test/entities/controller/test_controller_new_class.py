@@ -84,9 +84,9 @@ class ControllerTest(unittest.TestCase):
         # act
         self.controller.update_networks_factor()
         # assert
-        self.assertEqual(self.network1.factor_to_first_network, 1)
-        self.assertEqual(self.network2.factor_to_first_network, 2)
-        self.assertEqual(self.network3.factor_to_first_network, 6)
+        self.assertEqual(self.network1.factor_to_first_network, [1])
+        self.assertEqual(self.network2.factor_to_first_network, [1, 2])
+        self.assertEqual(self.network3.factor_to_first_network, [1, 3, 2])
 
     def test_update_networks_factor_sec(self):
         # arrange
@@ -102,9 +102,9 @@ class ControllerTest(unittest.TestCase):
         # act
         self.controller.update_networks_factor()
         # assert
-        self.assertEqual(self.network1.factor_to_first_network, 1)
-        self.assertEqual(self.network2.factor_to_first_network, 0.5)
-        self.assertEqual(self.network3.factor_to_first_network, 0.16666666666666666)
+        self.assertEqual(self.network1.factor_to_first_network, [1])
+        self.assertEqual(self.network2.factor_to_first_network, [1, 0.5])
+        self.assertEqual(self.network3.factor_to_first_network, [1, 0.3333333333333333, 0.5])
 
     def setup_update_set_points(self):
         """Helper method to set up the networks with assets.

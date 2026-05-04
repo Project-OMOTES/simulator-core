@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
+    PROPERTY_BYPASS,
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HEAT_POWER_PRIMARY,
@@ -63,6 +64,11 @@ class HeatPumpTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
             )
         ] = 2.0
+        self.heat_pump.solver_asset.prev_sol[
+            self.heat_pump.solver_asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+            )
+        ] = -2.0
 
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
@@ -80,6 +86,11 @@ class HeatPumpTest(unittest.TestCase):
                 property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
             )
         ] = 1.0
+        self.heat_pump.solver_asset.prev_sol[
+            self.heat_pump.solver_asset.get_index_matrix(
+                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+            )
+        ] = -1.0
 
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
@@ -91,31 +102,34 @@ class HeatPumpTest(unittest.TestCase):
         setpoints = {
             SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
             SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
-            SECONDARY + PROPERTY_HEAT_DEMAND: 310,
-            PROPERTY_SET_PRESSURE: True,  # Boolean value
+            SECONDARY + PROPERTY_HEAT_DEMAND: -310,
+            SECONDARY + PROPERTY_SET_PRESSURE: True,  # Boolean value
+            PROPERTY_BYPASS: False,
         }
 
         with patch(
             "omotes_simulator_core.entities.assets.heat_pump."
             "heat_demand_and_temperature_to_mass_flow",
-            return_value=321.0,
+            return_value=-321.0,
         ) as mock_calc:
             self.heat_pump._set_setpoints_secondary(setpoints)
 
             # Self attributes
             self.assertEqual(self.heat_pump.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.temperature_out_secondary, 273.15 + 25.0)
-            self.assertEqual(self.heat_pump.mass_flow_secondary, 321.0)
+            self.assertEqual(self.heat_pump.mass_flow_secondary, -321.0)
             self.assertEqual(self.heat_pump.control_mass_flow_secondary, False)
 
             # Solver asset attributes
             self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 273.15 + 25.0)
-            self.assertEqual(self.heat_pump.solver_asset.mass_flow_rate_secondary, 321.0)
+            self.assertEqual(
+                self.heat_pump.solver_asset.mass_flow_rate_rate_set_point_secondary, -321.0
+            )
             self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, False)
 
             mock_calc.assert_called_once_with(
-                thermal_demand=310, temperature_in=273.15 + 15.0, temperature_out=273.15 + 25.0
+                thermal_demand=-310, temperature_in=273.15 + 15.0, temperature_out=273.15 + 25.0
             )
 
     def test_set_setpoints_secondary_missing_key(self):
@@ -124,7 +138,8 @@ class HeatPumpTest(unittest.TestCase):
             SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 15.0,
             SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 25.0,
             SECONDARY + PROPERTY_HEAT_DEMAND: 310,
-            PROPERTY_SET_PRESSURE: True,  # Boolean value
+            SECONDARY + PROPERTY_SET_PRESSURE: True,  # Boolean value
+            PROPERTY_BYPASS: True,
         }
 
         # Act & Assert
@@ -143,6 +158,7 @@ class HeatPumpTest(unittest.TestCase):
             PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
             PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
             PRIMARY + PROPERTY_HEAT_DEMAND: 300,
+            PRIMARY + PROPERTY_SET_PRESSURE: False,
         }
 
         with patch(
@@ -155,12 +171,12 @@ class HeatPumpTest(unittest.TestCase):
             # Self attributes
             self.assertEqual(self.heat_pump.temperature_in_primary, 273.15 + 10.0)
             self.assertEqual(self.heat_pump.temperature_out_primary, 273.15 + 20.0)
-            self.assertEqual(self.heat_pump.mass_flow_initialization_primary, 125)
+            self.assertEqual(self.heat_pump.mass_flow_initialization_primary, -125)
 
             # Solver asset attributes
             self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 273.15 + 10.0)
             self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 273.15 + 20.0)
-            self.assertEqual(self.heat_pump.solver_asset.mass_flow_initialization_primary, 125)
+            self.assertEqual(self.heat_pump.solver_asset.mass_flow_initialization_primary, -125)
 
             mock_calc.assert_called_once_with(
                 thermal_demand=300, temperature_in=273.15 + 10.0, temperature_out=273.15 + 20.0
@@ -171,6 +187,7 @@ class HeatPumpTest(unittest.TestCase):
             PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 10.0,
             PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 20.0,
             PRIMARY + PROPERTY_HEAT_DEMAND: 300,
+            PRIMARY + PROPERTY_SET_PRESSURE: False,
         }
 
         for missing_key in base_setpoints.keys():
@@ -192,7 +209,9 @@ class HeatPumpTest(unittest.TestCase):
             SECONDARY + PROPERTY_TEMPERATURE_OUT: 270.0,
             PRIMARY + PROPERTY_HEAT_DEMAND: 1500,
             SECONDARY + PROPERTY_HEAT_DEMAND: 1000,
-            PROPERTY_SET_PRESSURE: False,
+            PRIMARY + PROPERTY_SET_PRESSURE: False,
+            SECONDARY + PROPERTY_SET_PRESSURE: False,
+            PROPERTY_BYPASS: False,
         }
 
         # Act
@@ -204,12 +223,12 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.set_setpoints(setpoints)
 
         # Assert
-        self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 300.0)
+        self.assertAlmostEquals(self.heat_pump.solver_asset.temperature_in_primary, 273.1454, 2)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 290.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)
         self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, True)
-        self.assertEqual(self.heat_pump.mass_flow_initialization_primary, 125)
+        self.assertEqual(self.heat_pump.mass_flow_initialization_primary, -125)
         self.assertEqual(self.heat_pump.mass_flow_secondary, 125)
         self.assertEqual(mock_calc.call_count, 2)
 

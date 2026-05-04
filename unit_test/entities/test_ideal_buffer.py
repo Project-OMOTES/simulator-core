@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_SET_PRESSURE,
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.ideal_heat_storage import ChargeState, IdealHeatStorage
@@ -77,6 +78,7 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: -1e6,
+            PROPERTY_SET_PRESSURE: False,
         }
         self.heat_buffer.max_volume = 100.0  # m3
         self.heat_buffer.first_time_step = False
@@ -121,6 +123,7 @@ class HeatBufferTest(unittest.TestCase):
         # Arrange
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_SET_PRESSURE: False,
         }
         self.heat_buffer.max_volume = 100.0  # m3
         self.heat_buffer.first_time_step = False
@@ -164,9 +167,7 @@ class HeatBufferTest(unittest.TestCase):
     def test_idle_set_setpoints(self) -> None:
         """Test setting setpoints of a HeatBuffer to idle."""
         # Arrange
-        setpoints = {
-            PROPERTY_HEAT_DEMAND: 0.0,
-        }
+        setpoints = {PROPERTY_HEAT_DEMAND: 0.0, PROPERTY_SET_PRESSURE: False}
         self.heat_buffer.set_setpoints(setpoints=setpoints)
 
         # - Evaluate temperature inflow
@@ -200,13 +201,14 @@ class HeatBufferTest(unittest.TestCase):
         """Test setting setpoints of a HeatBuffer with missing setpoint."""
         # Arrange
         setpoints: dict[str, float] = {}
+        required_setpoint = {PROPERTY_SET_PRESSURE, PROPERTY_HEAT_DEMAND}
 
         # Act / Assert
         with self.assertRaises(ValueError) as context:
             self.heat_buffer.set_setpoints(setpoints=setpoints)
         self.assertEqual(
             str(context.exception),
-            "The setpoints {'heat_demand'} are missing.",
+            f"The setpoints {sorted(required_setpoint)} are missing.",
         )
 
     def test_get_state(self) -> None:

@@ -51,6 +51,7 @@ class HeatBufferAsset(FallType):
         temperature_connection_0: float = 293.15,
         temperature_connection_1: float = 293.15,
         massflow_connection_0: float = 10.0,
+        set_pressure: float = 100000.0,
     ):
         """
         Initializes the HeatBuffer object with the given parameters.
@@ -71,6 +72,8 @@ class HeatBufferAsset(FallType):
         # Set inlet and outlet temperatures
         self.temperature_connection_0 = temperature_connection_0
         self.temperature_connection_1 = temperature_connection_1
+        self.set_massflow_rate = True
+        self.set_pressure = set_pressure
         # Initialize the FallType parent class
         super().__init__(
             name=name,
@@ -96,16 +99,19 @@ class HeatBufferAsset(FallType):
         # Check if the number of unknowns is 6
         if self.number_of_unknowns != 6:
             raise ValueError("The number of unknowns must be 6!")
-
         equations = [
             self.get_press_to_node_equation(0),  # Pressure balance at inlet (conn. pt -> node)
             self.get_press_to_node_equation(1),  # Pressure balance at outlet (conn. pt -> node)
-            self.get_internal_cont_equation(),  # Internal continuity equation
-            # self.get_volumetric_continuity_equation(),  # Volumetric continuity equation
-            self.get_mass_flow_equation(0),  # Prescribed mass flow at inlet
             self.get_thermal_equations(0),  # Thermal equation at inlet
             self.get_thermal_equations(1),  # Thermal equation at outlet
         ]
+        if self.set_massflow_rate:
+            equations.append(self.get_internal_cont_equation())  # Internal continuity equation
+            equations.append(self.get_mass_flow_equation(0))  # Prescribed mass flow at inlet
+        else:
+            equations.append(self.get_set_pressure_equation(0, self.set_pressure))
+            equations.append(self.get_set_pressure_equation(1, 0.5 * self.set_pressure))
+
         return equations
 
     def get_volumetric_continuity_equation(self) -> EquationObject:
@@ -234,3 +240,25 @@ class HeatBufferAsset(FallType):
             return self.get_prescribe_temp_equation(connection_point)
         else:
             return self.get_internal_energy_to_node_equation(connection_point)
+
+    def get_set_pressure_equation(
+        self, connection_point: int, set_pressure: float
+    ) -> EquationObject:
+        """Returns the equation to set the pressure to the given value.
+
+        :param connection_point: The index of the connection point to get the equation for.
+        :param set_pressure: The value to set the pressure to.
+        """
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="pressure",
+                    connection_point=connection_point,
+                    use_relative_indexing=False,
+                )
+            ]
+        )
+        equation_object.coefficients = np.array([1.0])
+        equation_object.rhs = set_pressure
+        return equation_object

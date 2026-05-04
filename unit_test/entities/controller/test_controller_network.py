@@ -61,7 +61,7 @@ class TestControllerNetwork(unittest.TestCase):
         self.assertEqual(self.controller_network.consumers, self.consumers)
         self.assertEqual(self.controller_network.producers, self.producers)
         self.assertEqual(self.controller_network.storages, self.storages)
-        self.assertEqual(self.controller_network.factor_to_first_network, self.factor)
+        self.assertEqual(self.controller_network.factor_to_first_network, [self.factor])
         self.assertEqual(self.controller_network.path, [])
 
     def test_exists(self):
@@ -256,9 +256,15 @@ class TestControllerNetwork(unittest.TestCase):
             {
                 storage1.id: {
                     PROPERTY_HEAT_DEMAND: -20,
+                    PROPERTY_TEMPERATURE_OUT: 50,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_SET_PRESSURE: False,
                 },
                 storage2.id: {
                     PROPERTY_HEAT_DEMAND: -25,
+                    PROPERTY_TEMPERATURE_OUT: 50,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_SET_PRESSURE: False,
                 },
             },
         )
@@ -286,9 +292,15 @@ class TestControllerNetwork(unittest.TestCase):
             {
                 storage1.id: {
                     PROPERTY_HEAT_DEMAND: 10,
+                    PROPERTY_TEMPERATURE_OUT: 50,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_SET_PRESSURE: False,
                 },
                 storage2.id: {
                     PROPERTY_HEAT_DEMAND: 15,
+                    PROPERTY_TEMPERATURE_OUT: 50,
+                    PROPERTY_TEMPERATURE_IN: 40,
+                    PROPERTY_SET_PRESSURE: False,
                 },
             },
         )
