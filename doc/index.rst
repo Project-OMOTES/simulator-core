@@ -3,10 +3,8 @@
 
 Welcome to OMOTES simulator-core documentation!
 ===============================================
-This documentation covers the OMOTES simulator, a tool designed to simulate the thermo-hydraulics of district heating systems.
-Developed as part of the Dutch Nieuwe Warmte Nu program, the simulator is written in Python and uses the ESDL format as input.
-
-For more information, visit the `NWN website`_ or the `ESDL website`_.
+This documentation covers OMOTES.SIMULATOR_CORE, a simulator for the thermo-hydraulics of district
+heating systems in the Nieuwe Warmte Nu context.
 
 This documentation is divided in the following sections:
 
@@ -14,10 +12,13 @@ This documentation is divided in the following sections:
    :maxdepth: 1
    :caption: Contents:
 
-   architecture/architecture
+   intro/intro_main
    solver/solver_main
-   assets/assets
+   network/network_main
+   physics/physics_main
    controller/controller
+   developer/developer_main
+   support/support
 
 
 Indices and tables
@@ -27,6 +28,3 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-
-.. _NWN website: https://www.nwn.nu/
-.. _ESDL: https://www.esdl.nl/
