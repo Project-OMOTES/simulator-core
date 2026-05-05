@@ -3,21 +3,24 @@
 Pipe asset
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The **Pipe Asset** represents a pipe within the simulator, responsible for transporting fluids between 
-different assets in the network.
+The **Pipe Asset** is the entity-level representation of a network pipe that
+transports fluid between connected assets.
 
-This asset is stored within the `Pipe` class in the 
-`omotes_simulator_core.entities.assets.pipe` module.
+It captures the design and operating properties that define hydraulic losses,
+thermal exchange, and connectivity before those values are mapped to the solver.
 
-A pipe asset is initialized with an asset name, a unique asset ID, and a list of connected port IDs. It is 
-characterized by various parameters such as length, inner diameter, roughness, heat transfer properties, and 
-external temperature.
+Implemented by
+--------------
 
-The `set_setpoints` method allows for defining necessary operational parameters before a simulation, while the 
-`write_to_output` method stores the computed outputs for each timestep.
+This reference page documents the ``Pipe`` entity in
+``omotes_simulator_core.entities.assets.pipe``.
 
-The pipe creates an instance of SolverPipe and assigns it to the solver_asset, which can be used for further
-calculations in the simulation based on the pipe's defined properties.
+Related documentation
+---------------------
+
+- For pipe behavior during simulation, see :doc:`../physics/pipe_physics`.
+- For network connectivity and solved state variables, see :doc:`../network/network_main`.
 
 .. autoclass:: omotes_simulator_core.entities.assets.pipe.Pipe
+   :no-index:
    :members:

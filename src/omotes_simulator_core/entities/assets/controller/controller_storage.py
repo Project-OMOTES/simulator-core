@@ -29,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
@@ -53,8 +54,7 @@ class ControllerStorageAbstract(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_in: float,
-        temperature_out: float,
+        temperatures: Temperatures,
         max_charge_power: float,
         max_discharge_power: float,
         profile: Optional[pd.DataFrame] = None,
@@ -63,15 +63,13 @@ class ControllerStorageAbstract(AssetControllerAbstract):
 
         :param str name: Name of the storage.
         :param str identifier: Unique identifier of the consumer.
-        :param float temperature_in: Temperature of the inlet.
-        :param float temperature_out: Temperature of the outlet.
+        :param float temperatures: Temperatures of the storage.
         :param float max_charge_power: Maximum charge power of the storage.
         :param float max_discharge_power: Maximum discharge power of the storage.
         :param Optional[pd.DataFrame] profile: Profile of the storage.
         """
         super().__init__(name, identifier)
-        self.temperature_out = temperature_out
-        self.temperature_in = temperature_in
+        self.temperatures = temperatures
 
         # Profile of the storage.
         if profile is None:
@@ -102,14 +100,14 @@ class ControllerStorageAbstract(AssetControllerAbstract):
 
         :return: float with the temperature difference.
         """
-        return self.temperature_in - self.temperature_out
+        return self.temperatures.in_flow - self.temperatures.out_flow
 
     def average_temperature(self) -> float:
         """Get the average temperature of the storage.
 
         :return: float with the average temperature.
         """
-        return (self.temperature_in + self.temperature_out) / 2.0
+        return (self.temperatures.in_flow + self.temperatures.out_flow) / 2.0
 
     def get_effective_max_discharge_power(
         self,
@@ -145,8 +143,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_in: float,
-        temperature_out: float,
+        temperatures: Temperatures,
         max_charge_power: float,
         max_discharge_power: float,
         profile: Optional[pd.DataFrame] = None,
@@ -155,8 +152,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
 
         :param str name: Name of the storage.
         :param str identifier: Unique identifier of the consumer.
-        :param float temperature_in: Temperature of the inlet.
-        :param float temperature_out: Temperature of the outlet.
+        :param float temperatures: Temperatures of the storage.
         :param float max_charge_power: Maximum charge power of the storage.
         :param float max_discharge_power: Maximum discharge power of the storage.
         :param pd.DataFrame profile: Profile of the storage, defaults to empty DataFrame.
@@ -167,8 +163,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
         super().__init__(
             name=name,
             identifier=identifier,
-            temperature_in=temperature_in,
-            temperature_out=temperature_out,
+            temperatures=temperatures,
             max_charge_power=max_charge_power,
             max_discharge_power=max_discharge_power,
             profile=profile,
@@ -182,8 +177,7 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_in: float,
-        temperature_out: float,
+        temperatures: Temperatures,
         max_charge_power: float,
         max_discharge_power: float,
         fill_level: float,
@@ -203,8 +197,7 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         super().__init__(
             name=name,
             identifier=identifier,
-            temperature_in=temperature_in,
-            temperature_out=temperature_out,
+            temperatures=temperatures,
             max_charge_power=max_charge_power,
             max_discharge_power=max_discharge_power,
             profile=profile,
@@ -216,8 +209,8 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
         self.volume_hot: float = fill_level * volume
 
         # Buffer temperatures
-        self.buffer_temperature_hot: float = temperature_in
-        self.buffer_temperature_cold: float = temperature_out
+        self.buffer_temperature_hot: float = temperatures.in_flow
+        self.buffer_temperature_cold: float = temperatures.out_flow
 
     def _calculate_power_from_volume(self, volume: float, is_discharge: bool) -> float:
         """Calculate power from available volume.
@@ -315,8 +308,8 @@ class ControllerIdealHeatStorage(ControllerStorageAbstract):
             self.buffer_temperature_hot = state[PROPERTY_BUFFER_HOT_TEMPERATURE]
             self.buffer_temperature_cold = state[PROPERTY_BUFFER_COLD_TEMPERATURE]
             # Update derived properties
-            self.temperature_in = self.buffer_temperature_hot
-            self.temperature_out = self.buffer_temperature_cold
+            self.temperatures.in_flow = self.buffer_temperature_hot
+            self.temperatures.out_flow = self.buffer_temperature_cold
         else:
             missing_keys = sorted(available_state_keys.difference(state.keys()))
             raise KeyError(f"State keys {missing_keys} are missing for storage {self.name}.")

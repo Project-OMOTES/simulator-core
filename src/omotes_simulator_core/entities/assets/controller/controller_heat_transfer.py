@@ -28,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 
 
 class HeatTransferAssetType(Enum):
@@ -52,6 +53,8 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         identifier: str,
         factor: float,
         heat_transfer_type: HeatTransferAssetType,
+        temperatures_primary: Temperatures,
+        temperatures_secondary: Temperatures,
         max_electrical_power: float | None = None,
     ):
         """Constructor of the class, which sets all attributes.
@@ -60,11 +63,14 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         :param float factor: The COP (heat pump) or efficiency (heat exchanger) factor.
         :param HeatTransferAssetType heat_transfer_type: Type of heat transfer asset.
+        :param dict[str, float] temperatures: Dictionary of heat transfer temperature set points
         :param float | None max_electrical_power: Maximum electrical power for heat pump [W].
         """
         super().__init__(name, identifier)
         self.factor = factor
         self.heat_transfer_type = heat_transfer_type
+        self.primary_temperatures = temperatures_primary
+        self.secondary_temperatures = temperatures_secondary
         self.max_electrical_power = max_electrical_power
 
     def set_asset_prim(
@@ -81,11 +87,11 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: self.primary_temperatures.out_flow,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: self.primary_temperatures.in_flow,
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: self.secondary_temperatures.out_flow,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: self.secondary_temperatures.in_flow,
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: True,
@@ -95,11 +101,11 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: self.primary_temperatures.out_flow,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: self.primary_temperatures.in_flow,
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * self.factor,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: self.secondary_temperatures.out_flow,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: self.secondary_temperatures.in_flow,
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: False,

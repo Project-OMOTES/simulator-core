@@ -21,6 +21,7 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 
 
 class ControllerProducer(AssetControllerAbstract):
@@ -30,8 +31,7 @@ class ControllerProducer(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_in: float,
-        temperature_out: float,
+        temperatures: Temperatures,
         power: float,
         marginal_costs: float,
         profile: pd.DataFrame,
@@ -41,15 +41,13 @@ class ControllerProducer(AssetControllerAbstract):
 
         :param str name: Name of the source.
         :param str identifier: Unique identifier of the source.
-        :param float temperature_in: Inlet temperature of the source.
-        :param float temperature_out: Outlet temperature of the source.
+        :param float temperatures: Temperatures of the source.
         :param float power: Power of the source.
         :param float marginal_costs: Marginal costs of the source.
         :param int priority: Priority of the source.
         """
         super().__init__(name, identifier)
-        self.temperature_in: float = temperature_in
-        self.temperature_out: float = temperature_out
+        self.temperatures = temperatures
         self.power: float = power
         self.marginal_costs: float = marginal_costs
         self.priority: None | int = priority

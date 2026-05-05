@@ -20,11 +20,19 @@ from typing import Any
 import pandas as pd
 from esdl import esdl
 
-from omotes_simulator_core.adapter.transforms.string_to_esdl import StringEsdlAssetMapper
+from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    OmotesAssetLabels,
+    StringEsdlAssetMapper,
+)
 from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
+from omotes_simulator_core.entities.assets.asset_defaults import PRIMARY, SECONDARY
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolationMethod,
     ProfileSamplingMethod,
+)
+from omotes_simulator_core.entities.assets.controller.temperature_data import (
+    Temperatures,
+    celcius_to_kelvin,
 )
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
@@ -150,6 +158,66 @@ class EsdlAssetObject:
             f"No port found with temperature type: {temp_type} for asset: {self.esdl_asset.name}"
         )
 
+    def get_temperature_port(self, port_id: str, temp_type: str) -> float:
+        """Return the temperature of the port."""
+        for esdl_port in self.esdl_asset.port:
+            if esdl_port.id == port_id:
+                if temp_type == "Supply":
+                    return float(celcius_to_kelvin(esdl_port.carrier.supplyTemperature))
+                elif temp_type == "Return":
+                    return float(celcius_to_kelvin(esdl_port.carrier.returnTemperature))
+                logger.error(f"Unknown temperature type: {temp_type}")
+                raise ValueError(f"Unknown temperature type: {temp_type}")
+        logger.error(
+            f"No port found with id: {port_id} for asset: {self.esdl_asset.name}",
+            extra={"esdl_object_id": self.get_id()},
+        )
+        raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
+
+    def get_temperatures_asset(self, side: str | None = None) -> Temperatures:
+        """Get the inflow and outflow temperature of an asset."""
+        if self.get_esdl_type() == OmotesAssetLabels.CONSUMER:
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("In", "Supply"),
+                out_flow=self.get_temperature("Out", "Return"),
+            )
+        elif self.get_esdl_type() == OmotesAssetLabels.PRODUCER:
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("In", "Return"),
+                out_flow=self.get_temperature("Out", "Supply"),
+            )
+        elif (self.get_esdl_type() == OmotesAssetLabels.ATES) | (
+            self.get_esdl_type() == OmotesAssetLabels.STORAGE
+        ):
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("In", "Return"),
+                out_flow=self.get_temperature("Out", "Supply"),
+            )
+        elif (self.get_esdl_type() == OmotesAssetLabels.HEAT_EXCHANGER) | (
+            self.get_esdl_type() == OmotesAssetLabels.HEAT_PUMP
+        ):
+            if side == PRIMARY:
+                temperatures = Temperatures(
+                    in_flow=self.get_temperature("In", "Supply"),
+                    out_flow=self.get_temperature("Out", "Return"),
+                )
+            elif side == SECONDARY:
+                temperatures = Temperatures(
+                    in_flow=self.get_temperature("In", "Return"),
+                    out_flow=self.get_temperature("Out", "Supply"),
+                )
+            else:
+                logger.error(
+                    f"Unknown side: {side} for heat exchange asset: {self.esdl_asset.name}"
+                )
+                raise ValueError(
+                    f"Unknown side: {side} for heat exchange asset: {self.esdl_asset.name}"
+                )
+        else:
+            logger.error(f"Unknown esdl type for temperatures: {self.esdl_asset.name}")
+            raise ValueError(f"Unknown esdl type for temperatures: {self.esdl_asset.name}")
+        return temperatures
+
     def get_port_ids(self) -> list[str]:
         """Returns a sorted list of the port ids of the asset."""
         list_of_ports = sort_ports(
@@ -248,13 +316,3 @@ class EsdlAssetObject:
     def get_esdl_type(self) -> str:
         """Returns the ESDL type of the asset as a string."""
         return StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
-
-
-def get_return_temperature(esdl_port: esdl.Port) -> float:
-    """Get the temperature of the port."""
-    return float(esdl_port.carrier.returnTemperature) + 273.15
-
-
-def get_supply_temperature(esdl_port: esdl.Port) -> float:
-    """Get the temperature of the port."""
-    return float(esdl_port.carrier.supplyTemperature) + 273.15

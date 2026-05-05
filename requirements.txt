@@ -4,60 +4,60 @@
 #
 #    pip-compile --output-file='..\..\requirements.txt' '..\..\pyproject.toml'
 #
-certifi==2025.10.5
+certifi==2026.4.22
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.7
     # via requests
 coolprop==6.6.0
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 dataclass-wizard==0.22.3
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 future-fstrings==1.2.0
     # via pyecore
-idna==3.11
+idna==3.13
     # via requests
 influxdb==5.3.2
-    # via omotes-simulator-core (..\..\pyproject.toml)
-lxml==6.0.2
+    # via omotes-simulator-core (../../pyproject.toml)
+lxml==6.1.0
     # via pyecore
 msgpack==1.1.2
     # via influxdb
 networkx==2.7.1
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 numpy==2.1.3
     # via
-    #   omotes-simulator-core (..\..\pyproject.toml)
+    #   omotes-simulator-core (../../pyproject.toml)
     #   pandas
     #   scipy
 ordered-set==4.1.0
     # via pyecore
 pandas==2.2.3
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 pyecore==0.13.2
     # via pyesdl
-pyesdl==25.7
-    # via omotes-simulator-core (..\..\pyproject.toml)
+pyesdl==26.4.1
+    # via omotes-simulator-core (../../pyproject.toml)
 pyjnius==1.6.1
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
     #   influxdb
     #   pandas
-pytz==2025.2
+pytz==2026.2
     # via
     #   influxdb
     #   pandas
-requests==2.32.5
+requests==2.33.1
     # via influxdb
-restrictedpython==8.0
+restrictedpython==8.1
     # via pyecore
 scipy==1.14.1
-    # via omotes-simulator-core (..\..\pyproject.toml)
+    # via omotes-simulator-core (../../pyproject.toml)
 six==1.17.0
     # via
     #   influxdb
     #   python-dateutil
-tzdata==2025.2
+tzdata==2026.2
     # via pandas
-urllib3==2.5.0
+urllib3==2.6.3
     # via requests

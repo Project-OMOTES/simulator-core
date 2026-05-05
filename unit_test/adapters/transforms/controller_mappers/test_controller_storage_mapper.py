@@ -49,8 +49,8 @@ class TestControllerAtesStorageMapper(unittest.TestCase):
         controller_storage = self.mapper.to_entity(storage_assets[0])
 
         # Assert
-        self.assertEqual(controller_storage.temperature_in, 353.15)
-        self.assertEqual(controller_storage.temperature_out, 313.15)
+        self.assertEqual(controller_storage.temperatures.out_flow, 353.15)
+        self.assertEqual(controller_storage.temperatures.in_flow, 313.15)
         self.assertEqual(controller_storage.max_charge_power, 11.61e6)
         self.assertEqual(controller_storage.max_discharge_power, 11.61e6)
         self.assertEqual(controller_storage.effective_max_charge_power, 11.61e6)
@@ -80,8 +80,8 @@ class TestControllerIdealHeatStorageMapper(unittest.TestCase):
 
         # Assert
         # - Temperature related properties
-        self.assertEqual(controller_storage.temperature_in, 353.15)
-        self.assertEqual(controller_storage.temperature_out, 323.15)
+        self.assertEqual(controller_storage.temperatures.out_flow, 353.15)
+        self.assertEqual(controller_storage.temperatures.in_flow, 323.15)
         # - Volume related properties
         self.assertEqual(
             controller_storage.fill_level, storage_assets[0].get_property("fillLevel", 9999)
