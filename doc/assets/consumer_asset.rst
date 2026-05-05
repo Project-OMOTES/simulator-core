@@ -2,20 +2,27 @@
 
 Consumer asset
 +++++++++++++++++++++++++++++++++++++++++++++
-The **Consumer Asset** represents components that consume energy.
 
-This asset is stored within the `DemandCluster` class in the 
-`omotes_simulator_core.entities.assets.demand_cluster` module.
+The **Consumer Asset** is the entity-level representation of a controllable heat
+sink in the simulation input model.
 
-A consumer asset is initialized with an asset name, a unique asset ID, and a list of connected port IDs. 
-Values are set for different parameters that include as internal diameter, supply and return temperatures, 
-pressure input, thermal power allocation, and mass flow rate.
+It groups the metadata, ports, and operating parameters needed to represent
+heat demand before those values are translated to solver behavior.
 
-The `set_setpoints` method ensures that required setpoints—supply temperature, return temperature, and heat 
-demand are provided before adjusting the thermal power allocation and computing the mass flow rate accordingly. 
-This calculated data is then passed to the `solver_asset` instance for further use in simulations.
+Implemented by
+--------------
+
+This reference page documents the ``DemandCluster`` entity in
+``omotes_simulator_core.entities.assets.demand_cluster``.
+
+Related documentation
+---------------------
+
+- For consumer behavior during simulation, see :doc:`../physics/consumer_physics`.
+- For network-level interpretation of available flow and inlet state, see :doc:`../network/network_main`.
 
 
 .. autoclass:: omotes_simulator_core.entities.assets.demand_cluster.DemandCluster
+   :no-index:
    :members:
 
