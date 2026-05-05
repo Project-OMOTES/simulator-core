@@ -22,6 +22,7 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,7 @@ class ControllerConsumer(AssetControllerAbstract):
         self,
         name: str,
         identifier: str,
-        temperature_in: float,
-        temperature_out: float,
+        temperatures: Temperatures,
         max_power: float,
         profile: pd.DataFrame,
     ):
@@ -42,14 +42,12 @@ class ControllerConsumer(AssetControllerAbstract):
 
         :param str name: Name of the consumer.
         :param str identifier: Unique identifier of the consumer.
-        :param float temperature_in: Temperature input of the consumer.
-        :param float temperature_out: Temperature output of the consumer.
+        :param float temperatures: Temperatures of the consumer.
         :param float max_power: Maximum power of the consumer.
         :param pd.DataFrame profile: Resampled profile based on interpolation and sampling methods.
         """
         super().__init__(name, identifier)
-        self.temperature_in = temperature_in
-        self.temperature_out = temperature_out
+        self.temperatures = temperatures
         self.max_power: float = max_power
         self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
 
