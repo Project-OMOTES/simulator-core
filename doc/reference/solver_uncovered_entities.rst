@@ -1,16 +1,7 @@
-Solver Reference: Supporting Entities
-======================================
+Solver Reference: Additional Entities
+=====================================
 
-Purpose
--------
-
-This landing page contains supporting solver-related reference pages that are
-not covered in the main curated solver set in :doc:`solver_reference`.
-
-These pages complement the main solver taxonomy without duplicating it.
-
-Contents
---------
+This page covers solver-side entities not included in the core solver reference pages.
 
 .. toctree::
    :maxdepth: 1
