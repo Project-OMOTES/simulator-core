@@ -153,6 +153,8 @@ The producer does not model internal pressure losses. When pressure control is e
 pressure is prescribed and the resulting mass flow follows from the network solution. When pressure
 control is disabled, the asset prescribes mass flow directly to meet the requested heat output.
 
+.. note:: The current default value for the supply pressure is 10 bar, with a pressure drop of (:math:`\Delta p`) of 5 bar over the asset.
+
 
 Operating Modes
 ~~~~~~~~~~~~~~~

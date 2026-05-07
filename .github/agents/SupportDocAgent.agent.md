@@ -243,7 +243,7 @@ After writing or updating the support page:
 3. Verify that support/reporting instructions are grounded in the repository context.
 4. Verify that the page fits under ``Support`` and is reachable from the correct landing page or toctree.
 5. Verify that the page does not duplicate conceptual, developer-guide, or API-reference content.
-6. If execution tools are available, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
+6. If execution tools are available, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_sphinx.bat``.
 7. Inspect the build output for warnings and errors, including broken toctrees, malformed links, and duplicate labels.
 8. If an error or warning is found, fix it before returning the final content.
 9. Do not finish with known syntax errors, malformed lists, broken references, or unresolved build warnings caused by the change.

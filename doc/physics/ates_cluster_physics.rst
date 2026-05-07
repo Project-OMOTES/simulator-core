@@ -212,13 +212,6 @@ Limitations
 - Wellbore thermal losses and mechanical constraints are not modeled explicitly.
 - Accuracy depends on the validity and calibration of the configured external aquifer model.
 
-See Also
---------
-
-- :doc:`ideal_heat_storage_physics` — In-tank heat storage system
-- :doc:`producer_physics` — Heat production boundary
-- :doc:`consumer_physics` — Heat demand boundary
-
 References
 ----------
 
