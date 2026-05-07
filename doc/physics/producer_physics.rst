@@ -130,6 +130,8 @@ pressure is prescribed and the resulting mass flow follows from the network solu
 control is disabled, the asset prescribes mass flow directly to target the requested heat
 production.
 
+.. note:: The current default value for the supply pressure is 10 bar, with a pressure drop of (:math:`\Delta p`) of 5 bar over the asset.
+
 
 Operating Modes
 ~~~~~~~~~~~~~~~
