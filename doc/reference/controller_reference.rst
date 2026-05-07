@@ -1,12 +1,8 @@
 Controller Reference
 ====================
 
-Curated technical reference for controller classes, sub-network coordination,
-and asset-specific controller components.
-
-Use this section for implementation-oriented controller pages that complement
-the conceptual Control section rather than duplicate its user-facing behavior
-overview.
+Low-level controller documentation for main/sub-network control and asset-specific
+controller components.
 
 .. toctree::
    :maxdepth: 1
