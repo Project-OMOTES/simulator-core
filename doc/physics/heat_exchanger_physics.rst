@@ -238,3 +238,10 @@ Limitations
 - No transient warm-up, cooldown, or thermal storage effects.
 - No explicit leakage, bypass flow, or cross-contamination between circuits.
 - If exchanger pressure drop is important for the study, a more detailed asset model is needed.
+
+References
+----------
+
+.. rubric:: References
+
+*(No references listed.)*
