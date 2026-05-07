@@ -1,21 +1,7 @@
 Asset Reference
 ===============
 
-Purpose
--------
-
-This landing page contains the main curated set of entity-level asset reference
-pages used throughout simulation and control documentation.
-
-Supporting asset entities that are not part of this main set are collected
-separately in :doc:`asset_uncovered_entities`.
-
-Behavioral interpretation of these entities belongs in the Physics section; see
-:doc:`../physics/physics_main` for the governing relations and asset behavior
-pages.
-
-Contents
---------
+Detailed asset pages for entity-level assets used by simulation and control.
 
 .. toctree::
    :maxdepth: 1
