@@ -51,7 +51,7 @@ Before writing, inspect the closest matching existing documentation page and pre
 1. Follow repository documentation style first, especially:
    - ``doc/index.rst``
    - ``doc/architecture/architecture.rst``
-   - ``doc/developer/developer_main.rst`` (Developer Documentation landing page)
+   - existing developer-facing pages under ``doc/`` if present
    - any contributor or support material already present in the repository
 
 2. Use implementation files as primary technical sources:
@@ -104,7 +104,15 @@ Do not include:
 
 Top-level structure alignment
 -----------------------------
-These pages belong under the fixed top-level documentation order (see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)).
+These pages belong under the fixed top-level documentation order:
+
+1. Intro
+2. Solver
+3. Network
+4. Physics
+5. Control
+6. Developer Documentation
+7. Support
 
 This agent owns human-authored pages within ``Developer Documentation`` only.
 
@@ -270,15 +278,21 @@ Use tests as evidence for these workflows where available.
 
 Style rules
 -----------
-See [Documentation Architecture](../instructions/documentation-architecture.instructions.md) for the shared style rules. In addition:
-- Use contributor-oriented language; be concrete and practical.
+- Use neutral, technical, contributor-oriented language.
+- Prefer short paragraphs and clear headings.
+- Be concrete and practical.
 - Keep examples tied to the repository.
 - Avoid unnecessary bullets except for pitfalls, checklists, and compact guidance.
+- Output valid reStructuredText only.
 
 reStructuredText requirements
 -----------------------------
-See [Documentation Architecture](../instructions/documentation-architecture.instructions.md) for the shared output-format requirements. In addition:
+- Output only the final ``.rst`` page content.
+- Use valid reStructuredText syntax.
+- Use standard section headings and underlines.
 - Use ``.. list-table::`` where structured file/module guidance improves clarity.
+- Do not use Markdown.
+- Do not include meta-commentary, TODOs, or explanation of writing choices.
 
 Final check before writing
 --------------------------
