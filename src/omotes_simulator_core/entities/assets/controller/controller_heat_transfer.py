@@ -61,6 +61,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         :param str identifier: Unique identifier of the consumer.
         :param float factor: The COP (heat pump) or efficiency (heat exchanger) factor.
         :param HeatTransferAssetType heat_transfer_type: Type of heat transfer asset.
+        :param dict[str, float] temperatures: Dictionary of heat transfer temperature set points
         :param float | None max_electrical_power: Maximum electrical power for heat pump [W].
         """
         super().__init__(name, identifier)

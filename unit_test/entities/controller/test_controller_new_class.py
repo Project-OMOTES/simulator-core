@@ -177,10 +177,10 @@ class ControllerTest(unittest.TestCase):
         self.storage1.temperature_out = 50
         self.storage1.temperature_in = 40
         temperature_dict = {
-            PRIMARY + PROPERTY_TEMPERATURE_IN: 50,
-            PRIMARY + PROPERTY_TEMPERATURE_OUT: 30,
-            SECONDARY + PROPERTY_TEMPERATURE_IN: 40,
-            SECONDARY + PROPERTY_TEMPERATURE_OUT: 80,
+            PRIMARY + PROPERTY_TEMPERATURE_IN: 50 + 273.15,
+            PRIMARY + PROPERTY_TEMPERATURE_OUT: 30 + 273.15,
+            SECONDARY + PROPERTY_TEMPERATURE_IN: 40 + 273.15,
+            SECONDARY + PROPERTY_TEMPERATURE_OUT: 80 + 273.15,
         }
         # Create heat transfer assets
         heatpump = ControllerHeatTransferAsset(
