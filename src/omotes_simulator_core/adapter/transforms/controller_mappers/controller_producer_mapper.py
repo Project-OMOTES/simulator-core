@@ -45,14 +45,14 @@ class ControllerProducerMapper(EsdlMapperAbstract):
     ) -> ControllerProducer:
         """Method to map an esdl asset to a producer entity class.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
+        :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
         power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
         marginal_costs = esdl_asset.get_marginal_costs()
-        temperature_in = esdl_asset.get_temperature("In", "Return")
-        temperature_out = esdl_asset.get_temperature("Out", "Supply")
+        temperatures = esdl_asset.get_temperatures_asset()
         strategy_priority = esdl_asset.get_strategy_priority()
 
         resampled_profile = None
@@ -64,13 +64,13 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             else:
                 profile = esdl_asset.get_constraint_max_profile()
 
-            self.profile_interpolator = ProfileInterpolator(
+            profile_interpolator = ProfileInterpolator(
                 profile=profile,
                 sampling_method=esdl_asset.get_sampling_method(),
                 interpolation_method=esdl_asset.get_interpolation_method(),
                 timestep=timestep,
             )
-            resampled_profile = self.profile_interpolator.get_resampled_profile()
+            resampled_profile = profile_interpolator.get_resampled_profile()
 
         if resampled_profile is None:
             resampled_profile = pd.DataFrame()
@@ -78,8 +78,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
         contr_producer = ControllerProducer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_in=temperature_in,
-            temperature_out=temperature_out,
+            temperatures=temperatures,
             power=power,
             marginal_costs=marginal_costs,
             profile=resampled_profile,  # Empty DataFrame is added if there is no profile.

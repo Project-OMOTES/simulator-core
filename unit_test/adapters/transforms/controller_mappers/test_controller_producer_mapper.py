@@ -42,8 +42,8 @@ class TestControllerProducerMapper(unittest.TestCase):
         controller_producer = self.mapper.to_entity(producer_assets[0])
 
         # Assert
-        self.assertEqual(controller_producer.temperature_in, 313.15)
-        self.assertEqual(controller_producer.temperature_out, 353.15)
+        self.assertEqual(controller_producer.temperatures.in_flow, 313.15)
+        self.assertEqual(controller_producer.temperatures.out_flow, 353.15)
         self.assertEqual(controller_producer.power, 1e8)
         self.assertEqual(controller_producer.marginal_costs, 0)
 

@@ -42,7 +42,7 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
     def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerHeatTransferAsset:
         """Method to map an EsdlAsset to a ControllerHeatTransferAsset.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
 
         :return: Entity object.
         """
@@ -77,7 +77,7 @@ class ControllerHeatExchangeMapper(EsdlMapperAbstract):
     def to_entity(self, esdl_asset: EsdlAssetObject) -> ControllerHeatTransferAsset:
         """Method to map an EsdlAsset to a ControllerHeatTransferAsset.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
 
         :return: Entity object.
         """

@@ -45,6 +45,6 @@ class TestControllerConsumerMapper(unittest.TestCase):
         controller_consumer = self.mapper.to_entity(consumer_assets[0])
 
         # Assert
-        self.assertEqual(controller_consumer.temperature_out, 313.15)
-        self.assertEqual(controller_consumer.temperature_in, 353.15)
+        self.assertEqual(controller_consumer.temperatures.out_flow, 313.15)
+        self.assertEqual(controller_consumer.temperatures.in_flow, 353.15)
         self.assertEqual(controller_consumer.max_power, 5e6)

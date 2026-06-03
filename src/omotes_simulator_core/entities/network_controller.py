@@ -286,8 +286,8 @@ class NetworkController(NetworkControllerAbstract):
                     if producer.id not in producers:
                         producers[producer.id] = {
                             PROPERTY_HEAT_DEMAND: 0,
-                            PROPERTY_TEMPERATURE_IN: producer.temperature_in,
-                            PROPERTY_TEMPERATURE_OUT: producer.temperature_out,
+                            PROPERTY_TEMPERATURE_IN: producer.temperatures.in_flow,
+                            PROPERTY_TEMPERATURE_OUT: producer.temperatures.out_flow,
                             PROPERTY_SET_PRESSURE: False,
                         }
         return producers

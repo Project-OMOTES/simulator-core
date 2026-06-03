@@ -35,7 +35,7 @@ from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
 
 
 class ControllerAtesStorageMapper(EsdlMapperAbstract):
-    """Class to map an esdl asset to a Ates Storage entity class."""
+    """Class to map an esdl asset to an Ates Storage entity class."""
 
     def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
@@ -44,26 +44,25 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
     def to_entity(
         self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
     ) -> ControllerAtesStorage:
-        """Method to map an esdl asset to a Ates Storage entity class.
+        """Method to map an esdl asset to an Ates Storage entity class.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
         :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
-        self.profile_interpolator = ProfileInterpolator(
+        profile_interpolator = ProfileInterpolator(
             profile=pd.DataFrame(),
             sampling_method=esdl_asset.get_sampling_method(),
             interpolation_method=esdl_asset.get_interpolation_method(),
             timestep=timestep,
         )
-        resampled_profile = self.profile_interpolator.get_resampled_profile()
+        resampled_profile = profile_interpolator.get_resampled_profile()
 
         return ControllerAtesStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_in=esdl_asset.get_temperature("In", "Supply"),
-            temperature_out=esdl_asset.get_temperature("Out", "Return"),
+            temperatures=esdl_asset.get_temperatures_asset(),
             max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
             max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
             profile=resampled_profile,
@@ -71,7 +70,7 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
 
 
 class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
-    """Class to map an esdl asset to a Ideal Heat Storage entity class."""
+    """Class to map an esdl asset to an Ideal Heat Storage entity class."""
 
     def to_esdl(self, entity: AssetControllerAbstract) -> EsdlAssetObject:
         """Map an Entity to a EsdlAsset."""
@@ -80,26 +79,25 @@ class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
     def to_entity(
         self, esdl_asset: EsdlAssetObject, timestep: Optional[int] = None
     ) -> ControllerIdealHeatStorage:
-        """Method to map an esdl asset to a Ideal Heat Storage entity class.
+        """Method to map an esdl asset to an Ideal Heat Storage entity class.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
         :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
         """
-        self.profile_interpolator = ProfileInterpolator(
+        profile_interpolator = ProfileInterpolator(
             profile=pd.DataFrame(),
             sampling_method=esdl_asset.get_sampling_method(),
             interpolation_method=esdl_asset.get_interpolation_method(),
             timestep=timestep,
         )
-        resampled_profile = self.profile_interpolator.get_resampled_profile()
+        resampled_profile = profile_interpolator.get_resampled_profile()
 
         return ControllerIdealHeatStorage(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_in=esdl_asset.get_temperature("In", "Supply"),
-            temperature_out=esdl_asset.get_temperature("Out", "Return"),
+            temperatures=esdl_asset.get_temperatures_asset(),
             max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
             max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
             fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
