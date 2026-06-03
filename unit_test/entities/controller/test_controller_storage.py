@@ -33,6 +33,7 @@ from omotes_simulator_core.entities.assets.controller.controller_storage import 
     ControllerIdealHeatStorage,
     ControllerStorageAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 PROFILE_VALUES = [100000, -200000]
@@ -53,8 +54,10 @@ class ControllerStorageAbstractTest(unittest.TestCase):
         self.storage = ControllerStorageAbstract(
             name="storage",
             identifier="storage_id",
-            temperature_in=DEFAULT_TEMPERATURE,
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            temperatures=Temperatures(
+                in_flow=DEFAULT_TEMPERATURE,
+                out_flow=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            ),
             max_charge_power=1e6,
             max_discharge_power=1e6,
             profile=PROFILE,
@@ -67,9 +70,9 @@ class ControllerStorageAbstractTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.storage.name, "storage")
         self.assertEqual(self.storage.id, "storage_id")
-        self.assertEqual(self.storage.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.storage.temperatures.in_flow, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.storage.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.storage.temperatures.out_flow, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1e6)
@@ -108,8 +111,10 @@ class ControllerAtestStorageTest(unittest.TestCase):
         self.storage = ControllerAtesStorage(
             "storage",
             "id",
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_in=DEFAULT_TEMPERATURE,
+            temperatures=Temperatures(
+                in_flow=DEFAULT_TEMPERATURE,
+                out_flow=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            ),
             max_charge_power=1000000,
             max_discharge_power=-1000000,
             profile=PROFILE,
@@ -122,9 +127,9 @@ class ControllerAtestStorageTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.storage.name, "storage")
         self.assertEqual(self.storage.id, "id")
-        self.assertEqual(self.storage.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.storage.temperatures.in_flow, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.storage.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.storage.temperatures.out_flow, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
@@ -139,8 +144,10 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         self.storage = ControllerIdealHeatStorage(
             "storage",
             "id",
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_in=DEFAULT_TEMPERATURE,
+            temperatures=Temperatures(
+                in_flow=DEFAULT_TEMPERATURE,
+                out_flow=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            ),
             max_charge_power=1000000,
             max_discharge_power=-1000000,
             fill_level=0.5,
@@ -155,9 +162,9 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.storage.name, "storage")
         self.assertEqual(self.storage.id, "id")
-        self.assertEqual(self.storage.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.storage.temperatures.in_flow, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.storage.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.storage.temperatures.out_flow, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
         )
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
@@ -174,8 +181,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
         self.storage.volume_hot = 1.0  # m3
-        self.storage.temperature_in = 2.0
-        self.storage.temperature_out = 1.0
+        self.storage.temperatures.in_flow = 2.0
+        self.storage.temperatures.out_flow = 1.0
         self.storage.timestep = 1.0
         self.storage.max_discharge_power = 100
 
@@ -205,8 +212,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         patch_rho.return_value = 1.0  # kg/m3
         self.storage.volume = 1.0  # m3
         self.storage.volume_hot = 0.0  # m3
-        self.storage.temperature_in = 2.0
-        self.storage.temperature_out = 1.0
+        self.storage.temperatures.in_flow = 2.0
+        self.storage.temperatures.out_flow = 1.0
         self.storage.timestep = 1.0
         self.storage.max_charge_power = 1e9
 
@@ -343,8 +350,8 @@ class ControllerIdealHeatStorageTest(unittest.TestCase):
         # Arrange
         patch_cp.return_value = 1.0  # J/kg.K
         patch_rho.return_value = 1.0  # kg/m3
-        self.storage.temperature_in = 2.0
-        self.storage.temperature_out = 1.0
+        self.storage.temperatures.in_flow = 2.0
+        self.storage.temperatures.out_flow = 1.0
         self.storage.timestep = 1.0
 
         # Act

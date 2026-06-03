@@ -34,6 +34,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorageAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 from omotes_simulator_core.entities.network_controller import NetworkController
 
 
@@ -137,8 +138,7 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=50,
             marginal_costs=1,
             priority=2,
@@ -147,8 +147,7 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=40,
             marginal_costs=1,
             priority=3,
@@ -159,33 +158,34 @@ class ControllerTest(unittest.TestCase):
         consumer1 = Mock(spec=ControllerConsumer)
         consumer1.id = "consumer1"
         consumer1.get_heat_demand = Mock(return_value=10)
-        consumer1.temperature_in = 50
-        consumer1.temperature_out = 40
+        consumer1.temperatures = Temperatures(in_flow=50, out_flow=40)
         consumer2 = Mock(spec=ControllerConsumer)
         consumer2.id = "consumer2"
         consumer2.get_heat_demand = Mock(return_value=20)
-        consumer2.temperature_in = 50
-        consumer2.temperature_out = 40
+        consumer2.temperatures = Temperatures(in_flow=50, out_flow=40)
 
         # Create storage asset
         self.storage1 = Mock(spec=ControllerStorageAbstract)
         self.storage1.id = "storage1"
         self.storage1.effective_max_discharge_power = 10
         self.storage1.effective_max_charge_power = 20
-        self.storage1.temperature_out = 50
-        self.storage1.temperature_in = 40
+        self.storage1.temperatures = Temperatures(in_flow=40, out_flow=50)
 
         # Create heat transfer assets
         heatpump = ControllerHeatTransferAsset(
             name="heatpump1",
             identifier="heatpump1",
             factor=5.0,
+            temperatures_primary=Temperatures(in_flow=50 + 273.15, out_flow=30 + 273.15),
+            temperatures_secondary=Temperatures(in_flow=40 + 273.15, out_flow=80 + 273.15),
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
         )
         heatpump2 = ControllerHeatTransferAsset(
             name="heatpump2",
             identifier="heatpump2",
             factor=1.0,
+            temperatures_primary=Temperatures(in_flow=50 + 273.15, out_flow=30 + 273.15),
+            temperatures_secondary=Temperatures(in_flow=40 + 273.15, out_flow=80 + 273.15),
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
         )
 
@@ -455,8 +455,7 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=50,
             marginal_costs=1,
             priority=2,
@@ -465,8 +464,7 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=40,
             marginal_costs=1,
             priority=3,
@@ -475,8 +473,7 @@ class ControllerTest(unittest.TestCase):
         producer3 = ControllerProducer(
             name="producer3",
             identifier="producer3",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=40,
             marginal_costs=1,
             priority=1,
@@ -485,8 +482,7 @@ class ControllerTest(unittest.TestCase):
         producer4 = ControllerProducer(
             name="producer4",
             identifier="producer4",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=20,
             marginal_costs=1,
             priority=3,
@@ -528,8 +524,7 @@ class ControllerTest(unittest.TestCase):
         producer1 = ControllerProducer(
             name="producer1",
             identifier="producer1",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=50,
             marginal_costs=1,
             priority=2,
@@ -538,8 +533,7 @@ class ControllerTest(unittest.TestCase):
         producer2 = ControllerProducer(
             name="producer2",
             identifier="producer2",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=40,
             marginal_costs=1,
             priority=3,
@@ -548,8 +542,7 @@ class ControllerTest(unittest.TestCase):
         producer3 = ControllerProducer(
             name="producer3",
             identifier="producer3",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=40,
             marginal_costs=1,
             priority=1,
@@ -558,8 +551,7 @@ class ControllerTest(unittest.TestCase):
         producer4 = ControllerProducer(
             name="producer4",
             identifier="producer4",
-            temperature_out=50,
-            temperature_in=40,
+            temperatures=Temperatures(in_flow=40, out_flow=50),
             power=20,
             marginal_costs=1,
             priority=3,

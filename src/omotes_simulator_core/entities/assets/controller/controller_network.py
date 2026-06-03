@@ -139,6 +139,7 @@ class ControllerNetwork:
     def set_supply(self, time: datetime.datetime, factor: float = 1, priority: int = 0) -> dict:
         """Method to set the producers with the given priority to max power times the factor.
 
+        :param time: Time to set the max power to.
         :param float factor: Factor to multiply the max power with.
         :param int priority: Priority of the producers to set. When 0 all producers are set.
 
@@ -153,8 +154,8 @@ class ControllerNetwork:
             # Discharging (e.g., heat from component/system to the network) is negative.
             producers[source.id] = {
                 PROPERTY_HEAT_DEMAND: -1 * source.get_max_power(time) * factor,
-                PROPERTY_TEMPERATURE_OUT: source.temperature_out,
-                PROPERTY_TEMPERATURE_IN: source.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: source.temperatures.out_flow,
+                PROPERTY_TEMPERATURE_IN: source.temperatures.in_flow,
                 PROPERTY_SET_PRESSURE: False,
             }
         return producers
@@ -169,8 +170,8 @@ class ControllerNetwork:
         for storage in self.storages:
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: +1 * storage.effective_max_charge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: storage.temperatures.out_flow,
+                PROPERTY_TEMPERATURE_IN: storage.temperatures.in_flow,
                 PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
@@ -186,8 +187,8 @@ class ControllerNetwork:
             # Discharging is negative (e.g., heat from component/system to the network)
             storage_settings[storage.id] = {
                 PROPERTY_HEAT_DEMAND: -1 * storage.effective_max_discharge_power * factor,
-                PROPERTY_TEMPERATURE_OUT: storage.temperature_out,
-                PROPERTY_TEMPERATURE_IN: storage.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: storage.temperatures.out_flow,
+                PROPERTY_TEMPERATURE_IN: storage.temperatures.in_flow,
                 PROPERTY_SET_PRESSURE: False,
             }
         return storage_settings
@@ -220,8 +221,8 @@ class ControllerNetwork:
             # Charging (e.g., heat from network to compontent) is positive.
             consumers[consumer.id] = {
                 PROPERTY_HEAT_DEMAND: +1 * consumer.get_heat_demand(time) * factor,
-                PROPERTY_TEMPERATURE_OUT: consumer.temperature_out,
-                PROPERTY_TEMPERATURE_IN: consumer.temperature_in,
+                PROPERTY_TEMPERATURE_OUT: consumer.temperatures.out_flow,
+                PROPERTY_TEMPERATURE_IN: consumer.temperatures.in_flow,
             }
         return consumers
 

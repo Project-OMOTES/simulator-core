@@ -458,6 +458,54 @@ class EsdlObjectTest(unittest.TestCase):
         self.assertTrue(has_optimizer_profile)
         self.assertIs(has_no_optimizer_profile, False)
 
+    def test_get_temperature_port_prim_supply(self):
+        # Arrange
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        heatpump = esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)[0]
+        ports = heatpump.get_port_ids()
+        # Act
+        temp_prim_in = heatpump.get_temperature_port(ports[0], "Supply")
+        # Assert
+        self.assertEqual(temp_prim_in, 40 + 273.15)
+
+    def test_get_temperature_port_prim_return(self):
+        # Arrange
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        heatpump = esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)[0]
+        ports = heatpump.get_port_ids()
+        # Act
+        temp_prim_in = heatpump.get_temperature_port(ports[1], "Return")
+        # Assert
+        self.assertEqual(temp_prim_in, 20 + 273.15)
+
+    def test_get_temperature_port_sec_supply(self):
+        # Arrange
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        heatpump = esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)[0]
+        ports = heatpump.get_port_ids()
+        # Act
+        temp_prim_in = heatpump.get_temperature_port(ports[2], "Supply")
+        # Assert
+        self.assertEqual(temp_prim_in, 80 + 273.15)
+
+    def test_get_temperature_port_sec_return(self):
+        # Arrange
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_file_path = str(esdl_file_path)
+        esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
+        heatpump = esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)[0]
+        ports = heatpump.get_port_ids()
+        # Act
+        temp_prim_in = heatpump.get_temperature_port(ports[3], "Return")
+        # Assert
+        self.assertEqual(temp_prim_in, 50 + 273.15)
+
 
 class StringEsdlAssetMapperTest(unittest.TestCase):
     """Class to test conversion from esdl asset to string and back."""

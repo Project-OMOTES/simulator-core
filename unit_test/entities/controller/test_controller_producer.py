@@ -23,6 +23,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_TEMPERATURE_DIFFERENCE,
 )
 from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 
 
 class ControllerProducerTest(unittest.TestCase):
@@ -40,8 +41,10 @@ class ControllerProducerTest(unittest.TestCase):
         self.producer = ControllerProducer(
             "producer",
             "id",
-            temperature_out=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
-            temperature_in=DEFAULT_TEMPERATURE,
+            temperatures=Temperatures(
+                in_flow=DEFAULT_TEMPERATURE,
+                out_flow=DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
+            ),
             power=1000,
             marginal_costs=0.1,
             priority=1,
@@ -53,9 +56,10 @@ class ControllerProducerTest(unittest.TestCase):
         # Assert
         self.assertEqual(self.producer.name, "producer")
         self.assertEqual(self.producer.id, "id")
-        self.assertEqual(self.producer.temperature_in, DEFAULT_TEMPERATURE)
+        self.assertEqual(self.producer.temperatures.in_flow, DEFAULT_TEMPERATURE)
         self.assertEqual(
-            self.producer.temperature_out, DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE
+            self.producer.temperatures.out_flow,
+            DEFAULT_TEMPERATURE + DEFAULT_TEMPERATURE_DIFFERENCE,
         )
         self.assertEqual(self.producer.power, 1000)
         self.assertEqual(self.producer.marginal_costs, 0.1)

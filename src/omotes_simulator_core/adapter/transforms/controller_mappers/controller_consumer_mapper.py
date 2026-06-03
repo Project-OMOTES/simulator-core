@@ -41,7 +41,7 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
     ) -> ControllerConsumer:
         """Method to map an esdl asset to a consumer entity class.
 
-        :param EsdlAssetObject model: Object to be converted to an asset entity.
+        :param EsdlAssetObject esdl_asset: Object to be converted to an asset entity.
         :param Optional[int] timestep: Simulation timestep in seconds.
 
         :return: Entity object.
@@ -49,22 +49,20 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
-        temperature_in = esdl_asset.get_temperature("In", "Supply")
-        temperature_out = esdl_asset.get_temperature("Out", "Return")
+        temperatures = esdl_asset.get_temperatures_asset()
         profile = esdl_asset.get_profile()
-        self.profile_interpolator = ProfileInterpolator(
+        profile_interpolator = ProfileInterpolator(
             profile=profile,
             sampling_method=esdl_asset.get_sampling_method(),
             interpolation_method=esdl_asset.get_interpolation_method(),
             timestep=timestep,
         )
-        resampled_profile = self.profile_interpolator.get_resampled_profile()
+        resampled_profile = profile_interpolator.get_resampled_profile()
 
         contr_consumer = ControllerConsumer(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            temperature_in=temperature_in,
-            temperature_out=temperature_out,
+            temperatures=temperatures,
             max_power=power,
             profile=resampled_profile,
         )
