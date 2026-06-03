@@ -259,6 +259,13 @@ Limitations
 - The COP does not vary with source temperature, sink temperature, or operating point within the asset model.
 - The documentation describes the four-port ``HeatPump`` asset; the separate two-port ``AirToWaterHeatPump`` asset follows different behavior and should be documented separately.
 
+See Also
+--------
+
+- :doc:`heat_exchanger_physics` — Related four-port heat transfer asset (passive coupling)
+- :doc:`air_to_water_heat_pump_physics` — Two-port heat pump variant
+- :doc:`producer_physics` — Simple heat source model
+
 References
 ----------
 
