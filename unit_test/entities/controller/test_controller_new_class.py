@@ -15,6 +15,7 @@
 """Test controller class."""
 import datetime
 import unittest
+from logging import info
 from unittest.mock import Mock
 
 import pandas as pd
