@@ -3,18 +3,25 @@
 Producer asset
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The **Producer Asset** represents all components that generate thermal energy.
+The **Producer Asset** is the entity-level representation of a controllable heat
+source in the simulation input model.
 
-This asset is stored within the `ProductionCluster` class in the 
-`omotes_simulator_core.entities.assets.production_cluster` module.
+It groups the metadata, ports, and operating parameters needed to represent heat
+production before those values are translated to solver behavior.
 
-A producer asset is initialized with an asset name, a unique asset ID, and a list of connected port IDs. It 
-manages different operational parameters that include supply and return temperatures, pressure supply, and mass flow 
-control. The producer ensures that the thermal production meets the given setpoints.
+Implemented by
+--------------
 
-The `set_setpoints` method ensures that all necessary setpoints that includes supply temperature, return temperature, heat 
-demand, and supply pressure are provided in order to compute the mass flow rate. 
+This reference page documents the ``ProductionCluster`` entity in
+``omotes_simulator_core.entities.assets.production_cluster``.
+
+Related documentation
+---------------------
+
+- For producer behavior during simulation, see :doc:`../physics/producer_physics`.
+- For network-level interpretation of pressure and flow, see :doc:`../network/network_main`.
 
 
 .. autoclass:: omotes_simulator_core.entities.assets.production_cluster.ProductionCluster
+   :no-index:
    :members:

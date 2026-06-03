@@ -30,12 +30,12 @@ All these assets have been derived from three base classes:
 **Contents**
 
 .. toctree::
-    :maxdepth: 1
-    :glob:
+   :maxdepth: 1
+   :glob:
 
-    assets/base_item.rst
-    assets/base_asset.rst
-    assets/fall_type.rst
-    assets/solver_pipe.rst
-    assets/solver_producer.rst
-    assets/solver_node.rst
+   assets/base_item.rst
+   assets/base_asset.rst
+   assets/fall_type.rst
+   assets/solver_pipe.rst
+   assets/solver_heatboundary.rst
+   assets/solver_node.rst

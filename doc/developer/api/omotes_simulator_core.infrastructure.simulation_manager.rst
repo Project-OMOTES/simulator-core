@@ -1,0 +1,7 @@
+infrastructure.simulation_manager
+=================================
+
+.. automodule:: omotes_simulator_core.infrastructure.simulation_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:

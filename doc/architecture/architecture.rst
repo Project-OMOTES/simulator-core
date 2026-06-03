@@ -20,7 +20,9 @@ which runs the simulation and passes back the results.
 
    asset_factories
    configuration
+   esdl_asset_object
    esdl_object
+   network_simulation
    simulation_manager
 
 

@@ -29,8 +29,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
-from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
 
