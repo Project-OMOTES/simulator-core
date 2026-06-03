@@ -52,6 +52,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         identifier: str,
         factor: float,
         heat_transfer_type: HeatTransferAssetType,
+        temperatures: dict[str, float],
         max_electrical_power: float | None = None,
     ):
         """Constructor of the class, which sets all attributes.
@@ -65,6 +66,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         super().__init__(name, identifier)
         self.factor = factor
         self.heat_transfer_type = heat_transfer_type
+        self.temperatures = temperatures
         self.max_electrical_power = max_electrical_power
 
     def set_asset_prim(
@@ -81,11 +83,21 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY
+                    + PROPERTY_TEMPERATURE_OUT: self.temperatures[
+                        PRIMARY + PROPERTY_TEMPERATURE_OUT
+                    ],
+                    PRIMARY
+                    + PROPERTY_TEMPERATURE_IN: self.temperatures[PRIMARY + PROPERTY_TEMPERATURE_IN],
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY
+                    + PROPERTY_TEMPERATURE_OUT: self.temperatures[
+                        SECONDARY + PROPERTY_TEMPERATURE_OUT
+                    ],
+                    SECONDARY
+                    + PROPERTY_TEMPERATURE_IN: self.temperatures[
+                        SECONDARY + PROPERTY_TEMPERATURE_IN
+                    ],
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: True,
@@ -95,11 +107,21 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY
+                    + PROPERTY_TEMPERATURE_OUT: self.temperatures[
+                        PRIMARY + PROPERTY_TEMPERATURE_OUT
+                    ],
+                    PRIMARY
+                    + PROPERTY_TEMPERATURE_IN: self.temperatures[PRIMARY + PROPERTY_TEMPERATURE_IN],
                     SECONDARY + PROPERTY_HEAT_DEMAND: heat_demand * self.factor,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY
+                    + PROPERTY_TEMPERATURE_OUT: self.temperatures[
+                        SECONDARY + PROPERTY_TEMPERATURE_OUT
+                    ],
+                    SECONDARY
+                    + PROPERTY_TEMPERATURE_IN: self.temperatures[
+                        SECONDARY + PROPERTY_TEMPERATURE_IN
+                    ],
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: False,
