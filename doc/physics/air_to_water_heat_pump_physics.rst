@@ -178,6 +178,13 @@ Limitations
 - No explicit maximum electrical power cap in this two-port implementation.
 - This page documents only the two-port ``AirToWaterHeatPump``; the four-port ``HeatPump`` has different physics and controls.
 
+See Also
+--------
+
+- :doc:`heat_pump_physics` — Four-port heat pump with coupled primary and secondary circuits
+- :doc:`producer_physics` — Simpler heat production model
+- :doc:`consumer_physics` — Heat demand boundary
+
 References
 ----------
 
