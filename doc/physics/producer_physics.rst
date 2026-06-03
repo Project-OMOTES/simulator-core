@@ -209,6 +209,13 @@ Limitations
 - No explicit modelling of heat losses or environmental interactions.
 - Convergence is checked against a 0.1% tolerance between supplied and demanded heat.
 
+See Also
+--------
+
+- :doc:`consumer_physics` — Complementary heat demand asset model
+- :doc:`air_to_water_heat_pump_physics` — Specialized producer with electrical input
+- :doc:`ideal_heat_storage_physics` — Heat buffering for supply stability
+
 References
 ----------
 
