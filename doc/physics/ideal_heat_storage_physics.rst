@@ -336,6 +336,13 @@ Limitations
 - No pressure-drop model for internal storage components.
 - Accuracy depends on timestep size; large timesteps can smooth short transients.
 
+See Also
+--------
+
+- :doc:`ates_cluster_physics` — Aquifer thermal energy storage (ATES) system
+- :doc:`producer_physics` — Heat supply source
+- :doc:`consumer_physics` — Heat demand sink
+
 References
 ----------
 

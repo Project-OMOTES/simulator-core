@@ -95,6 +95,13 @@ Limitations
 - No local pressure-drop model is included for fittings or manifolds at the junction.
 - No transient stratification or delay effects are represented at the node.
 
+See Also
+--------
+
+- :doc:`pipe_physics` — Network piping and transport
+- :doc:`producer_physics` — Heat supply boundaries
+- :doc:`consumer_physics` — Heat demand boundaries
+
 References
 ----------
 
