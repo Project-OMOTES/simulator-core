@@ -54,23 +54,16 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         max_electrical_power = esdl_asset.get_property(
             esdl_property_name="power", default_value=None
         )
-        ports = esdl_asset.get_port_ids()
-        temperature_prim_in = esdl_asset.get_temperature_port(ports[0], "Supply")
-        temperature_prim_out = esdl_asset.get_temperature_port(ports[1], "Return")
-        temperature_sec_in = esdl_asset.get_temperature_port(ports[2], "Return")
-        temperature_sec_out = esdl_asset.get_temperature_port(ports[3], "Supply")
-        temperature_dict = {
-            PRIMARY + PROPERTY_TEMPERATURE_IN: temperature_prim_in,
-            PRIMARY + PROPERTY_TEMPERATURE_OUT: temperature_prim_out,
-            SECONDARY + PROPERTY_TEMPERATURE_IN: temperature_sec_in,
-            SECONDARY + PROPERTY_TEMPERATURE_OUT: temperature_sec_out,
-        }
+        temperatures_primary = esdl_asset.get_temperatures_asset(side=PRIMARY)
+        temperatures_secondary = esdl_asset.get_temperatures_asset(side=SECONDARY)
+
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             factor=coefficient_of_performance,
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
-            temperatures=temperature_dict,
+            temperatures_primary=temperatures_primary,
+            temperatures_secondary=temperatures_secondary,
             max_electrical_power=max_electrical_power,
         )
         return contr_heat_transfer
@@ -94,22 +87,14 @@ class ControllerHeatExchangeMapper(EsdlMapperAbstract):
             esdl_property_name="Efficiency",
             default_value=HeatExchangerDefaults.heat_transfer_efficiency,
         )
-        ports = esdl_asset.get_port_ids()
-        temperature_prim_in = esdl_asset.get_temperature_port(ports[0], "Supply")
-        temperature_prim_out = esdl_asset.get_temperature_port(ports[1], "Return")
-        temperature_sec_in = esdl_asset.get_temperature_port(ports[2], "Return")
-        temperature_sec_out = esdl_asset.get_temperature_port(ports[3], "Supply")
-        temperature_dict = {
-            PRIMARY + PROPERTY_TEMPERATURE_IN: temperature_prim_in,
-            PRIMARY + PROPERTY_TEMPERATURE_OUT: temperature_prim_out,
-            SECONDARY + PROPERTY_TEMPERATURE_IN: temperature_sec_in,
-            SECONDARY + PROPERTY_TEMPERATURE_OUT: temperature_sec_out,
-        }
+        temperatures_primary = esdl_asset.get_temperatures_asset(side=PRIMARY)
+        temperatures_secondary = esdl_asset.get_temperatures_asset(side=SECONDARY)
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
             factor=coefficient_of_performance,
-            temperatures=temperature_dict,
+            temperatures_primary=temperatures_primary,
+            temperatures_secondary=temperatures_secondary,
             heat_transfer_type=HeatTransferAssetType.HEAT_EXCHANGER,
         )
         return contr_heat_transfer

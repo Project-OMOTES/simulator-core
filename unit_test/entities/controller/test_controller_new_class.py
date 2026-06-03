@@ -36,6 +36,7 @@ from omotes_simulator_core.entities.assets.controller.controller_producer import
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerStorageAbstract,
 )
+from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
 from omotes_simulator_core.entities.network_controller import NetworkController
 
 
@@ -176,25 +177,22 @@ class ControllerTest(unittest.TestCase):
         self.storage1.effective_max_charge_power = 20
         self.storage1.temperature_out = 50
         self.storage1.temperature_in = 40
-        temperature_dict = {
-            PRIMARY + PROPERTY_TEMPERATURE_IN: 50 + 273.15,
-            PRIMARY + PROPERTY_TEMPERATURE_OUT: 30 + 273.15,
-            SECONDARY + PROPERTY_TEMPERATURE_IN: 40 + 273.15,
-            SECONDARY + PROPERTY_TEMPERATURE_OUT: 80 + 273.15,
-        }
+
         # Create heat transfer assets
         heatpump = ControllerHeatTransferAsset(
             name="heatpump1",
             identifier="heatpump1",
             factor=5.0,
-            temperatures=temperature_dict,
+            temperatures_primary=Temperatures(in_flow=50 + 273.15, out_flow=30 + 273.15),
+            temperatures_secondary=Temperatures(in_flow=40 + 273.15, out_flow=80 + 273.15),
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
         )
         heatpump2 = ControllerHeatTransferAsset(
             name="heatpump2",
             identifier="heatpump2",
             factor=1.0,
-            temperatures=temperature_dict,
+            temperatures_primary=Temperatures(in_flow=50 + 273.15, out_flow=30 + 273.15),
+            temperatures_secondary=Temperatures(in_flow=40 + 273.15, out_flow=80 + 273.15),
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
         )
 
