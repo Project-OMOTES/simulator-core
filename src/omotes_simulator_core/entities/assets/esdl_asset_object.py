@@ -175,6 +175,7 @@ class EsdlAssetObject:
         raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
 
     def get_temperatures_asset(self, side: str | None) -> Temperatures:
+        """Get the inflow and outflow temperature of an asset."""
         if self.get_esdl_type() == OmotesAssetLabels.CONSUMER:
             temperatures = Temperatures(
                 in_flow=self.get_temperature("In", "Supply"),

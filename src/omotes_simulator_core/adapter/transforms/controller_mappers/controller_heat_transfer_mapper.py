@@ -17,8 +17,6 @@
 """Module containing the Esdl to asset mapper class."""
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
     HeatExchangerDefaults,
     HeatPumpDefaults,

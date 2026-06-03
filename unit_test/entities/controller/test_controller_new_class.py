@@ -22,8 +22,6 @@ import pandas as pd
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
     PROPERTY_HEAT_DEMAND,
-    PROPERTY_TEMPERATURE_IN,
-    PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
