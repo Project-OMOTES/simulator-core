@@ -77,8 +77,8 @@ This profile defines the heat demand as a function of time. Interpolation is use
 demand at each simulation timestep. 
 
 The controller can override this profile value when it surpasses the maximum power limit of the asset, 
-or when there is insufficient heat supply in the network to meet the demand. See **TODO: link to controller documentation**
-for more details on how the controller allocates heat supply to meet demand across the network.
+or when there is insufficient heat supply in the network to meet the demand. See
+:doc:`../controller/controller` for more details on how the controller allocates heat supply to meet demand across the network.
 
 .. [#heat-demand-set-point] The heat demand set point defines the mass flow required to meet the
   heat demand, given the inlet and outlet temperatures. The mass flow is calculated as:
@@ -193,6 +193,13 @@ Limitations
 - No modelling of part-load efficiency or startup/shutdown dynamics.
 - No explicit modelling of heat losses or environmental interactions.
 - Convergence is checked against a 0.1% tolerance between supplied and demanded heat.
+
+See Also
+--------
+
+- :doc:`producer_physics` — Complementary heat production asset model
+- :doc:`heat_exchanger_physics` — Multi-circuit heat transfer
+- :doc:`ideal_heat_storage_physics` — Heat storage for supply smoothing
 
 References
 ----------
