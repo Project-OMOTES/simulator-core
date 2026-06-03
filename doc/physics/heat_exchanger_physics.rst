@@ -239,6 +239,13 @@ Limitations
 - No explicit leakage, bypass flow, or cross-contamination between circuits.
 - If exchanger pressure drop is important for the study, a more detailed asset model is needed.
 
+See Also
+--------
+
+- :doc:`heat_pump_physics` — Related four-port asset with active heat input
+- :doc:`producer_physics` — Simple heat production
+- :doc:`consumer_physics` — Heat demand endpoint
+
 References
 ----------
 
