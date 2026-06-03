@@ -37,7 +37,7 @@ class TestEsdlAssetHeatExchangerMapper(unittest.TestCase):
             / ".."
             / ".."
             / "testdata"
-            / "simple_heat_exchanger.esdl"
+            / "Simple_heat_exchange.esdl"
         )
         self.esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         self.mapper = EsdlAssetHeatExchangerMapper()
