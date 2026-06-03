@@ -23,3 +23,21 @@ class Temperatures:
 
     in_flow: float
     out_flow: float
+
+
+def celcius_to_kelvin(temperature: float) -> float:
+    """Convert Celcius to Kelvin.
+
+    :param temperature: temperature in C
+    :return: temperature in K
+    """
+    return temperature + 273.15
+
+
+def kelvin_to_celcius(temperature: float) -> float:
+    """Convert Kelvin to Celcius.
+
+    :param temperature: temperature in K
+    :return: temperature in C
+    """
+    return temperature - 273.15

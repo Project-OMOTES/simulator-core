@@ -30,7 +30,10 @@ from omotes_simulator_core.entities.assets.controller.profile_interpolation impo
     ProfileInterpolationMethod,
     ProfileSamplingMethod,
 )
-from omotes_simulator_core.entities.assets.controller.temperature_data import Temperatures
+from omotes_simulator_core.entities.assets.controller.temperature_data import (
+    Temperatures,
+    celcius_to_kelvin,
+)
 from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
@@ -160,9 +163,9 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.id == port_id:
                 if temp_type == "Supply":
-                    return float(esdl_port.carrier.supplyTemperature) + 273.15
+                    return float(celcius_to_kelvin(esdl_port.carrier.supplyTemperature))
                 elif temp_type == "Return":
-                    return float(esdl_port.carrier.returnTemperature) + 273.15
+                    return float(celcius_to_kelvin(esdl_port.carrier.returnTemperature))
                 logger.error(f"Unknown temperature type: {temp_type}")
                 raise ValueError(f"Unknown temperature type: {temp_type}")
         logger.error(
@@ -310,13 +313,3 @@ class EsdlAssetObject:
     def get_esdl_type(self) -> str:
         """Returns the ESDL type of the asset as a string."""
         return StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
-
-
-def get_return_temperature(esdl_port: esdl.Port) -> float:
-    """Get the temperature of the port."""
-    return float(esdl_port.carrier.returnTemperature) + 273.15
-
-
-def get_supply_temperature(esdl_port: esdl.Port) -> float:
-    """Get the temperature of the port."""
-    return float(esdl_port.carrier.supplyTemperature) + 273.15

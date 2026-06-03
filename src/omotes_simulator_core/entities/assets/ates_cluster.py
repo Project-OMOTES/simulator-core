@@ -31,12 +31,12 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
 )
-from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
-from omotes_simulator_core.entities.assets.utils import (
+from omotes_simulator_core.entities.assets.controller.temperature_data import (
     celcius_to_kelvin,
-    heat_demand_and_temperature_to_mass_flow,
     kelvin_to_celcius,
 )
+from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
+from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 logger = logging.getLogger(__name__)
