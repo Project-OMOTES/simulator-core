@@ -323,32 +323,21 @@ class HeatTransferAsset(BaseAsset):
         )
         # Add the internal energy equations at connection points 1, and 3 to set
         # the temperature through internal energy at the outlet of the heat transfer asset.
-        if self.iteration_flow_direction_primary != FlowDirection.ZERO:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=self.primary_side_outflow,
-                    supply_temperature=self.temperature_out_primary,
-                )
+
+        equations.append(
+            self.prescribe_temperature_at_connection_point(
+                connection_point=self.primary_side_outflow,
+                supply_temperature=self.temperature_out_primary,
             )
-        else:
-            equations.append(
-                self.get_internal_energy_to_node_equation(
-                    connection_point=self.primary_side_outflow
-                )
+        )
+
+        equations.append(
+            self.prescribe_temperature_at_connection_point(
+                connection_point=self.secondary_side_outflow,
+                supply_temperature=self.temperature_out_secondary,
             )
-        if self.iteration_flow_direction_secondary != FlowDirection.ZERO:
-            equations.append(
-                self.prescribe_temperature_at_connection_point(
-                    connection_point=self.secondary_side_outflow,
-                    supply_temperature=self.temperature_out_secondary,
-                )
-            )
-        else:
-            equations.append(
-                self.get_internal_energy_to_node_equation(
-                    connection_point=self.secondary_side_outflow
-                )
-            )
+        )
+
         # -- Mass flow rate or pressure on secondary side (2x) --
         # Prescribe the pressure at the secondary side of the heat transfer asset.
         if self.pre_scribe_mass_flow_secondary:
@@ -409,29 +398,35 @@ class HeatTransferAsset(BaseAsset):
         # heat transfer asset.
         # If the mass flow at the inflow node of the primary and secondary side is not zero,
         if self.pre_scribe_mass_flow_primary:
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=0,
-                    mass_flow_value=-1 * abs(self.mass_flow_initialization_primary),
+            mass_flow_rate = abs(self.get_mass_flow_from_prev_solution())
+            if mass_flow_rate == 0:
+                mass_flow_set = self.mass_flow_initialization_primary
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=0,
+                        mass_flow_value=-1 * mass_flow_set,
+                    )
                 )
-            )
-            equations.append(
-                self.prescribe_mass_flow_at_connection_point(
-                    connection_point=1,
-                    mass_flow_value=abs(self.mass_flow_initialization_primary),
+                equations.append(
+                    self.prescribe_mass_flow_at_connection_point(
+                        connection_point=1,
+                        mass_flow_value=mass_flow_set,
+                    )
                 )
-            )
+            else:
+                equations.append(self.get_continuity_equation_primary_side())
+                equations.append(self.get_heat_pump_equation())
         else:
             if self.iteration_flow_direction_primary == FlowDirection.ZERO:
                 pset_out = self.pressure_set_point_secondary
                 pset_in = self.pressure_set_point_secondary
             else:
                 if self.iteration_flow_direction_primary == FlowDirection.POSITIVE:
-                    pset_out = self.pressure_set_point_secondary / 2
-                    pset_in = self.pressure_set_point_secondary
+                    pset_out = self.pressure_set_point_secondary / 1e5 / 2
+                    pset_in = self.pressure_set_point_secondary / 1e5
                 else:
-                    pset_out = self.pressure_set_point_secondary
-                    pset_in = self.pressure_set_point_secondary / 2
+                    pset_out = self.pressure_set_point_secondary / 1e5
+                    pset_in = self.pressure_set_point_secondary / 2 / 1e5
             equations.append(
                 self.prescribe_pressure_at_connection_point(
                     connection_point=self.primary_side_inflow,
@@ -660,7 +655,7 @@ class HeatTransferAsset(BaseAsset):
                     )
                 ]
             )
-        return float(-1 * abs(-energy_secondary_side / internal_energy_difference_primary))
+        return float(abs(-energy_secondary_side / internal_energy_difference_primary))
 
     def prescribe_temperature_at_connection_point(
         self, connection_point: int, supply_temperature: float
@@ -828,3 +823,150 @@ class HeatTransferAsset(BaseAsset):
             The electric power consumption of the heat transfer asset.
         """
         return abs(abs(self.get_heat_power_primary()) - abs(self.get_heat_power_secondary()))
+
+    def get_continuity_equation_primary_side(self) -> EquationObject:
+        """Return the continuity equation for the primary side of the heat transfer asset.
+
+        The continuity equation for the primary side of the heat transfer asset is defined as:
+
+        .. math::
+
+            \dot{m}_{in} + \dot{m}_{out} = 0
+
+        :return: EquationObject
+            The continuity equation for the primary side of the heat transfer asset.
+        """
+        equation_object = EquationObject()
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.primary_side_inflow,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=self.primary_side_outflow,
+                    use_relative_indexing=False,
+                ),
+            ]
+        )
+        equation_object.coefficients = np.array([1.0, 1.0])
+        equation_object.rhs = 0.0
+        return equation_object
+
+    def get_heat_pump_equation(self) -> EquationObject:
+        """Return the heat pump equation for the heat transfer asset."""
+
+        equation_object = EquationObject()
+        m1 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=0,
+                use_relative_indexing=True,
+            )
+        ]
+        m2 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=1,
+                use_relative_indexing=True,
+            )
+        ]
+        m3 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=2,
+                use_relative_indexing=True,
+            )
+        ]
+        m4 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=3,
+                use_relative_indexing=True,
+            )
+        ]
+        u1 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=0,
+                use_relative_indexing=True,
+            )
+        ]
+        u2 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=1,
+                use_relative_indexing=True,
+            )
+        ]
+        u3 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=2,
+                use_relative_indexing=True,
+            )
+        ]
+        u4 = self.prev_sol[
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=3,
+                use_relative_indexing=True,
+            )
+        ]
+
+        rhs = u1 * m1 - u2 * m1 + self.heat_transfer_coefficient * (u3 * m3 + u4 * m4)
+        equation_object.indices = np.array(
+            [
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=0,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=0,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=1,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=2,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=2,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=3,
+                    use_relative_indexing=False,
+                ),
+                self.get_index_matrix(
+                    property_name="internal_energy",
+                    connection_point=3,
+                    use_relative_indexing=False,
+                ),
+            ]
+        )
+
+        equation_object.coefficients = np.array(
+            [
+                u1 - u2,
+                m1,
+                -m1,
+                self.heat_transfer_coefficient * u3,
+                self.heat_transfer_coefficient * m3,
+                self.heat_transfer_coefficient * u4,
+                self.heat_transfer_coefficient * m4,
+            ]
+        )
+        equation_object.rhs = rhs
+        return equation_object
