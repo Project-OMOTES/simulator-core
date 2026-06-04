@@ -58,7 +58,7 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         contr_heat_transfer = ControllerHeatTransferAsset(
             name=esdl_asset.esdl_asset.name,
             identifier=esdl_asset.esdl_asset.id,
-            factor=coefficient_of_performance,
+            factor=1 - 1 / coefficient_of_performance,
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
             temperatures_primary=temperatures_primary,
             temperatures_secondary=temperatures_secondary,
