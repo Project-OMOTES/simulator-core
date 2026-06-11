@@ -15,7 +15,10 @@
 
 """Module containing the Esdl to Producer asset mapper class."""
 
+import esdl
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.elec_boiler import ElecBoiler
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
@@ -34,10 +37,29 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a producer entity.
         :return: Producer object.
         """
-        producer_entity = ProductionCluster(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
-            port_ids=esdl_asset.get_port_ids(),
-        )
+        
+        if type(esdl_asset.esdl_asset) == esdl.ElectricBoiler:
+                producer_entity = ElecBoiler(
+                asset_name=esdl_asset.esdl_asset.name,
+                asset_id=esdl_asset.esdl_asset.id,
+                port_ids=esdl_asset.get_port_ids(),
+            )
+                
+        elif type(esdl_asset.esdl_asset) == esdl.GasHeater:
+            # producer_entity = ElecBoiler(  # type:ignore
+            #     asset_name=esdl_asset.esdl_asset.name,
+            #     asset_id=esdl_asset.esdl_asset.id,
+            #     port_ids=esdl_asset.get_port_ids(),
+            # )
+            pass # TODO: create and link the gas heater mapper here.
+        
+        else:
+            producer_entity = ProductionCluster(
+                asset_name=esdl_asset.esdl_asset.name,
+                asset_id=esdl_asset.esdl_asset.id,
+                port_ids=esdl_asset.get_port_ids(),
+            )
+
+        # TODO: call eboiler or gas heater entities from here.
 
         return producer_entity

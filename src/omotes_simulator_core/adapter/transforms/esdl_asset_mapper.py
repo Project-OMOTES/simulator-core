@@ -47,6 +47,7 @@ conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
     esdl.ResidualHeatSource: EsdlAssetProducerMapper,
     esdl.SolarCollector: EsdlAssetProducerMapper,
     esdl.GasHeater: EsdlAssetProducerMapper,
+    esdl.ElectricBoiler: EsdlAssetProducerMapper,
     esdl.Consumer: EsdlAssetConsumerMapper,
     esdl.GenericConsumer: EsdlAssetConsumerMapper,
     esdl.HeatingDemand: EsdlAssetConsumerMapper,
