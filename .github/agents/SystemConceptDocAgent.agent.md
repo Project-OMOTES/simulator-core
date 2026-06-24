@@ -331,6 +331,6 @@ After writing or updating the file:
 5. Verify that claims about execution flow, solver behavior, network behavior, and control behavior are supported by code or tests.
 6. Verify that the page does not duplicate material that belongs in ``doc/physics`` or developer documentation.
 7. Check that the page introduces no documentation build warnings or errors.
-8. If command execution or validation tools are available, run ``doc/run_sphinx.bat`` or the repository-preferred documentation build command.
+8. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the repository-preferred documentation build command.
 9. If an error or warning is found, fix it before returning the final content.
 10. Do not finish with known syntax errors, broken headings, malformed math blocks, broken references, or unresolved build warnings caused by the change.

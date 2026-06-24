@@ -10,9 +10,9 @@ network through one inlet and one outlet and tracks the amount of hot volume in 
 fill level between 0 and 1.
 
 In simulation, the asset behaves as an idealized control volume with stratified hot and cold zones.
-The controller provides a thermal power setpoint, and the asset translates that setpoint into mass
-flow and port temperatures based on the current operating mode. The asset is mapped from ESDL
-``HeatStorage`` and receives controller-driven setpoints during simulation.
+It receives a thermal power setpoint and translates that request into mass flow and port
+temperatures based on whether the storage is charging, discharging, or idle. The asset is mapped
+from ESDL ``HeatStorage``.
 
 Parameters
 ~~~~~~~~~~
@@ -42,31 +42,13 @@ Parameters
      - K
      - from ESDL carrier temperature at Out/Return port
    * - ``max_charge_power``
-     - Maximum charging power enforced by controller
+     - Maximum charging power
      - W
      - ``maxChargeRate``
    * - ``max_discharge_power``
-     - Maximum discharging power enforced by controller
+     - Maximum discharging power
      - W
      - ``maxDischargeRate``
-   * - ``effective_max_charge_power``
-     - Effective charging limit used by the controller, derived from remaining volume,
-       timestep, temperature difference, and ``max_charge_power``
-     - W
-     - derived in controller (not directly mapped)
-   * - ``effective_max_discharge_power``
-     - Effective discharging limit used by the controller, derived from available hot volume,
-       timestep, temperature difference, and ``max_discharge_power``
-     - W
-     - derived in controller (not directly mapped)
-   * - ``buffer_temperature_hot``
-     - Hot-zone buffer temperature state used for storage state updates
-     - K
-     - state variable (not directly mapped)
-   * - ``buffer_temperature_cold``
-     - Cold-zone buffer temperature state used for storage state updates
-     - K
-     - state variable (not directly mapped)
 
 Controlled Parameters
 ~~~~~~~~~~~~~~~~~~~~~
@@ -85,8 +67,10 @@ The storage receives one user-relevant control signal from the controller:
        negative values discharge the storage.
      - W
 
-The controller typically clips :math:`Q_{set}` to feasible charging or discharging power based on
-state of charge, volume, timestep, and configured power limits.
+The requested storage power can be clipped by the effective charge or discharge capacity of the
+storage. This becomes important near empty or full states, or when the temperature difference
+between the hot and cold zones is small. For controller-level dispatch behavior, see
+:doc:`../controller/controller`.
 
 Additional simulation outputs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,8 +121,8 @@ The corresponding temperature assignment follows the active mode:
   connection point 1.
 - **Idle**: both connection temperatures are set to the internal hot and cold buffer temperatures.
 
-Internally, the solver mass-flow sign is chosen so that discharge and charge map consistently to the
-selected port orientation.
+The solved mass-flow sign follows this mode definition: charging corresponds to flow into the
+storage and discharging corresponds to flow out of the storage hot zone.
 
 Mass flow and thermal power
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,47 +183,17 @@ This means fill level always remains bounded between empty and full.
 Effective charge and discharge power
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before assigning a storage setpoint, the controller computes effective charging and discharging
-power limits from both configured power limits and available storage volume over the timestep.
-
-The power corresponding to an available volume :math:`V_{avail}` is:
-
-.. math::
-
-  P_{vol} = \frac{V_{avail}}{\Delta t} \rho(\bar{T}) c_p(\bar{T}) \Delta T
-
-with :math:`\bar{T} = (T_{hot} + T_{cold})/2` and :math:`\Delta T = T_{hot} - T_{cold}`.
-
-The effective limits are then:
+The usable storage power is limited by both the configured charge or discharge rating and the
+amount of hot or cold volume that can be exchanged during one timestep. A concise engineering
+approximation is:
 
 .. math::
 
-  P_{dis,eff} = \min\left(P_{dis,max}, P_{vol}(V_{hot})\right)
+  P_{ch,eff} = \min\left(P_{ch,max}, \frac{V_{max} - V_{hot}}{\Delta t} \rho c_p \Delta T\right)
 
 .. math::
 
-  P_{ch,eff} = \min\left(P_{ch,max}, P_{vol}(V_{max} - V_{hot})\right)
-
-For implementation-specific edge cases, the controller applies the following piecewise behavior:
-
-.. math::
-
-  P_{ch,eff} =
-  \begin{cases}
-    0, & V_{avail,ch} \leq 0 \\
-    0, & \Delta T = 0 \\
-    \min\left(P_{ch,max}, P_{vol}(V_{avail,ch})\right), & \Delta T > 0
-  \end{cases}
-
-.. math::
-
-  P_{dis,eff} =
-  \begin{cases}
-    0, & V_{hot} \leq 0 \\
-    P_{dis,max}, & \Delta T = 0 \;\text{and}\; 0 < f < 1 \\
-    0, & \Delta T = 0 \;\text{and}\; (f = 0 \;\text{or}\; f = 1) \\
-    \min\left(P_{dis,max}, P_{vol}(V_{hot})\right), & \Delta T > 0
-  \end{cases}
+  P_{dis,eff} = \min\left(P_{dis,max}, \frac{V_{hot}}{\Delta t} \rho c_p \Delta T\right)
 
 where:
 
@@ -257,65 +211,30 @@ where:
     - Effective maximum charging power [W]
   * - :math:`V_{hot}`
     - Current hot volume in storage [m3]
-  * - :math:`V_{avail,ch}`
-    - Available volume for charging, :math:`V_{max} - V_{hot}` [m3]
-  * - :math:`f`
-    - Fill level (hot-volume fraction) [-]
+  * - :math:`\Delta T`
+    - Temperature difference between hot and cold zones, :math:`T_{hot} - T_{cold}` [K]
+  * - :math:`\rho`
+    - Fluid density at representative storage conditions [kg/m3]
+  * - :math:`c_p`
+    - Specific heat capacity at representative storage conditions [J/(kg K)]
 
-**Practical consequence**: as the storage approaches empty or full, the effective power limits reduce,
-which may clip controller requests even when configured maximum power is higher. Also, charging
-power becomes zero when :math:`\Delta T = 0`, while discharging follows the special piecewise rule
-above.
+In practical terms, requested charge or discharge power can be clipped even when the configured
+power rating is higher. Clipping becomes more likely when the storage approaches full or empty, or
+when the hot and cold zones have little temperature difference and therefore little usable thermal
+capacity.
 
 Temperature state update
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-When charging or discharging, the hot and cold buffer temperatures are updated using a mixing-based
-specific internal energy balance for each zone. Internal energy from incoming flow is blended with
-existing zone energy, then converted back to temperature through fluid property relations.
-
-For each zone, the updated specific internal energy is:
+When charging or discharging, each zone is updated with an ideal-mixing energy balance. In compact
+form, the updated specific internal energy of a zone is:
 
 .. math::
 
-  u_{hot,new} = \frac{u_{hot,old} m_{hot} + u_{in,0} m_0}{m_{hot} + m_0}
+  u_{new} = \frac{u_{old} m_{old} + u_{in} m_{in}}{m_{old} + m_{in}}
 
-.. math::
-
-  u_{cold,new} = \frac{u_{cold,old} m_{cold} + u_{in,1} m_1}{m_{cold} + m_1}
-
-with zone masses defined as:
-
-.. math::
-
-  m_{hot} = V_{hot} \rho(T_{hot}), \quad m_{cold} = (V_{max} - V_{hot}) \rho(T_{cold})
-
-.. math::
-
-  m_0 = \dot{m}_0 \Delta t, \quad m_1 = \dot{m}_1 \Delta t
-
-The updated temperatures follow from the fluid-property inverse relation:
-
-.. math::
-
-  T_{hot,new} = T(u_{hot,new}), \quad T_{cold,new} = T(u_{cold,new})
-
-where:
-
-.. list-table::
-  :widths: 25 75
-  :stub-columns: 1
-
-  * - :math:`u_{hot,old}`, :math:`u_{cold,old}`
-    - Previous hot and cold zone specific internal energies [J/kg]
-  * - :math:`u_{in,0}`, :math:`u_{in,1}`
-    - Specific internal energies of incoming flow at both ports [J/kg]
-  * - :math:`m_0`, :math:`m_1`
-    - Inflowing masses over the timestep [kg]
-  * - :math:`T(u)`
-    - Temperature obtained from fluid-property relation for specific internal energy
-
-This captures first-order thermal state evolution while remaining computationally lightweight.
+The new zone temperature then follows from the fluid-property relation :math:`T(u)`. This means
+incoming flow mixes instantaneously with the corresponding hot or cold zone over the timestep.
 
 Assumptions
 -----------
@@ -339,6 +258,8 @@ Limitations
 See Also
 --------
 
+- :doc:`../controller/controller` -- Controller behavior for storage dispatch and coordination
+- :doc:`../network/network_main` -- Network equations that determine hydraulic interaction
 - :doc:`ates_cluster_physics` — Aquifer thermal energy storage (ATES) system
 - :doc:`producer_physics` — Heat supply source
 - :doc:`consumer_physics` — Heat demand sink
