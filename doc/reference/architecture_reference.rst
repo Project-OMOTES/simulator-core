@@ -1,7 +1,11 @@
 Architecture Reference
 ======================
 
-Lower-level architecture pages for orchestration and asset construction flow.
+Curated technical reference for orchestration flow, configuration, and asset
+construction structure.
+
+Use this section when package-based API navigation is less helpful than a
+workflow-oriented view of how simulator setup and execution fit together.
 
 .. toctree::
    :maxdepth: 1
