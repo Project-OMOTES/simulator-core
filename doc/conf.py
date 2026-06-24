@@ -105,7 +105,7 @@ def normalize_apidoc_titles(output_dir: Path) -> None:
         title = re.sub(r"\s*module$", "", title).strip()
 
         if not title:
-            title = "API Index" if rst_file.name == "modules.rst" else "API root"
+            title = "API Root Index"
 
         if heading_re.match(lines[1].strip()):
             lines[0] = title

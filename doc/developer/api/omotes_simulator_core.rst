@@ -1,5 +1,5 @@
-API root
-========
+API Root Index
+==============
 
 .. automodule:: omotes_simulator_core
    :members:

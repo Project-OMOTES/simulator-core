@@ -13,7 +13,7 @@ How to use this section
 -----------------------
 
 - Start with the conceptual pages below to understand solver workflow and result interpretation.
-- Use the detailed pages further down when you need class-level information about solver internals.
+- Use the Solver Reference page (linked below) for class-level information about solver internals.
 - Use the Physics section for asset-specific constitutive relations and the Network section for
   connectivity concepts.
 
@@ -27,19 +27,11 @@ Conceptual pages
    solver_unknowns_and_equations
    solver_convergence
 
-**Contents**
+Implementation reference
+-------------------------
 
-.. toctree::
-    :maxdepth: 1
-    :glob:
-
-    solver.rst
-    matrix.rst
-    equation_object.rst
-    network.rst
-    asset_main.rst
-    solver_utility.rst
-
+For solver classes, matrix assembly, and asset-level solver implementation details, use
+:doc:`../reference/solver_reference`.
 
 Related Documentation
 ---------------------

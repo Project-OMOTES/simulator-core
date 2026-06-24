@@ -15,10 +15,5 @@ conceptual Solver section without replacing it.
    ../solver/equation_object
    ../solver/network
    ../solver/solver_utility
-   ../solver/assets/base_item
-   ../solver/assets/base_asset
-   ../solver/assets/fall_type
-   ../solver/assets/solver_heatboundary
-   ../solver/assets/solver_pipe
-   ../solver/assets/solver_node
+   ../solver/asset_main
    ./solver_uncovered_entities

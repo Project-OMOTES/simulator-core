@@ -10,8 +10,11 @@ lower-level supporting pages that sit outside the end-user conceptual flow.
 How to use this section
 -----------------------
 
-- Use the developer reference landing page for curated technical reference, generated
-  package/module lookup, and direct shortcuts into commonly used API modules.
+- Start with the developer navigation page to pick the right path.
+- Use the curated reference pages (Architecture, Asset, Solver, Controller) when you need
+  technical reference organized by topic rather than by Python package.
+- Use the API root index for exhaustive package/module/class lookup that the curated pages
+  do not cover.
 - Use Intro, Solver, Network, Physics, and Control for conceptual behavior and interpretation.
 
 **Contents**
@@ -20,4 +23,9 @@ How to use this section
    :maxdepth: 1
    :titlesonly:
 
-   api_reference_main
+   developer_navigation
+   ../reference/architecture_reference
+   ../reference/asset_reference
+   ../reference/solver_reference
+   ../reference/controller_reference
+   api/omotes_simulator_core

@@ -133,6 +133,13 @@ Specifically:
 
 Do not blur these boundaries through landing-page text or toctree organization.
 
+Concretely: if a page is already toctreed from the curated ``doc/reference/`` tier or the
+generated API tree, a conceptual section landing page (Intro/Solver/Network/Physics/Control)
+must not toctree into it a second time — cross-link with ``:doc:``/``:ref:`` prose instead
+(see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)
+and ``doc/controller/controller.rst``'s "Implementation reference" section for the correct
+pattern).
+
 Control navigation policy
 -------------------------
 Treat Control as a mixed section with separate subpaths:
@@ -228,7 +235,11 @@ Specifically:
 - summarize only enough to orient the reader,
 - do not restate full conceptual explanations,
 - do not restate developer workflows,
-- do not restate API details.
+- do not restate API details,
+- do not toctree a section landing page into a page that is already toctreed from the
+  curated ``doc/reference/`` tier or the generated API tree (see
+  [Documentation Architecture](../instructions/documentation-architecture.instructions.md)) —
+  use prose cross-links instead.
 
 Style rules
 -----------
@@ -263,7 +274,10 @@ After writing or updating navigation files:
 4. Verify that each top-level section has a clear landing page or toctree entry.
 5. Verify that new pages are discoverable from the correct section.
 6. Verify that landing pages do not duplicate specialist content.
-7. If execution tools are available, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
-8. Inspect the build output for warnings and errors, including broken toctrees, missing documents, duplicate labels, and malformed links.
-9. If an error or warning is found, fix it before returning the final content.
-10. Do not finish with known syntax errors, broken toctrees, inconsistent section ordering, or unresolved build warnings caused by the change.
+7. Verify that no page is reachable through more than one toctree path — in particular,
+   check that Solver, Network, Physics, and Control landing-page toctrees do not re-list a
+   page already toctreed from the curated ``doc/reference/`` tier or the generated API tree.
+8. If execution tools are available, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
+9. Inspect the build output for warnings and errors, including broken toctrees, missing documents, duplicate labels, and malformed links.
+10. If an error or warning is found, fix it before returning the final content.
+11. Do not finish with known syntax errors, broken toctrees, inconsistent section ordering, or unresolved build warnings caused by the change.

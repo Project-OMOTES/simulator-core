@@ -209,10 +209,10 @@ Use the following ownership model:
   owned by: ``SystemConceptDocAgent`` + ``NavigationAgent``
 
 - Solver
-  owned by: ``SystemConceptDocAgent``
+  owned by: ``SystemConceptDocAgent`` + ``NavigationAgent``
 
 - Network
-  owned by: ``SystemConceptDocAgent``
+  owned by: ``SystemConceptDocAgent`` + ``NavigationAgent``
 
 - Physics
   owned by: ``PhysicsAssetDocAgent`` + ``NavigationAgent``

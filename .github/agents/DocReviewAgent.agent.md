@@ -131,10 +131,18 @@ In particular:
 - API reference should not duplicate long conceptual or workflow explanation,
 - landing pages should not duplicate subordinate pages,
 - support pages should not duplicate troubleshooting or conceptual docs in detail,
-- API reference landing pages should not link the same generated page through more than
-  one toctree path (e.g. listing a package and its subpackages separately in
-  ``api_reference_main.rst`` when the package's own generated page already nests them via
-  apidoc's toctree — see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)).
+- the Developer Documentation toctree should not link the same generated page through more
+  than one toctree path (e.g. listing a package and its subpackages separately when the
+  package's own generated page already nests them via apidoc's toctree), and should not
+  reintroduce an intermediate landing page between ``developer_main.rst`` and the curated
+  reference cluster pages or the generated tree's root index — see
+  [Documentation Architecture](../instructions/documentation-architecture.instructions.md).
+- more generally, no page anywhere should be reachable through more than one toctree path:
+  check that conceptual section landing pages (Intro/Solver/Network/Physics/Control) cross-
+  link to ``doc/reference/`` pages with ``:doc:``/``:ref:`` prose rather than re-toctreeing a
+  page already toctreed from the curated reference tier or the generated API tree (
+  ``doc/controller/controller.rst``'s "Implementation reference" section is the reference
+  pattern to check new pages against).
 
 If duplication exists:
 - recommend consolidation,

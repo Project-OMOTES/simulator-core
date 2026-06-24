@@ -153,6 +153,14 @@ Do not use this agent to document:
 - how to add a new asset in code,
 - module/class reference details.
 
+When a conceptual page needs to point readers to implementation/reference detail (for
+example solver internals or controller classes), cross-link to the relevant
+``doc/reference/`` page with ``:doc:``/``:ref:`` prose only — do not add a ``.. toctree::``
+entry pointing at a page that is already toctreed from the curated ``doc/reference/`` tier
+or the generated API tree (see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)
+and ``doc/controller/controller.rst``'s "Implementation reference" section for the correct
+pattern). A page may only be toctreed from one place.
+
 Content requirements
 --------------------
 Include, where applicable:

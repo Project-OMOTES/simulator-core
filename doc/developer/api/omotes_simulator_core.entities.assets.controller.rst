@@ -19,3 +19,4 @@ Submodules
    omotes_simulator_core.entities.assets.controller.controller_producer
    omotes_simulator_core.entities.assets.controller.controller_storage
    omotes_simulator_core.entities.assets.controller.profile_interpolation
+   omotes_simulator_core.entities.assets.controller.temperature_data

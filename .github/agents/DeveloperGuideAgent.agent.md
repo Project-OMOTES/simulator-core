@@ -51,7 +51,11 @@ Before writing, inspect the closest matching existing documentation page and pre
 1. Follow repository documentation style first, especially:
    - ``doc/index.rst``
    - ``doc/architecture/architecture.rst``
-   - ``doc/developer/developer_main.rst`` (Developer Documentation landing page)
+   - ``doc/developer/developer_main.rst`` (Developer Documentation landing page; its
+     toctree is flat — it lists ``developer_navigation``, the four curated reference
+     cluster pages, and the generated tree's root index directly as siblings, with no
+     intermediate API landing page)
+   - ``doc/developer/developer_navigation.rst`` (guided "start here" sub-page)
    - any contributor or support material already present in the repository
 
 2. Use implementation files as primary technical sources:
