@@ -44,15 +44,7 @@ Your role is to review and correct documentation quality at the content-architec
 
 Top-level structure alignment
 -----------------------------
-Review pages against the fixed top-level documentation order:
-
-1. Intro
-2. Solver
-3. Network
-4. Physics
-5. Control
-6. Developer Documentation
-7. Support
+Review pages against the fixed top-level documentation order (see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)).
 
 When reviewing, verify that each page belongs in the correct part of this structure.
 
@@ -254,7 +246,7 @@ After review and any focused edits:
 3. Verify that edits improved audience fit or section fit rather than broadening scope.
 4. Verify that duplication was reduced rather than moved around.
 5. Verify that relevant cross-links or related-doc pointers are present where useful.
-6. If execution tools are available and the task includes file edits, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_sphinx.bat``.
+6. If execution tools are available and the task includes file edits, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
 7. Inspect the output for warnings and errors related to the reviewed pages.
 8. If a page remains fundamentally misassigned, mark it for reassignment rather than forcing it into the wrong structure.
 9. Do not finish with known syntax errors, broken directives, or unresolved build warnings caused by the review changes.
