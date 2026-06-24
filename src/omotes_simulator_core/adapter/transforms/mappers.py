@@ -183,7 +183,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         The value is a list of all connected assets and the id of the port it is connected to.
 
         :return: dict[Any, list[list[tuple[str, str]]], which is the dictionary with the connected
-            assets.
+        assets.
         """
         py_joint_dict = {}
         for esdl_joint in self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.JOINT):
