@@ -75,6 +75,7 @@ def run_apidoc(_app):
             "--force",
             "--module-first",
             "--separate",
+            "--no-toc",
             "--output-dir",
             str(output_dir),
             str(module_dir),
@@ -104,7 +105,7 @@ def normalize_apidoc_titles(output_dir: Path) -> None:
         title = re.sub(r"\s*module$", "", title).strip()
 
         if not title:
-            title = "API root"
+            title = "API Index" if rst_file.name == "modules.rst" else "API root"
 
         if heading_re.match(lines[1].strip()):
             lines[0] = title

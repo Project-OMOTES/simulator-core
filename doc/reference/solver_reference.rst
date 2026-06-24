@@ -1,8 +1,11 @@
 Solver Reference
 ================
 
-Low-level solver documentation for equations, matrix assembly, network structure,
-and solver-side asset behavior.
+Curated technical reference for internal solver entities, matrix assembly,
+network structure, and solver-side asset behavior.
+
+Use this section for implementation-oriented solver details that complement the
+conceptual Solver section without replacing it.
 
 .. toctree::
    :maxdepth: 1

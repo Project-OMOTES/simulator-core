@@ -1,16 +1,24 @@
-Asset Reference: Additional Entities
+Asset Reference: Supporting Entities
 ====================================
 
-This page covers asset-related entities that are not described in the main
-entity asset pages.
+Purpose
+-------
+
+This landing page contains supporting asset-related reference pages that are
+not covered in the main curated entity-level asset set in
+:doc:`asset_reference`.
+
+These pages complement the main asset taxonomy without duplicating it.
+
+For physical behavior and model interpretation, use the Physics section;
+start from :doc:`../physics/physics_main`.
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 1
 
-   ../assets/heat_exchanger_asset
-   ../assets/ideal_heat_storage_asset
-   ../assets/junction_asset
-   ../assets/air_to_water_heat_pump_asset
    ../assets/asset_abstract_asset
    ../assets/asset_defaults_asset
    ../assets/esdl_asset_object_asset
