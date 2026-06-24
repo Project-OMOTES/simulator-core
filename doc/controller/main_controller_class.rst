@@ -2,14 +2,19 @@
 
 Network controller class
 =====================================
-The NetworkController class serves as the base controller, managing lists of controllable assets.
-The update_setpoints method retrieves controller settings for a specific time step.
 
-To create a custom controller, implement a new class with your desired logic and inherit from
-the NetworkControllerAbstract class.
+Purpose
+-------
 
-In the current implementation of the controller the priority of the sources is set based on the
-marginal costs.
+This page documents the implementation-facing controller classes that coordinate
+network-level setpoint generation.
+
+Use this reference when you need class signatures, inheritance structure, and
+member-level details for the abstract controller interface and the default
+network controller implementation.
+
+For user-facing control behavior and operating interpretation, start from
+:doc:`controller`.
 
 .. autoclass:: omotes_simulator_core.entities.network_controller_abstract.NetworkControllerAbstract
     :members:

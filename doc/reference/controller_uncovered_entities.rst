@@ -1,7 +1,17 @@
-Controller Reference: Additional Entities
-=========================================
+Controller Reference: Supporting Entities
+==========================================
 
-This page covers controller-side entities not included in the core controller pages.
+Purpose
+-------
+
+This landing page contains supporting controller-related reference pages that
+are not covered in the main curated controller set in
+:doc:`controller_reference`.
+
+These pages complement the main controller taxonomy without duplicating it.
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 1
