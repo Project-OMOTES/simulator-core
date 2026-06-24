@@ -81,7 +81,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
         :param bypass: When true the heat exchange is bypassed, so the heat demand is not
-        reduced by the factor. Default is False.
+            reduced by the factor. Default is False.
         """
         if bypass:
             return {
@@ -120,7 +120,7 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
         The supply and return temperatures are also set.
         :param float heat_demand: Heat demand to set.
         :param bypass: When true the heat exchange is bypassed, so the heat demand is not
-        reduced by the factor. Default is False.
+            reduced by the factor. Default is False.
         """
         if bypass:
             return {

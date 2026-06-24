@@ -14,3 +14,4 @@ a circular import error. By splitting this class, this is avoided.
 
 .. autoclass:: omotes_simulator_core.solver.network.assets.base_asset.BaseAsset
     :members:
+    :no-index:

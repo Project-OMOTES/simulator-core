@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Implementation of the HeatBoundary class."""
+
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
@@ -66,19 +67,27 @@ class HeatBoundary(FallType):
         mass_flow_rate_set_point: float = 10.0,
         set_pressure: float = 10000.0,
     ):
-        """
-        Initializes the HeatBoundary object with the given parameters.
+        """Initialize the heat boundary.
 
         Parameters
         ----------
-        name : str The name of the asset.
-        _id : str The unique identifier of the asset.
-        number_of_unknowns : int, optional
-            The number of unknown variables for the asset. The default is 6, which corresponds to
-            the mass flow rate, pressure, and temperature at each connection point.
-        number_con_points : int, optional
-            The number of connection points for the asset. The default is 2, which corresponds to
-            the inlet and outlet.
+        name : str
+            The name of the asset.
+        _id : str
+            The unique identifier of the asset.
+        supply_temperature : float, optional
+            The prescribed supply temperature [K].
+        heat_flux : float, optional
+            The prescribed heat flux [W].
+        loss_coefficient : float, optional
+            The hydraulic loss coefficient used by the parent fall-type asset.
+        pre_scribe_mass_flow : bool, optional
+            If ``True``, prescribe mass flow at the connection points. If ``False``, prescribe
+            pressure instead.
+        mass_flow_rate_set_point : float, optional
+            The prescribed mass flow rate [kg/s].
+        set_pressure : float, optional
+            The prescribed pressure [Pa].
         """
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
@@ -96,9 +105,11 @@ class HeatBoundary(FallType):
         """Returns a list of EquationObjects that represent the equations for the asset.
 
         The equations are:
+
         - Pressure balance at each connection point
         - Thermal balance at each connection point
         - Prescribed mass flow rate or pressure at each connection point
+
         :return: list[EquationObject]
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
@@ -124,9 +135,10 @@ class HeatBoundary(FallType):
         The equation is:
 
         - If pre_scribe_mass_flow is True, then Mass flow rate at connection point = Mass flow rate
-        property
+                    property
         - If pre_scribe_mass_flow is False, then Pressure at connection point = Set pressure
-        property
+                    property
+
         :param int connection_point: The connection point for which to get the equation
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side

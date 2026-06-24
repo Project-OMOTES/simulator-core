@@ -77,6 +77,7 @@ class SolverPipe(FallType):
         """Method to set the physical properties of the pipe.
 
         :param physical_properties: dictionary containing the physical properties of the pipe.
+
         expected properties are: length [m], diameter [m], roughness [m]
         """
         expected_properties = [

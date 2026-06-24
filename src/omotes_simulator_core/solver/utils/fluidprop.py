@@ -10,6 +10,7 @@ Thermodynamic properties are provided by CoolProp:
 * http://www.coolprop.org/
 * http://pubs.acs.org/doi/abs/10.1021/ie4033999
 """
+
 __author__ = "Dennis van Gils"
 __authoremail__ = "vangils.dennis@gmail.com"
 __url__ = "https://github.com/Dennis-van-Gils/python-fluidprop"
@@ -114,7 +115,7 @@ class FluidProperties:
         kappa (`numpy.ndarray[]`):
             Thermal diffusivity [m^2/s].
 
-        lambda_ (`numpy.ndarray[]`):
+        ``lambda_`` (``numpy.ndarray[]``):
             Thermal conductivity [W/(m K)].
 
         Cp (`numpy.ndarray[]`):

@@ -46,7 +46,7 @@ class BaseAsset(BaseItem):
         :param str name: The name of the asset.
         :param str _id: The unique identifier of the asset.
         :param int, optional number_of_unknowns: The number of unknown variables for the node.
-        The default is 3.
+            The default is 3.
         :param int, optional number_connection_points: The number of connection points for the
             asset. The default is 2, which corresponds to the inlet and outlet.
         """

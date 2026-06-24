@@ -151,7 +151,15 @@ Classify the page intent as follows:
 Do not use this agent to document:
 - how to extend control classes as a contributor,
 - how to add a new asset in code,
-- module/class reference details.
+- module/class reference details,
+- the controller's detailed per-timestep decision logic or its physical impact on the solved
+  model — these belong to ``ControllerBehaviorDocAgent``. For Control, this agent owns only the
+  short, high-level conceptual landing page (``doc/controller/controller.rst``); link to the
+  detailed behavior pages rather than absorbing their content.
+- the solver's detailed equation-assembly/iteration mechanics or their physical impact on the
+  solved model — these belong to ``SolverBehaviorDocAgent``. For Solver, this agent owns only the
+  existing shallow conceptual tier (``doc/solver/solver_main.rst`` and its three conceptual pages);
+  link to ``doc/solver/solver_behavior.rst`` rather than absorbing its content.
 
 When a conceptual page needs to point readers to implementation/reference detail (for
 example solver internals or controller classes), cross-link to the relevant

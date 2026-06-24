@@ -8,3 +8,4 @@ properties.
 
 .. autoclass:: omotes_simulator_core.solver.utils.fluid_properties.FluidProperties
    :members:
+   :no-index:

@@ -7,3 +7,4 @@ consumers.
 
 .. autoclass:: omotes_simulator_core.solver.network.assets.production_asset.HeatBoundary
    :members:
+   :no-index:

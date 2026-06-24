@@ -25,11 +25,15 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
 )
-from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
+from omotes_simulator_core.entities.assets.controller.controller_consumer import (
+    ControllerConsumer,
+)
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     ControllerHeatTransferAsset,
 )
-from omotes_simulator_core.entities.assets.controller.controller_producer import ControllerProducer
+from omotes_simulator_core.entities.assets.controller.controller_producer import (
+    ControllerProducer,
+)
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerAtesStorage,
     ControllerIdealHeatStorage,
@@ -214,7 +218,7 @@ class ControllerNetwork:
         :param float factor: Factor to multiply the heat demand with.
 
         :return: dict with the key the asset id and the value a dict with the set points for the
-        consumers.
+            consumers.
         """
         consumers = {}
         for consumer in self.consumers:

@@ -43,7 +43,7 @@ def replace_joint_in_connected_assets(
 
     :param connected_py_assets: List of connected assets
     :param py_joint_dict: Dictionary with joint id as key and list of tuples with
-    connected asset id and port as value.
+        connected asset id and port as value.
     :param py_asset_id: Id of the asset all the connected assets are connected to
     :param iteration_limit: Limit for the number of iterations
 
@@ -183,7 +183,7 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
         The value is a list of all connected assets and the id of the port it is connected to.
 
         :return: dict[Any, list[list[tuple[str, str]]], which is the dictionary with the connected
-        assets.
+            assets.
         """
         py_joint_dict = {}
         for esdl_joint in self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.JOINT):

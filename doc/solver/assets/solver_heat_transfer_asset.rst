@@ -7,3 +7,4 @@ sides in solver equations.
 
 .. autoclass:: omotes_simulator_core.solver.network.assets.heat_transfer_asset.HeatTransferAsset
    :members:
+   :no-index:

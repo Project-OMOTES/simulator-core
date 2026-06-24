@@ -13,6 +13,8 @@ How to use this section
 -----------------------
 
 - Start with the conceptual pages below to understand solver workflow and result interpretation.
+- Use :doc:`solver_behavior` for the detailed explanation of the equation system the solver solves
+  each timestep and how that solve changes the physical model.
 - Use the Solver Reference page (linked below) for class-level information about solver internals.
 - Use the Physics section for asset-specific constitutive relations and the Network section for
   connectivity concepts.
@@ -26,6 +28,7 @@ Conceptual pages
    solver_workflow
    solver_unknowns_and_equations
    solver_convergence
+   solver_behavior
 
 Implementation reference
 -------------------------

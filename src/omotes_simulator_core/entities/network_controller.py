@@ -26,9 +26,13 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
     HeatTransferAssetType,
 )
-from omotes_simulator_core.entities.assets.controller.controller_network import ControllerNetwork
+from omotes_simulator_core.entities.assets.controller.controller_network import (
+    ControllerNetwork,
+)
 from omotes_simulator_core.entities.heat_network import HeatNetwork
-from omotes_simulator_core.entities.network_controller_abstract import NetworkControllerAbstract
+from omotes_simulator_core.entities.network_controller_abstract import (
+    NetworkControllerAbstract,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -75,12 +79,13 @@ class NetworkController(NetworkControllerAbstract):
 
         This method is used to determine the set points for all assets in the network.
         This is done in the following steps:
-        1. Set the conversion factor for all networks based on the heat exchangers/heat pumps.
+
+        1. Set the conversion factor for all networks based on the heat exchangers or heat pumps.
         2. Calculate the total demand and supply of the network converted to the first network in
-            the list.
-        3. Based on these results the set points for demand, supply and storage can be set.
-        4. Finally, the heat transfer assets are set based on the set points of the producers,
-            consumers and stroages
+           the list.
+        3. Based on these results, set the points for demand, supply, and storage.
+        4. Finally, set the heat-transfer assets based on the set points of the producers,
+           consumers, and storages.
 
         :param float time: Time step for which to run the controller.
         :return: dict with the key the asset id and the heat demand for that asset.

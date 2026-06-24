@@ -9,3 +9,4 @@ network and pass them to the matrix to be solved. The solution is then passed ba
 
 .. autoclass:: omotes_simulator_core.solver.solver.Solver
    :members:
+   :no-index:

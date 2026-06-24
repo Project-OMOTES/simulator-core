@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing Based boundary class."""
+
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
@@ -57,6 +58,7 @@ class BaseBoundary(BaseAsset):
 
         This method gets an equation to the matrix that sets the pressure at the boundary
         to a fixed value.
+
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
@@ -72,6 +74,7 @@ class BaseBoundary(BaseAsset):
         """Method to get all the equations of the boundary.
 
         These equations are:
+
         - Pressure balance at each connection point
         - Thermal balance at each connection point
         - Pre describe pressure equation

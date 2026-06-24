@@ -9,6 +9,8 @@ are not covered in the main curated controller set in
 :doc:`controller_reference`.
 
 These pages complement the main controller taxonomy without duplicating it.
+Use this group for additional controller components such as heat-transfer and
+storage controllers, shared controller abstractions, and supporting helpers.
 
 Contents
 --------

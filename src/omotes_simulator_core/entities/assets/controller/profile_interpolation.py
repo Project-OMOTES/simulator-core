@@ -73,7 +73,7 @@ class ProfileInterpolator:
         :param pd.DataFrame profile: DataFrame with 'date' and 'values' columns
         :param ProfileSamplingMethod sampling_method: Method to use for profile sampling
         :param ProfileInterpolationMethod interpolation_method: Method to use for
-        profile interpolation
+            profile interpolation
         :param Optional[int] timestep: Simulation timestep in seconds.
         """
         self.profile = profile

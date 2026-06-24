@@ -123,7 +123,7 @@ class Matrix:
 
         :param int index:Start position for which to supply the solution
         :param int number_of_unknowns: Number of elements for which the solution needs to
-        be provided
+            be provided
         :return: list with teh solution
         """
         if index > self.num_unknowns:

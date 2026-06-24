@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing abstract BaseItem class."""
+
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -69,7 +70,8 @@ class BaseItem(ABC):
         :param str property_name: The property name for which the matrix index is needed.
         :param int connection_point: The connection point for which the matrix index is needed.
         :param bool use_relative_indexing: returns the index into coefficient array for the current
-        componentthe matrix if true, otherwise return the index in the complete matrix if false.
+            component matrix if true, otherwise return the index in the complete matrix if false.
+
         :return: The matrix index for the property and connection point.
         """
         return index_core_quantity.get_index_property(

@@ -149,18 +149,37 @@ If duplication exists:
 - recommend moving content to the correct page type,
 - or apply a focused edit if the task allows it.
 
+Solver-specific review rules
+-----------------------------
+Treat solver documentation as two distinct documentation types:
+
+1. Solver conceptual documentation
+2. Solver behavior and physical impact
+
+Review solver pages against these distinctions.
+
+Flag the following as errors:
+- conceptual solver pages drifting into equation-assembly or iteration-mechanics detail,
+- the solver behavior page drifting into bare API reference, re-deriving asset-internal physics
+  correlations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, or restating the
+  conceptual solver pages.
+
 Control-specific review rules
 -----------------------------
-Treat control documentation as three distinct documentation types:
+Treat control documentation as four distinct documentation types:
 
 1. User-facing control concepts
-2. Developer control extension guides
-3. Controller API reference
+2. Controller behavior and physical impact
+3. Developer control extension guides
+4. Controller API reference
 
 Review control pages against these distinctions.
 
 Flag the following as errors:
 - conceptual control pages drifting into contributor implementation guidance,
+- controller behavior pages drifting into bare API reference, re-deriving asset-internal
+  physics equations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, or restating the
+  conceptual landing overview,
 - contributor control guides drifting into end-user explanation as their primary purpose,
 - controller API reference pages containing long narrative explanation better suited for conceptual docs or developer guides.
 
@@ -186,6 +205,12 @@ Examples:
 
 - support pages:
   check for actionable support paths, issue-type guidance, and reporting checklist usefulness
+
+- mapper-comparison-style architecture pages (abstract mapper class plus its concrete derived
+  mappers, for example ``doc/architecture/asset_factories.rst``):
+  check that every concrete subclass present in source is covered, and that each one documents
+  which properties it reads with their internal field, default (if any), and unit, sourced from
+  the mapper code and the relevant defaults dataclass rather than invented
 
 Review output policy
 --------------------

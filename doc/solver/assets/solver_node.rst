@@ -9,5 +9,7 @@ energy continuity.
 
 .. autoclass:: omotes_simulator_core.solver.network.assets.base_node_item.BaseNodeItem
     :members:
+    :no-index:
 .. autoclass:: omotes_simulator_core.solver.network.assets.node.Node
     :members:
+    :no-index:

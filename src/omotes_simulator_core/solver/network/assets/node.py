@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the node class."""
+
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
@@ -69,9 +70,13 @@ class Node(BaseNodeItem):
     ):
         """Initializes the Node object with the given parameters.
 
-        :param uuid.UUID name: The unique identifier of the node.
-        :param int, optional number_of_unknowns: The number of unknown variables for the node.
-        The default is 3.
+        :param str name: The name of the node.
+        :param str _id: The unique identifier of the node.
+        :param int number_of_unknowns: The number of unknown variables for the node.
+            The default is 3.
+        :param float height: The node height [m].
+        :param float initial_temperature: The initial node temperature [K].
+        :param float set_pressure: The prescribed node pressure [Pa].
         """
         super().__init__(name=name, _id=_id, number_of_unknowns=number_of_unknowns)
         self.connected_assets: list[tuple[BaseItem, int]] = []
@@ -109,6 +114,7 @@ class Node(BaseNodeItem):
         - Mass flow rate continuity equation
         - Energy balance equation
         - Discharge equation
+
         :return: list[EquationObject]
             A list of EquationObjects that contain the indices, coefficients, and right-hand side
             values of the equations.
@@ -130,7 +136,6 @@ class Node(BaseNodeItem):
         When the mass flow rate of all connected components is smaller or equal 0.
         Then the node will pre-scribe its temperature otherwise it will give
         an equation where the sum of mass flow rat times specific internal energy is zero.
-
 
         :return: EquationObject An EquationObject that contains the indices, coefficients,
             and right-hand side value of the equation.

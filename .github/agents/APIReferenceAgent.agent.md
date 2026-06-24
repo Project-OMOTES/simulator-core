@@ -93,11 +93,15 @@ Before editing reference pages, inspect the existing documentation structure and
    - the implementation-oriented pages those wrapper pages toctree into, which this agent
      also owns: ``doc/architecture/*.rst``, ``doc/controller/*.rst`` and
      ``doc/controller/assets/*.rst`` (excluding ``controller.rst``, the conceptual landing
-     page owned by ``NavigationAgent``/``SystemConceptDocAgent``), and ``doc/solver/*.rst``
+     page owned by ``NavigationAgent``/``SystemConceptDocAgent``, and excluding
+     ``doc/controller/control_behavior.rst`` and ``doc/controller/behavior/*.rst``, the detailed
+     controller behavior / physical-impact pages owned by ``ControllerBehaviorDocAgent``), and
+     ``doc/solver/*.rst``
      and ``doc/solver/assets/*.rst`` (excluding the conceptual trio
      ``solver_workflow.rst``, ``solver_unknowns_and_equations.rst``, and
      ``solver_convergence.rst``, and the landing page ``solver_main.rst``, both owned by
-     ``SystemConceptDocAgent``)
+     ``SystemConceptDocAgent``, and excluding ``doc/solver/solver_behavior.rst``, the detailed
+     solver behavior / physical-impact page owned by ``SolverBehaviorDocAgent``)
 
 2. Use source code as the authoritative reference source:
    - ``src/omotes_simulator_core/...`` for the target package/module tree
@@ -330,6 +334,34 @@ For controller-related reference:
 - include base abstractions when they are part of the contributor-facing extension surface,
 - do not explain control behavior in simulation except in brief reference context,
 - do not explain extension workflows here; link to developer guides instead.
+
+Mapper property documentation policy
+-------------------------------------
+Some abstract/derived class hierarchies specialize primarily by *which fields or properties each
+concrete subclass reads* rather than by distinct algorithmic behavior — the ESDL asset mapper
+hierarchy (``EsdlMapperAbstract`` and its concrete mappers under
+``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/``) is the reference case, with
+``doc/architecture/asset_factories.rst`` as its contributor-facing page.
+
+For this pattern, document each concrete subclass with a concise per-class property table in
+addition to the existing branching/validation narrative:
+
+- Columns: ESDL Property, Internal Field, Default (if any), Unit.
+- Source the default value and unit only from source: the mapper's
+  ``esdl_asset.get_property(...)``/``get_temperature(...)`` call sites for the ESDL property name,
+  internal field, and default, and the relevant defaults dataclass (for example
+  ``src/omotes_simulator_core/entities/assets/asset_defaults.py``) for the unit, which is usually
+  stated in a docstring or inline comment next to the default.
+- Never invent a unit or default that is not present in source. If a unit is genuinely not stated
+  anywhere in source, write "unit not stated in source" rather than guessing.
+- The property table supplements, not replaces, the existing per-mapper prose: keep branching,
+  validation, and fallback-chain logic (for example multi-source lookups or raised errors) in
+  prose, and use the table only for the property-to-field-to-default-to-unit facts.
+- Cover every concrete subclass that exists in source; do not omit one because it has few or no
+  mapped properties (state plainly when a mapper reads no ESDL properties beyond shared asset
+  metadata).
+- Apply this policy only to hierarchies with this fields-differ-by-subclass pattern. It does not
+  apply to every developer/architecture page.
 
 Duplication control
 -------------------

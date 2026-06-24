@@ -97,9 +97,9 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
             current pipe object.
         :return: The inner diameter of the pipe if specified, otherwise it uses the nominal
-        diameter to retrieve the inner diameter from the EDR list. If neither is available,
-        a default diameter is returned. When only the nominal diameter is specified,
-        the insulation schedule must be provided; in this case, it is assumed to be 1.
+            diameter to retrieve the inner diameter from the EDR list. If neither is available,
+            a default diameter is returned. When only the nominal diameter is specified,
+            the insulation schedule must be provided; in this case, it is assumed to be 1.
 
         """
         inner_diameter = esdl_asset.get_property("innerDiameter", 0)
