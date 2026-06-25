@@ -96,10 +96,21 @@ Support page requirements
 --------------------------
 - Keep a dedicated ``Support`` page (``doc/support/support.rst``) in the main toctree.
 - Provide clear instructions for requesting support.
-- Ground support paths in what actually exists in the repository: the GitHub issue
-  tracker, ``CONTRIBUTING.md`` (branch/PR/review workflow, lint/type-check, test coverage
-  guideline), and ``README.md``. No ``.github/ISSUE_TEMPLATE/`` directory exists in this
-  repository — do not reference or invent issue templates.
+- Ground support paths in what actually exists:
+  - The `Project-OMOTES/user_feedback <https://github.com/Project-OMOTES/user_feedback>`_
+    repository is the end-user support front door for the Design toolkit (of which
+    simulator-core is a backend component): Discussions, "Q&A" category, for usage
+    questions; Issues, using the ``bug_report.yml``/``feature_request.yml`` templates, for
+    bug reports and feature requests.
+  - ``CONTRIBUTING.md`` (branch/PR/review workflow, lint/type-check, test coverage
+    guideline) and this repository's own GitHub issue tracker for contributor/development
+    questions and code-level bugs in simulator-core itself.
+  - ``README.md`` for package/usage overview.
+- No ``.github/ISSUE_TEMPLATE/`` directory exists in *this* repository (simulator-core) —
+  do not invent templates here. Templates do exist in the external ``user_feedback``
+  repository (``bug_report.yml``, ``feature_request.yml``, ``question.yml``) and may be
+  referenced by name/purpose since they are real, confirmed artifacts — do not fabricate
+  others.
 - Keep the page concise and actionable.
 
 Style rules
