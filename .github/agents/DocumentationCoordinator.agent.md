@@ -5,7 +5,6 @@ argument-hint: Documentation goal, affected sections/pages, and scope constraint
 tools: [read, search, edit, execute/runInTerminal, web, agent]
 agents:
   - SystemConceptDocAgent
-  - NetworkLayerDocAgent
   - PhysicsAssetDocAgent
   - SolverBehaviorDocAgent
   - ControllerBehaviorDocAgent
@@ -89,8 +88,7 @@ Classify each task into one of the following documentation types:
 - Intro documentation
 - Solver conceptual documentation
 - Solver behavior and physical impact
-- Network conceptual documentation
-- Network layer structure documentation
+- Network documentation
 - Physics asset documentation
 - User-facing control concepts
 - Controller behavior and physical impact
@@ -140,18 +138,13 @@ Treat solver documentation as two distinct types:
 
 Network documentation refinement
 ---------------------------------
-Treat network documentation as two distinct types:
-
-- Network conceptual documentation:
-  short, high-level overview of connectivity and communication between assets and the
-  solver/controller, for users and integrators (``doc/network/network_main.rst``)
-
-- Network layer structure documentation:
-  detailed, source-grounded explanation of how the network graph is represented (nodes,
-  junctions, connection points), how it is constructed from ESDL connectivity, and how it is
-  partitioned into sub-networks, at a level of detail comparable to the physics asset pages
-  (``doc/network/network_topology.rst``, ``network_construction.rst``,
-  ``network_boundary_conditions.rst``, ``network_subnetworks.rst``, and similar topic pages)
+Treat network documentation as a single consolidated page intent, authored entirely in
+``doc/network/network_main.rst``. The page covers, in one place: connectivity and
+communication between assets and the solver/controller, how the network graph is
+represented (nodes, junctions, connection points), how it is constructed from ESDL
+connectivity, and how it is partitioned into sub-networks. Depth comparable to the
+physics asset pages is expected within this single page; do not split it into separate
+topology/construction/sub-network pages.
 
 Control documentation refinement
 --------------------------------
@@ -189,11 +182,8 @@ Delegate work according to the following rules:
 - Solver behavior and physical impact
   Route to: ``SolverBehaviorDocAgent``
 
-- Network conceptual documentation
+- Network documentation
   Route to: ``SystemConceptDocAgent``
-
-- Network layer structure documentation
-  Route to: ``NetworkLayerDocAgent``
 
 - Physics asset documentation
   Route to: ``PhysicsAssetDocAgent``
@@ -241,18 +231,10 @@ allow a single page to serve both purposes.
 
 Network decision rule
 ----------------------
-If a network-related request is ambiguous, classify by the primary question being answered:
-
-- "How is the network represented conceptually?" or "How does the network communicate with the
-  solver and controller during simulation?"
-  => network conceptual documentation
-
-- "How is the network graph structured/represented?", "how is it built from ESDL?", or "how is
-  it partitioned into sub-networks?"
-  => network layer structure documentation
-
-When a request mixes both, split it into separate sub-tasks and assign them separately. Do not
-allow a single page to serve both purposes.
+Do not split network content into multiple pages or sub-tasks. Whether the request is about
+connectivity/communication with the solver and controller, or about graph
+structure/representation, ESDL construction, or sub-network partitioning, route it to
+``doc/network/network_main.rst``.
 
 Control decision rule
 ---------------------
@@ -320,10 +302,7 @@ Use the following ownership model:
   - ``NavigationAgent`` for Solver section landing pages and toctree consistency
 
 - Network
-  owned by:
-  - ``SystemConceptDocAgent`` for the conceptual network landing page
-  - ``NetworkLayerDocAgent`` for the detailed network layer structure pages
-  - ``NavigationAgent`` for Network section landing pages and toctree consistency
+  owned by: ``SystemConceptDocAgent`` + ``NavigationAgent``
 
 - Physics
   owned by: ``PhysicsAssetDocAgent`` + ``NavigationAgent``
@@ -423,12 +402,10 @@ Use these cues when classifying requests:
   tolerance", "pressure-drop closure", "physical impact of the solve"
   => Solver behavior and physical impact
 
-- "how is the network represented", "communication between assets and solver/controller"
-  => Network conceptual documentation
-
-- "network topology", "node/junction connectivity", "how is the network built from ESDL",
+- "how is the network represented", "communication between assets and solver/controller",
+  "network topology", "node/junction connectivity", "how is the network built from ESDL",
   "sub-network partitioning", "connection points"
-  => Network layer structure documentation
+  => Network documentation
 
 - "control behavior", "setpoint propagation", "operating logic", "what does control do"
   => User-facing control concepts
@@ -473,7 +450,7 @@ Prevent duplication across sections.
 
 In particular:
 - Solver, Network, and Control pages may describe system behavior conceptually, but should not repeat asset-level physics details already owned by ``PhysicsAssetDocAgent``.
-- Network layer structure pages may describe topology, construction, and partitioning in detail, but should not repeat asset-level physics, controller dispatch decisions, or solver equation-assembly mechanics owned by other specialist agents.
+- The network page may describe topology, construction, and partitioning in detail, but should not repeat asset-level physics, controller dispatch decisions, or solver equation-assembly mechanics owned by other specialist agents.
 - Developer guide pages may describe extension workflows, but should not duplicate autogenerated API reference.
 - API reference pages must not contain long narrative explanations that belong in the developer guide.
 
@@ -487,19 +464,6 @@ Do not allow solver documentation to collapse into a mixed page type.
   physics correlations owned by ``PhysicsAssetDocAgent``, or become API reference
 - ``APIReferenceAgent`` must not write long narrative explanations that belong in conceptual docs
   or the solver behavior page
-
-Network duplication control
-----------------------------
-Do not allow network documentation to collapse into a mixed page type.
-
-- ``SystemConceptDocAgent`` must not write the detailed network structure, ESDL-construction, or
-  sub-network partitioning detail as part of the conceptual network page
-- ``NetworkLayerDocAgent`` must not restate the conceptual network page, re-derive asset-internal
-  physics equations owned by ``PhysicsAssetDocAgent``, restate controller dispatch decisions
-  owned by ``ControllerBehaviorDocAgent``, restate solver equation-assembly mechanics owned by
-  ``SolverBehaviorDocAgent``, or become API reference
-- ``APIReferenceAgent`` must not write long narrative explanations that belong in conceptual docs
-  or the network layer structure pages
 
 Control duplication control
 ---------------------------

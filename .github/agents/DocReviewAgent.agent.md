@@ -50,7 +50,8 @@ When reviewing, verify that each page belongs in the correct part of this struct
 
 Special attention:
 - Physics pages should remain asset-focused and end-user-oriented.
-- Intro, Solver, Network, and conceptual Control pages should remain conceptual rather than implementation-heavy.
+- Intro, Solver, and conceptual Control pages should remain conceptual rather than implementation-heavy.
+- The Network page combines conceptual connectivity with source-grounded structural depth (representation, ESDL construction, sub-network partitioning) in one page; it should not, however, restate asset-internal physics, controller dispatch, or solver equation-assembly mechanics owned by other specialist agents.
 - Developer Documentation should remain contributor-facing.
 - API reference should remain generated reference rather than narrative documentation.
 - Support should remain concise and actionable.
@@ -204,21 +205,15 @@ Flag the following as errors:
 
 Network-specific review rules
 ------------------------------
-Treat network documentation as two distinct documentation types:
-
-1. Network conceptual documentation
-2. Network layer structure documentation
-
-Review network pages against these distinctions.
+Network documentation is a single consolidated page (``doc/network/network_main.rst``)
+covering connectivity/communication with the solver and controller together with
+topology/representation, ESDL construction, and sub-network partitioning.
 
 Flag the following as errors:
-- the conceptual network page (``doc/network/network_main.rst``) drifting into detailed
-  topology/representation, ESDL-construction, or sub-network partitioning detail,
-- network layer structure pages drifting into bare API reference, re-deriving asset-internal
-  physics equations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, restating
-  controller dispatch decisions owned by ``ControllerBehaviorDocAgent``, restating solver
-  equation-assembly mechanics owned by ``SolverBehaviorDocAgent``, or restating the conceptual
-  network page.
+- the network page drifting into bare API reference, re-deriving asset-internal physics
+  equations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, restating controller
+  dispatch decisions owned by ``ControllerBehaviorDocAgent``, or restating solver
+  equation-assembly mechanics owned by ``SolverBehaviorDocAgent``.
 
 Completeness review by page type
 --------------------------------

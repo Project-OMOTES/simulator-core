@@ -5,7 +5,6 @@ argument-hint: Validation goal, target docs/files or scope of build validation, 
 tools: [read, search, edit, execute/runInTerminal, web, agent]
 agents:
   - PhysicsAssetDocAgent
-  - NetworkLayerDocAgent
   - SystemConceptDocAgent
   - DeveloperGuideAgent
   - APIReferenceAgent
@@ -157,9 +156,6 @@ Examples:
 
 - solver or network conceptual page with broken section structure or cross-links
   => ``SystemConceptDocAgent``
-
-- end-user network layer structure page with malformed structure or cross-links
-  => ``NetworkLayerDocAgent``
 
 - developer guide with malformed list-tables or incorrect workflow-linked references
   => ``DeveloperGuideAgent``

@@ -142,7 +142,10 @@ Classify the page intent as follows:
   how the solver participates in timestep execution, convergence behavior, result interpretation, and the relation between solving and simulation progression
 
 - ``Network``:
-  how the network is represented conceptually, how assets and connectivity affect behavior, and how users should think about network-level interactions
+  how the network is represented conceptually and structurally — connectivity and
+  communication with the solver/controller, the graph representation (nodes, junctions,
+  connection points), how it is constructed from ESDL, and how it is partitioned into
+  sub-networks, in a single page
 
 - ``Control``:
   current control concepts, setpoint propagation, operating logic at a conceptual level, and the user-visible consequences of control actions
@@ -165,6 +168,21 @@ subpages. The page must answer, in this order, as short prose/bullet sections:
 Do not list the same cross-link target in more than one navigation section. Keep the page
 concise (mesido-style brevity) rather than growing it into a long, multi-topic essay; push
 excess depth out via cross-links instead of adding new intro subpages.
+
+Network single-page rule
+-------------------------
+Keep the entire Network section in one page, ``doc/network/network_main.rst``. Do not split
+it into topology/construction/sub-network subpages. The page covers, in order: Overview
+(connectivity and communication with the solver/controller), Representation (a structural
+component/role table — for example ``Network``, ``BaseAsset``, ``Node``, ``Junction``,
+``HeatNetwork`` — grounded in source), Construction (how the graph is built from ESDL
+connectivity), Sub-network partitioning, Node connectivity rules (including a concise
+structural equation such as node mass-flow continuity where it clarifies a constraint),
+Assumptions, Limitations, and Implementation reference. The structural component table and
+construction/partitioning narrative are an explicit exception to the general "no
+class-by-class API walkthrough" rule below — they describe structural role, not full API
+detail, and must still cross-link to ``doc/physics`` and ``doc/reference`` rather than
+re-deriving asset physics, controller dispatch, or solver equation-assembly mechanics.
 
 Do not use this agent to document:
 - how to extend control classes as a contributor,
@@ -203,7 +221,10 @@ Only include details that improve user understanding or interpretation.
 
 Section order
 -------------
-Use the following section order for all sections that are present:
+Use the following section order for all sections that are present, except where the
+``Intro single-page rule`` or ``Network single-page rule`` above specifies a different,
+page-specific order — those take precedence for ``doc/intro/intro_main.rst`` and
+``doc/network/network_main.rst`` respectively:
 
 1. Title
 2. Overview
