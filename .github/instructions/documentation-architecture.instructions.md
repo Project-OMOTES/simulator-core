@@ -14,7 +14,7 @@ Fixed top-level section order
 Use this order for ``doc/index.rst``, major landing pages, top-level toctrees, and section
 navigation decisions, unless the user explicitly requests a different structure:
 
-1. Intro
+1. Introduction
 2. Solver
 3. Network
 4. Physics
