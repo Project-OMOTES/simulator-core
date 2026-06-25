@@ -78,9 +78,7 @@ class NetworkController(NetworkControllerAbstract):
 
         1. Set the conversion factor for all networks based on the heat exchangers or heat pumps.
         2. Calculate the total demand and supply of the network converted to the first network in
-           the list.
-        3. Based on these results, set the points for demand, supply, and storage.
-        4. Finally, set the heat-transfer assets based on the set points of the producers,
+        3. Based on these results, set the setpoints for demand, supply, and storage.
            consumers, and storages.
 
         :param float time: Time step for which to run the controller.
