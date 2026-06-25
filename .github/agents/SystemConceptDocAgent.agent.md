@@ -72,8 +72,7 @@ Before writing, inspect the closest matching existing documentation page and pre
 
 1. Follow repository documentation style first, especially:
    - ``doc/index.rst``
-   - For Intro pages: ``doc/intro/intro_main.rst``, ``doc/intro/audience_and_use_cases.rst``,
-     ``doc/intro/package_scope.rst``, ``doc/intro/simulation_input_and_output.rst``
+   - For Intro pages: ``doc/intro/intro_main.rst`` (the single consolidated intro page)
    - For Solver pages: ``doc/solver/solver_main.rst``
    - For Network pages: ``doc/network/network_main.rst``
    - For Control pages: ``doc/controller/controller.rst``
@@ -147,6 +146,25 @@ Classify the page intent as follows:
 
 - ``Control``:
   current control concepts, setpoint propagation, operating logic at a conceptual level, and the user-visible consequences of control actions
+
+Intro single-page rule
+----------------------
+Keep the entire Intro in one page, ``doc/intro/intro_main.rst``. Do not split it into
+subpages. The page must answer, in this order, as short prose/bullet sections:
+
+1. Overview — what OMOTES.SIMULATOR_CORE is.
+2. What It Does — scope boundaries (what is in scope and out of scope).
+3. Why It Is Used — audience and use cases (who uses the package and what
+   decisions/questions it supports).
+4. Example — one concrete ESDL-to-result path at a conceptual level (ESDL model ->
+   EsdlObject -> SimulationConfiguration -> SimulationManager.execute -> DataFrame), with a
+   trimmed runnable code example, cross-linking to ``README.md`` for the full example and to
+   existing architecture/reference documentation for deeper details.
+5. Related Documentation — links to adjacent sections.
+
+Do not list the same cross-link target in more than one navigation section. Keep the page
+concise (mesido-style brevity) rather than growing it into a long, multi-topic essay; push
+excess depth out via cross-links instead of adding new intro subpages.
 
 Do not use this agent to document:
 - how to extend control classes as a contributor,

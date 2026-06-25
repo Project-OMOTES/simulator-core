@@ -164,6 +164,25 @@ Flag the following as errors:
   correlations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, or restating the
   conceptual solver pages.
 
+Intro-specific review rules
+---------------------------
+Treat intro documentation as four distinct page intents:
+
+1. Intro landing and orientation
+2. Scope and boundaries
+3. Audience and use cases
+4. Input/output and execution contract
+
+Flag the following as errors:
+- boundary pages restating detailed runtime execution steps,
+- audience pages restating detailed input/output contract material,
+- input/output pages omitting a concrete ESDL-to-result execution path,
+- intro pages that answer multiple intro intents without a clear separation,
+- an intro subpage repeating the same cross-link target across more than one navigation
+  section (for example, an audience's "first stop" link reappearing verbatim in a later
+  "where to continue"/"see also" list, or a navigation section silently dropping an audience
+  covered everywhere else on the page).
+
 Control-specific review rules
 -----------------------------
 Treat control documentation as four distinct documentation types:
@@ -182,6 +201,24 @@ Flag the following as errors:
   conceptual landing overview,
 - contributor control guides drifting into end-user explanation as their primary purpose,
 - controller API reference pages containing long narrative explanation better suited for conceptual docs or developer guides.
+
+Network-specific review rules
+------------------------------
+Treat network documentation as two distinct documentation types:
+
+1. Network conceptual documentation
+2. Network layer structure documentation
+
+Review network pages against these distinctions.
+
+Flag the following as errors:
+- the conceptual network page (``doc/network/network_main.rst``) drifting into detailed
+  topology/representation, ESDL-construction, or sub-network partitioning detail,
+- network layer structure pages drifting into bare API reference, re-deriving asset-internal
+  physics equations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, restating
+  controller dispatch decisions owned by ``ControllerBehaviorDocAgent``, restating solver
+  equation-assembly mechanics owned by ``SolverBehaviorDocAgent``, or restating the conceptual
+  network page.
 
 Completeness review by page type
 --------------------------------

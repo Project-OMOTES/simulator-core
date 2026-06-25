@@ -4,45 +4,72 @@ Introduction
 Overview
 --------
 
-OMOTES.SIMULATOR_CORE is the simulation package used to evaluate thermo-hydraulic behavior in district
-heating systems. It provides the package-level entry point for understanding what the simulator does,
-how the main subsystems fit together, and how to interpret the results that come out of a run.
+OMOTES.SIMULATOR_CORE is the simulation engine used to evaluate thermo-hydraulic behavior in
+district heating systems. Given a network description in ESDL format, a start/stop time, and a
+timestep, it computes how hydraulic and thermal state evolves over the simulation period and
+returns the result as a time series.
 
-What OMOTES.SIMULATOR_CORE Does
-------------------------------
+What It Does
+------------
 
-The package turns a time-based system description into simulation results. In practice, it combines the
-network structure, asset behavior, control setpoints, and solver execution needed to compute how the
-system evolves over time.
+The package combines four things to produce a result: network topology, asset physics, control
+setpoints, and solver execution. At each timestep, setpoints are applied, the network equations are
+assembled and solved, and the resulting state is recorded.
 
-This introductory section keeps the focus on the overall package rather than on implementation detail.
-Use it to understand the scope of the simulator before moving into the solver, network, physics, and
-control sections.
+In scope:
+
+- Time-stepped simulation of hydraulic and thermal behavior
+- Integration of network topology, asset physics, and controller setpoints
+- Deterministic results for a given model and run configuration
+
+Out of scope:
+
+- Interactive visualization dashboards and scenario authoring tools
+- Site-specific deployment and operational orchestration
+- Generic data platform concerns not required for simulation execution
 
 Why It Is Used
---------------
+---------------
 
-The package is used when you need to study how a district-heating system behaves under changing demand,
-network conditions, and control decisions. It supports modelers and integrators who want to compare
-scenarios, interpret operational behavior, or connect simulation results to surrounding tooling.
+The package is used to study how a district-heating system behaves under changing demand, network
+conditions, and control decisions:
 
-Typical use is to answer questions such as whether a configuration can meet demand, how a control
-strategy affects system response, or what thermal and hydraulic trends appear over a simulation period.
+- **End users and modelers** compare scenarios and interpret operational behavior — whether a
+  configuration meets demand, or how a control strategy affects system response.
+- **Integrators** connect simulation runs to surrounding tooling and workflows.
+- **Contributors** extend package capabilities while preserving simulation correctness.
 
-Contents
---------
+Example
+-------
 
-.. toctree::
-   :maxdepth: 1
+A run is defined by an ESDL model and a time configuration, and returns a pandas ``DataFrame`` of
+results:
 
-   package_scope
-   audience_and_use_cases
-   simulation_input_and_output
+.. code-block:: python
+
+   from omotes_simulator_core.entities.esdl_object import EsdlObject
+   from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
+   from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
+   from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
+
+   config = SimulationConfiguration(
+       simulation_id=uuid.uuid1(),
+       name="test run",
+       timestep=3600,
+       start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+       stop=datetime.strptime("2019-01-01T01:00:00", "%Y-%m-%dT%H:%M:%S"),
+   )
+
+   sim = SimulationManager(EsdlObject(pyesdl_from_file("path/to/file.esdl")), config)
+   result = sim.execute(progressLogger)
+
+The ESDL model is loaded and wrapped as an ``EsdlObject``; run parameters (start/stop, timestep)
+are captured in a ``SimulationConfiguration``; ``SimulationManager`` ties the two together; and
+``execute`` runs the timestep loop and returns the result ``DataFrame``. See ``README.md`` for the
+full runnable example, including progress reporting.
 
 Related Documentation
----------------------
-
-For the next level of detail, see:
+----------------------
 
 - :doc:`../solver/solver_main` for solver behavior and numerical execution.
 - :doc:`../network/network_main` for network representation and connectivity concepts.
