@@ -1,0 +1,10 @@
+{% extends "!page.html" %}
+{% block footer %}
+{{ super() }}
+<p class="ai-disclosure">
+  Parts of this documentation was produced with the assistance of generative AI via the
+  agent-based documentation pipeline defined in <code>.github/agents/</code>. This
+  applies to the documentation only. All content has been reviewed and verified
+  by the maintainers of this project.
+</p>
+{% endblock %}

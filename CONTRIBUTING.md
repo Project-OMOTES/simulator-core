@@ -1,6 +1,8 @@
 # This file
-This file should describe the development process for this project and include instruction on 
-how to run/build your project.  Any environment settings/requirements?
+This file describes the development workflow for contributors making code changes to
+simulator-core. If you're an end user reporting a bug, requesting a feature, or asking a
+usage question, use the [user feedback repository](https://github.com/Project-OMOTES/user_feedback)
+instead — see `doc/support/support.rst` for the full process.
 
 # Development guidelines
 The general proces is as follows:
