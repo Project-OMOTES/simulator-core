@@ -24,6 +24,7 @@ How to use this section
    :titlesonly:
 
    developer_navigation
+  simulation_contributor_flow
    ../reference/architecture_reference
    ../reference/asset_reference
    ../reference/solver_reference
