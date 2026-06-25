@@ -9,3 +9,4 @@ physical properties of the pipe.
 
 .. autoclass:: omotes_simulator_core.solver.network.assets.solver_pipe.SolverPipe
    :members:
+   :no-index:

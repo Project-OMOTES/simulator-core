@@ -1,5 +1,6 @@
 General architecture
 =========================
+
 In this section we will describe the general architecture of the simulator.
 
 The simulation manager manages model configuration and simulation execution, see section :ref:`simulation manager`.
@@ -13,15 +14,14 @@ Both of these classes use factories methods to create the assets needed, see :re
 Both the heat network object and the controller object are used to create a network simulation object,
 which runs the simulation and passes back the results.
 
+Related pages:
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
-
-   asset_factories
-   configuration
-   esdl_object
-   simulation_manager
+- :doc:`asset_factories`
+- :doc:`configuration`
+- :doc:`esdl_asset_object`
+- :doc:`esdl_object`
+- :doc:`network_simulation`
+- :doc:`simulation_manager`
 
 
 

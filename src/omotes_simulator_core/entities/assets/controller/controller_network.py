@@ -214,7 +214,7 @@ class ControllerNetwork:
         :param float factor: Factor to multiply the heat demand with.
 
         :return: dict with the key the asset id and the value a dict with the set points for the
-        consumers.
+            consumers.
         """
         consumers = {}
         for consumer in self.consumers:

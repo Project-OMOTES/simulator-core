@@ -16,5 +16,6 @@ information can be found on this `website`_.
 
 .. autoclass:: omotes_simulator_core.solver.matrix.equation_object.EquationObject
    :members:
+   :no-index:
 
 .. _website: https://en.wikipedia.org/wiki/Newton%27s_method

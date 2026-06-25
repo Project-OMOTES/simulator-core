@@ -75,12 +75,11 @@ class NetworkController(NetworkControllerAbstract):
 
         This method is used to determine the set points for all assets in the network.
         This is done in the following steps:
-        1. Set the conversion factor for all networks based on the heat exchangers/heat pumps.
+
+        1. Set the conversion factor for all networks based on the heat exchangers or heat pumps.
         2. Calculate the total demand and supply of the network converted to the first network in
-            the list.
-        3. Based on these results the set points for demand, supply and storage can be set.
-        4. Finally, the heat transfer assets are set based on the set points of the producers,
-            consumers and stroages
+        3. Based on these results, set the setpoints for demand, supply, and storage.
+           consumers, and storages.
 
         :param float time: Time step for which to run the controller.
         :return: dict with the key the asset id and the heat demand for that asset.

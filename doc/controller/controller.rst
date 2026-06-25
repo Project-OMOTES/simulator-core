@@ -1,53 +1,175 @@
-Controller
-=====================================
-The controller manages set points for assets in the simulator. 
-ESDL data is parsed by mapper functions into controller objects. 
-These objects are stored in an overarching controller class, 
-which splits the district heating system into sub networks.
-This split is done on the heat transfer assets (heat pump and heat exchangers). Each network holds the production,
-consumption and storage assets hydraulic connected to that assets, together with a heat transfer asset, which is
-either the primary side or the secondary side.
-The overarching class is invoked at each time step to calculate and return the set points for that step.
-The set points are passed back to the simulator in a dictionary format,
-where the key is the asset ID, and the value is another dictionary. 
-This inner dictionary holds the set points, with the keys being properties (e.g., supply temperature, heat demand) 
-and the values being their corresponding set points.
+Control
+=======
 
-The overarching controller class prioritizes source allocation based on a priority system. 
-To cope with heat transfer assets it calculates a conversion factor to transfer heat from on sub network to another.
-For heat exchangers this factor is 1 (assuming no loss) and for heat pumps it is equal to the COP, for now it is
-constant, but it can be update each time step.
-All heat demand, source power, charge and discharge rate of storage is converted to a value in the first sub network.
-This is done be following the path each network has to take to go from the sub network to the first network and multiplying
-all conversion factors.
-Then the controller can start assigning capacity from priority 1 sources. If more capacity is needed, it moves to priority 2,
-and so on. If demand is lower than the available capacity at a given priority, the excess is equally distributed across the sources.
-If demand exceeds capacity, a message is sent to the user, and demand is downscaled to match available resources.
+Overview
+--------
 
-When storage is present, the controller first allocates source capacity to meet consumer demand.
-Any remaining capacity is used to charge the storage. If source capacity is insufficient, 
-the controller taps into the storage to meet the remaining demand.
-In the assign step the set points are converted back to their respective sub networks.
-This basic control strategy may be extended with more complex strategies in the future.
+The controller translates user demand and operating limits into per-timestep setpoints for the
+simulated heat network. It does not solve the hydraulic or thermal state itself. Instead, it
+decides how much heat should be requested, supplied, stored, or transferred so that the network and
+physics models can evaluate whether that requested operation is feasible.
 
-The controller consists of the following classes:
+For users and modelers, the controller is the bridge between scenario input and simulated network
+behavior. It determines how demand profiles are propagated to assets, how available production and
+storage are allocated, and how coupled networks exchange heat through heat pumps or heat exchangers.
 
-#. :ref:`main_controller_class`: Main controller class, used to store the assets and calculate the control value for a time step.
-#. :ref:`sub_network_class`: Subnetwork class, which stores a sub network of the district heating system. This is part of the network which is hydrualicly connected.
-#. :ref:`consumer_controller_class`: Class to control consumers in the network
-#. :ref:`producer_controller_class`: Class to control producers in the network
-#. :ref:`ates_controller_class`: Class to control Ates cluster in the network
+Role in the Simulation Workflow
+-------------------------------
 
-**Contents**
+At each simulation step, the controller evaluates the current system state and prepares setpoints
+for the next network solve. In practice, this means that it:
+
+#. groups hydraulically connected assets into controller-side subnetworks,
+#. reads consumer demand and available producer or storage capacity,
+#. distributes heat demand across producers, storages, and heat-transfer assets,
+#. assigns one pressure-setting location per hydraulically separated part of the system, and
+#. passes the resulting setpoints to the network and physics models.
+
+The network model then applies those setpoints when assembling and solving the timestep equations.
+The solved pressures, flows, and thermal states determine whether the requested control action can
+actually be realized in the system.
+
+Key Concepts
+------------
+
+Network controller
+    The top-level control component that coordinates all controller-side subnetworks and produces
+    the setpoint dictionary used by the simulation step.
+
+Subnetworks
+    Hydraulically connected groups of assets. The controller treats each such group as a local
+    balancing problem while still coordinating heat exchange between subnetworks.
+
+Consumers
+    Demand-side control components that request heat according to their time-dependent demand
+    profiles.
+
+Producers
+    Supply-side control components that provide heat up to their available capacity and priority.
+
+Storages
+    Flexible control components that can absorb or release heat. In the current model this includes
+    ideal heat storage and ATES-based storage.
+
+Heat-transfer assets
+    Coupling components, such as heat exchangers and heat pumps, that transfer heat between
+    subnetworks and introduce conversion or capacity constraints between the connected sides.
+
+Setpoints
+    Asset-level control targets passed into the timestep solve. These include requested heat demand
+    or supply, temperature targets, and the selected location where pressure is imposed for a
+    hydraulic part of the system.
+
+Behavior and Interpretation
+---------------------------
+
+What the controller does
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+At a high level, the controller tries to satisfy consumer demand with available production first and
+then uses storage flexibility when supply and demand do not match exactly. When coupled networks are
+present, it also determines how much heat should pass through each heat-transfer asset so that the
+connected subnetworks remain consistent.
+
+Setpoint propagation
+~~~~~~~~~~~~~~~~~~~~
+
+Setpoints propagate from system demand to individual assets in stages. Consumer demand profiles are
+first converted into requested heat offtake. The controller then compares total demand with the
+available producer capacity and storage charge or discharge capacity across the relevant
+subnetworks. Based on that comparison, it assigns asset-level setpoints for consumers, producers,
+storages, and heat-transfer assets.
+
+This means the controller output should be read as a requested operating state, not as a guarantee.
+The final delivered heat, temperatures, and flows still depend on the solved network and asset
+physics.
+
+Control building blocks
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The current control layer is organized around a small number of asset categories:
+
+- the network controller that coordinates the full system,
+- subnetworks that represent hydraulically connected parts of the model,
+- consumers that request heat,
+- producers that inject heat,
+- storages, including ideal heat storage and ATES, that shift heat over time,
+- heat-transfer assets that connect subnetworks through heat exchangers or heat pumps.
+
+These building blocks matter because each category contributes a different kind of limit or
+flexibility to the timestep balance.
+
+Control interaction with network and physics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The controller defines intent, while the network and physics sections determine realization. A
+producer setpoint may request heat injection, a consumer setpoint may request offtake, and a
+storage setpoint may request charging or discharging, but the solved hydraulic and thermal state
+still depends on connectivity, pressure conditions, transport losses, and asset-specific physical
+constraints.
+
+Heat-transfer assets are especially important in this interaction. They couple subnetworks and can
+limit how much heat is effectively exchanged between the connected sides. As a result, a shortage,
+curtailment, or change in dispatch may be caused either by controller allocation or by network and
+physics constraints that prevent the requested operating point from being fully realized.
+
+Practical simulation consequences
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For users and modelers, the most important consequence is that controller results should be
+interpreted together with solved network outcomes.
+
+- If total demand exceeds available production and dischargeable storage, consumer delivery may be
+  reduced.
+- If total supply exceeds demand, storage may absorb surplus heat until its effective charge limit
+  is reached.
+- If a heat pump or heat exchanger couples subnetworks, the achievable transfer can constrain both
+  sides of the system.
+- If pressure is imposed at a different asset than expected, flow patterns can still remain valid
+  as long as the hydraulic part of the network is properly anchored.
+
+Assumptions
+-----------
+
+- Control is evaluated per timestep and produces asset-level setpoints for that timestep.
+- Subnetworks are based on hydraulic connectivity and coordinated through heat-transfer assets.
+- Storage is represented through effective charge and discharge capability, not through a detailed
+  control optimization problem.
+- The controller allocates requested operation before the network and physics solve determines the
+  final realized state.
+
+Limitations
+-----------
+
+- This page gives a conceptual overview only and does not describe detailed timestep dispatch logic.
+- It does not replace the asset-level physics interpretation in :doc:`../physics/physics_main`.
+- It does not document class internals or contributor-oriented implementation details.
+- Detailed controller behavior belongs on the dedicated behavior page.
+
+Implementation Reference
+------------------------
+
+For controller classes, controller-side subnetworks, and implementation-oriented reference, see
+:doc:`../reference/controller_reference`.
+
+Related Documentation
+---------------------
+
+Use :doc:`controller_behavior` for the detailed user-facing explanation of controller behavior
+during a timestep.
+
+For network-level interaction and topology context, see :doc:`../network/network_main`.
+
+For asset-level physical interpretation of the resulting operating state, see
+:doc:`../physics/physics_main`.
+
+For implementation-oriented controller reference material, see
+:doc:`../reference/controller_reference`.
 
 .. toctree::
-    :maxdepth: 1
-    :glob:
+   :maxdepth: 1
+   :titlesonly:
 
-    main_controller_class
-    sub_network_class
-    assets/consumer
-    assets/producer
-    assets/ates
+   controller_behavior
 
 

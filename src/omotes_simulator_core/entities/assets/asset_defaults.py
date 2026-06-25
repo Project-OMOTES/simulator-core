@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Define default values and names for assets."""
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -40,7 +41,7 @@ class PipeDefaults:
     :param float external_temperature: The external temperature of the pipe [K].
     :param float qheat_external: The external heat flow of the pipe [W].
     :param int insulation_schedule: Assumed insulation schedule of the pipe required
-    to retrieve the inner diameter of the pipe from the EDR list[-].
+        to retrieve the inner diameter of the pipe from the EDR list [-].
     """
 
     k_value: float = 2e-3
@@ -103,8 +104,8 @@ class HeatExchangerDefaults:
     """Class containing the default values for a heat exchanger.
 
     :param float heat_transfer_efficiency: The efficiency of the heat exchanger [-].
-    Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is chosen
-    here.
+        Typically we assume ideal heat transfer with minimum losses, so a value of 1.0 is
+        chosen here.
     """
 
     heat_transfer_efficiency: float = 1.0

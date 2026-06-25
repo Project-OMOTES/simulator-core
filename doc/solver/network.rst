@@ -12,3 +12,4 @@ For this purpose several methods have been implemented.
 
 .. autoclass:: omotes_simulator_core.solver.network.network.Network
    :members:
+   :no-index:
