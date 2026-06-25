@@ -6,6 +6,14 @@ It focuses on connectivity, communication between nodes and assets, and how netw
 The network model is configured from ESDL-derived assets and represented as connected components and nodes.
 At each simulation step, setpoints from the controller are applied to assets, the network equations are assembled, and solver results are propagated back to entities.
 
+Network layer pages
+-------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   network_topology
+
 Implementation reference
 -------------------------
 
