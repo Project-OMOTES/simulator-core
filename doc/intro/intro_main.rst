@@ -12,11 +12,11 @@ simulation run.
 **Contents**
 
 .. toctree::
-	:maxdepth: 1
+   :maxdepth: 1
 
-	package_scope
-	audience_and_use_cases
-	simulation_input_and_output
+   package_scope
+   audience_and_use_cases
+   simulation_input_and_output
 
 Section map
 -----------
