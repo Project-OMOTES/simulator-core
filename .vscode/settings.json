@@ -34,8 +34,6 @@
       "matchCommandLine": true
     },
     ".\\doc\\run_spinx.bat": true,
-    ".\\venv\\Scripts\\python.exe": true,
-    "&": true,
     "/^& \\.\\\\venv\\\\Scripts\\\\python\\.exe -m sphinx -b html doc doc\\\\_build\\\\html$/": {
       "approve": true,
       "matchCommandLine": true
