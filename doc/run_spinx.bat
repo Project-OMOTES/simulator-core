@@ -4,14 +4,11 @@ setlocal
 rem Jump to the directory where this script is located (doc\)
 pushd "%~dp0"
 
-set "PY_BOOTSTRAP=python"
-where py >NUL 2>NUL
 if %ERRORLEVEL% EQU 0 set "PY_BOOTSTRAP=py"
 
 if not exist .\venv\Scripts\python.exe (
     echo Creating virtual environment...
-    %PY_BOOTSTRAP% -m venv .\venv
-
+    call create_venv.bat
     call .\venv\Scripts\activate.bat
 ) else (
     echo Using existing virtual environment...
