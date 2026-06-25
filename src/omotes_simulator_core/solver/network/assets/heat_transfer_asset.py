@@ -398,8 +398,7 @@ class HeatTransferAsset(BaseAsset):
         # heat transfer asset.
         # If the mass flow at the inflow node of the primary and secondary side is not zero,
         if self.pre_scribe_mass_flow_primary:
-            mass_flow_rate = abs(self.get_mass_flow_from_prev_solution())
-            if mass_flow_rate == 0:
+            if self.prev_sol[0] == 0:
                 mass_flow_set = self.mass_flow_initialization_primary
                 equations.append(
                     self.prescribe_mass_flow_at_connection_point(
@@ -554,8 +553,24 @@ class HeatTransferAsset(BaseAsset):
         since the heat transfer asset is in bypass mode the secondary outflow is set equal to
         the primary inflow, and vice versa.
         """
-        equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
-        equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
+        if self.prev_sol[3] == 0:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=1,
+                    supply_temperature=self.temperature_out_primary,
+                )
+            )
+        else:
+            equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
+        if self.prev_sol[9] == 0:
+            equations.append(
+                self.prescribe_temperature_at_connection_point(
+                    connection_point=3,
+                    supply_temperature=self.temperature_out_secondary,
+                )
+            )
+        else:
+            equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
         equations.append(self.short_cut_internal_energy(con_point1=0, con_point2=3))
         equations.append(self.short_cut_internal_energy(con_point1=1, con_point2=2))
 
