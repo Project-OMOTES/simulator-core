@@ -186,6 +186,16 @@ class EsdlAssetObject:
                 in_flow=self.get_temperature("In", "Return"),
                 out_flow=self.get_temperature("Out", "Supply"),
             )
+        elif self.get_esdl_type() == OmotesAssetLabels.GAS_HEATER:
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("In", "Return"),
+                out_flow=self.get_temperature("Out", "Supply"),
+            )
+        elif self.get_esdl_type() == OmotesAssetLabels.ELECTRIC_BOILER:
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("In", "Return"),
+                out_flow=self.get_temperature("Out", "Supply"),
+            )
         elif (self.get_esdl_type() == OmotesAssetLabels.ATES) | (
             self.get_esdl_type() == OmotesAssetLabels.STORAGE
         ):
