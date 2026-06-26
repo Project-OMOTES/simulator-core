@@ -121,7 +121,16 @@ class EsdlControllerMapper(EsdlMapperAbstract):
             ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
             for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)
             if esdl_asset.get_number_of_ports() == 2
+        ] + [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.GAS_HEATER)
+        ] + [
+            ControllerProducerMapper().to_entity(esdl_asset=esdl_asset)
+            for esdl_asset in esdl_object.get_all_assets_of_type(OmotesAssetLabels.ELECTRIC_BOILER)
         ]
+
+        # ELECTRIC_BOILER = "electric_boiler"
+        # GAS_HEATER = "gas_heater"
 
         storages = self.convert_heat_storages_and_ates(esdl_object)
 
