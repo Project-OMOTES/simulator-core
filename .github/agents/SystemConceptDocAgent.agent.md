@@ -77,6 +77,7 @@ Before writing, inspect the closest matching existing documentation page and pre
    - For Solver pages: ``doc/solver/solver_main.rst``
    - For Network pages: ``doc/network/network_main.rst``
    - For Control pages: ``doc/controller/controller.rst``
+  - For Control behavioral terminology/context only: ``doc/controller/controller_behavior.rst``
    - ``doc/physics/physics_main.rst`` (cross-reference landing page only, not a style source for Physics content itself)
    - ``doc/architecture/architecture.rst``
    - any existing landing page in the same section as ``<TARGET_FILE>``
@@ -146,7 +147,10 @@ Classify the page intent as follows:
   how the network is represented conceptually, how assets and connectivity affect behavior, and how users should think about network-level interactions
 
 - ``Control``:
-  current control concepts, setpoint propagation, operating logic at a conceptual level, and the user-visible consequences of control actions
+  current control concepts, setpoint propagation, operating logic at a conceptual level, and the user-visible consequences of control actions.
+  Keep descriptions tied to the heat-network physics interface: controller output should be framed as
+  requested heat extraction/injection and boundary-condition intent that is later realized or constrained
+  by the hydraulic and thermal solve.
 
 Do not use this agent to document:
 - how to extend control classes as a contributor,
@@ -205,6 +209,8 @@ Optional sections:
 
 Optional sections may be added only when they materially improve clarity.
 
+**For ``Control`` pages specifically:** Omit the ``Limitations`` section. Control pages should end with ``Assumptions`` before proceeding to ``Related Documentation`` or the toctree.
+
 Section requirements
 --------------------
 
@@ -214,6 +220,10 @@ Explain:
 - what this part of the simulator does,
 - why it matters,
 - how readers should think about it.
+
+For ``Control`` pages, phrase overview text in terms of physics-facing setpoint intent (for example,
+asset-level heat extraction/injection requests and pressure-boundary intent for the timestep solve),
+not only generic demand-profile propagation wording.
 
 For ``Intro`` pages, explicitly include:
 - what OMOTES.SIMULATOR_CORE does,
@@ -244,6 +254,37 @@ Examples:
 
 Keep definitions concise and simulation-oriented.
 
+For ``Control`` pages, format each concept as a reStructuredText definition list:
+
+  **Concept Name**
+      Definition text here. For multi-line definitions, continue text on the next line with consistent indentation (same indent level as the first line of the definition).
+
+**IMPORTANT for reStructuredText formatting:** To prevent text from being boxed as literal blocks:
+  - Do NOT use extra indentation or line breaks that create gaps in the definition text.
+  - Do NOT use ``::`` or ``|`` markers within definitions.
+  - Write multi-line definitions as flowing text with uniform indentation, not as separate paragraphs or code blocks.
+  - Example of CORRECT formatting:
+
+    **Storages**
+        Flexible control components that can absorb or release heat. In the current model this includes ideal heat storage and ATES-based storage. Effective charge and discharge capability depends on current fill level or state of charge, which affects how much storage can contribute in a timestep.
+
+  - Example of INCORRECT formatting (will create a box):
+
+    **Storages**
+        Flexible control components that can absorb or release heat. In the current model this includes
+      ideal heat storage and ATES-based storage. Effective charge and discharge capability depends on
+      current fill level or state of charge, which affects how much storage can contribute in a timestep.
+
+Include at least these concepts when relevant to the current model:
+- Network Controller: the top-level control component that coordinates subnetworks
+- Subnetworks: hydraulically separated groups of assets
+- Consumers: demand-side components
+- Producers: supply-side components
+- Storages: flexible components with effective charge/discharge capability tied to fill level or state of charge
+- Heat-transfer assets: coupling components between subnetworks
+- Setpoints: asset-level control targets
+- Priority: dispatch ordering used when producer output must be capped; determines which producer supplies heat under surplus conditions
+
 Behavior and Interpretation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Describe the main behavior in practical terms.
@@ -268,12 +309,8 @@ Include only assumptions that matter for:
 - model setup,
 - understanding the documented workflow.
 
-Limitations
-~~~~~~~~~~~
-Use short bullets.
-
-State what the page intentionally simplifies or does not cover.
-Point readers to more specific sections when relevant.
+For ``Control`` pages, state that storage behavior is constrained by effective charging/discharging
+capability and that this capability depends on the current fill level/state of charge.
 
 Related Documentation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -320,6 +357,14 @@ See [Documentation Architecture](../instructions/documentation-architecture.inst
 - Avoid implementation-oriented wording unless needed to anchor behavior.
 - Avoid unnecessary bullets outside assumptions, limitations, and short checklists.
 
+For ``Control`` page Key Concepts specifically:
+- Each concept must be formatted as a definition-list entry (bold concept name followed by indented definition).
+- Do not use code blocks, boxed elements, or literal formatting for concept definitions.
+- Do not use ``::`` or ``|`` markers within definition text.
+- Keep each definition to 1–2 concise sentences.
+- Do not nest concepts within examples or use numbered/bulleted lists within concept definitions.
+- For multi-line definitions, maintain consistent indentation across all lines to prevent reStructuredText from treating the text as a literal block (which would create a box).
+
 reStructuredText requirements
 -----------------------------
 See [Documentation Architecture](../instructions/documentation-architecture.instructions.md) for the shared output-format requirements. In addition:
@@ -350,3 +395,10 @@ After writing or updating the file:
 8. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the repository-preferred documentation build command.
 9. If an error or warning is found, fix it before returning the final content.
 10. Do not finish with known syntax errors, broken headings, malformed math blocks, broken references, or unresolved build warnings caused by the change.
+
+For ``Control`` pages specifically, also verify:
+- All required concepts (Network Controller, Subnetworks, Consumers, Producers, Storages, Heat-transfer assets, Setpoints, Priority) are present in the Key Concepts section.
+- Priority concept is clearly defined as related to dispatch ordering when producer output is capped.
+- No ``Limitations`` section is present; the page proceeds directly from ``Assumptions`` to ``Related Documentation``.
+- All Key Concept definitions are formatted as definition-list entries (bold name, indented definition) with no code blocks or boxes.
+- Specifically verify that the Storages concept definition does NOT appear in a box; its text should flow naturally as a continuation of the definition line.
