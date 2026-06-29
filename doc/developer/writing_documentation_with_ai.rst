@@ -212,6 +212,8 @@ other content-level fixes to the correct specialist agent.
 
 Common documentation validation checks:
 
+- Verify reStructuredText syntax and formatting via ``RstSyntaxAgent`` (or check headings,
+  lists, code blocks, directives, and tables manually if the agent is unavailable).
 - All new pages appear in exactly one ``.. toctree::``.
 - All ``:doc:`` and ``:ref:`` cross-references resolve without warnings.
 - All ``.. list-table::`` directives have consistent column widths and correct indentation.

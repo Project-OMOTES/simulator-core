@@ -73,8 +73,6 @@ This agent validates:
 - autodoc pages,
 - cross-references,
 - labels,
-- math directives,
-- list-tables,
 - landing pages,
 - generated API reference wiring,
 - navigation consistency insofar as it affects build and discoverability.
@@ -231,9 +229,11 @@ Before concluding validation, verify that:
 - the chosen build command is appropriate for the repository,
 - the relevant documentation files are syntactically valid,
 - toctrees resolve correctly,
+- references to labels and targets are valid,
 - autodoc targets resolve correctly where applicable,
 - no introduced warnings or errors remain unresolved,
 - larger content problems are routed back to the correct specialist agent.
+- check rst syntax and formatting via the ``RstSyntaxAgent``.
 
 Validation
 ----------
@@ -244,8 +244,10 @@ After running validation and any small repairs:
 3. Verify that recently edited pages do not introduce malformed directives, broken references, duplicate labels, or toctree failures.
 4. Verify that autodoc imports and targets resolve for API reference pages.
 5. Verify that navigation changes do not create missing documents or unreachable sections.
-6. Apply only small validation-oriented fixes directly.
-7. Route larger issues to the correct specialist agent.
-8. If the build still fails, report the concrete remaining causes and the correct owner for each.
-9. Do not finish with known syntax errors, broken toctrees, unresolved autodoc failures, duplicate labels, or unresolved build warnings caused by the changes under validation.
-10. Do not approve documentation merely because the prose looks correct; the build must also be structurally sound.
+6. Verify that all warnings and errors are either fixed or routed to the correct specialist agent.
+7. Verify that the build passes without errors or warnings after small fixes and routing.
+8. Apply only small validation-oriented fixes directly.
+9. Route larger issues to the correct specialist agent.
+10. If the build still fails, report the concrete remaining causes and the correct owner for each.
+11. Do not finish with known syntax errors, broken toctrees, unresolved autodoc failures, duplicate labels, or unresolved build warnings caused by the changes under validation.
+12. Do not approve documentation merely because the prose looks correct; the build must also be structurally sound.
