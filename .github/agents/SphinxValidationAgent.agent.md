@@ -123,6 +123,7 @@ Examples of issues this agent should detect:
 - malformed ``.. list-table::`` directives,
 - missing included documents,
 - orphaned pages where that matters to navigation.
+- linux/windows specific command notations in code examples
 
 Small-fix policy
 ----------------
