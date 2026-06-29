@@ -209,7 +209,7 @@ To validate the documentation build after updating this page:
 
 .. code-block:: bash
 
-    .\.venv\Scripts\python -m sphinx -b html doc doc/_build/html
+    python -m sphinx -b html doc doc/_build/html
 
 Common Pitfalls
 ---------------
@@ -250,7 +250,7 @@ Related Documentation
   ``app.py`` through ``SimulationManager``, ``NetworkSimulation``, and ``HeatNetwork``.
 - :doc:`testing` — test layout, how to run the full test suite, and the contributor
   checklist.
-- :doc:`../architecture/network_simulation` — conceptual overview of how the network
+- :doc:`../network/network_main` — conceptual overview of how the network
   simulation coordinates assets, the solver, and the controller.
 - For class-level details on ``AssetAbstract``, ``HeatNetwork``, and related types, consult
   the :doc:`api/omotes_simulator_core` root index.

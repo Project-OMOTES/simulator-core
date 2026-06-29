@@ -197,7 +197,7 @@ root using the following command:
 
 .. code-block:: console
 
-   .\.venv\Scripts\python -m sphinx -b html doc doc/_build/html
+   python -m sphinx -b html doc doc/_build/html
 
 A clean build produces no warnings or errors. If the build reports warnings, read the output
 carefully: most warnings identify the file and line number of the problem.

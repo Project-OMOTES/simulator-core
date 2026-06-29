@@ -57,25 +57,19 @@ Run the full test suite from the repository root:
 
 .. code-block:: bash
 
-    PYTHONPATH='$PYTHONPATH:src/' pytest -p no:faulthandler --junit-xml=test-results.xml unit_test/
+    python -m pytest unit_test/
 
-On Windows the equivalent is:
-
-.. code-block:: bat
-
-    set PYTHONPATH=.\src\;%PYTHONPATH%
-    pytest -p no:faulthandler unit_test\
-
-The ``-p no:faulthandler`` flag suppresses low-level crash reporting that can produce spurious
-output when the solver reaches certain numerical states.
+Because the previous step installs the package in editable mode, no manual ``PYTHONPATH``
+setup is required on any platform. Add ``-p no:faulthandler`` to suppress low-level crash
+reporting that can produce spurious output when the solver reaches certain numerical states.
 
 To run only a single subdirectory during development::
 
-    pytest unit_test/entities/
+    python -m pytest unit_test/entities/
 
 To run a single test file::
 
-    pytest unit_test/entities/test_pipe.py
+    python -m pytest unit_test/entities/test_pipe.py
 
 Unit Test Patterns
 ------------------
@@ -204,7 +198,7 @@ Testing Checklist
 
 Before submitting a change, verify the following:
 
-- All existing tests pass: ``pytest -p no:faulthandler unit_test/``
+- All existing tests pass: ``python -m pytest unit_test/``
 - A unit test exists for every new entity-layer asset class.
 - A unit test exists for every new solver-layer asset class.
 - A unit test exists for every new controller class or subclass.
@@ -213,8 +207,7 @@ Before submitting a change, verify the following:
 - No test imports from a private module interface (i.e., ``_private_method``).
 - Mocks use ``Mock(spec=<class>)`` to prevent silent attribute errors.
 - New ESDL test fixtures are placed in ``testdata/`` with a descriptive name.
-- The documentation build passes: ``doc\make.bat html`` (Windows) or
-  ``make -C doc html`` (Linux).
+- The documentation build passes: ``python -m sphinx -b html doc doc/_build/html``.
 
 Related Documentation
 ---------------------

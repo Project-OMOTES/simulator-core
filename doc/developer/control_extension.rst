@@ -93,7 +93,7 @@ Step-by-step Workflow
 ---------------------
 
 1. Create or modify an asset-level controller class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Asset controllers live in ``src/omotes_simulator_core/entities/assets/controller/``.
 
@@ -239,25 +239,25 @@ Before submitting:
 
    .. code-block:: bash
 
-       pytest unit_test/entities/controller/test_controller_my_asset.py
+       python -m pytest unit_test/entities/controller/test_controller_my_asset.py
 
 2. Run the integration test that exercises the entity-controller communication:
 
    .. code-block:: bash
 
-       pytest unit_test/integration/test_communication_controller_network.py
+       python -m pytest unit_test/integration/test_communication_controller_network.py
 
 3. Run a full integration test against a real ESDL file that includes your asset type:
 
    .. code-block:: bash
 
-       pytest unit_test/integration/test_heat_physics.py
+       python -m pytest unit_test/integration/test_heat_physics.py
 
 4. Run the full suite:
 
    .. code-block:: bash
 
-       PYTHONPATH='$PYTHONPATH:src/' pytest -p no:faulthandler unit_test/
+       python -m pytest unit_test/
 
 Common Pitfalls
 ---------------

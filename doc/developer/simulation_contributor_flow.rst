@@ -248,7 +248,7 @@ The most relevant tests for this execution flow are:
 
 Run the test suite from the repository root::
 
-    PYTHONPATH='$PYTHONPATH:src/' pytest -p no:faulthandler --junit-xml=test-results.xml unit_test/
+    python -m pytest unit_test/
 
 Common Pitfalls
 ---------------
