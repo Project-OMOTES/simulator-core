@@ -3,8 +3,8 @@ simulation
 
 .. automodule:: omotes_simulator_core.simulation
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

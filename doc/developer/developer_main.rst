@@ -1,21 +1,29 @@
 Developer Documentation
 =======================
 
-This section groups contributor-facing material and lower-level technical reference for
-OMOTES.SIMULATOR_CORE.
+This section contains contributor-facing guides for OMOTES.SIMULATOR_CORE.
 
-Use this section when you need implementation-oriented guidance, generated module reference, or
-lower-level supporting pages that sit outside the end-user conceptual flow.
+Use this section when you need implementation-oriented guidance — how the code is organized,
+how to extend the package, how to test your changes, and how to navigate the generated API
+reference.
+
+For system-level conceptual behavior and governing relations, consult the Intro, Solver,
+Network, Physics, and Control sections instead.
 
 How to use this section
 -----------------------
 
-- Start with the developer navigation page to pick the right path.
-- Use the curated reference pages (Architecture, Asset, Solver, Controller) when you need
-  technical reference organized by topic rather than by Python package.
-- Use the API root index for exhaustive package/module/class lookup that the curated pages
-  do not cover.
-- Use Intro, Solver, Network, Physics, and Control for conceptual behavior and interpretation.
+- Read :doc:`developer_navigation` first to choose the right path for your task.
+- Use :doc:`simulation_contributor_flow` to understand the full code layout and execution
+  flow before making any change.
+- Use :doc:`add_new_asset` when implementing a new thermo-hydraulic asset type.
+- Use :doc:`add_new_output_format` when adding new output columns, output datasets, or changing how output is assembled.
+- Use :doc:`control_extension` when modifying or extending controller behavior.
+- Use :doc:`testing` for guidance on test structure, running tests, and validation.
+- Use :doc:`writing_documentation_with_ai` when writing or reviewing documentation with the
+  AI agent workflow.
+- Use the :doc:`api/omotes_simulator_core` root index for exhaustive package, module, and
+  class lookup.
 
 **Contents**
 
@@ -24,9 +32,10 @@ How to use this section
    :titlesonly:
 
    developer_navigation
-  simulation_contributor_flow
-   ../reference/architecture_reference
-   ../reference/asset_reference
-   ../reference/solver_reference
-   ../reference/controller_reference
+   simulation_contributor_flow
+   add_new_asset
+   add_new_output_format
+   control_extension
+   testing
+   writing_documentation_with_ai
    api/omotes_simulator_core
