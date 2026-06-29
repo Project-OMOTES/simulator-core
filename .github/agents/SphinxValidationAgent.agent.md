@@ -11,6 +11,7 @@ agents:
   - NavigationAgent
   - SupportDocAgent
   - DocReviewAgent
+  - RstSyntaxAgent
 ---
 
 You are a documentation build validation agent.
@@ -67,7 +68,7 @@ Scope
 -----
 This agent validates:
 - documentation build commands,
-- ``.rst`` syntax,
+- ``.rst`` syntax via the ``RstSyntaxAgent``,
 - toctrees,
 - autodoc pages,
 - cross-references,
