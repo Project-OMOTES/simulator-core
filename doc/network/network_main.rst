@@ -4,10 +4,12 @@ Network layer
 Overview
 --------
 
-This section describes how assets are connected into a hydraulic network, how that
-structure is represented and built from ESDL, and how information is exchanged during
-simulation. It covers connectivity, communication between nodes and assets, and how
-network behavior interacts with solver and controller flow.
+This section describes:
+- how assets are connected into a hydraulic network, 
+- how that structure is represented and built from ESDL, 
+- and how information is exchanged during simulation. 
+
+It covers connectivity, communication between nodes and assets, and how network behavior interacts with solver and controller flow.
 
 The network model is configured from ESDL-derived assets and represented as connected
 components and nodes. At each simulation step, setpoints from the controller are applied
@@ -17,7 +19,7 @@ entities.
 Representation
 ---------------
 
-The network is represented as a graph of *assets* and *nodes*. Assets model physical
+The network is represented as a graph of *assets* and *nodes*. Assets model (combined) physical
 components (pipes, producers, consumers, heat exchangers, storage). Nodes model the
 connection points between assets where hydraulic and thermal state is shared.
 

@@ -118,6 +118,7 @@ Style rules
 - Use neutral, technical language.
 - Keep sections concise, actionable, and cross-linked.
 - Prefer short paragraphs and clear headings.
+- Use sentence case for headings: capitalize only the first letter (and proper nouns/acronyms).
 - Avoid unnecessary bullets except for assumptions, limitations, and checklists.
 - Output valid reStructuredText when writing ``.rst`` files.
 

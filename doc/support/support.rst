@@ -14,7 +14,7 @@ When to use this page
   Documentation instead if you are trying to understand existing behavior or
   implementation rather than report or ask something new.
 
-Support Paths
+Support paths
 --------------
 
 **Usage questions**
@@ -58,7 +58,7 @@ Before requesting support
 - Use Developer Documentation when the question is implementation-oriented.
 - Include the documentation page or workflow area that appears to be affected.
 
-Related Documentation
+Related documentation
 -----------------------
 
 - ``CONTRIBUTING.md`` for contribution workflow, code review, and testing requirements.

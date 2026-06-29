@@ -4,12 +4,12 @@ Introduction
 Overview
 --------
 
-OMOTES.SIMULATOR_CORE is the simulation engine used to evaluate thermo-hydraulic behavior in
+OMOTES.SIMULATOR_CORE is a simulation engine used to evaluate thermo-hydraulic behavior in
 district heating systems. Given a network description in ESDL format, a start/stop time, and a
 timestep, it computes how hydraulic and thermal state evolves over the simulation period and
 returns the result as a time series.
 
-What It Does
+What it does
 ------------
 
 The package combines four things to produce a result: network topology, asset physics, control
@@ -28,7 +28,7 @@ Out of scope:
 - Site-specific deployment and operational orchestration
 - Generic data platform concerns not required for simulation execution
 
-Why It Is Used
+Why it is used
 ---------------
 
 The package is used to study how a district-heating system behaves under changing demand, network
@@ -47,10 +47,22 @@ results:
 
 .. code-block:: python
 
+   import uuid
+   from datetime import datetime
+   import logging
+
    from omotes_simulator_core.entities.esdl_object import EsdlObject
    from omotes_simulator_core.entities.simulation_configuration import SimulationConfiguration
    from omotes_simulator_core.infrastructure.simulation_manager import SimulationManager
    from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
+
+   # Setup logger
+   logger = logging.getLogger(__name__)
+
+   # Create a callable that prints the progress messages
+   def progressLogger(progress: float, message: str) -> None:
+       """Function to report progress to logging/stdout."""
+       logger.info(f"({progress*100:.2f}%) {message}")
 
    config = SimulationConfiguration(
        simulation_id=uuid.uuid1(),
@@ -63,12 +75,14 @@ results:
    sim = SimulationManager(EsdlObject(pyesdl_from_file("path/to/file.esdl")), config)
    result = sim.execute(progressLogger)
 
-The ESDL model is loaded and wrapped as an ``EsdlObject``; run parameters (start/stop, timestep)
-are captured in a ``SimulationConfiguration``; ``SimulationManager`` ties the two together; and
-``execute`` runs the timestep loop and returns the result ``DataFrame``. See ``README.md`` for the
-full runnable example, including progress reporting.
+Overview of the Simulation Process:
 
-Related Documentation
+- The ESDL model is loaded and wrapped as an ``EsdlObject``.
+- Run parameters (start/stop, timestep) are captured in a ``SimulationConfiguration``.
+- ``SimulationManager`` ties the two together.
+- ``execute`` runs the timestep loop and returns the result ``DataFrame``. 
+
+Related documentation
 ----------------------
 
 - :doc:`../solver/solver_main` for solver behavior and numerical execution.
