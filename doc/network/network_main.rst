@@ -52,10 +52,6 @@ and outlet at index 1). Each connection point maps to a single ``Node``; a node 
 shared by any number of asset connection points, representing a physical junction between
 components.
 
-The solver ``Network`` stores assets and nodes in plain dictionaries, keyed by UUID
-string. This allows the solver to enumerate all items when assembling the equation
-system.
-
 Construction
 ------------
 
