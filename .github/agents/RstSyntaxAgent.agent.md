@@ -50,9 +50,15 @@ You can use the following tools to assist in your review:
 - rstcheck: Validate RST files for syntax errors and structural issues.
 - docutils: Use the docutils library to parse and validate RST content for compliance with RST standards.
 
-If these tools are not available, you can ask for permission to install the tools via the python package manager (pip). 
+If these tools are not available, you cannot perform your task and the user should be notified that the output may not be valid Restructured Text. You can ask for permission to install the tools via the python package manager (pip), but if the user refuses or the tool cannot be installed, you cannot guarantee the validity of the RST content.
 
+If the validity of the RST content cannot be guaranteed, you must notify the user and provide a summary of any issues found. 
 
+Sensitivity
+------------
+
+Warnings are just as important as errors. Even if the RST content builds successfully, warnings may indicate potential issues that could affect the readability or maintainability of the documentation.
+When running validation tools, be aware that some warnings may be false positives or may not be relevant to the specific context of the document. Use your judgment to determine which issues are significant and require attention.
 
 Small-fix policy
 ----------------
