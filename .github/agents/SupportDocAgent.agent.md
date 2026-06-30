@@ -114,7 +114,6 @@ A good support page should answer:
 - Is this a bug, a documentation issue, or a usage question?
 - What should I include in my report?
 - Where should I look first before opening an issue?
-- When should I consult developer docs instead?
 
 A support page should not:
 - become a developer onboarding page,
@@ -139,11 +138,10 @@ Section order
 Use the following section order for all sections that are present:
 
 1. Title
-2. When to use this page
-3. Support Paths
-4. What to include
-5. Before requesting support
-6. Related Documentation
+2. Support Paths
+3. What to include
+4. Before requesting support
+5. Related Documentation
 
 Optional sections:
 - ``Bug Reports``
@@ -156,13 +154,6 @@ Optional sections may be added only when they materially improve clarity.
 
 Section requirements
 --------------------
-
-When to use this page
-~~~~~~~~~~~~~~~~~~~~~
-Explain:
-- who this page is for,
-- which types of requests belong here,
-- when the reader should use other documentation instead.
 
 Support Paths
 ~~~~~~~~~~~~~

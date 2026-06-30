@@ -1,19 +1,6 @@
 Support
 =======
 
-Use this section when you need help using, interpreting, or extending OMOTES.SIMULATOR_CORE.
-
-When to use this page
-----------------------
-
-- You are a toolkit user, system modeler, or integrator with a usage question, a bug to
-  report, or a feature to request.
-- You are a contributor with a question about the development workflow, or you have found
-  a code-level issue in this repository.
-- Use the conceptual sections (Intro, Solver, Network, Physics, Control) or Developer
-  Documentation instead if you are trying to understand existing behavior or
-  implementation rather than report or ask something new.
-
 Support paths
 --------------
 
@@ -50,13 +37,13 @@ What to include
 Before requesting support
 ---------------------------
 
-- Search existing issues and discussions in
-  `Project-OMOTES/user_feedback <https://github.com/Project-OMOTES/user_feedback>`_ to
-  avoid duplicates.
 - Check the relevant conceptual section first: Intro, Solver, Network, Physics, or
   Control.
 - Use Developer Documentation when the question is implementation-oriented.
 - Include the documentation page or workflow area that appears to be affected.
+- Search existing issues and discussions in
+  `Project-OMOTES/user_feedback <https://github.com/Project-OMOTES/user_feedback>`_ to
+  avoid duplicates.
 
 Related documentation
 -----------------------
