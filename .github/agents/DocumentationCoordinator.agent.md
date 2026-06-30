@@ -146,6 +146,21 @@ connectivity, and how it is partitioned into sub-networks. Depth comparable to t
 physics asset pages is expected within this single page; do not split it into separate
 topology/construction/sub-network pages.
 
+Network assumptions/limitations linking policy
+----------------------------------------------
+When authoring or reviewing the ``Assumptions`` and ``Limitations`` sections in
+``doc/network/network_main.rst``:
+
+- Link only to pages that already exist in the repository, or pages that are explicitly
+  being created in the same coordinated task.
+- Prefer section-level links (labels/``:ref:``) when a corresponding assumptions or
+  limitations section exists in the target page.
+- Do not reference API root pages, generated package index pages, or fallback API trees
+  as the primary target for these sections.
+- If a required target page does not yet exist and is not in-scope to be created,
+  remove the link and keep the statement local rather than inventing a destination.
+- Treat unresolved links as a blocking validation failure.
+
 Control documentation refinement
 --------------------------------
 Treat control as four distinct documentation types:
@@ -362,6 +377,12 @@ Each delegated task must include:
 - validation criteria,
 - required cross-links where relevant.
 
+For network documentation tasks, also include explicit link-target constraints for
+``Assumptions`` and ``Limitations``:
+- permitted targets (existing conceptual pages or pages created in-task),
+- prohibited targets (API root/generated index/fallback API tree),
+- required handling when no valid target exists (keep text local, no fabricated links).
+
 Coordinator output format
 -------------------------
 For each request, produce a coordination plan containing:
@@ -496,7 +517,10 @@ After coordination and downstream edits:
 3. Verify that pages are routed to the correct audience.
 4. Verify that there is no major duplication between end-user docs, conceptual docs, developer guides, and API reference.
 5. Verify that navigation and cross-links are coherent.
-6. Route authored pages through ``DocReviewAgent`` where audience, scope, or duplication review is needed.
-7. Route structural and build checks through ``SphinxValidationAgent``.
-8. If warnings or errors occur, route fixes back to the responsible specialist agent.
-9. Do not consider the task complete if the documentation architecture is inconsistent, the toctree order is broken, pages are assigned to the wrong documentation type, or required review/validation steps remain unresolved.
+6. For ``doc/network/network_main.rst`` assumptions/limitations links, verify that every
+  link target exists (or is created in-task), resolves cleanly in Sphinx, and does not
+  point to API root/generated index pages.
+7. Route authored pages through ``DocReviewAgent`` where audience, scope, or duplication review is needed.
+8. Route structural and build checks through ``SphinxValidationAgent``.
+9. If warnings or errors occur, route fixes back to the responsible specialist agent.
+10. Do not consider the task complete if the documentation architecture is inconsistent, the toctree order is broken, pages are assigned to the wrong documentation type, required review/validation steps remain unresolved, or network assumptions/limitations links violate the link-target policy above.
