@@ -61,4 +61,4 @@ Related Documentation
 
 - For the overall solver flow, see :doc:`solver_workflow`.
 - For unknown and equation structure, see :doc:`solver_unknowns_and_equations`.
-- For simulation-loop context, see :doc:`../intro/simulation_input_and_output`.
+- For simulation-loop context, see :doc:`../intro/intro_main`.

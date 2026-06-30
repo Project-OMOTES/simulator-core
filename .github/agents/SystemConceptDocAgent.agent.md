@@ -72,8 +72,7 @@ Before writing, inspect the closest matching existing documentation page and pre
 
 1. Follow repository documentation style first, especially:
    - ``doc/index.rst``
-   - For Intro pages: ``doc/intro/intro_main.rst``, ``doc/intro/audience_and_use_cases.rst``,
-     ``doc/intro/package_scope.rst``, ``doc/intro/simulation_input_and_output.rst``
+   - For Intro pages: ``doc/intro/intro_main.rst`` (the single consolidated intro page)
    - For Solver pages: ``doc/solver/solver_main.rst``
    - For Network pages: ``doc/network/network_main.rst``
    - For Control pages: ``doc/controller/controller.rst``
@@ -143,10 +142,47 @@ Classify the page intent as follows:
   how the solver participates in timestep execution, convergence behavior, result interpretation, and the relation between solving and simulation progression
 
 - ``Network``:
-  how the network is represented conceptually, how assets and connectivity affect behavior, and how users should think about network-level interactions
+  how the network is represented conceptually and structurally — connectivity and
+  communication with the solver/controller, the graph representation (nodes, junctions,
+  connection points), how it is constructed from ESDL, and how it is partitioned into
+  sub-networks, in a single page
 
 - ``Control``:
   current control concepts, setpoint propagation, operating logic at a conceptual level, and the user-visible consequences of control actions
+
+Intro single-page rule
+----------------------
+Keep the entire Intro in one page, ``doc/intro/intro_main.rst``. Do not split it into
+subpages. The page must answer, in this order, as short prose/bullet sections:
+
+1. Overview — what OMOTES.SIMULATOR_CORE is.
+2. What It Does — scope boundaries (what is in scope and out of scope).
+3. Why It Is Used — audience and use cases (who uses the package and what
+   decisions/questions it supports).
+4. Example — one concrete ESDL-to-result path at a conceptual level (ESDL model ->
+   EsdlObject -> SimulationConfiguration -> SimulationManager.execute -> DataFrame), with a
+   trimmed runnable code example, cross-linking to ``README.md`` for the full example and to
+   existing architecture/reference documentation for deeper details.
+5. Related Documentation — links to adjacent sections.
+
+Do not list the same cross-link target in more than one navigation section. Keep the page
+concise (mesido-style brevity) rather than growing it into a long, multi-topic essay; push
+excess depth out via cross-links instead of adding new intro subpages.
+
+Network single-page rule
+-------------------------
+Keep the entire Network section in one page, ``doc/network/network_main.rst``. Do not split
+it into topology/construction/sub-network subpages. The page covers, in order: Overview
+(connectivity and communication with the solver/controller), Representation (a structural
+component/role table — for example ``Network``, ``BaseAsset``, ``Node``, ``Junction``,
+``HeatNetwork`` — grounded in source), Construction (how the graph is built from ESDL
+connectivity), Sub-network partitioning, Node connectivity rules (including a concise
+structural equation such as node mass-flow continuity where it clarifies a constraint),
+Assumptions, Limitations, and Implementation reference. The structural component table and
+construction/partitioning narrative are an explicit exception to the general "no
+class-by-class API walkthrough" rule below — they describe structural role, not full API
+detail, and must still cross-link to ``doc/physics`` and ``doc/reference`` rather than
+re-deriving asset physics, controller dispatch, or solver equation-assembly mechanics.
 
 Do not use this agent to document:
 - how to extend control classes as a contributor,
@@ -185,7 +221,10 @@ Only include details that improve user understanding or interpretation.
 
 Section order
 -------------
-Use the following section order for all sections that are present:
+Use the following section order for all sections that are present, except where the
+``Intro single-page rule`` or ``Network single-page rule`` above specifies a different,
+page-specific order — those take precedence for ``doc/intro/intro_main.rst`` and
+``doc/network/network_main.rst`` respectively:
 
 1. Title
 2. Overview
