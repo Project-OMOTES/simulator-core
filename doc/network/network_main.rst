@@ -5,9 +5,10 @@ Overview
 --------
 
 This section describes:
-- how assets are connected into a hydraulic network, 
-- how that structure is represented and built from ESDL, 
-- and how information is exchanged during simulation. 
+
+- how assets are connected into a hydraulic network,
+- how that structure is represented and built from ESDL,
+- and how information is exchanged during simulation.
 
 It covers connectivity, communication between nodes and assets, and how network behavior interacts with solver and controller flow.
 
@@ -113,25 +114,23 @@ Node connectivity rules
 ------------------------
 
 Each asset connection point is linked to at most one node. A node may be connected to
-any number of asset connection points. The continuity and energy-balance equations
-assembled at each node require at least one connected asset; isolated nodes are not
-meaningful in the solved system.
+any number of asset connection points. A node must have at least one connected port to
+be meaningful in the solved system; isolated nodes are not retained.
 
-At a node with :math:`n` connected asset ports, the solver enforces one mass-flow
-continuity equation:
-
-.. math::
-
-   \sum_{i=1}^{n} \dot{m}_i = 0
-
-This single constraint accounts for conservation at the junction. Connected assets
-contribute their own pressure and thermal relations at that node. See
-:doc:`../physics/junction_physics` for the full set of node equations.
+At each shared node the solver enforces mass-flow continuity over all connected asset
+ports; see :doc:`../physics/junction_physics` for the node continuity and energy-balance
+equations.
 
 Assumptions
 -----------
 
-- Only ESDL assets with state ``ENABLED`` are included in the network; disabled assets
+The assumptions below are specific to network construction and partitioning in this
+page. Related controller, solver, and junction assumptions are documented in
+:ref:`controller behavior assumptions <controller-behavior-assumptions>`,
+:ref:`solver behavior assumptions <solver-behavior-assumptions>`, and
+:ref:`junction physics assumptions <junction-physics-assumptions>`.
+
+- Only ESDL assets with state ``ENABLED`` are included in the network; disabled or optional assets
   are silently skipped during construction.
 - ESDL ``Joint`` elements are absorbed into junctions during construction; they do not
   produce standalone solver nodes or equation contributions.
@@ -144,6 +143,12 @@ Assumptions
 
 Limitations
 -----------
+
+The limitations below focus on the network-graph construction and partitioning logic.
+Related controller, solver, and junction limitations are documented in
+:ref:`controller behavior limitations <controller-behavior-limitations>`,
+:ref:`solver behavior limitations <solver-behavior-limitations>`, and
+:ref:`junction physics limitations <junction-physics-limitations>`.
 
 - The sub-network partitioning uses undirected graph reachability and does not account
   for flow direction.
@@ -160,10 +165,9 @@ Limitations
 Implementation reference
 -------------------------
 
-For solver-side network class details, see :doc:`../reference/solver_reference`. For
-controller-side sub-network behavior, see :doc:`../reference/controller_reference`. For
-network simulation orchestration, see :doc:`../reference/architecture_reference`. For
+For solver-side network class details, see :doc:`../reference/solver_reference`
+(:ref:`network-class`). For controller-side sub-network behavior, see
+:doc:`../reference/controller_reference` (:ref:`sub_network_class`). For network
+simulation orchestration, see :doc:`../reference/architecture_reference`. For
 node-level mass flow, energy, and pressure equations, see
 :doc:`../physics/junction_physics`.
-
-See also :ref:`network-class` for the solver-side network class and :ref:`sub_network_class` for controller-side sub-network behavior.
