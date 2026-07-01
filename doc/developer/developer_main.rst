@@ -10,21 +10,6 @@ reference.
 For system-level conceptual behavior and governing relations, consult the Intro, Solver,
 Network, Physics, and Control sections instead.
 
-How to use this section
------------------------
-
-- Read :doc:`developer_navigation` first to choose the right path for your task.
-- Use :doc:`simulation_contributor_flow` to understand the full code layout and execution
-  flow before making any change.
-- Use :doc:`add_new_asset` when implementing a new thermo-hydraulic asset type.
-- Use :doc:`add_new_output_format` when adding new output columns, output datasets, or changing how output is assembled.
-- Use :doc:`control_extension` when modifying or extending controller behavior.
-- Use :doc:`testing` for guidance on test structure, running tests, and validation.
-- Use :doc:`writing_documentation_with_ai` when writing or reviewing documentation with the
-  AI agent workflow.
-- Use the :doc:`api/omotes_simulator_core` root index for exhaustive package, module, and
-  class lookup.
-
 **Contents**
 
 .. toctree::
@@ -39,3 +24,11 @@ How to use this section
    testing
    writing_documentation_with_ai
    api/omotes_simulator_core
+
+
+How to use this section
+-----------------------
+
+- Start with :doc:`developer_navigation` to choose the correct guide for your task.
+- Use the toctree above for direct access once you know which page you need.
+
