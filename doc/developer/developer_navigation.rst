@@ -1,4 +1,4 @@
-Developer navigation
+Developer Navigation
 ====================
 
 Purpose
@@ -9,19 +9,16 @@ Use this page to quickly choose the right developer documentation path.
 Start here
 ----------
 
-- Need curated technical reference by topic or internal model grouping: go to
-  :doc:`../reference/architecture_reference`, :doc:`../reference/asset_reference`,
-  :doc:`../reference/solver_reference`, or :doc:`../reference/controller_reference`.
-- Need exhaustive package/module/class lookup instead: go to
-  :doc:`api/omotes_simulator_core`.
-- Need system-level conceptual behavior first: go to :doc:`../intro/intro_main`,
-  :doc:`../solver/solver_main`, :doc:`../network/network_main`, :doc:`../physics/physics_main`,
-  or :doc:`../controller/controller`.
+- :doc:`simulation_contributor_flow` — use this first for code layout, package structure,
+  and full execution flow from entrypoint to solver.
+- :doc:`add_new_asset` — add a new thermo-hydraulic asset type (entity layer, solver layer,
+  ESDL mapper, and registry wiring).
+- :doc:`add_new_output_format` — add or modify output columns, output datasets, or output
+  DataFrame assembly behavior.
+- :doc:`control_extension` — add or modify controller classes, mappers, and dispatch logic.
+- :doc:`testing` — locate tests, run the suite, and follow unit and integration test patterns.
+- :doc:`writing_documentation_with_ai` — use the repository AI agent workflow for
+  documentation authoring, review, and validation.
+- :doc:`api/omotes_simulator_core` — use for exhaustive package, module, and class lookup.
 
-Common entry points
--------------------
-
-- Simulation orchestration APIs: :doc:`api/omotes_simulator_core.infrastructure.simulation_manager`
-- Network simulation APIs: :doc:`api/omotes_simulator_core.simulation.networksimulation`
-- Heat-network entity APIs: :doc:`api/omotes_simulator_core.entities.heat_network`
-- Solver APIs: :doc:`api/omotes_simulator_core.solver.solver`
+Use this page as the single routing index for developer tasks.

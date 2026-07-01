@@ -3,8 +3,8 @@ adapter.transforms.esdl_asset_mappers
 
 .. automodule:: omotes_simulator_core.adapter.transforms.esdl_asset_mappers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

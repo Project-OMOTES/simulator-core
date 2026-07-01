@@ -183,6 +183,18 @@ Flag the following as errors:
 - contributor control guides drifting into end-user explanation as their primary purpose,
 - controller API reference pages containing long narrative explanation better suited for conceptual docs or developer guides.
 
+Developer guide review rules
+-----------------------------
+Treat developer guides as a distinct documentation type. This section of the documenation has a different audience and purpose than physics documentation. 
+The developer guide section is intended to help contributors understand the codebase, extend it, and test it. It should not be used as a primary source of end-user explanation or conceptual understanding. Review developer guides against these distinctions.
+
+Flag the followinbg as errors:
+- developer guides drifting into end-user explanation as their primary purpose,
+- developer guides drifting into bare API reference
+- developer guides drifting into conceptual explanation as their primary purpose,
+- developer guides drifting into physics documentation as their primary purpose.
+
+
 Completeness review by page type
 --------------------------------
 Review each page according to its type.

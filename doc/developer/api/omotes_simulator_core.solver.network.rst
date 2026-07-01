@@ -3,8 +3,8 @@ solver.network
 
 .. automodule:: omotes_simulator_core.solver.network
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

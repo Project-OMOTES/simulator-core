@@ -3,8 +3,8 @@ simulation.mappers
 
 .. automodule:: omotes_simulator_core.simulation.mappers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
