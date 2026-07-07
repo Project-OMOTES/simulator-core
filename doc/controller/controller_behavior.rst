@@ -1,30 +1,24 @@
 Controller Behavior
 ===================
 
-Overview
---------
+Description
+-----------
 
-This page describes the network-level controller behavior that runs once per simulation timestep.
-It explains how the controller groups assets into controllable subnetworks, balances consumer
-requests against producer and storage capability, and writes per-asset setpoints that the network
-solver then applies.
+This page documents what the network-level controller decides in each simulation timestep and how
+those decisions affect the solved thermal and hydraulic state.
 
-The controller does not solve hydraulics or asset-internal thermodynamics itself. Instead, it
-decides target heat transfer, temperatures, bypass use for heat-transfer assets, and which asset in
-each hydraulic part of the system becomes the pressure-setting boundary. The solved network state
-then determines the resulting mass flows, pressures, temperatures, and any difference between
-requested and delivered heat.
+The controller groups assets into hydraulically separated controller subnetworks, converts local
+demand and capacity to a common basis, applies a system-level dispatch rule, then writes per-asset
+setpoints for producers, consumers, storages, and heat-transfer assets.
 
-The timestep control path is centered on ``NetworkController.update_setpoints()``. It converts all
-local subnetwork demand and capacity to a common basis, performs a system-level heat balance, then
-projects the resulting dispatch back onto producers, consumers, storages, and heat-transfer assets.
-The controller therefore decides requested operation, while the network and physics models decide
-the physically realized state.
+It does not solve network hydraulics or asset-internal thermodynamics. Instead, it defines thermal
+and pressure-related boundary requests that are applied by the network and physics models in the
+next solve step.
 
 Control Inputs
 --------------
 
-The network-level controller reads the following inputs each timestep.
+The network-level dispatch reads the following quantities each timestep.
 
 .. list-table::
    :header-rows: 1
@@ -32,290 +26,226 @@ The network-level controller reads the following inputs each timestep.
    * - Input
      - Description
      - Unit
-   * - Consumer heat demand profile
-     - Requested consumer heat demand from each consumer controller at the current timestep
+   * - Consumer heat-demand profile
+     - Requested thermal demand from each consumer controller at the current timestep, clipped by
+       the consumer ``max_power`` in the consumer controller
      - W
-   * - Producer maximum power
-     - Available thermal output from each producer at the current timestep
+   * - Producer available power
+     - Maximum producer thermal output at the current timestep from each producer controller
      - W
    * - Producer priority
-     - Integer dispatch priority used when supply must be capped under surplus conditions
+     - Integer priority used for surplus producer capping when storage charging is saturated
      - -
    * - Storage effective maximum charge power
-     - Available storage charging capability used for surplus allocation
+     - Current charging capability reported by each storage controller
      - W
    * - Storage effective maximum discharge power
-     - Available storage discharging capability used for shortage allocation
+     - Current discharging capability reported by each storage controller
      - W
    * - Heat-transfer conversion factor
-     - Factor used to translate heat between subnetworks across a heat exchanger or heat pump
+     - Asset factor used to convert thermal power between primary and secondary subnetworks
      - -
-   * - Heat-pump maximum electrical power
-     - Optional electrical input limit on a secondary-side heat-pump network
+   * - Water-to-water heat-pump maximum electrical power
+     - Optional secondary-side electrical limit used to cap secondary-side thermal request
      - W
    * - Controller temperatures
-     - Fixed inlet and outlet temperature setpoints carried by producer, consumer, storage, and heat-transfer controllers
+     - Asset controller supply and return temperature setpoints used when writing setpoints
      - K
-   * - Previous solved asset state
-     - State fed back from the solved heat network into producers, consumers, and storages before the next dispatch update
+   * - Previous solved storage state
+     - Fill level, buffer temperatures, and timestep fed back to storage controllers before
+       dispatch so effective charge and discharge capability can be updated
      - asset-specific
 
 Decision Logic
 --------------
 
-Control Decomposition Into Subnetworks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Subnetwork Grouping and Conversion Basis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The controller is built from hydraulically separated subnetworks created by the ESDL controller
-mapper. If the model contains no heat-transfer assets, all consumers, producers, and storages are
-placed in one controller network. If heat exchangers or four-port heat pumps are present, the
-mapper splits the system into one controller network for each connected hydraulic side and places
-the heat-transfer asset on both sides.
+The controller receives subnetworks from the controller mapper. If no heat-transfer asset is
+present, all producers, consumers, and storages are dispatched in one controller network.
+If heat-transfer assets are present, each hydraulic side is represented by a separate controller
+network, and heat-transfer assets connect those controller networks by primary and secondary sides.
 
-.. list-table::
-   :header-rows: 1
+The mapper enforces a tree-shaped interconnection through heat-transfer assets. Looped
+interconnections are rejected, and paths longer than two heat-transfer stages are rejected.
 
-   * - Subnetwork element
-     - Mapping rule
-     - Consequence for control
-   * - Consumer, producer, storage
-     - Assigned to the hydraulic side to which its asset id is connected in the ESDL graph
-     - Demand, supply, and storage capability are first evaluated locally per hydraulic part
-   * - Heat exchanger or four-port heat pump, primary side
-     - Added to the controller network connected to ``<asset>_primary``
-     - This side can import or export heat depending on the net dispatch direction
-   * - Heat exchanger or four-port heat pump, secondary side
-     - Added to the controller network connected to ``<asset>_secondary``
-     - This side can import or export heat with the configured conversion factor
+Before balancing demand and supply, each network computes a conversion chain to a reference network
+through the path of connected heat-transfer assets. The chain product is used to convert local
+consumer demand, producer capacity, and storage charge or discharge capability to one common basis.
 
-The mapper then connects these subnetworks into a tree through shared heat-transfer assets. Looped
-connections through heat exchangers or heat pumps are rejected, and connections through more than
-two heat-transfer stages are not supported.
+In simplified form, for network :math:`i`:
 
-Each subnetwork stores a path to a reference network and a conversion chain
-``factor_to_first_network``. The controller multiplies the heat demand, producer capacity, and
-storage charge or discharge capacity of that subnetwork by the product of that chain before forming
-the system-wide energy balance. For a heat exchanger this factor is the configured efficiency-like
-conversion factor; for a heat pump it is the configured COP-like factor on the secondary side and
-its inverse when converting back toward the primary side.
+.. math::
 
-Per-Timestep Control Sequence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   F_i = \prod_k f_{i,k}
 
-The network-level control path follows a fixed sequence:
+.. math::
 
-1. Update each subnetwork conversion chain from its path through heat-transfer assets.
-2. Convert each subnetwork's consumer demand, producer capacity, and storage charge or discharge
-   capability to the reference-network basis.
-3. Form system totals:
+   Q_{demand,i}^{ref} = F_i Q_{demand,i}, \quad
+   Q_{supply,i}^{ref} = F_i Q_{supply,i}, \quad
+   Q_{storage,i}^{ref} = F_i Q_{storage,i}
+
+where :math:`f_{i,k}` is the factor contributed by each heat-transfer step in the path.
+
+Per-Timestep Dispatch Sequence
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For each timestep, the network controller applies this sequence:
+
+1. Update network conversion chains.
+2. Compute converted totals:
 
    .. math::
 
-      Q_{demand,tot} = \sum_i Q_{demand,i}
+      Q_{demand,tot} = \sum_i Q_{demand,i}^{ref}
 
    .. math::
 
-      Q_{supply,tot} = \sum_i Q_{supply,i}
+      Q_{supply,tot} = \sum_i Q_{supply,i}^{ref}
 
-4. Choose one of four dispatch branches: direct surplus, surplus with producer capping, shortage
-   covered by storage discharge, or shortage with proportional consumer curtailment.
-5. Write producer, storage, and consumer setpoints.
-6. For subnetworks that contain exactly one heat-transfer connection, derive the corresponding
-   primary-side and secondary-side setpoints for that heat-transfer asset.
-7. Choose one pressure-setting asset per subnetwork and set its pressure flag.
+3. Choose the dispatch branch from the demand-versus-supply comparison.
+4. Write producer, consumer, and storage heat-demand setpoints.
+5. Derive setpoints for subnetworks with exactly one connected heat-transfer side.
+6. Select one pressure-setting asset per subnetwork.
 
 Dispatch Logic for Supply, Demand, and Storage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The controller first compares converted total producer capability with converted total consumer
-demand.
-
-If
+The first branch condition is:
 
 .. math::
 
    Q_{supply,tot} > Q_{demand,tot}
 
-the system has surplus producer capability. All consumers are assigned their requested demand. The
-remaining surplus
+If true, all consumers are set to requested demand and the surplus is:
 
 .. math::
 
    Q_{surplus} = Q_{supply,tot} - Q_{demand,tot}
 
-is then compared with total effective storage charge capability.
-
-If storage can absorb the full surplus, all producers are set to maximum output and the controller
-allocates storage charging proportionally to available charge power:
+The controller compares this surplus to total effective storage charge capability:
 
 .. math::
 
-   f_{charge} = \frac{Q_{surplus}}{\sum_i Q_{charge,max,i}}
+   Q_{ch,tot} = \sum_i Q_{ch,max,i}^{ref}
+
+If :math:`Q_{ch,tot} > Q_{surplus}`, producers are set to maximum and storage charging is
+allocated proportionally:
 
 .. math::
 
-   Q_{storage,i} = f_{charge} Q_{charge,max,i}
+   f_{ch} = \frac{Q_{surplus}}{Q_{ch,tot}}, \quad
+   Q_{storage,i} = f_{ch} Q_{ch,max,i}
 
-with positive heat demand, meaning heat is taken from the network and stored.
+If :math:`Q_{ch,tot} \leq Q_{surplus}`, all storages charge at maximum and producer output is
+capped by priority to match demand plus maximum storage charge.
 
-If storage cannot absorb the full surplus, all storages are charged at maximum and producers are
-capped by priority. The controller fills producer groups in ascending priority order until the
-required supply is reached. If the last active priority group would overshoot the required supply,
-that entire group is scaled by a common factor while higher-priority groups are set to zero.
-
-If
+If :math:`Q_{supply,tot} \leq Q_{demand,tot}`, the controller evaluates shortage support from
+storage discharge:
 
 .. math::
 
-   Q_{supply,tot} \leq Q_{demand,tot}
+   Q_{dis,tot} = \sum_i Q_{dis,max,i}^{ref}
 
-the system is short of direct producer capability. The controller compares total producer capability
-plus total effective storage discharge capability against demand.
-
-If
+If :math:`Q_{supply,tot} + Q_{dis,tot} > Q_{demand,tot}`, all consumers keep requested demand,
+all producers are set to maximum, and storage discharge supplies the residual shortage:
 
 .. math::
 
-   Q_{supply,tot} + Q_{discharge,tot} > Q_{demand,tot}
-
-all consumers keep their requested demand, all producers are set to maximum, and storage discharge
-supplies the residual shortage:
+   Q_{short} = Q_{demand,tot} - Q_{supply,tot}
 
 .. math::
 
-   Q_{shortage} = Q_{demand,tot} - Q_{supply,tot}
+   f_{dis} = \frac{Q_{short}}{Q_{dis,tot}}, \quad
+   Q_{storage,i} = - f_{dis} Q_{dis,max,i}
+
+If :math:`Q_{supply,tot} + Q_{dis,tot} \leq Q_{demand,tot}`, all producers and storages are set
+to maximum delivery and consumer demand is proportionally curtailed:
 
 .. math::
 
-   f_{discharge} = \frac{Q_{shortage}}{\sum_i Q_{discharge,max,i}}
+   f_{curtail} = \frac{Q_{supply,tot} + Q_{dis,tot}}{Q_{demand,tot}}, \quad
+   Q_{consumer,i} = f_{curtail} Q_{consumer,i}^{req}
 
-.. math::
+Storage fill-level effect on effective capability
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   Q_{storage,i} = -f_{discharge} Q_{discharge,max,i}
+The dispatch branches above use effective storage capability, not only configured
+``max_charge_power`` and ``max_discharge_power``.
 
-with negative heat demand, meaning heat is injected from storage into the network.
+For ``ControllerIdealHeatStorage``, effective capability is updated from the solved previous state
+before dispatch. In practical terms:
 
-If
+- charge capability decreases as available cold volume shrinks near full fill level,
+- discharge capability decreases as available hot volume shrinks near empty fill level,
+- both capabilities are also limited by current hot-cold temperature difference and timestep.
 
-.. math::
+This means the controller clips storage participation near empty or full bounds even when nominal
+power ratings are high. As a result, producer capping (in surplus) or consumer curtailment
+(in shortage) can start earlier than expected from nominal ratings alone.
 
-   Q_{supply,tot} + Q_{discharge,tot} \leq Q_{demand,tot}
+For storage-internal relations and symbol definitions, see
+:doc:`../physics/ideal_heat_storage_physics`.
 
-the controller cannot meet total demand even with full storage discharge. It therefore sets all
-producers and storages to maximum delivery and scales every consumer by the same curtailment factor:
+Heat-Transfer Conversion and Water-to-Water Heat-Pump Limit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. math::
-
-   f_{curtail} = \frac{Q_{supply,tot} + Q_{discharge,tot}}{Q_{demand,tot}}
-
-.. math::
-
-   Q_{consumer,i} = f_{curtail} Q_{consumer,requested,i}
-
-This is a system-wide proportional curtailment rule on the converted-demand basis.
-
-The controller uses the asset sign convention implemented by ``ControllerNetwork``:
-
-- Consumer heat demand is positive, representing heat extraction from the network.
-- Storage charging is positive, representing heat moving from the network into storage.
-- Producer dispatch is negative, representing heat injected from the producer into the network.
-- Storage discharge is negative, representing heat injected from storage into the network.
-
-Heat-Transfer Asset Handling Across Primary and Secondary Networks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-After producer, consumer, and storage setpoints are assembled, the controller derives setpoints for
-heat exchangers and four-port heat pumps on subnetworks that have exactly one heat-transfer asset
-connected on either the primary or secondary side. For such a subnetwork it forms the algebraic sum
-of all already assigned producer, consumer, and storage heat-demand setpoints:
+After producer, consumer, and storage setpoints are assembled, each subnetwork with exactly one
+connected heat-transfer side computes net local request:
 
 .. math::
 
    Q_{net} = \sum Q_{producer} + \sum Q_{consumer} + \sum Q_{storage}
 
-The sign of ``Q_net`` determines the direction of transfer.
+The sign of :math:`Q_{net}` determines whether conversion is active or bypassed when writing
+primary-side and secondary-side setpoints.
 
-For a network that sees the heat-transfer asset on its primary side:
-
-- If ``Q_net < 0``, the primary side must deliver heat into that subnetwork. The controller calls
-  ``set_asset_prim(Q_net, bypass=False)``.
-- If ``Q_net >= 0``, the primary side does not need conversion-assisted delivery into that
-  subnetwork. The controller calls ``set_asset_prim(Q_net, bypass=True)``.
-
-For a network that sees the heat-transfer asset on its secondary side:
-
-- If ``Q_net < 0``, the secondary side must deliver heat into that subnetwork. The controller calls
-  ``set_asset_sec(Q_net, bypass=True)``.
-- If ``Q_net >= 0``, the secondary side must absorb heat and the controller calls
-  ``set_asset_sec(Q_net, bypass=False)``.
-
-With conversion active, the heat-transfer asset writes paired primary-side and secondary-side heat
-demands using its configured factor. In simplified form:
+With conversion active, the controller writes paired thermal requests using the configured factor
+:math:`f`:
 
 .. math::
 
    Q_{sec} = f Q_{prim}
 
-or, when dispatch is defined from the secondary side,
+or, when the request is defined on the secondary side,
 
 .. math::
 
    Q_{prim} = \frac{Q_{sec}}{f}
 
-where ``f`` is the exchanger efficiency-like factor or the heat-pump COP-like factor used by the
-controller.
-
-Heat-Pump Electrical Power Constraint on a Secondary Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The controller includes one additional rule for a subnetwork that contains exactly one
-secondary-side heat-pump connection with a configured maximum electrical power. Before writing the
-heat-transfer setpoints, it checks whether the requested thermal exchange on that secondary network
-would exceed the electrical limit:
+For a secondary-side water-to-water heat-pump connection with a configured electrical limit,
+the controller applies:
 
 .. math::
 
    Q_{sec,max} = P_{el,max} f
 
-If
+If :math:`|Q_{net}| > Q_{sec,max}`, consumers in that subnetwork are proportionally scaled:
 
 .. math::
 
-   |Q_{net}| > Q_{sec,max}
-
-the controller proportionally scales only the consumers in that subnetwork:
-
-.. math::
-
-   f_{hp} = \frac{Q_{sec,max}}{|Q_{net}|}
-
-.. math::
-
+   f_{hp} = \frac{Q_{sec,max}}{|Q_{net}|}, \quad
    Q_{consumer,i,new} = f_{hp} Q_{consumer,i,old}
 
-After this rescaling it recomputes the network heat balance and only then generates the heat-pump
-primary-side and secondary-side setpoints. This means the electrical limit is enforced on the
-secondary-network thermal request before the asset-level heat-pump physics is solved.
+The heat-transfer setpoints are then recalculated from the rescaled subnetwork request.
 
-Pressure-Setting Behavior
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Pressure-Setting Asset Selection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each subnetwork must contribute one pressure-setting boundary. ``ControllerNetwork.set_pressure()``
-selects that asset by fixed precedence:
+Each controller subnetwork must provide one pressure-setting boundary. Selection precedence is:
 
-1. First producer in the subnetwork, if any.
-2. Otherwise the first secondary-side heat-transfer asset in the subnetwork.
-3. Otherwise the first storage in the subnetwork.
+1. first producer in the subnetwork,
+2. otherwise first secondary-side heat-transfer asset,
+3. otherwise first storage asset.
 
-The selected setpoint key is ``set_pressure`` for producers and storages, or
-``secondary_set_pressure`` for a secondary-side heat-transfer asset. No primary-side heat-transfer
-asset is selected directly by this rule.
+The controller sets the selected pressure flag key to ``True`` and leaves other pressure flags
+``False``.
 
 Setpoints Produced
 ------------------
 
-The network-level controller returns a per-asset dictionary keyed by asset id and controlled
-property.
+The controller returns a dictionary keyed by asset identifier with the following setpoint keys.
 
 .. list-table::
    :header-rows: 1
@@ -324,154 +254,168 @@ property.
      - Description
      - Unit
    * - ``heat_demand``
-     - Producer, consumer, or storage thermal setpoint on a single hydraulic network
+     - Thermal request for producer, consumer, or storage assets
      - W
    * - ``temperature_in``
-     - Asset inlet temperature setpoint used by the receiving asset model
+     - Inlet temperature setpoint for producer, consumer, or storage assets
      - K
    * - ``temperature_out``
-     - Asset outlet temperature setpoint used by the receiving asset model
+     - Outlet temperature setpoint for producer, consumer, or storage assets
      - K
    * - ``set_pressure``
-     - Pressure-setting flag for a producer or storage selected as the hydraulic reference
+     - Pressure-setting flag for selected producer or storage asset
      - -
    * - ``primary_heat_demand``
-     - Heat-transfer asset primary-side thermal setpoint
+     - Primary-side heat-transfer thermal request
      - W
    * - ``primary_temperature_in``
-     - Heat-transfer asset primary-side inlet temperature setpoint
+     - Primary-side inlet temperature setpoint for heat-transfer asset
      - K
    * - ``primary_temperature_out``
-     - Heat-transfer asset primary-side outlet temperature setpoint
+     - Primary-side outlet temperature setpoint for heat-transfer asset
      - K
+   * - ``primary_set_pressure``
+     - Primary-side pressure flag on heat-transfer asset setpoint payload
+     - -
    * - ``secondary_heat_demand``
-     - Heat-transfer asset secondary-side thermal setpoint
+     - Secondary-side heat-transfer thermal request
      - W
    * - ``secondary_temperature_in``
-     - Heat-transfer asset secondary-side inlet temperature setpoint
+     - Secondary-side inlet temperature setpoint for heat-transfer asset
      - K
    * - ``secondary_temperature_out``
-     - Heat-transfer asset secondary-side outlet temperature setpoint
+     - Secondary-side outlet temperature setpoint for heat-transfer asset
      - K
    * - ``secondary_set_pressure``
-     - Pressure-setting flag when the hydraulic reference is a secondary-side heat-transfer asset
+     - Secondary-side pressure-setting flag for selected heat-transfer asset
      - -
    * - ``bypass``
-     - Flag indicating whether the heat-transfer asset should bypass conversion and pass the request through directly
+     - Flag controlling whether conversion factor is bypassed for the heat-transfer request
      - -
 
 Physical Impact
 ---------------
 
-Practical Effects on the Solved Hydraulic and Thermal State
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Demand Satisfaction and Curtailment Consequences
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The controller writes requested thermal operation, but the solved network determines the resulting
-mass flows, temperatures, and pressures. The physical impact of the controller is therefore best
-read as a change in boundary conditions for the next network solve.
+Decision:
+When :math:`Q_{supply,tot} + Q_{dis,tot} \leq Q_{demand,tot}`, the controller proportionally
+curtails all consumers.
 
-Consumer Delivery Under Shortage
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-When the system enters the shortage branch, every consumer request is reduced by the same scalar
-factor. The practical consequence is that unmet demand is distributed proportionally across all
-consumers rather than by location, priority, or hydraulic accessibility.
-
-For interpreting results this means:
-
-- a consumer can receive less heat because of explicit controller curtailment before the network is solved,
-- and the solved delivery can differ further from the curtailed request if hydraulics or available temperatures prevent exact realization.
-
-For the asset-level heat-to-mass-flow relation and reported delivered heat, see
-:doc:`../physics/consumer_physics`.
-
-Producer Dispatch and Capping
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Producer dispatch controls how much thermal power is made available to the network and whether a
-producer participates at all in a surplus case. When producer priorities are used to cap supply,
-lower-priority groups can remain fully loaded while the marginal priority group is uniformly scaled
-and higher-priority groups are forced to zero.
-
-This affects the solved hydraulic state because the active set of pressure-driven or
-mass-flow-imposing producers changes between timesteps. As a result, flow magnitudes and pressure
-distribution can shift even when total delivered demand is unchanged. For the producer-side physics
-of heat injection and pressure-controlled operation, see :doc:`../physics/producer_physics`.
-
-Storage Charge and Discharge Allocation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Storage participation is limited by the effective maximum charge and discharge powers provided by
-the storage controllers. The network-level controller allocates surplus charging or shortage
-discharge in proportion to these effective powers:
+Governing relation:
 
 .. math::
 
-   Q_{storage,i} = f Q_{storage,max,i}
+   Q_{consumer,i} = f_{curtail} Q_{consumer,i}^{req}, \quad
+   f_{curtail} = \frac{Q_{supply,tot} + Q_{dis,tot}}{Q_{demand,tot}}
 
-This means storage is not dispatched by cost, state-of-charge optimization, or location-specific
-hydraulic advantage. It is clipped only by available effective charge or discharge power and then
-shared proportionally across all participating storages.
+Practical consequence:
+The requested heat presented to the network is reduced before solving hydraulics. Reported
+delivered heat may be lower still if hydraulic or thermal conditions cannot realize the curtailed
+request exactly. For consumer asset-level behavior, see :doc:`../physics/consumer_physics`.
 
-The practical consequence is that storage can absorb or release only as much heat as its current
-controller state allows. Once that capability is exhausted, additional surplus forces producer
-capping and additional shortage forces consumer curtailment. For ATES-side physical interpretation,
-see :doc:`../physics/ates_cluster_physics`.
+Storage Clipping and Dispatch Branch Switching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Heat-Transfer Conversion Between Networks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Decision:
+Storage contribution is bounded by effective charge and discharge capability derived from current
+state.
 
-Heat-transfer assets connect hydraulic subnetworks while changing the thermal power seen on each
-side according to the configured conversion factor. The controller first balances the system on a
-common reference basis and then writes paired primary-side and secondary-side requests. A secondary
-network can therefore show larger thermal throughput than its connected primary network when a heat
-pump COP greater than one is active.
+Governing relation:
 
-The direction of the net subnetwork demand also determines whether conversion is active or a bypass
-flag is written. That choice changes whether the solved model interprets the coupling as factor-
-based transfer between networks or as a direct pass-through request on both sides. For the four-
-port heat-pump asset physics, see :doc:`../physics/heat_pump_physics`. For two-port heat pumps
-modeled as producers, see :doc:`../physics/air_to_water_heat_pump_physics`.
+.. math::
 
-Pressure-Setting Choice
-~~~~~~~~~~~~~~~~~~~~~~~
+   Q_{storage,i} = f Q_{storage,max,i}^{eff}
 
-The pressure flag selects which asset anchors each hydraulic subnetwork. This is the controller's
-only direct pressure decision. All other pressures arise from the network solve. Changing which
-asset carries the pressure flag changes the boundary condition used by the hydraulic model and can
-therefore alter solved flow distribution and pressure levels throughout that subnetwork, even if the
-same total heat setpoints are requested.
+where :math:`Q_{storage,max,i}^{eff}` is the current effective limit used by dispatch.
 
-For broader network interpretation, see :doc:`../network/network_main`.
+Practical consequence:
+As storages approach full or empty conditions, effective capability clips and less thermal buffering
+is available to balance mismatch. This can trigger producer capping in surplus periods or consumer
+curtailment in shortage periods. For storage-internal equations, see
+:doc:`../physics/ideal_heat_storage_physics` and :doc:`../physics/ates_cluster_physics`.
+
+Heat-Transfer Setpoints and Inter-Network Balance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Decision:
+The controller converts net subnetwork request into paired primary-side and secondary-side
+setpoints, optionally with bypass.
+
+Governing relation:
+
+.. math::
+
+   Q_{sec} = f Q_{prim}
+
+Practical consequence:
+Thermal request is redistributed between hydraulic subnetworks according to conversion factor, so
+the solved mass flow and temperature levels on each side can differ while still satisfying the
+controller-level converted balance. For water-to-water heat-pump asset physics, see
+:doc:`../physics/heat_pump_physics`.
+
+Pressure Boundary Selection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Decision:
+One asset per subnetwork is marked as pressure-setting by fixed precedence.
+
+Governing relation:
+The controller sets one pressure flag key to ``True`` per subnetwork.
+
+Practical consequence:
+The selected asset becomes the hydraulic pressure boundary for that subnetwork solve. Changing this
+selection changes hydraulic boundary conditions and can alter solved pressure and flow distribution.
+For network-level interpretation, see :doc:`../network/network_main`.
 
 Assumptions
 -----------
 
-- Control decisions are instantaneous within a timestep; the controller has no internal ramping, startup, or shutdown dynamics.
-- Consumer demand profiles and producer maximum powers are treated as known for the current timestep.
-- System-wide balancing is performed on converted thermal power totals, not on a hydraulic feasibility check before dispatch.
-- Storage allocation is proportional to effective charge or discharge capability.
-- Consumer curtailment under shortage is proportional across all consumers.
-- Pressure selection uses a fixed precedence rule rather than an optimization or hydraulic-quality criterion.
+- Controller decisions are instantaneous within a timestep.
+- Demand profiles and available producer power are treated as known at dispatch time.
+- Dispatch balancing is performed on converted thermal power totals, not on a prior hydraulic
+  feasibility optimization.
+- Storage participation is allocated proportionally to effective capability.
+- Consumer curtailment is proportional across consumers when total supply is insufficient.
+- Pressure-setting selection follows fixed precedence, not an optimization criterion.
 
 Limitations
 -----------
 
-- The network grouping built by the controller mapper must form a tree through heat-transfer assets; looped heat-transfer topologies are not supported.
-- Connections through more than two heat-transfer stages are rejected.
-- Heat-transfer setpoints are only derived for subnetworks that contain exactly one connected heat-transfer asset side.
-- The producer-capping rule uses integer priorities only and does not include cost, emissions, or efficiency optimization.
-- The secondary-side heat-pump electrical constraint is enforced by scaling consumers in that subnetwork; it does not re-optimize the rest of the system dispatch.
-- The network-level controller does not guarantee that the solved hydraulic or thermal state can realize every requested setpoint exactly.
+- Heat-transfer-connected controller networks must form a tree; looped topologies are not
+  supported.
+- Paths through more than two heat-transfer stages are not supported.
+- Heat-transfer setpoints are generated only for subnetworks with exactly one connected
+  heat-transfer side.
+- Surplus producer capping uses integer priority groups only; no cost or emission optimization is
+  performed.
+- The secondary-side water-to-water heat-pump electrical constraint is enforced by local consumer
+  scaling in that subnetwork.
+- Controller setpoints are requests; the solved network may realize different delivered values
+  because of hydraulic and thermal constraints.
 
 Related Documentation
 ---------------------
 
-- :doc:`../controller/controller` for the conceptual control overview.
-- :doc:`../network/network_main` for how controller setpoints become solved network states.
-- :doc:`../physics/producer_physics` for producer-side heat injection behavior.
-- :doc:`../physics/consumer_physics` for consumer-side heat extraction behavior.
-- :doc:`../physics/ates_cluster_physics` for ATES storage physics.
-- :doc:`../physics/heat_pump_physics` for four-port heat-pump behavior across primary and secondary networks.
-- :doc:`../physics/air_to_water_heat_pump_physics` for two-port heat pumps mapped as producers.
-- :doc:`../reference/controller_reference` for controller implementation reference.
+For the conceptual controller overview and workflow placement, see
+:doc:`controller`.
+
+For network-level interpretation of how controller setpoints are realized, see
+:doc:`../network/network_main`.
+
+For storage and heat-pump asset physics that constrain effective behavior, see
+:doc:`../physics/ideal_heat_storage_physics` and
+:doc:`../physics/heat_pump_physics`.
+
+For implementation-oriented controller reference, see
+:doc:`../reference/controller_reference`.
+
+- :doc:`controller` for the conceptual control overview.
+- :doc:`../physics/ideal_heat_storage_physics` for ideal heat-storage internal clipping behavior.
+- :doc:`../physics/ates_cluster_physics` for ATES storage behavior.
+- :doc:`../physics/producer_physics` for producer asset physical response.
+- :doc:`../physics/consumer_physics` for consumer asset physical response.
+- :doc:`../physics/heat_pump_physics` for water-to-water heat-pump internal behavior.
+- :doc:`../network/network_main` for network solve interpretation.
+- :doc:`../reference/controller_reference` for class-level reference.
