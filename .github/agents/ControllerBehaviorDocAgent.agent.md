@@ -97,6 +97,11 @@ existing ``doc/controller/behavior`` page as the structural template.
    setpoints, and physical-impact claims. Anchor the network dispatch description in
    ``NetworkController.update_setpoints``.
 
+3. For updates scoped to ``doc/controller/controller_behavior.rst``, also consult:
+  ``doc/physics/ideal_heat_storage_physics.rst`` for fill-level and effective
+  charge/discharge-capability interpretation, and ``doc/physics/heat_pump_physics.rst`` for
+  water-to-water heat-pump terminology context.
+
 Rules for source usage:
 - Use repository sources only.
 - Ground every decision-logic and physical-impact claim in the actual implementation, not in
@@ -192,6 +197,12 @@ curtail consumers), plus heat-transfer conversion and the pressure-set asset sel
 For a component page, cover that component's local rule (for example deriving effective storage
 charge/discharge power from available volume, or applying a producer priority and factor).
 
+For the ``Dispatch Logic for Supply, Demand, and Storage`` section in
+``doc/controller/controller_behavior.rst``, explicitly explain how storage fill level affects
+effective charge and discharge capability, including why capability clips near empty/full bounds,
+and cross-link to ``doc/physics/ideal_heat_storage_physics.rst`` instead of re-deriving
+asset-internal physics.
+
 Give the governing relation in simplified engineering form where it clarifies the decision.
 
 Setpoints Produced
@@ -274,6 +285,9 @@ the shared style rules. In addition:
 - Prefer short paragraphs with direct interpretation of decisions and their consequences.
 - Avoid textbook density and implementation-oriented wording.
 - Avoid unnecessary bullets outside tables, assumptions, and limitations.
+- For ``doc/controller/controller_behavior.rst`` specifically, use
+  ``water-to-water heat-pump`` as the preferred term in place of
+  ``four-port heat pump`` or ``four-port heat-pump``.
 
 reStructuredText requirements
 -----------------------------
@@ -305,13 +319,16 @@ After writing or updating a behavior page:
    existing ``doc/controller`` pages.
 5. Verify that decision-logic and physical-impact claims are supported by the source files in
    the source-priority table.
-6. Verify the page is toctreed only from ``doc/controller/controller.rst`` and not duplicated in
+6. For ``doc/controller/controller_behavior.rst``, verify terminology uses
+  ``water-to-water heat-pump`` and that storage-dispatch explanations include fill-level impact
+  and clipping context with a physics cross-link.
+7. Verify the page is toctreed only from ``doc/controller/controller.rst`` and not duplicated in
    any ``doc/reference/`` page.
-7. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the
+8. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the
    repository-preferred documentation build command.
-8. Inspect the build output for warnings and errors related to the new or edited page,
+9. Inspect the build output for warnings and errors related to the new or edited page,
    including rst syntax errors, malformed tables, invalid math blocks, broken references, and
    broken toctrees.
-9. If an error or warning is found, fix it before returning the final content.
-10. Do not finish with known syntax errors, broken section structure, malformed tables, broken
+10. If an error or warning is found, fix it before returning the final content.
+11. Do not finish with known syntax errors, broken section structure, malformed tables, broken
     math blocks, or unresolved build warnings caused by the change.
