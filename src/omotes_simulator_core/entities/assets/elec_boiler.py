@@ -20,10 +20,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    HeatPumpDefaults,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +33,13 @@ class ElecBoiler(ProductionCluster):
     """
 
     efficiency: float
-    """The efficiency of the electric boiler [-]."""
 
     def __init__(
         self,
         asset_name: str,
         asset_id: str,
         port_ids: list[str],
-        efficiency: float = HeatPumpDefaults.coefficient_of_performance, #TODO: Make sure this takes a default of 1.0.
+        efficiency: float = 1.0
     ) -> None:
         """
         Initialize the ElecBoiler asset.
@@ -57,12 +54,6 @@ class ElecBoiler(ProductionCluster):
             port_ids=port_ids,
         )
         self.efficiency = efficiency
-        self.solver_asset = HeatBoundary(
-            name=self.name,
-            _id=self.asset_id,
-            pre_scribe_mass_flow=False,
-            set_pressure=self.pressure_supply,
-        )
 
     def get_electric_power_consumption(self) -> float:
         """Calculate the electric power consumption of the electric boiler.

@@ -17,13 +17,12 @@
 import logging
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_ELECTRICITY_CONSUMPTION,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    HeatPumpDefaults,
+    PROPERTY_GAS_CONSUMPTION,
+    DEFAULT_GAS_ENERGY_CONTENT,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
-from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +34,13 @@ class GasHeater(ProductionCluster):
     """
 
     efficiency: float
-    """The efficiency of the gas heater [-]."""
 
     def __init__(
         self,
         asset_name: str,
         asset_id: str,
         port_ids: list[str],
-        efficiency: float = HeatPumpDefaults.coefficient_of_performance, #TODO: Make sure this takes a default of 1.0.
+        efficiency: float = 1.0,
     ) -> None:
         """
         Initialize the GasHeater asset.
@@ -51,17 +49,14 @@ class GasHeater(ProductionCluster):
         :param str asset_id: The unique identifier of the asset.
         :param List[str] port_ids: List of ids of the connected ports.
         """
+
+        self.efficiency = efficiency
+        self.gas_energy_content = DEFAULT_GAS_ENERGY_CONTENT
+
         super().__init__(
             asset_name=asset_name,
             asset_id=asset_id,
             port_ids=port_ids,
-        )
-        self.efficiency = efficiency
-        self.solver_asset = HeatBoundary(
-            name=self.name,
-            _id=self.asset_id,
-            pre_scribe_mass_flow=False,
-            set_pressure=self.pressure_supply,
         )
 
     def get_gas_consumption(self) -> float:
@@ -74,10 +69,8 @@ class GasHeater(ProductionCluster):
             The gas power consumption of the gas heater.
         """
 
-        			# self.Gas_demand_mass_flow / 1000.0 * self.energy_content * self.efficiency
-                    # - self.Heat_source
 
-        return 1.0 # TODO: Fix this, it needs a gas energy content value. Check if it is already used somewhere else. 
+        return abs(self.get_actual_heat_supplied()) / self.gas_energy_content / self.efficiency
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
@@ -88,6 +81,6 @@ class GasHeater(ProductionCluster):
         output_dict_temp = {
             PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
             PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
-            PROPERTY_ELECTRICITY_CONSUMPTION: (self.get_gas_consumption()),
+            PROPERTY_GAS_CONSUMPTION: self.get_gas_consumption(),
         }
         self.outputs[1][-1].update(output_dict_temp)  # Outputs appended to the out port.
