@@ -61,7 +61,8 @@ When including code examples or snippets:
 - Use the repository's actual class and function names where possible.
 - Use the repository's actual variable names where possible.
 
-When using a code block to show a commandline invocation, ensure that the command is valid for both Windows and Linux shells. Use a single code block with a single command, and do not include separate Windows/Linux blocks unless the command is actually different between platforms. Use the simplest form of the command possible, and do not include extra flags or options that are not required for the example to work. If the command is different between platforms, explain the difference in text instead of using separate code blocks.
+When using a code block to show a commandline invocation, prefer cross-platform commands where possible. Use a single code block with a single command, and do not include separate Windows/Linux blocks unless the command is actually different between platforms. Use the simplest form of the command possible, and do not include extra flags or options that are not required for the example to work. If the command is different between platforms, explain the difference in text instead of using separate code blocks.
+Use the repository's actual command names and paths where possible. The repository provides convenience scripts for common commands, so use those instead of hardcoding paths to executables or scripts.
 
 Introduction requirements
 --------------------------

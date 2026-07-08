@@ -185,10 +185,10 @@ Flag the following as errors:
 
 Developer guide review rules
 -----------------------------
-Treat developer guides as a distinct documentation type. This section of the documenation has a different audience and purpose than physics documentation. 
+Treat developer guides as a distinct documentation type. This section of the documentation has a different audience and purpose than physics documentation.
 The developer guide section is intended to help contributors understand the codebase, extend it, and test it. It should not be used as a primary source of end-user explanation or conceptual understanding. Review developer guides against these distinctions.
 
-Flag the followinbg as errors:
+Flag the following as errors:
 - developer guides drifting into end-user explanation as their primary purpose,
 - developer guides drifting into bare API reference
 - developer guides drifting into conceptual explanation as their primary purpose,
