@@ -6,11 +6,11 @@ It focuses on connectivity, communication between nodes and assets, and how netw
 The network model is configured from ESDL-derived assets and represented as connected components and nodes.
 At each simulation step, setpoints from the controller are applied to assets, the network equations are assembled, and solver results are propagated back to entities.
 
-Implementation reference
--------------------------
+Implementation API
+------------------
 
-For solver-side network class details, see :doc:`../reference/solver_reference`. For
-controller-side sub-network behavior, see :doc:`../reference/controller_reference`. For
-network simulation orchestration, see :doc:`../reference/architecture_reference`.
+For solver-side network class details, see :doc:`../developer/api/omotes_simulator_core.solver`.
+For controller-side sub-network behavior, see :doc:`../developer/api/omotes_simulator_core.entities.network_controller`.
+For network simulation orchestration, see :doc:`../developer/api/omotes_simulator_core.infrastructure.simulation_manager`.
 
 See also :ref:`network-class` for the solver-side network class and :ref:`sub_network_class` for controller-side sub-network behavior.
