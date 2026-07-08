@@ -193,11 +193,15 @@ Testing and Validation
 -----------------------
 
 After authoring or editing any documentation page, validate the build from the repository
-root using the following command:
+root using the repository convenience script. This is an intentional platform-specific
+exception because the wrapper script differs by shell (``.bat`` on Windows and ``.sh``
+on Linux):
 
 .. code-block:: console
 
-   python -m sphinx -b html doc doc/_build/html
+  doc/run_spinx.bat
+
+On Linux, run ``doc/run_sphinx.sh`` instead.
 
 A clean build produces no warnings or errors. If the build reports warnings, read the output
 carefully: most warnings identify the file and line number of the problem.

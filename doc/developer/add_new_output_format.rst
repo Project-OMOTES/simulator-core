@@ -205,11 +205,15 @@ To run the unit tests:
 
     python -m pytest unit_test/
 
-To validate the documentation build after updating this page:
+To validate the documentation build after updating this page, use the repository
+convenience script. This is an intentional platform-specific exception because the
+wrapper script differs by shell (``.bat`` on Windows and ``.sh`` on Linux):
 
-.. code-block:: bash
+.. code-block:: console
 
-    python -m sphinx -b html doc doc/_build/html
+  doc/run_spinx.bat
+
+On Linux, run ``doc/run_sphinx.sh`` instead.
 
 Common Pitfalls
 ---------------

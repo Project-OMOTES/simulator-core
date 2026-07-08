@@ -207,7 +207,10 @@ Before submitting a change, verify the following:
 - No test imports from a private module interface (i.e., ``_private_method``).
 - Mocks use ``Mock(spec=<class>)`` to prevent silent attribute errors.
 - New ESDL test fixtures are placed in ``testdata/`` with a descriptive name.
-- The documentation build passes: ``python -m sphinx -b html doc doc/_build/html``.
+- The documentation build passes via the repository convenience script:
+  ``doc/run_spinx.bat`` on Windows or ``doc/run_sphinx.sh`` on Linux.
+  This OS-specific difference is expected because the wrapper script uses platform-native
+  shells.
 
 Related Documentation
 ---------------------
