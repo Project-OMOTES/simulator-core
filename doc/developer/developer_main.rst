@@ -17,18 +17,19 @@ Network, Physics, and Control sections instead.
    :titlesonly:
 
    developer_navigation
-   simulation_contributor_flow
-   add_new_asset
-   add_new_output_format
-   control_extension
-   testing
-   writing_documentation_with_ai
+   architecture
+   simulation_flow
+   testing_strategy
+   documentation_with_ai_agents
+   developer_guides
    api/omotes_simulator_core
 
 
 How to use this section
 -----------------------
 
-- Start with :doc:`developer_navigation` to choose the correct guide for your task.
+- Start with :doc:`developer_navigation` to orient yourself in the repository.
+- Read :doc:`architecture` for a package-level overview before making structural changes.
+- Use :doc:`developer_guides` for step-by-step how-to guides for common extension tasks.
 - Use the toctree above for direct access once you know which page you need.
 

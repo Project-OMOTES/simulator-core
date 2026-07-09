@@ -285,6 +285,6 @@ Related Documentation
 
 - Conceptual overview of control: :doc:`../controller/controller`
 - Control behavior and dispatch mechanics: :doc:`../controller/controller_behavior`
-- Simulation orchestration and control flow: :doc:`simulation_contributor_flow`
-- Test layout and patterns: :doc:`testing`
+- Simulation orchestration and control flow: :doc:`simulation_flow`
+- Test layout and patterns: :doc:`testing_strategy`
 - Full class and module reference: :doc:`api/omotes_simulator_core`

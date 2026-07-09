@@ -254,9 +254,9 @@ Related Documentation
 ---------------------
 
 - :doc:`developer_navigation` — start here for a quick map of all developer guides.
-- :doc:`simulation_contributor_flow` — code layout, package structure, and execution flow
+- :doc:`simulation_flow` — code layout, package structure, and execution flow
   for contributors making code changes.
-- :doc:`testing` — how to run the test suite and validate code changes alongside
+- :doc:`testing_strategy` — how to run the test suite and validate code changes alongside
   documentation changes.
 - :doc:`../support/support` — where to ask questions and report issues.
 - The ``.github/agents/`` directory and

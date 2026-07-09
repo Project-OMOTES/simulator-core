@@ -1,17 +1,21 @@
-Adding a New Physics Asset
-==========================
+Adding New Solver and Entity Layer Assets
+=========================================
 
 Purpose
 -------
 
-Use this guide when you need to implement a new thermo-hydraulic asset type in the simulator —
-for example a new heat pump variant, a storage asset, or a pipe variant. The guide walks you
-through all four implementation steps: entity layer, solver layer, ESDL mapper, and mapper
-registration. It then points you to test patterns and related documentation.
+Use this guide when you need to implement a completely new thermo-hydraulic asset type in
+the simulator — for example a new heat pump variant, a storage asset, or a pipe variant.
+The guide walks you through all four implementation steps: solver layer, entity layer,
+ESDL mapper, and mapper registration. It then points you to test patterns and related
+documentation.
 
-This page is for contributors who work at the Python implementation level. It assumes you can
-already navigate the repository and run the unit test suite. For conceptual asset behavior and
-governing relations, consult the Physics section rather than this guide.
+If a suitable solver-layer asset already exists and you only need to add an entity-layer
+class, use :doc:`AddEntityLayerAsset` instead.
+
+This page is for contributors who work at the Python implementation level. It assumes you
+can already navigate the repository and run the unit test suite. For conceptual asset
+behavior and governing relations, consult the Physics section rather than this guide.
 
 Where Assets Live
 -----------------
@@ -222,5 +226,5 @@ Cross-links
 -----------
 
 - Asset behavior and physics: :doc:`../physics/physics_main`
-- Simulation orchestration and how assets are wired into the runtime: :doc:`simulation_contributor_flow`
-- Test layout and test patterns: :doc:`testing`
+- Simulation orchestration and how assets are wired into the runtime: :doc:`simulation_flow`
+- Test layout and test patterns: :doc:`testing_strategy`

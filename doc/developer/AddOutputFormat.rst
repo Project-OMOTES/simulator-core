@@ -135,7 +135,7 @@ along the column axis.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are introducing a completely new asset, also ensure the asset is registered in the ESDL
-mapper so that ``HeatNetwork.store_output`` can reach it. See :doc:`add_new_asset` for the
+mapper so that ``HeatNetwork.store_output`` can reach it. See :doc:`AddSolverAndEntityLayerAssets` for the
 mapper registration workflow; nothing extra is required for output beyond the steps above.
 
 Implementation Notes
@@ -247,12 +247,12 @@ Common Pitfalls
 Related Documentation
 ---------------------
 
-- :doc:`add_new_asset` — complete workflow for adding a new asset type, including
-  entity-layer, solver-layer, ESDL mapper, and mapper registration steps that precede
-  output implementation for a brand-new asset.
-- :doc:`simulation_contributor_flow` — end-to-end code layout and execution flow from
+- :doc:`AddSolverAndEntityLayerAssets` — complete workflow for adding a new asset type,
+  including entity-layer, solver-layer, ESDL mapper, and mapper registration steps that
+  precede output implementation for a brand-new asset.
+- :doc:`simulation_flow` — end-to-end code layout and execution flow from
   ``app.py`` through ``SimulationManager``, ``NetworkSimulation``, and ``HeatNetwork``.
-- :doc:`testing` — test layout, how to run the full test suite, and the contributor
+- :doc:`testing_strategy` — test layout, how to run the full test suite, and the contributor
   checklist.
 - :doc:`../network/network_main` — conceptual overview of how the network
   simulation coordinates assets, the solver, and the controller.

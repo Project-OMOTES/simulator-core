@@ -215,9 +215,9 @@ Before submitting a change, verify the following:
 Related Documentation
 ---------------------
 
-- :doc:`simulation_contributor_flow` — traces the full orchestration path from entrypoint to
+- :doc:`simulation_flow` — traces the full orchestration path from entrypoint to
   solver and identifies which tests correspond to each orchestration layer.
-- :doc:`add_new_asset` — step-by-step workflow for adding a new asset; includes test file
-  placement and what to test at each implementation step.
-- :doc:`control_extension` — contributor guide for adding or modifying controller classes,
+- :doc:`developer_guides` — step-by-step workflows for adding a new asset, output format, or
+  controller; each guide includes test file placement and patterns.
+- :doc:`ControlExtension` — contributor guide for adding or modifying controller classes,
   including the corresponding test patterns for controller unit tests.

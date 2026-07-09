@@ -3,8 +3,8 @@ adapter.transforms.controller_mappers
 
 .. automodule:: omotes_simulator_core.adapter.transforms.controller_mappers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
