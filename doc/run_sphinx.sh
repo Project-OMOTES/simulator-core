@@ -5,8 +5,9 @@ set -euo pipefail
 # Jump to the directory where this script is located (doc/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 pushd "$SCRIPT_DIR" > /dev/null
+cd ..
 
-if [ ! -f "./venv/bin/python" ]; then
+if [ ! -f "./.venv/bin/python" ]; then
 	echo "Creating virtual environment..."
 	if command -v python3 >/dev/null 2>&1; then
 		python3 -m venv .venv
@@ -22,8 +23,9 @@ else
 fi
 
 # shellcheck source=/dev/null
-source "./venv/bin/activate"
+source "./.venv/bin/activate"
 
+cd ..
 python -m pip install -r requirements.txt
 
 make clean
