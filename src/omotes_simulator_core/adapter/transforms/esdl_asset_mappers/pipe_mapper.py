@@ -108,7 +108,9 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         schedule = PIPE_DEFAULTS.default_schedule
 
         if esdl_asset.esdl_asset.eIsSet("innerDiameter"):
-            return float(esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter))
+            inner_diameter = float(esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter))
+            if inner_diameter != 0:
+                return inner_diameter
 
         dn_diameter = esdl_asset.get_property("diameter", PIPE_DEFAULTS.diameter)
         if dn_diameter is PIPE_DEFAULTS.diameter:

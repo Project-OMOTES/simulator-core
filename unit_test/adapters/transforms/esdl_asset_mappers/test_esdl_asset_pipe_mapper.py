@@ -175,6 +175,37 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             # Assert
             self.assertEqual(diameter, 0.42)
 
+    def test_get_diameter_with_inner_diameter_zero_uses_edr(self):
+        """Falls back to EDR when innerDiameter is set to 0 but a DN diameter is provided."""
+        # Arrange
+        esdl_asset_mock = Mock()
+        dn_mock = Mock()
+        dn_mock.name = "DN125"
+
+        def mock_get_property(key, default=None):
+            if key == "innerDiameter":
+                return 0
+            if key == "diameter":
+                return dn_mock
+            return default
+
+        esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key in (
+            "innerDiameter",
+            "diameter",
+        )
+        edr_object_mock = Mock()
+        edr_object_mock.innerDiameter = 0.1273
+
+        with patch.object(
+            EsdlAssetPipeMapper, "_get_esdl_object_from_edr", return_value=edr_object_mock
+        ):
+            # Act
+            diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
+
+            # Assert
+            self.assertEqual(diameter, 0.1273)
+
     def test_get_diameter_default_when_none_provided(self):
         """Returns default diameter when both innerDiameter is 0 and diameter is None."""
         # Arrange
