@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test pipe mapper."""
+
 import typing
 import unittest
 from pathlib import Path
@@ -138,6 +139,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key == "innerDiameter"
 
         # Act
         diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
@@ -160,6 +162,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key == "diameter"
         edr_object_mock = Mock()
         edr_object_mock.innerDiameter = 0.42
 
@@ -180,11 +183,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         def mock_get_property(key, default=None):
             if key == "innerDiameter":
                 return 0
-            if key == "diameter":
-                return None
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.eIsSet.return_value = False
 
         # Act
         diameter = EsdlAssetPipeMapper._get_diameter(esdl_asset_mock)
@@ -224,6 +226,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key == "diameter"
         edr_object_mock = Mock()
         edr_object_mock.innerDiameter = 0.08
 

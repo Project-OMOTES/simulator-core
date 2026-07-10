@@ -107,20 +107,17 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         # TODO add method to get schedule from esdl if it becomes available.
         schedule = PIPE_DEFAULTS.default_schedule
 
-        has_inner_diameter = esdl_asset.esdl_asset.eIsSet("innerDiameter")
-        has_dn_diameter = esdl_asset.esdl_asset.eIsSet("diameter")
-
-        if not has_inner_diameter and not has_dn_diameter:
-            return float(esdl_asset.get_property("diameter", PIPE_DEFAULTS.diameter))
-
-        if has_inner_diameter:
+        if esdl_asset.esdl_asset.eIsSet("innerDiameter"):
             return float(esdl_asset.get_property("innerDiameter", PIPE_DEFAULTS.diameter))
 
         dn_diameter = esdl_asset.get_property("diameter", PIPE_DEFAULTS.diameter)
+        if dn_diameter is PIPE_DEFAULTS.diameter:
+            return PIPE_DEFAULTS.diameter
+
         esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(dn_diameter.name, schedule)
         logger.info(
             f"Property innerDiameter is not set for: {esdl_asset.get_name()}, "
-            f"Schedule S1 is assumed for retrieval of pipe diameter from EDR list."
+            f"Schedule S1 is assumed for retrieval of pipe inner diameter from EDR list."
         )
         return float(esdl_object.innerDiameter)
 
