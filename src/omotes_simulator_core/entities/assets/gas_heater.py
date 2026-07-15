@@ -49,8 +49,15 @@ class GasHeater(ProductionCluster):
         :param str asset_id: The unique identifier of the asset.
         :param List[str] port_ids: List of ids of the connected ports.
         """
+        if efficiency == 0 or efficiency > 1.0:
+            logger.warning(
+                    f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
+                    f"Setting efficiency of {asset_name} to 1.0."
+                )
+            self.efficiency = 1.0
+        else:
+            self.efficiency = efficiency
 
-        self.efficiency = efficiency
         self.gas_energy_content = DEFAULT_GAS_ENERGY_CONTENT
 
         super().__init__(

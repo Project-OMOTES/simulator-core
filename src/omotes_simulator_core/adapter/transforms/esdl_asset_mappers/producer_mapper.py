@@ -44,6 +44,7 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
                 port_ids=esdl_asset.get_port_ids(),
+                efficiency=esdl_asset.esdl_asset.efficiency
             )
                 
         elif type(esdl_asset.esdl_asset) == esdl.GasHeater:
@@ -51,6 +52,7 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
                 port_ids=esdl_asset.get_port_ids(),
+                efficiency=esdl_asset.esdl_asset.efficiency
             )
         else:
             producer_entity = ProductionCluster(

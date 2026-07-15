@@ -53,7 +53,14 @@ class ElecBoiler(ProductionCluster):
             asset_id=asset_id,
             port_ids=port_ids,
         )
-        self.efficiency = efficiency
+        if efficiency == 0 or efficiency > 1.0:
+            logger.warning(
+                    f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
+                    f"Setting efficiency of {asset_name} to 1.0."
+                )
+            self.efficiency = 1.0
+        else:
+            self.efficiency = efficiency
 
     def get_electric_power_consumption(self) -> float:
         """Calculate the electric power consumption of the electric boiler.
