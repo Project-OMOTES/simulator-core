@@ -38,6 +38,7 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a producer entity.
         :return: Producer object.
         """
+        producer_entity: AssetAbstract
         if isinstance(esdl_asset.esdl_asset, esdl.ElectricBoiler):
             producer_entity = ElecBoiler(
                 asset_name=esdl_asset.esdl_asset.name,
