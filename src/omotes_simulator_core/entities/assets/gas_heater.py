@@ -17,10 +17,10 @@
 import logging
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_GAS_ENERGY_CONTENT,
+    PROPERTY_GAS_CONSUMPTION,
     PROPERTY_HEAT_SUPPLIED,
     PROPERTY_HEAT_SUPPLY_SET_POINT,
-    PROPERTY_GAS_CONSUMPTION,
-    DEFAULT_GAS_ENERGY_CONTENT,
 )
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 
@@ -51,9 +51,9 @@ class GasHeater(ProductionCluster):
         """
         if efficiency == 0 or efficiency > 1.0:
             logger.warning(
-                    f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
-                    f"Setting efficiency of {asset_name} to 1.0."
-                )
+                f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
+                f"Setting efficiency of {asset_name} to 1.0."
+            )
             self.efficiency = 1.0
         else:
             self.efficiency = efficiency
@@ -75,8 +75,6 @@ class GasHeater(ProductionCluster):
         :return: float
             The gas power consumption of the gas heater.
         """
-
-
         return abs(self.get_actual_heat_supplied()) / self.gas_energy_content / self.efficiency
 
     def write_to_output(self) -> None:

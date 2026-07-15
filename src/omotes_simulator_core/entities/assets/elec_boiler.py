@@ -35,11 +35,7 @@ class ElecBoiler(ProductionCluster):
     efficiency: float
 
     def __init__(
-        self,
-        asset_name: str,
-        asset_id: str,
-        port_ids: list[str],
-        efficiency: float = 1.0
+        self, asset_name: str, asset_id: str, port_ids: list[str], efficiency: float = 1.0
     ) -> None:
         """
         Initialize the ElecBoiler asset.
@@ -55,9 +51,9 @@ class ElecBoiler(ProductionCluster):
         )
         if efficiency == 0 or efficiency > 1.0:
             logger.warning(
-                    f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
-                    f"Setting efficiency of {asset_name} to 1.0."
-                )
+                f"Efficiency of {asset_name} is set to an invalid value of {efficiency}. "
+                f"Setting efficiency of {asset_name} to 1.0."
+            )
             self.efficiency = 1.0
         else:
             self.efficiency = efficiency
@@ -71,7 +67,6 @@ class ElecBoiler(ProductionCluster):
         :return: float
             The electric power consumption of the electric boiler.
         """
-
         return abs(self.get_actual_heat_supplied()) / self.efficiency
 
     def write_to_output(self) -> None:
