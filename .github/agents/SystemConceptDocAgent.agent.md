@@ -74,7 +74,6 @@ Before writing, inspect the closest matching existing documentation page and pre
    - ``doc/index.rst``
    - For Intro pages: ``doc/intro/intro_main.rst``, ``doc/intro/audience_and_use_cases.rst``,
      ``doc/intro/package_scope.rst``, ``doc/intro/simulation_input_and_output.rst``
-   - For Solver pages: ``doc/solver/solver_main.rst``
    - For Network pages: ``doc/network/network_main.rst``
    - For Control pages: ``doc/controller/controller.rst``
    - ``doc/physics/physics_main.rst`` (cross-reference landing page only, not a style source for Physics content itself)
@@ -157,9 +156,9 @@ Do not use this agent to document:
   short, high-level conceptual landing page (``doc/controller/controller.rst``); link to the
   detailed behavior pages rather than absorbing their content.
 - the solver's detailed equation-assembly/iteration mechanics or their physical impact on the
-  solved model — these belong to ``SolverBehaviorDocAgent``. For Solver, this agent owns only the
-  existing shallow conceptual tier (``doc/solver/solver_main.rst`` and its three conceptual pages);
-  link to ``doc/solver/solver_behavior.rst`` rather than absorbing its content.
+  solved model — these belong to ``SolverBehaviorDocAgent``, which owns the entire four-page Solver
+  section (``doc/solver/solver_main.rst``, ``solver_workflow.rst``, ``solver_unknowns.rst``, and
+  ``solver_convergence.rst``). Link to those pages rather than absorbing their content.
 
 When a conceptual page needs to point readers to implementation/reference detail (for
 example solver internals or controller classes), cross-link to the relevant

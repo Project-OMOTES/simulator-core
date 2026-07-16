@@ -1,64 +1,52 @@
-Solver convergence
-==================
+.. _solver-convergence:
+
+Convergence
+===========
 
 Overview
 --------
 
-Convergence in OMOTES.SIMULATOR_CORE is handled at two levels: inside the solver itself and at the
-broader timestep level in the network simulation loop.
+The solver decides that it has found the network state when the solution stops changing
+between iterations. Convergence is judged by comparing the new solution vector against the
+previous iteration's vector using a combined absolute and relative tolerance test.
 
-Role in the Simulation Workflow
--------------------------------
+Convergence
+-----------
 
-Inside ``Solver.solve()``, the matrix solution is updated repeatedly until the solution vector is
-considered converged or an iteration limit is reached. After each matrix solve, the network receives
-the updated results so assets and nodes can evaluate their next equations from the latest state.
-
-Outside the solver, ``NetworkSimulation.run()`` may repeat an entire timestep until asset-level
-convergence is reached or the timestep iteration limit is hit.
-
-Key Concepts
-------------
-
-- Matrix convergence: checks whether consecutive solution vectors are sufficiently close.
-- Solver iteration limit: stops the internal solve loop after 100 iterations.
-- Timestep convergence: checks whether assets report a converged state across repeated timestep runs.
-- Timestep iteration limit: stops timestep retries after 20 iterations.
-
-Behavior and Interpretation
----------------------------
-
-Matrix convergence is tested using relative and absolute tolerances through a vector comparison:
+The iteration is converged when every entry of the new solution agrees with the corresponding
+entry of the previous solution within tolerance:
 
 .. math::
 
-   x_{new} \approx x_{old}
+   \left| s_{new} - s_{old} \right| \le a_{tol} + r_{tol} \left| s_{old} \right|
 
-where closeness is evaluated using configured absolute and relative convergence thresholds.
+.. list-table::
+   :widths: 20 80
+   :stub-columns: 1
 
-This means the solver is not checking a single scalar residual in isolation. It is checking whether
-the full solved state stops changing materially between iterations.
+   * - :math:`s_{new}`
+     - Solution entry from the current iteration
+   * - :math:`s_{old}`
+     - Solution entry from the previous iteration
+   * - :math:`a_{tol}`
+     - Absolute tolerance, :math:`10^{-6}`
+   * - :math:`r_{tol}`
+     - Relative tolerance, :math:`10^{-6}`
 
-The timestep loop adds a second layer of stability checking. Even if one solver call converges,
-asset-level post-solve behavior may still require another timestep iteration before the network is
-treated as converged for output purposes.
+The absolute term keeps quantities that are near zero from blocking convergence, while the
+relative term scales the allowed change with the magnitude of the quantity, so large
+pressures and small mass flows are each judged on a comparable footing. The check must hold
+for every solved unknown at once; a single entry still changing keeps the iteration running.
 
-Assumptions
------------
-
-- Consecutive solution vectors are a sufficient indicator of internal numerical convergence.
-- Asset-level ``is_converged()`` checks represent the network's timestep stability criterion.
-- Resetting the solution state at the start of a new solve provides a consistent iteration start.
-
-Limitations
------------
-
-- The documentation does not define asset-specific convergence logic; that depends on each asset implementation.
-- If iteration limits are reached, the current code warns or exits the loop, but this page does not prescribe recovery strategy.
+In practice, tighter tolerances require more iterations to satisfy, while looser tolerances
+converge sooner at the cost of accuracy. If the criterion is not met within the iteration
+limit, the solver logs a non-converged warning and reports the last iterate as the result for
+the timestep (see :doc:`solver_workflow`).
 
 Related Documentation
 ---------------------
 
-- For the overall solver flow, see :doc:`solver_workflow`.
-- For unknown and equation structure, see :doc:`solver_unknowns_and_equations`.
-- For simulation-loop context, see :doc:`../intro/simulation_input_and_output`.
+- :doc:`solver_main` — the conceptual overview.
+- :doc:`solver_workflow` — where the convergence check sits in the solve loop.
+- :doc:`solver_unknowns` — the solved vector that is tested against tolerance.
+- :doc:`../reference/solver_reference` — class-level reference.
