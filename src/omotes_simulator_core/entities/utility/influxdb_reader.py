@@ -43,7 +43,7 @@ def _normalize_influx_filters(filters: str | None) -> list[dict[str, str]]:
         normalized_filters.append(
             {
                 "tag": str(tag),
-                "value": str(value).strip().strip('"').strip("'"),
+                "value": str(value).strip().strip("\"").strip("'"),
             }
         )
     return normalized_filters
