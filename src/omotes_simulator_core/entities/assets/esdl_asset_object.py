@@ -176,13 +176,12 @@ class EsdlAssetObject:
 
     def get_temperatures_asset(self, side: str | None = None) -> Temperatures:
         """Get the inflow and outflow temperature of an asset."""
-
         producer_types = [
             OmotesAssetLabels.PRODUCER,
             OmotesAssetLabels.GAS_HEATER,
             OmotesAssetLabels.ELECTRIC_BOILER,
-            ]
-        
+        ]
+
         if self.get_esdl_type() == OmotesAssetLabels.CONSUMER:
             temperatures = Temperatures(
                 in_flow=self.get_temperature("In", "Supply"),
