@@ -29,6 +29,7 @@ DEFAULT_MASS_FLOW_RATE = 1.0  # [kg/s]
 DEFAULT_POWER = 500000.0  # [W]
 DEFAULT_MISSING_VALUE = -9999.99  # [-]
 DEFAULT_ROUGHNESS = 1e-3  # [m]
+DEFAULT_GAS_ENERGY_CONTENT = 31.68 * 10.0**6  # [J/Nm3] Groningen gas: 31,68 MJ/Nm3 LCV
 
 
 @dataclass
@@ -148,6 +149,7 @@ PROPERTY_HEAT_SUPPLY_SET_POINT = "heat_supply_set_point"
 PROPERTY_HEAT_POWER_PRIMARY = "heat_power_primary"
 PROPERTY_HEAT_POWER_SECONDARY = "heat_power_secondary"
 PROPERTY_ELECTRICITY_CONSUMPTION = "electricity_consumption"
+PROPERTY_GAS_CONSUMPTION = "gas_consumption"
 PROPERTY_VOLUME = "volume"
 PROPERTY_FILL_LEVEL = "fill_level"
 PROPERTY_TIMESTEP = "time_step"
