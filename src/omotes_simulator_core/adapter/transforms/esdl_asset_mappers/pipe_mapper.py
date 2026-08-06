@@ -116,14 +116,22 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
         # diameter is an esdl.PipeDiameterEnum; VALUE_SPECIFIED means no DN size is given.
         dn_diameter = esdl_asset.esdl_asset.diameter
         if dn_diameter == esdl.PipeDiameterEnum.VALUE_SPECIFIED:
+            logger.warning(
+                f"Property innerDiameter is not set for: {esdl_asset.get_name()}. "
+                f"Returning default value: {PIPE_DEFAULTS.diameter} m.",
+                extra={"esdl_object_id": esdl_asset.get_id()},
+            )
             return PIPE_DEFAULTS.diameter
 
         esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(dn_diameter.name, schedule)
-        logger.info(
-            f"Property innerDiameter is not set for: {esdl_asset.get_name()}, "
-            f"Schedule S1 is assumed for retrieval of pipe inner diameter from EDR list."
+        inner_diameter = float(esdl_object.innerDiameter)
+        logger.warning(
+            f"Property innerDiameter is not set for: {esdl_asset.get_name()}. "
+            f"Schedule {schedule.name} is assumed for retrieval of pipe inner diameter from the "
+            f"EDR list.Returning value: {inner_diameter} m.",
+            extra={"esdl_object_id": esdl_asset.get_id()},
         )
-        return float(esdl_object.innerDiameter)
+        return inner_diameter
 
     @staticmethod
     def _get_esdl_object_from_edr(
