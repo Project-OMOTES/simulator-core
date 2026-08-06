@@ -30,11 +30,11 @@ Conceptual pages
    solver_convergence
    solver_behavior
 
-Implementation reference
--------------------------
+Implementation API
+------------------
 
 For solver classes, matrix assembly, and asset-level solver implementation details, use
-:doc:`../reference/solver_reference`.
+:doc:`../developer/api/omotes_simulator_core.solver`.
 
 Related Documentation
 ---------------------

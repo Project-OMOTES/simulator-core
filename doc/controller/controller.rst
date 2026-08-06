@@ -146,11 +146,11 @@ Limitations
 - It does not document class internals or contributor-oriented implementation details.
 - Detailed controller behavior belongs on the dedicated behavior page.
 
-Implementation Reference
-------------------------
+Implementation API
+------------------
 
-For controller classes, controller-side subnetworks, and implementation-oriented reference, see
-:doc:`../reference/controller_reference`.
+For controller classes, controller-side subnetworks, and implementation-oriented API documentation, see
+:doc:`../developer/api/omotes_simulator_core.entities.network_controller`.
 
 Related Documentation
 ---------------------
@@ -163,8 +163,8 @@ For network-level interaction and topology context, see :doc:`../network/network
 For asset-level physical interpretation of the resulting operating state, see
 :doc:`../physics/physics_main`.
 
-For implementation-oriented controller reference material, see
-:doc:`../reference/controller_reference`.
+For implementation-oriented controller API material, see
+:doc:`../developer/api/omotes_simulator_core.entities.network_controller`.
 
 .. toctree::
    :maxdepth: 1

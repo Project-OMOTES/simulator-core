@@ -3,8 +3,8 @@ adapter
 
 .. automodule:: omotes_simulator_core.adapter
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

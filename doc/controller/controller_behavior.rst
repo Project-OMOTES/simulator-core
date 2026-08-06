@@ -474,4 +474,4 @@ Related Documentation
 - :doc:`../physics/ates_cluster_physics` for ATES storage physics.
 - :doc:`../physics/heat_pump_physics` for four-port heat-pump behavior across primary and secondary networks.
 - :doc:`../physics/air_to_water_heat_pump_physics` for two-port heat pumps mapped as producers.
-- :doc:`../reference/controller_reference` for controller implementation reference.
+- :doc:`../developer/api/omotes_simulator_core.entities.network_controller` for controller implementation API details.

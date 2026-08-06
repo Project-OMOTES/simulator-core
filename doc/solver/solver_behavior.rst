@@ -264,4 +264,4 @@ Related Documentation
 - :doc:`../physics/physics_main` for asset-level physical interpretation more broadly.
 - :doc:`../controller/controller_behavior` for how controller setpoints, including the
   pressure-setting choice, become solver inputs.
-- :doc:`../reference/solver_reference` for solver implementation reference.
+- :doc:`../developer/api/omotes_simulator_core.solver` for solver implementation API details.

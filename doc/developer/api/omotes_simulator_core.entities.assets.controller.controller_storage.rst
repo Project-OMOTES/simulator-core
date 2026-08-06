@@ -3,5 +3,5 @@ entities.assets.controller.controller_storage
 
 .. automodule:: omotes_simulator_core.entities.assets.controller.controller_storage
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
