@@ -17,6 +17,7 @@
 import logging
 from typing import Any
 
+import esdl
 import numpy as np
 from esdl.edr.client import EDRClient
 
@@ -112,8 +113,9 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             if inner_diameter != 0:
                 return inner_diameter
 
-        dn_diameter = esdl_asset.get_property("diameter", PIPE_DEFAULTS.diameter)
-        if dn_diameter is PIPE_DEFAULTS.diameter:
+        # diameter is an esdl.PipeDiameterEnum; VALUE_SPECIFIED means no DN size is given.
+        dn_diameter = esdl_asset.esdl_asset.diameter
+        if dn_diameter == esdl.PipeDiameterEnum.VALUE_SPECIFIED:
             return PIPE_DEFAULTS.diameter
 
         esdl_object = EsdlAssetPipeMapper._get_esdl_object_from_edr(dn_diameter.name, schedule)

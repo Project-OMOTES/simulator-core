@@ -20,6 +20,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import esdl
+
 from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper import (
     EsdlAssetPipeMapper,
 )
@@ -157,11 +159,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         def mock_get_property(key, default=None):
             if key == "innerDiameter":
                 return 0
-            if key == "diameter":
-                return dn_mock
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.diameter = dn_mock
         esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key == "diameter"
         edr_object_mock = Mock()
         edr_object_mock.innerDiameter = 0.42
@@ -185,11 +186,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         def mock_get_property(key, default=None):
             if key == "innerDiameter":
                 return 0
-            if key == "diameter":
-                return dn_mock
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.diameter = dn_mock
         esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key in (
             "innerDiameter",
             "diameter",
@@ -207,7 +207,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             self.assertEqual(diameter, 0.1273)
 
     def test_get_diameter_default_when_none_provided(self):
-        """Returns default diameter when both innerDiameter is 0 and diameter is None."""
+        """Returns default diameter when innerDiameter is 0 and diameter is VALUE_SPECIFIED."""
         # Arrange
         esdl_asset_mock = Mock()
 
@@ -217,6 +217,7 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.diameter = esdl.PipeDiameterEnum.VALUE_SPECIFIED
         esdl_asset_mock.esdl_asset.eIsSet.return_value = False
 
         # Act
@@ -252,11 +253,10 @@ class TestEsdlAssetPipeMapper(unittest.TestCase):
         def mock_get_property(key, default=None):
             if key == "innerDiameter":
                 return 0
-            if key == "diameter":
-                return dn_mock
             return default
 
         esdl_asset_mock.get_property = mock_get_property
+        esdl_asset_mock.esdl_asset.diameter = dn_mock
         esdl_asset_mock.esdl_asset.eIsSet.side_effect = lambda key: key == "diameter"
         edr_object_mock = Mock()
         edr_object_mock.innerDiameter = 0.08
