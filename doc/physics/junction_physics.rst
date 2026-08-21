@@ -80,6 +80,8 @@ node pressure in their coupling equations. The node can also be operated with a 
 
 This is used when pressure must be prescribed at the junction.
 
+.. _junction-physics-assumptions:
+
 Assumptions
 -----------
 
@@ -87,6 +89,8 @@ Assumptions
 - Mixing at the junction is ideal and instantaneous within a timestep.
 - Pressure losses and heat losses inside the junction are neglected.
 - Node discharge is represented as an algebraic balancing variable.
+
+.. _junction-physics-limitations:
 
 Limitations
 -----------

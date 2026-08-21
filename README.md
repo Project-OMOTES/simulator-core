@@ -38,6 +38,13 @@ sim = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
 result = sim.execute(progressLogger)
 ```
 
+## Support
+
+Found a bug, want a feature, or have a usage question? See the
+[user feedback repository](https://github.com/Project-OMOTES/user_feedback) — open a
+Discussion (Q&A category) for questions, or check/open an Issue for bugs and feature
+requests.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first

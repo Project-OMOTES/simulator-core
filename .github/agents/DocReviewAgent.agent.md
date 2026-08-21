@@ -50,7 +50,8 @@ When reviewing, verify that each page belongs in the correct part of this struct
 
 Special attention:
 - Physics pages should remain asset-focused and end-user-oriented.
-- Intro, Solver, Network, and conceptual Control pages should remain conceptual rather than implementation-heavy.
+- Intro, Solver, and conceptual Control pages should remain conceptual rather than implementation-heavy.
+- The Network page combines conceptual connectivity with source-grounded structural depth (representation, ESDL construction, sub-network partitioning) in one page; it should not, however, restate asset-internal physics, controller dispatch, or solver equation-assembly mechanics owned by other specialist agents.
 - Developer Documentation should remain contributor-facing.
 - API reference should remain generated reference rather than narrative documentation.
 - Support should remain concise and actionable.
@@ -164,6 +165,25 @@ Flag the following as errors:
   correlations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, or restating the
   conceptual solver pages.
 
+Intro-specific review rules
+---------------------------
+Treat intro documentation as four distinct page intents:
+
+1. Intro landing and orientation
+2. Scope and boundaries
+3. Audience and use cases
+4. Input/output and execution contract
+
+Flag the following as errors:
+- boundary pages restating detailed runtime execution steps,
+- audience pages restating detailed input/output contract material,
+- input/output pages omitting a concrete ESDL-to-result execution path,
+- intro pages that answer multiple intro intents without a clear separation,
+- an intro subpage repeating the same cross-link target across more than one navigation
+  section (for example, an audience's "first stop" link reappearing verbatim in a later
+  "where to continue"/"see also" list, or a navigation section silently dropping an audience
+  covered everywhere else on the page).
+
 Control-specific review rules
 -----------------------------
 Treat control documentation as four distinct documentation types:
@@ -182,6 +202,18 @@ Flag the following as errors:
   conceptual landing overview,
 - contributor control guides drifting into end-user explanation as their primary purpose,
 - controller API reference pages containing long narrative explanation better suited for conceptual docs or developer guides.
+
+Network-specific review rules
+------------------------------
+Network documentation is a single consolidated page (``doc/network/network_main.rst``)
+covering connectivity/communication with the solver and controller together with
+topology/representation, ESDL construction, and sub-network partitioning.
+
+Flag the following as errors:
+- the network page drifting into bare API reference, re-deriving asset-internal physics
+  equations owned by ``PhysicsAssetDocAgent`` instead of cross-linking, restating controller
+  dispatch decisions owned by ``ControllerBehaviorDocAgent``, or restating solver
+  equation-assembly mechanics owned by ``SolverBehaviorDocAgent``.
 
 Completeness review by page type
 --------------------------------
