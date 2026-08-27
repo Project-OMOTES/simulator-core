@@ -229,6 +229,8 @@ The practical consequence is that any of the interpretations above are only vali
 is confirmed; an unconverged solve should be treated as an unreliable snapshot of the equation
 system rather than a physically consistent state.
 
+.. _solver-behavior-assumptions:
+
 Assumptions
 -----------
 
@@ -238,6 +240,8 @@ Assumptions
   solved implicitly within a single linear solve.
 - The assembled system has exactly one equation per declared unknown.
 - The solution vector starts from a uniform initial guess at the beginning of every new solve.
+
+.. _solver-behavior-limitations:
 
 Limitations
 -----------

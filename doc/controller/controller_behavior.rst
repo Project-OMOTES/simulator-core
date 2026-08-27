@@ -444,6 +444,8 @@ same total heat setpoints are requested.
 
 For broader network interpretation, see :doc:`../network/network_main`.
 
+.. _controller-behavior-assumptions:
+
 Assumptions
 -----------
 
@@ -453,6 +455,8 @@ Assumptions
 - Storage allocation is proportional to effective charge or discharge capability.
 - Consumer curtailment under shortage is proportional across all consumers.
 - Pressure selection uses a fixed precedence rule rather than an optimization or hydraulic-quality criterion.
+
+.. _controller-behavior-limitations:
 
 Limitations
 -----------
