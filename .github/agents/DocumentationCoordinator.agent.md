@@ -270,6 +270,9 @@ If a control-related request is ambiguous, classify by the primary question bein
 When a request mixes more than one of these, split it into multiple sub-tasks and assign them separately.
 Do not allow a single page to serve all three purposes.
 
+If the user explicitly scopes a request to ``doc/controller/controller_behavior.rst`` only,
+keep scope locked to that single page unless the user asks to broaden scope.
+
 Audience separation rules
 -------------------------
 Enforce the following audience boundaries:
@@ -349,6 +352,14 @@ When delegating to a specialist agent, always specify:
 - validation criteria,
 - required cross-links to adjacent sections where relevant.
 
+For tasks scoped to ``doc/controller/controller_behavior.rst``, also specify:
+- terminology requirement: use ``water-to-water heat-pump`` wording,
+- completeness requirement: in the ``Dispatch Logic for Supply, Demand, and Storage`` section,
+  explain storage fill-level impact on effective charge/discharge capability and clipping near
+  empty/full bounds,
+- physics link requirement: include a cross-link to
+  ``doc/physics/ideal_heat_storage_physics.rst`` for asset-internal storage behavior.
+
 The coordinator must not delegate vague requests such as:
 - "write the docs"
 - "improve this page"
@@ -377,6 +388,8 @@ Each delegated task must include:
 - validation criteria,
 - required cross-links where relevant.
 
+For control-behavior tasks scoped to ``doc/controller/controller_behavior.rst``, add explicit
+exclusions preventing edits to other pages unless the user requests broader scope.
 For network documentation tasks, also include explicit link-target constraints for
 ``Assumptions`` and ``Limitations``:
 - permitted targets (existing conceptual pages or pages created in-task),

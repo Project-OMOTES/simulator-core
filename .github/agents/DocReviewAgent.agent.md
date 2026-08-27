@@ -203,6 +203,13 @@ Flag the following as errors:
 - contributor control guides drifting into end-user explanation as their primary purpose,
 - controller API reference pages containing long narrative explanation better suited for conceptual docs or developer guides.
 
+For reviews of ``doc/controller/controller_behavior.rst``, also flag as errors:
+- use of ``four-port heat pump`` or ``four-port heat-pump`` where
+  ``water-to-water heat-pump`` terminology is required,
+- missing explanation in ``Dispatch Logic for Supply, Demand, and Storage`` of how fill level
+  constrains effective storage charge/discharge capability and clipping near empty/full bounds,
+- missing cross-link to ``doc/physics/ideal_heat_storage_physics.rst`` when storage fill-level
+  interpretation is discussed.
 Network-specific review rules
 ------------------------------
 Network documentation is a single consolidated page (``doc/network/network_main.rst``)
@@ -301,6 +308,11 @@ Before accepting a page, verify that:
 - it includes the information expected for its page type,
 - it links to the right neighboring documentation where useful,
 - it does not blur the boundary between conceptual docs, physics docs, developer guides, API reference, navigation, and support.
+
+For ``doc/controller/controller_behavior.rst`` specifically, also verify:
+- terminology uses ``water-to-water heat-pump`` consistently,
+- storage dispatch explanation includes fill-level impact and clipping behavior,
+- storage fill-level interpretation links to ``doc/physics/ideal_heat_storage_physics.rst``.
 
 Validation
 ----------
