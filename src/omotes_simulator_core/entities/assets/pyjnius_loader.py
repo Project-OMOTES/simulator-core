@@ -18,6 +18,7 @@ import glob
 import hashlib
 import logging
 import os
+import stat
 import tempfile
 import urllib.request
 from typing import Callable
@@ -100,9 +101,10 @@ class PyjniusLoader:
         The JAR is downloaded at runtime rather than shipped inside the wheel because it
         exceeds the 100 MB per-file size limit on PyPI.
 
-        If a `rosim*.jar` is already present in the `bin` folder, no download happens and
-        that file is used. To pick up a newer Rosim JAR, bump the module-level constants;
-        deleting the local copy only re-fetches the same pinned asset.
+        If any `rosim*.jar` is already present in the `bin` folder, no download happens and
+        that file is used, whatever its version. Picking up a newer Rosim JAR therefore takes
+        both steps: bump the module-level constants and delete the local copy, since either
+        one alone leaves the existing file in place.
 
         The JAR is fetched from a pinned release asset URL, written to a temporary file in
         the `bin` folder and verified against `ROSIM_JAR_SHA256`. Only a file with a matching
@@ -116,7 +118,7 @@ class PyjniusLoader:
         jar_files = glob.glob(os.path.join(bin_path, "rosim*.jar"))
         if jar_files:
             logger.debug("Rosim JAR files already present, skipping download.")
-            logger.debug(f"Using Rosim JAR file: {jar_files[0]}")
+            logger.debug("Using Rosim JAR file: %s", jar_files[0])
             return os.path.basename(jar_files[0])
 
         logger.debug("Downloading Rosim JAR files from GitHub")
@@ -130,11 +132,13 @@ class PyjniusLoader:
         try:
             os.close(temp_fd)
             # mkstemp creates the file 0600 and os.replace preserves that, where a plain
-            # download would have taken the umask default. Re-apply the umask so the JAR is
-            # readable by whoever the JVM runs as, without widening past what the umask allows.
-            umask = os.umask(0)
-            os.umask(umask)
-            os.chmod(temp_path, 0o666 & ~umask)
+            # download would have taken the umask default. Copy the mode of a sibling that the
+            # package itself shipped, so the JAR ends up as readable as the rest of `bin` for
+            # whoever the JVM runs as. Reading the umask instead would mean mutating
+            # process-global state, which is not safe to do from a library.
+            reference = os.path.join(bin_path, "jfxrt.jar")
+            if os.path.exists(reference):
+                os.chmod(temp_path, stat.S_IMODE(os.stat(reference).st_mode))
             urllib.request.urlretrieve(ROSIM_JAR_URL, temp_path)
             actual_hash = _sha256_of_file(temp_path)
             if actual_hash != ROSIM_JAR_SHA256:
@@ -150,10 +154,10 @@ class PyjniusLoader:
             except OSError:
                 # A failure to clean up must not replace the error that caused it, which
                 # carries the reason the download is unusable.
-                logger.warning(f"Failed to remove temporary download {temp_path}.")
+                logger.warning("Failed to remove temporary download %s.", temp_path, exc_info=True)
             raise
 
-        logger.debug(f"Using Rosim JAR file: {final_path}")
+        logger.debug("Using Rosim JAR file: %s", final_path)
         return ROSIM_JAR_NAME
 
     def load_class(self, classpath: str) -> JavaClass:
