@@ -18,7 +18,6 @@ import glob
 import hashlib
 import logging
 import os
-import stat
 import tempfile
 import urllib.request
 from typing import Callable
@@ -131,14 +130,11 @@ class PyjniusLoader:
         temp_fd, temp_path = tempfile.mkstemp(dir=bin_path, prefix=".rosim-download-")
         try:
             os.close(temp_fd)
-            # mkstemp creates the file 0600 and os.replace preserves that, where a plain
-            # download would have taken the umask default. Copy the mode of a sibling that the
-            # package itself shipped, so the JAR ends up as readable as the rest of `bin` for
-            # whoever the JVM runs as. Reading the umask instead would mean mutating
-            # process-global state, which is not safe to do from a library.
-            reference = os.path.join(bin_path, "jfxrt.jar")
-            if os.path.exists(reference):
-                os.chmod(temp_path, stat.S_IMODE(os.stat(reference).st_mode))
+            # The JAR keeps mkstemp's 0600 rather than the umask default a plain download
+            # would have taken, which only matters if it is written by one user and read by
+            # another. No OMOTES deployment switches user between the two, so the mode is
+            # left alone: reading the umask to widen it would mean mutating process-global
+            # state from library code.
             urllib.request.urlretrieve(ROSIM_JAR_URL, temp_path)
             actual_hash = _sha256_of_file(temp_path)
             if actual_hash != ROSIM_JAR_SHA256:
