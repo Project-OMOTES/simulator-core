@@ -34,7 +34,7 @@ them. Per connection point, the solver solves for three core quantities:
      - J/kg
 
 Specific internal energy is used as the thermal state variable rather than temperature
-directly. This keeps the energy-transport terms linear in the solved unknowns: convective
+directly. This keeps the energy-transport terms bilinear in the solved unknowns: convective
 energy transport appears as the product of mass flow and specific internal energy, both of
 which are solved quantities. Temperature is recovered from the specific internal energy
 through the fluid-property relations; those relations are not re-derived here (see

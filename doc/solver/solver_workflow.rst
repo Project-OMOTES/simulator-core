@@ -6,10 +6,11 @@ Solve Workflow
 Overview
 --------
 
-The solver reaches the network state through a fixed-point Newton-Raphson iteration: it
-repeatedly assembles a linear system from the current solution, solves it, transfers the
-result back to the assets and nodes, and tests whether the solution has stopped changing.
-The loop stops when the solution has converged or when an iteration limit is reached.
+The solver reaches the network state through iteration by using a Newton-Rapson method to
+linearize the equations: it repeatedly assembles a linear system from the current solution,
+solves it, transfers the result back to the assets and nodes, and tests whether the solution
+has stopped changing. The loop stops when the solution has converged or when an iteration limit
+is reached.
 
 Workflow
 --------
@@ -21,7 +22,7 @@ solution, so the iteration starts from a clean state.
 
 **Assemble.** Each asset and then each node contributes its equations, linearized about the
 current solution, into a single system. The number of equations always matches the number of
-unknowns, so the linear system is square and solvable.
+unknowns, so the linear system is square.
 
 **Solve.** The assembled linear system is solved for a new solution vector. This solution is
 the linearized estimate of the network state for the current iteration.
