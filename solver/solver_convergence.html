@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Solver Behavior" href="solver_behavior.html"><link rel="prev" title="Solver unknowns and equations" href="solver_unknowns_and_equations.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Network layer" href="../network/network_main.html"><link rel="prev" title="Solved Unknowns" href="solver_unknowns.html">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Solver convergence - OMOTES Simulator documentation documentation</title>
+        <title>Convergence - OMOTES Simulator documentation documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -194,10 +194,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../intro/intro_main.html">Introduction</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="solver_main.html">Solver</a><input aria-label="Toggle navigation of Solver" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="solver_workflow.html">Solver workflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver_unknowns_and_equations.html">Solver unknowns and equations</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Solver convergence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver_behavior.html">Solver Behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver_workflow.html">Solve Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver_unknowns.html">Solved Unknowns</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Convergence</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../network/network_main.html">Network layer</a></li>
@@ -456,65 +455,60 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="solver-convergence">
-<h1>Solver convergence<a class="headerlink" href="#solver-convergence" title="Link to this heading">¶</a></h1>
+          <section id="convergence">
+<span id="solver-convergence"></span><h1>Convergence<a class="headerlink" href="#convergence" title="Link to this heading">¶</a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>Convergence in OMOTES.SIMULATOR_CORE is handled at two levels: inside the solver itself and at the
-broader timestep level in the network simulation loop.</p>
+<p>The solver decides that it has found the network state when the solution stops changing
+between iterations. Convergence is judged by comparing the new solution vector against the
+previous iteration’s vector using a combined absolute and relative tolerance test.</p>
 </section>
-<section id="role-in-the-simulation-workflow">
-<h2>Role in the Simulation Workflow<a class="headerlink" href="#role-in-the-simulation-workflow" title="Link to this heading">¶</a></h2>
-<p>Inside <code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code>, the matrix solution is updated repeatedly until the solution vector is
-considered converged or an iteration limit is reached. After each matrix solve, the network receives
-the updated results so assets and nodes can evaluate their next equations from the latest state.</p>
-<p>Outside the solver, <code class="docutils literal notranslate"><span class="pre">NetworkSimulation.run()</span></code> may repeat an entire timestep until asset-level
-convergence is reached or the timestep iteration limit is hit.</p>
-</section>
-<section id="key-concepts">
-<h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Matrix convergence: checks whether consecutive solution vectors are sufficiently close.</p></li>
-<li><p>Solver iteration limit: stops the internal solve loop after 100 iterations.</p></li>
-<li><p>Timestep convergence: checks whether assets report a converged state across repeated timestep runs.</p></li>
-<li><p>Timestep iteration limit: stops timestep retries after 20 iterations.</p></li>
-</ul>
-</section>
-<section id="behavior-and-interpretation">
-<h2>Behavior and Interpretation<a class="headerlink" href="#behavior-and-interpretation" title="Link to this heading">¶</a></h2>
-<p>Matrix convergence is tested using relative and absolute tolerances through a vector comparison:</p>
+<section id="id1">
+<h2>Convergence<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>The iteration is converged when every entry of the new solution agrees with the corresponding
+entry of the previous solution within tolerance:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[x_{new} \approx x_{old}\]</div>
+\[\left| s_{new} - s_{old} \right| \le a_{tol} + r_{tol} \left| s_{old} \right|\]</div>
 </div>
-<p>where closeness is evaluated using configured absolute and relative convergence thresholds.</p>
-<p>This means the solver is not checking a single scalar residual in isolation. It is checking whether
-the full solved state stops changing materially between iterations.</p>
-<p>The timestep loop adds a second layer of stability checking. Even if one solver call converges,
-asset-level post-solve behavior may still require another timestep iteration before the network is
-treated as converged for output purposes.</p>
-</section>
-<section id="assumptions">
-<h2>Assumptions<a class="headerlink" href="#assumptions" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Consecutive solution vectors are a sufficient indicator of internal numerical convergence.</p></li>
-<li><p>Asset-level <code class="docutils literal notranslate"><span class="pre">is_converged()</span></code> checks represent the network’s timestep stability criterion.</p></li>
-<li><p>Resetting the solution state at the start of a new solve provides a consistent iteration start.</p></li>
-</ul>
-</section>
-<section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>The documentation does not define asset-specific convergence logic; that depends on each asset implementation.</p></li>
-<li><p>If iteration limits are reached, the current code warns or exits the loop, but this page does not prescribe recovery strategy.</p></li>
-</ul>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><th class="stub"><p><span class="math notranslate nohighlight">\(s_{new}\)</span></p></th>
+<td><p>Solution entry from the current iteration</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p><span class="math notranslate nohighlight">\(s_{old}\)</span></p></th>
+<td><p>Solution entry from the previous iteration</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p><span class="math notranslate nohighlight">\(a_{tol}\)</span></p></th>
+<td><p>Absolute tolerance, <span class="math notranslate nohighlight">\(10^{-6}\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p><span class="math notranslate nohighlight">\(r_{tol}\)</span></p></th>
+<td><p>Relative tolerance, <span class="math notranslate nohighlight">\(10^{-6}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The absolute term keeps quantities that are near zero from blocking convergence, while the
+relative term scales the allowed change with the magnitude of the quantity, so large
+pressures and small mass flows are each judged on a comparable footing. The check must hold
+for every solved unknown at once; a single entry still changing keeps the iteration running.</p>
+<p>In practice, tighter tolerances require more iterations to satisfy, while looser tolerances
+converge sooner at the cost of accuracy. If the criterion is not met within the iteration
+limit, the solver logs a non-converged warning and reports the last iterate as the result for
+the timestep (see <a class="reference internal" href="solver_workflow.html"><span class="doc">Solve Workflow</span></a>).</p>
 </section>
 <section id="related-documentation">
 <h2>Related Documentation<a class="headerlink" href="#related-documentation" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>For the overall solver flow, see <a class="reference internal" href="solver_workflow.html"><span class="doc">Solver workflow</span></a>.</p></li>
-<li><p>For unknown and equation structure, see <a class="reference internal" href="solver_unknowns_and_equations.html"><span class="doc">Solver unknowns and equations</span></a>.</p></li>
-<li><p>For simulation-loop context, see <a class="reference internal" href="../intro/intro_main.html"><span class="doc">Introduction</span></a>.</p></li>
+<li><p><a class="reference internal" href="solver_main.html"><span class="doc">Solver</span></a> — the conceptual overview.</p></li>
+<li><p><a class="reference internal" href="solver_workflow.html"><span class="doc">Solve Workflow</span></a> — where the convergence check sits in the solve loop.</p></li>
+<li><p><a class="reference internal" href="solver_unknowns.html"><span class="doc">Solved Unknowns</span></a> — the solved vector that is tested against tolerance.</p></li>
+<li><p><a class="reference internal" href="../reference/solver_reference.html"><span class="doc">Solver Reference</span></a> — class-level reference.</p></li>
 </ul>
 </section>
 </section>
@@ -525,23 +519,23 @@ treated as converged for output purposes.</p>
         
 
         <div class="related-pages">
-          <a class="next-page" href="solver_behavior.html">
+          <a class="next-page" href="../network/network_main.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Solver Behavior</div>
+                <div class="title">Network layer</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="solver_unknowns_and_equations.html">
+          <a class="prev-page" href="solver_unknowns.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Solver unknowns and equations</div>
+                <div class="title">Solved Unknowns</div>
                 
               </div>
             </a>
@@ -584,13 +578,9 @@ treated as converged for output purposes.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Solver convergence</a><ul>
+<li><a class="reference internal" href="#">Convergence</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#role-in-the-simulation-workflow">Role in the Simulation Workflow</a></li>
-<li><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
-<li><a class="reference internal" href="#behavior-and-interpretation">Behavior and Interpretation</a></li>
-<li><a class="reference internal" href="#assumptions">Assumptions</a></li>
-<li><a class="reference internal" href="#limitations">Limitations</a></li>
+<li><a class="reference internal" href="#id1">Convergence</a></li>
 <li><a class="reference internal" href="#related-documentation">Related Documentation</a></li>
 </ul>
 </li>

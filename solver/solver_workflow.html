@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Solver unknowns and equations" href="solver_unknowns_and_equations.html"><link rel="prev" title="Solver" href="solver_main.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Solved Unknowns" href="solver_unknowns.html"><link rel="prev" title="Solver" href="solver_main.html">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Solver workflow - OMOTES Simulator documentation documentation</title>
+        <title>Solve Workflow - OMOTES Simulator documentation documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -194,10 +194,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../intro/intro_main.html">Introduction</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="solver_main.html">Solver</a><input aria-label="Toggle navigation of Solver" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Solver workflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver_unknowns_and_equations.html">Solver unknowns and equations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver_convergence.html">Solver convergence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver_behavior.html">Solver Behavior</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Solve Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver_unknowns.html">Solved Unknowns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver_convergence.html">Convergence</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../network/network_main.html">Network layer</a></li>
@@ -456,67 +455,45 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="solver-workflow">
-<h1>Solver workflow<a class="headerlink" href="#solver-workflow" title="Link to this heading">¶</a></h1>
+          <section id="solve-workflow">
+<span id="solver-workflow"></span><h1>Solve Workflow<a class="headerlink" href="#solve-workflow" title="Link to this heading">¶</a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>The solver is responsible for computing the hydraulic and thermal state of the network for a single
-solve. It sits inside the timestep execution path and is called after controller setpoints have been
-applied to the network assets.</p>
+<p>The solver reaches the network state through iteration by using a Newton-Rapson method to
+linearize the equations: it repeatedly assembles a linear system from the current solution,
+solves it, transfers the result back to the assets and nodes, and tests whether the solution
+has stopped changing. The loop stops when the solution has converged or when an iteration limit
+is reached.</p>
 </section>
-<section id="role-in-the-simulation-workflow">
-<h2>Role in the Simulation Workflow<a class="headerlink" href="#role-in-the-simulation-workflow" title="Link to this heading">¶</a></h2>
-<p>At a high level, the execution flow is:</p>
-<ol class="arabic simple">
-<li><p>The simulation loop advances to the next timestep.</p></li>
-<li><p>The controller updates network state and computes setpoints for that timestep.</p></li>
-<li><p>The heat network applies those setpoints to assets.</p></li>
-<li><p>The solver assembles and solves the network equation system.</p></li>
-<li><p>Results are written back to assets and nodes.</p></li>
-<li><p>Asset-level convergence is checked at timestep level before output is stored.</p></li>
-</ol>
-<p>In the implementation, <code class="docutils literal notranslate"><span class="pre">NetworkSimulation.run()</span></code> drives the timestep loop, <code class="docutils literal notranslate"><span class="pre">HeatNetwork</span></code> applies
-controller input and invokes <code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code>, and the solver delegates equation solution to the
-matrix layer.</p>
-</section>
-<section id="key-concepts">
-<h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Timestep solve: one call to the solver that computes updated state values for the current network state.</p></li>
-<li><p>Equation assembly: assets and nodes each contribute equations to the global system.</p></li>
-<li><p>Result propagation: the solved vector is transferred back into asset and node state.</p></li>
-</ul>
-</section>
-<section id="behavior-and-interpretation">
-<h2>Behavior and Interpretation<a class="headerlink" href="#behavior-and-interpretation" title="Link to this heading">¶</a></h2>
-<p>The solver itself does not decide operational setpoints. Those come from the controller. Its task is
-to find a network state that satisfies the assembled hydraulic and thermal equations for the current
-inputs and topology.</p>
-<p>Because the solve runs inside the broader timestep loop, users should interpret solver output as the
-numerical state associated with one controller-driven network condition, not as a standalone control
-decision.</p>
-</section>
-<section id="assumptions">
-<h2>Assumptions<a class="headerlink" href="#assumptions" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Controller inputs have already been applied before the solve begins.</p></li>
-<li><p>Asset and node equations together provide a square system with one equation per unknown.</p></li>
-<li><p>The solver writes results back into network entities after each matrix solve.</p></li>
-</ul>
-</section>
-<section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>This page describes solver workflow, not asset-specific physical models.</p></li>
-<li><p>It does not replace the lower-level class reference pages for <code class="docutils literal notranslate"><span class="pre">Solver</span></code>, <code class="docutils literal notranslate"><span class="pre">Matrix</span></code>, or <code class="docutils literal notranslate"><span class="pre">Network</span></code>.</p></li>
-</ul>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">¶</a></h2>
+<p>Each call to the solver runs the following loop.</p>
+<p><strong>Initialize.</strong> The matrix solution is reset and every asset and node discards its previous
+solution, so the iteration starts from a clean state.</p>
+<p><strong>Assemble.</strong> Each asset and then each node contributes its equations, linearized about the
+current solution, into a single system. The number of equations always matches the number of
+unknowns, so the linear system is square.</p>
+<p><strong>Solve.</strong> The assembled linear system is solved for a new solution vector. This solution is
+the linearized estimate of the network state for the current iteration.</p>
+<p><strong>Transfer.</strong> The new solution is written back onto the assets and nodes, so that the next
+assembly step linearizes around the updated state.</p>
+<p><strong>Check and iterate.</strong> Convergence is tested by comparing the new solution against the
+solution of the previous iteration (see <a class="reference internal" href="solver_convergence.html"><span class="doc">Convergence</span></a>). If the two agree within
+tolerance, the loop stops and the network state is final for the timestep. Otherwise the loop
+repeats from the assembly step.</p>
+<p><strong>Iteration limit.</strong> The loop is capped at 100 iterations. If convergence is not reached
+within that limit, a warning is logged and the last computed iterate is used as the result.</p>
+<p>Because the equations are re-linearized about the latest solution on every pass, successive
+iterates move toward the state that satisfies the full nonlinear network equations.</p>
 </section>
 <section id="related-documentation">
 <h2>Related Documentation<a class="headerlink" href="#related-documentation" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>For unknowns and equation structure, see <a class="reference internal" href="solver_unknowns_and_equations.html"><span class="doc">Solver unknowns and equations</span></a>.</p></li>
-<li><p>For convergence behavior across iterations and timesteps, see <a class="reference internal" href="solver_convergence.html"><span class="doc">Solver convergence</span></a>.</p></li>
-<li><p>For asset-level physics, see <a class="reference internal" href="../physics/physics_main.html"><span class="doc">Physics</span></a>.</p></li>
+<li><p><a class="reference internal" href="solver_main.html"><span class="doc">Solver</span></a> — the conceptual overview and Newton-Raphson linearization statement.</p></li>
+<li><p><a class="reference internal" href="solver_unknowns.html"><span class="doc">Solved Unknowns</span></a> — the quantities assembled into each linear system.</p></li>
+<li><p><a class="reference internal" href="solver_convergence.html"><span class="doc">Convergence</span></a> — how the convergence check in the loop is evaluated.</p></li>
+<li><p><a class="reference internal" href="../physics/physics_main.html"><span class="doc">Physics</span></a> — the asset-internal relations that form the equations.</p></li>
+<li><p><a class="reference internal" href="../reference/solver_reference.html"><span class="doc">Solver Reference</span></a> — class-level reference.</p></li>
 </ul>
 </section>
 </section>
@@ -527,12 +504,12 @@ decision.</p>
         
 
         <div class="related-pages">
-          <a class="next-page" href="solver_unknowns_and_equations.html">
+          <a class="next-page" href="solver_unknowns.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Solver unknowns and equations</div>
+                <div class="title">Solved Unknowns</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -586,13 +563,9 @@ decision.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Solver workflow</a><ul>
+<li><a class="reference internal" href="#">Solve Workflow</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#role-in-the-simulation-workflow">Role in the Simulation Workflow</a></li>
-<li><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
-<li><a class="reference internal" href="#behavior-and-interpretation">Behavior and Interpretation</a></li>
-<li><a class="reference internal" href="#assumptions">Assumptions</a></li>
-<li><a class="reference internal" href="#limitations">Limitations</a></li>
+<li><a class="reference internal" href="#workflow">Workflow</a></li>
 <li><a class="reference internal" href="#related-documentation">Related Documentation</a></li>
 </ul>
 </li>
