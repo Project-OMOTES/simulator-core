@@ -52,21 +52,31 @@ Before writing, inspect the closest matching existing documentation page and pre
 
 1. Follow repository documentation style first, especially:
    - ``doc/index.rst``
-   - ``doc/support/support.rst`` (existing Support page; already references the issue
-     tracker, ``CONTRIBUTING.md``, and ``README.md``)
+   - ``doc/support/support.rst`` (existing Support page; already references the
+     ``user_feedback`` repository, this repository's own issue tracker, ``CONTRIBUTING.md``,
+     and ``README.md``)
    - ``CONTRIBUTING.md`` (repository root — branch/PR/review workflow, lint/type-check
      requirements, test coverage guideline)
    - ``README.md`` (repository root)
 
 2. Use repository context as the authority for support channels.
 
-Concrete support paths confirmed to exist in this repository:
-- the GitHub issue tracker,
+Concrete support paths confirmed to exist:
+- the `Project-OMOTES/user_feedback <https://github.com/Project-OMOTES/user_feedback>`_
+  repository's Discussions, "Q&A" category — for usage questions
+  (``https://github.com/Project-OMOTES/user_feedback/discussions/new?category=q-a``),
+- the same repository's Issues, using the ``bug_report.yml``/``feature_request.yml``
+  templates — for bug reports and feature requests; browse existing issues at
+  ``https://github.com/Project-OMOTES/user_feedback/issues`` before filing a new one,
+- this repository's own GitHub issue tracker — for development/code-level issues in
+  simulator-core itself, paired with ``CONTRIBUTING.md``,
 - ``CONTRIBUTING.md``,
 - ``README.md``.
 
-No ``.github/ISSUE_TEMPLATE/`` directory exists in this repository — do not reference or
-invent issue templates.
+No ``.github/ISSUE_TEMPLATE/`` directory exists in *this* repository (simulator-core) — do
+not invent templates here. Templates do exist in the external ``user_feedback`` repository
+(``bug_report.yml``, ``feature_request.yml``, ``question.yml``) and may be referenced by
+name/purpose since they are real, confirmed artifacts — do not fabricate others.
 
 Rules for source usage:
 - Do not invent support channels that are not present in the repository context.
@@ -104,7 +114,6 @@ A good support page should answer:
 - Is this a bug, a documentation issue, or a usage question?
 - What should I include in my report?
 - Where should I look first before opening an issue?
-- When should I consult developer docs instead?
 
 A support page should not:
 - become a developer onboarding page,
@@ -129,11 +138,10 @@ Section order
 Use the following section order for all sections that are present:
 
 1. Title
-2. When to use this page
-3. Support Paths
-4. What to include
-5. Before requesting support
-6. Related Documentation
+2. Support Paths
+3. What to include
+4. Before requesting support
+5. Related Documentation
 
 Optional sections:
 - ``Bug Reports``
@@ -146,13 +154,6 @@ Optional sections may be added only when they materially improve clarity.
 
 Section requirements
 --------------------
-
-When to use this page
-~~~~~~~~~~~~~~~~~~~~~
-Explain:
-- who this page is for,
-- which types of requests belong here,
-- when the reader should use other documentation instead.
 
 Support Paths
 ~~~~~~~~~~~~~

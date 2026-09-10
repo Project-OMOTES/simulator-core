@@ -94,7 +94,7 @@ Classify each task into one of the following documentation types:
 - Intro documentation
 - Solver conceptual documentation
 - Solver behavior and physical impact
-- Network conceptual documentation
+- Network documentation
 - Physics asset documentation
 - User-facing control concepts
 - Controller behavior and physical impact
@@ -105,6 +105,27 @@ Classify each task into one of the following documentation types:
 - Support documentation
 - Navigation/index/toctree maintenance
 
+Intro documentation refinement
+-----------------------------
+Treat intro documentation as a single consolidated page intent, authored entirely in
+``doc/intro/intro_main.rst``. The page must cover, concisely and in this order:
+
+1. Overview — what OMOTES.SIMULATOR_CORE is.
+2. What It Does — scope and boundaries (what simulator-core includes and excludes).
+3. Why It Is Used — audience and use cases (who uses the package and what
+   decisions/questions it supports).
+4. Example — the concrete ESDL-to-result run contract, with a trimmed runnable code
+   example and a short walkthrough, cross-referencing ``README.md`` for the full example.
+5. Related Documentation — links to the adjacent sections.
+
+Intro decision rule
+-------------------
+Do not split intro content into multiple pages or sub-tasks. Keep the page short
+(mesido-style brevity: short prose sections, not a page per audience/topic). If a request
+would grow the page into a long, multi-topic essay, push the excess detail out via
+cross-links to the relevant Solver/Network/Physics/Control/Developer pages rather than
+adding a new intro subpage.
+
 Solver documentation refinement
 --------------------------------
 Treat solver documentation as a single four-page section owned by ``SolverBehaviorDocAgent``:
@@ -113,6 +134,31 @@ Treat solver documentation as a single four-page section owned by ``SolverBehavi
 - ``doc/solver/solver_workflow.rst`` — the solve workflow (assemble, solve, check, iterate),
 - ``doc/solver/solver_unknowns.rst`` — the solved unknowns (pressure, mass flow, internal energy),
 - ``doc/solver/solver_convergence.rst`` — absolute and relative convergence determination.
+
+Network documentation refinement
+---------------------------------
+Treat network documentation as a single consolidated page intent, authored entirely in
+``doc/network/network_main.rst``. The page covers, in one place: connectivity and
+communication between assets and the solver/controller, how the network graph is
+represented (nodes, junctions, connection points), how it is constructed from ESDL
+connectivity, and how it is partitioned into sub-networks. Depth comparable to the
+physics asset pages is expected within this single page; do not split it into separate
+topology/construction/sub-network pages.
+
+Network assumptions/limitations linking policy
+----------------------------------------------
+When authoring or reviewing the ``Assumptions`` and ``Limitations`` sections in
+``doc/network/network_main.rst``:
+
+- Link only to pages that already exist in the repository, or pages that are explicitly
+  being created in the same coordinated task.
+- Prefer section-level links (labels/``:ref:``) when a corresponding assumptions or
+  limitations section exists in the target page.
+- Do not reference API root pages, generated package index pages, or fallback API trees
+  as the primary target for these sections.
+- If a required target page does not yet exist and is not in-scope to be created,
+  remove the link and keep the statement local rather than inventing a destination.
+- Treat unresolved links as a blocking validation failure.
 
 Control documentation refinement
 --------------------------------
@@ -150,7 +196,7 @@ Delegate work according to the following rules:
 - Solver behavior and physical impact
   Route to: ``SolverBehaviorDocAgent``
 
-- Network conceptual documentation
+- Network documentation
   Route to: ``SystemConceptDocAgent``
 
 - Physics asset documentation
@@ -197,6 +243,13 @@ If a solver-related request is ambiguous, classify by the primary question being
 When a request mixes both, split it into separate sub-tasks and assign them separately. Do not
 allow a single page to serve both purposes.
 
+Network decision rule
+----------------------
+Do not split network content into multiple pages or sub-tasks. Whether the request is about
+connectivity/communication with the solver and controller, or about graph
+structure/representation, ESDL construction, or sub-network partitioning, route it to
+``doc/network/network_main.rst``.
+
 Control decision rule
 ---------------------
 If a control-related request is ambiguous, classify by the primary question being answered:
@@ -215,6 +268,9 @@ If a control-related request is ambiguous, classify by the primary question bein
 
 When a request mixes more than one of these, split it into multiple sub-tasks and assign them separately.
 Do not allow a single page to serve all three purposes.
+
+If the user explicitly scopes a request to ``doc/controller/controller_behavior.rst`` only,
+keep scope locked to that single page unless the user asks to broaden scope.
 
 Audience separation rules
 -------------------------
@@ -295,6 +351,14 @@ When delegating to a specialist agent, always specify:
 - validation criteria,
 - required cross-links to adjacent sections where relevant.
 
+For tasks scoped to ``doc/controller/controller_behavior.rst``, also specify:
+- terminology requirement: use ``water-to-water heat-pump`` wording,
+- completeness requirement: in the ``Dispatch Logic for Supply, Demand, and Storage`` section,
+  explain storage fill-level impact on effective charge/discharge capability and clipping near
+  empty/full bounds,
+- physics link requirement: include a cross-link to
+  ``doc/physics/ideal_heat_storage_physics.rst`` for asset-internal storage behavior.
+
 The coordinator must not delegate vague requests such as:
 - "write the docs"
 - "improve this page"
@@ -322,6 +386,14 @@ Each delegated task must include:
 - explicit exclusions,
 - validation criteria,
 - required cross-links where relevant.
+
+For control-behavior tasks scoped to ``doc/controller/controller_behavior.rst``, add explicit
+exclusions preventing edits to other pages unless the user requests broader scope.
+For network documentation tasks, also include explicit link-target constraints for
+``Assumptions`` and ``Limitations``:
+- permitted targets (existing conceptual pages or pages created in-task),
+- prohibited targets (API root/generated index/fallback API tree),
+- required handling when no valid target exists (keep text local, no fabricated links).
 
 Coordinator output format
 -------------------------
@@ -363,8 +435,10 @@ Use these cues when classifying requests:
   tolerance", "pressure-drop closure", "physical impact of the solve"
   => Solver behavior and physical impact
 
-- "how is the network represented", "nodes", "connections", "communication"
-  => Network conceptual documentation
+- "how is the network represented", "communication between assets and solver/controller",
+  "network topology", "node/junction connectivity", "how is the network built from ESDL",
+  "sub-network partitioning", "connection points"
+  => Network documentation
 
 - "control behavior", "setpoint propagation", "operating logic", "what does control do"
   => User-facing control concepts
@@ -409,6 +483,7 @@ Prevent duplication across sections.
 
 In particular:
 - Solver, Network, and Control pages may describe system behavior conceptually, but should not repeat asset-level physics details already owned by ``PhysicsAssetDocAgent``.
+- The network page may describe topology, construction, and partitioning in detail, but should not repeat asset-level physics, controller dispatch decisions, or solver equation-assembly mechanics owned by other specialist agents.
 - Developer guide pages may describe extension workflows, but should not duplicate autogenerated API reference.
 - API reference pages must not contain long narrative explanations that belong in the developer guide.
 
@@ -454,7 +529,10 @@ After coordination and downstream edits:
 3. Verify that pages are routed to the correct audience.
 4. Verify that there is no major duplication between end-user docs, conceptual docs, developer guides, and API reference.
 5. Verify that navigation and cross-links are coherent.
-6. Route authored pages through ``DocReviewAgent`` where audience, scope, or duplication review is needed.
-7. Route structural and build checks through ``SphinxValidationAgent``.
-8. If warnings or errors occur, route fixes back to the responsible specialist agent.
-9. Do not consider the task complete if the documentation architecture is inconsistent, the toctree order is broken, pages are assigned to the wrong documentation type, or required review/validation steps remain unresolved.
+6. For ``doc/network/network_main.rst`` assumptions/limitations links, verify that every
+  link target exists (or is created in-task), resolves cleanly in Sphinx, and does not
+  point to API root/generated index pages.
+7. Route authored pages through ``DocReviewAgent`` where audience, scope, or duplication review is needed.
+8. Route structural and build checks through ``SphinxValidationAgent``.
+9. If warnings or errors occur, route fixes back to the responsible specialist agent.
+10. Do not consider the task complete if the documentation architecture is inconsistent, the toctree order is broken, pages are assigned to the wrong documentation type, required review/validation steps remain unresolved, or network assumptions/limitations links violate the link-target policy above.
