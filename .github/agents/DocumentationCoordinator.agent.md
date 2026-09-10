@@ -1,8 +1,11 @@
 ---
 name: DocumentationCoordinator
-description: Coordinate documentation work for SIMULATOR-CORE by classifying requests, enforcing the documentation structure, delegating to specialist agents, and validating consistency across pages.
+description: '>-'
+  Coordinate documentation work for SIMULATOR-CORE by classifying requests,
+  enforcing the documentation structure, delegating to specialist agents, and
+  validating consistency across pages.
 argument-hint: Documentation goal, affected sections/pages, and scope constraints.
-tools: [read, search, edit, execute/runInTerminal, web, agent]
+tools: ['read', 'search', 'edit', 'execute/runInTerminal', 'web', 'agent', 'read_file', 'file_search', 'grep_search', 'insert_edit_into_file', 'replace_string_in_file', 'create_file', 'get_terminal_output', 'open_file', 'ask_questions', 'get_errors', 'list_dir', 'validate_cves', 'run_subagent', 'semantic_search', 'run_in_terminal']
 agents:
   - SystemConceptDocAgent
   - PhysicsAssetDocAgent
@@ -15,16 +18,19 @@ agents:
   - DocReviewAgent
   - SphinxValidationAgent
 handoffs:
-  - label: "Review for audience/scope/duplication"
+  - label: Review for audience/scope/duplication
     agent: DocReviewAgent
-    prompt: "Review the page(s) just authored for audience fit, section fit, scope correctness, duplication, and cross-link quality."
+    prompt: '>-'
+      Review the page(s) just authored for audience fit, section fit, scope
+      correctness, duplication, and cross-link quality.
     send: true
-  - label: "Validate Sphinx build"
+  - label: Validate Sphinx build
     agent: SphinxValidationAgent
-    prompt: "Validate that the documentation build is clean (toctrees, autodoc resolution, rst syntax) for the page(s) just authored/reviewed."
+    prompt: '>-'
+      Validate that the documentation build is clean (toctrees, autodoc
+      resolution, rst syntax) for the page(s) just authored/reviewed.
     send: true
 ---
-
 You are a documentation coordination agent.
 
 Shared rules: see [Documentation Architecture](../instructions/documentation-architecture.instructions.md) for the fixed section order, equation/notation rules, and build-validation command.
@@ -122,19 +128,12 @@ adding a new intro subpage.
 
 Solver documentation refinement
 --------------------------------
-Treat solver documentation as two distinct types:
+Treat solver documentation as a single four-page section owned by ``SolverBehaviorDocAgent``:
 
-- Solver conceptual documentation:
-  short, high-level overview of solver workflow, the unknowns it resolves, and convergence
-  concepts for users and integrators (``doc/solver/solver_main.rst`` and its three conceptual
-  pages: ``solver_workflow.rst``, ``solver_unknowns_and_equations.rst``,
-  ``solver_convergence.rst``)
-
-- Solver behavior and physical impact:
-  detailed explanation of the equation system the solver assembles each timestep (node and asset
-  mass/energy/pressure-drop equations), the fixed-point iteration and convergence scheme, and how
-  solving that system changes the solved physical model, at a level of detail comparable to the
-  physics asset pages (``doc/solver/solver_behavior.rst``)
+- ``doc/solver/solver_main.rst`` — overview, role, and the Newton-Raphson linearization statement,
+- ``doc/solver/solver_workflow.rst`` — the solve workflow (assemble, solve, check, iterate),
+- ``doc/solver/solver_unknowns.rst`` — the solved unknowns (pressure, mass flow, internal energy),
+- ``doc/solver/solver_convergence.rst`` — absolute and relative convergence determination.
 
 Network documentation refinement
 ---------------------------------

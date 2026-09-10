@@ -1,63 +1,51 @@
-Solver workflow
-===============
+.. _solver-workflow:
+
+Solve Workflow
+==============
 
 Overview
 --------
 
-The solver is responsible for computing the hydraulic and thermal state of the network for a single
-solve. It sits inside the timestep execution path and is called after controller setpoints have been
-applied to the network assets.
+The solver reaches the network state through iteration by using a Newton-Rapson method to
+linearize the equations: it repeatedly assembles a linear system from the current solution,
+solves it, transfers the result back to the assets and nodes, and tests whether the solution
+has stopped changing. The loop stops when the solution has converged or when an iteration limit
+is reached.
 
-Role in the Simulation Workflow
--------------------------------
+Workflow
+--------
 
-At a high level, the execution flow is:
+Each call to the solver runs the following loop.
 
-#. The simulation loop advances to the next timestep.
-#. The controller updates network state and computes setpoints for that timestep.
-#. The heat network applies those setpoints to assets.
-#. The solver assembles and solves the network equation system.
-#. Results are written back to assets and nodes.
-#. Asset-level convergence is checked at timestep level before output is stored.
+**Initialize.** The matrix solution is reset and every asset and node discards its previous
+solution, so the iteration starts from a clean state.
 
-In the implementation, ``NetworkSimulation.run()`` drives the timestep loop, ``HeatNetwork`` applies
-controller input and invokes ``Solver.solve()``, and the solver delegates equation solution to the
-matrix layer.
+**Assemble.** Each asset and then each node contributes its equations, linearized about the
+current solution, into a single system. The number of equations always matches the number of
+unknowns, so the linear system is square.
 
-Key Concepts
-------------
+**Solve.** The assembled linear system is solved for a new solution vector. This solution is
+the linearized estimate of the network state for the current iteration.
 
-- Timestep solve: one call to the solver that computes updated state values for the current network state.
-- Equation assembly: assets and nodes each contribute equations to the global system.
-- Result propagation: the solved vector is transferred back into asset and node state.
+**Transfer.** The new solution is written back onto the assets and nodes, so that the next
+assembly step linearizes around the updated state.
 
-Behavior and Interpretation
----------------------------
+**Check and iterate.** Convergence is tested by comparing the new solution against the
+solution of the previous iteration (see :doc:`solver_convergence`). If the two agree within
+tolerance, the loop stops and the network state is final for the timestep. Otherwise the loop
+repeats from the assembly step.
 
-The solver itself does not decide operational setpoints. Those come from the controller. Its task is
-to find a network state that satisfies the assembled hydraulic and thermal equations for the current
-inputs and topology.
+**Iteration limit.** The loop is capped at 100 iterations. If convergence is not reached
+within that limit, a warning is logged and the last computed iterate is used as the result.
 
-Because the solve runs inside the broader timestep loop, users should interpret solver output as the
-numerical state associated with one controller-driven network condition, not as a standalone control
-decision.
-
-Assumptions
------------
-
-- Controller inputs have already been applied before the solve begins.
-- Asset and node equations together provide a square system with one equation per unknown.
-- The solver writes results back into network entities after each matrix solve.
-
-Limitations
------------
-
-- This page describes solver workflow, not asset-specific physical models.
-- It does not replace the lower-level class reference pages for ``Solver``, ``Matrix``, or ``Network``.
+Because the equations are re-linearized about the latest solution on every pass, successive
+iterates move toward the state that satisfies the full nonlinear network equations.
 
 Related Documentation
 ---------------------
 
-- For unknowns and equation structure, see :doc:`solver_unknowns_and_equations`.
-- For convergence behavior across iterations and timesteps, see :doc:`solver_convergence`.
-- For asset-level physics, see :doc:`../physics/physics_main`.
+- :doc:`solver_main` — the conceptual overview and Newton-Raphson linearization statement.
+- :doc:`solver_unknowns` — the quantities assembled into each linear system.
+- :doc:`solver_convergence` — how the convergence check in the loop is evaluated.
+- :doc:`../physics/physics_main` — the asset-internal relations that form the equations.
+- :doc:`../reference/solver_reference` — class-level reference.

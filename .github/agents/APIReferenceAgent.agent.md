@@ -97,11 +97,9 @@ Before editing reference pages, inspect the existing documentation structure and
      ``doc/controller/control_behavior.rst`` and ``doc/controller/behavior/*.rst``, the detailed
      controller behavior / physical-impact pages owned by ``ControllerBehaviorDocAgent``), and
      ``doc/solver/*.rst``
-     and ``doc/solver/assets/*.rst`` (excluding the conceptual trio
-     ``solver_workflow.rst``, ``solver_unknowns_and_equations.rst``, and
-     ``solver_convergence.rst``, and the landing page ``solver_main.rst``, both owned by
-     ``SystemConceptDocAgent``, and excluding ``doc/solver/solver_behavior.rst``, the detailed
-     solver behavior / physical-impact page owned by ``SolverBehaviorDocAgent``)
+     and ``doc/solver/assets/*.rst`` (excluding the four-page Solver section
+     ``solver_main.rst``, ``solver_workflow.rst``, ``solver_unknowns.rst``, and
+     ``solver_convergence.rst``, all owned by ``SolverBehaviorDocAgent``)
 
 2. Use source code as the authoritative reference source:
    - ``src/omotes_simulator_core/...`` for the target package/module tree
