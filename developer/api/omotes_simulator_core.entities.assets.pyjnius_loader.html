@@ -476,13 +476,18 @@ Java code.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="omotes_simulator_core.entities.assets.pyjnius_loader.PyjniusLoader.download_rosim_jar">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">download_rosim_jar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#omotes_simulator_core.entities.assets.pyjnius_loader.PyjniusLoader.download_rosim_jar" title="Link to this definition">¶</a></dt>
-<dd><p>Download the Rosim JAR files.</p>
-<p>This function will download the required Rosim JAR files into the <cite>bin</cite> folder.
-It will download it from the latest release on github of the simulator-core repository.
-If there is already a rosim jar in the bin folder it will not download it and use that one.
-If you want the downloaded the latest one, simply delete your local copy.
-We have implemented this to bypass the 100 mb size limit on pypi.
-It returns the name of the downloaded JAR file.</p>
+<dd><p>Ensure the Rosim JAR is present in the <cite>bin</cite> folder and return its file name.</p>
+<p>The JAR is downloaded at runtime rather than shipped inside the wheel because it
+exceeds the 100 MB per-file size limit on PyPI.</p>
+<p>If any <cite>rosim*.jar</cite> is already present in the <cite>bin</cite> folder, no download happens and
+that file is used, whatever its version. Picking up a newer Rosim JAR therefore takes
+both steps: bump the module-level constants and delete the local copy, since either
+one alone leaves the existing file in place.</p>
+<p>The JAR is fetched from a pinned release asset URL, written to a temporary file in
+the <cite>bin</cite> folder and verified against <cite>ROSIM_JAR_SHA256</cite>. Only a file with a matching
+digest is moved into its final place, so an interrupted or corrupted download can
+never be picked up as a valid cached JAR. A RuntimeError is raised when the digest
+does not match.</p>
 </dd></dl>
 
 <dl class="py method">
