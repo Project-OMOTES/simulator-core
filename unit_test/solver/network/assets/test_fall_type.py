@@ -343,3 +343,66 @@ class FallTypeTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(mock_press_to_node_eq.call_count, 1)
+
+    def test_internal_equations_are_cached(self) -> None:
+        """Evaluate that the internal equations are created once and then reused."""
+        # Arrange
+
+        # Act
+        first = [
+            self.asset.get_internal_cont_equation(),
+            self.asset.get_internal_energy_equation(),
+            self.asset.get_internal_pressure_loss_equation(),
+        ]
+        second = [
+            self.asset.get_internal_cont_equation(),
+            self.asset.get_internal_energy_equation(),
+            self.asset.get_internal_pressure_loss_equation(),
+        ]
+
+        # Assert
+        for first_equation, second_equation in zip(first, second):
+            self.assertIs(first_equation, second_equation)
+
+    def test_get_internal_energy_equation_updates_coefficients(self) -> None:
+        """Evaluate that the internal energy equation is updated with the previous solution."""
+        # Arrange
+        mass_flow_rate = 2.0
+        internal_energy = 100.0
+        number_core_quantities = index_core_quantity.number_core_quantities
+        self.asset.get_internal_energy_equation()
+        for connection_point in [0, 1]:
+            self.asset.prev_sol[
+                index_core_quantity.mass_flow_rate + number_core_quantities * connection_point
+            ] = mass_flow_rate
+            self.asset.prev_sol[
+                index_core_quantity.internal_energy + number_core_quantities * connection_point
+            ] = internal_energy
+
+        # Act
+        equation_object = self.asset.get_internal_energy_equation()
+
+        # Assert
+        np_testing.assert_array_equal(
+            equation_object.coefficients,
+            np.array([internal_energy, mass_flow_rate, internal_energy, mass_flow_rate]),
+        )
+        self.assertEqual(
+            equation_object.rhs, 2 * mass_flow_rate * internal_energy + self.asset.heat_flux
+        )
+
+    def test_set_matrix_index_invalidates_internal_equations(self) -> None:
+        """Evaluate that setting the matrix index invalidates the internal equations."""
+        # Arrange
+        first_equation = self.asset.get_internal_cont_equation()
+        new_matrix_index = index_core_quantity.number_core_quantities * 3
+
+        # Act
+        self.asset.set_matrix_index(new_matrix_index)
+        second_equation = self.asset.get_internal_cont_equation()
+
+        # Assert
+        self.assertIsNot(first_equation, second_equation)
+        self.assertEqual(
+            second_equation.indices[0], new_matrix_index + index_core_quantity.mass_flow_rate
+        )

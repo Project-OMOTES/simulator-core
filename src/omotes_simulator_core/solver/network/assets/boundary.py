@@ -53,20 +53,32 @@ class BaseBoundary(BaseAsset):
         )
         self.initial_pressure = 10000.0
 
+    def reset_cached_equations(self) -> None:
+        """Resets the cached equation objects of the boundary.
+
+        :return: None
+        """
+        super().reset_cached_equations()
+        self._pressure_equation: EquationObject | None = None
+
     def get_pressure_equation(self) -> EquationObject:
         """Get a prescribed pressure equation for the boundary.
 
         This method gets an equation to the matrix that sets the pressure at the boundary
-        to a fixed value.
+        to a fixed value. The indices and coefficients of the equation are constant, so they are
+        created once and stored on the boundary. Only the right-hand side is updated. Do not
+        modify the returned equation object, since it is reused for every iteration.
 
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
         """
-        # self.equations_dict["prescribe pressure"] = equation_id
-        equation_object = EquationObject()
-        equation_object.indices = np.array([self.matrix_index + index_core_quantity.pressure])
-        equation_object.coefficients = np.array([1.0])
+        equation_object = self._pressure_equation
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array([self.matrix_index + index_core_quantity.pressure])
+            equation_object.coefficients = np.array([1.0])
+            self._pressure_equation = equation_object
         equation_object.rhs = self.initial_pressure
         return equation_object
 

@@ -49,6 +49,17 @@ class BaseNodeItem(ABC):
         :param int index: The index of the item in the matrix.
         """
         self.matrix_index = index
+        # The matrix indices of the cached equations are no longer valid.
+        self.reset_cached_equations()
+
+    def reset_cached_equations(self) -> None:  # noqa: B027
+        """Resets the cached equation objects of the node item.
+
+        Equations of which the indices and coefficients do not change between iterations are
+        created once and stored on the node. This method invalidates those equations, so that
+        they are recreated when they are requested again. Node items which do not cache
+        equations do not have to implement this method, therefore it is not abstract.
+        """
 
     def get_index_matrix(self, property_name: str, use_relative_indexing: bool) -> int:
         """Method to get matrix index of a certain property for a connection point.

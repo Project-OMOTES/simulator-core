@@ -58,6 +58,37 @@ class BaseAsset(BaseItem):
         )
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
+        self._cached_supply_temperature: float | None = None
+        self._cached_supply_internal_energy: float = 0.0
+        # Relative indices in the previous solution, these do not depend on the matrix index.
+        self._relative_mass_flow_indices = tuple(
+            self.get_index_matrix(
+                property_name="mass_flow_rate",
+                connection_point=connection_point,
+                use_relative_indexing=True,
+            )
+            for connection_point in range(number_connection_points)
+        )
+        self.reset_cached_equations()
+
+    def reset_cached_equations(self) -> None:
+        """Resets the cached equation objects of the asset.
+
+        :return: None
+        """
+        number_connection_points = self.number_of_connection_point
+        self._press_to_node_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+        self._internal_energy_to_node_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+        self._massflow_to_node_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+        self._prescribe_temp_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
 
     def check_connection_point_valid(self, connection_point: int) -> bool:
         """Checks if the connection point is valid for the asset.
@@ -92,6 +123,8 @@ class BaseAsset(BaseItem):
             )
 
         self.connected_nodes[connection_point] = node
+        # The cached equations refer to the matrix index of the connected node.
+        self.reset_cached_equations()
 
     def disconnect_node(self, connection_point: int) -> None:
         """Disconnects a node from a connection point of the asset.
@@ -102,6 +135,8 @@ class BaseAsset(BaseItem):
         """
         self.check_connection_point_valid(connection_point)
         del self.connected_nodes[connection_point]
+        # The cached equations refer to the matrix index of the disconnected node.
+        self.reset_cached_equations()
 
     def is_connected(self, connection_point: int) -> bool:
         """Checks if a connection point is connected to a node.
@@ -147,16 +182,7 @@ class BaseAsset(BaseItem):
         :return: An equation object representing the thermal equation.
         :rtype: EquationObject
         """
-        if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=connection_point,
-                    use_relative_indexing=True,
-                )
-            ]
-            > 0
-        ):
+        if self.prev_sol[self._relative_mass_flow_indices[connection_point]] > 0:
             return self.get_prescribe_temp_equation(connection_point)
         else:
             return self.get_internal_energy_to_node_equation(connection_point)
@@ -164,38 +190,66 @@ class BaseAsset(BaseItem):
     def get_prescribe_temp_equation(self, connection_point: int) -> EquationObject:
         """Gets a prescribed temperature equation for a connection point of the asset.
 
+        The indices and coefficients of the equation are constant, so they are created once and
+        stored on the asset. Only the right-hand side is updated. Do not modify the returned
+        equation object, since it is reused for every iteration.
+
         :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the prescribed temperature equation.
         :rtype: EquationObject
         """
-        if not self.is_connected(connection_point=connection_point):
-            raise ValueError(
-                f"Connection point {connection_point} of asset {self.name} is not connected to a"
-                + " node."
-            )
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="internal_energy",
-                    connection_point=connection_point,
-                    use_relative_indexing=False,
+        equation_object = self._prescribe_temp_equations[connection_point]
+        if equation_object is None:
+            if not self.is_connected(connection_point=connection_point):
+                raise ValueError(
+                    f"Connection point {connection_point} of asset {self.name} is not connected"
+                    + " to a node."
                 )
-            ]
-        )
-        equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+            equation_object.coefficients = np.array([1.0])
+            self._prescribe_temp_equations[connection_point] = equation_object
+        equation_object.rhs = self._get_supply_internal_energy()
         return equation_object
+
+    def _get_supply_internal_energy(self) -> float:
+        """Returns the internal energy belonging to the supply temperature of the asset.
+
+        The supply temperature only changes between time steps, while the internal energy is
+        requested every iteration. Therefore the internal energy is calculated once per supply
+        temperature.
+
+        :return: float, the internal energy of the fluid [J/kg].
+        """
+        supply_temperature = self.supply_temperature
+        if supply_temperature != self._cached_supply_temperature:
+            self._cached_supply_internal_energy = fluid_props.get_ie(supply_temperature)
+            self._cached_supply_temperature = supply_temperature
+        return self._cached_supply_internal_energy
 
     def get_internal_energy_to_node_equation(self, connection_point: int) -> EquationObject:
         """Gets a temperature to node equation for a connection point of the asset.
+
+        The equation is constant, so it is created once and stored on the asset. Do not modify
+        the returned equation object, since it is reused for every iteration.
 
         :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the temperature to node equation.
         :rtype: EquationObject
         """
+        equation_object = self._internal_energy_to_node_equations[connection_point]
+        if equation_object is not None:
+            return equation_object
         # Check if the connection point is connected to a node
         if not self.is_connected(connection_point=connection_point):
             raise ValueError(
@@ -218,6 +272,7 @@ class BaseAsset(BaseItem):
         )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
+        self._internal_energy_to_node_equations[connection_point] = equation_object
         return equation_object
 
     def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
@@ -229,11 +284,17 @@ class BaseAsset(BaseItem):
     def get_press_to_node_equation(self, connection_point: int) -> EquationObject:
         """Gets a pressure to node equation for a connection point of the asset.
 
+        The equation is constant, so it is created once and stored on the asset. Do not modify
+        the returned equation object, since it is reused for every iteration.
+
         :param connection_point: The index of the connection point to get the equation for.
         :type connection_point: int
         :return: An equation object representing the pressure to node equation.
         :rtype: EquationObject
         """
+        equation_object = self._press_to_node_equations[connection_point]
+        if equation_object is not None:
+            return equation_object
         # Check if the connection point is connected to a node
         if not self.is_connected(connection_point=connection_point):
             raise ValueError(
@@ -256,16 +317,23 @@ class BaseAsset(BaseItem):
         )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
+        self._press_to_node_equations[connection_point] = equation_object
         return equation_object
 
     def add_massflow_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a pressure to node equation for a connection point of the asset.
+
+        The equation is constant, so it is created once and stored on the asset. Do not modify
+        the returned equation object, since it is reused for every iteration.
 
         :param connection_point: The index of the connection point to add the equation for.
         :type connection_point: int
         :return: An equation object representing the pressure to node equation.
         :rtype: EquationObject
         """
+        equation_object = self._massflow_to_node_equations[connection_point]
+        if equation_object is not None:
+            return equation_object
         # Check if the connection point is connected to a node
         if not self.is_connected(connection_point=connection_point):
             raise ValueError(
@@ -286,6 +354,7 @@ class BaseAsset(BaseItem):
         )
         equation_object.coefficients = np.array([1.0, -1.0])
         equation_object.rhs = 0.0
+        self._massflow_to_node_equations[connection_point] = equation_object
         return equation_object
 
     def get_result(self) -> list[float]:

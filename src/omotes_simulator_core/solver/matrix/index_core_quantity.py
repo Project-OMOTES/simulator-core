@@ -30,9 +30,34 @@ class IndexCoreQuantity:
     pressure = 1
     internal_energy = 2
 
+    _property_names = ("mass_flow_rate", "pressure", "internal_energy")
+    """The names of the core quantities for which the index table is created."""
+
+    _maximum_cached_connection_point = 8
+    """The highest connection point for which the index table is created."""
+
+    def __post_init__(self) -> None:
+        """Creates the lookup table with the index per property and connection point.
+
+        The index of a property and connection point is requested millions of times during a
+        simulation. Looking the index up in a dictionary is considerably faster than retrieving
+        the attribute by its name and calculating the offset of the connection point.
+
+        :return: None
+        """
+        self._index_table: dict[tuple[str, int], int] = {
+            (property_name, connection_point): int(getattr(self, property_name))
+            + connection_point * self.number_core_quantities
+            for property_name in self._property_names
+            for connection_point in range(self._maximum_cached_connection_point + 1)
+        }
+
     def get_index_property(self, property_name: str, connection_point: int) -> int:
         """Method to get the property of the index."""
-        return self.get_index(property_name) + connection_point * self.number_core_quantities
+        index = self._index_table.get((property_name, connection_point))
+        if index is None:
+            return self.get_index(property_name) + connection_point * self.number_core_quantities
+        return index
 
     def get_index(self, property_name: str) -> int:
         """Method to get the index of the property."""

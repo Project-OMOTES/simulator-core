@@ -49,6 +49,12 @@ class Solver:
             self.network.get_node(node).set_matrix_index(
                 self.matrix.add_unknowns(self.network.get_node(node).number_of_unknowns)
             )
+        # Equations of an asset refer to the matrix index of its connected nodes and vice versa.
+        # Therefore the cached equations are only valid once all matrix indices are set.
+        for asset in self.network.assets:
+            self.network.get_asset(asset).reset_cached_equations()
+        for node in self.network.nodes:
+            self.network.get_node(node).reset_cached_equations()
 
     def get_equations(self) -> list[EquationObject]:
         """Method to get the equations of the network.
@@ -56,10 +62,10 @@ class Solver:
         :return: list[EquationObject] equations: List of equations of the network.
         """
         equations: list[EquationObject] = []
-        for asset in self.network.assets:
-            equations = equations + self.network.assets[asset].get_equations()
-        for node in self.network.nodes:
-            equations = equations + self.network.nodes[node].get_equations()
+        for asset_item in self.network.assets.values():
+            equations.extend(asset_item.get_equations())
+        for node_item in self.network.nodes.values():
+            equations.extend(node_item.get_equations())
         return equations
 
     def solve(self) -> None:

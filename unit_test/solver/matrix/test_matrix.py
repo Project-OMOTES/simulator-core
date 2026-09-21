@@ -154,6 +154,97 @@ class MatrixTest(unittest.TestCase):
         self.assertIsInstance(cm.exception, RuntimeError)
         self.assertEqual(str(cm.exception), "Matrix is singular, matrix is dumped to file.")
 
+    def test_solve_reuses_matrix_pattern(self) -> None:
+        """Test that a second solve with the same pattern reuses the sparse matrix."""
+        # arrange
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+        equation1 = EquationObject()
+        equation1.indices = np.array([index, index + 1])
+        equation1.coefficients = np.array([1.0, 1.0])
+        equation1.rhs = 0.0
+        equation2 = EquationObject()
+        equation2.indices = np.array([index, index + 1])
+        equation2.coefficients = np.array([0.0, 1.0])
+        equation2.rhs = 10.0
+        matrix.solve([equation1, equation2])
+        first_matrix = matrix._matrix
+        # Change the values, but not the sparsity pattern of the system of equations.
+        equation2.rhs = 20.0
+
+        # act
+        result = matrix.solve([equation1, equation2])
+
+        # assert
+        self.assertIs(matrix._matrix, first_matrix)
+        self.assertEqual(result, [-20.0, 20.0])
+
+    def test_solve_rebuilds_changed_matrix_pattern(self) -> None:
+        """Test that a solve with a changed pattern rebuilds the sparse matrix."""
+        # arrange
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+        equation1 = EquationObject()
+        equation1.indices = np.array([index, index + 1])
+        equation1.coefficients = np.array([1.0, 1.0])
+        equation1.rhs = 0.0
+        equation2 = EquationObject()
+        equation2.indices = np.array([index, index + 1])
+        equation2.coefficients = np.array([0.0, 1.0])
+        equation2.rhs = 10.0
+        matrix.solve([equation1, equation2])
+        first_matrix = matrix._matrix
+        # Use a shorter equation, which changes the sparsity pattern.
+        equation2.indices = np.array([index + 1])
+        equation2.coefficients = np.array([1.0])
+
+        # act
+        result = matrix.solve([equation1, equation2])
+
+        # assert
+        self.assertIsNot(matrix._matrix, first_matrix)
+        self.assertEqual(result, [-10.0, 10.0])
+
+    def test_solve_with_duplicate_indices(self) -> None:
+        """Test that duplicate indices within an equation are summed."""
+        # arrange
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+        equation1 = EquationObject()
+        # The coefficient of the first unknown is split over two entries.
+        equation1.indices = np.array([index, index, index + 1])
+        equation1.coefficients = np.array([0.5, 0.5, 1.0])
+        equation1.rhs = 0.0
+        equation2 = EquationObject()
+        equation2.indices = np.array([index, index + 1])
+        equation2.coefficients = np.array([0.0, 1.0])
+        equation2.rhs = 10.0
+
+        # act
+        result = matrix.solve([equation1, equation2])
+
+        # assert
+        self.assertTrue(matrix._has_duplicates)
+        self.assertEqual(result, [-10.0, 10.0])
+
+    def test_add_unknowns_resets_matrix_pattern(self) -> None:
+        """Test that adding unknowns invalidates the cached sparsity pattern."""
+        # arrange
+        matrix = Matrix()
+        index = matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([index])
+        equation.coefficients = np.array([1.0])
+        equation.rhs = 5.0
+        matrix.solve([equation])
+
+        # act
+        matrix.add_unknowns(1)
+
+        # assert
+        self.assertIsNone(matrix._matrix)
+        self.assertEqual(len(matrix._data_map), 0)
+
     def test_is_converged_false(self) -> None:
         """Test the is converged of the matrix object."""
         # arrange

@@ -101,6 +101,21 @@ class HeatBoundary(FallType):
             loss_coefficient=loss_coefficient,
         )
 
+    def reset_cached_equations(self) -> None:
+        """Resets the cached equation objects of the asset.
+
+        :return: None
+        """
+        super().reset_cached_equations()
+        # The mass flow and pressure variants are cached separately, since the asset switches
+        # between them when the controller changes the set points.
+        self._pre_scribe_mass_flow_equations: list[EquationObject | None] = [
+            None
+        ] * self.number_of_connection_point
+        self._pre_scribe_pressure_equations: list[EquationObject | None] = [
+            None
+        ] * self.number_of_connection_point
+
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the asset.
 
@@ -139,6 +154,10 @@ class HeatBoundary(FallType):
         - If pre_scribe_mass_flow is False, then Pressure at connection point = Set pressure
                     property
 
+        The indices and coefficients of both variants are constant, so they are created once and
+        stored on the asset. Only the right-hand side is updated. Do not modify the returned
+        equation object, since it is reused for every iteration.
+
         :param int connection_point: The connection point for which to get the equation
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
@@ -148,31 +167,37 @@ class HeatBoundary(FallType):
         if connection_point >= self.number_of_connection_point:
             raise IndexError("The connection point is not available.")
 
-        # Create equation object
-        equation_object = EquationObject()
         if self.pre_scribe_mass_flow:
-            equation_object.indices = np.array(
-                [
-                    self.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=connection_point,
-                        use_relative_indexing=False,
-                    )
-                ]
-            )
-            equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
+            equation_object = self._pre_scribe_mass_flow_equations[connection_point]
+            if equation_object is None:
+                equation_object = EquationObject()
+                equation_object.indices = np.array(
+                    [
+                        self.get_index_matrix(
+                            property_name="mass_flow_rate",
+                            connection_point=connection_point,
+                            use_relative_indexing=False,
+                        )
+                    ]
+                )
+                equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
+                self._pre_scribe_mass_flow_equations[connection_point] = equation_object
             equation_object.rhs = self.mass_flow_rate_set_point
         else:
-            equation_object.indices = np.array(
-                [
-                    self.get_index_matrix(
-                        property_name="pressure",
-                        connection_point=connection_point,
-                        use_relative_indexing=False,
-                    )
-                ]
-            )
-            equation_object.coefficients = np.array([1.0])
+            equation_object = self._pre_scribe_pressure_equations[connection_point]
+            if equation_object is None:
+                equation_object = EquationObject()
+                equation_object.indices = np.array(
+                    [
+                        self.get_index_matrix(
+                            property_name="pressure",
+                            connection_point=connection_point,
+                            use_relative_indexing=False,
+                        )
+                    ]
+                )
+                equation_object.coefficients = np.array([1.0])
+                self._pre_scribe_pressure_equations[connection_point] = equation_object
             if connection_point == 0:
                 equation_object.rhs = 0.5 * self.set_pressure
             else:

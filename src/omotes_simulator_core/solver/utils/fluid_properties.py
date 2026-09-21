@@ -38,7 +38,25 @@ class Interpolation:
         self.order = order
         self.bounds = bounds
         self.coefficients = np.polyfit(x, y, order)
+        self.lower_bound = x[0] * (1.0 - bounds)
+        self.upper_bound = x[-1] * (1.0 + bounds)
         self._check_interpolation()
+
+    def _update_coefficients(self) -> None:
+        """Stores the coefficients as python floats in order of increasing power.
+
+        The interpolation is evaluated millions of times during a simulation. Iterating over a
+        tuple of python floats is considerably faster than indexing the numpy array of
+        coefficients, which creates a numpy scalar for every coefficient. The cached result of
+        the previous evaluation is reset, since it belongs to the previous coefficients.
+
+        :return: None
+        """
+        self._increasing_power_coefficients = tuple(
+            float(coefficient) for coefficient in self.coefficients
+        )[::-1]
+        self._last_value: float | None = None
+        self._last_result = 0.0
 
     def _check_interpolation(self) -> None:
         """Check if the interpolation gives acceptable results.
@@ -46,6 +64,7 @@ class Interpolation:
         For every data point the difference with the interpolated value is calculated.
         If this difference is more than 2% and value error is raised.
         """
+        self._update_coefficients()
         series_range = max(self.y) - min(self.y)
         error = [abs(y - self(x)) / series_range for x, y in zip(self.x, self.y)]
         if any(e > 0.02 and e != np.inf for e in error):
@@ -54,22 +73,29 @@ class Interpolation:
     def __call__(self, value: float) -> float:
         """Returns the interpolated value at a given point.
 
-        The calculate the value at the given point, the coefficients of the polynomial are used.
-        A backwards loop is used, since the first value in the list is the one which is multiplied
-        with the highest order. In this way we can first use 1, then multiply it with the value to
-         get first order, then again multiply it with the value to get second order and so on.
-         In this way we can step by step multiply the temp value with the
-        value at the given point.
+        To calculate the value at the given point, the coefficients of the polynomial are used.
+        The coefficients are stored in order of increasing power, so the temporary value can
+        step by step be multiplied with the value at the given point to get the next power.
+
+        The result of the previous evaluation is cached. The fluid properties are requested
+        repeatedly for the same value while the equations of a single asset are created, so
+        this removes a large part of the evaluations without changing the result.
 
         :param value: The value to interpolate.
         :return: The interpolated value at the given point.
         """
-        self._check_bounds(value=value)
-        result = 0
+        if value == self._last_value:
+            return self._last_result
+        if value < self.lower_bound or value > self.upper_bound:
+            raise ValueError("Value is out of bounds.")
+        value = float(value)
+        result = 0.0
         temp_value = 1.0
-        for i in range(self.order, -1, -1):
-            result += self.coefficients[i] * temp_value
+        for coefficient in self._increasing_power_coefficients:
+            result += coefficient * temp_value
             temp_value *= value
+        self._last_value = value
+        self._last_result = result
         return result
 
     def _check_bounds(self, value: float) -> None:
@@ -78,7 +104,7 @@ class Interpolation:
         The bounds check is within the set bounds default 10%, since we are fitting a curve
         on the data points. The result is that the curve can be a bit wider than the data points.
         """
-        if value < self.x[0] * (1.0 - self.bounds) or value > self.x[-1] * (1.0 + self.bounds):
+        if value < self.lower_bound or value > self.upper_bound:
             raise ValueError("Value is out of bounds.")
 
 

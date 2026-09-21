@@ -125,6 +125,23 @@ class HeatTransferAsset(BaseAsset):
         ) = self.get_ordered_connection_point_list()
         self.bypass_mode = False
 
+    def reset_cached_equations(self) -> None:
+        """Resets the cached equation objects of the asset.
+
+        :return: None
+        """
+        super().reset_cached_equations()
+        number_connection_points = self.number_of_connection_point
+        self._prescribe_temperature_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+        self._prescribe_mass_flow_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+        self._prescribe_pressure_equations: list[EquationObject | None] = [
+            None
+        ] * number_connection_points
+
     def flow_direction(self, mass_flow: float) -> FlowDirection:
         """Returns the flow direction of the heat transfer asset.
 
@@ -678,18 +695,20 @@ class HeatTransferAsset(BaseAsset):
         :return: An equation object representing the prescribed temperature equation.
         :rtype: EquationObject
         """
-        # Create the equation object
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="internal_energy",
-                    connection_point=connection_point,
-                    use_relative_indexing=False,
-                )
-            ]
-        )
-        equation_object.coefficients = np.array([1.0])
+        equation_object = self._prescribe_temperature_equations[connection_point]
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+            equation_object.coefficients = np.array([1.0])
+            self._prescribe_temperature_equations[connection_point] = equation_object
         equation_object.rhs = fluid_props.get_ie(supply_temperature)
         return equation_object
 
@@ -699,24 +718,28 @@ class HeatTransferAsset(BaseAsset):
         """Prescribe the mass flow rate at the selected connection point.
 
         The returned equation object represents the prescribed mass flow rate or pressure equation
-        for the asset at the given connection point.
+        for the asset at the given connection point. The indices and coefficients are constant, so
+        they are created once and stored on the asset. Only the right-hand side is updated. Do not
+        modify the returned equation object, since it is reused for every iteration.
 
         :param int connection_point: The connection point for which to add the equation.
         :param float mass_flow_value: The prescribed mass flow rate at the connection point.
         :return: EquationObject
         """
-        # Add the equations
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="mass_flow_rate",
-                    connection_point=connection_point,
-                    use_relative_indexing=False,
-                )
-            ]
-        )
-        equation_object.coefficients = np.array([1])
+        equation_object = self._prescribe_mass_flow_equations[connection_point]
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+            equation_object.coefficients = np.array([1])
+            self._prescribe_mass_flow_equations[connection_point] = equation_object
         equation_object.rhs = mass_flow_value
         return equation_object
 
@@ -729,22 +752,28 @@ class HeatTransferAsset(BaseAsset):
 
             P_{connection_point} = P_{set_point}
 
+        The indices and coefficients are constant, so they are created once and stored on the
+        asset. Only the right-hand side is updated. Do not modify the returned equation object,
+        since it is reused for every iteration.
+
         :param int connection_point: The connection point for which to add the equation.
         :param float pressure_value: The prescribed pressure at the connection point.
         :return: EquationObject
         """
-        # Add the equations
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="pressure",
-                    connection_point=connection_point,
-                    use_relative_indexing=False,
-                )
-            ]
-        )
-        equation_object.coefficients = np.array([1.0])
+        equation_object = self._prescribe_pressure_equations[connection_point]
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="pressure",
+                        connection_point=connection_point,
+                        use_relative_indexing=False,
+                    )
+                ]
+            )
+            equation_object.coefficients = np.array([1.0])
+            self._prescribe_pressure_equations[connection_point] = equation_object
         equation_object.rhs = pressure_value
         return equation_object
 

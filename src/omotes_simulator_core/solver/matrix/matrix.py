@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
 import csv
+import operator
 
 import numpy as np
 import numpy.typing as npt
@@ -21,6 +22,12 @@ import scipy as sp
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+
+_rhs_of_equation = operator.attrgetter("rhs")
+"""Fast accessor for the right hand side of an equation object."""
+
+_size_of_equation = operator.attrgetter("coefficients.size")
+"""Fast accessor for the number of coefficients of an equation object."""
 
 
 class Matrix:
@@ -34,7 +41,21 @@ class Matrix:
 
     def __init__(self) -> None:
         """Constructor of matrix class."""
-        pass
+        # Cached sparsity pattern of the matrix, see _get_matrix.
+        self._pattern_columns: npt.NDArray = np.array([], dtype=int)
+        """Concatenated column indices of the equations for which the pattern was created."""
+
+        self._pattern_lengths: npt.NDArray = np.array([], dtype=int)
+        """Number of coefficients per equation for which the pattern was created."""
+
+        self._data_map: npt.NDArray = np.array([], dtype=int)
+        """Position in the data array of the sparse matrix for every supplied coefficient."""
+
+        self._has_duplicates: bool = False
+        """Whether multiple supplied coefficients share a position in the data array."""
+
+        self._matrix: sp.sparse.csc_matrix | None = None
+        """The sparse matrix belonging to the cached sparsity pattern."""
 
     def add_unknowns(self, number_unknowns: int) -> int:
         """Method to add unknowns to the matrix.
@@ -48,8 +69,21 @@ class Matrix:
         self.num_unknowns += number_unknowns
         self.sol_new = np.concatenate([self.sol_new, np.ones(number_unknowns)])
         self.sol_old = np.concatenate([self.sol_old, np.zeros(number_unknowns)])
+        # The size of the matrix changed, so the cached sparsity pattern is invalidated.
+        self.reset_matrix_pattern()
 
         return self.num_unknowns - number_unknowns
+
+    def reset_matrix_pattern(self) -> None:
+        """Method to invalidate the cached sparsity pattern of the matrix.
+
+        The pattern is rebuilt during the next call to :meth:`solve`.
+        """
+        self._matrix = None
+        self._pattern_columns = np.array([], dtype=int)
+        self._pattern_lengths = np.array([], dtype=int)
+        self._data_map = np.array([], dtype=int)
+        self._has_duplicates = False
 
     def solve(self, equations: list[EquationObject], dump: bool = False) -> list[float]:
         """Method to solve the system of equation given in the matrix using sparse matrix solver.
@@ -64,15 +98,8 @@ class Matrix:
         self.verify_equations(equations)
         self.sol_old = self.sol_new
         coefficient_array = np.concatenate([equation.coefficients for equation in equations])
-        column_index_array = np.concatenate([equation.indices for equation in equations])
-        row_index_array = np.concatenate(
-            [np.full((len(equations[i])), i) for i in range(len(equations))]
-        )
-        matrix = sp.sparse.csc_matrix(
-            (coefficient_array, (row_index_array, column_index_array)),
-            shape=(self.num_unknowns, self.num_unknowns),
-        )
-        rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
+        matrix = self._get_matrix(equations=equations, coefficients=coefficient_array)
+        rhs = np.fromiter(map(_rhs_of_equation, equations), dtype=float, count=len(equations))
         if dump:
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
@@ -81,6 +108,78 @@ class Matrix:
             raise RuntimeError("Matrix is singular, matrix is dumped to file.")
         result: list[float] = self.sol_new.tolist()
         return result
+
+    def _get_matrix(
+        self, equations: list[EquationObject], coefficients: npt.NDArray
+    ) -> sp.sparse.csc_matrix:
+        """Method to create the sparse matrix for the given equations.
+
+        The sparsity pattern of the matrix only depends on the indices of the equations and the
+        number of coefficients per equation. These change when the assets switch between equation
+        variants, for example when the flow direction changes, but they are identical for most
+        iterations. Therefore the pattern is cached and only the data of the sparse matrix is
+        updated when the pattern did not change.
+
+        :param equations: list with the equations to solve.
+        :param coefficients: The concatenated coefficients of the equations.
+        :return: The sparse matrix of the system of equations.
+        """
+        columns = np.concatenate([equation.indices for equation in equations])
+        lengths = np.fromiter(map(_size_of_equation, equations), dtype=int, count=len(equations))
+        if (
+            self._matrix is None
+            or not np.array_equal(columns, self._pattern_columns)
+            or not np.array_equal(lengths, self._pattern_lengths)
+        ):
+            self._create_matrix_pattern(columns=columns, lengths=lengths)
+        matrix = self._matrix
+        assert matrix is not None
+        # Only the data of the matrix changes, the sparsity pattern is reused.
+        if self._has_duplicates:
+            matrix.data[:] = np.bincount(self._data_map, weights=coefficients, minlength=matrix.nnz)
+        else:
+            matrix.data[self._data_map] = coefficients
+        return matrix
+
+    def _create_matrix_pattern(self, columns: npt.NDArray, lengths: npt.NDArray) -> None:
+        """Method to create the sparsity pattern of the matrix and store it on the class.
+
+        The rows and columns of the supplied coefficients are converted to a single linear index
+        in column major order. The sorted unique linear indices then have the same order as the
+        data array of a csc matrix, which allows the matrix to be created directly from its data,
+        indices and indptr arrays. The inverse of the unique operation maps every supplied
+        coefficient to its position in the data array of the sparse matrix. Coefficients which
+        share a position are summed, which is the same behaviour as that of the coo matrix of
+        scipy.
+
+        :param columns: The concatenated column indices of the equations.
+        :param lengths: The number of coefficients per equation.
+        :return: None
+        """
+        number_of_unknowns = np.int64(self.num_unknowns)
+        rows = np.repeat(np.arange(len(lengths), dtype=np.int64), lengths)
+        # Column major linear index, so that the unique indices are sorted per column.
+        linear_indices = columns.astype(np.int64) * number_of_unknowns + rows
+        unique_indices, data_map = np.unique(linear_indices, return_inverse=True)
+        self._data_map = data_map.ravel()
+        self._has_duplicates = len(unique_indices) != len(linear_indices)
+        matrix_rows = (unique_indices % number_of_unknowns).astype(np.int32)
+        matrix_columns = unique_indices // number_of_unknowns
+        # Number of entries per column gives the index pointer array of the csc matrix.
+        indptr = np.searchsorted(
+            matrix_columns, np.arange(self.num_unknowns + 1, dtype=np.int64)
+        ).astype(np.int32)
+        matrix = sp.sparse.csc_matrix(
+            (np.zeros(len(unique_indices)), matrix_rows, indptr),
+            shape=(self.num_unknowns, self.num_unknowns),
+        )
+        # The indices are unique and sorted per column, so the matrix is in canonical format.
+        # Setting the flags prevents the solver from sorting and de-duplicating every solve.
+        matrix.has_sorted_indices = True
+        matrix.has_canonical_format = True
+        self._matrix = matrix
+        self._pattern_columns = columns
+        self._pattern_lengths = lengths
 
     def verify_equations(self, equations: list[EquationObject]) -> None:
         """Method to verify if the system of equations can be solved.
@@ -142,7 +241,7 @@ class Matrix:
     def dump_matrix(
         self,
         matrix: sp.sparse.csc_matrix,
-        rhs_array: sp.sparse.csc_matrix,
+        rhs_array: npt.NDArray,
         file_name: str = "dump.csv",
     ) -> None:
         """Method to dump the matrix to a csv file.
@@ -159,8 +258,8 @@ class Matrix:
                 * int(self.num_unknowns / index_core_quantity.number_core_quantities)
                 + ["rhs"]
             )
-            for row, rhs in zip(matrix.todense(), rhs_array.todense()):
-                write.writerow(row.tolist()[0] + rhs.tolist()[0])
+            for row, rhs in zip(matrix.todense(), rhs_array):
+                write.writerow(row.tolist()[0] + [rhs])
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""

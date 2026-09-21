@@ -186,3 +186,35 @@ class HeatBoundaryTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(mock_temp_eq.call_count, 1)
+
+    def test_pre_scribe_equation_is_cached_per_mode(self) -> None:
+        """Test that both prescribe variants are cached separately and reused."""
+        # Arrange
+        connection_point_id = 1
+        self.asset.pre_scribe_mass_flow = True
+        mass_flow_equation = self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+            connection_point=connection_point_id
+        )
+        self.asset.pre_scribe_mass_flow = False
+        pressure_equation = self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+            connection_point=connection_point_id
+        )
+
+        # Act
+        self.asset.pre_scribe_mass_flow = True
+        self.asset.mass_flow_rate_set_point = 20.0
+        second_mass_flow_equation = self.asset.get_pre_scribe_mass_flow_or_pressure_equations(
+            connection_point=connection_point_id
+        )
+
+        # Assert
+        self.assertIsNot(mass_flow_equation, pressure_equation)
+        self.assertIs(mass_flow_equation, second_mass_flow_equation)
+        self.assertEqual(second_mass_flow_equation.rhs, 20.0)
+        npt.assert_array_equal(
+            second_mass_flow_equation.indices,
+            [
+                index_core_quantity.mass_flow_rate
+                + connection_point_id * index_core_quantity.number_core_quantities
+            ],
+        )

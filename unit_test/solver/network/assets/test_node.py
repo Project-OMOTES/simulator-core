@@ -324,6 +324,143 @@ class NodeTestEnergyEquation(unittest.TestCase):
             np.prod(self.node.prev_sol) + np.prod(self.connected_asset.prev_sol),
         )
 
+    def test_initialize_energy_equation_is_called_once(self) -> None:
+        """Test that the energy equation object is created only once and then reused."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+
+        # act
+        first_equation_object = self.node.get_energy_equation()
+        with patch.object(Node, "initialize_energy_equation") as mock_initialize:
+            second_equation_object = self.node.get_energy_equation()
+
+        # assert
+        mock_initialize.assert_not_called()
+        self.assertIs(first_equation_object, second_equation_object)
+        self.assertIs(first_equation_object, self.node.energy_equation_object)
+
+    def test_get_energy_equation_updates_coefficients_and_rhs(self) -> None:
+        """Test that a second call updates the coefficients and rhs with the new solution."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        self.node.prev_sol[index_core_quantity.mass_flow_rate] = self.discharge
+        self.node.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
+        self.connected_asset.prev_sol[index_core_quantity.mass_flow_rate] = -self.discharge
+        self.connected_asset.prev_sol[index_core_quantity.internal_energy] = self.internal_energy
+        self.node.get_energy_equation()
+        # Update the previous solution after the equation object has been initialized.
+        self.node.prev_sol[index_core_quantity.mass_flow_rate] = 2.0 * self.discharge
+        self.connected_asset.prev_sol[index_core_quantity.mass_flow_rate] = -2.0 * self.discharge
+
+        # act
+        equation_object = self.node.get_energy_equation()
+
+        # assert
+        np_test.assert_array_equal(
+            equation_object.coefficients,
+            np.array(
+                [
+                    self.internal_energy,
+                    2.0 * self.discharge,
+                    self.internal_energy,
+                    -2.0 * self.discharge,
+                ]
+            ),
+        )
+        self.assertEqual(
+            equation_object.rhs,
+            np.prod(self.node.prev_sol) + np.prod(self.connected_asset.prev_sol),
+        )
+
+    def test_connect_asset_invalidates_energy_equation(self) -> None:
+        """Test that connecting an asset invalidates the stored energy equation object."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        self.node.get_energy_equation()
+
+        # act
+        self.node.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
+
+        # assert
+        self.assertIsNone(self.node.energy_equation_object)
+        self.assertEqual(len(self.node.get_energy_equation().indices), 6)
+
+    def test_set_matrix_index_invalidates_energy_equation(self) -> None:
+        """Test that setting the matrix index invalidates the stored energy equation object."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        self.node.get_energy_equation()
+        new_matrix_index = index_core_quantity.number_core_quantities * 3
+
+        # act
+        self.node.set_matrix_index(new_matrix_index)
+
+        # assert
+        self.assertIsNone(self.node.energy_equation_object)
+        self.assertEqual(
+            self.node.get_energy_equation().indices[0],
+            new_matrix_index + index_core_quantity.mass_flow_rate,
+        )
+
+    def test_initialize_energy_equation_with_invalid_index(self) -> None:
+        """Test that an index outside the previous solution of an asset raises an error."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        self.connected_asset.prev_sol = np.zeros(1)
+
+        # act
+        with self.assertRaises(IndexError) as cm:
+            self.node.initialize_energy_equation()
+
+        # assert
+        self.assertIn(self.connected_asset.name, cm.exception.args[0])
+
+    def test_constant_equations_are_cached(self) -> None:
+        """Test that the constant node equations are created once and then reused."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+
+        # act
+        first = [self.node.get_node_cont_equation(), self.node.get_discharge_equation()]
+        second = [self.node.get_node_cont_equation(), self.node.get_discharge_equation()]
+
+        # assert
+        for first_equation, second_equation in zip(first, second):
+            self.assertIs(first_equation, second_equation)
+
+    def test_set_temperature_equation_updates_rhs(self) -> None:
+        """Test that the temperature equation is reused with an updated rhs."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        first_equation = self.node.set_temperature_equation()
+        self.node.initial_temperature = 350.0
+
+        # act
+        second_equation = self.node.set_temperature_equation()
+
+        # assert
+        self.assertIs(first_equation, second_equation)
+        self.assertEqual(second_equation.rhs, fluid_props.get_ie(350.0))
+
+    def test_connect_asset_invalidates_node_cont_equation(self) -> None:
+        """Test that connecting an asset invalidates the continuity equation."""
+        # arrange
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        first_equation = self.node.get_node_cont_equation()
+
+        # act
+        self.node.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
+        second_equation = self.node.get_node_cont_equation()
+
+        # assert
+        self.assertIsNot(first_equation, second_equation)
+        self.assertEqual(len(second_equation.indices), 3)
+        np_test.assert_array_equal(second_equation.coefficients, np.ones(3))
+
     @patch.object(Node, "get_energy_equation")
     @patch.object(Node, "set_temperature_equation")
     def test_get_energy_equations_with_positive_negative_flow(
@@ -440,3 +577,33 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # assert
         self.assertEqual(mock_set_temperature.call_count, 1)
         self.assertEqual(mock_set_energy.call_count, 0)
+
+    @patch.object(Node, "get_energy_equation")
+    @patch.object(Node, "set_temperature_equation")
+    def test_get_energy_equations_after_connecting_asset(
+        self, mock_set_temperature, mock_set_energy
+    ) -> None:
+        """Test that the cached mass flow lookup is invalidated when an asset is connected."""
+        # arrange
+        # - Outflow, at this point the node only sees a single positive flow.
+        self.connected_asset.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point * index_core_quantity.number_core_quantities
+        ] = +self.discharge
+        self.node.connect_asset(asset=self.connected_asset, connection_point=self.connection_point)
+        self.node.get_energy_equations()
+        # - Inflow on a second asset, connected after the first call.
+        self.connected_asset_2.prev_sol[
+            index_core_quantity.mass_flow_rate
+            + self.connection_point_2 * index_core_quantity.number_core_quantities
+        ] = -self.discharge
+        self.node.connect_asset(
+            asset=self.connected_asset_2, connection_point=self.connection_point_2
+        )
+
+        # act
+        self.node.get_energy_equations()
+
+        # assert
+        self.assertEqual(mock_set_temperature.call_count, 1)
+        self.assertEqual(mock_set_energy.call_count, 1)

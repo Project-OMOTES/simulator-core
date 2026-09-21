@@ -389,10 +389,10 @@ class Network:
         :param list[float] solution:Solution to be transferred to the assets.
         :return: None
         """
-        for asset in self.assets:
-            index = self.get_asset(asset_id=asset).matrix_index
-            nou = self.get_asset(asset_id=asset).number_of_unknowns
-            self.get_asset(asset_id=asset).prev_sol = solution[index : index + nou].tolist()
+        for asset in self.assets.values():
+            index = asset.matrix_index
+            nou = asset.number_of_unknowns
+            asset.prev_sol = solution[index : index + nou].tolist()
 
     def set_result_node(self, solution: npt.NDArray) -> None:
         """Method to transfer the solution to the nodes in the network.
@@ -400,10 +400,10 @@ class Network:
         :param list[float] solution:Solution to be transferred to the nodes.
         :return: None
         """
-        for node in self.nodes:
-            index = self.get_node(node_id=node).matrix_index
-            nou = self.get_node(node_id=node).number_of_unknowns
-            self.get_node(node_id=node).prev_sol = solution[index : index + nou].tolist()
+        for node in self.nodes.values():
+            index = node.matrix_index
+            nou = node.number_of_unknowns
+            node.prev_sol = solution[index : index + nou].tolist()
 
     def print_result(self) -> None:
         """Method to print the result of the network."""

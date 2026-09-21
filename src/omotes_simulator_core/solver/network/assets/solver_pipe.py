@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """module containing pipe class."""
 
+import math
+
 import numpy as np
 from scipy.optimize import root
 
@@ -72,6 +74,74 @@ class SolverPipe(FallType):
         self.roughness: float = roughness
         # Calculate the area of the pipe
         self.area: float = np.pi * self.diameter**2 / 4
+        # Relative indices of the previous solution, these are constant for the pipe.
+        self._internal_energy_indices = tuple(
+            self.get_index_matrix(
+                property_name="internal_energy",
+                connection_point=connection_point,
+                use_relative_indexing=True,
+            )
+            for connection_point in range(self.number_of_connection_point)
+        )
+        self.invalidate_solution_cache()
+
+    def invalidate_solution_cache(self) -> None:
+        """Invalidates the values which are derived from the previous solution.
+
+        The fluid properties, the loss coefficient and the heat supplied only depend on the
+        previous solution, while they are requested multiple times per iteration. Therefore they
+        are calculated once per solution and discarded when a new solution is stored.
+
+        :return: None
+        """
+        self._cached_temperatures: list[float | None] = [None, None]
+        self._cached_density: float | None = None
+        self._cached_viscosity: float | None = None
+        self._loss_coefficient_is_valid: bool = False
+        self._heat_supplied_is_valid: bool = False
+
+    def _get_temperature(self, connection_point: int) -> float:
+        """Returns the fluid temperature at the given connection point.
+
+        The temperature follows from the internal energy of the previous solution, which does
+        not change within an iteration. Therefore the result is cached per connection point.
+
+        :param int connection_point: The connection point to get the temperature for.
+        :return: float, the temperature of the fluid [K].
+        """
+        temperature = self._cached_temperatures[connection_point]
+        if temperature is None:
+            temperature = fluid_props.get_t(
+                self.prev_sol[self._internal_energy_indices[connection_point]]
+            )
+            self._cached_temperatures[connection_point] = temperature
+        return temperature
+
+    def _get_density(self) -> float:
+        """Returns the fluid density at the first connection point.
+
+        The density follows from the previous solution, so it is calculated once per solution.
+
+        :return: float, the density of the fluid [kg/m^3].
+        """
+        density = self._cached_density
+        if density is None:
+            density = fluid_props.get_density(self._get_temperature(0))
+            self._cached_density = density
+        return density
+
+    def _get_viscosity(self) -> float:
+        """Returns the fluid viscosity at the first connection point.
+
+        The viscosity follows from the previous solution, so it is calculated once per solution.
+
+        :return: float, the viscosity of the fluid [Pa.s].
+        """
+        viscosity = self._cached_viscosity
+        if viscosity is None:
+            viscosity = fluid_props.get_viscosity(self._get_temperature(0))
+            self._cached_viscosity = viscosity
+        return viscosity
 
     def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
         """Method to set the physical properties of the pipe.
@@ -98,6 +168,8 @@ class SolverPipe(FallType):
                 )
         # Update the area of the pipe
         self.area = np.pi * self.diameter**2 / 4
+        # The cached values depend on the physical properties of the pipe.
+        self.invalidate_solution_cache()
 
     def update_loss_coefficient(self) -> None:
         r"""Method to update the loss coefficient of the pipe.
@@ -111,25 +183,21 @@ class SolverPipe(FallType):
         .. math:: v = \frac{\dot{m}}{\rho A}
 
         with the density of the fluid defined at the first connection point.
+
+        The loss coefficient only depends on the previous solution, so it is calculated once
+        per solution.
         """
+        if self._loss_coefficient_is_valid:
+            return
         self.calc_lambda_loss()
-        density = fluid_props.get_density(
-            fluid_props.get_t(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
-        )
+        density = self._get_density()
         self.loss_coefficient = (
             self.lambda_loss
             * (self.length / self.diameter)
             * (1 / 2)
             * (1 / (self.area**2 * density))
         )
+        self._loss_coefficient_is_valid = True
 
     # TODO: Do we want to implement a dependency on the connection point?
     def calculate_reynolds_number(
@@ -152,27 +220,19 @@ class SolverPipe(FallType):
         :param float temperature: The temperature of the fluid (K).
         """
         # Retrieve properties from previous solution
+        use_cached_properties = temperature == DEFAULT_MISSING_VALUE
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
-            mass_flow_rate = self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
-                )
-            ]
-        if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
+            mass_flow_rate = self.prev_sol[self._relative_mass_flow_indices[0]]
+        if use_cached_properties:
+            temperature = self._get_temperature(0)
+            density = self._get_density()
+            viscosity = self._get_viscosity()
+        else:
+            density = fluid_props.get_density(temperature)
+            viscosity = fluid_props.get_viscosity(temperature)
         # Calculate the Reynolds number
-        density = fluid_props.get_density(temperature)
-        discharge = mass_flow_rate / density
-        velocity = discharge / self.area
-        return velocity * self.diameter / fluid_props.get_viscosity(temperature)
+        velocity = mass_flow_rate / density / self.area
+        return velocity * self.diameter / viscosity
 
     def calc_lambda_loss(self) -> None:
         r"""Method to calculate the lambda loss of the pipe.
@@ -247,17 +307,15 @@ class SolverPipe(FallType):
         if reynolds_number is None:
             reynolds_number = self.reynolds_number
         # Calculate the coefficients
-        A0 = -0.79638 * np.log((self.roughness / self.diameter) / 8.208 + 7.3357 / reynolds_number)
-        A1 = reynolds_number * (self.roughness / self.diameter) + 9.3120665 * A0
+        relative_roughness = self.roughness / self.diameter
+        A0 = -0.79638 * math.log(relative_roughness / 8.208 + 7.3357 / reynolds_number)
+        A1 = reynolds_number * relative_roughness + 9.3120665 * A0
 
         # Calculate the friction factor
-        return float(
-            (
-                (8.128943 + A1)
-                / (8.128943 * A0 - 0.86859209 * A1 * np.log(A1 / (3.7099535 * reynolds_number)))
-            )
-            ** 2
-        )
+        return (
+            (8.128943 + A1)
+            / (8.128943 * A0 - 0.86859209 * A1 * math.log(A1 / (3.7099535 * reynolds_number)))
+        ) ** 2
 
     def _colebrook_white_objective(self, lambda_guess: float) -> float:
         r"""Root function for the Colebrook-White equation.
@@ -359,15 +417,7 @@ class SolverPipe(FallType):
         """
         # Check the temperature
         if temperature == DEFAULT_MISSING_VALUE:
-            temperature = fluid_props.get_t(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
+            temperature = self._get_temperature(0)
 
         # Calculate the thermal diffusivity
         thermal_diffusivity = fluid_props.get_thermal_conductivity(temperature) / (
@@ -434,35 +484,15 @@ class SolverPipe(FallType):
 
         The inflow temperature is determined by looking at the flow direction in the pipe
         """
-        mass_flow_rate = self.prev_sol[
-            self.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
-            )
-        ]
+        mass_flow_rate = self.prev_sol[self._relative_mass_flow_indices[0]]
         # Determine the flow direction
         if mass_flow_rate < 0:
             # Flow from connection point 1 to connection point 0
-            tin = fluid_props.get_t(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=1,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
+            tin = self._get_temperature(1)
             mass_flow_rate = abs(mass_flow_rate)
         elif mass_flow_rate > 0:
             # Flow from connection point 0 to connection point 1
-            tin = fluid_props.get_t(
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ]
-            )
+            tin = self._get_temperature(0)
         else:
             # No flow
             tin = self.ambient_temperature
@@ -517,16 +547,9 @@ class SolverPipe(FallType):
         if mass_flow_rate == 0:
             return 0.0
         cp = fluid_props.get_heat_capacity(tin)
+        exponent = -self.alpha_value * math.pi * self.diameter * self.length / (mass_flow_rate * cp)
         heat_loss = (
-            mass_flow_rate
-            * cp
-            * (tin - self.ambient_temperature)
-            * (
-                1
-                - np.exp(
-                    -self.alpha_value * np.pi * self.diameter * self.length / (mass_flow_rate * cp)
-                )
-            )
+            mass_flow_rate * cp * (tin - self.ambient_temperature) * (1 - math.exp(exponent))
         )
         return float(heat_loss)
 
@@ -536,7 +559,11 @@ class SolverPipe(FallType):
         Definition: positive if heat is supplied to the fluid, negative if heat is extracted from
         the fluid.
 
+        The heat supplied only depends on the previous solution, so it is calculated once per
+        solution.
         """
+        if self._heat_supplied_is_valid:
+            return
         tin, mass_flow_rate = self._determine_inflow_temperature()
 
         self._calculate_total_heat_transfer_coefficient(
@@ -545,3 +572,4 @@ class SolverPipe(FallType):
         self.heat_supplied = -self._calculate_total_heat_loss(
             tin=tin, mass_flow_rate=mass_flow_rate
         )
+        self._heat_supplied_is_valid = True

@@ -85,6 +85,18 @@ class FallType(BaseAsset):
         self.heat_flux = heat_flux
         self.loss_coefficient = loss_coefficient
 
+    def reset_cached_equations(self) -> None:
+        """Resets the cached equation objects of the asset.
+
+        :return: None
+        """
+        super().reset_cached_equations()
+        self._internal_cont_equation: EquationObject | None = None
+        self._internal_energy_equation: EquationObject | None = None
+        self._internal_energy_relative_indices: tuple[int, int, int, int] = (0, 0, 0, 0)
+        self._internal_pressure_loss_equation: EquationObject | None = None
+        self._pressure_loss_mass_flow_index: int = 0
+
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the asset.
 
@@ -125,11 +137,7 @@ class FallType(BaseAsset):
         :rtype: EquationObject
         """
         if (
-            self.prev_sol[
-                self.get_index_matrix(
-                    "mass_flow_rate", connection_point=connection_point, use_relative_indexing=True
-                )
-            ]
+            self.prev_sol[self._relative_mass_flow_indices[connection_point]]
             > self.massflow_zero_limit
         ):
             return self.get_internal_energy_equation()
@@ -139,10 +147,15 @@ class FallType(BaseAsset):
     def get_internal_cont_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the internal continuity equation for the asset.
 
+        The equation is constant, so it is created once and stored on the asset. Do not modify
+        the returned equation object, since it is reused for every iteration.
+
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side value
             of the equation.
         """
+        if self._internal_cont_equation is not None:
+            return self._internal_cont_equation
         equation_object = EquationObject()
         equation_object.indices = np.array(
             [
@@ -156,6 +169,7 @@ class FallType(BaseAsset):
         )
         equation_object.coefficients = np.array([1.0, 1.0])
         equation_object.rhs = 0.0
+        self._internal_cont_equation = equation_object
         return equation_object
 
     def get_internal_energy_equation(self) -> EquationObject:
@@ -166,81 +180,78 @@ class FallType(BaseAsset):
         - Mass flow rate at inlet * Specific internal energy at inlet +
             Mass flow rate at outlet * Specific internal energy at outlet - Heat supplied = 0
 
+        The indices of the equation are constant, so they are created once and stored on the
+        asset. Only the coefficients and the right-hand side are updated. Do not modify the
+        returned equation object, since it is reused for every iteration.
+
         :return:EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side value of
             the equation.
         """
-        equation_object = EquationObject()
         self.update_heat_supplied()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
-                ),
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=False
-                ),
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
-                ),
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, use_relative_indexing=False
-                ),
-            ]
-        )
-        equation_object.coefficients = np.array(
-            [
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
+        equation_object = self._internal_energy_equation
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
+                        use_relative_indexing=False,
+                    ),
                     self.get_index_matrix(
                         property_name="internal_energy",
-                        connection_point=1,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
+                        connection_point=0,
+                        use_relative_indexing=False,
+                    ),
                     self.get_index_matrix(
                         property_name="mass_flow_rate",
                         connection_point=1,
-                        use_relative_indexing=True,
-                    )
-                ],
-            ]
-        )
-        equation_object.rhs = (
-            self.prev_sol[
+                        use_relative_indexing=False,
+                    ),
+                    self.get_index_matrix(
+                        property_name="internal_energy",
+                        connection_point=1,
+                        use_relative_indexing=False,
+                    ),
+                ]
+            )
+            equation_object.coefficients = np.zeros(4)
+            self._internal_energy_relative_indices = (
                 self.get_index_matrix(
                     property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
-                )
-            ]
-            * self.prev_sol[
+                ),
                 self.get_index_matrix(
                     property_name="internal_energy", connection_point=0, use_relative_indexing=True
-                )
-            ]
-            + self.prev_sol[
+                ),
                 self.get_index_matrix(
                     property_name="mass_flow_rate", connection_point=1, use_relative_indexing=True
-                )
-            ]
-            * self.prev_sol[
+                ),
                 self.get_index_matrix(
                     property_name="internal_energy", connection_point=1, use_relative_indexing=True
-                )
-            ]
+                ),
+            )
+            self._internal_energy_equation = equation_object
+        prev_sol = self.prev_sol
+        (
+            mass_flow_index_0,
+            internal_energy_index_0,
+            mass_flow_index_1,
+            internal_energy_index_1,
+        ) = self._internal_energy_relative_indices
+        mass_flow_rate_0 = prev_sol[mass_flow_index_0]
+        internal_energy_0 = prev_sol[internal_energy_index_0]
+        mass_flow_rate_1 = prev_sol[mass_flow_index_1]
+        internal_energy_1 = prev_sol[internal_energy_index_1]
+        # Be aware that the coefficients are in reverse order
+        coefficients = equation_object.coefficients
+        coefficients[0] = internal_energy_0
+        coefficients[1] = mass_flow_rate_0
+        coefficients[2] = internal_energy_1
+        coefficients[3] = mass_flow_rate_1
+        equation_object.rhs = (
+            mass_flow_rate_0 * internal_energy_0
+            + mass_flow_rate_1 * internal_energy_1
             + self.heat_flux
         )
         return equation_object
@@ -251,39 +262,45 @@ class FallType(BaseAsset):
         The equation is:
         - Pressure at inlet - Pressure at outlet - 2 * Loss coefficient * Mass flow rate *
         abs(Mass flow rate) = 0
+
+        The indices of the equation are constant, so they are created once and stored on the
+        asset. Only the coefficients and the right-hand side are updated. Do not modify the
+        returned equation object, since it is reused for every iteration.
+
         :return: EquationObject
         An EquationObject that contains the indices, coefficients, and right-hand side value
         of the equation.
         """
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
-                ),
-                self.get_index_matrix(
-                    property_name="pressure", connection_point=0, use_relative_indexing=False
-                ),
-                self.get_index_matrix(
-                    property_name="pressure", connection_point=1, use_relative_indexing=False
-                ),
-            ]
-        )
-        self.update_loss_coefficient()
-        mass_flow_rate = self.prev_sol[
-            self.get_index_matrix(
+        equation_object = self._internal_pressure_loss_equation
+        if equation_object is None:
+            equation_object = EquationObject()
+            equation_object.indices = np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate",
+                        connection_point=0,
+                        use_relative_indexing=False,
+                    ),
+                    self.get_index_matrix(
+                        property_name="pressure", connection_point=0, use_relative_indexing=False
+                    ),
+                    self.get_index_matrix(
+                        property_name="pressure", connection_point=1, use_relative_indexing=False
+                    ),
+                ]
+            )
+            equation_object.coefficients = np.array([0.0, -1.0, 1.0])
+            self._pressure_loss_mass_flow_index = self.get_index_matrix(
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
             )
-        ]
+            self._internal_pressure_loss_equation = equation_object
+        self.update_loss_coefficient()
+        mass_flow_rate = self.prev_sol[self._pressure_loss_mass_flow_index]
         if mass_flow_rate < 1e-5:
-            equation_object.coefficients = np.array(
-                [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
-            )
+            equation_object.coefficients[0] = -2.0 * self.loss_coefficient * 1e-5
             equation_object.rhs = -self.loss_coefficient * mass_flow_rate * 1e-5
         else:
-            equation_object.coefficients = np.array(
-                [-2.0 * self.loss_coefficient * abs(mass_flow_rate), -1.0, 1.0]
-            )
+            equation_object.coefficients[0] = -2.0 * self.loss_coefficient * abs(mass_flow_rate)
             equation_object.rhs = -self.loss_coefficient * mass_flow_rate * abs(mass_flow_rate)
         return equation_object
 

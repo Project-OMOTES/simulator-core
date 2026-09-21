@@ -326,3 +326,81 @@ class BaseAssetTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEquals(result, 112413.55, 2)
+
+    def test_constant_equations_are_cached(self) -> None:
+        """Test that the constant equations are created once and then reused."""
+        # Arrange
+        self.asset.connect_node(node=self.supply_node, connection_point=0)
+        self.asset.connect_node(node=self.return_node, connection_point=1)
+
+        # Act
+        first = [
+            self.asset.get_press_to_node_equation(0),
+            self.asset.get_internal_energy_to_node_equation(0),
+            self.asset.add_massflow_to_node_equation(0),
+        ]
+        second = [
+            self.asset.get_press_to_node_equation(0),
+            self.asset.get_internal_energy_to_node_equation(0),
+            self.asset.add_massflow_to_node_equation(0),
+        ]
+
+        # Assert
+        for first_equation, second_equation in zip(first, second):
+            self.assertIs(first_equation, second_equation)
+
+    def test_prescribe_temp_equation_updates_rhs(self) -> None:
+        """Test that the prescribed temperature equation is reused with an updated rhs."""
+        # Arrange
+        self.asset.connect_node(node=self.supply_node, connection_point=0)
+        first_equation = self.asset.get_prescribe_temp_equation(0)
+        self.asset.supply_temperature = 350.0
+
+        # Act
+        second_equation = self.asset.get_prescribe_temp_equation(0)
+
+        # Assert
+        self.assertIs(first_equation, second_equation)
+        self.assertEqual(second_equation.rhs, fluid_props.get_ie(350.0))
+
+    def test_set_matrix_index_invalidates_cached_equations(self) -> None:
+        """Test that setting the matrix index invalidates the cached equations."""
+        # Arrange
+        self.asset.connect_node(node=self.supply_node, connection_point=0)
+        first_equation = self.asset.get_press_to_node_equation(0)
+        new_matrix_index = index_core_quantity.number_core_quantities * 3
+
+        # Act
+        self.asset.set_matrix_index(new_matrix_index)
+        second_equation = self.asset.get_press_to_node_equation(0)
+
+        # Assert
+        self.assertIsNot(first_equation, second_equation)
+        self.assertEqual(
+            second_equation.indices[0], new_matrix_index + index_core_quantity.pressure
+        )
+
+    def test_disconnect_node_invalidates_cached_equations(self) -> None:
+        """Test that disconnecting a node invalidates the cached equations."""
+        # Arrange
+        self.asset.connect_node(node=self.supply_node, connection_point=0)
+        first_equation = self.asset.get_press_to_node_equation(0)
+
+        # Act
+        self.asset.disconnect_node(connection_point=0)
+        self.asset.connect_node(node=self.return_node, connection_point=0)
+        second_equation = self.asset.get_press_to_node_equation(0)
+
+        # Assert
+        self.assertIsNot(first_equation, second_equation)
+
+    def test_cached_equation_raises_when_not_connected(self) -> None:
+        """Test that the connection check is still performed when nothing is cached."""
+        # Arrange
+
+        # Act
+        with self.assertRaises(ValueError) as cm:
+            self.asset.get_press_to_node_equation(0)
+
+        # Assert
+        self.assertIsInstance(cm.exception, ValueError)
