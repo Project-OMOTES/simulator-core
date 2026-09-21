@@ -180,6 +180,8 @@ class EsdlAssetObject:
             OmotesAssetLabels.PRODUCER,
             OmotesAssetLabels.GAS_HEATER,
             OmotesAssetLabels.ELECTRIC_BOILER,
+            OmotesAssetLabels.RESIDUAL_HEAT,
+            OmotesAssetLabels.GEOTHERMAL,
         ]
 
         if self.get_esdl_type() == OmotesAssetLabels.CONSUMER:
