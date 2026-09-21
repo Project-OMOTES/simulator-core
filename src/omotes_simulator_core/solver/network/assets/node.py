@@ -53,6 +53,8 @@ class Node(BaseNodeItem):
         Returns an EquationObject that represents the pressure set equation for the node.
     set_temperature_equation() -> EquationObject
         Returns an EquationObject that represents the temperature set equation for the node.
+    initialize_energy_equation() -> None
+        Creates and stores the energy equation object with its matrix indices.
     get_energy_equation() -> EquationObject
         Returns an EquationObject that represents the energy equation for the node.
     is_connected() -> bool
@@ -83,6 +85,17 @@ class Node(BaseNodeItem):
         self.height = height
         self.initial_temperature = initial_temperature
         self.set_pressure = set_pressure
+        self.energy_equation_object: EquationObject | None = None
+        self._energy_equation_contributors: list[tuple[BaseItem | "Node", np.ndarray]] = []
+
+    def set_matrix_index(self, index: int) -> None:
+        """Sets the matrix index of the node and invalidates the cached energy equation.
+
+        :param int index: The index of the node in the matrix.
+        """
+        super().set_matrix_index(index)
+        self.energy_equation_object = None
+        self._energy_equation_contributors = []
 
     def connect_asset(self, asset: BaseItem, connection_point: int) -> None:
         """Connects an asset object at the given connection point to the node .
@@ -105,6 +118,9 @@ class Node(BaseNodeItem):
         else:
             # Connect the asset to the node
             self.connected_assets.append((asset, connection_point))
+            # The structure of the energy equation changed, so the cache is invalidated.
+            self.energy_equation_object = None
+            self._energy_equation_contributors = []
 
     def get_equations(self) -> list[EquationObject]:
         """Returns a list of EquationObjects that represent the equations for the node.
@@ -232,29 +248,36 @@ class Node(BaseNodeItem):
         equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
         return equation_object
 
-    def get_energy_equation(self) -> EquationObject:
-        """Returns an EquationObject that represents the energy equation for the node.
+    def initialize_energy_equation(self) -> None:
+        """Creates the energy equation object and stores it on the node.
 
-        :return: EquationObject
-            An EquationObject that contains the indices, coefficients, and right-hand side
-            value of the equation
+        The matrix indices of the equation only depend on the matrix index of the node, the
+        matrix indices of the connected assets and the connection points. These are fixed once
+        the matrix indices have been set, so they are determined once and reused every
+        iteration. Only the coefficients and the right-hand side are updated afterwards, see
+        :meth:`get_energy_equation`.
+
+        :return: None
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False),
-                self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False),
-            ]
-        )
-        # Be aware that the coefficients are in reverse order
-        equation_object.coefficients = np.array(self.prev_sol)[
-            (equation_object.indices - self.matrix_index)[::-1]
+        contributors: list[tuple[BaseItem | "Node", np.ndarray]] = []
+        # Indices of the node itself.
+        indices = [
+            np.array(
+                [
+                    self.get_index_matrix(
+                        property_name="mass_flow_rate", use_relative_indexing=False
+                    ),
+                    self.get_index_matrix(
+                        property_name="internal_energy", use_relative_indexing=False
+                    ),
+                ]
+            )
         ]
-        equation_object.rhs = float(np.prod(equation_object.coefficients))
-        # Extend the equation_object with the indices and coefficients of the connected assets
+        contributors.append((self, indices[0] - self.matrix_index))
+        # Indices of the connected assets.
         for asset, asset_connection_id in self.connected_assets:
-            # Extended asset indices
-            extra_indices = np.array(
+            asset_indices = np.array(
                 [
                     asset.get_index_matrix(
                         "mass_flow_rate", asset_connection_id, use_relative_indexing=False
@@ -264,19 +287,47 @@ class Node(BaseNodeItem):
                     ),
                 ]
             )
-            # Extend the indices and coefficients of the equation object
-            equation_object.indices = np.append(
-                equation_object.indices,
-                extra_indices,
-            )
-            # Extend the coefficients of the equation object
-            prev_sol = np.array(asset.prev_sol)
-            equation_object.coefficients = np.append(
-                equation_object.coefficients,
-                prev_sol[(extra_indices - asset.matrix_index)[::-1]],
-            )
-            # Extend the right-hand side of the equation object
-            equation_object.rhs += np.prod(prev_sol[extra_indices - asset.matrix_index])
+            indices.append(asset_indices)
+            contributors.append((asset, asset_indices - asset.matrix_index))
+        # Verify that the relative indices fit in the previous solution of their owner.
+        for item, relative_indices in contributors:
+            if max(relative_indices) >= len(item.prev_sol) or min(relative_indices) < 0:
+                raise IndexError(
+                    f"Energy equation of node {self.name} requires indices "
+                    f"{relative_indices.tolist()} of {item.name}, which only has "
+                    f"{len(item.prev_sol)} unknowns."
+                )
+        equation_object.indices = np.concatenate(indices)
+        equation_object.coefficients = np.zeros(len(equation_object.indices))
+        equation_object.rhs = 0.0
+        self.energy_equation_object = equation_object
+        self._energy_equation_contributors = contributors
+
+    def get_energy_equation(self) -> EquationObject:
+        """Returns an EquationObject that represents the energy equation for the node.
+
+        The equation object is created once by :meth:`initialize_energy_equation`. This method
+        only updates the coefficients and the right-hand side of the stored equation object
+        using the latest previous solution of the node and the connected assets.
+
+        :return: EquationObject
+            An EquationObject that contains the indices, coefficients, and right-hand side
+            value of the equation
+        """
+        if self.energy_equation_object is None:
+            self.initialize_energy_equation()
+        equation_object = self.energy_equation_object
+        assert equation_object is not None
+        rhs = 0.0
+        position = 0
+        for item, relative_indices in self._energy_equation_contributors:
+            prev_sol = np.array(item.prev_sol)
+            values = prev_sol[relative_indices]
+            # Be aware that the coefficients are in reverse order
+            equation_object.coefficients[position : position + len(relative_indices)] = values[::-1]
+            rhs += float(np.prod(values))
+            position += len(relative_indices)
+        equation_object.rhs = rhs
         return equation_object
 
     def is_connected(self) -> bool:
