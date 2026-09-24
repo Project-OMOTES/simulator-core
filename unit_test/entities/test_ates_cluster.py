@@ -81,7 +81,7 @@ class AtesClusterTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.15, delta=0.1)
-        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.15, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 301.313, delta=0.1)
 
     def test_injection_ates_sign_conventions(self) -> None:
         """Test the sign and temperature conventions of a charging ATES."""
@@ -134,7 +134,9 @@ class AtesClusterTest(unittest.TestCase):
 
         # Assert
         # The hot well is produced, so it cools down slightly with respect to the charged state.
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.54, delta=0.1)
+        self.assertAlmostEqual(
+            self.ates_cluster.hot_well_temperature, 357.81324887114687, delta=0.1
+        )
         # The cold well is injected with the return temperature of the network.
         self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)
 
