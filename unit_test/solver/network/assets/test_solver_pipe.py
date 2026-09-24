@@ -240,7 +240,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-6, 1), -3.3)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-6, 1), -3.3)
 
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -259,7 +259,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -278,7 +278,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
@@ -297,7 +297,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), 0.0)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), 0.0)
 
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
@@ -316,7 +316,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.6)
 
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
@@ -335,7 +335,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.6)
 
     def test_calculate_graetz_number(self) -> None:
         """Test the calculate_graetz_number method."""
