@@ -49,64 +49,6 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)
 
-    def test_set_physical_properties(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-            PROPERTY_ROUGHNESS: 0.002,
-            PROPERTY_ALPHA_VALUE: 0.5,
-        }
-
-        # act
-        self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertEqual(self.asset.diameter, physical_properties_dict[PROPERTY_DIAMETER])
-        self.assertEqual(self.asset.length, physical_properties_dict[PROPERTY_LENGTH])
-        self.assertEqual(self.asset.roughness, physical_properties_dict[PROPERTY_ROUGHNESS])
-        self.assertEqual(self.asset.alpha_value, physical_properties_dict[PROPERTY_ALPHA_VALUE])
-        self.assertEqual(self.asset.area, 0.19634954084936207)
-
-    def test_set_physical_properties_missing_key(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-        }
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(
-            str(cm.exception), f"Property {PROPERTY_ROUGHNESS} is missing in physical_properties"
-        )
-
-    def test_set_physical_properties_additional_key(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-            PROPERTY_ROUGHNESS: 0.002,
-        }
-        delattr(self.asset, PROPERTY_DIAMETER)
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(
-            str(cm.exception), f"Property {PROPERTY_DIAMETER} is not a valid property of the pipe"
-        )
-
     def test_calculate_reynolds_number_laminar_low_temp(self) -> None:
         """Test the calculate_reynolds_number method for a laminar flow at low temperature."""
         # arrange

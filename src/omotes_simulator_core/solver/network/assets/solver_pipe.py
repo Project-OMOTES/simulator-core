@@ -75,32 +75,6 @@ class SolverPipe(FallType):
         self.area: float = np.pi * self.diameter**2 / 4
         self.alpha_value: float = alpha_value
 
-    def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
-        """Method to set the physical properties of the pipe.
-
-        :param physical_properties: dictionary containing the physical properties of the pipe.
-
-        expected properties are: length [m], diameter [m], roughness [m]
-        """
-        expected_properties = [
-            PROPERTY_LENGTH,
-            PROPERTY_DIAMETER,
-            PROPERTY_ROUGHNESS,
-            PROPERTY_ALPHA_VALUE,
-        ]
-
-        for expected_property in expected_properties:
-            if expected_property not in physical_properties:
-                raise ValueError(f"Property {expected_property} is missing in physical_properties")
-            if hasattr(self, expected_property):
-                setattr(self, expected_property, physical_properties[expected_property])
-            else:
-                raise ValueError(
-                    f"Property {expected_property} is not a valid property " f"of the pipe"
-                )
-        # Update the area of the pipe
-        self.area = np.pi * self.diameter**2 / 4
-
     def update_loss_coefficient(self) -> None:
         r"""Method to update the loss coefficient of the pipe.
 
