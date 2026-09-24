@@ -21,11 +21,14 @@ import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_BUFFER_COLD_TEMPERATURE,
     PROPERTY_BUFFER_HOT_TEMPERATURE,
+    PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
+    PROPERTY_HOT_WELL_TEMPERATURE,
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
@@ -134,6 +137,104 @@ class ControllerAtestStorageTest(unittest.TestCase):
         self.assertEqual(self.storage.start_index, 0)
         self.assertEqual(self.storage.max_charge_power, 1000000)
         pd.testing.assert_frame_equal(self.storage.profile, PROFILE)
+
+    def _get_expected_power(self, volume_flow: float, hot: float, cold: float) -> float:
+        """Calculate the power which can be exchanged with the given flow and temperatures."""
+        density = fluid_props.get_density((hot + cold) / 2.0)
+        mass_flow = volume_flow / 3600.0 * density
+        return mass_flow * (fluid_props.get_ie(hot) - fluid_props.get_ie(cold))
+
+    def test_set_state_updates_effective_powers(self):
+        """Test that the state of the aquifer limits the charge and discharge power."""
+        # Arrange
+        storage = ControllerAtesStorage(
+            "storage",
+            "id",
+            temperatures=Temperatures(in_flow=313.15, out_flow=353.15),
+            max_charge_power=1e9,
+            max_discharge_power=1e9,
+        )
+        hot_well_temperature = 358.15
+        cold_well_temperature = 313.15
+
+        # Act
+        storage.set_state(
+            {
+                PROPERTY_HOT_WELL_TEMPERATURE: hot_well_temperature,
+                PROPERTY_COLD_WELL_TEMPERATURE: cold_well_temperature,
+                PROPERTY_TIMESTEP: 3600,
+            }
+        )
+
+        # Assert
+        self.assertEqual(storage.hot_well_temperature, hot_well_temperature)
+        self.assertEqual(storage.cold_well_temperature, cold_well_temperature)
+        self.assertAlmostEqual(
+            storage.effective_max_discharge_power,
+            self._get_expected_power(
+                ATES_DEFAULTS.maximum_flow_discharge, hot_well_temperature, 313.15
+            ),
+        )
+        self.assertAlmostEqual(
+            storage.effective_max_charge_power,
+            self._get_expected_power(
+                ATES_DEFAULTS.maximum_flow_charge, 353.15, cold_well_temperature
+            ),
+        )
+
+    def test_no_discharge_below_supply_temperature(self):
+        """Test that a depleted aquifer cannot discharge into the network."""
+        # Arrange
+        storage = ControllerAtesStorage(
+            "storage",
+            "id",
+            temperatures=Temperatures(in_flow=313.15, out_flow=353.15),
+            max_charge_power=1e9,
+            max_discharge_power=1e9,
+        )
+
+        # Act
+        storage.set_state(
+            {
+                PROPERTY_HOT_WELL_TEMPERATURE: 333.15,  # below the minimum discharge temperature
+                PROPERTY_COLD_WELL_TEMPERATURE: 313.15,
+                PROPERTY_TIMESTEP: 3600,
+            }
+        )
+
+        # Assert
+        self.assertEqual(storage.effective_max_discharge_power, 0.0)
+        self.assertGreater(storage.effective_max_charge_power, 0.0)
+
+    def test_discharge_just_below_supply_temperature(self):
+        """Test that an aquifer charged to the supply temperature can still discharge."""
+        # Arrange
+        storage = ControllerAtesStorage(
+            "storage",
+            "id",
+            temperatures=Temperatures(in_flow=313.15, out_flow=353.15),
+            max_charge_power=1e9,
+            max_discharge_power=1e9,
+        )
+
+        # Act
+        storage.set_state(
+            {
+                PROPERTY_HOT_WELL_TEMPERATURE: 352.15,  # just below the supply temperature
+                PROPERTY_COLD_WELL_TEMPERATURE: 313.15,
+                PROPERTY_TIMESTEP: 3600,
+            }
+        )
+
+        # Assert
+        self.assertEqual(storage.get_minimum_discharge_temperature(), 313.15 + 0.9 * 40.0)
+        self.assertGreater(storage.effective_max_discharge_power, 0.0)
+
+    def test_set_state_missing_keys(self):
+        """Test that a state without the well temperatures raises an error."""
+        # Act / Assert
+        with self.assertRaises(KeyError):
+            self.storage.set_state({PROPERTY_TIMESTEP: 3600})
 
 
 class ControllerIdealHeatStorageTest(unittest.TestCase):

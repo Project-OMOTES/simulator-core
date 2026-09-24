@@ -21,41 +21,69 @@ from datetime import datetime
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
+    PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_HEAT_DEMAND,
+    PROPERTY_HOT_WELL_TEMPERATURE,
     PROPERTY_MASSFLOW,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.controller.temperature_data import (
     celcius_to_kelvin,
     kelvin_to_celcius,
 )
 from omotes_simulator_core.entities.assets.pyjnius_loader import PyjniusLoader
-from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
+from omotes_simulator_core.entities.assets.utils import (
+    heat_demand_and_temperature_to_mass_flow,
+    mass_flow_and_temperature_to_heat_demand,
+)
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
+from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
+
+MINIMUM_TEMPERATURE_DIFFERENCE = 1e-3
+"""Minimum temperature difference over the asset to calculate a mass flow rate [K]."""
 
 
 class AtesCluster(AssetAbstract):
     """An AtesCluster contains Ates assets that consumes heat and produces heat."""
 
-    temperature_in: float
-    """The inlet temperature of the asset [K]."""
+    temperature_connection_0: float
+    """The temperature at connection point 0 of the asset [K].
 
-    temperature_out: float
-    """The outlet temperature of the asset [K]."""
+    Connection point 0 is always connected to the supply (hot) side of the network. It is the
+    inflow of the asset when charging and the outflow of the asset when discharging.
+    """
+
+    temperature_connection_1: float
+    """The temperature at connection point 1 of the asset [K].
+
+    Connection point 1 is always connected to the return (cold) side of the network. It is the
+    outflow of the asset when charging and the inflow of the asset when discharging.
+    """
 
     thermal_power_allocation: float
-    """The thermal for injection (positive) or production (negative) by the asset [W]."""
+    """The thermal power charged (positive) or discharged (negative) by the asset [W].
+
+    This follows the controller convention: heat flowing from the network into the asset
+    (charging the aquifer) is positive, heat flowing from the asset into the network
+    (discharging the aquifer) is negative.
+    """
 
     mass_flowrate: float
-    """The flow rate going in or out by the asset [kg/s]."""
+    """The mass flow rate set point of the asset [kg/s].
+
+    Positive when charging (flow from connection point 0 to 1) and negative when discharging
+    (flow from connection point 1 to 0).
+    """
 
     aquifer_depth: float
     """The depth of the aquifer [m]."""
@@ -112,10 +140,10 @@ class AtesCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
-        self.temperature_in = DEFAULT_TEMPERATURE
-        self.temperature_out = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
-        self.hot_well_temperature = self.temperature_in
-        self.cold_well_temperature = self.temperature_out
+        self.temperature_connection_0 = DEFAULT_TEMPERATURE
+        self.temperature_connection_1 = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.hot_well_temperature = self.temperature_connection_0
+        self.cold_well_temperature = self.temperature_connection_1
         self.thermal_power_allocation = 0  # Watt
         self.mass_flowrate = 0  # kg/s
         self.solver_asset = HeatBoundary(name=self.name, _id=self.asset_id)
@@ -140,17 +168,83 @@ class AtesCluster(AssetAbstract):
         self.first_time_step = True
 
     def _calculate_massflowrate(self) -> None:
-        """Calculate mass flowrate of the asset."""
-        self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
-            abs(self.thermal_power_allocation), self.temperature_in, self.temperature_out
+        """Calculate the mass flow rate set point of the asset.
+
+        The temperatures are bound to the connection points of the asset, so the sign of the
+        thermal power allocation determines the flow direction: positive (charging) results in a
+        positive mass flow rate set point, which is a flow from connection point 0 to connection
+        point 1.
+        """
+        if (
+            abs(self.temperature_connection_0 - self.temperature_connection_1)
+            < MINIMUM_TEMPERATURE_DIFFERENCE
+        ):
+            logger.warning(
+                f"The temperature difference over asset {self.name} is too small to calculate a"
+                + " mass flow rate. The mass flow rate is set to zero.",
+                extra={"esdl_object_id": self.asset_id},
+            )
+            self.mass_flowrate = 0.0
+            return
+        self.mass_flowrate = -1 * heat_demand_and_temperature_to_mass_flow(
+            self.thermal_power_allocation,
+            self.temperature_connection_0,
+            self.temperature_connection_1,
+        )
+        self._limit_massflowrate()
+
+    def _get_maximum_mass_flow_rate(self) -> float:
+        """Get the maximum mass flow rate the wells of the asset can handle.
+
+        :return float: The maximum mass flow rate of the asset [kg/s].
+        """
+        if self.thermal_power_allocation >= 0:
+            maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_charge  # m3/h
+        else:
+            maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
+        density = fluid_props.get_density(
+            (self.temperature_connection_0 + self.temperature_connection_1) / 2
+        )
+        return maximum_volume_flow_rate / 3600 * density
+
+    def _limit_massflowrate(self) -> None:
+        """Limit the mass flow rate of the asset to the capacity of the wells.
+
+        The requested thermal power can only be delivered when the temperature difference over
+        the asset is large enough. When the aquifer is close to depleted, the required mass flow
+        rate runs away and would push the rest of the network out of its operating range. The mass
+        flow rate is therefore limited and the thermal power allocation is reduced to the power
+        that the asset can actually exchange.
+        """
+        maximum_mass_flow_rate = self._get_maximum_mass_flow_rate()
+        if abs(self.mass_flowrate) <= maximum_mass_flow_rate:
+            return
+        logger.warning(
+            f"The mass flow rate {self.mass_flowrate} of asset {self.name} exceeds the maximum"
+            + f" mass flow rate {maximum_mass_flow_rate}. The mass flow rate is limited and the"
+            + " requested thermal power is not met.",
+            extra={"esdl_object_id": self.asset_id},
+        )
+        self.mass_flowrate = math.copysign(maximum_mass_flow_rate, self.mass_flowrate)
+        self.thermal_power_allocation = mass_flow_and_temperature_to_heat_demand(
+            temperature_out=self.temperature_connection_1,
+            temperature_in=self.temperature_connection_0,
+            mass_flow=self.mass_flowrate,
         )
 
     def _set_solver_asset_setpoint(self) -> None:
-        """Set the setpoint of solver asset."""
-        if self.mass_flowrate <= 0:
-            self.solver_asset.supply_temperature = self.cold_well_temperature  # production
+        """Set the setpoint of solver asset.
+
+        The solver asset prescribes its supply temperature at the connection point where the flow
+        leaves the asset. The temperature of the inflowing connection point is taken from the
+        connected node.
+        """
+        if self.thermal_power_allocation >= 0:
+            # Charging: the flow leaves the asset at connection point 1 (return side).
+            self.solver_asset.supply_temperature = self.cold_well_temperature
         else:
-            self.solver_asset.supply_temperature = self.hot_well_temperature  # injection
+            # Discharging: the flow leaves the asset at connection point 0 (supply side).
+            self.solver_asset.supply_temperature = self.hot_well_temperature
         self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -177,26 +271,29 @@ class AtesCluster(AssetAbstract):
             raise ValueError(
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
-        self.thermal_power_allocation = -1 * setpoints[PROPERTY_HEAT_DEMAND]
-        if self.first_time_step:
-            # Depending on the sign of the power allocation the ATES is charging or discharging.
-            # If positive then charging and the Flow direction is negative, So in and out
-            # temperature are switch, since they are not set on flow direction but on port.
-            if self.thermal_power_allocation >= 0:
-                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_OUT]
-                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_IN]
+        self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
+        charging = self.thermal_power_allocation >= 0
+        if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
+            # The controller supplies the temperatures of the ATES with a producer-like
+            # definition, which is swapped between charging and discharging. Connection point 0
+            # is always connected to the supply (hot) side of the network and connection point 1
+            # to the return (cold) side, so the setpoints are mapped per operating mode.
+            if charging:
+                self.temperature_connection_0 = setpoints[PROPERTY_TEMPERATURE_IN]
+                self.temperature_connection_1 = setpoints[PROPERTY_TEMPERATURE_OUT]
             else:
-                self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
-                self.temperature_out = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.temperature_connection_0 = setpoints[PROPERTY_TEMPERATURE_OUT]
+                self.temperature_connection_1 = setpoints[PROPERTY_TEMPERATURE_IN]
             self.first_time_step = False
         else:
-            # After the first time step: use solver temperature
-            if self.thermal_power_allocation >= 0:
-                self.temperature_in = self.solver_asset.get_temperature(0)
-                self.temperature_out = self.hot_well_temperature
+            # After the first time step: the temperature of the inflowing connection point is
+            # taken from the solver and the outflowing connection point from the aquifer.
+            if charging:
+                self.temperature_connection_0 = self.solver_asset.get_temperature(0)
+                self.temperature_connection_1 = self.cold_well_temperature
             else:
-                self.temperature_in = self.solver_asset.get_temperature(1)
-                self.temperature_out = self.cold_well_temperature
+                self.temperature_connection_0 = self.hot_well_temperature
+                self.temperature_connection_1 = self.solver_asset.get_temperature(1)
         self.solver_asset.pre_scribe_mass_flow = not (  # type: ignore
             setpoints[PROPERTY_SET_PRESSURE]
         )
@@ -205,6 +302,20 @@ class AtesCluster(AssetAbstract):
             self._run_rosim()
             self.current_time = self.time
         self._set_solver_asset_setpoint()
+
+    def get_state(self) -> dict[str, float]:
+        """Get the state of the asset.
+
+        The controller uses the well temperatures to determine how much power the asset can
+        still charge or discharge.
+
+        :return: dict[str, float] A dictionary containing the state of the asset.
+        """
+        return {
+            PROPERTY_HOT_WELL_TEMPERATURE: self.hot_well_temperature,
+            PROPERTY_COLD_WELL_TEMPERATURE: self.cold_well_temperature,
+            PROPERTY_TIMESTEP: self.time_step,
+        }
 
     def write_to_output(self) -> None:
         """Method to write time step results to the output dict.
@@ -220,6 +331,7 @@ class AtesCluster(AssetAbstract):
             PROPERTY_TEMPERATURE_OUT: self.solver_asset.get_temperature(1),
         }
         self.output.append(output_dict)
+        self.first_time_step = False
 
     def postprocess(self) -> None:
         """Postprocess after a simulation time step to update internal states.
@@ -281,14 +393,14 @@ class AtesCluster(AssetAbstract):
         self.rosim = RosimSequential(xmlfilejava, logLevel, -1)
 
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 1e6,
+            PROPERTY_HEAT_DEMAND: 10e6,
             PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
             PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
             PROPERTY_SET_PRESSURE: False,
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
-        for i in range(12):
+        for i in range(20):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
@@ -301,21 +413,27 @@ class AtesCluster(AssetAbstract):
         # density needs to change with PVT calculation
         timestep = self.time_step / 3600  # convert to hours
 
-        rosim_input__flow = [-1 * volume_flow, volume_flow]  # first element is for producer well
-        # and second element is for injection well, positive flow is going upward and negative flow
-        # is downward
+        rosim_input__flow = [volume_flow, -1 * volume_flow]  # first element is for the hot well
+        # and second element is for the cold well. A positive flow injects into the well and a
+        # negative flow produces from the well. A positive mass flow rate of the asset is
+        # charging, which injects into the hot well and produces from the cold well.
 
-        if volume_flow < 0:
-            rosim_input_temperature = [kelvin_to_celcius(self.temperature_in), -1]  # Celcius, -1 in
-            # injection well to make sure it is not used
-        elif volume_flow > 0:
+        if volume_flow > 0:
+            # Charging: water from the supply side of the network (connection point 0) is
+            # injected into the hot well, the cold well is produced.
+            rosim_input_temperature = [
+                kelvin_to_celcius(self.temperature_connection_0),
+                -1,
+            ]  # Celcius, -1 in the cold well to make sure it is not used
+        elif volume_flow < 0:
+            # Discharging: water from the return side of the network (connection point 1) is
+            # injected into the cold well, the hot well is produced.
             rosim_input_temperature = [
                 -1,
-                kelvin_to_celcius(self.temperature_out),
-            ]  # Celcius, -1 in
-            # producer well to make sure it is not used
+                kelvin_to_celcius(self.temperature_connection_1),
+            ]  # Celcius, -1 in the hot well to make sure it is not used
         else:
-            rosim_input_temperature = [-1, -1]  # -1 in both producer and injection well to make
+            rosim_input_temperature = [-1, -1]  # -1 in both the hot and cold well to make
             # sure it is not used
         logger.debug("rosim input temperature %s", rosim_input_temperature)
         logger.debug("rosim input flow %s", rosim_input__flow)
@@ -330,7 +448,10 @@ class AtesCluster(AssetAbstract):
         self.cold_well_temperature = celcius_to_kelvin(ates_temperature[1])  # convert to K
 
     def get_heat_supplied(self) -> float:
-        """Get the actual heat supplied by the asset.
+        """Get the actual heat exchanged with the network by the asset.
+
+        The sign follows the controller convention: positive when the asset is charging (heat
+        from the network into the aquifer) and negative when it is discharging.
 
         :return float: The actual heat supplied by the asset [W].
         """
