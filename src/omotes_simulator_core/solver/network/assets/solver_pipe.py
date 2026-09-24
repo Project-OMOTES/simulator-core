@@ -61,6 +61,8 @@ class SolverPipe(FallType):
         :param float length: The length of the pip [m] with a default value of 1000.0 m.
         :param float diameter: The diameter of the pipe [m] with a default value of 0.2 m.
         :param float roughness: The roughness of the pipe [m] with a default value of 1E-3 m.
+        :param float alpha_value: The heat transfer coefficient of the pipe [W/m^2/K] with a
+        default value of 0.0 W/m^2/K.
         """
         super().__init__(name=name, _id=_id)
         # Set the physical properties of the pipe
