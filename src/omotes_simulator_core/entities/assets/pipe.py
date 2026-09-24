@@ -96,6 +96,7 @@ class Pipe(AssetAbstract):
             length=self.length,
             diameter=self.inner_diameter,
             roughness=self.roughness,
+            alpha_value=alpha_value,
         )
 
     def set_setpoints(self, setpoints: dict) -> None:

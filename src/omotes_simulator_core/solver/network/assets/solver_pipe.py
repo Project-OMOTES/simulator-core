@@ -56,6 +56,7 @@ class SolverPipe(FallType):
         length: float = 1000.0,
         diameter: float = 0.2,
         roughness: float = 0.001,
+        alpha_value: float = 0.0,
     ):
         """Constructor of pipe class.
 
@@ -72,6 +73,7 @@ class SolverPipe(FallType):
         self.roughness: float = roughness
         # Calculate the area of the pipe
         self.area: float = np.pi * self.diameter**2 / 4
+        self.alpha_value: float = alpha_value
 
     def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
         """Method to set the physical properties of the pipe.
@@ -542,6 +544,4 @@ class SolverPipe(FallType):
         self._calculate_total_heat_transfer_coefficient(
             temperature=tin, mass_flow_rate=mass_flow_rate
         )
-        self.heat_supplied = -self._calculate_total_heat_loss(
-            tin=tin, mass_flow_rate=mass_flow_rate
-        )
+        self.heat_flux = -self._calculate_total_heat_loss(tin=tin, mass_flow_rate=mass_flow_rate)
