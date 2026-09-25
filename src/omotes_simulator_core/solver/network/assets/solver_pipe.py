@@ -144,7 +144,7 @@ class SolverPipe(FallType):
             )
         # Calculate the Reynolds number
         density = fluid_props.get_density(temperature)
-        discharge = mass_flow_rate / density
+        discharge = abs(mass_flow_rate) / density
         velocity = discharge / self.area
         return velocity * self.diameter / fluid_props.get_viscosity(temperature)
 
@@ -174,6 +174,7 @@ class SolverPipe(FallType):
 
         """
         # Update the Reynolds number
+
         self.reynolds_number = self.calculate_reynolds_number()
         # Determine the loss
         if self.reynolds_number < 100:
