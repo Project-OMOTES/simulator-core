@@ -75,6 +75,7 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pipe.inner_diameter, self.inner_diameter)
         self.assertEqual(pipe.roughness, self.roughness)
         self.assertEqual(pipe.alpha_value, self.alpha_value)
+        self.assertEqual(pipe.solver_asset.alpha_value, self.alpha_value)
         self.assertEqual(pipe.minor_loss_coefficient, self.minor_loss_coefficient)
         self.assertEqual(pipe.external_temperature, self.external_temperature)
         self.assertEqual(pipe.qheat_external, self.qheat_external)

@@ -19,10 +19,6 @@ from scipy.optimize import root
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_MISSING_VALUE,
-    PROPERTY_ALPHA_VALUE,
-    PROPERTY_DIAMETER,
-    PROPERTY_LENGTH,
-    PROPERTY_ROUGHNESS,
 )
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -56,6 +52,7 @@ class SolverPipe(FallType):
         length: float = 1000.0,
         diameter: float = 0.2,
         roughness: float = 0.001,
+        alpha_value: float = 0.0,
     ):
         """Constructor of pipe class.
 
@@ -64,6 +61,8 @@ class SolverPipe(FallType):
         :param float length: The length of the pip [m] with a default value of 1000.0 m.
         :param float diameter: The diameter of the pipe [m] with a default value of 0.2 m.
         :param float roughness: The roughness of the pipe [m] with a default value of 1E-3 m.
+        :param float alpha_value: The heat transfer coefficient of the pipe [W/m^2/K] with a
+        default value of 0.0 W/m^2/K.
         """
         super().__init__(name=name, _id=_id)
         # Set the physical properties of the pipe
@@ -72,32 +71,7 @@ class SolverPipe(FallType):
         self.roughness: float = roughness
         # Calculate the area of the pipe
         self.area: float = np.pi * self.diameter**2 / 4
-
-    def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
-        """Method to set the physical properties of the pipe.
-
-        :param physical_properties: dictionary containing the physical properties of the pipe.
-
-        expected properties are: length [m], diameter [m], roughness [m]
-        """
-        expected_properties = [
-            PROPERTY_LENGTH,
-            PROPERTY_DIAMETER,
-            PROPERTY_ROUGHNESS,
-            PROPERTY_ALPHA_VALUE,
-        ]
-
-        for expected_property in expected_properties:
-            if expected_property not in physical_properties:
-                raise ValueError(f"Property {expected_property} is missing in physical_properties")
-            if hasattr(self, expected_property):
-                setattr(self, expected_property, physical_properties[expected_property])
-            else:
-                raise ValueError(
-                    f"Property {expected_property} is not a valid property " f"of the pipe"
-                )
-        # Update the area of the pipe
-        self.area = np.pi * self.diameter**2 / 4
+        self.alpha_value: float = alpha_value
 
     def update_loss_coefficient(self) -> None:
         r"""Method to update the loss coefficient of the pipe.
@@ -542,6 +516,4 @@ class SolverPipe(FallType):
         self._calculate_total_heat_transfer_coefficient(
             temperature=tin, mass_flow_rate=mass_flow_rate
         )
-        self.heat_supplied = -self._calculate_total_heat_loss(
-            tin=tin, mass_flow_rate=mass_flow_rate
-        )
+        self.heat_flux = -self._calculate_total_heat_loss(tin=tin, mass_flow_rate=mass_flow_rate)
