@@ -186,7 +186,7 @@ class AtesCluster(AssetAbstract):
             )
             self.mass_flowrate = 0.0
             return
-        self.mass_flowrate = -1 * heat_demand_and_temperature_to_mass_flow(
+        self.mass_flowrate = heat_demand_and_temperature_to_mass_flow(
             self.thermal_power_allocation,
             self.temperature_connection_0,
             self.temperature_connection_1,
