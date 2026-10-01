@@ -117,14 +117,14 @@ class HeatPumpTest(unittest.TestCase):
             # Self attributes
             self.assertEqual(self.heat_pump.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.temperature_out_secondary, 273.15 + 25.0)
-            self.assertEqual(self.heat_pump.mass_flow_secondary, -321.0)
+            self.assertEqual(self.heat_pump.mass_flow_secondary, 321.0)
             self.assertEqual(self.heat_pump.control_mass_flow_secondary, False)
 
             # Solver asset attributes
             self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 273.15 + 15.0)
             self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 273.15 + 25.0)
             self.assertEqual(
-                self.heat_pump.solver_asset.mass_flow_rate_rate_set_point_secondary, -321.0
+                self.heat_pump.solver_asset.mass_flow_rate_rate_set_point_secondary, 321.0
             )
             self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, False)
 
@@ -171,12 +171,12 @@ class HeatPumpTest(unittest.TestCase):
             # Self attributes
             self.assertEqual(self.heat_pump.temperature_in_primary, 273.15 + 10.0)
             self.assertEqual(self.heat_pump.temperature_out_primary, 273.15 + 20.0)
-            self.assertEqual(self.heat_pump.mass_flow_initialization_primary, -125)
+            self.assertEqual(self.heat_pump.mass_flow_initialization_primary, 125)
 
             # Solver asset attributes
             self.assertEqual(self.heat_pump.solver_asset.temperature_in_primary, 273.15 + 10.0)
             self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 273.15 + 20.0)
-            self.assertEqual(self.heat_pump.solver_asset.mass_flow_initialization_primary, -125)
+            self.assertEqual(self.heat_pump.solver_asset.mass_flow_initialization_primary, 125)
 
             mock_calc.assert_called_once_with(
                 thermal_demand=300, temperature_in=273.15 + 10.0, temperature_out=273.15 + 20.0
@@ -228,8 +228,8 @@ class HeatPumpTest(unittest.TestCase):
         self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)
         self.assertEqual(self.heat_pump.solver_asset.pre_scribe_mass_flow_secondary, True)
-        self.assertEqual(self.heat_pump.mass_flow_initialization_primary, -125)
-        self.assertEqual(self.heat_pump.mass_flow_secondary, 125)
+        self.assertEqual(self.heat_pump.mass_flow_initialization_primary, 125)
+        self.assertEqual(self.heat_pump.mass_flow_secondary, -125)
         self.assertEqual(mock_calc.call_count, 2)
 
     def test_write_to_output(self):
