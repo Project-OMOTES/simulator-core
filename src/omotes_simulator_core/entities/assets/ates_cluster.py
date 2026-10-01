@@ -166,6 +166,7 @@ class AtesCluster(AssetAbstract):
         self.current_time = datetime.now()
         self._init_rosim()
         self.first_time_step = True
+        self.charging = True
 
     def _calculate_massflowrate(self) -> None:
         """Calculate the mass flow rate set point of the asset.
@@ -198,7 +199,7 @@ class AtesCluster(AssetAbstract):
 
         :return float: The maximum mass flow rate of the asset [kg/s].
         """
-        if self.thermal_power_allocation >= 0:
+        if self.charging:
             maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_charge  # m3/h
         else:
             maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
@@ -239,7 +240,7 @@ class AtesCluster(AssetAbstract):
         leaves the asset. The temperature of the inflowing connection point is taken from the
         connected node.
         """
-        if self.thermal_power_allocation >= 0:
+        if self.charging:
             # Charging: the flow leaves the asset at connection point 1 (return side).
             self.solver_asset.supply_temperature = self.cold_well_temperature
         else:
@@ -272,13 +273,13 @@ class AtesCluster(AssetAbstract):
                 f"The setpoints {necessary_setpoints.difference(setpoints_set)} are missing."
             )
         self.thermal_power_allocation = setpoints[PROPERTY_HEAT_DEMAND]
-        charging = self.thermal_power_allocation >= 0
+        self.charging = self.thermal_power_allocation >= 0
         if self.first_time_step or self.solver_asset.prev_sol[0] == 0.0:
             # The controller supplies the temperatures of the ATES with a producer-like
             # definition, which is swapped between charging and discharging. Connection point 0
             # is always connected to the supply (hot) side of the network and connection point 1
             # to the return (cold) side, so the setpoints are mapped per operating mode.
-            if charging:
+            if self.charging:
                 self.temperature_connection_0 = setpoints[PROPERTY_TEMPERATURE_IN]
                 self.temperature_connection_1 = setpoints[PROPERTY_TEMPERATURE_OUT]
             else:
@@ -288,7 +289,7 @@ class AtesCluster(AssetAbstract):
         else:
             # After the first time step: the temperature of the inflowing connection point is
             # taken from the solver and the outflowing connection point from the aquifer.
-            if charging:
+            if self.charging:
                 self.temperature_connection_0 = self.solver_asset.get_temperature(0)
                 self.temperature_connection_1 = self.cold_well_temperature
             else:
