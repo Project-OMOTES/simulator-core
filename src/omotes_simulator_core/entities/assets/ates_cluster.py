@@ -394,14 +394,14 @@ class AtesCluster(AssetAbstract):
         self.rosim = RosimSequential(xmlfilejava, logLevel, -1)
 
         setpoints = {
-            PROPERTY_HEAT_DEMAND: 10e6,
+            PROPERTY_HEAT_DEMAND: 1e6,
             PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
             PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
             PROPERTY_SET_PRESSURE: False,
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
         logger.info("initializing ates with charging for 12 weeks")
-        for i in range(20):
+        for i in range(12):
             logger.info(f"charging ates week {i + 1}")
             self.set_time_step(3600 * 24 * 7)
             self.set_time(datetime(2023, 1, i + 1, 0, 0, 0))
