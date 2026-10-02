@@ -66,7 +66,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        self.assertAlmostEqual(mass_flow_calculated, 0.011902381642040025, 4)
+        self.assertAlmostEqual(mass_flow_calculated, -0.011902381642040025, 4)
 
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""

@@ -359,13 +359,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
-                    mass_flow_value=-1 * mset,
+                    mass_flow_value=mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=3,
-                    mass_flow_value=mset,
+                    mass_flow_value=-1 * mset,
                 )
             )
         else:
@@ -412,13 +412,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=0,
-                    mass_flow_value=-1 * abs(self.mass_flow_initialization_primary),
+                    mass_flow_value=abs(self.mass_flow_initialization_primary),
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=1,
-                    mass_flow_value=abs(self.mass_flow_initialization_primary),
+                    mass_flow_value=-1 * abs(self.mass_flow_initialization_primary),
                 )
             )
         else:
@@ -559,8 +559,8 @@ class HeatTransferAsset(BaseAsset):
         since the heat transfer asset is in bypass mode the secondary outflow is set equal to
         the primary inflow, and vice versa.
         """
-        equations.append(self.get_internal_energy_to_node_equation(connection_point=1))
-        equations.append(self.get_internal_energy_to_node_equation(connection_point=3))
+        equations.append(self.get_internal_energy_to_node_equation(connection_point=0))
+        equations.append(self.get_internal_energy_to_node_equation(connection_point=2))
         equations.append(self.short_cut_internal_energy(con_point1=0, con_point2=3))
         equations.append(self.short_cut_internal_energy(con_point1=1, con_point2=2))
 
