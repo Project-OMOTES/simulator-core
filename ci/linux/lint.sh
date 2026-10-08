@@ -5,4 +5,4 @@ if [[ "$OSTYPE" != "win32" && "$OSTYPE" != "msys" ]]; then
   . .venv/bin/activate
 fi
 
-flake8 ./src/omotes_simulator_core ./unit_test/
+flake8
