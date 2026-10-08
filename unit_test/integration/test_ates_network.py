@@ -213,9 +213,3 @@ class AtesNetworkTest(unittest.TestCase):
                 # Assert
                 self._assert_discharging()
                 self._assert_producer_supplies_network()
-
-
-
-
-
-
