@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Restore venv
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
           name: ${{ runner.os }}-python-${{ matrix.python-version }}-venv-${{github.run_id}}
       - name: Untar venv
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Restore venv
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
           name: ${{ runner.os }}-python-${{ matrix.python-version }}-venv-${{github.run_id}}
       - name: Untar venv
@@ -87,7 +87,7 @@ jobs:
         with:
           lfs: 'true'
       - name: Restore venv
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
           name: ${{ runner.os }}-python-${{ matrix.python-version }}-venv-${{github.run_id}}
       - name: Untar venv
@@ -129,7 +129,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Restore venv
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
           name: ${{ runner.os }}-python-${{ matrix.python-version }}-venv-${{github.run_id}}
       - name: Untar venv
@@ -151,7 +151,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Restore venv
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
           name: ${{ runner.os }}-python-${{ matrix.python-version }}-venv-${{github.run_id}}
       - name: Untar venv
