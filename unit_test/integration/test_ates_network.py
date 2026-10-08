@@ -62,7 +62,7 @@ class AtesNetworkTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create the heat network of the ATES test case."""
-        esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test_ates_2.esdl")
+        esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test_ates.esdl")
         esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
         self.network = HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)
         self.ates = cast(AtesCluster, self.network.get_asset_by_id(ATES_ID))
