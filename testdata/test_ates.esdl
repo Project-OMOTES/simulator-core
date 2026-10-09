@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="course_model with return network" id="3b21ab49-fd94-4dda-878d-dcaf651ded78_with_return_network" description="basic" esdlVersion="v2111" version="11">
+<esdl:EnergySystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:esdl="http://www.tno.nl/esdl" name="course_model with return network" id="3b21ab49-fd94-4dda-878d-dcaf651ded78_with_return_network" description="basic" esdlVersion="v2111" version="12">
   <energySystemInformation xsi:type="esdl:EnergySystemInformation" id="9a76b800-6e2c-4e99-a9a5-859f7badd061">
     <carriers xsi:type="esdl:Carriers" id="e84423d9-b617-4fa0-b113-1ba12daacaaf">
       <carrier xsi:type="esdl:HeatCommodity" returnTemperature="40.0" id="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret" name="supply_ret" supplyTemperature="80.0"/>
@@ -166,8 +166,8 @@
       </asset>
       <asset xsi:type="esdl:Joint" name="Joint_086f" id="086f467d-afd5-4a87-aad2-0b03f185edef">
         <geometry xsi:type="esdl:Point" lat="52.02182284526067" lon="4.409407116472722"/>
-        <port xsi:type="esdl:InPort" id="9b3744f2-f9f0-4e32-a118-e116154e1384" name="In" connectedTo="37a4d419-e788-4ca7-a033-3a06c6872fdf b94d1e9b-5377-4016-9bb3-4452effb5a20" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
-        <port xsi:type="esdl:OutPort" id="3a52317d-827b-4dc4-a6df-1b145bbb1736" name="Out" connectedTo="9a462e32-2e53-40ca-97eb-8394b6a3d131" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
+        <port xsi:type="esdl:InPort" id="9b3744f2-f9f0-4e32-a118-e116154e1384" name="In" connectedTo="37a4d419-e788-4ca7-a033-3a06c6872fdf" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
+        <port xsi:type="esdl:OutPort" id="3a52317d-827b-4dc4-a6df-1b145bbb1736" name="Out" connectedTo="9a462e32-2e53-40ca-97eb-8394b6a3d131 3874047c-96e8-4555-902a-8646daf3f984" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
       </asset>
       <asset xsi:type="esdl:Pipe" name="Pipe5_ret_a" innerDiameter="0.1" length="993.35" id="3a1d7c9a-18cd-4360-ae7f-74062a514317" outerDiameter="0.16">
         <geometry xsi:type="esdl:Line">
@@ -191,34 +191,34 @@
       </asset>
       <asset xsi:type="esdl:Joint" name="Joint_526a" id="526a38b8-cf6c-407e-9a76-837d409fdf12">
         <geometry xsi:type="esdl:Point" lat="52.021920019967986" lon="4.4088220596313485"/>
-        <port xsi:type="esdl:InPort" id="027db45e-289d-4611-94ba-95d04abec30f" name="In" connectedTo="23be2b8d-5f5a-471f-875f-b7e20997f7c5" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
-        <port xsi:type="esdl:OutPort" id="ba8ac663-b53c-400a-a838-206da20b63d7" name="Out" connectedTo="fb200deb-6383-4e50-b041-9536046ee404 9a58c5ba-1ac1-48cb-b583-5c568190ae3c" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
+        <port xsi:type="esdl:InPort" id="027db45e-289d-4611-94ba-95d04abec30f" name="In" connectedTo="23be2b8d-5f5a-471f-875f-b7e20997f7c5 7ca06d72-bb1d-41ac-9a19-6306fb33e10e" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
+        <port xsi:type="esdl:OutPort" id="ba8ac663-b53c-400a-a838-206da20b63d7" name="Out" connectedTo="fb200deb-6383-4e50-b041-9536046ee404" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
       </asset>
-      <asset xsi:type="esdl:Pipe" name="Pipe_ates" length="598.2" id="fa07b73b-0ec7-4a6d-bbd5-60b5fdf09d92">
+      <asset xsi:type="esdl:Pipe" name="Pipe_ates" length="587.1" id="fa07b73b-0ec7-4a6d-bbd5-60b5fdf09d92">
         <geometry xsi:type="esdl:Line">
+          <point xsi:type="esdl:Point" lat="52.02192167049198" lon="4.4093088805675515"/>
           <point xsi:type="esdl:Point" lat="52.02648843713918" lon="4.4050025939941415"/>
-          <point xsi:type="esdl:Point" lat="52.02183574000574" lon="4.40939286723733"/>
         </geometry>
-        <port xsi:type="esdl:InPort" id="3874047c-96e8-4555-902a-8646daf3f984" name="In" connectedTo="07a302f6-4e5b-40ef-87e3-c908a993dfe4" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
-        <port xsi:type="esdl:OutPort" id="b94d1e9b-5377-4016-9bb3-4452effb5a20" name="Out" connectedTo="9b3744f2-f9f0-4e32-a118-e116154e1384" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
+        <port xsi:type="esdl:InPort" id="3874047c-96e8-4555-902a-8646daf3f984" name="In" connectedTo="3a52317d-827b-4dc4-a6df-1b145bbb1736" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
+        <port xsi:type="esdl:OutPort" id="b94d1e9b-5377-4016-9bb3-4452effb5a20" name="Out" connectedTo="e14c67db-96c3-4fc9-aed2-4fe0f84a34d3" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
       </asset>
       <asset xsi:type="esdl:Pipe" name="Pipe_ates_ret" length="549.0" id="1f1a7ed1-c6fe-4afe-a39c-77803b8aed2f">
         <geometry xsi:type="esdl:Line" CRS="WGS84">
-          <point xsi:type="esdl:Point" lat="52.02203885753961" lon="4.408714771270753"/>
           <point xsi:type="esdl:Point" lat="52.02633000273639" lon="4.404745101928712"/>
+          <point xsi:type="esdl:Point" lat="52.02203885753961" lon="4.408714771270753"/>
         </geometry>
-        <port xsi:type="esdl:InPort" id="9a58c5ba-1ac1-48cb-b583-5c568190ae3c" name="In" connectedTo="ba8ac663-b53c-400a-a838-206da20b63d7" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
-        <port xsi:type="esdl:OutPort" id="7ca06d72-bb1d-41ac-9a19-6306fb33e10e" name="Out" connectedTo="e14c67db-96c3-4fc9-aed2-4fe0f84a34d3" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
+        <port xsi:type="esdl:InPort" id="9a58c5ba-1ac1-48cb-b583-5c568190ae3c" name="In" connectedTo="07a302f6-4e5b-40ef-87e3-c908a993dfe4" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
+        <port xsi:type="esdl:OutPort" id="7ca06d72-bb1d-41ac-9a19-6306fb33e10e" name="Out" connectedTo="027db45e-289d-4611-94ba-95d04abec30f" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
       </asset>
       <asset xsi:type="esdl:ATES" aquiferNetToGross="1.0" name="ATES_4d6d" aquiferThickness="45.0" maxDischargeRate="11610000.0" wellCasingSize="13.0" aquiferAnisotropy="4.0" aquiferPorosity="0.3" aquiferTopDepth="300.0" aquiferMidTemperature="17.0" id="4d6dfb40-ea51-4176-a27e-4ee60cad4034" wellDistance="150.0" maxChargeRate="11610000.0" salinity="10000.0" aquiferPermeability="10000.0">
         <geometry xsi:type="esdl:Point" lat="52.026597360465495" lon="4.404745101928712"/>
         <dataSource xsi:type="esdl:DataSource" description="This data was generated using the 'kosten_per_asset.xslx' file in the 'Kentallen' directory of WarmingUp project 1D" attribution="" name="WarmingUp factsheet: HT-ATES (high)"/>
-        <port xsi:type="esdl:InPort" id="e14c67db-96c3-4fc9-aed2-4fe0f84a34d3" name="In" connectedTo="7ca06d72-bb1d-41ac-9a19-6306fb33e10e" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret">
+        <port xsi:type="esdl:InPort" id="e14c67db-96c3-4fc9-aed2-4fe0f84a34d3" name="In" connectedTo="b94d1e9b-5377-4016-9bb3-4452effb5a20" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret">
           <profile xsi:type="esdl:InfluxDBProfile" multiplier="5.0" startDate="2018-12-31T23:00:00.000000+0000" filters="" id="1e323c5f-f645-42bf-8631-b63b0a24c424" measurement="WarmingUp default profiles" database="energy_profiles" host="profiles.warmingup.info" port="443" field="demand4_MW" endDate="2019-12-31T22:00:00.000000+0000">
             <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitReference" reference="e9405fc8-5e57-4df5-8584-4babee7cdf1b"/>
           </profile>
         </port>
-        <port xsi:type="esdl:OutPort" id="07a302f6-4e5b-40ef-87e3-c908a993dfe4" name="Out" connectedTo="3874047c-96e8-4555-902a-8646daf3f984" carrier="e96c4852-b2bc-43be-8fa7-5ae5e25a1883_ret"/>
+        <port xsi:type="esdl:OutPort" id="07a302f6-4e5b-40ef-87e3-c908a993dfe4" name="Out" connectedTo="9a58c5ba-1ac1-48cb-b583-5c568190ae3c" carrier="bac202fe-7c5f-4623-8ade-badbc607a16e_ret"/>
         <costInformation xsi:type="esdl:CostInformation">
           <fixedOperationalCosts xsi:type="esdl:SingleValue" value="30000.0">
             <profileQuantityAndUnit xsi:type="esdl:QuantityAndUnitType" unit="EURO" perTimeUnit="YEAR" id="574ef21d-681a-43ae-a1cb-f7b25d88defb" description="Cost in EUR/yr"/>

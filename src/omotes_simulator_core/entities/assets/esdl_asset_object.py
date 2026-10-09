@@ -180,6 +180,7 @@ class EsdlAssetObject:
             OmotesAssetLabels.PRODUCER,
             OmotesAssetLabels.GAS_HEATER,
             OmotesAssetLabels.ELECTRIC_BOILER,
+            OmotesAssetLabels.GEOTHERMAL,
         ]
 
         if self.get_esdl_type() == OmotesAssetLabels.CONSUMER:
@@ -193,9 +194,13 @@ class EsdlAssetObject:
                 out_flow=self.get_temperature("Out", "Supply"),
             )
 
-        elif (self.get_esdl_type() == OmotesAssetLabels.ATES) | (
-            self.get_esdl_type() == OmotesAssetLabels.STORAGE
-        ):
+        elif self.get_esdl_type() == OmotesAssetLabels.ATES:
+            temperatures = Temperatures(
+                in_flow=self.get_temperature("Out", "Return"),
+                out_flow=self.get_temperature("In", "Supply"),
+            )
+
+        elif self.get_esdl_type() == OmotesAssetLabels.STORAGE:
             temperatures = Temperatures(
                 in_flow=self.get_temperature("In", "Return"),
                 out_flow=self.get_temperature("Out", "Supply"),

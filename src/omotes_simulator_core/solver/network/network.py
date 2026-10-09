@@ -410,3 +410,10 @@ class Network:
         for asset in self.assets:
             print(type(self.get_asset(asset_id=asset)))
             print(self.get_asset(asset_id=asset).get_result())
+
+    def reset_prev_solution(self) -> None:
+        """Method to reset the previous solution of the network."""
+        for asset in self.assets:
+            self.assets[asset].reset_prev_sol()
+        for node in self.nodes:
+            self.nodes[node].reset_prev_sol()
