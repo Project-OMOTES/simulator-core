@@ -1,4 +1,4 @@
-set profile_results_file=profiling_result.prof
+set profile_results_file=profiling_result_final.prof
 set esdl_file=.\testdata\test1.esdl
 
 pushd .

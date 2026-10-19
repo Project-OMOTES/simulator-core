@@ -37,7 +37,7 @@ def heat_demand_and_temperature_to_mass_flow(
     """
     internal_energy1 = fluid_props.get_ie(temperature_in)
     internal_energy2 = fluid_props.get_ie(temperature_out)
-    return thermal_demand / (internal_energy2 - internal_energy1)
+    return thermal_demand / (internal_energy1 - internal_energy2)
 
 
 def mass_flow_and_temperature_to_heat_demand(
