@@ -1,5 +1,5 @@
 set profile_results_file=profiling_result_final.prof
-set esdl_file="C:\Users\zwan\Downloads\Delft_TPCv_supply_only with return network.esdl"
+set esdl_file=.\testdata\test1.esdl
 
 pushd .
 cd /D "%~dp0"
