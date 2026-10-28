@@ -21,9 +21,12 @@ import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
+    ATES_DEFAULTS,
     PROPERTY_BUFFER_COLD_TEMPERATURE,
     PROPERTY_BUFFER_HOT_TEMPERATURE,
+    PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
+    PROPERTY_HOT_WELL_TEMPERATURE,
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -33,6 +36,15 @@ from omotes_simulator_core.entities.assets.controller.temperature_data import Te
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 logger = logging.getLogger(__name__)
+
+MINIMUM_USABLE_TEMPERATURE_FRACTION = 0.9
+"""Minimum fraction of the temperature difference of the network an aquifer needs to deliver.
+
+The aquifer supplies its water at the temperature of its hot well. When that temperature drops too
+far below the supply temperature of the network, the supply side of the network is diluted and the
+consumers cannot be supplied anymore. The aquifer is therefore only discharged while its hot well
+still covers this fraction of the temperature difference of the network.
+"""
 
 
 class ControllerStorageAbstract(AssetControllerAbstract):
@@ -139,6 +151,12 @@ class ControllerStorageAbstract(AssetControllerAbstract):
 class ControllerAtesStorage(ControllerStorageAbstract):
     """Class to store the storage for the controller asset."""
 
+    hot_well_temperature: float
+    """The temperature of the hot well of the aquifer [K]."""
+
+    cold_well_temperature: float
+    """The temperature of the cold well of the aquifer [K]."""
+
     def __init__(
         self,
         name: str,
@@ -168,6 +186,106 @@ class ControllerAtesStorage(ControllerStorageAbstract):
             max_discharge_power=max_discharge_power,
             profile=profile,
         )
+
+        # Well temperatures of the aquifer, updated with the state of the asset.
+        self.hot_well_temperature = temperatures.out_flow
+        self.cold_well_temperature = temperatures.in_flow
+
+    def _power_from_maximum_flow(
+        self,
+        maximum_volume_flow: float,
+        temperature_hot: float,
+        temperature_cold: float,
+    ) -> float:
+        """Calculate the power that can be exchanged with the maximum flow of the wells.
+
+        :param float maximum_volume_flow: Maximum volume flow of the well [m3/h].
+        :param float temperature_hot: Temperature of the hot side of the asset [K].
+        :param float temperature_cold: Temperature of the cold side of the asset [K].
+        :return: float with the power which can be exchanged [W].
+        """
+        if temperature_hot <= temperature_cold:
+            return 0.0
+        average_temperature = (temperature_hot + temperature_cold) / 2.0
+        mass_flow = (
+            maximum_volume_flow / 3600.0 * fluid_props.get_density(average_temperature)
+        )  # kg/s
+        return mass_flow * (
+            fluid_props.get_ie(temperature_hot) - fluid_props.get_ie(temperature_cold)
+        )
+
+    def get_minimum_discharge_temperature(self) -> float:
+        """Determine the lowest hot well temperature which can still supply the network.
+
+        :return: float with the minimum temperature of the hot well [K].
+        """
+        return self.temperatures.in_flow + MINIMUM_USABLE_TEMPERATURE_FRACTION * (
+            self.temperatures.out_flow - self.temperatures.in_flow
+        )
+
+    def get_effective_max_discharge_power(self) -> float:
+        """Determine the effective maximum discharge power of the asset.
+
+        Discharging cools the hot well down. The asset delivers its water at the temperature of
+        the hot well, so it can only supply the network while that temperature is close enough to
+        the supply temperature of the network. Below that temperature the asset would dilute the
+        supply side of the network and no power is available. The power is further limited by the
+        maximum flow of the wells and by the temperature difference between the hot well and the
+        return temperature of the network.
+
+        :return: float with the effective maximum discharge power [W].
+        """
+        if self.hot_well_temperature < self.get_minimum_discharge_temperature():
+            return 0.0
+        return min(
+            self.max_discharge_power,
+            self._power_from_maximum_flow(
+                maximum_volume_flow=ATES_DEFAULTS.maximum_flow_discharge,
+                temperature_hot=self.hot_well_temperature,
+                temperature_cold=self.temperatures.in_flow,
+            ),
+        )
+
+    def get_effective_max_charge_power(self) -> float:
+        """Determine the effective maximum charge power of the asset.
+
+        Charging heats the hot well up with water from the supply side of the network. The power
+        which can be charged is limited by the maximum flow of the wells and by the temperature
+        difference between the supply temperature of the network and the cold well.
+
+        :return: float with the effective maximum charge power [W].
+        """
+        return min(
+            self.max_charge_power,
+            self._power_from_maximum_flow(
+                maximum_volume_flow=ATES_DEFAULTS.maximum_flow_charge,
+                temperature_hot=self.temperatures.out_flow,
+                temperature_cold=self.cold_well_temperature,
+            ),
+        )
+
+    def set_state(self, state: dict[str, float]) -> None:
+        """Set the state of the controller.
+
+        :param dict[str, float] state: State of the controller from the asset_abstract
+            get_state method.
+        """
+        available_state_keys = {
+            PROPERTY_HOT_WELL_TEMPERATURE,
+            PROPERTY_COLD_WELL_TEMPERATURE,
+            PROPERTY_TIMESTEP,
+        }
+        if not available_state_keys.issubset(state.keys()):
+            missing_keys = sorted(available_state_keys.difference(state.keys()))
+            raise KeyError(f"State keys {missing_keys} are missing for storage {self.name}.")
+
+        self.hot_well_temperature = state[PROPERTY_HOT_WELL_TEMPERATURE]
+        self.cold_well_temperature = state[PROPERTY_COLD_WELL_TEMPERATURE]
+        self.timestep = state[PROPERTY_TIMESTEP]
+
+        # Update the effective maximum charge and discharge power of the asset.
+        self.effective_max_charge_power = self.get_effective_max_charge_power()
+        self.effective_max_discharge_power = self.get_effective_max_discharge_power()
 
 
 class ControllerIdealHeatStorage(ControllerStorageAbstract):

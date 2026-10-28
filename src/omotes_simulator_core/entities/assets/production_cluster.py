@@ -124,7 +124,7 @@ class ProductionCluster(AssetAbstract):
         """
         # Calculate the mass flow rate
         self.heat_demand_set_point = heat_demand
-        self.controlled_mass_flow = -heat_demand_and_temperature_to_mass_flow(
+        self.controlled_mass_flow = heat_demand_and_temperature_to_mass_flow(
             thermal_demand=heat_demand,
             temperature_in=self.temperature_in,
             temperature_out=self.temperature_out,

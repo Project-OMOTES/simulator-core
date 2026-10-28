@@ -65,7 +65,7 @@ class ProductionClusterTest(unittest.TestCase):
             PROPERTY_SET_PRESSURE: False,
         }
 
-        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
+        mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],
@@ -121,7 +121,7 @@ class ProductionClusterTest(unittest.TestCase):
         }
 
         # Act
-        mass_flow = -1 * heat_demand_and_temperature_to_mass_flow(
+        mass_flow = heat_demand_and_temperature_to_mass_flow(
             temperature_out=setpoints[PROPERTY_TEMPERATURE_OUT],
             temperature_in=setpoints[PROPERTY_TEMPERATURE_IN],
             thermal_demand=setpoints[PROPERTY_HEAT_DEMAND],

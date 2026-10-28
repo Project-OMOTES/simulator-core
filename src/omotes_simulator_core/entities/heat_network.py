@@ -15,6 +15,7 @@
 
 """HeatNetwork entity class."""
 import datetime
+import logging
 from typing import Callable
 
 import pandas as pd
@@ -23,6 +24,8 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.solver.network.network import Network
 from omotes_simulator_core.solver.solver import Solver
+
+logger = logging.getLogger(__name__)
 
 
 class HeatNetwork:
@@ -110,6 +113,7 @@ class HeatNetwork:
         """
         for py_asset in self.assets:
             if not py_asset.is_converged():
+                logger.debug(f"Asset not converged is {py_asset.name}")
                 return False
         return True
 
