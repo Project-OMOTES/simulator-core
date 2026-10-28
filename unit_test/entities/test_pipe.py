@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Junction entities."""
+
 import unittest
 from unittest.mock import patch
 
@@ -93,7 +94,7 @@ class PipeTest(unittest.TestCase):
             # act
             velocity = self.pipe.get_velocity(port=0)
         # assert
-        self.assertAlmostEquals(velocity, 12.732, places=3)
+        self.assertAlmostEqual(velocity, 12.732, places=3)
 
     def test_write_to_output(self):
         """Test for the get_pressure_loss_per_length method."""  # noqa: D202

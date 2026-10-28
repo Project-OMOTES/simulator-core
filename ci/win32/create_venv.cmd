@@ -4,14 +4,14 @@ rem @echo off
 pushd .
 cd /D "%~dp0"
 
-set VENV_DIR=..\..\venv
+set VENV_DIR=..\..\.venv
 
-py --list | findstr /i /C:"3.11" 
+py --list | findstr /i /C:"3.14" 
 if %errorlevel% == 0 (
-    echo Python 3.11 found!
-    py -3.11 -m venv %VENV_DIR%
+    echo Python 3.14 found!
+    py -3.14 -m venv %VENV_DIR%
 ) else (
-    echo Python 3.11 not found, using installed 3.X
+    echo Python 3.14 not found, using installed 3.X
     py -3 -m venv %VENV_DIR%
     echo Python version is:
     py -3 --version
@@ -30,6 +30,7 @@ if not exist %VENV_DIR%\Scripts\python.exe (
 call %VENV_DIR%\Scripts\activate.bat
 python -m ensurepip --upgrade
 python -m pip install pip-tools setuptools wheel
+call .\update_dependencies.cmd
 call .\install_dependencies.cmd
 call .\install_dev.cmd
 call .\check_java_jdk.cmd

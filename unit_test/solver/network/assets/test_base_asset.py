@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Junction entities."""
+
 import unittest
 from uuid import uuid4
 
@@ -309,7 +310,7 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_temperature(connection_point=connection_point_id)
 
         # Assert
-        self.assertAlmostEquals(result, temperature, 2)
+        self.assertAlmostEqual(result, temperature, 2)
 
     def test_base_get_internal_energy(self) -> None:
         """Test the get_internal_energy method."""
@@ -325,4 +326,4 @@ class BaseAssetTest(unittest.TestCase):
         result = self.asset.get_internal_energy(connection_point=connection_point_id)
 
         # Assert
-        self.assertAlmostEquals(result, 112413.55, 2)
+        self.assertAlmostEqual(result, 112413.55, 2)
