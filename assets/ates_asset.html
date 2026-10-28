@@ -521,10 +521,25 @@ and retrieval before the network and asset behavior are solved.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_heat_supplied</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span></dt>
-<dd><p>Get the actual heat supplied by the asset.</p>
+<dd><p>Get the actual heat exchanged with the network by the asset.</p>
+<p>The sign follows the controller convention: positive when the asset is charging (heat
+from the network into the aquifer) and negative when it is discharging.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return float<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The actual heat supplied by the asset [W].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Get the state of the asset.</p>
+<p>The controller uses the well temperatures to determine how much power the asset can
+still charge or discharge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, float] A dictionary containing the state of the asset.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -543,7 +558,9 @@ and retrieval before the network and asset behavior are solved.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">mass_flowrate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
-<dd><p>The flow rate going in or out by the asset [kg/s].</p>
+<dd><p>The mass flow rate set point of the asset [kg/s].</p>
+<p>Positive when charging (flow from connection point 0 to 1) and negative when discharging
+(flow from connection point 1 to 0).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -583,20 +600,27 @@ The keys of the dictionary are the names of the setpoints and the values are the
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">temperature_in</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
-<dd><p>The inlet temperature of the asset [K].</p>
+<span class="sig-name descname"><span class="pre">temperature_connection_0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
+<dd><p>The temperature at connection point 0 of the asset [K].</p>
+<p>Connection point 0 is always connected to the supply (hot) side of the network. It is the
+inflow of the asset when charging and the outflow of the asset when discharging.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">temperature_out</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
-<dd><p>The outlet temperature of the asset [K].</p>
+<span class="sig-name descname"><span class="pre">temperature_connection_1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
+<dd><p>The temperature at connection point 1 of the asset [K].</p>
+<p>Connection point 1 is always connected to the return (cold) side of the network. It is the
+outflow of the asset when charging and the inflow of the asset when discharging.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">thermal_power_allocation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span></dt>
-<dd><p>The thermal for injection (positive) or production (negative) by the asset [W].</p>
+<dd><p>The thermal power charged (positive) or discharged (negative) by the asset [W].</p>
+<p>This follows the controller convention: heat flowing from the network into the asset
+(charging the aquifer) is positive, heat flowing from the asset into the network
+(discharging the aquifer) is negative.</p>
 </dd></dl>
 
 <dl class="py attribute">
