@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Module containing a matrix class to store the matrix and solve it using numpy."""
+
 import csv
 
 import numpy as np
@@ -72,7 +73,7 @@ class Matrix:
             (coefficient_array, (row_index_array, column_index_array)),
             shape=(self.num_unknowns, self.num_unknowns),
         )
-        rhs = sp.sparse.csc_matrix([[equation.rhs] for equation in equations])
+        rhs = np.array([equation.rhs for equation in equations], dtype=float)
         if dump:
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
@@ -142,16 +143,17 @@ class Matrix:
     def dump_matrix(
         self,
         matrix: sp.sparse.csc_matrix,
-        rhs_array: sp.sparse.csc_matrix,
+        rhs_array: npt.NDArray | sp.sparse.csc_matrix,
         file_name: str = "dump.csv",
     ) -> None:
         """Method to dump the matrix to a csv file.
 
         :param matrix: Matrix to be printed to the file
-        :param rhs_array: Right hand side to be printed to the file
+        :param rhs_array: Dense vector or sparse column containing the right hand side
         :param file_name: File name to dump the matrix in default=dump.csv
         :return:
         """
+        rhs_values = rhs_array if isinstance(rhs_array, np.ndarray) else rhs_array.toarray().ravel()
         with open(file_name, "w", newline="") as f:
             write = csv.writer(f)
             write.writerow(
@@ -159,8 +161,8 @@ class Matrix:
                 * int(self.num_unknowns / index_core_quantity.number_core_quantities)
                 + ["rhs"]
             )
-            for row, rhs in zip(matrix.todense(), rhs_array.todense()):
-                write.writerow(row.tolist()[0] + rhs.tolist()[0])
+            for row, rhs in zip(matrix.todense(), rhs_values):
+                write.writerow(row.tolist()[0] + [rhs])
 
     def reset_solution(self) -> None:
         """Method to reset the solution to 1, so the new iteration can start."""
