@@ -74,7 +74,7 @@ class PyjniusLoader:
     Java code.
     """
 
-    INSTANCE = None
+    INSTANCE: PyjniusLoader | None = None
     loaded_classes: dict[str, JavaClass]
 
     def __init__(self) -> None:
