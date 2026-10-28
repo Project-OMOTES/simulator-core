@@ -60,8 +60,6 @@ flake8-bugbear==26.9.30
     # via omotes-simulator-core (../../pyproject.toml)
 flake8-docstrings==1.7.0
     # via omotes-simulator-core (../../pyproject.toml)
-flake8-mock==0.4
-    # via omotes-simulator-core (../../pyproject.toml)
 flake8-pyproject==1.2.4
     # via omotes-simulator-core (../../pyproject.toml)
 flake8-quotes==3.4.0
