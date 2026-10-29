@@ -202,59 +202,24 @@ class FallType(BaseAsset):
                     ),
                 ]
             )
+        internal_energy_0 = self.prev_sol[
+            self.get_index_matrix("internal_energy", 0, use_relative_indexing=True)
+        ]
+        mass_flow_rate_0 = self.prev_sol[
+            self.get_index_matrix("mass_flow_rate", 0, use_relative_indexing=True)
+        ]
+        internal_energy_1 = self.prev_sol[
+            self.get_index_matrix("internal_energy", 1, use_relative_indexing=True)
+        ]
+        mass_flow_rate_1 = self.prev_sol[
+            self.get_index_matrix("mass_flow_rate", 1, use_relative_indexing=True)
+        ]
         self.internal_energy_equation.coefficients = np.array(
-            [
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=0,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="internal_energy",
-                        connection_point=1,
-                        use_relative_indexing=True,
-                    )
-                ],
-                self.prev_sol[
-                    self.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=1,
-                        use_relative_indexing=True,
-                    )
-                ],
-            ]
+            [internal_energy_0, mass_flow_rate_0, internal_energy_1, mass_flow_rate_1]
         )
         self.internal_energy_equation.rhs = (
-            self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
-                )
-            ]
-            * self.prev_sol[
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
-                )
-            ]
-            + self.prev_sol[
-                self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=1, use_relative_indexing=True
-                )
-            ]
-            * self.prev_sol[
-                self.get_index_matrix(
-                    property_name="internal_energy", connection_point=1, use_relative_indexing=True
-                )
-            ]
+            mass_flow_rate_0 * internal_energy_0
+            + mass_flow_rate_1 * internal_energy_1
             + self.heat_flux
         )
         return self.internal_energy_equation
