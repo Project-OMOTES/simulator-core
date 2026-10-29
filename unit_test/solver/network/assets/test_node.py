@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Node asset of the solver class."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
@@ -440,3 +441,82 @@ class NodeTestEnergyEquation(unittest.TestCase):
         # assert
         self.assertEqual(mock_set_temperature.call_count, 1)
         self.assertEqual(mock_set_energy.call_count, 0)
+
+
+class NodeAssemblyRegressionTest(unittest.TestCase):
+    """Test array assembly without changing equation ordering or state handling."""
+
+    def setUp(self) -> None:
+        """Create a node with nonzero offsets and distinct values at both asset ports."""
+        self.node = Node(name="node", _id="node")
+        self.node.set_matrix_index(12)
+        self.node.prev_sol = [2.5, 10000.0, 7.0]
+        self.asset = HeatBoundary(name="boundary", _id="boundary")
+        self.asset.set_matrix_index(24)
+        self.asset.prev_sol = np.array([-1.5, 20000.0, 11.0, 0.0, 30000.0, 13.0])
+
+    def test_continuity_assembly(self) -> None:
+        """Preserve order, duplicate indices, shape, dtype, and the empty case."""
+        for count in (0, 1, 2, 8):
+            with self.subTest(connections=count):
+                # Deliberately retain repeated entries to check duplicate matrix indices.
+                self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
+                with patch.object(np, "append", side_effect=AssertionError("Unexpected append")):
+                    equation = self.node.get_node_cont_equation()
+                np_test.assert_array_equal(
+                    equation.indices, [12] + [24 + 3 * (i % 2) for i in range(count)]
+                )
+                np_test.assert_array_equal(equation.coefficients, [1.0] * (count + 1))
+                self.assertEqual(equation.indices.dtype, np.dtype(int))
+                self.assertEqual(equation.coefficients.dtype, np.dtype(float))
+                self.assertEqual(equation.rhs, 0.0)
+
+    def test_energy_assembly(self) -> None:
+        """Preserve coefficient reversal, signed flows, zero flows, and RHS summation."""
+        for count in (0, 1, 2, 8):
+            with self.subTest(connections=count):
+                self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
+                expected_indices = [12, 14]
+                expected_coefficients = [7.0, 2.5]
+                expected_rhs = 17.5
+                for i in range(count):
+                    if i % 2 == 0:
+                        expected_indices.extend([24, 26])
+                        expected_coefficients.extend([11.0, -1.5])
+                        expected_rhs += -16.5
+                    else:
+                        expected_indices.extend([27, 29])
+                        expected_coefficients.extend([13.0, 0.0])
+                        expected_rhs += 0.0
+                with patch.object(np, "append", side_effect=AssertionError("Unexpected append")):
+                    equation = self.node.get_energy_equation()
+                np_test.assert_array_equal(equation.indices, expected_indices)
+                np_test.assert_array_equal(equation.coefficients, expected_coefficients)
+                self.assertEqual(equation.indices.dtype, np.dtype(int))
+                self.assertEqual(equation.coefficients.dtype, np.dtype(float))
+                self.assertEqual(equation.rhs, expected_rhs)
+
+    def test_repeated_assembly_uses_current_state(self) -> None:
+        """Return independent arrays and reflect changed solutions, indices, and connections."""
+        self.node.connected_assets = [(self.asset, 0)]
+        old_continuity = self.node.get_node_cont_equation()
+        old_energy = self.node.get_energy_equation()
+        self.node.set_matrix_index(15)
+        self.asset.set_matrix_index(30)
+        self.node.prev_sol = [-4.0, 10000.0, 5.0]
+        self.asset.prev_sol[3] = 4.0
+        self.node.connected_assets = [(self.asset, 1), (self.asset, 0)]
+
+        continuity = self.node.get_node_cont_equation()
+        energy = self.node.get_energy_equation()
+
+        np_test.assert_array_equal(continuity.indices, [15, 33, 30])
+        np_test.assert_array_equal(continuity.coefficients, [1.0, 1.0, 1.0])
+        np_test.assert_array_equal(energy.indices, [15, 17, 33, 35, 30, 32])
+        np_test.assert_array_equal(energy.coefficients, [5.0, -4.0, 13.0, 4.0, 11.0, -1.5])
+        self.assertEqual(energy.rhs, 15.5)
+        np_test.assert_array_equal(old_continuity.indices, [12, 24])
+        np_test.assert_array_equal(old_energy.coefficients, [7.0, 2.5, 11.0, -1.5])
+        for previous, current in ((old_continuity, continuity), (old_energy, energy)):
+            self.assertFalse(np.shares_memory(previous.indices, current.indices))
+            self.assertFalse(np.shares_memory(previous.coefficients, current.coefficients))

@@ -168,23 +168,20 @@ class Node(BaseNodeItem):
             of the equation.
         """
         equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
-        )
-        equation_object.coefficients = np.array([1.0])
+        indices = [
+            self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)
+        ]
         equation_object.rhs = 0.0
         for asset, asset_connection_point in self.connected_assets:
-            equation_object.indices = np.append(
-                equation_object.indices,
-                [
-                    asset.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=asset_connection_point,
-                        use_relative_indexing=False,
-                    )
-                ],
+            indices.append(
+                asset.get_index_matrix(
+                    property_name="mass_flow_rate",
+                    connection_point=asset_connection_point,
+                    use_relative_indexing=False,
+                )
             )
-            equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
+        equation_object.indices = np.array(indices)
+        equation_object.coefficients = np.ones(len(indices))
         return equation_object
 
     def get_discharge_equation(self) -> EquationObject:
@@ -251,6 +248,8 @@ class Node(BaseNodeItem):
             (equation_object.indices - self.matrix_index)[::-1]
         ]
         equation_object.rhs = float(np.prod(equation_object.coefficients))
+        indices = list(equation_object.indices)
+        coefficients = list(equation_object.coefficients)
         # Extend the equation_object with the indices and coefficients of the connected assets
         for asset, asset_connection_id in self.connected_assets:
             # Extended asset indices
@@ -265,18 +264,14 @@ class Node(BaseNodeItem):
                 ]
             )
             # Extend the indices and coefficients of the equation object
-            equation_object.indices = np.append(
-                equation_object.indices,
-                extra_indices,
-            )
+            indices.extend(extra_indices)
             # Extend the coefficients of the equation object
             prev_sol = np.array(asset.prev_sol)
-            equation_object.coefficients = np.append(
-                equation_object.coefficients,
-                prev_sol[(extra_indices - asset.matrix_index)[::-1]],
-            )
+            coefficients.extend(prev_sol[(extra_indices - asset.matrix_index)[::-1]])
             # Extend the right-hand side of the equation object
             equation_object.rhs += np.prod(prev_sol[extra_indices - asset.matrix_index])
+        equation_object.indices = np.array(indices)
+        equation_object.coefficients = np.array(coefficients)
         return equation_object
 
     def is_connected(self) -> bool:

@@ -15,10 +15,16 @@
 
 """Test matrix object."""
 
+import csv
 import unittest
+from functools import partial
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 import numpy as np
 import numpy.testing as npt
+import scipy as sp
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.matrix import Matrix
@@ -104,6 +110,93 @@ class MatrixTest(unittest.TestCase):
 
         # assert
         self.assertEqual(result, [-10.0, 10.0])
+
+    def test_solve_dense_rhs(self) -> None:
+        """Pass a floating-point vector to the sparse solver, including a single unknown."""
+        for size in (1, 3):
+            with self.subTest(size=size):
+                matrix = Matrix()
+                matrix.add_unknowns(size)
+                equations = []
+                for i in range(size):
+                    equation = EquationObject()
+                    equation.indices = np.array([i])
+                    equation.coefficients = np.array([2.0])
+                    equation.rhs = i - 1
+                    equations.append(equation)
+                with patch(
+                    "omotes_simulator_core.solver.matrix.matrix.sp.sparse.linalg.spsolve",
+                    wraps=sp.sparse.linalg.spsolve,
+                ) as solve:
+                    result = matrix.solve(equations)
+                rhs = solve.call_args.args[1]
+                self.assertIsInstance(rhs, np.ndarray)
+                self.assertEqual(rhs.shape, (size,))
+                self.assertEqual(rhs.dtype, np.dtype(float))
+                npt.assert_allclose(result, np.arange(-1, size - 1) / 2)
+
+    def test_solve_repeated_rhs(self) -> None:
+        """Refresh the RHS and retain the previous solution across solves."""
+        matrix = Matrix()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([0])
+        equation.coefficients = np.array([2.0])
+        equation.rhs = 4.0
+        self.assertEqual(matrix.solve([equation]), [2.0])
+        equation.rhs = -6.0
+        self.assertEqual(matrix.solve([equation]), [-3.0])
+        npt.assert_array_equal(matrix.sol_old, [2.0])
+        npt.assert_array_equal(matrix.sol_new, [-3.0])
+
+    def test_dump_matrix_rhs_formats(self) -> None:
+        """Keep the CSV layout identical for dense and legacy sparse RHS inputs."""
+        matrix = Matrix()
+        matrix.add_unknowns(3)
+        coefficients = sp.sparse.eye(3, format="csc")
+        rhs = np.array([0.0, -2.0, 3.0])
+        for rhs_array in (rhs, sp.sparse.csc_matrix(rhs[:, None])):
+            with self.subTest(rhs_type=type(rhs_array)), TemporaryDirectory() as directory:
+                filename = Path(directory) / "dump.csv"
+                matrix.dump_matrix(coefficients, rhs_array, str(filename))
+                with filename.open(newline="") as handle:
+                    rows = list(csv.reader(handle))
+                self.assertEqual(rows[0], ["m", "P", "u", "rhs"])
+                npt.assert_array_equal(
+                    np.array(rows[1:], dtype=float), np.column_stack((np.eye(3), rhs))
+                )
+
+    def test_solve_dump(self) -> None:
+        """Write valid diagnostics during an explicit dump and a singular solve."""
+        for singular in (False, True):
+            with self.subTest(singular=singular), TemporaryDirectory() as directory:
+                matrix = Matrix()
+                matrix.add_unknowns(3)
+                equations = []
+                for i in range(3):
+                    equation = EquationObject()
+                    equation.indices = np.array([i])
+                    equation.coefficients = np.array([0.0 if singular else 1.0])
+                    equation.rhs = float(i)
+                    equations.append(equation)
+                filename = Path(directory) / "dump.csv"
+                dump = partial(matrix.dump_matrix, file_name=str(filename))
+                with patch.object(matrix, "dump_matrix", side_effect=dump) as dump_method:
+                    if singular:
+                        with self.assertWarns(sp.sparse.linalg.MatrixRankWarning):
+                            with self.assertRaisesRegex(RuntimeError, "Matrix is singular"):
+                                matrix.solve(equations)
+                    else:
+                        self.assertEqual(matrix.solve(equations, dump=True), [0.0, 1.0, 2.0])
+                    dump_method.assert_called_once()
+                with filename.open(newline="") as handle:
+                    rows = list(csv.reader(handle))
+                self.assertEqual(rows[0], ["m", "P", "u", "rhs"])
+                expected_matrix = np.zeros((3, 3)) if singular else np.eye(3)
+                npt.assert_array_equal(
+                    np.array(rows[1:], dtype=float),
+                    np.column_stack((expected_matrix, np.arange(3))),
+                )
 
     def test_solve_large(self) -> None:
         """Test the solving of the matrix object."""
