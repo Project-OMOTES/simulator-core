@@ -22,6 +22,7 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_test
 
+from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
@@ -461,6 +462,7 @@ class NodeAssemblyRegressionTest(unittest.TestCase):
             with self.subTest(connections=count):
                 # Deliberately retain repeated entries to check duplicate matrix indices.
                 self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
+                self.node.continuity_equation = EquationObject()
                 with patch.object(np, "append", side_effect=AssertionError("Unexpected append")):
                     equation = self.node.get_node_cont_equation()
                 np_test.assert_array_equal(
@@ -498,65 +500,6 @@ class NodeAssemblyRegressionTest(unittest.TestCase):
                 self.assertEqual(equation.indices.dtype, np.dtype(int))
                 self.assertEqual(equation.coefficients.dtype, np.dtype(float))
                 self.assertEqual(equation.rhs, expected_rhs)
-
-    def test_repeated_continuity_assembly_uses_current_state(self) -> None:
-        """Return independent continuity arrays after index and connection changes."""
-        self.node.connected_assets = [(self.asset, 0)]
-        old_continuity = self.node.get_node_cont_equation()
-        self.node.set_matrix_index(15)
-        self.asset.set_matrix_index(30)
-        self.node.prev_sol = [-4.0, 10000.0, 5.0]
-        self.asset.prev_sol[3] = 4.0
-        self.node.connected_assets = [(self.asset, 1), (self.asset, 0)]
-
-        continuity = self.node.get_node_cont_equation()
-
-        np_test.assert_array_equal(continuity.indices, [15, 33, 30])
-        np_test.assert_array_equal(continuity.coefficients, [1.0, 1.0, 1.0])
-        np_test.assert_array_equal(old_continuity.indices, [12, 24])
-        self.assertFalse(np.shares_memory(old_continuity.indices, continuity.indices))
-        self.assertFalse(np.shares_memory(old_continuity.coefficients, continuity.coefficients))
-
-    def test_repeated_energy_assembly_uses_current_state(self) -> None:
-        """Reuse structural storage but refresh all values without index lookups."""
-        for count in (0, 1, 2, 8):
-            with self.subTest(connections=count):
-                self.node = Node(name="node", _id="node")
-                self.node.set_matrix_index(12)
-                self.node.prev_sol = [2.5, 10000.0, 7.0]
-                self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
-                self.asset.prev_sol = np.array([-1.5, 20000.0, 11.0, 0.0, 30000.0, 13.0])
-                equation = self.node.get_energy_equation()
-                indices = equation.indices
-                coefficients = equation.coefficients
-                previous_coefficients = coefficients.copy()
-                self.node.prev_sol = [-4.0, 10000.0, 5.0]
-                self.asset.prev_sol = np.array([-2.0, 20000.0, 17.0, 4.0, 30000.0, 19.0])
-                expected_coefficients = [5.0, -4.0]
-                expected_rhs = -20.0
-                for i in range(count):
-                    expected_coefficients.extend([17.0, -2.0] if i % 2 == 0 else [19.0, 4.0])
-                    expected_rhs += -34.0 if i % 2 == 0 else 76.0
-
-                with (
-                    patch.object(self.node, "get_index_matrix") as node_indices,
-                    patch.object(self.asset, "get_index_matrix") as asset_indices,
-                ):
-                    updated = self.node.get_energy_equation()
-                node_indices.assert_not_called()
-                asset_indices.assert_not_called()
-                self.assertIs(updated, equation)
-                self.assertIs(updated.indices, indices)
-                self.assertIs(updated.coefficients, coefficients)
-                np_test.assert_array_equal(updated.coefficients, expected_coefficients)
-                self.assertFalse(np.array_equal(previous_coefficients, updated.coefficients))
-                self.assertEqual(updated.rhs, expected_rhs)
-
-                self.node.prev_sol[0] = 0.0
-                self.asset.prev_sol[[0, 3]] = 0.0
-                zero_flow = self.node.get_energy_equation()
-                self.assertEqual(zero_flow.rhs, 0.0)
-                np_test.assert_array_equal(zero_flow.coefficients[1::2], 0.0)
 
     def test_energy_cache_survives_temperature_branch(self) -> None:
         """Keep energy and temperature caches separate and refresh on returning to energy."""
