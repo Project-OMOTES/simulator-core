@@ -20,6 +20,7 @@ from scipy.optimize import root
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_MISSING_VALUE,
 )
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -91,7 +92,7 @@ class SolverPipe(FallType):
             fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -129,14 +130,16 @@ class SolverPipe(FallType):
         if mass_flow_rate == DEFAULT_MISSING_VALUE:
             mass_flow_rate = self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                    connection_point=0,
+                    use_relative_indexing=True
                 )
             ]
         if temperature == DEFAULT_MISSING_VALUE:
             temperature = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -337,7 +340,7 @@ class SolverPipe(FallType):
             temperature = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -411,7 +414,9 @@ class SolverPipe(FallType):
         """
         mass_flow_rate = self.prev_sol[
             self.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=0,
+                use_relative_indexing=True
             )
         ]
         # Determine the flow direction
@@ -420,7 +425,7 @@ class SolverPipe(FallType):
             tin = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=1,
                         use_relative_indexing=True,
                     )
@@ -432,7 +437,7 @@ class SolverPipe(FallType):
             tin = fluid_props.get_t(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )

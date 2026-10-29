@@ -13,30 +13,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Classes for storing core quantities of the matrix."""
-import dataclasses
+
+from enum import IntEnum
+
+NUMBER_OF_CORE_QUANTITIES = 3
 
 
-@dataclasses.dataclass
-class IndexCoreQuantity:
-    """Enum for the index of the matrix.
+class CoreQuantity(IntEnum):
+    """Offsets of core quantities within a connection point."""
 
-    This is used to store the order of the core quants in the matrix.
-    The number of core quantities is the maximum number of core quantities used.
-    for the indices these should be in increasing order. This is not checked.
+    MASS_FLOW_RATE = 0
+    PRESSURE = 1
+    INTERNAL_ENERGY = 2
+
+
+def get_index_property(core_quantity: CoreQuantity, connection_point: int) -> int:
+    """Get the component-relative index of a core quantity at a connection point.
+
+    :param core_quantity: The core quantity for which to get the index.
+    :param connection_point: The connection point for which to get the index.
+    :return: The relative index, without the component's absolute matrix base.
     """
-
-    number_core_quantities = 3
-    mass_flow_rate = 0
-    pressure = 1
-    internal_energy = 2
-
-    def get_index_property(self, property_name: str, connection_point: int) -> int:
-        """Method to get the property of the index."""
-        return self.get_index(property_name) + connection_point * self.number_core_quantities
-
-    def get_index(self, property_name: str) -> int:
-        """Method to get the index of the property."""
-        return int(getattr(self, property_name))
-
-
-index_core_quantity = IndexCoreQuantity()
+    return int(core_quantity) + connection_point * NUMBER_OF_CORE_QUANTITIES

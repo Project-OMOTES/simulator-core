@@ -17,6 +17,7 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 
 
@@ -161,7 +162,7 @@ class HeatBoundary(FallType):
             self.prescribe_mass_flow_equations[connection_point].indices = np.array(
                 [
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=connection_point,
                         use_relative_indexing=False,
                     )
@@ -182,7 +183,7 @@ class HeatBoundary(FallType):
         self.prescribe_pressure_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -206,7 +207,7 @@ class HeatBoundary(FallType):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )

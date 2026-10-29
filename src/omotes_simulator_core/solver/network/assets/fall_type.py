@@ -18,7 +18,10 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    CoreQuantity,
+    NUMBER_OF_CORE_QUANTITIES,
+)
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
 
@@ -79,7 +82,7 @@ class FallType(BaseAsset):
         super().__init__(
             name=name,
             _id=_id,
-            number_of_unknowns=index_core_quantity.number_core_quantities * 2,
+            number_of_unknowns=NUMBER_OF_CORE_QUANTITIES * 2,
             number_connection_points=2,
             supply_temperature=supply_temperature,
         )
@@ -131,7 +134,9 @@ class FallType(BaseAsset):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    "mass_flow_rate", connection_point=connection_point, use_relative_indexing=True
+                    CoreQuantity.MASS_FLOW_RATE,
+                    connection_point=connection_point,
+                    use_relative_indexing=True,
                 )
             ]
             > self.massflow_zero_limit
@@ -152,10 +157,10 @@ class FallType(BaseAsset):
         self.continuity_equation.indices = np.array(
             [
                 self.get_index_matrix(
-                    "mass_flow_rate", connection_point=0, use_relative_indexing=False
+                    CoreQuantity.MASS_FLOW_RATE, connection_point=0, use_relative_indexing=False
                 ),
                 self.get_index_matrix(
-                    "mass_flow_rate", connection_point=1, use_relative_indexing=False
+                    CoreQuantity.MASS_FLOW_RATE, connection_point=1, use_relative_indexing=False
                 ),
             ]
         )
@@ -181,38 +186,38 @@ class FallType(BaseAsset):
             self.internal_energy_equation.indices = np.array(
                 [
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=0,
                         use_relative_indexing=False,
                     ),
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=False,
                     ),
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=1,
                         use_relative_indexing=False,
                     ),
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=1,
                         use_relative_indexing=False,
                     ),
                 ]
             )
         internal_energy_0 = self.prev_sol[
-            self.get_index_matrix("internal_energy", 0, use_relative_indexing=True)
+            self.get_index_matrix(CoreQuantity.INTERNAL_ENERGY, 0, use_relative_indexing=True)
         ]
         mass_flow_rate_0 = self.prev_sol[
-            self.get_index_matrix("mass_flow_rate", 0, use_relative_indexing=True)
+            self.get_index_matrix(CoreQuantity.MASS_FLOW_RATE, 0, use_relative_indexing=True)
         ]
         internal_energy_1 = self.prev_sol[
-            self.get_index_matrix("internal_energy", 1, use_relative_indexing=True)
+            self.get_index_matrix(CoreQuantity.INTERNAL_ENERGY, 1, use_relative_indexing=True)
         ]
         mass_flow_rate_1 = self.prev_sol[
-            self.get_index_matrix("mass_flow_rate", 1, use_relative_indexing=True)
+            self.get_index_matrix(CoreQuantity.MASS_FLOW_RATE, 1, use_relative_indexing=True)
         ]
         self.internal_energy_equation.coefficients = np.array(
             [internal_energy_0, mass_flow_rate_0, internal_energy_1, mass_flow_rate_1]
@@ -239,15 +244,19 @@ class FallType(BaseAsset):
             self.pressure_loss_equation.indices = np.array(
                 [
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=0,
                         use_relative_indexing=False,
                     ),
                     self.get_index_matrix(
-                        property_name="pressure", connection_point=0, use_relative_indexing=False
+                        core_quantity=CoreQuantity.PRESSURE,
+                        connection_point=0,
+                        use_relative_indexing=False,
                     ),
                     self.get_index_matrix(
-                        property_name="pressure", connection_point=1, use_relative_indexing=False
+                        core_quantity=CoreQuantity.PRESSURE,
+                        connection_point=1,
+                        use_relative_indexing=False,
                     ),
                 ]
             )
@@ -257,7 +266,9 @@ class FallType(BaseAsset):
 
         mass_flow_rate = self.prev_sol[
             self.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=0,
+                use_relative_indexing=True,
             )
         ]
         if abs(mass_flow_rate) < 1e-5:

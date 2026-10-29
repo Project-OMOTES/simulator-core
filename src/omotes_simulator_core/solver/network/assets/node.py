@@ -18,6 +18,7 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -148,7 +149,9 @@ class Node(BaseNodeItem):
             [
                 asset.prev_sol[
                     asset.get_index_matrix(
-                        "mass_flow_rate", asset_connection_point, use_relative_indexing=True
+                        CoreQuantity.MASS_FLOW_RATE,
+                        asset_connection_point,
+                        use_relative_indexing=True,
                     )
                 ]
                 for asset, asset_connection_point in self.connected_assets
@@ -176,13 +179,15 @@ class Node(BaseNodeItem):
         ):
             return self.continuity_equation
         indices = [
-            self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)
+            self.get_index_matrix(
+                core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
+            )
         ]
         self.continuity_equation.rhs = 0.0
         for asset, asset_connection_point in self.connected_assets:
             indices.append(
                 asset.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=asset_connection_point,
                     use_relative_indexing=False,
                 )
@@ -201,7 +206,11 @@ class Node(BaseNodeItem):
         if len(self.discharge_equation.indices) != 0:
             return self.discharge_equation
         self.discharge_equation.indices = np.array(
-            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
+                )
+            ]
         )
         self.discharge_equation.coefficients = np.array([1.0])
         self.discharge_equation.rhs = 0.0
@@ -216,7 +225,11 @@ class Node(BaseNodeItem):
         """
         equation_object = EquationObject()
         equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="pressure", use_relative_indexing=False)]
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.PRESSURE, use_relative_indexing=False
+                )
+            ]
         )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.set_pressure
@@ -232,7 +245,11 @@ class Node(BaseNodeItem):
         if len(self.temperature_equation.indices) != 0:
             return self.temperature_equation
         self.temperature_equation.indices = np.array(
-            [self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False)]
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
+                )
+            ]
         )
         self.temperature_equation.coefficients = np.array([1.0])
         self.temperature_equation.rhs = fluid_props.get_ie(self.initial_temperature)
@@ -253,17 +270,25 @@ class Node(BaseNodeItem):
         equation_object = self.energy_equation
         if len(equation_object.indices) == 0:
             indices = [
-                self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False),
-                self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False),
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
+                ),
             ]
             for asset, asset_connection_id in self.connected_assets:
                 indices.extend(
                     [
                         asset.get_index_matrix(
-                            "mass_flow_rate", asset_connection_id, use_relative_indexing=False
+                            CoreQuantity.MASS_FLOW_RATE,
+                            asset_connection_id,
+                            use_relative_indexing=False,
                         ),
                         asset.get_index_matrix(
-                            "internal_energy", asset_connection_id, use_relative_indexing=False
+                            CoreQuantity.INTERNAL_ENERGY,
+                            asset_connection_id,
+                            use_relative_indexing=False,
                         ),
                     ]
                 )

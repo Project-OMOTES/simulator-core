@@ -20,6 +20,7 @@ import math
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -154,7 +155,7 @@ class BaseAsset(BaseItem):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -188,7 +189,7 @@ class BaseAsset(BaseItem):
         self.prescribe_temperature_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -221,12 +222,12 @@ class BaseAsset(BaseItem):
         self.internal_energy_to_node_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 ),
                 self.get_connected_node(connection_point).get_index_matrix(
-                    property_name="internal_energy", use_relative_indexing=False
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
                 ),
             ]
         )
@@ -263,12 +264,12 @@ class BaseAsset(BaseItem):
         self.pressure_to_node_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 ),
                 self.get_connected_node(connection_point).get_index_matrix(
-                    property_name="pressure", use_relative_indexing=False
+                    core_quantity=CoreQuantity.PRESSURE, use_relative_indexing=False
                 ),
             ]
         )
@@ -295,10 +296,12 @@ class BaseAsset(BaseItem):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                    connection_point=0,
+                    use_relative_indexing=False
                 ),
                 self.connected_nodes[connection_point].get_index_matrix(
-                    property_name="mass_flow_rate", use_relative_indexing=False
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
                 ),
             ]
         )
@@ -354,7 +357,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -370,7 +373,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -386,7 +389,7 @@ class BaseAsset(BaseItem):
         return fluid_props.get_t(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -402,7 +405,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )

@@ -22,7 +22,7 @@ import numpy.typing as npt
 import scipy as sp
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import NUMBER_OF_CORE_QUANTITIES
 
 
 class Matrix:
@@ -209,9 +209,7 @@ class Matrix:
         with open(file_name, "w", newline="") as f:
             write = csv.writer(f)
             write.writerow(
-                ["m", "P", "u"]
-                * int(self.num_unknowns / index_core_quantity.number_core_quantities)
-                + ["rhs"]
+                ["m", "P", "u"] * int(self.num_unknowns / NUMBER_OF_CORE_QUANTITIES) + ["rhs"]
             )
             for row, rhs in zip(matrix.todense(), rhs_values):
                 write.writerow(row.tolist()[0] + [rhs])
