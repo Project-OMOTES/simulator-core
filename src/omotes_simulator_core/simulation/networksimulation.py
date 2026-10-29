@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simulates an heat network for the specified duration."""
+
 import logging
 from datetime import timedelta, timezone
 from typing import Callable

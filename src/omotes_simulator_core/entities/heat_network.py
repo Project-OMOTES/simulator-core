@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """HeatNetwork entity class."""
+
 import datetime
 import logging
 from typing import Callable

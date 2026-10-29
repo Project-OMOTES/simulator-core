@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing abstract BaseNodeItem class."""
+
 from abc import ABC, abstractmethod
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject

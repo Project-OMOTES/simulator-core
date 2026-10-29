@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Binding to Rosim through Pyjnius."""
+
 import glob
 import hashlib
 import logging

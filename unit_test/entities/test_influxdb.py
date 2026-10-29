@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test influxdb reader."""
+
 import unittest
 from pathlib import Path
 from unittest.mock import Mock

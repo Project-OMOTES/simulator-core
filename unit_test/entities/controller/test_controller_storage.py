@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller storage class."""
+
 import unittest
 from datetime import datetime
 from unittest.mock import patch

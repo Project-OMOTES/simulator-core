@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test energy system mapper class."""
+
 import unittest
 from pathlib import Path
 

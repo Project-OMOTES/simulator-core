@@ -24,7 +24,6 @@ import numpy as np
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
     CoreQuantity,
-    NUMBER_OF_CORE_QUANTITIES,
 )
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 

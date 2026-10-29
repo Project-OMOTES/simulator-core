@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Pipe entities."""
+
 import unittest
 from unittest.mock import Mock
 

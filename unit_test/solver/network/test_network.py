@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test network class."""
+
 import unittest
 import uuid
 from io import StringIO

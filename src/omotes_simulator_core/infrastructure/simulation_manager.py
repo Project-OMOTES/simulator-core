@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Simulation manager creates and controls the simulation objects."""
+
 import logging
 from typing import Callable
 

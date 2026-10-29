@@ -47,7 +47,7 @@ class EsdlAssetHeatPumpMapper(EsdlMapperAbstract):
                 maximum_electrical_power=esdl_asset.get_property("power", None),
             )
         elif hp_ports == 2:  # Air to water heat pump case.
-            heatpump_entity = AirToWaterHeatPump(  # type:ignore
+            heatpump_entity = AirToWaterHeatPump(  # type: ignore
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
                 port_ids=esdl_asset.get_port_ids(),
