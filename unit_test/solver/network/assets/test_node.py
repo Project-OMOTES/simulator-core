@@ -475,6 +475,9 @@ class NodeAssemblyRegressionTest(unittest.TestCase):
         """Preserve coefficient reversal, signed flows, zero flows, and RHS summation."""
         for count in (0, 1, 2, 8):
             with self.subTest(connections=count):
+                self.node = Node(name="node", _id="node")
+                self.node.set_matrix_index(12)
+                self.node.prev_sol = [2.5, 10000.0, 7.0]
                 self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
                 expected_indices = [12, 14]
                 expected_coefficients = [7.0, 2.5]
@@ -496,11 +499,10 @@ class NodeAssemblyRegressionTest(unittest.TestCase):
                 self.assertEqual(equation.coefficients.dtype, np.dtype(float))
                 self.assertEqual(equation.rhs, expected_rhs)
 
-    def test_repeated_assembly_uses_current_state(self) -> None:
-        """Return independent arrays and reflect changed solutions, indices, and connections."""
+    def test_repeated_continuity_assembly_uses_current_state(self) -> None:
+        """Return independent continuity arrays after index and connection changes."""
         self.node.connected_assets = [(self.asset, 0)]
         old_continuity = self.node.get_node_cont_equation()
-        old_energy = self.node.get_energy_equation()
         self.node.set_matrix_index(15)
         self.asset.set_matrix_index(30)
         self.node.prev_sol = [-4.0, 10000.0, 5.0]
@@ -508,15 +510,81 @@ class NodeAssemblyRegressionTest(unittest.TestCase):
         self.node.connected_assets = [(self.asset, 1), (self.asset, 0)]
 
         continuity = self.node.get_node_cont_equation()
-        energy = self.node.get_energy_equation()
 
         np_test.assert_array_equal(continuity.indices, [15, 33, 30])
         np_test.assert_array_equal(continuity.coefficients, [1.0, 1.0, 1.0])
-        np_test.assert_array_equal(energy.indices, [15, 17, 33, 35, 30, 32])
-        np_test.assert_array_equal(energy.coefficients, [5.0, -4.0, 13.0, 4.0, 11.0, -1.5])
-        self.assertEqual(energy.rhs, 15.5)
         np_test.assert_array_equal(old_continuity.indices, [12, 24])
-        np_test.assert_array_equal(old_energy.coefficients, [7.0, 2.5, 11.0, -1.5])
-        for previous, current in ((old_continuity, continuity), (old_energy, energy)):
-            self.assertFalse(np.shares_memory(previous.indices, current.indices))
-            self.assertFalse(np.shares_memory(previous.coefficients, current.coefficients))
+        self.assertFalse(np.shares_memory(old_continuity.indices, continuity.indices))
+        self.assertFalse(np.shares_memory(old_continuity.coefficients, continuity.coefficients))
+
+    def test_repeated_energy_assembly_uses_current_state(self) -> None:
+        """Reuse structural storage but refresh all values without index lookups."""
+        for count in (0, 1, 2, 8):
+            with self.subTest(connections=count):
+                self.node = Node(name="node", _id="node")
+                self.node.set_matrix_index(12)
+                self.node.prev_sol = [2.5, 10000.0, 7.0]
+                self.node.connected_assets = [(self.asset, i % 2) for i in range(count)]
+                self.asset.prev_sol = np.array([-1.5, 20000.0, 11.0, 0.0, 30000.0, 13.0])
+                equation = self.node.get_energy_equation()
+                indices = equation.indices
+                coefficients = equation.coefficients
+                previous_coefficients = coefficients.copy()
+                self.node.prev_sol = [-4.0, 10000.0, 5.0]
+                self.asset.prev_sol = np.array([-2.0, 20000.0, 17.0, 4.0, 30000.0, 19.0])
+                expected_coefficients = [5.0, -4.0]
+                expected_rhs = -20.0
+                for i in range(count):
+                    expected_coefficients.extend([17.0, -2.0] if i % 2 == 0 else [19.0, 4.0])
+                    expected_rhs += -34.0 if i % 2 == 0 else 76.0
+
+                with (
+                    patch.object(self.node, "get_index_matrix") as node_indices,
+                    patch.object(self.asset, "get_index_matrix") as asset_indices,
+                ):
+                    updated = self.node.get_energy_equation()
+                node_indices.assert_not_called()
+                asset_indices.assert_not_called()
+                self.assertIs(updated, equation)
+                self.assertIs(updated.indices, indices)
+                self.assertIs(updated.coefficients, coefficients)
+                np_test.assert_array_equal(updated.coefficients, expected_coefficients)
+                self.assertFalse(np.array_equal(previous_coefficients, updated.coefficients))
+                self.assertEqual(updated.rhs, expected_rhs)
+
+                self.node.prev_sol[0] = 0.0
+                self.asset.prev_sol[[0, 3]] = 0.0
+                zero_flow = self.node.get_energy_equation()
+                self.assertEqual(zero_flow.rhs, 0.0)
+                np_test.assert_array_equal(zero_flow.coefficients[1::2], 0.0)
+
+    def test_energy_cache_survives_temperature_branch(self) -> None:
+        """Keep energy and temperature caches separate and refresh on returning to energy."""
+        other_asset = HeatBoundary(name="other", _id="other")
+        other_asset.set_matrix_index(30)
+        other_asset.prev_sol = np.array([3.0, 40000.0, 23.0, 4.0, 50000.0, 29.0])
+        self.node.connected_assets = [(self.asset, 0), (other_asset, 1)]
+        energy = self.node.get_energy_equations()
+        indices = energy.indices
+        coefficients = energy.coefficients
+        np_test.assert_array_equal(indices, [12, 14, 24, 26, 33, 35])
+        np_test.assert_array_equal(coefficients, [7.0, 2.5, 11.0, -1.5, 29.0, 4.0])
+        self.assertEqual(energy.rhs, 117.0)
+
+        self.asset.prev_sol[0] = 2.0
+        temperature = self.node.get_energy_equations()
+        self.assertIsNot(temperature, energy)
+        np_test.assert_array_equal(temperature.indices, [14])
+        np_test.assert_array_equal(temperature.coefficients, [1.0])
+        self.assertEqual(temperature.rhs, fluid_props.get_ie(self.node.initial_temperature))
+
+        self.node.prev_sol = [-4.0, 10000.0, 5.0]
+        self.asset.prev_sol = np.array([-2.0, 20000.0, 17.0, 0.0, 30000.0, 19.0])
+        other_asset.prev_sol[5] = 31.0
+        updated = self.node.get_energy_equations()
+        self.assertIs(updated, energy)
+        self.assertIs(updated.indices, indices)
+        self.assertIs(updated.coefficients, coefficients)
+        np_test.assert_array_equal(coefficients, [5.0, -4.0, 17.0, -2.0, 31.0, 4.0])
+        self.assertEqual(updated.rhs, 70.0)
+        np_test.assert_array_equal(temperature.coefficients, [1.0])
