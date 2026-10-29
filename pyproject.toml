@@ -20,7 +20,7 @@ classifiers = [
 
 dependencies = [
     "numpy>=2.4,<3",
-    "pandas>=2.3,<4",
+    "pandas>=3.0.0,<4.0",
     "scipy>=1.16.1,<2",
     "pyesdl>=26.2,<27",
     "dataclass-wizard>=0.22.3,<1",
