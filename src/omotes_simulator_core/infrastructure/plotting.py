@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Plot result on the map for debugging."""
+
 import esdl
 import geopandas as gpd
 import numpy as np
@@ -140,7 +141,5 @@ class Plotting:
                 lons = np.append(lons, np.array(None))
                 names = np.append(names, np.array(None))
 
-        fig = px.line_mapbox(
-            lat=lats, lon=lons, hover_name=names, zoom=14, mapbox_style="carto-positron"
-        )
+        fig = px.line_map(lat=lats, lon=lons, hover_name=names, zoom=14)
         fig.write_html(output_filename)

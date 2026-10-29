@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test utility functions."""
+
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
@@ -134,8 +135,8 @@ class UtilFunctionTest(unittest.TestCase):
 
         # Act
         esdl_asset_mock.esdl_asset.material.Error = "Error"
-        delattr(esdl_asset_mock.esdl_asset.material, "component")
-        delattr(esdl_asset_mock.esdl_asset.material, "reference")
+        delattr(esdl_asset_mock.esdl_asset.material, "component")  # noqa
+        delattr(esdl_asset_mock.esdl_asset.material, "reference")  # noqa
 
         # Assert
         with self.assertRaises(NotImplementedError):
