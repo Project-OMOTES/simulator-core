@@ -17,6 +17,7 @@
 import unittest
 from uuid import uuid4
 
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from omotes_simulator_core.solver.network.network import Network
@@ -125,7 +126,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     abs(
                         self.network.get_asset(asset).prev_sol[
                             self.network.get_asset(asset).get_index_matrix(
-                                property_name="mass_flow_rate",
+                                core_quantity=CoreQuantity.MASS_FLOW_RATE,
                                 connection_point=connection_point,
                                 use_relative_indexing=True,
                             )
@@ -138,7 +139,9 @@ class NetworkZeroFlowTest(unittest.TestCase):
         self.assertEqual(
             self.network.get_asset(self.production_asset.name).prev_sol[
                 self.network.get_asset(self.production_asset.name).get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                    connection_point=0,
+                    use_relative_indexing=True
                 )
             ],
             fluid_props.get_ie(
@@ -148,7 +151,9 @@ class NetworkZeroFlowTest(unittest.TestCase):
         self.assertEqual(
             self.network.get_asset(self.demand_asset.name).prev_sol[
                 self.network.get_asset(self.demand_asset.name).get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                    connection_point=0,
+                    use_relative_indexing=True
                 )
             ],
             fluid_props.get_ie(

@@ -14,10 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test BaseItem asset of the solver class."""
+
 import unittest
 from uuid import uuid4
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 
@@ -71,3 +73,27 @@ class BaseItemTest(unittest.TestCase):
 
         # assert
         self.assertEqual(asset.matrix_index, 1)
+
+    def test_get_index_matrix(self) -> None:
+        node = MockBaseNodeItem("node", "node", 3)
+        other = MockBaseNodeItem("other", "other", 3)
+        for base in (0, 17, 40):
+            node.set_matrix_index(base)
+            for core_quantity, offset in (
+                (CoreQuantity.MASS_FLOW_RATE, 0),
+                (CoreQuantity.PRESSURE, 1),
+                (CoreQuantity.INTERNAL_ENERGY, 2),
+            ):
+                for relative in (True, False):
+                    with self.subTest(base=base, core_quantity=core_quantity, relative=relative):
+                        expected = offset + (0 if relative else base)
+                        self.assertEqual(node.get_index_matrix(core_quantity, relative), expected)
+                        self.assertEqual(
+                            node.get_index_matrix(
+                                core_quantity=core_quantity, use_relative_indexing=relative
+                            ),
+                            expected,
+                        )
+            self.assertEqual(other.get_index_matrix(CoreQuantity.PRESSURE, False), 1)
+        node.matrix_index = 23
+        self.assertEqual(node.get_index_matrix(CoreQuantity.PRESSURE, False), 24)

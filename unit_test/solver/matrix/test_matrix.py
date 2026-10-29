@@ -289,6 +289,72 @@ class MatrixTest(unittest.TestCase):
         # assert
         self.assertEqual(result, True)
 
+    def test_is_converged_tolerances(self) -> None:
+        """Test is_converged gives the same result as np.allclose."""
+        matrix = Matrix()
+        matrix.add_unknowns(3)
+        for new, old in [
+            ([0.0, 0.0, 0.0], [5e-7, 0.0, 0.0]),
+            ([0.0, 0.0, 0.0], [2e-6, 0.0, 0.0]),
+            ([1000.0, 1.0, 1.0], [1000.0005, 1.0, 1.0]),
+            ([1000.0, 1.0, 1.0], [1000.01, 1.0, 1.0]),
+        ]:
+            matrix.sol_new = np.array(new)
+            matrix.sol_old = np.array(old)
+            expected = np.allclose(new, old, atol=1e-6, rtol=1e-6)
+            self.assertEqual(matrix.is_converged(), expected)
+
+    def test_solve_with_duplicate_entries(self) -> None:
+        """Test that duplicate (row, column) entries are summed."""
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+        equation1 = EquationObject()
+        equation1.indices = np.array([index, index, index + 1])
+        equation1.coefficients = np.array([1.0, 1.0, 1.0])
+        equation1.rhs = 5.0
+        equation2 = EquationObject()
+        equation2.indices = np.array([index + 1])
+        equation2.coefficients = np.array([2.0])
+        equation2.rhs = 2.0
+
+        result = matrix.solve([equation1, equation2])
+
+        npt.assert_allclose(result, [2.0, 1.0])
+
+    def test_solve_pattern_cache_reuse_and_invalidation(self) -> None:
+        """Test that the cached pattern is reused and rebuilt when the structure changes."""
+        matrix = Matrix()
+        index = matrix.add_unknowns(2)
+
+        def make(
+            coefficients: list[float], rhs: list[float], diagonal_only: bool = False
+        ) -> list[EquationObject]:
+            equation1 = EquationObject()
+            equation2 = EquationObject()
+            equation1.indices = np.array([index, index + 1])
+            equation1.coefficients = np.array(coefficients[:2])
+            equation1.rhs = rhs[0]
+            if diagonal_only:
+                equation2.indices = np.array([index + 1])
+                equation2.coefficients = np.array(coefficients[3:])
+            else:
+                equation2.indices = np.array([index, index + 1])
+                equation2.coefficients = np.array(coefficients[2:])
+            equation2.rhs = rhs[1]
+            return [equation1, equation2]
+
+        first = matrix.solve(make([2.0, 0.0, 0.0, 4.0], [2.0, 8.0]))
+        cache = matrix._pattern_cache
+        second = matrix.solve(make([1.0, 0.0, 0.0, 1.0], [3.0, 4.0]))
+        reused = matrix._pattern_cache is cache
+        third = matrix.solve(make([1.0, 1.0, 0.0, 2.0], [3.0, 4.0], diagonal_only=True))
+
+        npt.assert_allclose(first, [1.0, 2.0])
+        npt.assert_allclose(second, [3.0, 4.0])
+        self.assertTrue(reused)
+        self.assertIsNot(matrix._pattern_cache, cache)
+        npt.assert_allclose(third, [1.0, 2.0])
+
     def test_get_solution(self) -> None:
         """Test the get solution of the matrix object."""
         # arrange

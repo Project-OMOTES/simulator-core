@@ -14,13 +14,17 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Junction entities."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
 import numpy.testing as npt
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    CoreQuantity,
+    NUMBER_OF_CORE_QUANTITIES,
+)
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -122,7 +126,7 @@ class HeatBoundaryTest(unittest.TestCase):
         # Assert
         npt.assert_array_equal(
             equation_object.indices,
-            [index_core_quantity.internal_energy, index_core_quantity.internal_energy],
+            [CoreQuantity.INTERNAL_ENERGY, CoreQuantity.INTERNAL_ENERGY],
         )
         npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
         self.assertEqual(equation_object.rhs, 0.0)
@@ -150,8 +154,7 @@ class HeatBoundaryTest(unittest.TestCase):
         # Arrange
         connection_point_id = 1
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + connection_point_id * index_core_quantity.number_core_quantities
+            CoreQuantity.MASS_FLOW_RATE + connection_point_id * NUMBER_OF_CORE_QUANTITIES
         ] = 1.0
 
         # Act
@@ -160,10 +163,7 @@ class HeatBoundaryTest(unittest.TestCase):
         # Assert
         npt.assert_array_equal(
             equation_object.indices,
-            [
-                index_core_quantity.internal_energy
-                + connection_point_id * index_core_quantity.number_core_quantities
-            ],
+            [CoreQuantity.INTERNAL_ENERGY + connection_point_id * NUMBER_OF_CORE_QUANTITIES],
         )
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, fluid_props.get_ie(self.asset.supply_temperature))
@@ -177,8 +177,7 @@ class HeatBoundaryTest(unittest.TestCase):
         # Arrange
         connection_point_id = 1
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + connection_point_id * index_core_quantity.number_core_quantities
+            CoreQuantity.MASS_FLOW_RATE + connection_point_id * NUMBER_OF_CORE_QUANTITIES
         ] = 1.0
 
         # Act

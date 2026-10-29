@@ -23,6 +23,7 @@ import numpy as np
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
     CoreQuantity,
+    NUMBER_OF_CORE_QUANTITIES,
 )
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
@@ -90,7 +91,7 @@ class HeatTransferAsset(BaseAsset):
         super().__init__(
             name=name,
             _id=_id,
-            number_of_unknowns=index_core_quantity.number_core_quantities * 4,
+            number_of_unknowns=NUMBER_OF_CORE_QUANTITIES * 4,
             number_connection_points=4,
         )
         # Define the outlet temperature of the asset on the cold side

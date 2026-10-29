@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Thermocline Buffer entities."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
@@ -21,7 +22,10 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_testing
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    CoreQuantity,
+    NUMBER_OF_CORE_QUANTITIES,
+)
 from omotes_simulator_core.solver.network.assets.buffer_asset import HeatBufferAsset
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.network.assets.node import Node
@@ -141,10 +145,10 @@ class HeatBufferAssetTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
                     self.asset.matrix_index
-                    + index_core_quantity.mass_flow_rate
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.MASS_FLOW_RATE
+                    + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -177,14 +181,14 @@ class HeatBufferAssetTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
-                    self.asset.matrix_index + index_core_quantity.internal_energy,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
+                    self.asset.matrix_index + CoreQuantity.INTERNAL_ENERGY,
                     self.asset.matrix_index
-                    + index_core_quantity.mass_flow_rate
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.MASS_FLOW_RATE
+                    + NUMBER_OF_CORE_QUANTITIES,
                     self.asset.matrix_index
-                    + index_core_quantity.internal_energy
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.INTERNAL_ENERGY
+                    + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -192,29 +196,19 @@ class HeatBufferAssetTest(unittest.TestCase):
             equation_object.coefficients,
             np.array(
                 [
-                    self.asset.prev_sol[index_core_quantity.internal_energy],
-                    self.asset.prev_sol[index_core_quantity.mass_flow_rate],
-                    self.asset.prev_sol[
-                        index_core_quantity.internal_energy
-                        + index_core_quantity.number_core_quantities
-                    ],
-                    self.asset.prev_sol[
-                        index_core_quantity.mass_flow_rate
-                        + index_core_quantity.number_core_quantities
-                    ],
+                    self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY],
+                    self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE],
+                    self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY + NUMBER_OF_CORE_QUANTITIES],
+                    self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES],
                 ]
             ),
         )
         self.assertEqual(
             equation_object.rhs,
-            self.asset.prev_sol[index_core_quantity.mass_flow_rate]
-            * self.asset.prev_sol[index_core_quantity.internal_energy]
-            + self.asset.prev_sol[
-                index_core_quantity.mass_flow_rate + index_core_quantity.number_core_quantities
-            ]
-            * self.asset.prev_sol[
-                index_core_quantity.internal_energy + index_core_quantity.number_core_quantities
-            ]
+            self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE]
+            * self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY]
+            + self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES]
+            * self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY + NUMBER_OF_CORE_QUANTITIES]
             + self.asset.heat_flux,
         )
 
@@ -228,8 +222,7 @@ class HeatBufferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + index_core_quantity.number_core_quantities * connection_point
+            CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES * connection_point
         ] = 1.0
 
         # Act
@@ -248,8 +241,7 @@ class HeatBufferAssetTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + index_core_quantity.number_core_quantities * connection_point
+            CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES * connection_point
         ] = (self.asset.massflow_zero_limit * 0.1)
 
         # Act

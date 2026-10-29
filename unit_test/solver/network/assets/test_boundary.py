@@ -14,11 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Boundary entities."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    NUMBER_OF_CORE_QUANTITIES,
+    CoreQuantity,
+)
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.boundary import BaseBoundary
 from omotes_simulator_core.solver.network.assets.node import Node
@@ -56,9 +60,7 @@ class BaseBoundaryTest(unittest.TestCase):
         equation_object = self.asset.get_pressure_equation()
 
         # Assert
-        self.assertEqual(
-            equation_object.indices, [self.asset.matrix_index + index_core_quantity.pressure]
-        )
+        self.assertEqual(equation_object.indices, [self.asset.matrix_index + CoreQuantity.PRESSURE])
         self.assertEqual(equation_object.coefficients, [1.0])
         self.assertEqual(equation_object.rhs, 50000.0)
 

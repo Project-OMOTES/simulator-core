@@ -22,6 +22,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_POWER_SECONDARY,
 )
 from omotes_simulator_core.entities.assets.heat_exchanger import HeatExchanger
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 
 
 class HeatExchangerTest(unittest.TestCase):
@@ -48,43 +49,59 @@ class HeatExchangerTest(unittest.TestCase):
         # Set properties of the solver asset
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=0,
+                use_relative_indexing=False
             )
         ] = 10.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=0,
+                use_relative_indexing=False
             )
         ] = -2.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=1, use_relative_indexing=False
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=1,
+                use_relative_indexing=False
             )
         ] = 2.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=1,
+                use_relative_indexing=False
             )
         ] = 5.0
 
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=2, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=2,
+                use_relative_indexing=False
             )
         ] = 15.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=2, use_relative_indexing=False
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=2,
+                use_relative_indexing=False
             )
         ] = 1.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="mass_flow_rate", connection_point=3, use_relative_indexing=False
+                core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                connection_point=3,
+                use_relative_indexing=False
             )
         ] = -1.0
         self.heat_exchanger.solver_asset.prev_sol[
             self.heat_exchanger.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=3, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=3,
+                use_relative_indexing=False
             )
         ] = 20.0
 

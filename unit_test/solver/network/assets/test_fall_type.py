@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test FallType entities."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
@@ -21,7 +22,10 @@ from uuid import uuid4
 import numpy as np
 import numpy.testing as np_testing
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    CoreQuantity,
+    NUMBER_OF_CORE_QUANTITIES,
+)
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.network.assets.node import Node
 
@@ -118,10 +122,10 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
                     self.asset.matrix_index
-                    + index_core_quantity.mass_flow_rate
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.MASS_FLOW_RATE
+                    + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -154,14 +158,14 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
-                    self.asset.matrix_index + index_core_quantity.internal_energy,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
+                    self.asset.matrix_index + CoreQuantity.INTERNAL_ENERGY,
                     self.asset.matrix_index
-                    + index_core_quantity.mass_flow_rate
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.MASS_FLOW_RATE
+                    + NUMBER_OF_CORE_QUANTITIES,
                     self.asset.matrix_index
-                    + index_core_quantity.internal_energy
-                    + index_core_quantity.number_core_quantities,
+                    + CoreQuantity.INTERNAL_ENERGY
+                    + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -169,29 +173,19 @@ class FallTypeTest(unittest.TestCase):
             equation_object.coefficients,
             np.array(
                 [
-                    self.asset.prev_sol[index_core_quantity.internal_energy],
-                    self.asset.prev_sol[index_core_quantity.mass_flow_rate],
-                    self.asset.prev_sol[
-                        index_core_quantity.internal_energy
-                        + index_core_quantity.number_core_quantities
-                    ],
-                    self.asset.prev_sol[
-                        index_core_quantity.mass_flow_rate
-                        + index_core_quantity.number_core_quantities
-                    ],
+                    self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY],
+                    self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE],
+                    self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY + NUMBER_OF_CORE_QUANTITIES],
+                    self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES],
                 ]
             ),
         )
         self.assertEqual(
             equation_object.rhs,
-            self.asset.prev_sol[index_core_quantity.mass_flow_rate]
-            * self.asset.prev_sol[index_core_quantity.internal_energy]
-            + self.asset.prev_sol[
-                index_core_quantity.mass_flow_rate + index_core_quantity.number_core_quantities
-            ]
-            * self.asset.prev_sol[
-                index_core_quantity.internal_energy + index_core_quantity.number_core_quantities
-            ]
+            self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE]
+            * self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY]
+            + self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES]
+            * self.asset.prev_sol[CoreQuantity.INTERNAL_ENERGY + NUMBER_OF_CORE_QUANTITIES]
             + self.asset.heat_flux,
         )
 
@@ -223,11 +217,9 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
-                    self.asset.matrix_index + index_core_quantity.pressure,
-                    self.asset.matrix_index
-                    + index_core_quantity.pressure
-                    + index_core_quantity.number_core_quantities,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
+                    self.asset.matrix_index + CoreQuantity.PRESSURE,
+                    self.asset.matrix_index + CoreQuantity.PRESSURE + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -237,7 +229,7 @@ class FallTypeTest(unittest.TestCase):
                 [
                     -2.0
                     * self.asset.loss_coefficient
-                    * abs(self.asset.prev_sol[index_core_quantity.mass_flow_rate]),
+                    * abs(self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE]),
                     -1.0,
                     1.0,
                 ]
@@ -246,9 +238,59 @@ class FallTypeTest(unittest.TestCase):
         self.assertEqual(
             equation_object.rhs,
             -self.asset.loss_coefficient
-            * self.asset.prev_sol[index_core_quantity.mass_flow_rate]
-            * abs(self.asset.prev_sol[index_core_quantity.mass_flow_rate]),
+            * self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE]
+            * abs(self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE]),
         )
+
+    def test_internal_energy_equation_refreshes_solution_and_heat(self) -> None:
+        self.asset.set_matrix_index(18)
+        for flow_0, energy_0, flow_1, energy_1, heat in (
+            (2.0, 100.0, -2.0, 90.0, 5.0),
+            (-3.0, 80.0, 3.0, 110.0, -7.0),
+            (0.0, 70.0, 0.0, 120.0, 0.0),
+        ):
+            with self.subTest(flow_0=flow_0):
+                self.asset.prev_sol = np.array(
+                    [flow_0, 10000.0, energy_0, flow_1, 20000.0, energy_1]
+                )
+                with patch.object(self.asset, "update_heat_supplied") as update_heat:
+                    update_heat.side_effect = lambda heat=heat: setattr(
+                        self.asset, "heat_flux", heat
+                    )
+                    equation = self.asset.get_internal_energy_equation()
+                update_heat.assert_called_once_with()
+                np_testing.assert_array_equal(equation.indices, [18, 20, 21, 23])
+                np_testing.assert_array_equal(
+                    equation.coefficients, [energy_0, flow_0, energy_1, flow_1]
+                )
+                self.assertEqual(equation.rhs, flow_0 * energy_0 + flow_1 * energy_1 + heat)
+
+    def test_internal_energy_equation_preserves_index_override(self) -> None:
+        class ReorderedFallType(FallType):
+            def get_index_matrix(
+                self,
+                core_quantity: CoreQuantity,
+                connection_point: int,
+                use_relative_indexing: bool,
+            ) -> int:
+                offsets = {
+                    CoreQuantity.INTERNAL_ENERGY: 0,
+                    CoreQuantity.PRESSURE: 1,
+                    CoreQuantity.MASS_FLOW_RATE: 2,
+                }
+                return (
+                    offsets[core_quantity]
+                    + 3 * connection_point
+                    + (0 if use_relative_indexing else self.matrix_index)
+                )
+
+        asset = ReorderedFallType("reordered", "reordered")
+        asset.set_matrix_index(12)
+        asset.prev_sol = np.array([100.0, 10000.0, 2.0, 80.0, 20000.0, -2.0])
+        equation = asset.get_internal_energy_equation()
+        np_testing.assert_array_equal(equation.indices, [14, 12, 17, 15])
+        np_testing.assert_array_equal(equation.coefficients, [100.0, 2.0, 80.0, -2.0])
+        self.assertEqual(equation.rhs, 40.0)
 
     def test_get_internal_pressure_loss_equation_linearized_discharge(self) -> None:
         """Evaluate getting an internal pressure loss equation for the boundary object.
@@ -269,11 +311,9 @@ class FallTypeTest(unittest.TestCase):
             equation_object.indices,
             np.array(
                 [
-                    self.asset.matrix_index + index_core_quantity.mass_flow_rate,
-                    self.asset.matrix_index + index_core_quantity.pressure,
-                    self.asset.matrix_index
-                    + index_core_quantity.pressure
-                    + index_core_quantity.number_core_quantities,
+                    self.asset.matrix_index + CoreQuantity.MASS_FLOW_RATE,
+                    self.asset.matrix_index + CoreQuantity.PRESSURE,
+                    self.asset.matrix_index + CoreQuantity.PRESSURE + NUMBER_OF_CORE_QUANTITIES,
                 ]
             ),
         )
@@ -283,9 +323,7 @@ class FallTypeTest(unittest.TestCase):
         )
         self.assertEqual(
             equation_object.rhs,
-            -self.asset.loss_coefficient
-            * 1e-5
-            * self.asset.prev_sol[index_core_quantity.mass_flow_rate],
+            -self.asset.loss_coefficient * 1e-5 * self.asset.prev_sol[CoreQuantity.MASS_FLOW_RATE],
         )
 
     @patch.object(FallType, "get_internal_energy_equation")
@@ -298,8 +336,7 @@ class FallTypeTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + index_core_quantity.number_core_quantities * connection_point
+            CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES * connection_point
         ] = 1.0
 
         # Act
@@ -318,8 +355,7 @@ class FallTypeTest(unittest.TestCase):
         # Arrange
         connection_point = 0
         self.asset.prev_sol[
-            index_core_quantity.mass_flow_rate
-            + index_core_quantity.number_core_quantities * connection_point
+            CoreQuantity.MASS_FLOW_RATE + NUMBER_OF_CORE_QUANTITIES * connection_point
         ] = (self.asset.massflow_zero_limit * 0.1)
 
         # Act

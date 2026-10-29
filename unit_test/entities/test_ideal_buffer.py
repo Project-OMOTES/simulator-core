@@ -29,6 +29,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
 )
 from omotes_simulator_core.entities.assets.ideal_heat_storage import ChargeState, IdealHeatStorage
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
 
@@ -50,14 +51,18 @@ class HeatBufferTest(unittest.TestCase):
         # Ensure prev_sol is set for selected temp.
         self.heat_buffer.solver_asset.prev_sol[
             self.heat_buffer.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=0, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=0,
+                use_relative_indexing=False
             )
         ] = fluid_props.get_ie(
             self.heat_buffer.temperature_connection_0
         )  # type: ignore
         self.heat_buffer.solver_asset.prev_sol[
             self.heat_buffer.solver_asset.get_index_matrix(
-                property_name="internal_energy", connection_point=1, use_relative_indexing=False
+                core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                connection_point=1,
+                use_relative_indexing=False
             )
         ] = fluid_props.get_ie(
             self.heat_buffer.temperature_connection_1
