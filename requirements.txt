@@ -50,7 +50,7 @@ python-dateutil==3.0.0
     # via
     #   influxdb
     #   pandas
-pytz==2026.5
+pytz==2026.6
     # via influxdb
 requests==2.34.2
     # via
