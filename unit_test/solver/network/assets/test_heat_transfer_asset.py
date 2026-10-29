@@ -263,14 +263,14 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 0.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 0.0
         # -- Set temperatures to override zero value check
@@ -278,28 +278,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 30)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 20)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 40)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 70)
 
@@ -355,14 +355,14 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -10.0
         # -- Set temperatures to override zero value check
@@ -370,28 +370,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 30)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 20)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 40)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 70)
 
@@ -446,14 +446,14 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -77.55
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -38.76
         # -- Set temperatures to override zero value check
@@ -461,28 +461,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 30)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 20)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 40)
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(273.15 + 70)
 
@@ -515,28 +515,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 5.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 1.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -1.0
         # Act
@@ -552,28 +552,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 15.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 20.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 1.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -1.0
 
@@ -591,28 +591,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 10.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 5.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 2.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 2.0
         # --- Secondary side
@@ -620,28 +620,28 @@ class HeatTransferTest(unittest.TestCase):
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 20.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 15.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 1.0
         self.asset.prev_sol[
             self.asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 1.0
         # Act

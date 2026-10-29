@@ -132,7 +132,7 @@ class SolverPipe(FallType):
                 self.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=True
+                    use_relative_indexing=True,
                 )
             ]
         if temperature == DEFAULT_MISSING_VALUE:
@@ -416,7 +416,7 @@ class SolverPipe(FallType):
             self.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=True
+                use_relative_indexing=True,
             )
         ]
         # Determine the flow direction

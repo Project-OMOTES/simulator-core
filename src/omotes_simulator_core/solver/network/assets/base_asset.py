@@ -298,7 +298,7 @@ class BaseAsset(BaseItem):
                 self.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 ),
                 self.connected_nodes[connection_point].get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False

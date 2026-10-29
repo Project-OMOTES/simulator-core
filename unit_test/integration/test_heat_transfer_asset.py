@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Heat Pump Solver Asset."""
+
 import unittest
 from uuid import uuid4
 
@@ -120,7 +121,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             77.55,
@@ -131,7 +132,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             -38.76,
@@ -142,7 +143,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -153,7 +154,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
@@ -227,7 +228,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             77.55,
@@ -238,7 +239,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             -38.76,
@@ -249,7 +250,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=1,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.production_asset.supply_temperature),
@@ -260,7 +261,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.demand_asset.supply_temperature),
@@ -333,7 +334,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             77.55,
@@ -344,7 +345,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             38.76,
@@ -355,7 +356,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -366,7 +367,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=3,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
@@ -439,7 +440,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             38.76,
@@ -450,7 +451,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             -38.76,
@@ -461,7 +462,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -534,7 +535,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             38.76,
@@ -545,7 +546,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             -38.76,
@@ -556,7 +557,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.demand_asset.supply_temperature),
@@ -567,7 +568,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -641,7 +642,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             93.07,
@@ -652,7 +653,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             -38.76,
@@ -663,7 +664,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=1,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.production_asset.supply_temperature),
@@ -674,7 +675,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.heat_transfer_asset.temperature_out_primary),
@@ -685,7 +686,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(secondary_in).initial_temperature),
@@ -696,7 +697,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=3,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(secondary_out).initial_temperature),
@@ -771,7 +772,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             0.0,
@@ -782,7 +783,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             0.0,
@@ -793,7 +794,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(30 + 273.15),
@@ -804,7 +805,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=1,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(primary_out).initial_temperature),
@@ -815,7 +816,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=2,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(40 + 273.15),
@@ -826,7 +827,7 @@ class HeatTransferAssetIntegrationTest(unittest.TestCase):
                 self.heat_transfer_asset.get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=3,
-                    use_relative_indexing=False
+                    use_relative_indexing=False,
                 )
             ],
             fluid_props.get_ie(self.network.get_node(secondary_out).initial_temperature),

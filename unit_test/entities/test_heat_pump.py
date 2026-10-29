@@ -60,21 +60,21 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 10.0
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 2.0
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -2.0
 
@@ -82,7 +82,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 5.0
 
@@ -90,21 +90,21 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 15.0
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=2,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 1.0
         self.heat_pump.solver_asset.prev_sol[
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.MASS_FLOW_RATE,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = -1.0
 
@@ -112,7 +112,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=3,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = 20.0
 

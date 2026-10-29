@@ -21,8 +21,8 @@ from uuid import uuid4
 import numpy.testing as npt
 
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
-    CoreQuantity,
     NUMBER_OF_CORE_QUANTITIES,
+    CoreQuantity,
 )
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.node import Node

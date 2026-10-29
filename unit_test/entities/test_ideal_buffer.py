@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Ideal Buffer."""
+
 import unittest
 
 import numpy as np
@@ -53,7 +54,7 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=0,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(
             self.heat_buffer.temperature_connection_0
@@ -62,7 +63,7 @@ class HeatBufferTest(unittest.TestCase):
             self.heat_buffer.solver_asset.get_index_matrix(
                 core_quantity=CoreQuantity.INTERNAL_ENERGY,
                 connection_point=1,
-                use_relative_indexing=False
+                use_relative_indexing=False,
             )
         ] = fluid_props.get_ie(
             self.heat_buffer.temperature_connection_1

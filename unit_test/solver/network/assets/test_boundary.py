@@ -20,7 +20,6 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
-    NUMBER_OF_CORE_QUANTITIES,
     CoreQuantity,
 )
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset

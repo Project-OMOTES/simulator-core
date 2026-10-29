@@ -19,8 +19,8 @@ import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
-    CoreQuantity,
     NUMBER_OF_CORE_QUANTITIES,
+    CoreQuantity,
 )
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 
@@ -180,7 +180,6 @@ class FallType(BaseAsset):
             An EquationObject that contains the indices, coefficients, and right-hand side value of
             the equation.
         """
-
         self.update_heat_supplied()
         if len(self.internal_energy_equation.indices) == 0:
             self.internal_energy_equation.indices = np.array(

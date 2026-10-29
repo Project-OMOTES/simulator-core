@@ -23,8 +23,8 @@ import numpy as np
 import numpy.testing as np_testing
 
 from omotes_simulator_core.solver.matrix.index_core_quantity import (
-    CoreQuantity,
     NUMBER_OF_CORE_QUANTITIES,
+    CoreQuantity,
 )
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.network.assets.node import Node

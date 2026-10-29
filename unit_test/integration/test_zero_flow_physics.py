@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Zero flow of a simple network."""
+
 import unittest
 from uuid import uuid4
 
@@ -141,7 +142,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
                 self.network.get_asset(self.production_asset.name).get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=True
+                    use_relative_indexing=True,
                 )
             ],
             fluid_props.get_ie(
@@ -153,7 +154,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
                 self.network.get_asset(self.demand_asset.name).get_index_matrix(
                     core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=0,
-                    use_relative_indexing=True
+                    use_relative_indexing=True,
                 )
             ],
             fluid_props.get_ie(
