@@ -105,7 +105,7 @@ msgpack==1.2.4
     # via
     #   -c ../../requirements.txt
     #   influxdb
-mypy==2.4.0
+mypy==2.4.1
     # via omotes-simulator-core (../../pyproject.toml)
 mypy-extensions==1.1.0
     # via
@@ -153,7 +153,7 @@ pathspec==1.1.1
     # via
     #   black
     #   mypy
-platformdirs==4.13.7
+platformdirs==4.14.0
     # via black
 plotly==7.1.0
     # via omotes-simulator-core (../../pyproject.toml)
