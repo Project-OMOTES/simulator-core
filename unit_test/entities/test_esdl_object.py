@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test esdl object class."""
+
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
@@ -120,6 +121,24 @@ class EsdlObjectTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(asset_id, asset.esdl_asset.id)
+
+    def test_get_strategy_priority_with_value(self):
+        """Test retrieval of an explicitly configured strategy priority."""
+        asset = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)[0]
+
+        for expected_priority in (0, 3):
+            with self.subTest(priority=expected_priority):
+                asset.esdl_asset.controlStrategy = esdl.PriorityStrategy(priority=expected_priority)
+                self.assertEqual(asset.get_strategy_priority(), expected_priority)
+
+    def test_get_strategy_priority_default(self):
+        """Test default when no priority is configured."""
+        asset = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)[0]
+
+        for strategy in (None, esdl.PriorityStrategy()):
+            with self.subTest(strategy=type(strategy).__name__):
+                asset.esdl_asset.controlStrategy = strategy
+                self.assertEqual(asset.get_strategy_priority(), 1)
 
     def test_get_state(self):
         """Test get_state method."""

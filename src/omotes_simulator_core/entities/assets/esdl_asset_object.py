@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing classes to be able to interact with esdl objects."""
+
 import logging
 from typing import Any
 
@@ -65,9 +66,10 @@ class EsdlAssetObject:
         return str(self.esdl_asset.id)
 
     def get_strategy_priority(self) -> int | None:
-        """Get the control strategy priority value."""
-        if hasattr(self.esdl_asset.controlStrategy, "priority"):
-            return int(self.esdl_asset.controlStrategy.priority)
+        """Get the control strategy priority value, defaulting to 1 when not set."""
+        strategy = self.esdl_asset.controlStrategy
+        if hasattr(strategy, "priority") and strategy.eIsSet("priority"):
+            return int(strategy.priority)
         else:
             return 1
 
