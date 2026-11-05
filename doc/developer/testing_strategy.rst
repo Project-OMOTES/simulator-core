@@ -1,223 +1,213 @@
-Testing Strategy
+Testing strategy
 ================
 
 Purpose
 -------
 
-This guide helps contributors understand where tests live, how to run the test suite, what
-patterns to follow when writing new tests, and what to check before submitting a change.
+This guide explains where tests live, how to run them, which test level to choose, and
+what to check before submitting a change. Use it when you add a feature, fix a bug, or
+restructure code. It does not cover physics derivations or user-facing behavior.
 
-Use this page when you are adding a feature, fixing a bug, or making any structural change that
-requires new or modified tests. It is implementation-oriented and assumes you can already navigate
-the repository. It does not cover physics derivations or user-facing behavior.
-
-Test Layout
------------
-
-All tests live under ``unit_test/``. The directory is flat at the top level; each subdirectory
-targets a distinct layer or cross-cutting concern.
+Relevant modules and files
+--------------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 30 70
+   :widths: 30 30 40
 
-   * - Subdirectory
-     - What it covers
+   * - File or Module
+     - Role
+     - Why it matters for this topic
    * - ``unit_test/adapters/``
-     - ESDL-to-entity mapping: ``EsdlGraphMapper``, controller mappers, and ESDL asset mappers.
-       Verifies that ESDL graph topology is translated correctly to internal objects.
-   * - ``unit_test/entities/``
-     - Entity-layer asset classes (``Pipe``, ``HeatPump``, ``Ates``, etc.) and all
-       asset-level controller classes (``ControllerProducer``, ``ControllerConsumer``, etc.).
-       Each asset and controller class has its own test module.
-   * - ``unit_test/infrastructure/``
-     - ``SimulationManager`` orchestration and plotting utilities. Tests here cover how
-       ``SimulationManager`` wires ESDL input to ``HeatNetwork`` and ``NetworkController``.
-   * - ``unit_test/integration/``
-     - Cross-component end-to-end scenarios run through ``SimulationManager`` against real ESDL
-       files from ``testdata/``. Covers heat physics, pressure physics, zero-flow conditions,
-       heat transfer assets, and ideal heat buffers across full simulation runs.
-   * - ``unit_test/simulation/``
-     - ``NetworkSimulation`` time-step orchestration. Verifies the simulation loop, controller
-       update sequencing, and convergence retry logic in isolation.
-   * - ``unit_test/solver/``
-     - Low-level solver components: solver-layer asset classes (``BaseAsset``, ``SolverPipe``,
-       ``ProductionAsset``, etc.), the network matrix builder, and solver utility functions.
+     - Mapper tests
+     - ``transforms/esdl_asset_mappers/`` tests one ESDL asset mapper per file,
+       ``transforms/controller_mappers/`` tests controller mappers and
+       ``EsdlControllerMapper``, ``transforms/test_esdl_graph_mapper.py`` tests graph
+       creation, and ``utility/test_graph.py`` tests the graph utility.
    * - ``unit_test/transforms/``
-     - Data transformation utilities: ESDL-to-dataframe mapper and transform utility helpers.
+     - ``EsdlEnergySystemMapper`` and port utilities
+     - ``test_mapper.py`` tests ``EsdlEnergySystemMapper.to_entity`` and joint
+       replacement; ``test_transform_utils.py`` tests port sorting helpers.
+   * - ``unit_test/entities/``
+     - Entity assets and asset controllers
+     - One file per entity asset (for example ``test_pipe.py``, ``test_gas_heater.py``);
+       ``controller/`` holds asset controller tests and ``test_controller_new_class.py``
+       for ``NetworkController``.
+   * - ``unit_test/solver/``
+     - Solver assets, network, and matrix
+     - ``network/assets/`` has one file per solver asset class; ``network/test_network.py``
+       tests the solver graph; ``matrix/`` tests ``Matrix`` and ``EquationObject``.
+   * - ``unit_test/simulation/``
+     - Time loop
+     - ``test_networksimulation.py`` tests ``NetworkSimulation``.
+   * - ``unit_test/infrastructure/``
+     - Orchestration and plotting
+     - ``test_simulationmanager.py`` runs ``SimulationManager`` end to end.
+   * - ``unit_test/integration/``
+     - Multi-component scenarios
+     - Physics checks at three entry levels; see `Integration test patterns`_.
+   * - ``testdata/``
+     - ESDL fixtures
+     - Real ESDL files, such as ``test1.esdl`` and ``test_ates.esdl``, used by mapper,
+       simulation, and integration tests.
+   * - ``ci/linux/`` and ``ci/win32/``
+     - Convenience scripts
+     - ``test_unit``, ``lint``, ``typecheck``, ``format``, and ``check_formatting`` run
+       the same checks as the pipeline.
+   * - ``pyproject.toml``
+     - Tool configuration
+     - ``[tool.pytest.ini_options]`` adds coverage options with ``--cov-fail-under 90``;
+       ``[tool.flake8]``, Black, and isort settings also live here.
 
-Running Tests
--------------
+Execution or extension flow
+---------------------------
 
-Install the development dependencies before running tests::
+Set up the environment once with ``ci/linux/create_venv.sh`` or ``ci\win32\create_venv.cmd``.
+These scripts create ``.venv`` and install the pinned runtime and development dependencies.
+Alternatively, install the package in editable mode with its ``dev`` extra.
 
-    pip install -e ".[dev]"
+Run the full suite with ``ci/linux/test_unit.sh`` on Linux or ``ci\win32\test_unit.cmd`` on
+Windows. Both scripts add ``src`` to ``PYTHONPATH`` and run
+``pytest -p no:faulthandler unit_test/``. The full run includes the coverage check from
+``pyproject.toml``.
 
-Run the full test suite from the repository root:
+For a single directory or file during development, call pytest directly and disable
+coverage. Without ``--no-cov`` a partial run fails the 90% coverage threshold even when all
+selected tests pass. The package must be importable, either through an editable install or
+by adding ``src`` to ``PYTHONPATH`` as the scripts do:
 
 .. code-block:: bash
 
-    python -m pytest unit_test/
+    python -m pytest --no-cov -p no:faulthandler unit_test/entities/test_pipe.py
 
-Because the previous step installs the package in editable mode, no manual ``PYTHONPATH``
-setup is required on any platform. Add ``-p no:faulthandler`` to suppress low-level crash
-reporting that can produce spurious output when the solver reaches certain numerical states.
+Before submitting, also run the lint, type check, and formatting scripts in the same
+``ci`` folder (``lint``, ``typecheck``, ``check_formatting``). Use ``format`` to apply Black
+and isort.
 
-To run only a single subdirectory during development::
+Implementation notes
+--------------------
 
-    python -m pytest unit_test/entities/
+Unit tests use ``unittest.TestCase`` with ``setUp`` and one behavior per test method,
+commented as Arrange, Act, and Assert. Follow the closest existing test file.
 
-To run a single test file::
+Entity asset tests
+~~~~~~~~~~~~~~~~~~
 
-    python -m pytest unit_test/entities/test_pipe.py
+Construct the entity asset directly with keyword arguments, as in
+``unit_test/entities/test_pipe.py`` and ``unit_test/entities/test_gas_heater.py``. Replace
+solver results with ``unittest.mock.patch.object`` on ``asset.solver_asset`` getters such as
+``get_mass_flow_rate``, ``get_pressure``, and ``get_temperature``, so no solve is needed.
 
-Unit Test Patterns
-------------------
+To test ``write_to_output``, call ``write_standard_output()`` first, as ``HeatNetwork``
+does, and then assert on ``asset.outputs[port_index][-1]``. ``test_gas_heater.py`` shows
+this sequence for the output port of a producer.
 
-Asset unit tests
+Solver asset tests
+~~~~~~~~~~~~~~~~~~
+
+Solver asset tests live in ``unit_test/solver/network/assets/``, one file per class (for
+example ``test_solver_pipe.py``, ``test_heat_transfer_asset.py``). They call methods such as
+``get_equations`` or individual equation helpers on a solver asset and check the returned
+``EquationObject`` contents, without running ``Solver``.
+
+Controller tests
 ~~~~~~~~~~~~~~~~
 
-Unit tests for entity-layer assets live in ``unit_test/entities/``. The pattern follows the
-standard ``unittest.TestCase`` structure used throughout the repository:
+Asset controller tests live in ``unit_test/entities/controller/`` and construct the
+controller directly. ``test_controller_new_class.py`` tests ``NetworkController`` with
+``Mock(spec=ControllerNetwork)``, ``Mock(spec=ControllerConsumer)``, and
+``Mock(spec=ControllerStorageAbstract)`` objects, so the tests fail when a mocked attribute
+does not exist on the real class.
 
-- ``setUp`` constructs the asset with representative parameter values.
-- Individual test methods verify one behavior each, using the ``Arrange / Act / Assert``
-  sequence.
-- Solver interactions are replaced with ``unittest.mock.patch`` or ``Mock`` objects so the
-  entity layer can be tested independently of the solver.
+Mapper tests
+~~~~~~~~~~~~
 
-A concrete example is ``unit_test/entities/test_pipe.py``:
+Mapper tests load a real ESDL file from ``testdata/`` with
+``EsdlObject(pyesdl_from_file(...))``, select assets with
+``esdl_object.get_all_assets_of_type(...)``, and call ``mapper.to_entity``.
+``test_esdl_asset_producer_mapper.py`` checks the resulting entity's name, ID, and
+connected ports against the ESDL asset. Add an ESDL fixture to ``testdata/`` when no
+existing file contains the asset type you need.
 
-.. code-block:: python
+Integration test patterns
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    class PipeTest(unittest.TestCase):
-        def setUp(self) -> None:
-            self.pipe = Pipe(
-                asset_name="pipe",
-                asset_id="pipe_id",
-                port_ids=["test1", "test2"],
-                length=5,
-                inner_diameter=1,
-                roughness=0.001,
-                alpha_value=0.8,
-                minor_loss_coefficient=0.0,
-                external_temperature=293.15,
-                qheat_external=0.0,
-            )
+Integration tests in ``unit_test/integration/`` enter the stack at one of three levels:
 
-        def test_pipe_create(self) -> None:
-            # Act and Assert
-            pipe = Pipe(...)
-            self.assertIsInstance(pipe, Pipe)
+.. list-table::
+   :header-rows: 1
+   :widths: 20 45 35
 
-When adding a new asset:
+   * - Level
+     - Pattern
+     - Examples
+   * - Full run
+     - ``SimulationManager(EsdlObject(pyesdl_from_file(path)), config)`` followed by
+       ``execute(callback)``; assertions on the returned ``DataFrame``.
+     - ``test_heat_physics.py``, ``test_pressure_physics.py``
+   * - Network
+     - ``HeatNetwork(EsdlEnergySystemMapper(esdl_object).to_entity)`` with a hand-written
+       ``controller_input`` passed to ``run_time_step``; no controller.
+     - ``test_ates_network.py``, ``test_communication_controller_network.py``
+   * - Solver
+     - A solver ``Network()`` built with ``add_existing_asset`` and ``connect_assets``,
+       boundary values set on solver assets, then ``Solver(network).solve()``.
+     - ``test_zero_flow_physics.py``, ``test_heat_transfer_asset.py``,
+       ``test_ideal_heat_buffer.py``
 
-- Create ``unit_test/entities/test_<asset_name>.py`` mirroring the structure of
-  ``unit_test/entities/test_pipe.py`` or the closest existing asset test.
-- Test construction with valid parameters and any required defaults.
-- Test that output properties return expected types or raise appropriate errors when the
-  asset has not yet been solved.
-- Test any asset-specific logic such as clamping, bypass conditions, or state transitions.
-
-Solver-layer asset tests live in ``unit_test/solver/network/assets/``. Each file targets one
-solver asset class (for example ``test_solver_pipe.py``, ``test_production_asset.py``). These
-tests verify that ``get_equations()`` returns the expected matrix contributions for given inputs,
-without running the full nonlinear solver.
-
-Controller unit tests
-~~~~~~~~~~~~~~~~~~~~~
-
-Controller tests live in ``unit_test/entities/controller/``. See
-``unit_test/entities/controller/test_controller_new_class.py`` for a worked example that
-exercises ``NetworkController`` with mock ``ControllerNetwork`` instances. Use
-``Mock(spec=<class>)`` to constrain mocks to the real interface.
-
-When adding a new controller class:
-
-- Create ``unit_test/entities/controller/test_controller_<role>.py``.
-- Use ``Mock(spec=ControllerNetwork)`` for the network argument.
-- Call ``update_setpoints`` and assert that the returned dict contains the expected keys and
-  value types.
-- Test edge cases such as zero demand, empty subnetworks, or profile boundaries.
-
-Adapter tests
-~~~~~~~~~~~~~
-
-Mapper tests live in ``unit_test/adapters/``. The main file is
-``unit_test/adapters/test_esdl_graph_mapper.py``. Mapper tests verify that a known ESDL
-structure (supplied inline or from a small fixture) maps to the expected internal graph
-topology. Use real ESDL objects rather than mocks where construction is straightforward; use
-mocks only for external dependencies such as file loaders.
-
-Integration Test Patterns
--------------------------
-
-Integration tests live in ``unit_test/integration/``. Each file runs a complete simulation
-through ``SimulationManager`` using a real ESDL file from ``testdata/``, then asserts on
-output values such as supply temperatures, mass flow rates, pressures, or heat transfer
-quantities.
-
-When to add an integration test:
-
-- A new asset or controller class introduces cross-component coupling that unit tests cannot
-  exercise in isolation (for example, a new asset type that affects network-level pressure
-  balance).
-- A bug fix addresses emergent behavior that only manifests across multiple layers (entity,
-  solver, controller).
-- A new ESDL configuration produces a topology that no existing integration test covers.
-
-The general pattern (taken from ``unit_test/integration/test_heat_physics.py``) is:
+A minimal full-run setup, based on ``test_heat_physics.py``:
 
 .. code-block:: python
 
-    class HeatDemandTest(unittest.TestCase):
-        def setUp(self) -> None:
-            esdl_file_path = str(
-                Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl"
-            )
-            esdl_object = EsdlObject(pyesdl_from_file(esdl_file_path))
-            self.controller = EsdlControllerMapper().to_entity(esdl_object)
-            config = SimulationConfiguration(
-                simulation_id=uuid.uuid1(),
-                name="test run",
-                timestep=3600,
-                ...
-            )
-            manager = SimulationManager(esdl_object, self.controller, config)
-            self.output = manager.execute()
+    esdl_file_path = str(Path(__file__).parent / ".." / ".." / "testdata" / "test1.esdl")
+    config = SimulationConfiguration(
+        simulation_id=uuid.uuid1(),
+        name="test run",
+        timestep=3600,
+        start=datetime.strptime("2019-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S"),
+        stop=datetime.strptime("2019-01-01T06:00:00", "%Y-%m-%dT%H:%M:%S"),
+    )
+    app = SimulationManager(EsdlObject(pyesdl_from_file(esdl_file_path)), config)
+    result = app.execute(progress_calback=lambda progress, message: None)
 
-        def test_supply_temperature(self) -> None:
-            # Assert on self.output values
+Use the lowest level that exercises the behavior you changed. Solver-level tests isolate
+equations; network-level tests check entity and solver coupling with fixed setpoints; full
+runs check control and physics together.
 
-Integration tests are slower than unit tests because they run the full solver loop. Keep
-individual integration test files focused on one ESDL topology. Add a new ESDL file to
-``testdata/`` if no existing file exercises the required network configuration.
+Testing and validation
+----------------------
 
-Testing Checklist
------------------
+Before submitting a change, check that:
 
-Before submitting a change, verify the following:
+- The full suite passes through ``ci/linux/test_unit.sh`` or ``ci\win32\test_unit.cmd``,
+  including the 90% coverage threshold.
+- ``lint``, ``typecheck``, and ``check_formatting`` in ``ci/linux/`` or ``ci/win32/``
+  report no issues.
+- Every new entity asset, solver asset, asset controller, and mapper has a unit test.
+- An integration test exists when the change couples components in a new way, such as a
+  new asset type in a network or a change to control logic.
+- New ESDL fixtures are in ``testdata/`` with a descriptive name.
+- The documentation builds without new warnings when you changed docstrings or pages under
+  ``doc/``. Use ``doc/run_sphinx.sh`` on Linux or ``doc/run_sphinx.bat`` on Windows.
 
-- All existing tests pass: ``python -m pytest unit_test/``
-- A unit test exists for every new entity-layer asset class.
-- A unit test exists for every new solver-layer asset class.
-- A unit test exists for every new controller class or subclass.
-- A unit test exists for every new mapper or transform.
-- An integration test has been added if the change introduces cross-component coupling.
-- No test imports from a private module interface (i.e., ``_private_method``).
-- Mocks use ``Mock(spec=<class>)`` to prevent silent attribute errors.
-- New ESDL test fixtures are placed in ``testdata/`` with a descriptive name.
-- The documentation build passes via the repository convenience script:
-  ``doc/run_spinx.bat`` on Windows or ``doc/run_sphinx.sh`` on Linux.
-  This OS-specific difference is expected because the wrapper script uses platform-native
-  shells.
+Common pitfalls
+---------------
 
-Related Documentation
+- Running a subset of tests without ``--no-cov`` and reading the coverage failure as a test
+  failure.
+- Asserting on ``outputs[port][-1]`` after ``write_to_output`` without calling
+  ``write_standard_output`` first; the output list is then empty or holds the previous row.
+- Using a bare ``Mock()`` for controllers or networks; use ``Mock(spec=...)`` so misspelled
+  attributes fail the test.
+- Writing a full-run integration test for a solver-only change; it is slower and harder to
+  diagnose than a solver-level test.
+- Testing an ESDL asset mapper with a hand-built mock asset when a ``testdata/`` file already
+  contains that asset type.
+
+Related documentation
 ---------------------
 
-- :doc:`simulation_flow` — traces the full orchestration path from entrypoint to
-  solver and identifies which tests correspond to each orchestration layer.
-- :doc:`developer_guides` — step-by-step workflows for adding a new asset, output format, or
-  controller; each guide includes test file placement and patterns.
-- :doc:`ControlExtension` — contributor guide for adding or modifying controller classes,
-  including the corresponding test patterns for controller unit tests.
+- :doc:`simulation_flow` — which call each test level enters.
+- :doc:`developer_guides` — extension guides, each with test guidance.
+- :doc:`ControlExtension` — tests for control changes.
+- :doc:`documentation_with_ai_agents` — documentation build and review workflow.

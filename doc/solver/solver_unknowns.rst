@@ -52,4 +52,4 @@ Related Documentation
 - :doc:`solver_workflow` — how these unknowns are assembled and solved each iteration.
 - :doc:`solver_convergence` — how the solved vector is tested for convergence.
 - :doc:`../physics/physics_main` — fluid-property relations and asset-internal physics.
-- :doc:`../reference/solver_reference` — class-level reference.
+- :doc:`../developer/solver_reference` — class-level reference.

@@ -27,11 +27,10 @@ Single toctree path rule
 Every page must be reachable through exactly one ``.. toctree::`` path. This applies
 repo-wide, not just to the generated API tree: conceptual section landing pages
 (Intro/Solver/Network/Physics/Control) must not toctree directly into a page that is
-already toctreed from the curated ``doc/reference/`` tier or the generated API tree.
-Cross-link to such a page with ``:doc:``/``:ref:`` prose instead — see
-``doc/controller/controller.rst``'s "Implementation reference" section for the correct
-pattern (a prose link to ``:doc:`../reference/controller_reference`` with no toctree entry
-duplicating it). Linking the same page from two toctrees produces duplicate, confusing
+already toctreed from the curated reference pages (``doc/developer/*_reference.rst``) or
+the generated API tree. Cross-link to such a page with ``:doc:``/``:ref:`` prose instead —
+for example a prose link to ``:doc:`../developer/controller_reference``` with no toctree
+entry duplicating it. Linking the same page from two toctrees produces duplicate, confusing
 navigation entries for the same content even though Sphinx does not warn about it.
 
 Equation depth policy
@@ -87,14 +86,18 @@ Developer documentation requirements
   package page already nests every subpackage via its own ``.. toctree::``; do not also
   list the root package or its subpackages a second time elsewhere.
 - Maintain the curated landing/reference tier by hand: ``doc/developer/developer_main.rst``,
-  ``doc/developer/developer_navigation.rst``, and ``doc/reference/``
-  (``architecture_reference.rst``, ``asset_reference.rst``, ``asset_uncovered_entities.rst``,
-  ``controller_reference.rst``, ``controller_uncovered_entities.rst``,
-  ``solver_reference.rst``, ``solver_uncovered_entities.rst``).
+  ``doc/developer/developer_navigation.rst``, and the four curated reference cluster pages
+  directly under ``doc/developer/`` (``network_reference.rst``, ``controller_reference.rst``,
+  ``solver_reference.rst``, ``asset_reference.rst``). Each cluster page ends with an
+  ``API reference`` toctree that is the single toctree path to the hand-written autodoc
+  wrapper pages of its subsystem (``doc/solver/*.rst`` and ``doc/solver/assets/*.rst``
+  outside the Solver section pages, ``doc/controller/*.rst`` and
+  ``doc/controller/assets/*.rst`` outside the Control section pages, and
+  ``doc/assets/*.rst``).
 - Keep navigation flat and shallow: ``doc/developer/developer_main.rst``'s own toctree lists
   ``developer_navigation``, the four curated reference cluster pages
-  (``architecture_reference.rst``, ``asset_reference.rst``, ``solver_reference.rst``,
-  ``controller_reference.rst``), and the generated tree's root index
+  (``network_reference.rst``, ``controller_reference.rst``, ``solver_reference.rst``,
+  ``asset_reference.rst``), and the generated tree's root index
   (``api/omotes_simulator_core``) directly as siblings — all reachable in exactly 1 hop from
   ``developer_main.rst`` (2 hops from ``doc/index.rst``). Do not introduce an intermediate
   landing page between ``developer_main.rst`` and any of these — curated reference is the
@@ -126,6 +129,8 @@ Support page requirements
 Style rules
 -----------
 - Use neutral, technical language.
+  - Do not use overly generic language such as "the system" or "the codebase"; be specific about modules, classes, and functions.
+  - Avoid vague terms like "provenance" or "contract", instead use precise terminology relevant to the repository's code and architecture, such as specific classes, methods, and modules.
 - Keep sections concise, actionable, and cross-linked.
 - Prefer short paragraphs and clear headings.
 - Use sentence case for headings: capitalize only the first letter (and proper nouns/acronyms).
@@ -142,6 +147,6 @@ Output format requirements
 
 Build-validation command
 -------------------------
-If command execution is available, run ``doc/make.bat html`` or ``doc/run_spinx.bat``
+If command execution is available, run ``doc/make.bat html`` or ``doc/run_sphinx.bat``
 (the repository's actual build script filename) from the repository root to check for
 documentation build warnings or errors.

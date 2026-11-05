@@ -1,44 +1,18 @@
-Extending Control Behavior
+Extending control behavior
 ==========================
 
 Purpose
 -------
 
-Use this guide when you need to add a new controller type, extend an existing controller,
-modify dispatch logic, or change how setpoints are propagated to assets. This is
-implementation-oriented, contributor-facing documentation — not a user-facing conceptual
-overview of control.
+Use this guide when you change how setpoints are computed: new controller parameters, a
+controller for a new asset type, different dispatch rules, or a replacement network
+controller. It describes the control code as it is implemented today and the extension
+paths that the code supports.
 
-This page is for contributors who work at the Python implementation level. For conceptual
-explanations of what the control system does, consult :doc:`../controller/controller`. For
-physical impact and detailed dispatch mechanics, consult :doc:`../controller/controller_behavior`.
+For what the controller does conceptually, see :doc:`../controller/controller`. For the
+dispatch rules and their effect on results, see :doc:`../controller/controller_behavior`.
 
-Control Architecture for Contributors
--------------------------------------
-
-The control layer is split into three tiers:
-
-**Asset-level controllers** (``entities/assets/controller/``)
-    Per-asset classes such as ``ControllerProducer``, ``ControllerConsumer``,
-    ``ControllerAtesStorage``, ``ControllerIdealHeatStorage``, ``ControllerHeatTransferAsset``.
-    Each inherits from ``AssetControllerAbstract``. They own asset-specific state
-    (profiles, demand, stored energy, COP) and the logic to compute per-asset setpoints.
-
-**Network-level controller** (``entities/network_controller.py``)
-    The ``NetworkController`` class. It owns a list of ``ControllerNetwork`` objects
-    (one per hydraulically isolated sub-network). Each ``ControllerNetwork`` contains the
-    asset-level controllers for its sub-network. ``NetworkController`` orchestrates the
-    dispatch: update network state, calculate per-network totals, distribute demand across
-    producers, and return the setpoints dict.
-
-**Abstract contract** (``entities/network_controller_abstract.py``)
-    The ``NetworkControllerAbstract`` base class defines the minimal interface that
-    ``NetworkSimulation`` depends on: one abstract method, ``update_setpoints(time)``.
-    ``NetworkSimulation`` calls ``update_network_state`` and ``update_setpoints`` on the
-    abstract interface; it does not know about individual asset controllers or the
-    ``ControllerNetwork`` grouping logic.
-
-Relevant Modules and Files
+Relevant modules and files
 --------------------------
 
 .. list-table::
@@ -50,241 +24,205 @@ Relevant Modules and Files
      - Why it matters for this topic
    * - ``src/omotes_simulator_core/entities/network_controller_abstract.py``
      - Abstract interface
-     - Defines the contract that ``NetworkSimulation`` depends on. Any custom controller
-       must inherit from this and implement ``update_setpoints``.
+     - ``NetworkControllerAbstract`` declares one abstract method,
+       ``update_setpoints(time) -> dict``.
    * - ``src/omotes_simulator_core/entities/network_controller.py``
-     - Concrete implementation
-     - Current dispatch logic. Owns update orchestration, network-level balancing,
-       and producer priority/curtailment. Study this before modifying dispatch.
-   * - ``src/omotes_simulator_core/entities/assets/controller/asset_controller_abstract.py``
-     - Asset-level base class
-     - Minimal contract for per-asset controllers. Defines ``set_state`` (receive network
-       state from entity layer) and ``calculate_setpoints`` (return a dict per timestep).
+     - Dispatch logic
+     - ``NetworkController`` implements ``update_network_state`` and
+       ``update_setpoints``: supply and demand balance, storage use, producer priority,
+       consumer capping, heat transfer setpoints, and the pressure-setting asset.
    * - ``src/omotes_simulator_core/entities/assets/controller/controller_network.py``
-     - Network grouping
-     - Groups asset controllers by hydraulic connectivity. Holds producer, consumer, storage,
-       and heat-transfer asset lists. Study when extending to understand sub-network
-       isolation and factor adjustment for multi-network systems.
-   * - ``src/omotes_simulator_core/entities/assets/controller/controller_producer.py``
-     - Producer logic
-     - Example: supply-temperature and demand-based setpoint logic for production assets.
-   * - ``src/omotes_simulator_core/entities/assets/controller/controller_consumer.py``
-     - Consumer logic
-     - Example: demand profile and return temperature logic for demand assets.
+     - Sub-network
+     - ``ControllerNetwork`` holds the controllers of one hydraulically connected part and
+       builds setpoint dictionaries with methods such as ``set_supply``,
+       ``set_consumer_to_demand``, ``set_storage_charge_power``, and ``set_pressure``.
+   * - ``src/omotes_simulator_core/entities/assets/controller/asset_controller_abstract.py``
+     - Asset controller base
+     - ``AssetControllerAbstract(name, identifier)`` stores ``name`` and ``id`` and has a
+       no-op ``set_state``. It is not an ABC and declares no setpoint method.
+   * - ``src/omotes_simulator_core/entities/assets/controller/controller_producer.py``,
+       ``controller_consumer.py``, ``controller_storage.py``,
+       ``controller_heat_transfer.py``
+     - Asset controllers
+     - Hold profiles, limits, temperatures, and storage state, and expose
+       ``get_max_power``, ``get_heat_demand``, effective charge and discharge power, or
+       ``set_asset_prim`` and ``set_asset_sec``.
    * - ``src/omotes_simulator_core/adapter/transforms/controller_mapper.py``
-     - ESDL-to-controller mapper
-     - ``EsdlControllerMapper.to_entity`` creates the network controller from the ESDL.
-       Contains the instantiation dispatch.
+     - Controller creation
+     - ``EsdlControllerMapper.to_entity`` creates asset controllers per asset label, splits
+       them into ``ControllerNetwork`` objects, and returns the ``NetworkController``.
    * - ``src/omotes_simulator_core/adapter/transforms/controller_mappers/``
-     - Per-asset controller mappers
-     - One mapper per asset-level controller type (``controller_producer_mapper.py``,
-       ``controller_consumer_mapper.py``, etc.). Each inherits from ``EsdlMapperAbstract``.
+     - Asset controller mappers
+     - ``ControllerProducerMapper``, ``ControllerConsumerMapper``,
+       ``ControllerAtesStorageMapper``, ``ControllerIdealHeatStorageMapper``,
+       ``ControllerHeatPumpMapper``, and ``ControllerHeatExchangeMapper``.
+   * - ``src/omotes_simulator_core/entities/assets/asset_defaults.py``
+     - Setpoint keys
+     - ``PROPERTY_HEAT_DEMAND``, ``PROPERTY_TEMPERATURE_IN``, ``PROPERTY_TEMPERATURE_OUT``,
+       ``PROPERTY_SET_PRESSURE``, ``PROPERTY_BYPASS``, and the ``PRIMARY`` and ``SECONDARY``
+       prefixes.
    * - ``unit_test/entities/controller/``
      - Controller unit tests
-     - Unit tests for all controller classes. Use ``Mock(spec=ControllerNetwork)`` to
-       isolate asset controllers from network-level logic.
+     - One file per asset controller, ``test_controller_network.py``, and
+       ``test_controller_new_class.py`` for ``NetworkController``.
    * - ``unit_test/integration/test_communication_controller_network.py``
-     - Integration coupling test
-     - Verifies that ``update_network_state`` correctly propagates entity-layer asset state
-       to per-asset controller objects. This is the most important integration test for
-       controller changes.
+     - Coupling test
+     - Checks that ``update_network_state`` calls ``set_state`` on every producer, consumer,
+       and storage controller.
 
-Step-by-step Workflow
----------------------
+Execution or extension flow
+---------------------------
 
-1. Create or modify an asset-level controller class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How setpoints are produced
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Asset controllers live in ``src/omotes_simulator_core/entities/assets/controller/``.
+Every timestep ``NetworkSimulation`` calls:
 
-Inherit from ``AssetControllerAbstract``:
+1. ``NetworkController.update_network_state(heat_network)``. For every producer, consumer,
+   and storage controller it calls
+   ``controller.set_state(heat_network.get_asset_by_id(controller.id).get_state())``. Only
+   ``AtesCluster`` and ``IdealHeatStorage`` return a non-empty state; their controllers
+   use it to update the effective charge and discharge power.
 
-.. code-block:: python
+2. ``NetworkController.update_setpoints(time)``, which:
 
-    from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-        AssetControllerAbstract,
-    )
+   a. Updates ``factor_to_first_network`` of each ``ControllerNetwork`` from the heat
+      transfer factors along its ``path``.
+   b. Sums consumer demand and producer maximum power over all networks, scaled to the
+      first network.
+   c. If supply exceeds demand, sets consumers to demand and charges storage with the
+      surplus. When storage cannot take the whole surplus, it charges storage at maximum and
+      sets producers by ``priority``.
+   d. Otherwise sets producers to maximum and discharges storage for the shortfall. When
+      supply plus storage cannot meet demand, it logs a warning and scales all consumers
+      down by the same factor.
+   e. For each network with exactly one heat transfer asset, sums the heat demand setpoints
+      of that network and calls ``set_asset_prim`` or ``set_asset_sec`` on the heat
+      transfer controller. For a heat pump on the secondary side with
+      ``max_electrical_power``, consumer setpoints in that network are scaled down first
+      when the requested heat exceeds ``max_electrical_power`` times ``factor``.
+   f. Asks each network for its pressure-setting asset with ``set_pressure()`` and sets the
+      returned key to ``True``.
 
-    class ControllerMyAsset(AssetControllerAbstract):
-        def __init__(self, asset_id: str, time_step: float) -> None:
-            super().__init__(asset_id, time_step)
-            # Initialize asset-specific state (profiles, COP, storage, etc.)
+The result maps asset IDs to setpoint dictionaries and is passed to
+``HeatNetwork.run_time_step``.
 
-        def set_state(self, state: dict[str, float]) -> None:
-            # Called by NetworkController.update_network_state() before each update_setpoints.
-            # Receive state dict from entity-layer asset via get_state().
-            # Example: read current supply temperature or storage level.
-            pass
+Extension paths
+~~~~~~~~~~~~~~~
 
-        def calculate_setpoints(self, time: datetime.datetime) -> dict[str, float]:
-            # Called by ControllerNetwork or NetworkController.update_setpoints().
-            # Return a dict mapping property names to setpoint values.
-            # Example: return {"heat_demand": 100000, "supply_temperature": 55}
-            return {}
+Choose the smallest path that does the job:
 
-The two key methods are:
+- **New parameter for an existing controller type.** Read the ESDL value in the controller
+  mapper, store it on the asset controller, and use it in ``ControllerNetwork`` or
+  ``NetworkController``. ``ControllerProducer.priority`` is read with
+  ``esdl_asset.get_strategy_priority()`` in ``ControllerProducerMapper`` and used in
+  ``NetworkController._set_producers_based_on_priority``.
+- **Existing controller type for a new asset type.** Add a list comprehension to
+  ``EsdlControllerMapper.to_entity`` that calls the existing mapper for the new
+  ``OmotesAssetLabels`` value, as is done for ``GAS_HEATER`` and ``ELECTRIC_BOILER`` with
+  ``ControllerProducerMapper``. See :doc:`AddEntityLayerAsset`.
+- **State-dependent control.** Return the state from the entity asset's ``get_state``,
+  override ``set_state`` in the asset controller, and use the derived values in the
+  dispatch. The storage controllers follow this pattern. ``update_network_state`` only
+  covers producers, consumers, and storages; extend it if another category needs state.
+- **New controller category.** Add the controller class, a mapper in
+  ``controller_mappers/`` exported from its ``__init__.py``, a list in
+  ``ControllerNetwork``, a branch in ``NetworkItems.add`` (which raises ``ValueError`` for
+  unknown controller types), creation in ``EsdlControllerMapper.to_entity``, and dispatch
+  in ``NetworkController.update_setpoints``.
+- **Different dispatch rules.** Change ``NetworkController.update_setpoints`` or the
+  ``ControllerNetwork`` helper methods. Keep the setpoint dictionary keys described
+  below.
+- **Replacement network controller.** Subclass ``NetworkControllerAbstract``. Because
+  ``NetworkSimulation`` is typed against ``NetworkController`` and also calls
+  ``update_network_state``, the replacement must implement that method too, and either
+  ``NetworkSimulation`` must be retyped to the abstract class or the replacement must
+  subclass ``NetworkController``. ``SimulationManager`` always builds the controller with
+  ``EsdlControllerMapper``, so it must be changed to select another controller.
 
-- ``set_state`` — receive current network state (temperature, flow, pressure) from the
-  entity-layer asset.
-- ``calculate_setpoints`` — compute and return the setpoints for the next solver call.
+Implementation notes
+--------------------
 
-2. Wire the new asset controller into ControllerNetwork
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Edit ``src/omotes_simulator_core/entities/assets/controller/controller_network.py``.
-
-In the ``ControllerNetwork.__init__`` constructor or in ``EsdlControllerMapper``, add the new
-asset controller to the appropriate list:
-
-- ``self.producers`` — for production assets
-- ``self.consumers`` — for demand assets
-- ``self.storages`` — for storage assets
-- ``self.heat_transfer_assets_prim`` or ``self.heat_transfer_assets_sec`` — for heat exchangers
-  or heat pumps
-
-Then update ``calculate_setpoints`` inside ``ControllerNetwork`` (if it exists) or inside
-``NetworkController.update_setpoints`` to include logic that consults your new controller.
-
-3. Create the controller mapper
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Create a new file in ``src/omotes_simulator_core/adapter/transforms/controller_mappers/``,
-for example ``controller_my_asset_mapper.py``.
-
-Inherit from ``EsdlMapperAbstract``:
-
-.. code-block:: python
-
-    from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-    from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
-        AssetControllerAbstract,
-    )
-    from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-    from omotes_simulator_core.entities.assets.controller.controller_my_asset import (
-        ControllerMyAsset,
-    )
-
-    class EsdlControllerMyAssetMapper(EsdlMapperAbstract):
-
-        def to_esdl(self, entity: ControllerMyAsset) -> EsdlAssetObject:
-            raise NotImplementedError("EsdlControllerMyAssetMapper.to_esdl()")
-
-        def to_entity(self, esdl_asset: EsdlAssetObject, timestep: float) -> AssetControllerAbstract:
-            return ControllerMyAsset(
-                asset_id=esdl_asset.esdl_asset.id,
-                time_step=timestep,
-                # read additional properties with esdl_asset.get_property(name, default)
-            )
-
-4. Register the mapper
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Open ``src/omotes_simulator_core/adapter/transforms/controller_mapper.py`` and add two changes.
-
-First, import the new mapper:
-
-.. code-block:: python
-
-    from omotes_simulator_core.adapter.transforms.controller_mappers.controller_my_asset_mapper import (
-        EsdlControllerMyAssetMapper,
-    )
-
-Second, add an entry to the controller dispatch table (inside ``EsdlControllerMapper.to_entity``
-or in a dispatch dict):
-
-.. code-block:: python
-
-    mapper = EsdlControllerMyAssetMapper()
-    controller = mapper.to_entity(esdl_asset, timestep=config.timestep)
-
-The exact pattern depends on the current controller mapper implementation. Study the existing
-mappers for the current pattern.
-
-5. Add unit and integration tests
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Unit tests for the asset-level controller belong in ``unit_test/entities/controller/``.
-Follow the pattern of existing controller tests:
-
-.. code-block:: python
-
-    class ControllerMyAssetTest(unittest.TestCase):
-        def setUp(self) -> None:
-            self.controller = ControllerMyAsset(asset_id="my_asset_id", time_step=3600)
-
-        def test_calculate_setpoints(self) -> None:
-            time = datetime.datetime(2020, 1, 1, 0, 0, 0)
-            setpoints = self.controller.calculate_setpoints(time)
-            self.assertIn("heat_demand", setpoints)
-            self.assertIsInstance(setpoints["heat_demand"], (int, float))
-
-        def test_set_state(self) -> None:
-            state = {"supply_temperature": 55, "mass_flow": 100}
-            self.controller.set_state(state)  # Should not raise
-
-Use ``Mock(spec=ControllerNetwork)`` when you need to mock the network object passed to your
-controller.
-
-Integration tests belong in ``unit_test/integration/``. The most relevant integration test
-is ``test_communication_controller_network.py``, which verifies that ``update_network_state``
-correctly reads from entity-layer assets and propagates state to your controller. Add a test
-there if your controller depends on new state properties.
-
-Testing control changes
+Setpoint dictionary keys
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before submitting:
+Entity assets validate the keys they receive, so the controller must provide:
 
-1. Run unit tests for your new or modified controller class:
+- **Producers and storages:** ``PROPERTY_HEAT_DEMAND``, ``PROPERTY_TEMPERATURE_IN``,
+  ``PROPERTY_TEMPERATURE_OUT``, and ``PROPERTY_SET_PRESSURE``. ``ProductionCluster`` raises
+  ``ValueError`` when one is missing.
+- **Consumers:** ``PROPERTY_HEAT_DEMAND``, ``PROPERTY_TEMPERATURE_IN``, and
+  ``PROPERTY_TEMPERATURE_OUT``.
+- **Heat transfer assets:** the keys produced by ``set_asset_prim`` and ``set_asset_sec``:
+  the quantities above with the ``PRIMARY`` and ``SECONDARY`` prefixes, plus
+  ``PROPERTY_BYPASS``. ``HeatPump`` and ``HeatExchanger`` check them per side and raise
+  ``ValueError`` when one is missing.
 
-   .. code-block:: bash
+Heat taken from the network is positive and heat delivered to the network is negative:
+consumer demand and storage charging are positive, producer supply and storage discharging
+are negative.
 
-       python -m pytest unit_test/entities/controller/test_controller_my_asset.py
+Each ``ControllerNetwork`` must contain a producer, a secondary heat transfer asset, or a
+storage, checked in that order, to set the pressure; otherwise ``set_pressure`` raises
+``ValueError``.
 
-2. Run the integration test that exercises the entity-controller communication:
+Current limitations
+~~~~~~~~~~~~~~~~~~~
 
-   .. code-block:: bash
+- ``AssetControllerAbstract`` does not enforce any interface; ``ControllerNetwork`` and
+  ``NetworkController`` call type-specific methods directly.
+- Heat transfer setpoints are only produced for networks with exactly one heat transfer
+  asset.
+- ``ControllerHeatTransferAsset.set_asset_sec`` uses fixed temperatures instead of the
+  configured ``primary_temperatures`` and ``secondary_temperatures``.
+- ``ControllerNetwork.get_total_supply_priority`` uses ``producer.power``, not
+  ``get_max_power(time)``, so profiles are ignored when producers are dispatched by
+  priority.
+- ``EsdlControllerMapper.to_entity`` raises ``RuntimeError`` when heat transfer assets form
+  a loop between networks or when a network is more than two stages away from the
+  reference network.
 
-       python -m pytest unit_test/integration/test_communication_controller_network.py
+Testing and validation
+----------------------
 
-3. Run a full integration test against a real ESDL file that includes your asset type:
+- **Asset controller tests** in ``unit_test/entities/controller/``: construct the
+  controller directly and test methods such as ``get_max_power``, ``get_heat_demand``,
+  ``set_state``, or ``set_asset_prim`` for representative times and states.
+- **Dispatch tests** in ``test_controller_new_class.py``: build ``NetworkController`` from
+  ``Mock(spec=ControllerNetwork)`` objects and controllers created with
+  ``Mock(spec=ControllerConsumer)`` or ``Mock(spec=ControllerStorageAbstract)``, call
+  ``update_setpoints``, and assert on the returned dictionary.
+- **Mapper tests** in ``unit_test/adapters/transforms/controller_mappers/``, including
+  ``test_esdl_controller_mapper.py`` for network splitting.
+- **Coupling test** ``test_communication_controller_network.py`` when you change
+  ``get_state``, ``set_state``, or ``update_network_state``.
+- **Full runs** ``test_heat_physics.py`` and ``test_pressure_physics.py`` to check that
+  physics results still match.
 
-   .. code-block:: bash
+Run the full suite with ``ci/linux/test_unit.sh`` or ``ci\win32\test_unit.cmd``. See
+:doc:`testing_strategy` for targeted runs with ``--no-cov``.
 
-       python -m pytest unit_test/integration/test_heat_physics.py
-
-4. Run the full suite:
-
-   .. code-block:: bash
-
-       python -m pytest unit_test/
-
-Common Pitfalls
+Common pitfalls
 ---------------
 
-- **Forgetting to register the mapper**: new controller types that are not registered in
-  ``controller_mapper.py`` will silently produce no controller in the network. Always register
-  and always add a unit test for the mapper.
-- **Breaking the abstract contract**: ``NetworkSimulation`` calls ``update_setpoints`` only.
-  Do not require ``NetworkSimulation`` to call additional methods. If your controller needs
-  initialization, do it in the constructor or lazily inside ``update_setpoints``.
-- **Circular dependencies**: asset controllers must not import from ``HeatNetwork`` or
-  ``Solver``. State flow is unidirectional: entity layer reads state from asset and passes
-  it to the controller via ``set_state``.
-- **Ignoring network isolation**: heat exchangers and heat pumps connect multiple
-  ``ControllerNetwork`` objects. If your controller modifies supply temperature or COP based
-  on state, test it with a multi-network ESDL file (e.g. with a heat pump that bridges
-  two networks).
-- **Confusing controller setpoints with solver unknowns**: the controller returns a setpoint
-  dict; the solver then solves a nonlinear system to find the state that satisfies both
-  the controller's setpoints and the physical equations. Do not expect the solver to produce
-  exactly the setpoint values — it produces the closest solution that respects physics.
+- **Missing setpoint keys.** A missing key makes the entity asset raise during
+  ``run_time_step``; an asset without any entry silently keeps its previous setpoints.
+- **Wrong sign.** Supply as a positive heat demand makes a producer extract heat.
+- **No pressure asset.** A sub-network without producer, secondary heat transfer asset, or
+  storage makes ``set_pressure`` raise ``ValueError``.
+- **Unsorted controller.** A controller type not handled in ``NetworkItems.add`` raises
+  ``ValueError`` for systems with heat transfer assets, but works without them; test both.
+- **Assuming the abstract interface is enough.** ``NetworkSimulation`` also calls
+  ``update_network_state``.
+- **Expecting exact setpoints in results.** The solver satisfies setpoints only within the
+  limits of the physics and the convergence checks; compare results with tolerances.
 
-Related Documentation
+Related documentation
 ---------------------
 
-- Conceptual overview of control: :doc:`../controller/controller`
-- Control behavior and dispatch mechanics: :doc:`../controller/controller_behavior`
-- Simulation orchestration and control flow: :doc:`simulation_flow`
-- Test layout and patterns: :doc:`testing_strategy`
-- Full class and module reference: :doc:`api/omotes_simulator_core`
+- :doc:`../controller/controller` — conceptual description of control.
+- :doc:`../controller/controller_behavior` — dispatch rules and their effect.
+- :doc:`simulation_flow` — where the controller is called in a timestep.
+- :doc:`AddEntityLayerAsset` — connecting a new asset to an existing controller type.
+- :doc:`testing_strategy` — test levels and commands.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

@@ -246,7 +246,7 @@ After writing or updating the file in ``doc/physics``:
 3. Verify that all required sections are present in the correct order, except optional sections that may be omitted by rule.
 4. Verify that terminology, heading style, and table style match the closest existing page in ``doc/physics``.
 5. Check that the page does not introduce warnings or errors in the documentation build, especially in ``doc/physics``.
-6. If command execution or validation tools are available, run ``doc/run_spinx.bat`` from the repository root as the preferred validation command.
+6. If command execution or validation tools are available, run ``doc/run_sphinx.bat`` from the repository root as the preferred validation command.
 7. Inspect the build or validation output for errors and warnings related to the new or edited page, including reStructuredText syntax errors, malformed tables, invalid math blocks, broken references, and indentation or heading issues.
 8. If an error or warning is found, fix it before returning the final content.
 9. Do not consider the task complete if the new or edited documentation introduces a build error or warning in ``doc/physics``.

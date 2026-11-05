@@ -1,128 +1,169 @@
-Package Architecture
+Package architecture
 ====================
 
 Purpose
 -------
 
-This page provides a contributor-oriented overview of how the OMOTES.SIMULATOR_CORE package
-is structured: what each top-level package is responsible for, how the two-layer asset model
-works, and how the control layer fits in. Read this page before making structural changes to
-the package.
+This page gives contributors an overview of how OMOTES.SIMULATOR_CORE is layered: which
+package owns which responsibility, which way dependencies point, how an asset is split over
+an entity class and a solver class, and how the control hierarchy is organized. Read it
+before moving code between packages or adding a new kind of component.
 
-For the detailed execution flow (which class calls which, in what order), see
-:doc:`simulation_flow`. For adding assets or extending control, see :doc:`developer_guides`.
+For a file-by-file map, see :doc:`developer_navigation`. For the per-timestep call order,
+see :doc:`simulation_flow`. For step-by-step extension work, see :doc:`developer_guides`.
 
-Package Layout
---------------
+Relevant modules and files
+--------------------------
 
-The source tree under ``src/omotes_simulator_core/`` contains six top-level packages:
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
 
-``infrastructure/``
-    Application entrypoint (``app.py``) and ``SimulationManager``. This is the boundary
-    between the outside world and the simulation internals. It is the right place to add
-    top-level error handling or result post-processing. Contributors should not add domain
-    logic here.
+   * - File or Module
+     - Role
+     - Why it matters for this topic
+   * - ``src/omotes_simulator_core/infrastructure/``
+     - Outer boundary
+     - ``app.py`` and ``SimulationManager`` connect a loaded ``EsdlObject`` and a
+       ``SimulationConfiguration`` to the simulation; ``SimulationManager.execute`` logs and
+       re-raises any error from a run.
+   * - ``src/omotes_simulator_core/adapter/``
+     - ESDL translation
+     - ``transforms/`` holds all ESDL-to-entity and ESDL-to-controller mappers;
+       ``utility/graph.py`` holds the graph used for sub-network detection.
+   * - ``src/omotes_simulator_core/entities/``
+     - Runtime object model
+     - Entity assets, asset controllers, ``HeatNetwork``, ``NetworkController``, and the
+       ESDL wrappers ``EsdlObject`` and ``EsdlAssetObject``.
+   * - ``src/omotes_simulator_core/simulation/``
+     - Time loop
+     - ``NetworkSimulation`` and the ``EsdlMapperAbstract`` base class.
+   * - ``src/omotes_simulator_core/solver/``
+     - Physics solve
+     - ``Solver``, the solver ``Network`` graph, solver assets, the ``Matrix``, and
+       ``fluid_props``.
 
-``adapter/``
-    Everything related to reading and transforming ESDL input. Contains three sub-packages:
+Execution or extension flow
+---------------------------
 
-    - ``transforms/`` — mapper classes that convert ESDL objects into internal entities and
-      controller objects. ``esdl_asset_mapper.py`` holds the dispatch table; each asset type
-      has a dedicated mapper in ``esdl_asset_mappers/``; each controller type has a dedicated
-      mapper in ``controller_mappers/``.
-    - ``utility/`` — graph utilities used by the ESDL-to-graph conversion step.
-    - ``presentation/`` — output presentation layer.
+A run has two phases that touch different packages.
 
-``entities/``
-    The runtime object model. Contains:
+1. **Build phase** (``SimulationManager.execute``). ``adapter`` reads the ``EsdlObject``
+   and produces runtime objects in ``entities`` and ``solver``:
 
-    - ``assets/`` — entity-layer asset classes (one per physics asset type), the abstract
-      base ``AssetAbstract``, and the ``controller/`` sub-package with per-asset controller
-      classes.
-    - ``heat_network.py`` — the runtime container that holds all assets and the solver.
-    - ``network_controller.py`` and ``network_controller_abstract.py`` — the network
-      controller and its abstract contract.
-    - ``esdl_object.py``, ``simulation_configuration.py``, ``utility/`` — supporting types.
+   - ``EsdlEnergySystemMapper.to_entity`` is passed to ``HeatNetwork`` as a factory. For
+     each enabled ESDL asset it calls ``EsdlAssetMapper.to_entity`` to create an entity
+     asset, then calls ``Network.add_existing_asset`` with that asset's ``solver_asset``.
+     Afterwards it connects the solver assets through ``Network.connect_assets``, which
+     creates the solver ``Node`` objects wrapped by entity ``Junction`` objects.
+   - ``EsdlControllerMapper.to_entity`` creates one asset controller per controllable ESDL
+     asset, groups them into ``ControllerNetwork`` objects, and returns a
+     ``NetworkController``.
 
-``simulation/``
-    The time-step orchestration loop (``networksimulation.py``) and the abstract mapper
-    base class (``mappers/mappers.py``).
+2. **Run phase** (``NetworkSimulation.run``). No ESDL is touched. Each timestep the
+   ``NetworkController`` reads entity state and returns setpoints, ``HeatNetwork`` applies
+   them to entity assets, and ``Solver.solve`` solves the solver ``Network``.
 
-``solver/``
-    The nonlinear physics solver. Contains:
+When you add a component, decide first which phase it belongs to. ESDL parsing belongs in
+the build phase and in ``adapter``; per-timestep behavior belongs in ``entities`` or
+``solver``.
 
-    - ``solver.py`` — assembles the equation matrix and iterates.
-    - ``network/`` — the solver-side graph model (``Network``) and solver-layer asset
-      classes under ``network/assets/``.
-    - ``matrix/`` — the ``Matrix`` class, ``EquationObject``, and index helpers used to
-      assemble and solve the linear system at each iteration.
+Implementation notes
+--------------------
 
-``entities/assets/controller/``
-    Per-asset controller classes (``ControllerProducer``, ``ControllerConsumer``,
-    ``ControllerAtesStorage``, ``ControllerIdealHeatStorage``, ``ControllerHeatTransferAsset``)
-    and ``ControllerNetwork`` which groups hydraulically connected assets.
+Dependency direction
+~~~~~~~~~~~~~~~~~~~~
 
-Two-Layer Asset Model
----------------------
+Imports point inward: ``infrastructure`` imports ``adapter``, ``entities``, and
+``simulation``; ``adapter`` imports ``entities`` and ``solver``; ``entities`` imports
+``solver``. The current code has these exceptions, which new code should not extend:
 
-Every thermo-hydraulic asset is represented by two classes at different abstraction levels:
+- ``entities/esdl_object.py`` and ``entities/assets/esdl_asset_object.py`` import
+  ``OmotesAssetLabels`` and port helpers from ``adapter/transforms``.
+- ``solver/network/assets/solver_pipe.py`` imports constants from
+  ``entities/assets/asset_defaults.py``.
+
+The ``esdl`` package is imported in ``adapter`` and in the ESDL wrappers
+``entities/esdl_object.py``, ``entities/assets/esdl_asset_object.py``, and
+``entities/utility/influxdb_reader.py``. Entity asset classes, controllers, ``HeatNetwork``,
+and ``solver`` do not import ``esdl``; mappers pass them plain Python values.
+
+Two-layer asset model
+~~~~~~~~~~~~~~~~~~~~~
+
+Every thermo-hydraulic asset is split over two classes:
 
 **Entity layer** (``entities/assets/``)
-    Python classes such as ``ProductionCluster``, ``DemandCluster``, ``Pipe``, ``HeatPump``.
-    These hold per-timestep state, apply controller setpoints, collect output, and expose
-    ``get_state()`` for the controller. All inherit from ``AssetAbstract``.
+    Classes such as ``ProductionCluster``, ``DemandCluster``, ``Pipe``, and ``HeatPump``,
+    all derived from ``AssetAbstract``. They translate controller setpoints into solver
+    settings in ``set_setpoints``, report state for the controller in ``get_state``, decide
+    convergence in ``is_converged``, update internal state in ``postprocess``, and write
+    output in ``write_to_output``.
 
 **Solver layer** (``solver/network/assets/``)
-    Low-level classes such as ``HeatBoundary``, ``SolverPipe``, ``HeatTransferAsset``.
-    These implement ``get_equations()`` and supply ``EquationObject`` instances to the
-    global matrix. They represent mass flow, pressure drop, and energy balance as algebraic
-    constraints — they do not know about time series or ESDL properties.
+    Classes such as ``HeatBoundary``, ``SolverPipe``, ``HeatTransferAsset``, and
+    ``HeatBufferAsset``, derived from ``BaseAsset`` (which derives from ``BaseItem``). They
+    return ``EquationObject`` instances from ``get_equations`` and store the latest solution
+    in ``prev_sol``. They have no notion of ESDL, profiles, or output tables.
 
-Each entity-layer asset creates its corresponding solver-layer asset in its constructor and
-registers it with the ``Network`` graph object. The entity layer reads solver results through
-``self.solver_asset`` after each ``Solver.solve()`` call.
+The entity class creates its solver asset in ``__init__`` and stores it as
+``self.solver_asset``; the mapper registers it in ``Network``. After ``Solver.solve`` the
+entity class reads results through ``self.solver_asset`` accessors such as
+``get_mass_flow_rate``, ``get_temperature``, and ``get_pressure``.
 
-The dependency direction is one-way: the entity layer depends on the solver layer. Solver-layer
-classes must never import from ``entities/``.
+Several entity classes can share one solver class. ``GasHeater``, ``ElecBoiler``, and
+``AirToWaterHeatPump`` subclass ``ProductionCluster`` and reuse ``HeatBoundary``; only
+setpoint handling and output differ.
 
-Control Architecture
---------------------
+Control hierarchy
+~~~~~~~~~~~~~~~~~
 
-The control layer sits between ``NetworkSimulation`` and ``HeatNetwork``:
+- ``NetworkControllerAbstract`` declares one abstract method,
+  ``update_setpoints(time) -> dict``.
+- ``NetworkController`` implements it and also provides ``update_network_state``, which
+  ``NetworkSimulation`` calls before ``update_setpoints``. ``NetworkSimulation`` is typed
+  against ``NetworkController``, not against the abstract class.
+- ``NetworkController`` holds a list of ``ControllerNetwork`` objects. Each represents a
+  hydraulically connected sub-network bounded by heat pumps or heat exchangers, and holds
+  lists of producer, consumer, storage, and primary/secondary heat transfer controllers.
+- Asset controllers derive from ``AssetControllerAbstract`` and hold profiles, limits, and
+  storage state. They do not compute setpoint dictionaries themselves;
+  ``ControllerNetwork`` and ``NetworkController`` build the dictionaries from their
+  ``get_heat_demand``, ``get_max_power``, and effective charge and discharge values.
 
-- ``NetworkControllerAbstract`` defines the contract: one abstract method,
-  ``update_setpoints(time: datetime) -> dict``.
-- ``NetworkController`` is the concrete implementation. It holds a list of
-  ``ControllerNetwork`` objects — one per hydraulically isolated sub-network. Each
-  ``ControllerNetwork`` contains per-asset controller objects
-  (``ControllerProducer``, ``ControllerConsumer``, ``ControllerAtesStorage``, etc.) that own
-  demand profiles and storage state.
-- ``NetworkSimulation`` only calls ``update_network_state`` and ``update_setpoints`` on the
-  abstract interface; it does not know about individual asset controllers.
+The setpoint dictionary maps asset IDs to ``PROPERTY_*`` keys from ``asset_defaults.py``.
+It is the only data passed from control to physics.
 
-This separation means that the controller can be replaced or mocked without changing
-``NetworkSimulation``. The ``NetworkControllerAbstract`` contract is the extension point.
+Testing and validation
+----------------------
 
-Implementation Notes
---------------------
+Layer boundaries are reflected in the test tree: ``unit_test/solver/`` tests solver assets
+without entity classes, ``unit_test/entities/`` tests entity assets and controllers with the
+solver patched, and ``unit_test/integration/`` combines layers. After moving code between
+packages, run the full suite and the type checker (``ci/linux/typecheck.sh`` or
+``ci\win32\typecheck.cmd``), which reports broken imports. See :doc:`testing_strategy`.
 
-- The adapter layer (``adapter/``) is the only package that knows about ESDL. Do not add
-  ESDL imports to ``entities/`` or ``solver/``.
-- ``SimulationManager`` owns the error boundary for a complete run. Keep orchestration logic
-  there, not in ``NetworkSimulation``.
-- The ``simulation/`` package is intentionally thin. Its only runtime class,
-  ``NetworkSimulation``, delegates all physics to ``HeatNetwork`` and all control decisions
-  to ``NetworkController``.
-- Adding a new asset type requires changes in both ``entities/`` (entity layer) and
-  ``solver/`` (solver layer) plus a new mapper in ``adapter/``. See :doc:`developer_guides`
-  for step-by-step guidance.
+Common pitfalls
+---------------
 
-Related Documentation
+- Adding ``esdl`` imports to entity assets, controllers, or ``solver``: read ESDL values in
+  a mapper and pass them to the constructor.
+- Putting physics in ``set_setpoints``: equations belong in the solver asset's
+  ``get_equations``; the entity class only sets solver attributes.
+- Extending the ``NetworkControllerAbstract`` interface implicitly: a replacement for
+  ``NetworkController`` must also provide ``update_network_state``.
+- Adding orchestration to ``NetworkSimulation``: keep run setup in ``SimulationManager`` and
+  keep ``NetworkSimulation`` limited to the time loop.
+
+Related documentation
 ---------------------
 
-- :doc:`simulation_flow` — detailed execution flow from entrypoint to solver.
-- :doc:`developer_guides` — how-to guides for adding assets, output formats, and
-  controller extensions.
-- :doc:`testing_strategy` — test layout and patterns for each package layer.
-- :doc:`../intro/intro_main` — user-facing overview of what the simulator does.
-- :doc:`api/omotes_simulator_core` — generated API reference for class and module details.
+- :doc:`developer_navigation` — file-level map of the repository.
+- :doc:`network_reference`, :doc:`controller_reference`, :doc:`solver_reference` and
+  :doc:`asset_reference` — responsibilities and interfaces per subsystem.
+- :doc:`simulation_flow` — per-timestep execution flow.
+- :doc:`developer_guides` — extension how-to guides.
+- :doc:`testing_strategy` — test layout and commands.
+- :doc:`../intro/intro_main` — what the simulator does.
+- :doc:`../controller/controller` — conceptual description of control.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

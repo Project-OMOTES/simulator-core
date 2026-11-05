@@ -1,13 +1,13 @@
-Developer How-To Guides
+Developer how-to guides
 =======================
 
 Purpose
 -------
 
 This section contains step-by-step guides for common extension tasks. Each guide is
-implementation-oriented and targeted at contributors who already understand the repository
-structure. If you are new to the codebase, start with :doc:`architecture` and
-:doc:`simulation_flow` first.
+implementation-oriented and targeted at contributors who already know the repository
+layout. If you are new to this repository, read :doc:`developer_navigation`,
+:doc:`architecture`, and :doc:`simulation_flow` first.
 
 .. toctree::
    :maxdepth: 1
@@ -18,23 +18,30 @@ structure. If you are new to the codebase, start with :doc:`architecture` and
    ControlExtension
    AddOutputFormat
 
+Execution or extension flow
+---------------------------
 
-Guide overview
---------------
+Pick the guide that matches the smallest change that does the job:
 
 :doc:`AddEntityLayerAsset`
-    Add a new entity-layer asset class that wraps an existing solver-layer asset. Use this
-    when a suitable solver-layer asset already exists and you only need to add entity-level
-    state, setpoint handling, and output collection.
+    Add an entity asset that reuses an existing solver asset, for example a new producer
+    type that subclasses ``ProductionCluster`` like ``GasHeater`` and ``ElecBoiler``. Covers
+    the entity class, ESDL mapping, controller mapping, and tests.
 
 :doc:`AddSolverAndEntityLayerAssets`
-    Add a completely new thermo-hydraulic asset type: solver layer, entity layer, ESDL
-    mapper, and mapper registration. Use this when no suitable solver-layer asset exists.
+    Add an asset type whose equations no existing solver asset provides: a solver asset,
+    an entity asset, an ESDL mapper, registration, and tests at solver and entity level.
 
 :doc:`ControlExtension`
-    Add a new controller type or extend existing dispatch logic. Covers asset-level
-    controllers, network-level controller wiring, and mapper registration.
+    Change how setpoints are computed: asset controllers, ``ControllerNetwork``,
+    ``NetworkController``, controller mappers, and the setpoint dictionary keys.
 
 :doc:`AddOutputFormat`
-    Add new output columns or datasets to existing assets. Covers ``write_to_output``,
-    ``asset_defaults.py`` constants, and DataFrame shape expectations.
+    Add output columns to an asset: ``PROPERTY_*`` constants, ``write_to_output``, and the
+    layout of the result ``DataFrame``.
+
+Related documentation
+---------------------
+
+- :doc:`testing_strategy` — test levels and commands used by every guide.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

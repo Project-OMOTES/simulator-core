@@ -91,7 +91,7 @@ Preferred validation sources:
 2. ``doc/conf.py``
 3. build scripts such as:
    - ``doc/make.bat html``
-   - ``doc/run_spinx.bat``
+   - ``doc/run_sphinx.bat``
    - other repository-preferred Sphinx build commands if present
 
 Rules for validation:
@@ -240,7 +240,7 @@ Validation
 ----------
 After running validation and any small repairs:
 
-1. Run the repository-preferred documentation build command if available, such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
+1. Run the repository-preferred documentation build command if available, such as ``doc/make.bat html`` or ``doc/run_sphinx.bat``.
 2. Inspect the full output for warnings and errors.
 3. Verify that recently edited pages do not introduce malformed directives, broken references, duplicate labels, or toctree failures.
 4. Verify that autodoc imports and targets resolve for API reference pages.

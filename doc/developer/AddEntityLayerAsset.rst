@@ -1,20 +1,19 @@
-Adding an Entity-Layer Asset for an Existing Solver Asset
-==========================================================
+Adding an entity-layer asset for an existing solver asset
+=========================================================
 
 Purpose
 -------
 
-Use this guide when a suitable solver-layer asset already exists and you only need to add
-an entity-layer class to expose it through the simulation — for example, adding a new variant
-of an existing asset type that reuses the same physics equations.
+Use this guide when the equations you need already exist in a solver asset and you only
+need a new entity asset: different setpoint handling, extra parameters, or extra output.
+``GasHeater`` and ``ElecBoiler`` are the reference examples. Both subclass
+``ProductionCluster``, reuse its ``HeatBoundary`` solver asset, and add an efficiency and a
+fuel or electricity consumption output.
 
-If no suitable solver-layer asset exists, use :doc:`AddSolverAndEntityLayerAssets` instead,
-which covers creating both layers from scratch.
+If no solver asset provides the equations you need, use
+:doc:`AddSolverAndEntityLayerAssets`. For asset physics, see :doc:`../physics/physics_main`.
 
-This guide is for contributors working at the Python implementation level. For conceptual
-asset behavior, consult :doc:`../physics/physics_main`.
-
-Relevant Modules and Files
+Relevant modules and files
 --------------------------
 
 .. list-table::
@@ -25,174 +24,201 @@ Relevant Modules and Files
      - Role
      - Why it matters for this topic
    * - ``src/omotes_simulator_core/entities/assets/asset_abstract.py``
-     - Entity-layer base class
-     - Defines the interface all entity-layer assets must implement:
-       ``set_setpoints``, ``write_to_output``, ``get_state``.
+     - Entity base class
+     - Declares the abstract ``set_setpoints``, ``write_to_output``, and ``postprocess``
+       methods and the ``outputs`` structure.
+   * - ``src/omotes_simulator_core/entities/assets/production_cluster.py``,
+       ``gas_heater.py``, ``elec_boiler.py``
+     - Reference implementation
+     - Show a base entity asset and two subclasses that reuse its solver asset.
    * - ``src/omotes_simulator_core/entities/assets/asset_defaults.py``
-     - Output column constants
-     - Defines string constants used as output dictionary keys. Add new constants here
-       rather than using string literals in ``write_to_output``.
-   * - ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/``
-     - Per-asset ESDL mappers
-     - One mapper file per asset type. Your new mapper reads ESDL properties and constructs
-       the entity-layer asset.
+     - Constants
+     - ``PROPERTY_*`` output and setpoint keys and default values such as
+       ``DEFAULT_GAS_ENERGY_CONTENT``.
+   * - ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/producer_mapper.py``
+     - ESDL asset mapper
+     - ``EsdlAssetProducerMapper.to_entity`` chooses ``ElecBoiler``, ``GasHeater``, or
+       ``ProductionCluster`` with ``isinstance`` checks on the ESDL asset.
    * - ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py``
      - Mapper dispatch table
-     - Maps ESDL asset types to mapper classes via ``conversion_dict_mappers``. Must be
-       updated to register your new mapper.
-   * - ``unit_test/entities/``
-     - Entity-layer unit tests
-     - Follow existing test patterns (e.g. ``test_heat_pump.py``) for the new class.
-   * - ``unit_test/adapters/transforms/esdl_asset_mappers/``
-     - Mapper unit tests
-     - Verify that ESDL properties are correctly transferred to entity attributes.
+     - ``conversion_dict_mappers`` maps each ESDL class to a mapper class.
+   * - ``src/omotes_simulator_core/adapter/transforms/string_to_esdl.py``
+     - Asset labels
+     - ``OmotesAssetLabels`` and ``StringEsdlAssetMapper`` define which ESDL classes
+       ``EsdlObject.get_all_assets_of_type`` returns for a label.
+   * - ``src/omotes_simulator_core/adapter/transforms/controller_mapper.py``
+     - Controller creation
+     - ``EsdlControllerMapper.to_entity`` creates asset controllers per label; an asset
+       without a controller never receives setpoints.
+   * - ``unit_test/entities/test_gas_heater.py``
+     - Entity test example
+     - Tests construction, parameter validation, and ``write_to_output`` with patched
+       solver getters.
+   * - ``unit_test/adapters/transforms/esdl_asset_mappers/test_esdl_asset_producer_mapper.py``
+     - Mapper test example
+     - Maps a producer from ``testdata/test1.esdl`` and checks name, ID, and ports.
 
-Extension Flow
---------------
+Execution or extension flow
+---------------------------
 
-1. Create the entity-layer asset class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. Choose the base class
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create a new file in ``src/omotes_simulator_core/entities/assets/``, for example
-``my_asset_variant.py``.
+If an existing entity asset already handles the setpoints your asset receives, subclass it,
+as ``GasHeater`` subclasses ``ProductionCluster``. You inherit the solver asset, setpoint
+validation, convergence check, and output port choice.
 
-Inherit from ``AssetAbstract`` and assign the existing solver-layer asset in ``__init__``:
+Otherwise subclass ``AssetAbstract``, create the solver asset in ``__init__``, and assign it
+to ``self.solver_asset``. You must then implement ``set_setpoints``, ``write_to_output``,
+and ``postprocess``. Override ``get_state`` or ``is_converged`` when the defaults (an empty
+dictionary and ``True``) do not fit.
+:doc:`developer_navigation` lists which solver class each existing entity uses.
 
-.. code-block:: python
+2. Write the entity class
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-    from omotes_simulator_core.solver.network.assets.existing_solver_asset import ExistingSolverAsset
-
-    class MyAssetVariant(AssetAbstract):
-        asset_type = "my_asset_variant"
-        number_of_con_points: int = 2  # adjust to match port count
-
-        def __init__(self, asset_name: str, asset_id: str, connected_ports: list[str]) -> None:
-            super().__init__(asset_name, asset_id, connected_ports)
-            self.solver_asset = ExistingSolverAsset(
-                name=asset_name,
-                _id=asset_id,
-            )
-            self._register_solver_asset(self.solver_asset)
-
-The following methods **must** be implemented:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 30 70
-
-   * - Method
-     - Responsibility
-   * - ``set_setpoints(self, setpoints: dict)``
-     - Accept and apply setpoints before each solver call. Raise ``KeyError`` if a required
-       setpoint is missing.
-   * - ``write_to_output(self)``
-     - Append asset-specific quantities to ``self.outputs`` for the current timestep. Call
-       ``self.write_standard_output()`` first.
-
-Use ``get_state(self) -> dict[str, float]`` to expose internal state the controller needs.
-Study ``ProductionCluster`` or ``HeatPump`` for representative patterns before writing new
-methods.
-
-2. Create the ESDL mapper
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Create a new file in
-``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/``, for example
-``my_asset_variant_mapper.py``.
+Create a module in ``src/omotes_simulator_core/entities/assets/``. The following is
+``GasHeater``, shortened:
 
 .. code-block:: python
 
-    from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-    from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-    from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-    from omotes_simulator_core.entities.assets.my_asset_variant import MyAssetVariant
+    class GasHeater(ProductionCluster):
+        def __init__(
+            self,
+            asset_name: str,
+            asset_id: str,
+            port_ids: list[str],
+            efficiency: float = 1.0,
+        ) -> None:
+            if efficiency == 0 or efficiency > 1.0:
+                logger.warning(...)
+                self.efficiency = 1.0
+            else:
+                self.efficiency = efficiency
+            self.gas_energy_content = DEFAULT_GAS_ENERGY_CONTENT
+            super().__init__(asset_name=asset_name, asset_id=asset_id, port_ids=port_ids)
 
+        def get_gas_consumption(self) -> float:
+            return abs(self.get_actual_heat_supplied()) / self.gas_energy_content / self.efficiency
 
-    class EsdlMyAssetVariantMapper(EsdlMapperAbstract):
+        def write_to_output(self) -> None:
+            output_dict_temp = {
+                PROPERTY_HEAT_SUPPLY_SET_POINT: self.heat_demand_set_point,
+                PROPERTY_HEAT_SUPPLIED: self.get_actual_heat_supplied(),
+                PROPERTY_GAS_CONSUMPTION: self.get_gas_consumption(),
+            }
+            self.outputs[1][-1].update(output_dict_temp)
 
-        def to_esdl(self, entity: MyAssetVariant) -> EsdlAssetObject:
-            raise NotImplementedError("EsdlMyAssetVariantMapper.to_esdl()")
+Follow the existing constructor convention: entity assets take ``asset_name``,
+``asset_id``, and ``port_ids`` (``HeatPump`` uses ``connected_ports``) and pass them to
+``AssetAbstract.__init__(asset_name, asset_id, connected_ports)``. Validate parameters in
+the constructor and log a warning when you fall back to a default.
 
-        def to_entity(self, esdl_asset: EsdlAssetObject) -> AssetAbstract:
-            return MyAssetVariant(
-                asset_name=esdl_asset.esdl_asset.name,
-                asset_id=esdl_asset.esdl_asset.id,
-                connected_ports=esdl_asset.get_port_ids(),
-            )
+3. Add constants
+~~~~~~~~~~~~~~~~
 
-Use ``esdl_asset.get_property(name, default)`` to read optional ESDL attributes safely.
+Add new output keys and defaults to ``asset_defaults.py``, as was done for
+``PROPERTY_GAS_CONSUMPTION`` and ``DEFAULT_GAS_ENERGY_CONTENT``. See :doc:`AddOutputFormat`
+for how output keys become ``DataFrame`` columns.
 
-3. Register the mapper
-~~~~~~~~~~~~~~~~~~~~~~~
+4. Map the ESDL asset to the entity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Open ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py`` and add:
+There are two options:
 
-.. code-block:: python
+- **Branch in an existing mapper.** When the new entity is a variant of an existing one,
+  add an ``isinstance`` branch to that mapper before the generic case, as
+  ``EsdlAssetProducerMapper.to_entity`` does for ``esdl.ElectricBoiler`` and
+  ``esdl.GasHeater``, and make sure the ESDL class is a key in ``conversion_dict_mappers``.
+- **Add a new mapper.** Create a class derived from ``EsdlMapperAbstract`` in
+  ``adapter/transforms/esdl_asset_mappers/`` with ``to_entity(esdl_asset)`` and a
+  ``to_esdl`` that raises ``NotImplementedError``. Add the ESDL class and the mapper to
+  ``conversion_dict_mappers``.
 
-    from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.my_asset_variant_mapper import (
-        EsdlMyAssetVariantMapper,
-    )
+Read ESDL attributes in the mapper, for example ``esdl_asset.esdl_asset.efficiency`` or
+``esdl_asset.get_property(esdl_property_name=..., default_value=...)``, and pass plain values
+to the entity constructor.
 
-Then add an entry to ``conversion_dict_mappers``:
+5. Make sure the asset gets a controller
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
+``HeatNetwork.run_time_step`` only calls ``set_setpoints`` on assets whose ID is in the
+controller output, so the asset also needs an asset controller:
 
-    conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
-        ...
-        esdl.MyEsdlAssetVariantType: EsdlMyAssetVariantMapper,
-        ...
-    }
+- Check that the ESDL class is returned by ``EsdlObject.get_all_assets_of_type`` for some
+  ``OmotesAssetLabels`` value. If not, add a label and add the class to
+  ``StringEsdlAssetMapper.label_to_type_map``.
+- Check that ``EsdlControllerMapper.to_entity`` creates a controller for that label. For
+  ``GAS_HEATER`` and ``ELECTRIC_BOILER`` it adds ``ControllerProducerMapper`` results to the
+  producer list. Add a similar list comprehension for a new label.
 
-Testing and Validation
+See :doc:`ControlExtension` when the asset needs a new kind of controller.
+
+Implementation notes
+--------------------
+
+- Do not add the solver asset to the ``Network`` yourself.
+  ``EsdlEnergySystemMapper._convert_assets`` calls ``network.add_existing_asset`` for each
+  enabled entity's ``solver_asset``, and ``_create_junctions`` connects the solver assets
+  according to the ESDL port connections.
+- ``Network`` stores solver assets by name, and existing entity classes pass the asset name
+  as the solver asset ``name``. ``add_existing_asset`` raises ``ValueError`` for a duplicate
+  name.
+- ``write_to_output`` runs after ``write_standard_output`` has appended one dictionary per
+  port. Update ``self.outputs[port][-1]``; do not append and do not call
+  ``write_standard_output`` yourself. ``ProductionCluster`` and its subclasses write to
+  port 1.
+- ``set_setpoints`` can run up to 20 times per timestep. Keep it free of cumulative side
+  effects and put end-of-timestep state updates in ``postprocess``.
+- ``ProductionCluster.set_setpoints`` raises ``ValueError`` when one of
+  ``PROPERTY_TEMPERATURE_IN``, ``PROPERTY_TEMPERATURE_OUT``, ``PROPERTY_HEAT_DEMAND``, or
+  ``PROPERTY_SET_PRESSURE`` is missing. Subclasses inherit this check.
+- Entity classes do not import ``esdl``; the mapper translates ESDL data.
+
+Testing and validation
 ----------------------
 
-Unit tests for the entity layer belong in ``unit_test/entities/``. Follow the pattern of
-``test_heat_pump.py`` or ``test_production_cluster.py``:
+- **Entity test.** Add ``unit_test/entities/test_<asset>.py`` modelled on
+  ``test_gas_heater.py``: test construction and parameter fallback, test derived values
+  with ``patch.object`` on the entity or ``solver_asset`` getters, and test
+  ``write_to_output`` by calling ``write_standard_output()`` first and asserting on
+  ``outputs[port][-1]``.
+- **Mapper test.** Add or extend a test in
+  ``unit_test/adapters/transforms/esdl_asset_mappers/`` that loads an ESDL file from
+  ``testdata/`` and checks the type and attributes of the mapped entity. ``testdata/``
+  does not contain a ``GasHeater`` or ``ElectricBoiler`` yet, so a new ESDL type needs a new
+  fixture.
+- **Controller mapping.** Extend
+  ``unit_test/adapters/transforms/controller_mappers/test_esdl_controller_mapper.py`` when
+  you add a label or a controller list comprehension.
+- **Full run.** Run a ``SimulationManager`` integration test on a fixture that contains the
+  asset to check that it receives setpoints and produces output.
 
-- Construct the asset in ``setUp`` with representative port IDs and setpoint values.
-- Test ``set_setpoints`` with valid inputs and missing required keys.
-- Mock ``self.solver_asset`` to isolate entity logic from the solver layer.
-- Test ``write_to_output`` by calling it and asserting the expected keys are present in
-  ``self.outputs``.
+Run the full suite with ``ci/linux/test_unit.sh`` or ``ci\win32\test_unit.cmd``. See
+:doc:`testing_strategy` for targeted runs.
 
-Unit tests for the mapper belong in
-``unit_test/adapters/transforms/esdl_asset_mappers/``. Follow the pattern of
-``test_esdl_asset_heat_pump_mapper.py``:
-
-- Construct a mock ``EsdlAssetObject`` wrapping a representative PyESDL asset.
-- Assert that ``to_entity`` returns an instance of ``MyAssetVariant``.
-- Assert that ESDL properties are correctly transferred to entity attributes.
-
-Run the full test suite from the repository root:
-
-.. code-block:: console
-
-    python -m pytest unit_test/
-
-Common Pitfalls
+Common pitfalls
 ---------------
 
-- **Referencing a solver asset that does not register itself with ``Network``.** Call
-  ``self._register_solver_asset(self.solver_asset)`` in ``__init__``; without this the
-  solver graph will not include the asset.
-- **Not registering the mapper.** New asset types that are not in
-  ``conversion_dict_mappers`` will silently produce no asset in the runtime network.
-  Always register and always add a mapper unit test.
-- **Using string literals as output keys.** Define all output column names as constants in
-  ``asset_defaults.py`` and import them. String literals that differ by one character
-  produce silently wrong output.
-- **Confusing entity state with solver state.** The entity layer owns per-timestep state
-  for control and output; the solver layer owns the matrix unknowns. Do not read solver
-  unknowns directly in ``write_to_output`` — read them through ``self.solver_asset``
-  properties that the solver layer already exposes.
+- **Unregistered ESDL class.** ``EsdlAssetMapper.to_entity`` looks up
+  ``type(esdl_asset)`` in ``conversion_dict_mappers`` and raises ``NotImplementedError``
+  when it is missing. Subclasses of a registered ESDL class are not matched.
+- **No controller.** Without a controller entry the asset is built and solved but keeps its
+  constructor defaults; no error is raised.
+- **Duplicate selection.** ``StringEsdlAssetMapper`` requires unique labels and types.
+  Listing both a base ESDL class and its subclass under labels can select an asset twice.
+- **Duplicated output rows.** Calling ``write_standard_output`` inside ``write_to_output``
+  appends a second row per timestep.
+- **String literals as keys.** Use ``PROPERTY_*`` constants from ``asset_defaults.py`` for
+  setpoints and outputs.
 
-Related Documentation
+Related documentation
 ---------------------
 
-- :doc:`AddSolverAndEntityLayerAssets` — full workflow when no solver asset exists yet.
-- :doc:`simulation_flow` — execution flow showing where entity assets are constructed and
-  how they interact with the solver.
-- :doc:`testing_strategy` — test layout and patterns for entity-layer tests.
-- :doc:`../physics/physics_main` — conceptual asset behavior and governing relations.
-- :doc:`api/omotes_simulator_core` — generated API reference for class details.
+- :doc:`AddSolverAndEntityLayerAssets` — when a new solver asset is needed.
+- :doc:`AddOutputFormat` — adding output columns.
+- :doc:`ControlExtension` — adding or changing controllers.
+- :doc:`simulation_flow` — where entity assets are built and called.
+- :doc:`testing_strategy` — test levels and commands.
+- :doc:`../physics/physics_main` — asset physics.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

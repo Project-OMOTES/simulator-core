@@ -1,230 +1,231 @@
-Adding New Solver and Entity Layer Assets
+Adding new solver and entity-layer assets
 =========================================
 
 Purpose
 -------
 
-Use this guide when you need to implement a completely new thermo-hydraulic asset type in
-the simulator — for example a new heat pump variant, a storage asset, or a pipe variant.
-The guide walks you through all four implementation steps: solver layer, entity layer,
-ESDL mapper, and mapper registration. It then points you to test patterns and related
-documentation.
+Use this guide when no existing solver asset provides the equations for a new asset type, so
+you need a new solver asset, an entity asset that wraps it, ESDL mapping, and tests at every
+level. If an existing solver asset fits, use :doc:`AddEntityLayerAsset` instead; it is less
+work and less risk.
 
-If a suitable solver-layer asset already exists and you only need to add an entity-layer
-class, use :doc:`AddEntityLayerAsset` instead.
+This guide is for contributors working on the Python implementation. For the governing
+equations of existing assets, see :doc:`../physics/physics_main`. For how the solver
+assembles and iterates equations, see :doc:`../solver/solver_main`.
 
-This page is for contributors who work at the Python implementation level. It assumes you
-can already navigate the repository and run the unit test suite. For conceptual asset
-behavior and governing relations, consult the Physics section rather than this guide.
-
-Where Assets Live
------------------
-
-The simulator represents each asset in two separate layers, each with a distinct responsibility:
-
-**Entity layer** — ``src/omotes_simulator_core/entities/assets/``
-    High-level Python classes that own per-timestep state, apply setpoints, and collect output.
-    All entity-layer assets inherit from ``AssetAbstract``.
-
-**Solver layer** — ``src/omotes_simulator_core/solver/network/assets/``
-    Low-level classes that contribute matrix equations to the nonlinear solver. All solver-layer
-    assets ultimately inherit from ``BaseItem`` (via ``BaseAsset`` for two-port thermo-hydraulic
-    assets, or via specialized base classes such as ``FallType`` for assets with different
-    topologies).
-
-The entity-layer class holds a reference to its corresponding solver-layer instance as
-``self.solver_asset``. The entity layer calls into the solver layer to read hydraulic and thermal
-results; the solver layer calls ``get_equations()`` to supply the matrix builder.
-
-Step-by-step Workflow
----------------------
-
-1. Create the entity-layer asset class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Create a new file in ``src/omotes_simulator_core/entities/assets/``, for example
-``my_asset.py``.
-
-Inherit from ``AssetAbstract``:
-
-.. code-block:: python
-
-    from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-
-    class MyAsset(AssetAbstract):
-        asset_type = "my_asset"
-        number_of_con_points: int = 2  # adjust to match port count
-
-        def __init__(self, asset_name: str, asset_id: str, connected_ports: list[str]) -> None:
-            super().__init__(asset_name, asset_id, connected_ports)
-            # initialise asset-specific state here
-
-The following methods **must** be implemented:
+Relevant modules and files
+--------------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 30 70
+   :widths: 38 22 40
 
-   * - Method
-     - Responsibility
-   * - ``set_setpoints(self, setpoints: dict)``
-     - Accept a dictionary of setpoint names and values and apply them to the asset's internal
-       state before each solver call. Raise ``KeyError`` if a required setpoint is missing.
-   * - ``write_to_output(self)``
-     - Append asset-specific computed quantities (e.g. heat power, electrical consumption) to
-       ``self.outputs`` for the current timestep. Call ``self.write_standard_output()`` first to
-       record the standard mass-flow, pressure, and temperature entries.
+   * - File or Module
+     - Role
+     - Why it matters for this topic
+   * - ``src/omotes_simulator_core/solver/network/assets/base_item.py``
+     - Solver root class
+     - ``BaseItem`` declares the abstract ``get_equations`` and ``disconnect_node`` and
+       holds ``prev_sol`` and the matrix index.
+   * - ``src/omotes_simulator_core/solver/network/assets/base_asset.py``
+     - Solver asset base
+     - ``BaseAsset(name, _id, number_of_unknowns=6, number_connection_points=2,
+       supply_temperature=293.15)`` implements node connection, result getters, and
+       reusable equations such as ``get_press_to_node_equation``.
+   * - ``src/omotes_simulator_core/solver/network/assets/fall_type.py``
+     - Two-port base with internal equations
+     - ``FallType`` returns six equations: two pressure-to-node, two thermal, internal
+       continuity, and internal pressure loss. ``HeatBoundary``, ``SolverPipe``, and
+       ``HeatBufferAsset`` derive from it.
+   * - ``src/omotes_simulator_core/solver/network/assets/production_asset.py``
+     - Example subclass
+     - ``HeatBoundary`` replaces the internal equations with prescribed mass flow or
+       pressure equations.
+   * - ``src/omotes_simulator_core/solver/network/assets/heat_transfer_asset.py``
+     - Four-port example
+     - ``HeatTransferAsset`` derives from ``BaseAsset`` with ``number_connection_points=4``
+       and twelve unknowns.
+   * - ``src/omotes_simulator_core/solver/matrix/index_core_quantity.py``
+     - Unknown layout
+     - Three core quantities per connection point: mass flow rate, pressure, and internal
+       energy.
+   * - ``src/omotes_simulator_core/solver/network/network.py``
+     - Solver graph
+     - ``add_existing_asset`` and ``connect_assets`` build the graph; ``str_to_class_dict``
+       is used only by ``add_asset`` with a type string.
+   * - ``src/omotes_simulator_core/entities/assets/asset_abstract.py``
+     - Entity base class
+     - Abstract ``set_setpoints``, ``write_to_output``, and ``postprocess``.
+   * - ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py``
+     - Mapper dispatch table
+     - ``conversion_dict_mappers`` maps ESDL classes to mapper classes.
+   * - ``unit_test/solver/network/assets/`` and ``unit_test/integration/``
+     - Tests
+     - Solver asset unit tests and solver-level integration tests to copy from.
 
-The following methods have default no-op implementations in ``AssetAbstract`` and may be
-overridden when the asset carries state that must be exposed:
+Execution or extension flow
+---------------------------
 
-- ``get_setpoints(self) -> dict[str, float]`` — return current setpoint values.
-- ``get_state(self) -> dict[str, float]`` — return current internal state values.
+1. Design the unknowns and equations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Instantiate the matching solver-layer object and assign it to ``self.solver_asset`` before
-the asset is connected to the network. See the existing ``ProductionCluster.__init__`` and
-``HeatPump.__init__`` for concrete examples.
+Each connection point has three unknowns (mass flow rate, pressure, and internal energy), so
+an asset with :math:`n` connection points has :math:`3n` unknowns. Existing solver assets
+return as many equations from ``get_equations`` as they have unknowns: six for two-port
+assets and twelve for ``HeatTransferAsset``. Nodes contribute their own equations. Write down
+which equation constrains which unknown before you write code; see
+:doc:`../solver/solver_unknowns`.
 
-2. Create the solver-layer asset class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. Create the solver asset
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create a new file in ``src/omotes_simulator_core/solver/network/assets/``, for example
-``my_solver_asset.py``.
+Create a module in ``src/omotes_simulator_core/solver/network/assets/``. Pick the closest
+base class:
 
-For a standard two-port thermo-hydraulic asset, inherit from ``BaseAsset``:
+- ``FallType`` or one of its subclasses for two-port assets that only change some
+  equations, as ``HeatBoundary`` does.
+- ``BaseAsset`` for a different port count or a different set of equations, as
+  ``HeatTransferAsset`` does.
 
 .. code-block:: python
 
-    from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
-    from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-
     class MySolverAsset(BaseAsset):
-
-        def __init__(self, name: str, _id: str) -> None:
+        def __init__(self, name: str, _id: str, my_parameter: float = 0.0) -> None:
             super().__init__(
                 name=name,
                 _id=_id,
-                number_of_unknowns=6,       # 3 quantities × 2 ports
+                number_of_unknowns=index_core_quantity.number_core_quantities * 2,
                 number_connection_points=2,
             )
+            self.my_parameter = my_parameter
 
         def get_equations(self) -> list[EquationObject]:
-            # Return the matrix equations that constrain this asset's unknowns.
-            ...
+            return [
+                self.get_press_to_node_equation(0),
+                self.get_press_to_node_equation(1),
+                self.get_thermal_equations(0),
+                self.get_thermal_equations(1),
+                self.get_my_first_equation(),
+                self.get_my_second_equation(),
+            ]
 
-``BaseItem`` (the root of the solver hierarchy) declares ``get_equations`` as abstract;
-every concrete solver asset must implement it. The method must return one ``EquationObject``
-per unknown so that the matrix builder can assemble the global system.
+Store boundary values and parameters as attributes that the entity asset can set, as
+``HeatBoundary`` does with ``pre_scribe_mass_flow``, ``mass_flow_rate_set_point``, and
+``set_pressure``. Use ``self.prev_sol`` and ``get_index_matrix`` to linearize nonlinear
+terms around the previous iteration, following ``FallType``.
 
-For assets with different topologies (for example an asset with four ports, such as a
-water-to-water heat pump), examine ``HeatTransferAsset`` and ``FallType`` as starting points
-rather than ``BaseAsset`` directly.
-
-Setter methods for boundary conditions (e.g. supply temperature, prescribed mass flow,
-prescribed pressure) are plain attributes or simple methods. Study ``HeatBoundary`` and
-``HeatTransferAsset`` for representative patterns before writing new equation logic.
-
-3. Create the ESDL mapper
+3. Create the entity asset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create a new file in
-``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/``, for example
-``my_asset_mapper.py``.
+Create a module in ``src/omotes_simulator_core/entities/assets/``. Subclass
+``AssetAbstract``, call ``super().__init__(asset_name, asset_id, connected_ports)``, create the
+solver asset with ``name=self.name`` and ``_id=self.asset_id``, and assign it to
+``self.solver_asset``. Implement:
 
-Inherit from ``EsdlMapperAbstract``:
+- ``set_setpoints(setpoints)`` — check that the required ``PROPERTY_*`` keys are present
+  (existing assets raise ``ValueError``) and set the solver asset attributes.
+- ``write_to_output()`` — update ``self.outputs[port][-1]`` with asset-specific values.
+- ``postprocess()`` — update state at the end of a timestep, or ``pass`` when there is none.
+
+Override ``is_converged`` when the asset must check the solved result against its setpoint,
+as ``ProductionCluster`` does, and ``get_state`` when the asset controller needs state.
+:doc:`AddEntityLayerAsset` describes these steps in more detail.
+
+4. Map and register the ESDL asset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Create a mapper derived from ``EsdlMapperAbstract`` in
+``src/omotes_simulator_core/adapter/transforms/esdl_asset_mappers/``:
 
 .. code-block:: python
 
-    from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
-    from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-    from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
-    from omotes_simulator_core.entities.assets.my_asset import MyAsset
-
-
-    class EsdlMyAssetMapper(EsdlMapperAbstract):
-
+    class EsdlAssetMyAssetMapper(EsdlMapperAbstract):
         def to_esdl(self, entity: MyAsset) -> EsdlAssetObject:
-            raise NotImplementedError("EsdlMyAssetMapper.to_esdl()")
+            raise NotImplementedError("EsdlAssetMyAssetMapper.to_esdl()")
 
-        def to_entity(self, esdl_asset: EsdlAssetObject) -> AssetAbstract:
+        def to_entity(self, esdl_asset: EsdlAssetObject) -> MyAsset:
             return MyAsset(
                 asset_name=esdl_asset.esdl_asset.name,
                 asset_id=esdl_asset.esdl_asset.id,
-                connected_ports=esdl_asset.get_port_ids(),
-                # read additional ESDL properties with esdl_asset.get_property(name, default)
+                port_ids=esdl_asset.get_port_ids(),
+                my_parameter=esdl_asset.get_property(
+                    esdl_property_name="myParameter", default_value=0.0
+                ),
             )
 
-Use ``esdl_asset.get_property(name, default)`` to read optional ESDL attributes safely.
-Use ``esdl_asset.get_port_ids()`` to obtain the ordered list of port identifiers.
+Add the ESDL class and the mapper to ``conversion_dict_mappers`` in
+``esdl_asset_mapper.py``. ``EsdlEnergySystemMapper`` then creates the entity, adds its
+solver asset to the ``Network``, and connects it; you do not register the solver asset
+yourself.
 
-4. Register the mapper
-~~~~~~~~~~~~~~~~~~~~~~~
+5. Connect the asset to control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Open ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py`` and add two
-changes.
+Make sure ``EsdlControllerMapper`` creates a controller for the asset and that the setpoint
+dictionary contains the keys your ``set_setpoints`` requires. Reusing an existing
+controller is described in :doc:`AddEntityLayerAsset`; new control behavior is described
+in :doc:`ControlExtension`.
 
-First, import your new mapper class at the top of the file alongside the existing imports:
+Implementation notes
+--------------------
 
-.. code-block:: python
+- Keep physics in the solver asset. The entity asset only translates setpoints into solver
+  attributes and reads results through getters such as ``get_mass_flow_rate``,
+  ``get_pressure``, ``get_temperature``, and ``get_internal_energy``.
+- ``Solver.solve`` resets ``prev_sol`` before it starts and iterates until the matrix has
+  converged or the iteration limit of 100 is passed. Equations that depend on
+  ``prev_sol`` must give a solvable system for the reset values.
+- ``FallType.get_equations`` raises ``ValueError`` when fewer than two nodes are connected
+  or when ``number_of_unknowns`` is not six. Keep similar checks in new assets so that
+  wiring errors fail early.
+- Register the solver class in ``Network.str_to_class_dict`` only if tests or tools need to
+  create it with ``Network.add_asset`` and a type string; the ESDL path uses
+  ``add_existing_asset``.
+- Solver assets do not import from ``entities`` or ``esdl``.
 
-    from omotes_simulator_core.adapter.transforms.esdl_asset_mappers.my_asset_mapper import (
-        EsdlMyAssetMapper,
-    )
+Testing and validation
+----------------------
 
-Second, add one or more entries to ``conversion_dict_mappers``:
+Add tests at each level:
 
-.. code-block:: python
+- **Solver asset unit test** in ``unit_test/solver/network/assets/``, modelled on
+  ``test_fall_type.py``: connect ``Node`` objects with ``connect_node``, call
+  ``get_equations``, and check the number of equations and their indices, coefficients,
+  and right-hand side. Test the error paths for missing nodes.
+- **Solver-level integration test** in ``unit_test/integration/``, modelled on
+  ``test_zero_flow_physics.py`` or ``test_heat_transfer_asset.py``: build a ``Network``
+  with ``add_existing_asset`` and ``connect_assets``, set boundary values, call
+  ``Solver(network).solve()``, and assert on mass flow, pressure, and temperature.
+- **Entity unit test** in ``unit_test/entities/`` with patched solver getters, as described
+  in :doc:`testing_strategy`.
+- **Mapper test** in ``unit_test/adapters/transforms/esdl_asset_mappers/`` using an ESDL
+  fixture in ``testdata/``.
+- **Full run** through ``SimulationManager`` on a fixture that contains the asset.
 
-    conversion_dict_mappers: dict[type, type[EsdlMapperAbstract]] = {
-        ...
-        esdl.MyEsdlAssetType: EsdlMyAssetMapper,
-        ...
-    }
+Run the full suite with ``ci/linux/test_unit.sh`` or ``ci\win32\test_unit.cmd`` and the
+type checker with ``ci/linux/typecheck.sh`` or ``ci\win32\typecheck.cmd``.
 
-The ``EsdlAssetMapper.to_entity`` method uses this dictionary to dispatch to the correct
-mapper at runtime. A single mapper class may be registered for multiple ESDL types if they
-share the same construction logic (see how ``EsdlAssetProducerMapper`` handles several
-producer variants).
+Common pitfalls
+---------------
 
-5. Test file placement and patterns
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- **Equation count mismatch.** Returning fewer or more equations than unknowns gives a
+  singular or overdetermined matrix. Count them per connection point.
+- **Duplicated base equations.** ``get_press_to_node_equation`` and the thermal equations
+  already link the asset to its nodes; do not add separate node-coupling equations.
+- **Registering the solver asset twice.** ``Network.add_existing_asset`` raises
+  ``ValueError`` for an existing name, and the mapper already adds every enabled asset.
+- **Physics in the entity asset.** Computing flows or temperatures in ``set_setpoints``
+  bypasses the solver and breaks convergence checks.
+- **Untested at solver level.** Errors in equations are much easier to find in a
+  solver-level test than in a full run.
 
-Unit tests for the entity layer belong in ``unit_test/entities/``. Follow the pattern of
-``test_heat_pump.py`` or ``test_production_cluster.py``:
+Related documentation
+---------------------
 
-- Construct the asset in ``setUp`` with representative port ids and setpoint values.
-- Test ``set_setpoints`` with valid and invalid inputs.
-- Mock ``self.solver_asset`` to isolate entity logic from the solver layer.
-- Test ``write_to_output`` by calling it and inspecting ``self.outputs``.
-
-Unit tests for the solver-layer class belong in ``unit_test/solver/network/assets/``.
-Follow the pattern of ``test_production_asset.py`` or ``test_heat_transfer_asset.py``:
-
-- Test that ``get_equations`` returns the correct number of ``EquationObject`` instances.
-- Test boundary-condition setters by checking the ``prev_sol`` state after setting values.
-
-Unit tests for the mapper belong in
-``unit_test/adapters/transforms/esdl_asset_mappers/``.
-Follow the pattern of ``test_esdl_asset_heat_pump_mapper.py``:
-
-- Construct a mock ``EsdlAssetObject`` wrapping a representative PyESDL asset.
-- Assert that ``to_entity`` returns an instance of the expected entity class.
-- Assert that ESDL properties are correctly transferred to entity attributes.
-
-Running and validating tests
-----------------------------
-
-After placing test files, verify end-to-end behavior by running the full unit test suite with
-``python -m pytest`` from the repository root. If the asset is exercised by any existing ESDL
-test-data files in ``testdata/``, run the relevant integration tests under
-``unit_test/integration/`` as well. For new ESDL scenarios, add a minimal ``.esdl`` file to
-``testdata/`` and write a corresponding integration test that asserts the simulation completes
-without error and produces non-trivial output. See the existing integration tests for the
-expected structure.
-
-Cross-links
------------
-
-- Asset behavior and physics: :doc:`../physics/physics_main`
-- Simulation orchestration and how assets are wired into the runtime: :doc:`simulation_flow`
-- Test layout and test patterns: :doc:`testing_strategy`
+- :doc:`AddEntityLayerAsset` — entity asset, mapping, and controller details.
+- :doc:`../solver/solver_main` — solver behavior.
+- :doc:`../solver/solver_unknowns` — unknowns per connection point.
+- :doc:`../solver/solver_convergence` — convergence criteria.
+- :doc:`../physics/physics_main` — governing equations of existing assets.
+- :doc:`testing_strategy` — test levels and commands.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

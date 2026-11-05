@@ -1,21 +1,18 @@
-Simulation Flow
+Simulation flow
 ===============
 
 Purpose
 -------
 
-This guide explains how simulation executes end-to-end in OMOTES.SIMULATOR_CORE and where
-to make changes safely.
+This guide traces a simulation run from the application entrypoint to the solver and back
+to the output table. Use it when you need to know where a step happens, in which order calls
+are made, or which entry level to use for a test or debugging session.
 
-It traces the execution path from the application entrypoint through to the nonlinear solver
-and identifies the abstractions that separate each layer. For a package-level architecture
-overview (package layout, two-layer asset model, control architecture), see :doc:`architecture`.
+It is written for contributors. For what the simulator computes, see the Intro, Network,
+Solver, and Control sections. For package boundaries and the two-layer asset model, see
+:doc:`architecture`. For class-level signatures, use :doc:`api/omotes_simulator_core`.
 
-This page is for contributors and new developers. For conceptual system-level explanations
-consult the Intro, Solver, Network, and Control sections. For class-level detail use the
-:doc:`api/omotes_simulator_core` root index.
-
-Relevant Modules and Files
+Relevant modules and files
 --------------------------
 
 .. list-table::
@@ -27,187 +24,206 @@ Relevant Modules and Files
      - Why it matters for this topic
    * - ``src/omotes_simulator_core/infrastructure/app.py``
      - Entrypoint
-     - Builds ``SimulationConfiguration``, loads the ESDL file, and calls
-       ``SimulationManager.execute``. The ``run()`` function here is the single
-       entry point when the package is invoked from the command line.
+     - ``run(file_path)`` builds a ``SimulationConfiguration``, loads the ESDL file with
+       ``pyesdl_from_file`` into an ``EsdlObject``, and calls
+       ``SimulationManager.execute(progressLogger)``.
    * - ``src/omotes_simulator_core/infrastructure/simulation_manager.py``
      - Orchestrator
-     - Creates ``HeatNetwork`` and ``NetworkController`` from the ESDL object, then
-       creates ``NetworkSimulation`` and calls ``run``. Owns the error boundary for
-       a full simulation run.
+     - Creates ``HeatNetwork`` and ``NetworkController`` from the ESDL object, runs
+       ``NetworkSimulation``, and returns ``gather_output()``. Logs and re-raises any
+       exception from the run.
    * - ``src/omotes_simulator_core/entities/simulation_configuration.py``
      - Configuration dataclass
      - Holds ``simulation_id``, ``name``, ``timestep``, ``start``, and ``stop``.
        Passed from the entrypoint through to ``NetworkSimulation``.
    * - ``src/omotes_simulator_core/simulation/networksimulation.py``
      - Time-step loop
-     - Owns the outer time loop, controller update sequencing, the convergence retry
-       loop (up to 20 iterations per timestep), and the progress callback cadence.
+     - Owns the time loop, the controller call order, the convergence retry loop (at most
+       20 passes per timestep), and the progress callback interval.
    * - ``src/omotes_simulator_core/entities/heat_network.py``
      - Runtime network wrapper
-     - Holds the asset list and solver. Applies controller setpoints to assets per
-       timestep, calls ``Solver.solve``, checks convergence, post-processes assets,
-       and accumulates output.
+     - Holds entity assets, junctions, the solver ``Network``, and the ``Solver``. Applies
+       setpoints, solves, checks convergence, post-processes, and stores output.
    * - ``src/omotes_simulator_core/entities/assets/asset_abstract.py``
      - Entity-layer base class
-     - Abstract base for all thermo-hydraulic asset entities. Defines
-       ``set_setpoints``, ``write_to_output``, and output collection.
+     - Declares the abstract ``set_setpoints``, ``write_to_output``, and ``postprocess``
+       methods and implements ``write_standard_output`` and ``get_timeseries``.
    * - ``src/omotes_simulator_core/solver/network/network.py``
      - Solver graph model
-     - Holds the dictionary of solver-layer assets and nodes consumed by ``Solver``.
-       Assets are added by the mapper, not by ``HeatNetwork`` directly.
+     - Holds solver assets and nodes. Assets are added by ``EsdlEnergySystemMapper`` via
+       ``add_existing_asset`` and connected via ``connect_assets``.
    * - ``src/omotes_simulator_core/solver/solver.py``
      - Nonlinear solve loop
-     - Builds the global matrix from each asset's ``get_equations()`` return value
-       and iterates (up to 100 inner iterations) until convergence.
+     - Collects ``get_equations()`` from all solver assets and nodes, solves the matrix,
+       and repeats until ``Matrix.is_converged()`` or the iteration limit of 100.
    * - ``src/omotes_simulator_core/entities/network_controller_abstract.py``
      - Control abstraction
-     - Defines the minimal contract used by ``NetworkSimulation``: one abstract
-       method, ``update_setpoints(time)``.
+     - Declares one abstract method, ``update_setpoints(time)``.
    * - ``src/omotes_simulator_core/entities/network_controller.py``
      - Concrete controller
-     - Implements ``NetworkControllerAbstract``. Owns a list of ``ControllerNetwork``
-       objects (one per hydraulically isolated sub-network) and orchestrates
-       per-asset setpoint dispatch across those networks.
+     - Implements ``update_setpoints`` and ``update_network_state``. Holds one
+       ``ControllerNetwork`` per hydraulically separated sub-network.
    * - ``src/omotes_simulator_core/adapter/transforms/mappers.py``
      - ESDL-to-entity mapper
-     - ``EsdlEnergySystemMapper.to_entity`` converts an ``EsdlObject`` into the
-       ``(list[AssetAbstract], list[Junction])`` tuple consumed by ``HeatNetwork``.
+     - ``EsdlEnergySystemMapper.to_entity(network)`` creates the entity assets, registers
+       their solver assets in ``network``, connects them, and returns
+       ``(list[AssetAbstract], list[Junction])``.
    * - ``src/omotes_simulator_core/adapter/transforms/controller_mapper.py``
      - ESDL-to-controller mapper
-     - ``EsdlControllerMapper.to_entity`` converts an ``EsdlObject`` into a
-       ``NetworkController`` containing the correct ``ControllerNetwork`` objects.
+     - ``EsdlControllerMapper.to_entity(esdl, timestep)`` creates the asset controllers and
+       the ``NetworkController``.
    * - ``src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py``
      - Asset dispatch table
-     - Maps ESDL asset types to per-asset mapper classes via ``conversion_dict_mappers``.
+     - Maps ESDL asset types to mapper classes via ``conversion_dict_mappers``.
    * - ``unit_test/infrastructure/test_simulationmanager.py``
-     - Orchestration unit tests
-     - Verifies ``SimulationManager.execute`` returns output and triggers the progress
-       callback correctly.
+     - Orchestration test
+     - Runs ``SimulationManager.execute`` on ``testdata/test1.esdl`` and checks the shape of
+       the result table.
    * - ``unit_test/simulation/test_networksimulation.py``
-     - Loop-level unit tests
-     - Verifies the time-step loop, controller update order, and output collection.
+     - Time-loop test
+     - Checks construction with mocks and runs ``NetworkSimulation.run`` on
+       ``testdata/test1.esdl``.
    * - ``unit_test/integration/test_heat_physics.py``
      - End-to-end integration test
-     - Runs a full simulation against ``testdata/test1.esdl`` and asserts physical
-       output values. The primary integration test for physics correctness.
+     - Runs a full simulation through ``SimulationManager`` and asserts physical results
+       such as heat power and primary inlet temperature.
 
-Package Layout
---------------
+Execution or extension flow
+---------------------------
 
-For the full package layout, two-layer asset model, and control architecture overview, see
-:doc:`architecture`. This page focuses on the execution flow.
+High-level run
+~~~~~~~~~~~~~~
 
-Execution Flow
---------------
+1. **Entrypoint.** ``app.run()`` creates a ``SimulationConfiguration``, loads the ESDL
+   file into an ``EsdlObject``, and calls ``SimulationManager.execute(callback)``.
 
-The following numbered steps trace a full simulation run from entrypoint to output:
+2. **Build.** ``SimulationManager.execute`` creates two runtime objects:
 
-1. **Entrypoint** — ``app.run()`` creates a ``SimulationConfiguration`` dataclass (timestep,
-   start datetime, stop datetime), loads the ESDL file into an ``EsdlObject``, and calls
-   ``SimulationManager.execute(progress_callback)``.
+   - ``HeatNetwork(EsdlEnergySystemMapper(esdl).to_entity)``. ``HeatNetwork`` creates an
+     empty solver ``Network`` and passes it to ``to_entity``. For each enabled ESDL asset
+     the mapper creates an entity asset through ``EsdlAssetMapper.to_entity`` and calls
+     ``network.add_existing_asset(entity.solver_asset)``. Disabled assets are skipped with
+     a warning. The mapper then connects the solver assets and wraps the created solver
+     nodes in ``Junction`` objects. ``HeatNetwork`` finally creates the ``Solver``.
+   - ``EsdlControllerMapper().to_entity(esdl, timestep=config.timestep)``, which returns a
+     ``NetworkController``.
 
-2. **ESDL parsing** — ``SimulationManager.execute`` creates two runtime objects from the
-   ESDL input in parallel:
+3. **Time loop.** ``NetworkSimulation(network, controller).run(config, callback)``
+   computes the number of timesteps from ``start``, ``stop``, and ``timestep``. For each
+   timestep it:
 
-   - ``HeatNetwork(EsdlEnergySystemMapper(esdl).to_entity)`` — the mapper callable is passed
-     as a factory argument. ``to_entity`` returns ``(list[AssetAbstract], list[Junction])``;
-     each asset constructor also creates and registers the corresponding solver-layer asset
-     inside the ``Network`` graph object.
-   - ``EsdlControllerMapper().to_entity(esdl, timestep=config.timestep)`` — returns a
-     ``NetworkController`` containing one ``ControllerNetwork`` per hydraulically isolated
-     sub-network.
+   a. Sets ``time`` to ``start`` plus the elapsed seconds, with the UTC timezone.
 
-3. **Simulation loop** — ``SimulationManager`` creates ``NetworkSimulation(network, controller)``
-   and calls ``worker.run(config, progress_callback)``. Inside ``run``:
+   b. Calls ``controller.update_network_state(heat_network)``. The controller reads
+      ``get_state()`` from producer, consumer, and storage entity assets and passes it to
+      their asset controllers.
 
-   a. The loop iterates over each timestep from ``config.start`` to ``config.stop`` in
-      steps of ``config.timestep`` seconds.
+   c. Calls ``controller.update_setpoints(time)``, which returns ``controller_input``: a
+      dictionary from asset ID to a dictionary of ``PROPERTY_*`` setpoints.
 
-   b. Per timestep:
+   d. Calls ``network.network.reset_prev_solution()`` to clear the previous solver
+      solution.
 
-      - ``controller.update_network_state(heat_network)`` — reads current asset state
-        (temperatures, flows) from each entity-layer asset and updates the corresponding
-        per-asset controller objects.
-      - ``controller.update_setpoints(time)`` — calculates and returns
-        ``controller_input``: a ``dict[asset_id, dict[property, value]]`` containing the
-        heat demand, supply temperature, return temperature, and pressure setpoints for
-        every asset.
-      - A convergence retry loop (up to 20 iterations) runs
-        ``network.run_time_step(time, timestep, controller_input)`` followed by
-        ``network.check_convergence()``.
+   e. Runs up to 20 passes of ``network.run_time_step(time, timestep, controller_input)``
+      followed by ``network.check_convergence()``. ``run_time_step`` calls
+      ``set_time_step``, ``set_time``, and ``set_setpoints`` only on assets whose ID is a
+      key in ``controller_input``, then calls ``Solver.solve()``. ``check_convergence``
+      returns ``False`` as soon as one asset's ``is_converged()`` is ``False``.
 
-   c. ``network.run_time_step`` applies the setpoints dict to each asset via
-      ``asset.set_setpoints(...)`` and calls ``solver.solve()``.
+   f. Calls ``network.post_process_assets()``, which calls ``postprocess()`` on every
+      asset, then ``network.store_output()``, which calls ``write_standard_output()`` and
+      then ``write_to_output()`` on every asset.
 
-   d. ``solver.solve()`` calls ``asset.get_equations()`` on every solver-layer asset and
-      node in the ``Network`` graph, assembles the global matrix, and runs the linear
-      solver. The outer iteration loop in ``Solver.solve()`` repeats up to 100 times.
+   g. Calls the progress callback every ``progress_interval`` timesteps, which limits the
+      number of progress messages to about ``MAX_NUMBER_MESSAGES`` (15).
 
-   e. After convergence (or iteration limit), ``network.post_process_assets()`` and
-      ``network.store_output()`` are called.
+4. **Solve.** ``Solver.solve()`` resets the matrix solution and the previous solution of
+   every solver asset and node, then repeats: collect equations from all assets and nodes,
+   solve the matrix, and write the results back to assets and nodes. It stops when the
+   matrix has converged or after more than 100 iterations, in which case it logs a
+   warning.
 
-4. **Output collection** — after the time loop, ``worker.gather_output()`` calls
-   ``network.gather_output()``, which collects each asset's output list into a single
-   ``pandas.DataFrame`` returned to the caller.
+5. **Output.** ``SimulationManager`` calls ``worker.gather_output()``, which concatenates
+   ``get_timeseries()`` of every asset into a single ``pandas.DataFrame``.
 
-Two-Layer Asset Model
----------------------
+Lower-level entry points
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-For the two-layer asset model and control architecture descriptions, see :doc:`architecture`.
+Tests and debugging sessions often skip part of the stack:
 
-Testing and Validation
+- **Network level.** Build ``HeatNetwork(EsdlEnergySystemMapper(esdl).to_entity)``, write
+  a ``controller_input`` dictionary by hand, and call ``run_time_step`` directly. This skips
+  the controller. ``unit_test/integration/test_ates_network.py`` uses this pattern.
+- **Solver level.** Create a solver ``Network()``, add solver assets with
+  ``add_existing_asset``, connect them with ``connect_assets``, set boundary values on the
+  solver assets, and call ``Solver(network).solve()``. This skips entities, ESDL, and
+  control. ``unit_test/integration/test_zero_flow_physics.py`` and
+  ``unit_test/integration/test_heat_transfer_asset.py`` use this pattern.
+
+Implementation notes
+--------------------
+
+- ``NetworkSimulation`` is typed against ``NetworkController`` and calls
+  ``update_network_state``, which is not part of ``NetworkControllerAbstract``.
+- ``NetworkSimulation`` does not raise when the 20 retry passes end without convergence; it
+  logs the number of passes at debug level and continues. ``Solver.solve`` also only logs a
+  warning when it reaches its iteration limit.
+- Setpoints are computed once per timestep, before the retry loop. Retry passes only
+  re-run ``set_setpoints`` and the solve with the same ``controller_input``; assets can use
+  the previous pass's solver results inside ``set_setpoints`` and ``is_converged``.
+- ``postprocess`` runs before ``store_output``, so output written in ``write_to_output``
+  reflects state after post-processing.
+- The ESDL is read only in the build phase. Nothing in the time loop accesses ESDL objects.
+
+Testing and validation
 ----------------------
 
-The most relevant tests for this execution flow are:
+Choose the test level that matches the part of the flow you changed:
 
-- ``unit_test/infrastructure/test_simulationmanager.py`` — verifies the orchestration path:
-  checks that ``execute`` returns a non-empty ``DataFrame`` and that the progress callback
-  is invoked.
-- ``unit_test/simulation/test_networksimulation.py`` — verifies the time-step loop in
-  isolation using mocked ``HeatNetwork`` and ``NetworkController`` objects.
-- ``unit_test/integration/test_heat_physics.py`` — runs a full simulation against a real
-  ESDL file and asserts physical output values. Use this as the reference integration test.
-- ``unit_test/integration/test_communication_controller_network.py`` — verifies that
-  ``update_network_state`` correctly propagates entity-layer asset state to per-asset
-  controller objects.
+- ``unit_test/infrastructure/test_simulationmanager.py`` covers the build and the full run
+  through ``SimulationManager``.
+- ``unit_test/simulation/test_networksimulation.py`` covers ``NetworkSimulation``
+  construction (with ``Mock`` objects) and a real run on ``testdata/test1.esdl``.
+- ``unit_test/integration/test_communication_controller_network.py`` wraps assets and
+  asset controllers in ``Mock(wraps=...)`` and checks that ``update_network_state`` calls
+  ``set_state`` on every producer, consumer, and storage controller.
+- ``unit_test/integration/test_heat_physics.py`` and
+  ``unit_test/integration/test_pressure_physics.py`` check physical results of full runs.
+- The network-level and solver-level tests listed under `Lower-level entry points`_ check
+  behavior without the controller or without entities.
 
-Run the test suite from the repository root::
+Run the full suite with ``ci/linux/test_unit.sh`` or ``ci\win32\test_unit.cmd``. To run a
+single file, see :doc:`testing_strategy`; targeted runs need ``--no-cov`` because of the
+coverage threshold in ``pyproject.toml``.
 
-    python -m pytest unit_test/
-
-Common Pitfalls
+Common pitfalls
 ---------------
 
-- **Editing the wrong layer**: solver-layer asset classes (``solver/network/assets/``) must
-  not import from ``entities/``. Dependency runs upward only: entity layer depends on solver
-  layer, never the reverse.
-- **Bypassing the mapper registry**: new asset types that are not registered in
-  ``esdl_asset_mapper.py``'s ``conversion_dict_mappers`` will silently produce no asset
-  in the network. Always register and always add a unit test for the mapper.
-- **Skipping ``update_network_state``**: the controller's per-asset controller objects do
-  not read from the solver directly. They rely on ``update_network_state`` being called
-  before ``update_setpoints`` each timestep. If you add state that the controller needs,
-  expose it via ``AssetAbstract.get_state()`` and read it in ``NetworkController.update_network_state``.
-- **Convergence retry confusion**: ``network.run_time_step`` is called inside a retry loop
-  of up to 20 iterations. Asset state that accumulates side effects across calls within a
-  single timestep will produce incorrect results. Use ``store_output`` for committed output
-  and ``post_process_assets`` for end-of-timestep finalization only.
-- **Confusing the two solver iteration loops**: there is an outer iteration loop in
-  ``NetworkSimulation.run`` (convergence retries, max 20) and an inner loop inside
-  ``Solver.solve`` (matrix iterations, max 100). They serve different purposes: the outer
-  loop handles controller-physics coupling; the inner loop handles the nonlinear equation
-  solve.
+- **Missing controller entry.** ``run_time_step`` only updates assets whose ID is in
+  ``controller_input``. An asset without a controller keeps its previous setpoints without
+  any warning.
+- **Unregistered ESDL type.** An ESDL asset type missing from ``conversion_dict_mappers``
+  raises ``NotImplementedError`` in ``EsdlAssetMapper.to_entity`` during the build phase.
+- **State that accumulates across retry passes.** ``set_setpoints`` and ``Solver.solve`` can
+  run up to 20 times per timestep. Update time-integrated state, such as a storage fill
+  level, in ``postprocess`` and not in ``set_setpoints``.
+- **New controller state.** Asset controllers only receive what
+  ``NetworkController.update_network_state`` passes from ``AssetAbstract.get_state()``. To
+  give a controller more state, extend both ``get_state`` on the entity asset and
+  ``update_network_state``.
+- **Two iteration loops.** The retry loop in ``NetworkSimulation.run`` (at most 20 passes)
+  couples setpoint handling and physics; the loop in ``Solver.solve`` (at most 100
+  iterations) solves the nonlinear equations. Neither raises an error when its limit is
+  reached.
 
-Related Documentation
+Related documentation
 ---------------------
 
-- Conceptual overview of the system: :doc:`../intro/intro_main`
-- Package architecture and two-layer asset model: :doc:`architecture`
-- Solver behavior and equation assembly: :doc:`../solver/solver_main`
-- Network representation: :doc:`../network/network_main`
-- Control behavior and setpoint logic: :doc:`../controller/controller`
-- Adding a new asset: :doc:`developer_guides`
-- Extending control behavior: :doc:`developer_guides`
-- Test layout and running tests: :doc:`testing_strategy`
-- Full class and module reference: :doc:`api/omotes_simulator_core`
+- :doc:`../intro/intro_main` — what the simulator does.
+- :doc:`architecture` — package boundaries and the two-layer asset model.
+- :doc:`../solver/solver_main` — solver behavior and equation assembly.
+- :doc:`../network/network_main` — network representation.
+- :doc:`../controller/controller` — control behavior and setpoint logic.
+- :doc:`developer_guides` — how-to guides for extending the simulator.
+- :doc:`testing_strategy` — test layout and commands.
+- :doc:`api/omotes_simulator_core` — generated class and module reference.

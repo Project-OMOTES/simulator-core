@@ -163,7 +163,8 @@ For network-level interaction and topology context, see :doc:`../network/network
 For asset-level physical interpretation of the resulting operating state, see
 :doc:`../physics/physics_main`.
 
-For implementation-oriented controller API material, see
+For implementation-oriented controller material, see
+:doc:`../developer/controller_reference`. For the generated class reference, see
 :doc:`../developer/api/omotes_simulator_core.entities.network_controller`.
 
 .. toctree::
