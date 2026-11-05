@@ -78,7 +78,7 @@ Before writing, inspect the closest matching existing documentation page and pre
    - For Control pages: ``doc/controller/controller.rst``
   - For Control behavioral terminology/context only: ``doc/controller/controller_behavior.rst``
    - ``doc/physics/physics_main.rst`` (cross-reference landing page only, not a style source for Physics content itself)
-   - ``doc/architecture/architecture.rst``
+   - ``doc/developer/architecture.rst``
    - any existing landing page in the same section as ``<TARGET_FILE>``
 
 2. Use implementation files only to anchor behavioral claims and execution flow:
@@ -185,7 +185,8 @@ structural equation such as node mass-flow continuity where it clarifies a const
 Assumptions, Limitations, and Implementation reference. The structural component table and
 construction/partitioning narrative are an explicit exception to the general "no
 class-by-class API walkthrough" rule below — they describe structural role, not full API
-detail, and must still cross-link to ``doc/physics`` and ``doc/reference`` rather than
+detail, and must still cross-link to ``doc/physics`` and the curated reference pages
+(``doc/developer/*_reference.rst``) rather than
 re-deriving asset physics, controller dispatch, or solver equation-assembly mechanics.
 
 Do not use this agent to document:
@@ -203,10 +204,11 @@ Do not use this agent to document:
 
 When a conceptual page needs to point readers to implementation/reference detail (for
 example solver internals or controller classes), cross-link to the relevant
-``doc/reference/`` page with ``:doc:``/``:ref:`` prose only — do not add a ``.. toctree::``
-entry pointing at a page that is already toctreed from the curated ``doc/reference/`` tier
+curated reference page (``doc/developer/*_reference.rst``) with ``:doc:``/``:ref:`` prose
+only — do not add a ``.. toctree::``
+entry pointing at a page that is already toctreed from the curated reference pages
 or the generated API tree (see [Documentation Architecture](../instructions/documentation-architecture.instructions.md)
-and ``doc/controller/controller.rst``'s "Implementation reference" section for the correct
+and ``doc/network/network_main.rst``'s "Implementation reference" section for the correct
 pattern). A page may only be toctreed from one place.
 
 Content requirements
@@ -431,7 +433,7 @@ After writing or updating the file:
 5. Verify that claims about execution flow, solver behavior, network behavior, and control behavior are supported by code or tests.
 6. Verify that the page does not duplicate material that belongs in ``doc/physics`` or developer documentation.
 7. Check that the page introduces no documentation build warnings or errors.
-8. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the repository-preferred documentation build command.
+8. If command execution or validation tools are available, run ``doc/run_sphinx.bat`` or the repository-preferred documentation build command.
 9. If an error or warning is found, fix it before returning the final content.
 10. Do not finish with known syntax errors, broken headings, malformed math blocks, broken references, or unresolved build warnings caused by the change.
 

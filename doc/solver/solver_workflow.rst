@@ -48,4 +48,4 @@ Related Documentation
 - :doc:`solver_unknowns` — the quantities assembled into each linear system.
 - :doc:`solver_convergence` — how the convergence check in the loop is evaluated.
 - :doc:`../physics/physics_main` — the asset-internal relations that form the equations.
-- :doc:`../reference/solver_reference` — class-level reference.
+- :doc:`../developer/solver_reference` — class-level reference.

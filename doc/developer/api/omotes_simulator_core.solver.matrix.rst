@@ -3,8 +3,8 @@ solver.matrix
 
 .. automodule:: omotes_simulator_core.solver.matrix
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
