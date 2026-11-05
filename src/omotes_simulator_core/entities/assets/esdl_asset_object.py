@@ -141,7 +141,6 @@ class EsdlAssetObject:
         # TODO: Get interpolation method from ESDL properties if available
         return ProfileInterpolationMethod.DEFAULT
 
-    # make a function to check temperature for both in and out ports
     def get_temperature(self, port_type: str, temp_type: str) -> float:
         """Get the temperature of the port."""
         for esdl_port in self.esdl_asset.port:
@@ -207,15 +206,17 @@ class EsdlAssetObject:
         elif (self.get_esdl_type() == OmotesAssetLabels.HEAT_EXCHANGER) | (
             self.get_esdl_type() == OmotesAssetLabels.HEAT_PUMP
         ):
+            ports = self.get_port_ids()
             if side == PRIMARY:
+                self.get_temperature_port(port_id=ports[0], temp_type="Supply")
                 temperatures = Temperatures(
-                    in_flow=self.get_temperature("In", "Supply"),
-                    out_flow=self.get_temperature("Out", "Return"),
+                    in_flow=self.get_temperature_port(port_id=ports[0], temp_type="Supply"),
+                    out_flow=self.get_temperature_port(port_id=ports[1], temp_type="Return"),
                 )
             elif side == SECONDARY:
                 temperatures = Temperatures(
-                    in_flow=self.get_temperature("In", "Return"),
-                    out_flow=self.get_temperature("Out", "Supply"),
+                    in_flow=self.get_temperature_port(port_id=ports[2], temp_type="Return"),
+                    out_flow=self.get_temperature_port(port_id=ports[3], temp_type="Supply"),
                 )
             else:
                 logger.error(

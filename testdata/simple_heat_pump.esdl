@@ -9,7 +9,7 @@
         <port xsi:type="esdl:OutPort" name="SecOut" id="e11b83fa-c124-46f4-b2dd-41649e0075ab" connectedTo="c4da2e55-e843-41e7-8d9a-d9217873ad2a" carrier="448bac5b-224d-46d2-bece-a690bb0c339c"/>
         <geometry xsi:type="esdl:Point" lat="52.051711954437685" lon="4.483494758605958" CRS="WGS84"/>
       </asset>
-      <asset xsi:type="esdl:GenericProducer" name="GenericProducer_d46e" id="GenericProducer_d46e" power="100000.0">
+      <asset xsi:type="esdl:GenericProducer" name="GenericProducer_d46e" id="GenericProducer_d46e" power="10000000.0">
         <port xsi:type="esdl:OutPort" name="Out" id="cd75e6a1-d9bc-4c43-88a5-eacc2a3a7c54" connectedTo="4612e567-987e-436f-b42a-164e5ac41003" carrier="e2b95d83-989a-4a77-971f-435e931a0adf"/>
         <port xsi:type="esdl:InPort" name="In" id="61860e7e-9e2c-47f3-bfb9-246a2dde0110" connectedTo="2b090a14-ed38-4ddc-9c1e-c8086ed99f1a" carrier="e2b95d83-989a-4a77-971f-435e931a0adf"/>
         <geometry xsi:type="esdl:Point" lat="52.05161958657236" lon="4.480876922607423" CRS="WGS84"/>

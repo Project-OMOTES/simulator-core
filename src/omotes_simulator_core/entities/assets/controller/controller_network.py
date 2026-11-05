@@ -246,7 +246,7 @@ class ControllerNetwork:
         """
         if self.producers:
             return self.producers[0].id, PROPERTY_SET_PRESSURE
-        if self.heat_transfer_assets_sec:
+        if self.heat_transfer_assets_prim:
             return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
         if self.storages:
             return self.storages[0].id, PROPERTY_SET_PRESSURE
