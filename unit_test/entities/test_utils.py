@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test utility functions."""
+
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
@@ -66,7 +67,7 @@ class UtilFunctionTest(unittest.TestCase):
         )  # act
 
         # Assert
-        self.assertAlmostEqual(mass_flow_calculated, 0.011902381642040025, 4)
+        self.assertAlmostEqual(mass_flow_calculated, -0.011902381642040025, 4)
 
     def test_mass_flow_and_temperature_to_heat_demand(self) -> None:
         """Test mass_flow_and_temperature_to_heat_demand."""
@@ -134,8 +135,8 @@ class UtilFunctionTest(unittest.TestCase):
 
         # Act
         esdl_asset_mock.esdl_asset.material.Error = "Error"
-        delattr(esdl_asset_mock.esdl_asset.material, "component")
-        delattr(esdl_asset_mock.esdl_asset.material, "reference")
+        delattr(esdl_asset_mock.esdl_asset.material, "component")  # noqa
+        delattr(esdl_asset_mock.esdl_asset.material, "reference")  # noqa
 
         # Assert
         with self.assertRaises(NotImplementedError):

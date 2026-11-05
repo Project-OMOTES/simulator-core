@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Test controller class."""
+
 import datetime
 import unittest
 from unittest.mock import Mock
@@ -251,24 +252,24 @@ class ControllerTest(unittest.TestCase):
 
         # assert
         # - Network 1
-        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
+        self.assertAlmostEqual(result["producer1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
         # - Network 2
-        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0, places=3)
-        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEqual(result["producer2"][PROPERTY_HEAT_DEMAND], 0.0, places=3)
+        self.assertAlmostEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
         # - Network 3
-        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
         # - Heat pump network 1 <-> network 2
-        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10.0, places=3)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEqual(
             result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -50.0, places=3
         )
         # - Heat pump network 2 <-> network 3
-        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEqual(
             result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -20.0, places=3
         )
         # - Storage network 2 (charging)
-        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEqual(result["storage1"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
 
     def test_update_setpoints_two_source(self):
         self.setup_update_set_points()
@@ -297,18 +298,18 @@ class ControllerTest(unittest.TestCase):
         # act
         result = self.controller.update_setpoints(time=datetime.datetime.now())
         # assert
-        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], -25.0, places=3)
-        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
-        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 25.0, places=3)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(result["producer1"][PROPERTY_HEAT_DEMAND], -25.0, places=3)
+        self.assertAlmostEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10.0, places=3)
+        self.assertAlmostEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 25.0, places=3)
+        self.assertAlmostEqual(
             result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -25.0, places=3
         )
-        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20.0, places=3)
+        self.assertAlmostEqual(
             result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -20.0, places=3
         )
-        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -5.0, places=3)
+        self.assertAlmostEqual(result["storage1"][PROPERTY_HEAT_DEMAND], -5.0, places=3)
 
     def test_update_stetpoints_cap_demand(self):
         # arrange
@@ -321,19 +322,15 @@ class ControllerTest(unittest.TestCase):
         # act
         result = self.controller.update_setpoints(time=datetime.datetime.now())
         # assert
-        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
-        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
-        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 15, places=3)
-        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 15, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10, places=3)
-        self.assertAlmostEquals(
-            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -10, places=3
-        )
-        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 15, places=3)
-        self.assertAlmostEquals(
-            result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -15, places=3
-        )
-        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
+        self.assertAlmostEqual(result["producer1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
+        self.assertAlmostEqual(result["producer2"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
+        self.assertAlmostEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -10, places=3)
+        self.assertAlmostEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 15, places=3)
+        self.assertAlmostEqual(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -15, places=3)
+        self.assertAlmostEqual(result["storage1"][PROPERTY_HEAT_DEMAND], -10.0, places=3)
 
     def test_update_stetpoints_cap_storage(self):
         # arrange
@@ -344,19 +341,15 @@ class ControllerTest(unittest.TestCase):
         # act
         result = self.controller.update_setpoints(time=datetime.datetime.now())
         # assert
-        self.assertAlmostEquals(result["producer1"][PROPERTY_HEAT_DEMAND], -50.0, places=3)
-        self.assertAlmostEquals(result["producer2"][PROPERTY_HEAT_DEMAND], -40.0, places=3)
-        self.assertAlmostEquals(result["consumer1"][PROPERTY_HEAT_DEMAND], 10, places=3)
-        self.assertAlmostEquals(result["consumer2"][PROPERTY_HEAT_DEMAND], 20, places=3)
-        self.assertAlmostEquals(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 50, places=3)
-        self.assertAlmostEquals(
-            result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -50, places=3
-        )
-        self.assertAlmostEquals(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20, places=3)
-        self.assertAlmostEquals(
-            result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -20, places=3
-        )
-        self.assertAlmostEquals(result["storage1"][PROPERTY_HEAT_DEMAND], 60.0, places=3)
+        self.assertAlmostEqual(result["producer1"][PROPERTY_HEAT_DEMAND], -50.0, places=3)
+        self.assertAlmostEqual(result["producer2"][PROPERTY_HEAT_DEMAND], -40.0, places=3)
+        self.assertAlmostEqual(result["consumer1"][PROPERTY_HEAT_DEMAND], 10, places=3)
+        self.assertAlmostEqual(result["consumer2"][PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEqual(result["heatpump1"][PRIMARY + PROPERTY_HEAT_DEMAND], 50, places=3)
+        self.assertAlmostEqual(result["heatpump1"][SECONDARY + PROPERTY_HEAT_DEMAND], -50, places=3)
+        self.assertAlmostEqual(result["heatpump2"][PRIMARY + PROPERTY_HEAT_DEMAND], 20, places=3)
+        self.assertAlmostEqual(result["heatpump2"][SECONDARY + PROPERTY_HEAT_DEMAND], -20, places=3)
+        self.assertAlmostEqual(result["storage1"][PROPERTY_HEAT_DEMAND], 60.0, places=3)
 
     def test_set_producers_to_max(self):
         # arrange

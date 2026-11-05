@@ -34,6 +34,9 @@ class OmotesAssetLabels(str, Enum):
     ATES = "ates"
     HEAT_PUMP = "heat_pump"
     HEAT_EXCHANGER = "heat_exchanger"
+    ELECTRIC_BOILER = "electric_boiler"
+    GAS_HEATER = "gas_heater"
+    RESIDUAL_HEAT = "residual_heat_source"
 
 
 class StringEsdlAssetMapper:
@@ -69,6 +72,9 @@ class StringEsdlAssetMapper:
             OmotesAssetLabels.ATES: [esdl.ATES],
             OmotesAssetLabels.HEAT_PUMP: [esdl.HeatPump],
             OmotesAssetLabels.HEAT_EXCHANGER: [esdl.HeatExchange],
+            OmotesAssetLabels.ELECTRIC_BOILER: [esdl.ElectricBoiler],
+            OmotesAssetLabels.GAS_HEATER: [esdl.GasHeater],
+            OmotesAssetLabels.RESIDUAL_HEAT: [esdl.ResidualHeatSource],
         }
 
         self.type_to_label_map: dict[Type[esdl.Asset], OmotesAssetLabels] = {

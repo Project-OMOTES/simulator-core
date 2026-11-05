@@ -15,6 +15,7 @@
 
 """Module to read the esdl profiles from an energy system."""
 import logging
+import os
 from datetime import datetime
 from typing import cast
 
@@ -71,7 +72,6 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    influx_cred_map: dict[str, tuple[str, str]] = {}
     profile_host = str(esdl_profile.host)
     profile_port = int(esdl_profile.port)
     profile_database = str(esdl_profile.database)
@@ -87,18 +87,16 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     if profile_port == 443:
         ssl_setting = True
 
-    influx_host = f"{profile_host}:{profile_port}"
-    if influx_host in influx_cred_map:
-        (username, password) = influx_cred_map[influx_host]
-    else:
-        username = None
-        password = None
+    # ESDL's InfluxDBProfile carries no credentials, so authentication (if the
+    # target InfluxDB requires it) is configured via environment variables.
+    username = os.environ.get("INFLUXDB_USERNAME", "")
+    password = os.environ.get("INFLUXDB_PASSWORD", "")
     conn_settings = ConnectionSettings(
         host=profile_host,
         port=profile_port,
         database=profile_database,
-        username=username or "",
-        password=password or "",
+        username=username,
+        password=password,
         ssl=ssl_setting,
         verify_ssl=ssl_setting,
     )

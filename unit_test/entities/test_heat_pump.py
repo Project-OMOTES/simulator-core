@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test HeatPump entities."""
+
 import unittest
 from unittest.mock import patch
 
@@ -223,7 +224,7 @@ class HeatPumpTest(unittest.TestCase):
             self.heat_pump.set_setpoints(setpoints)
 
         # Assert
-        self.assertAlmostEquals(self.heat_pump.solver_asset.temperature_in_primary, 273.1454, 2)
+        self.assertAlmostEqual(self.heat_pump.solver_asset.temperature_in_primary, 273.1454, 2)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_primary, 290.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_in_secondary, 280.0)
         self.assertEqual(self.heat_pump.solver_asset.temperature_out_secondary, 270.0)

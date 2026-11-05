@@ -96,6 +96,7 @@ class Pipe(AssetAbstract):
             length=self.length,
             diameter=self.inner_diameter,
             roughness=self.roughness,
+            alpha_value=alpha_value,
         )
 
     def set_setpoints(self, setpoints: dict) -> None:
@@ -120,7 +121,7 @@ class Pipe(AssetAbstract):
         self.outputs[1][-1].update(
             {
                 PROPERTY_PRESSURE_LOSS: pressure_loss,
-                PROPERTY_PRESSURE_LOSS_PER_LENGTH: pressure_loss / self.length,
+                PROPERTY_PRESSURE_LOSS_PER_LENGTH: abs(pressure_loss) / self.length,
                 PROPERTY_HEAT_LOSS: self.get_heat_loss(),
             }
         )

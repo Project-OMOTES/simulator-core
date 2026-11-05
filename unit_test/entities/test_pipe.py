@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Junction entities."""
+
 import unittest
 from unittest.mock import patch
 
@@ -75,6 +76,7 @@ class PipeTest(unittest.TestCase):
         self.assertEqual(pipe.inner_diameter, self.inner_diameter)
         self.assertEqual(pipe.roughness, self.roughness)
         self.assertEqual(pipe.alpha_value, self.alpha_value)
+        self.assertEqual(pipe.solver_asset.alpha_value, self.alpha_value)
         self.assertEqual(pipe.minor_loss_coefficient, self.minor_loss_coefficient)
         self.assertEqual(pipe.external_temperature, self.external_temperature)
         self.assertEqual(pipe.qheat_external, self.qheat_external)
@@ -92,7 +94,7 @@ class PipeTest(unittest.TestCase):
             # act
             velocity = self.pipe.get_velocity(port=0)
         # assert
-        self.assertAlmostEquals(velocity, 12.732, places=3)
+        self.assertAlmostEqual(velocity, 12.732, places=3)
 
     def test_write_to_output(self):
         """Test for the get_pressure_loss_per_length method."""  # noqa: D202

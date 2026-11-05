@@ -1,0 +1,12 @@
+{% extends "!page.html" %}
+{% block footer %}
+{{ super() }}
+<p class="ai-disclosure">
+  Parts of this documentation were produced with the assistance of generative AI via the
+  agent-based documentation pipeline defined in <a
+    href="https://github.com/Project-OMOTES/simulator-core/tree/main/.github/agents"><code>.github/agents/</code></a>.
+  This
+  applies to the documentation only. All content has been reviewed and verified
+  by the maintainers of this project.
+</p>
+{% endblock %}

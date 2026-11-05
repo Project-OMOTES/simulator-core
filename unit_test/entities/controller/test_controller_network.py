@@ -275,14 +275,14 @@ class TestControllerNetwork(unittest.TestCase):
         storage1.id = "storage1"
         storage1.effective_max_charge_power = 10
         storage1.effective_max_discharge_power = 20
-        storage1.temperatures.out_flow = 50
-        storage1.temperatures.in_flow = 40
+        storage1.temperatures.out_flow = 40
+        storage1.temperatures.in_flow = 50
         storage2 = Mock()
         storage2.id = "storage2"
         storage2.effective_max_charge_power = 15
         storage2.effective_max_discharge_power = 25
-        storage2.temperatures.out_flow = 50
-        storage2.temperatures.in_flow = 40
+        storage2.temperatures.out_flow = 40
+        storage2.temperatures.in_flow = 50
         self.controller_network.storages = [storage1, storage2]
         # act
         result = self.controller_network.set_all_storages_charge_to_max()

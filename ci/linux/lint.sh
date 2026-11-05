@@ -4,5 +4,5 @@ if [[ "$OSTYPE" != "win32" && "$OSTYPE" != "msys" ]]; then
   echo "Activating .venv first."
   . .venv/bin/activate
 fi
-
+python -V
 flake8 ./src/omotes_simulator_core ./unit_test/

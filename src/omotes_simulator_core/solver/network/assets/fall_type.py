@@ -275,7 +275,7 @@ class FallType(BaseAsset):
                 property_name="mass_flow_rate", connection_point=0, use_relative_indexing=True
             )
         ]
-        if mass_flow_rate < 1e-5:
+        if abs(mass_flow_rate) < 1e-5:
             equation_object.coefficients = np.array(
                 [-2.0 * self.loss_coefficient * 1e-5, -1.0, 1.0]
             )

@@ -20,12 +20,6 @@ from uuid import uuid4
 
 import numpy as np
 
-from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_ALPHA_VALUE,
-    PROPERTY_DIAMETER,
-    PROPERTY_LENGTH,
-    PROPERTY_ROUGHNESS,
-)
 from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
@@ -48,64 +42,6 @@ class SolverPipeTest(unittest.TestCase):
         # Connect the nodes to the asset
         self.asset.connect_node(node=self.supply_node, connection_point=0)
         self.asset.connect_node(node=self.return_node, connection_point=1)
-
-    def test_set_physical_properties(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-            PROPERTY_ROUGHNESS: 0.002,
-            PROPERTY_ALPHA_VALUE: 0.5,
-        }
-
-        # act
-        self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertEqual(self.asset.diameter, physical_properties_dict[PROPERTY_DIAMETER])
-        self.assertEqual(self.asset.length, physical_properties_dict[PROPERTY_LENGTH])
-        self.assertEqual(self.asset.roughness, physical_properties_dict[PROPERTY_ROUGHNESS])
-        self.assertEqual(self.asset.alpha_value, physical_properties_dict[PROPERTY_ALPHA_VALUE])
-        self.assertEqual(self.asset.area, 0.19634954084936207)
-
-    def test_set_physical_properties_missing_key(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-        }
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(
-            str(cm.exception), f"Property {PROPERTY_ROUGHNESS} is missing in physical_properties"
-        )
-
-    def test_set_physical_properties_additional_key(self) -> None:
-        """Test the set_physical_properties method."""
-        # arrange
-        physical_properties_dict = {
-            PROPERTY_DIAMETER: 0.5,
-            PROPERTY_LENGTH: 2000.0,
-            PROPERTY_ROUGHNESS: 0.002,
-        }
-        delattr(self.asset, PROPERTY_DIAMETER)
-
-        # act
-        with self.assertRaises(ValueError) as cm:
-            self.asset.set_physical_properties(physical_properties=physical_properties_dict)  # act
-
-        # assert
-        self.assertIsInstance(cm.exception, ValueError)
-        self.assertEqual(
-            str(cm.exception), f"Property {PROPERTY_DIAMETER} is not a valid property of the pipe"
-        )
 
     def test_calculate_reynolds_number_laminar_low_temp(self) -> None:
         """Test the calculate_reynolds_number method for a laminar flow at low temperature."""
@@ -240,7 +176,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-6, 1), -3.3)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-6, 1), -3.3)
 
     def test_update_heat_supplied_negative_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -259,7 +195,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_positive_velocity(self) -> None:
         """Test the update_heat_supplied method."""
@@ -278,7 +214,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.4)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.4)
 
     def test_update_heat_supplied_no_flow(self) -> None:
         """Test the update_heat_supplied method."""
@@ -297,7 +233,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), 0.0)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), 0.0)
 
     def test_update_heat_supplied_positive_velocity_larger_diameter(self) -> None:
         """Test the update_heat_supplied method."""
@@ -316,7 +252,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.6)
 
     def test_update_heat_supplied_positive_velocity_larger_coefficient(self) -> None:
         """Test the update_heat_supplied method."""
@@ -335,7 +271,7 @@ class SolverPipeTest(unittest.TestCase):
         self.asset.update_heat_supplied()  # act
 
         # assert
-        self.assertEqual(np.round(self.asset.heat_supplied * 1e-3, 1), -447.6)
+        self.assertEqual(np.round(self.asset.heat_flux * 1e-3, 1), -447.6)
 
     def test_calculate_graetz_number(self) -> None:
         """Test the calculate_graetz_number method."""
