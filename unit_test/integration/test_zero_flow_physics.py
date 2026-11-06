@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Zero flow of a simple network."""
+
 import unittest
 from uuid import uuid4
 

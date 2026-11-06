@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing the Fall type class."""
+
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject

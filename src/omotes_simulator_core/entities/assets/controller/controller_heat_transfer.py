@@ -126,11 +126,11 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: self.primary_temperatures.in_flow,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: self.primary_temperatures.out_flow,
                     SECONDARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: self.secondary_temperatures.out_flow,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: self.secondary_temperatures.in_flow,
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: True,
@@ -140,11 +140,11 @@ class ControllerHeatTransferAsset(AssetControllerAbstract):
             return {
                 self.id: {
                     PRIMARY + PROPERTY_HEAT_DEMAND: heat_demand / self.factor,
-                    PRIMARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 30,
-                    PRIMARY + PROPERTY_TEMPERATURE_IN: 273.15 + 50,
+                    PRIMARY + PROPERTY_TEMPERATURE_OUT: self.primary_temperatures.in_flow,
+                    PRIMARY + PROPERTY_TEMPERATURE_IN: self.primary_temperatures.out_flow,
                     SECONDARY + PROPERTY_HEAT_DEMAND: -1 * heat_demand,
-                    SECONDARY + PROPERTY_TEMPERATURE_OUT: 273.15 + 80,
-                    SECONDARY + PROPERTY_TEMPERATURE_IN: 273.15 + 40,
+                    SECONDARY + PROPERTY_TEMPERATURE_OUT: self.secondary_temperatures.out_flow,
+                    SECONDARY + PROPERTY_TEMPERATURE_IN: self.secondary_temperatures.in_flow,
                     SECONDARY + PROPERTY_SET_PRESSURE: False,
                     PRIMARY + PROPERTY_SET_PRESSURE: False,
                     PROPERTY_BYPASS: False,

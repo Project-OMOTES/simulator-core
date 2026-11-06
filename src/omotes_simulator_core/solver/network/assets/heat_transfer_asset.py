@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing a Heat Transfer asset."""
+
 import logging
 from enum import Enum
 
@@ -479,13 +480,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=2,
-                    mass_flow_value=mset,
+                    mass_flow_value=-1 * mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=3,
-                    mass_flow_value=-mset,
+                    mass_flow_value=mset,
                 )
             )
         else:
@@ -517,13 +518,13 @@ class HeatTransferAsset(BaseAsset):
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=0,
-                    mass_flow_value=mset,
+                    mass_flow_value=-1 * mset,
                 )
             )
             equations.append(
                 self.prescribe_mass_flow_at_connection_point(
                     connection_point=1,
-                    mass_flow_value=-1 * mset,
+                    mass_flow_value=mset,
                 )
             )
         else:

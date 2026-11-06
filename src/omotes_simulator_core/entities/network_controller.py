@@ -155,7 +155,6 @@ class NetworkController(NetworkControllerAbstract):
 
             if number_of_heat_exchangers != 1:
                 continue
-
             total_heat_demand: float = 0
             for producer in network.producers:
                 total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
@@ -196,7 +195,7 @@ class NetworkController(NetworkControllerAbstract):
                 else:
                     heat_transfer.update(asset.set_asset_prim(total_heat_demand, bypass=True))
             for asset in network.heat_transfer_assets_sec:
-                if total_heat_demand < 0:
+                if total_heat_demand > 0:
                     heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=True))
                 else:
                     heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=False))

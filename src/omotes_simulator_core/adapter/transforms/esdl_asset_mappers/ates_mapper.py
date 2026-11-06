@@ -34,6 +34,7 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
         :param EsdlAssetObject esdl_asset: Object to be converted to a ates entity.
         :return: Ates object.
         """
+        temperatures = esdl_asset.get_temperatures_asset()
         ates_entity = AtesCluster(
             asset_name=esdl_asset.esdl_asset.name,
             asset_id=esdl_asset.esdl_asset.id,
@@ -72,6 +73,8 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             well_distance=esdl_asset.get_property(
                 esdl_property_name="wellDistance", default_value=ATES_DEFAULTS.well_distance
             ),
+            hot_well_temperature=temperatures.out_flow,
+            cold_well_temperature=temperatures.in_flow,
         )
 
         return ates_entity

@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test HeatExchanger entities."""
+
 import unittest
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
