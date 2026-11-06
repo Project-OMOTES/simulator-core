@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Heat Buffer class."""
+
 from enum import Enum
 from typing import Dict
 

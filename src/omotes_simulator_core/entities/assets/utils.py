@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Utility functions for assets."""
+
 from enum import IntEnum
 
 import numpy as np

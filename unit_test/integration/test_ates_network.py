@@ -19,6 +19,7 @@ The tests run a single time step with a hand-made controller input, so the behav
 asset can be checked for a charging and for a discharging time step without depending on the
 controller allocation logic.
 """
+
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path

@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing a Heat Transfer asset."""
+
 import logging
 from enum import Enum
 

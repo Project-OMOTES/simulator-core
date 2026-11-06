@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """__init__.py file for initialization code."""
+
 from omotes_simulator_core.adapter.transforms.controller_mappers.controller_consumer_mapper import (
     ControllerConsumerMapper,
 )

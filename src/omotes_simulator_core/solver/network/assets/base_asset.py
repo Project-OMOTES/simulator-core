@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing BaseAsset class."""
+
 import math
 
 import numpy as np

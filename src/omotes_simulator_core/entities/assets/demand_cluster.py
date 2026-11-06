@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """demandCluster class."""
+
 import logging
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract

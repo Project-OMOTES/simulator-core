@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Module containing classes to be able to interact with esdl objects."""
+
 import logging
 from typing import Any
 
