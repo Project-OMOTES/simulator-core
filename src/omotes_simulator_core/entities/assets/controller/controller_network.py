@@ -24,6 +24,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
     SECONDARY,
+    PRIMARY,
 )
 from omotes_simulator_core.entities.assets.controller.controller_consumer import ControllerConsumer
 from omotes_simulator_core.entities.assets.controller.controller_heat_transfer import (
@@ -247,7 +248,9 @@ class ControllerNetwork:
         if self.producers:
             return self.producers[0].id, PROPERTY_SET_PRESSURE
         if self.heat_transfer_assets_prim:
-            return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
+            return self.heat_transfer_assets_prim[0].id, PRIMARY + PROPERTY_SET_PRESSURE
         if self.storages:
             return self.storages[0].id, PROPERTY_SET_PRESSURE
+        if self.heat_transfer_assets_sec:
+            return self.heat_transfer_assets_sec[0].id, SECONDARY + PROPERTY_SET_PRESSURE
         raise ValueError("No asset found for which the pressure can be set.")
