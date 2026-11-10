@@ -25,6 +25,10 @@ from omotes_simulator_core.solver.matrix.equation_object import EquationObject
 from omotes_simulator_core.solver.matrix.index_core_quantity import NUMBER_OF_CORE_QUANTITIES
 
 
+class SingularMatrixError(RuntimeError):
+    """Raised when a singular system produces a NaN solution."""
+
+
 class Matrix:
     """Class which stores the matrix and can be used to solve it."""
 
@@ -37,6 +41,7 @@ class Matrix:
     def __init__(self) -> None:
         """Constructor of matrix class."""
         self._pattern_cache: dict[str, Any] | None = None
+        self._cached_matrix: sp.sparse.csc_matrix | None = None
 
     def add_unknowns(self, number_unknowns: int) -> int:
         """Method to add unknowns to the matrix.
@@ -75,7 +80,7 @@ class Matrix:
         self.sol_new = sp.sparse.linalg.spsolve(matrix, rhs)
         if np.isnan(self.sol_new).any():
             self.dump_matrix(matrix=matrix, rhs_array=rhs)
-            raise RuntimeError("Matrix is singular, matrix is dumped to file.")
+            raise SingularMatrixError("Matrix is singular, matrix is dumped to file.")
         result: list[float] = self.sol_new.tolist()
         return result
 
@@ -89,7 +94,8 @@ class Matrix:
 
         The sorting permutation, row indices and column pointers only depend on the column
         indices and the number of coefficients per equation. These are cached and validated on
-        every call, so only the coefficients are re-ordered (and duplicates summed) per call.
+        every call. The CSC matrix is reused on a cache hit, with its coefficients refreshed
+        (and duplicates summed) per call. The returned matrix is owned by this instance.
         :param coefficients: coefficients of all equations, concatenated.
         :param columns: column indices of all equations, concatenated.
         :param lengths: number of coefficients per equation.
@@ -127,13 +133,18 @@ class Matrix:
                 "indptr": indptr,
             }
             self._pattern_cache = cache
+            self._cached_matrix = None
         data = coefficients[cache["permutation"]]
         if cache["starts"] is not None:
             data = np.add.reduceat(data, cache["starts"])
-        return sp.sparse.csc_matrix(
-            (data, cache["indices"], cache["indptr"]),
-            shape=(self.num_unknowns, self.num_unknowns),
-        )
+        if self._cached_matrix is None or self._cached_matrix.dtype != data.dtype:
+            self._cached_matrix = sp.sparse.csc_matrix(
+                (data, cache["indices"], cache["indptr"]),
+                shape=(self.num_unknowns, self.num_unknowns),
+            )
+        else:
+            self._cached_matrix.data[:] = data
+        return self._cached_matrix
 
     def verify_equations(self, equations: list[EquationObject]) -> None:
         """Method to verify if the system of equations can be solved.
