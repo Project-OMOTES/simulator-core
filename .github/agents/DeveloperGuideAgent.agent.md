@@ -127,7 +127,7 @@ The developer section should contain the following pages (additional pages may b
 - ``doc/developer/documentation_with_ai_agents.rst`` (curated guide for contributors on how to write documentation with the help of ai agents)
 - ``doc/developer/developer_guides.rst`` (curated list of developer guides for new contributors)
   - ``doc/developer/AddEntityLayerAsset.rst`` (Sub-page with an HowTo for adding a new entity-layer asset based on an existing solver asset)
-  - ``doc/developer/AddSolverAndEntityLayerAssets.rst`` (Sub-page with an HowTo for adding a new solver asset and a new entity layer asset)
+  - ``doc/developer/AddSolverLayerAssets.rst`` (Sub-page with an HowTo for adding a new solver asset)
   - ``doc/developer/ControlExtension.rst`` (Sub-page with an HowTo for extending control behavior)
   - ``doc/developer/AddOutputFormat.rst`` (Sub-page with an HowTo for adding a new output format)
 

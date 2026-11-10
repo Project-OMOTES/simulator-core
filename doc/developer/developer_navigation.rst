@@ -127,8 +127,8 @@ covers the full workflow.
      - ``entities/assets/production_cluster.py`` and ``gas_heater.py``
      - :doc:`AddEntityLayerAsset`
    * - Add a new physical asset type
-     - ``solver/network/assets/base_asset.py`` and ``entities/assets/asset_abstract.py``
-     - :doc:`AddSolverAndEntityLayerAssets`
+     - ``solver/network/assets/base_asset.py`` and ``solver/network/assets/fall_type.py``
+     - :doc:`AddSolverLayerAssets`, then :doc:`AddEntityLayerAsset`
    * - Change dispatch or add a controlled asset role
      - ``entities/network_controller.py`` and
        ``entities/assets/controller/controller_network.py``

@@ -11,7 +11,7 @@ change an asset, or who need to understand why an asset receives certain setpoin
 writes certain output.
 
 For the physics of each asset, read :doc:`../physics/physics_main`. For step-by-step guides,
-read :doc:`AddEntityLayerAsset` and :doc:`AddSolverAndEntityLayerAssets`. For the full list
+read :doc:`AddEntityLayerAsset` and :doc:`AddSolverLayerAssets`. For the full list
 of methods, use the generated API reference (:doc:`api/omotes_simulator_core`).
 
 Relevant modules and files
@@ -154,8 +154,8 @@ Common pitfalls
 Related documentation
 ---------------------
 
-- :doc:`AddEntityLayerAsset` and :doc:`AddSolverAndEntityLayerAssets` — guides for new
-  assets.
+- :doc:`AddEntityLayerAsset` and :doc:`AddSolverLayerAssets` — guides for new entity and
+  solver assets.
 - :doc:`AddOutputFormat` — guide for output columns.
 - :doc:`architecture` — the two-layer asset model.
 - :doc:`network_reference` — how assets are connected.

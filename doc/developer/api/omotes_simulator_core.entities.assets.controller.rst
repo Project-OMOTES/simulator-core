@@ -3,8 +3,8 @@ entities.assets.controller
 
 .. automodule:: omotes_simulator_core.entities.assets.controller
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------

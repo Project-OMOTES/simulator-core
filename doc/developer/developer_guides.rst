@@ -14,7 +14,7 @@ layout. If you are new to this repository, read :doc:`developer_navigation`,
    :titlesonly:
 
    AddEntityLayerAsset
-   AddSolverAndEntityLayerAssets
+   AddSolverLayerAssets
    ControlExtension
    AddOutputFormat
 
@@ -28,9 +28,10 @@ Pick the guide that matches the smallest change that does the job:
     type that subclasses ``ProductionCluster`` like ``GasHeater`` and ``ElecBoiler``. Covers
     the entity class, ESDL mapping, controller mapping, and tests.
 
-:doc:`AddSolverAndEntityLayerAssets`
-    Add an asset type whose equations no existing solver asset provides: a solver asset,
-    an entity asset, an ESDL mapper, registration, and tests at solver and entity level.
+:doc:`AddSolverLayerAssets`
+    Add a solver asset when no existing one provides the equations you need: base class
+    choice, unknowns, ``EquationObject`` rows, and unit and solver-level integration tests.
+    Then continue with :doc:`AddEntityLayerAsset` to wrap it in an entity asset.
 
 :doc:`ControlExtension`
     Change how setpoints are computed: asset controllers, ``ControllerNetwork``,

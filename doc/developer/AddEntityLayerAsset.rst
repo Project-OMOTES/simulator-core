@@ -10,8 +10,9 @@ need a new entity asset: different setpoint handling, extra parameters, or extra
 ``ProductionCluster``, reuse its ``HeatBoundary`` solver asset, and add an efficiency and a
 fuel or electricity consumption output.
 
-If no solver asset provides the equations you need, use
-:doc:`AddSolverAndEntityLayerAssets`. For asset physics, see :doc:`../physics/physics_main`.
+If no solver asset provides the equations you need, first add one with
+:doc:`AddSolverLayerAssets` and then return to this guide. For asset physics, see
+:doc:`../physics/physics_main`.
 
 Relevant modules and files
 --------------------------
@@ -215,7 +216,7 @@ Common pitfalls
 Related documentation
 ---------------------
 
-- :doc:`AddSolverAndEntityLayerAssets` — when a new solver asset is needed.
+- :doc:`AddSolverLayerAssets` — when a new solver asset is needed.
 - :doc:`AddOutputFormat` — adding output columns.
 - :doc:`ControlExtension` — adding or changing controllers.
 - :doc:`simulation_flow` — where entity assets are built and called.

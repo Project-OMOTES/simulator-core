@@ -79,7 +79,7 @@ A solver asset contributes equations through ``get_equations``. Each equation is
 ``IndexCoreQuantity``. ``BaseAsset`` already provides builders for the equations that
 connect an asset to its nodes (pressure, energy and mass flow to node). A new asset normally
 adds only its internal equations. The step-by-step guide is
-:doc:`AddSolverAndEntityLayerAssets`.
+:doc:`AddSolverLayerAssets`.
 
 Implementation notes
 --------------------
@@ -133,7 +133,7 @@ Related documentation
 - :doc:`simulation_flow` — where ``Solver.solve`` is called.
 - :doc:`network_reference` — how the ``Network`` passed to the solver is built.
 - :doc:`asset_reference` — entity assets that set values on solver assets.
-- :doc:`AddSolverAndEntityLayerAssets` — guide for writing a new solver asset.
+- :doc:`AddSolverLayerAssets` — guide for writing a new solver asset.
 - :doc:`../solver/solver_main` — conceptual solver description.
 - :doc:`../physics/physics_main` — per-asset equations.
 

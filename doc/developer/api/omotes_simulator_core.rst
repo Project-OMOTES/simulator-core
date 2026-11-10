@@ -3,8 +3,8 @@ API Root Index
 
 .. automodule:: omotes_simulator_core
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------

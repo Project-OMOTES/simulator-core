@@ -153,8 +153,8 @@ along the column axis.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A new asset only produces output when the ESDL mapper adds it to the ``HeatNetwork``. See
-:doc:`AddEntityLayerAsset` or :doc:`AddSolverAndEntityLayerAssets` for the mapping
-workflow; output needs nothing beyond the steps above.
+:doc:`AddEntityLayerAsset` for the mapping workflow; output needs nothing beyond the steps
+above.
 
 Implementation notes
 --------------------
@@ -271,9 +271,8 @@ Related documentation
 
 - :doc:`AddEntityLayerAsset` — adding an asset based on an existing solver asset, using
   ``GasHeater`` as the example.
-- :doc:`AddSolverAndEntityLayerAssets` — complete workflow for a new asset type,
-  including entity-layer, solver-layer, ESDL mapper, and mapper registration steps that
-  precede output implementation for a brand-new asset.
+- :doc:`AddSolverLayerAssets` — adding a solver asset when no existing one provides the
+  equations a new asset type needs.
 - :doc:`simulation_flow` — end-to-end code layout and execution flow from
   ``app.py`` through ``SimulationManager``, ``NetworkSimulation``, and ``HeatNetwork``.
 - :doc:`testing_strategy` — test layout, how to run the full test suite, and the contributor

@@ -3,8 +3,8 @@ infrastructure
 
 .. automodule:: omotes_simulator_core.infrastructure
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------

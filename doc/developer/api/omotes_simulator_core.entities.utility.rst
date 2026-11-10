@@ -3,8 +3,8 @@ entities.utility
 
 .. automodule:: omotes_simulator_core.entities.utility
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
