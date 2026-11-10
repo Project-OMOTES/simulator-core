@@ -27,7 +27,7 @@ import numpy.testing as npt
 import scipy as sp
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.matrix import Matrix
+from omotes_simulator_core.solver.matrix.matrix import Matrix, SingularMatrixError
 
 
 class MatrixTest(unittest.TestCase):
@@ -184,7 +184,7 @@ class MatrixTest(unittest.TestCase):
                 with patch.object(matrix, "dump_matrix", side_effect=dump) as dump_method:
                     if singular:
                         with self.assertWarns(sp.sparse.linalg.MatrixRankWarning):
-                            with self.assertRaisesRegex(RuntimeError, "Matrix is singular"):
+                            with self.assertRaisesRegex(SingularMatrixError, "Matrix is singular"):
                                 matrix.solve(equations)
                     else:
                         self.assertEqual(matrix.solve(equations, dump=True), [0.0, 1.0, 2.0])
@@ -240,7 +240,7 @@ class MatrixTest(unittest.TestCase):
         equation2.rhs = 10.0
 
         # act
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(SingularMatrixError) as cm:
             matrix.solve([equation1, equation2])
 
         # assert
@@ -345,7 +345,9 @@ class MatrixTest(unittest.TestCase):
 
         first = matrix.solve(make([2.0, 0.0, 0.0, 4.0], [2.0, 8.0]))
         cache = matrix._pattern_cache
+        csc_matrix = matrix._cached_matrix
         second = matrix.solve(make([1.0, 0.0, 0.0, 1.0], [3.0, 4.0]))
+        self.assertIs(matrix._cached_matrix, csc_matrix)
         reused = matrix._pattern_cache is cache
         third = matrix.solve(make([1.0, 1.0, 0.0, 2.0], [3.0, 4.0], diagonal_only=True))
 
@@ -353,7 +355,79 @@ class MatrixTest(unittest.TestCase):
         npt.assert_allclose(second, [3.0, 4.0])
         self.assertTrue(reused)
         self.assertIsNot(matrix._pattern_cache, cache)
+        self.assertIsNot(matrix._cached_matrix, csc_matrix)
         npt.assert_allclose(third, [1.0, 2.0])
+
+    def test_reused_matrix_refreshes_duplicate_coefficients(self) -> None:
+        matrix = Matrix()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([0, 0])
+        equation.coefficients = np.array([1.0, 1.0])
+        equation.rhs = 4.0
+        self.assertEqual(matrix.solve([equation]), [2.0])
+        cached = matrix._cached_matrix
+        equation.coefficients[:] = [2.0, 2.0]
+        equation.rhs = -12.0
+        self.assertEqual(matrix.solve([equation]), [-3.0])
+        self.assertIs(matrix._cached_matrix, cached)
+        self.assertTrue(cached.has_canonical_format)
+        npt.assert_array_equal(cached.data, [4.0])
+
+    def test_pattern_changes_with_same_entry_count(self) -> None:
+        matrix = Matrix()
+        matrix.add_unknowns(2)
+        equations = []
+        for column in (0, 1):
+            equation = EquationObject()
+            equation.indices = np.array([column])
+            equation.coefficients = np.array([2.0])
+            equation.rhs = float(2 + 2 * column)
+            equations.append(equation)
+        self.assertEqual(matrix.solve(equations), [1.0, 2.0])
+        cached = matrix._cached_matrix
+        equations[0].indices[0] = 1
+        equations[1].indices[0] = 0
+        self.assertEqual(matrix.solve(equations), [2.0, 1.0])
+        self.assertIsNot(matrix._cached_matrix, cached)
+        cached = matrix._cached_matrix
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([2])
+        equation.coefficients = np.array([1.0])
+        equation.rhs = 3.0
+        self.assertEqual(matrix.solve([*equations, equation]), [2.0, 1.0, 3.0])
+        self.assertIsNot(matrix._cached_matrix, cached)
+        self.assertEqual(matrix._cached_matrix.shape, (3, 3))
+
+    def test_cached_matrix_preserves_changed_numeric_dtype(self) -> None:
+        matrix = Matrix()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([0])
+        equation.coefficients = np.array([2])
+        equation.rhs = 4.0
+        self.assertEqual(matrix.solve([equation]), [2.0])
+        equation.coefficients = np.array([0.5])
+        self.assertEqual(matrix.solve([equation]), [8.0])
+
+    def test_cached_matrix_reports_new_singularity(self) -> None:
+        matrix = Matrix()
+        matrix.add_unknowns(1)
+        equation = EquationObject()
+        equation.indices = np.array([0])
+        equation.coefficients = np.array([2.0])
+        equation.rhs = 4.0
+        self.assertEqual(matrix.solve([equation]), [2.0])
+        cached = matrix._cached_matrix
+        equation.coefficients[0] = 0.0
+        with patch.object(matrix, "dump_matrix") as dump:
+            with self.assertWarns(sp.sparse.linalg.MatrixRankWarning):
+                with self.assertRaisesRegex(SingularMatrixError, "Matrix is singular"):
+                    matrix.solve([equation])
+        self.assertIs(matrix._cached_matrix, cached)
+        dump.assert_called_once()
+        npt.assert_array_equal(dump.call_args.kwargs["matrix"].data, [0.0])
 
     def test_get_solution(self) -> None:
         """Test the get solution of the matrix object."""
