@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test production cluster."""
+
 import unittest
 from unittest.mock import patch
 

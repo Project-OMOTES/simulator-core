@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test esdl object class."""
+
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, Mock

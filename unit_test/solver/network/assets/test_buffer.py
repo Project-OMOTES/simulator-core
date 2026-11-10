@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test Thermocline Buffer entities."""
+
 import unittest
 from unittest.mock import patch
 from uuid import uuid4

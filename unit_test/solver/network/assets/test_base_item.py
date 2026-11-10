@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Test BaseItem asset of the solver class."""
+
 import unittest
 from uuid import uuid4
 

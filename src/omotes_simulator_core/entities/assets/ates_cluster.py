@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """atesCluster class."""
+
 import logging
 import math
 import os
@@ -133,6 +134,8 @@ class AtesCluster(AssetAbstract):
         salinity: float,
         well_casing_size: float,
         well_distance: float,
+        hot_well_temperature: float = DEFAULT_TEMPERATURE,
+        cold_well_temperature: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -140,8 +143,8 @@ class AtesCluster(AssetAbstract):
         :param str asset_id: The unique identifier of the asset.
         """
         super().__init__(asset_name=asset_name, asset_id=asset_id, connected_ports=port_ids)
-        self.temperature_connection_0 = DEFAULT_TEMPERATURE
-        self.temperature_connection_1 = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE
+        self.temperature_connection_0 = hot_well_temperature
+        self.temperature_connection_1 = cold_well_temperature
         self.hot_well_temperature = self.temperature_connection_0
         self.cold_well_temperature = self.temperature_connection_1
         self.thermal_power_allocation = 0  # Watt
@@ -395,8 +398,8 @@ class AtesCluster(AssetAbstract):
 
         setpoints = {
             PROPERTY_HEAT_DEMAND: 1e6,
-            PROPERTY_TEMPERATURE_OUT: celcius_to_kelvin(35),
-            PROPERTY_TEMPERATURE_IN: celcius_to_kelvin(85),
+            PROPERTY_TEMPERATURE_OUT: self.cold_well_temperature,
+            PROPERTY_TEMPERATURE_IN: self.hot_well_temperature,
             PROPERTY_SET_PRESSURE: False,
         }
         # initially charging 12 weeks with 85-35 temperature 1 MW
