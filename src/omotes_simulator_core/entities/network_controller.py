@@ -156,11 +156,13 @@ class NetworkController(NetworkControllerAbstract):
             if number_of_heat_exchangers != 1:
                 continue
             total_heat_demand: float = 0
+            total_storage_demand = 0
             for producer in network.producers:
                 total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
             for consumer in network.consumers:
                 total_heat_demand += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
             for storage in network.storages:
+                total_storage_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
                 total_heat_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             for asset in network.heat_transfer_assets_sec:
@@ -180,11 +182,13 @@ class NetworkController(NetworkControllerAbstract):
                                 asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
                         # Recalculate total_heat_supply after scaling
                         total_heat_demand = 0
+                        total_storage_demand = 0
                         for producer in network.producers:
                             total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
                         for consumer in network.consumers:
                             total_heat_demand += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
                         for storage in network.storages:
+                            total_storage_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
                             total_heat_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             # this might look weird, but we know there is only one primary or secondary asset.
@@ -195,7 +199,7 @@ class NetworkController(NetworkControllerAbstract):
                 else:
                     heat_transfer.update(asset.set_asset_prim(total_heat_demand, bypass=True))
             for asset in network.heat_transfer_assets_sec:
-                if total_heat_demand > 0:
+                if total_storage_demand > 0:
                     heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=True))
                 else:
                     heat_transfer.update(asset.set_asset_sec(total_heat_demand, bypass=False))
