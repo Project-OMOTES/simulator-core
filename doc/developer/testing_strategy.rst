@@ -122,11 +122,11 @@ does not exist on the real class.
 Mapper tests
 ~~~~~~~~~~~~
 
-Mapper tests load a real ESDL file from ``testdata/`` with
+Mapper tests live in ``unit_test/adapter/`` and load a real ESDL file from ``testdata/`` with
 ``EsdlObject(pyesdl_from_file(...))``, select assets with
 ``esdl_object.get_all_assets_of_type(...)``, and call ``mapper.to_entity``.
-``test_esdl_asset_producer_mapper.py`` checks the resulting entity's name, ID, and
-connected ports against the ESDL asset. Add an ESDL fixture to ``testdata/`` when no
+For example, ``test_esdl_asset_producer_mapper.py`` checks the resulting entity's name, ID, and
+connected ports against the ESDL asset. Add an ESDL file to ``testdata/`` when no
 existing file contains the asset type you need.
 
 Integration test patterns
