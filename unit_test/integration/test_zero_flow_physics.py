@@ -131,6 +131,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     network.assets["Demand"].supply_temperature = cold
                     network.assets["Demand"].mass_flow_rate_set_point = flow # noqa
                 solver.solve()
+                cold_network.reset_prev_solution()
                 cold_solver = Solver(cold_network)
                 cold_solver.solve()
                 self.assertTrue(solver.matrix.is_converged())
