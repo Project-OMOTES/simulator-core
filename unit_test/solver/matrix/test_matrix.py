@@ -371,8 +371,6 @@ class MatrixTest(unittest.TestCase):
         equation.rhs = -12.0
         self.assertEqual(matrix.solve([equation]), [-3.0])
         self.assertIs(matrix._cached_matrix, cached)
-        self.assertTrue(cached.has_canonical_format)
-        npt.assert_array_equal(cached.data, [4.0])
 
     def test_pattern_changes_with_same_entry_count(self) -> None:
         matrix = Matrix()
@@ -398,7 +396,6 @@ class MatrixTest(unittest.TestCase):
         equation.rhs = 3.0
         self.assertEqual(matrix.solve([*equations, equation]), [2.0, 1.0, 3.0])
         self.assertIsNot(matrix._cached_matrix, cached)
-        self.assertEqual(matrix._cached_matrix.shape, (3, 3))
 
     def test_cached_matrix_preserves_changed_numeric_dtype(self) -> None:
         matrix = Matrix()

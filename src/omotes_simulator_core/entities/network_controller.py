@@ -155,8 +155,8 @@ class NetworkController(NetworkControllerAbstract):
 
             if number_of_heat_exchangers != 1:
                 continue
-            total_heat_demand: float = 0
-            total_storage_demand = 0
+            total_heat_demand = 0.0
+            total_storage_demand = 0.0
             for producer in network.producers:
                 total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
             for consumer in network.consumers:
@@ -181,14 +181,15 @@ class NetworkController(NetworkControllerAbstract):
                                 scaled = current * scale_factor
                                 asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND] = scaled
                         # Recalculate total_heat_supply after scaling
-                        total_heat_demand = 0
-                        total_storage_demand = 0
+                        total_heat_demand = 0.0
+                        total_storage_demand = 0.0
                         for producer in network.producers:
                             total_heat_demand += asset_setpoints[producer.id][PROPERTY_HEAT_DEMAND]
                         for consumer in network.consumers:
                             total_heat_demand += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
                         for storage in network.storages:
-                            total_storage_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
+                            total_storage_demand += (
+                                asset_setpoints)[storage.id][PROPERTY_HEAT_DEMAND]
                             total_heat_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             # this might look weird, but we know there is only one primary or secondary asset.

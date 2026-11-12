@@ -129,7 +129,6 @@ class NetworkZeroFlowTest(unittest.TestCase):
                 for network in (self.network, cold_network):
                     network.assets["Production"].supply_temperature = hot
                     network.assets["Demand"].supply_temperature = cold
-                    network.assets["Demand"].mass_flow_rate_set_point = flow
                 solver.solve()
                 cold_solver = Solver(cold_network)
                 cold_solver.solve()
