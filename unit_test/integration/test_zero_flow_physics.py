@@ -16,8 +16,12 @@
 """Test Zero flow of a simple network."""
 
 import unittest
+from copy import deepcopy
 from uuid import uuid4
 
+import numpy as np
+
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.assets.solver_pipe import SolverPipe
 from omotes_simulator_core.solver.network.network import Network
@@ -105,6 +109,41 @@ class NetworkZeroFlowTest(unittest.TestCase):
         for node in nodes_cold:
             self.network.get_node(node).initial_temperature = 40 + 273.15
 
+    def test_warm_start_flow_and_temperature_transitions(self) -> None:
+        """Match cold solves and physical balances across abrupt changes and flow reversal."""
+        self.production_asset.pre_scribe_mass_flow = False
+        self.demand_asset.pre_scribe_mass_flow = True
+        cold_network = deepcopy(self.network)
+        solver = Solver(self.network)
+        for flow, hot, cold in (
+            (10.0, 333.15, 313.15),
+            (10.0, 333.15, 313.15),
+            (0.1, 353.15, 303.15),
+            (0.0, 333.15, 313.15),
+            (-0.1, 333.15, 313.15),
+            (-10.0, 353.15, 303.15),
+            (0.0, 333.15, 313.15),
+            (10.0, 333.15, 313.15),
+        ):
+            with self.subTest(flow=flow, hot=hot):
+                for network in (self.network, cold_network):
+                    network.assets["Production"].supply_temperature = hot
+                    network.assets["Demand"].supply_temperature = cold
+                    network.assets["Demand"].mass_flow_rate_set_point = flow  # type: ignore
+                solver.solve()
+                cold_network.reset_prev_solution()
+                cold_solver = Solver(cold_network)
+                cold_solver.solve()
+                self.assertTrue(solver.matrix.is_converged())
+                np.testing.assert_allclose(
+                    solver.matrix.sol_new, cold_solver.matrix.sol_new, rtol=1e-6, atol=1e-6
+                )
+                for equation in solver.get_equations():
+                    terms = equation.coefficients * solver.matrix.sol_new[equation.indices]
+                    residual = abs(float(np.sum(terms)) - equation.rhs)
+                    scale = 1.0 + float(np.sum(np.abs(terms))) + abs(equation.rhs)
+                    self.assertLessEqual(residual, 1e-6 * scale)
+
     def test_zeroflow(self) -> None:
         """Test zero flow."""
         # Arrange
@@ -126,7 +165,7 @@ class NetworkZeroFlowTest(unittest.TestCase):
                     abs(
                         self.network.get_asset(asset).prev_sol[
                             self.network.get_asset(asset).get_index_matrix(
-                                property_name="mass_flow_rate",
+                                core_quantity=CoreQuantity.MASS_FLOW_RATE,
                                 connection_point=connection_point,
                                 use_relative_indexing=True,
                             )
@@ -139,7 +178,9 @@ class NetworkZeroFlowTest(unittest.TestCase):
         self.assertEqual(
             self.network.get_asset(self.production_asset.name).prev_sol[
                 self.network.get_asset(self.production_asset.name).get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                    connection_point=0,
+                    use_relative_indexing=True,
                 )
             ],
             fluid_props.get_ie(
@@ -149,7 +190,9 @@ class NetworkZeroFlowTest(unittest.TestCase):
         self.assertEqual(
             self.network.get_asset(self.demand_asset.name).prev_sol[
                 self.network.get_asset(self.demand_asset.name).get_index_matrix(
-                    property_name="internal_energy", connection_point=0, use_relative_indexing=True
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
+                    connection_point=0,
+                    use_relative_indexing=True,
                 )
             ],
             fluid_props.get_ie(

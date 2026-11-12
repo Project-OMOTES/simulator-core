@@ -18,6 +18,7 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -83,6 +84,10 @@ class Node(BaseNodeItem):
         self.height = height
         self.initial_temperature = initial_temperature
         self.set_pressure = set_pressure
+        self.continuity_equation = EquationObject()
+        self.discharge_equation = EquationObject()
+        self.temperature_equation = EquationObject()
+        self.energy_equation = EquationObject()
 
     def connect_asset(self, asset: BaseItem, connection_point: int) -> None:
         """Connects an asset object at the given connection point to the node .
@@ -124,8 +129,8 @@ class Node(BaseNodeItem):
             raise ValueError(f"Node {self.name} is not connected to any asset.")
         # Construct equation object
         equations = [
-            self.get_node_cont_equation(),
             self.get_energy_equations(),
+            self.get_node_cont_equation(),
             self.get_discharge_equation(),
         ]
         return equations
@@ -144,7 +149,9 @@ class Node(BaseNodeItem):
             [
                 asset.prev_sol[
                     asset.get_index_matrix(
-                        "mass_flow_rate", asset_connection_point, use_relative_indexing=True
+                        CoreQuantity.MASS_FLOW_RATE,
+                        asset_connection_point,
+                        use_relative_indexing=True,
                     )
                 ]
                 for asset, asset_connection_point in self.connected_assets
@@ -167,25 +174,27 @@ class Node(BaseNodeItem):
             An EquationObject that contains the indices, coefficients, and right-hand side value
             of the equation.
         """
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
-        )
-        equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = 0.0
-        for asset, asset_connection_point in self.connected_assets:
-            equation_object.indices = np.append(
-                equation_object.indices,
-                [
-                    asset.get_index_matrix(
-                        property_name="mass_flow_rate",
-                        connection_point=asset_connection_point,
-                        use_relative_indexing=False,
-                    )
-                ],
+        if (len(self.continuity_equation.indices) != 0) and (
+            len(self.continuity_equation.coefficients) != 0
+        ):
+            return self.continuity_equation
+        indices = [
+            self.get_index_matrix(
+                core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
             )
-            equation_object.coefficients = np.append(equation_object.coefficients, [1.0])
-        return equation_object
+        ]
+        self.continuity_equation.rhs = 0.0
+        for asset, asset_connection_point in self.connected_assets:
+            indices.append(
+                asset.get_index_matrix(
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                    connection_point=asset_connection_point,
+                    use_relative_indexing=False,
+                )
+            )
+        self.continuity_equation.indices = np.array(indices)
+        self.continuity_equation.coefficients = np.ones(len(indices))
+        return self.continuity_equation
 
     def get_discharge_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the discharge is zero equation for the node.
@@ -194,13 +203,18 @@ class Node(BaseNodeItem):
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
         """
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False)]
+        if len(self.discharge_equation.indices) != 0:
+            return self.discharge_equation
+        self.discharge_equation.indices = np.array(
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
+                )
+            ]
         )
-        equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = 0.0
-        return equation_object
+        self.discharge_equation.coefficients = np.array([1.0])
+        self.discharge_equation.rhs = 0.0
+        return self.discharge_equation
 
     def get_pressure_set_equation(self) -> EquationObject:
         """Returns an EquationObject that sets the pressure of the node to a pre-defined value.
@@ -211,7 +225,11 @@ class Node(BaseNodeItem):
         """
         equation_object = EquationObject()
         equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="pressure", use_relative_indexing=False)]
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.PRESSURE, use_relative_indexing=False
+                )
+            ]
         )
         equation_object.coefficients = np.array([1.0])
         equation_object.rhs = self.set_pressure
@@ -224,59 +242,80 @@ class Node(BaseNodeItem):
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation.
         """
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False)]
+        if len(self.temperature_equation.indices) != 0:
+            return self.temperature_equation
+        self.temperature_equation.indices = np.array(
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
+                )
+            ]
         )
-        equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = fluid_props.get_ie(self.initial_temperature)
-        return equation_object
+        self.temperature_equation.coefficients = np.array([1.0])
+        self.temperature_equation.rhs = fluid_props.get_ie(self.initial_temperature)
+        return self.temperature_equation
 
     def get_energy_equation(self) -> EquationObject:
         """Returns an EquationObject that represents the energy equation for the node.
+
+        Indices and coefficient storage are initialized on the first call, after which
+        connections and matrix indices must remain fixed. Coefficients and RHS are
+        refreshed from the current solution on every call. The returned object is reused,
+        so it represents the latest equation rather than an independent snapshot.
 
         :return: EquationObject
             An EquationObject that contains the indices, coefficients, and right-hand side
             value of the equation
         """
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
-            [
-                self.get_index_matrix(property_name="mass_flow_rate", use_relative_indexing=False),
-                self.get_index_matrix(property_name="internal_energy", use_relative_indexing=False),
+        equation_object = self.energy_equation
+        if len(equation_object.indices) == 0:
+            indices = [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
+                ),
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
+                ),
             ]
-        )
+            for asset, asset_connection_id in self.connected_assets:
+                indices.extend(
+                    [
+                        asset.get_index_matrix(
+                            CoreQuantity.MASS_FLOW_RATE,
+                            asset_connection_id,
+                            use_relative_indexing=False,
+                        ),
+                        asset.get_index_matrix(
+                            CoreQuantity.INTERNAL_ENERGY,
+                            asset_connection_id,
+                            use_relative_indexing=False,
+                        ),
+                    ]
+                )
+            equation_object.indices = np.array(indices, dtype=int)
+            equation_object.coefficients = np.empty(len(indices), dtype=float)
+
         # Be aware that the coefficients are in reverse order
-        equation_object.coefficients = np.array(self.prev_sol)[
-            (equation_object.indices - self.matrix_index)[::-1]
+        equation_object.coefficients[0] = self.prev_sol[
+            equation_object.indices[1] - self.matrix_index
         ]
-        equation_object.rhs = float(np.prod(equation_object.coefficients))
-        # Extend the equation_object with the indices and coefficients of the connected assets
-        for asset, asset_connection_id in self.connected_assets:
-            # Extended asset indices
-            extra_indices = np.array(
-                [
-                    asset.get_index_matrix(
-                        "mass_flow_rate", asset_connection_id, use_relative_indexing=False
-                    ),
-                    asset.get_index_matrix(
-                        "internal_energy", asset_connection_id, use_relative_indexing=False
-                    ),
-                ]
+        equation_object.coefficients[1] = self.prev_sol[
+            equation_object.indices[0] - self.matrix_index
+        ]
+        equation_object.rhs = float(
+            equation_object.coefficients[0] * equation_object.coefficients[1]
+        )
+        for i, (asset, _) in enumerate(self.connected_assets, start=1):
+            offset = 2 * i
+            equation_object.coefficients[offset] = asset.prev_sol[
+                equation_object.indices[offset + 1] - asset.matrix_index
+            ]
+            equation_object.coefficients[offset + 1] = asset.prev_sol[
+                equation_object.indices[offset] - asset.matrix_index
+            ]
+            equation_object.rhs += float(
+                equation_object.coefficients[offset] * equation_object.coefficients[offset + 1]
             )
-            # Extend the indices and coefficients of the equation object
-            equation_object.indices = np.append(
-                equation_object.indices,
-                extra_indices,
-            )
-            # Extend the coefficients of the equation object
-            prev_sol = np.array(asset.prev_sol)
-            equation_object.coefficients = np.append(
-                equation_object.coefficients,
-                prev_sol[(extra_indices - asset.matrix_index)[::-1]],
-            )
-            # Extend the right-hand side of the equation object
-            equation_object.rhs += np.prod(prev_sol[extra_indices - asset.matrix_index])
         return equation_object
 
     def is_connected(self) -> bool:
