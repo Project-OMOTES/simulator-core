@@ -543,6 +543,10 @@ value of the equation.</p>
 <dt class="sig sig-object py" id="omotes_simulator_core.solver.network.assets.node.Node.get_energy_equation">
 <span class="sig-name descname"><span class="pre">get_energy_equation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="omotes_simulator_core.solver.matrix.equation_object.html#omotes_simulator_core.solver.matrix.equation_object.EquationObject" title="omotes_simulator_core.solver.matrix.equation_object.EquationObject"><span class="pre">EquationObject</span></a></span></span><a class="headerlink" href="#omotes_simulator_core.solver.network.assets.node.Node.get_energy_equation" title="Link to this definition">¶</a></dt>
 <dd><p>Returns an EquationObject that represents the energy equation for the node.</p>
+<p>Indices and coefficient storage are initialized on the first call, after which
+connections and matrix indices must remain fixed. Coefficients and RHS are
+refreshed from the current solution on every call. The returned object is reused,
+so it represents the latest equation rather than an independent snapshot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>EquationObject
