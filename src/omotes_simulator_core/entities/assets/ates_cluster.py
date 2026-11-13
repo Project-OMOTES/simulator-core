@@ -20,6 +20,8 @@ import math
 import os
 from datetime import datetime
 
+from scipy.constants import g
+
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
@@ -206,10 +208,93 @@ class AtesCluster(AssetAbstract):
             maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_charge  # m3/h
         else:
             maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
-        density = fluid_props.get_density(
-            (self.temperature_connection_0 + self.temperature_connection_1) / 2
+        average_temperature = (self.temperature_connection_0 + self.temperature_connection_1) / 2
+        downhole_pressure = (
+            self._get_saline_density(101325, average_temperature) * g * self.aquifer_depth
         )
+        # Charging produces from the cold well; discharging produces from the hot well.
+        production_temperature = (
+            self.cold_well_temperature if self.charging else self.hot_well_temperature
+        )
+        maximum_volume_flow_rate = min(
+            maximum_volume_flow_rate,
+            self._get_max_flowrate_extraction_norm(downhole_pressure, production_temperature),
+        )
+        density = fluid_props.get_density(average_temperature)
         return maximum_volume_flow_rate / 3600 * density
+
+    def _get_max_flowrate_extraction_norm(self, pressure: float, temperature: float) -> float:
+        """Calculate the NVOE extraction limit for sand production [m3/h].
+
+        Uses the NVOE Richtlijnen Ondergrondse Energieopslag (November 2006) extraction
+        velocity and the legacy ATES depth correction of 0.01 per metre. This depth
+        correction is based on expert judgment, not the NVOE guideline itself.
+
+        :param pressure: Downhole pressure [Pa].
+        :param temperature: Producing well temperature [K].
+        """
+        saline_density = self._get_saline_density(pressure, temperature)
+        saline_viscosity = self._get_saline_viscosity(temperature)
+        permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        well_radius = 0.5 * self.well_casing_size * 0.0254  # inch to m
+        maximum_extraction_velocity: float = (
+            2 * 3600 * permeability * saline_density * g / saline_viscosity
+        )
+        return (
+            2
+            * math.pi
+            * well_radius
+            * self.aquifer_thickness
+            * maximum_extraction_velocity
+            * self.aquifer_depth
+            * 0.01
+        )
+
+    def _get_saline_density(self, pressure: float, temperature: float) -> float:
+        """Calculate saline density using the Batzle-Wang correlation [kg/m3].
+
+        :param pressure: Pressure [Pa].
+        :param temperature: Temperature [K].
+        """
+        P = pressure * 1e-6  # Pa to MPa
+        T = kelvin_to_celcius(temperature)
+        S = self.salinity * 1e-6  # ppm to kg/kg
+        density_fresh = 1 + 1e-6 * (
+            -80.0 * T
+            - 3.3 * T * T
+            + 0.00175 * T * T * T
+            + 489.0 * P
+            - 2.0 * T * P
+            + 0.016 * T * T * P
+            - 1.3e-5 * T * T * T * P
+            - 0.333 * P * P
+            - 0.002 * T * P * P
+        )
+        density = density_fresh + S * (
+            0.668
+            + 0.44 * S
+            + 1e-6
+            * (
+                300.0 * P
+                - 2400.0 * P * S
+                + T * (80.0 + 3.0 * T - 3300.0 * S - 13.0 * P + 47.0 * P * S)
+            )
+        )
+        return density * 1000  # g/cm3 to kg/m3
+
+    def _get_saline_viscosity(self, temperature: float) -> float:
+        """Calculate pressure-independent Batzle-Wang saline viscosity [Pa s].
+
+        :param temperature: Temperature [K].
+        """
+        S = self.salinity * 1e-6  # ppm to kg/kg
+        T = kelvin_to_celcius(temperature)
+        viscosity = (
+            0.1
+            + 0.333 * S
+            + (1.65 + 91.90 * S**3) * math.exp(-(0.42 * (S**0.8 - 0.17) ** 2 + 0.045) * T**0.8)
+        )
+        return viscosity * 1e-3  # cP to Pa s
 
     def _limit_massflowrate(self) -> None:
         """Limit the mass flow rate of the asset to the capacity of the wells.
