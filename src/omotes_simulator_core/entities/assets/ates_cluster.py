@@ -26,7 +26,6 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
     DEFAULT_TEMPERATURE,
-    DEFAULT_TEMPERATURE_DIFFERENCE,
     PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HOT_WELL_TEMPERATURE,
@@ -117,6 +116,9 @@ class AtesCluster(AssetAbstract):
 
     well_distance: float
     """The distance of the well [m]."""
+
+    solver_asset: HeatBoundary
+    """The heat boundary used by the network solver."""
 
     pyjnius_loader: PyjniusLoader
     """Loader object to delay importing pyjnius module and Java classes."""
@@ -334,7 +336,7 @@ class AtesCluster(AssetAbstract):
         else:
             # Discharging: the flow leaves the asset at connection point 0 (supply side).
             self.solver_asset.supply_temperature = self.hot_well_temperature
-        self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate  # type: ignore
+        self.solver_asset.mass_flow_rate_set_point = self.mass_flowrate
 
     def set_setpoints(self, setpoints: dict) -> None:
         """Placeholder to set the setpoints of an asset prior to a simulation.
@@ -383,9 +385,7 @@ class AtesCluster(AssetAbstract):
             else:
                 self.temperature_connection_0 = self.hot_well_temperature
                 self.temperature_connection_1 = self.solver_asset.get_temperature(1)
-        self.solver_asset.pre_scribe_mass_flow = not (  # type: ignore
-            setpoints[PROPERTY_SET_PRESSURE]
-        )
+        self.solver_asset.pre_scribe_mass_flow = not setpoints[PROPERTY_SET_PRESSURE]
         self._calculate_massflowrate()
         if self.current_time != self.time:
             self._run_rosim()
@@ -553,7 +553,7 @@ class AtesCluster(AssetAbstract):
 
         :return: True if the asset has converged, False otherwise
         """
-        if self.solver_asset.pre_scribe_mass_flow:  # type: ignore
+        if self.solver_asset.pre_scribe_mass_flow:
             return abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
                 abs(self.thermal_power_allocation) * 0.001
             )

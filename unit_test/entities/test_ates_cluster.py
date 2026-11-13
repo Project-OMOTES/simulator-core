@@ -111,7 +111,7 @@ class AtesClusterTest(unittest.TestCase):
         # Charging: flow from connection point 0 to 1, so a positive mass flow rate set point.
         self.assertGreater(self.ates_cluster.mass_flowrate, 0.0)
         self.assertEqual(
-            self.ates_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
+            self.ates_cluster.solver_asset.mass_flow_rate_set_point,
             self.ates_cluster.mass_flowrate,
         )
         # Charging: the flow leaves the asset at connection point 1 at the cold well temperature.
@@ -166,7 +166,7 @@ class AtesClusterTest(unittest.TestCase):
         # Discharging: flow from connection point 1 to 0, so a negative mass flow rate set point.
         self.assertLess(self.ates_cluster.mass_flowrate, 0.0)
         self.assertEqual(
-            self.ates_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
+            self.ates_cluster.solver_asset.mass_flow_rate_set_point,
             self.ates_cluster.mass_flowrate,
         )
         # Discharging: the flow leaves the asset at connection point 0 at the hot well temperature.
