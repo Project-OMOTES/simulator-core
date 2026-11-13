@@ -363,7 +363,8 @@ class MatrixTest(unittest.TestCase):
 
         In this case the pattern is the same, but the coefficients are different.
         The cached matrix should be reused, but the coefficients should be updated.
-        The coefficients have the same value."""
+        The coefficients have the same value.
+        """
         matrix = Matrix()
         matrix.add_unknowns(1)
         equation = EquationObject()
@@ -404,8 +405,10 @@ class MatrixTest(unittest.TestCase):
         self.assertIsNot(matrix._cached_matrix, cached)
 
     def test_cached_matrix_reports_new_singularity(self) -> None:
-        """Test singularity detection when the cached matrix is reused but the coefficients
-        change to make it singular."""
+        """Test singularity detection.
+
+        The cached matrix is reused but the coefficients change to make it singular.
+        """
         matrix = Matrix()
         matrix.add_unknowns(1)
         equation = EquationObject()
