@@ -137,7 +137,7 @@ class AtesCluster(AssetAbstract):
         well_casing_size: float,
         well_distance: float,
         hot_well_temperature: float = DEFAULT_TEMPERATURE,
-        cold_well_temperature: float = DEFAULT_TEMPERATURE - DEFAULT_TEMPERATURE_DIFFERENCE,
+        cold_well_temperature: float = DEFAULT_TEMPERATURE,
     ) -> None:
         """Initialize a AtesCluster object.
 
