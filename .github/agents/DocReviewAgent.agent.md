@@ -140,10 +140,10 @@ In particular:
   [Documentation Architecture](../instructions/documentation-architecture.instructions.md).
 - more generally, no page anywhere should be reachable through more than one toctree path:
   check that conceptual section landing pages (Intro/Solver/Network/Physics/Control) cross-
-  link to ``doc/reference/`` pages with ``:doc:``/``:ref:`` prose rather than re-toctreeing a
-  page already toctreed from the curated reference tier or the generated API tree (
-  ``doc/controller/controller.rst``'s "Implementation reference" section is the reference
-  pattern to check new pages against).
+  link to the curated reference pages (``doc/developer/*_reference.rst``) with
+  ``:doc:``/``:ref:`` prose rather than re-toctreeing a page already toctreed from the
+  curated reference tier or the generated API tree (``doc/network/network_main.rst``'s
+  "Implementation reference" section is the reference pattern to check new pages against).
 
 If duplication exists:
 - recommend consolidation,
@@ -210,6 +210,7 @@ For reviews of ``doc/controller/controller_behavior.rst``, also flag as errors:
   constrains effective storage charge/discharge capability and clipping near empty/full bounds,
 - missing cross-link to ``doc/physics/ideal_heat_storage_physics.rst`` when storage fill-level
   interpretation is discussed.
+
 Network-specific review rules
 ------------------------------
 Network documentation is a single consolidated page (``doc/network/network_main.rst``)
@@ -323,7 +324,7 @@ After review and any focused edits:
 3. Verify that edits improved audience fit or section fit rather than broadening scope.
 4. Verify that duplication was reduced rather than moved around.
 5. Verify that relevant cross-links or related-doc pointers are present where useful.
-6. If execution tools are available and the task includes file edits, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_spinx.bat``.
+6. If execution tools are available and the task includes file edits, run the repository-preferred documentation build command such as ``doc/make.bat html`` or ``doc/run_sphinx.bat``.
 7. Inspect the output for warnings and errors related to the reviewed pages.
 8. If a page remains fundamentally misassigned, mark it for reassignment rather than forcing it into the wrong structure.
 9. Do not finish with known syntax errors, broken directives, or unresolved build warnings caused by the review changes.

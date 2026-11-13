@@ -49,4 +49,4 @@ Related Documentation
 - :doc:`solver_main` — the conceptual overview.
 - :doc:`solver_workflow` — where the convergence check sits in the solve loop.
 - :doc:`solver_unknowns` — the solved vector that is tested against tolerance.
-- :doc:`../reference/solver_reference` — class-level reference.
+- :doc:`../developer/solver_reference` — class-level reference.

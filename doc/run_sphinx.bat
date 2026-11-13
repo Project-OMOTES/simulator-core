@@ -24,4 +24,6 @@ call make.bat html
 call .\venv\Scripts\deactivate.bat
 popd
 endlocal
-pause
+
+rem Pause the script if it was run directly (not called from another script or cmd shell)
+IF /I %0 EQU "%~f0" pause

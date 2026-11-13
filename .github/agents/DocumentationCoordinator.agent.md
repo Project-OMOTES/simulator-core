@@ -17,6 +17,7 @@ agents:
   - NavigationAgent
   - DocReviewAgent
   - SphinxValidationAgent
+  - RstSyntaxAgent
 handoffs:
   - label: Review for audience/scope/duplication
     agent: DocReviewAgent

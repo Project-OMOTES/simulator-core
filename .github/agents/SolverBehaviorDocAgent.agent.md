@@ -65,8 +65,8 @@ the others. There is no separate detailed-behavior page: the Newton-Raphson deta
 ``solver_main`` and ``solver_workflow``, the solved quantities in ``solver_unknowns``, and the
 convergence criteria in ``solver_convergence``.
 
-Solver class/module API reference (``doc/reference/solver_reference.rst``,
-``doc/reference/solver_uncovered_entities.rst``, ``doc/solver/*.rst`` and
+Solver class/module API reference (the ``API reference`` toctree of
+``doc/developer/solver_reference.rst``, ``doc/solver/*.rst`` and
 ``doc/solver/assets/*.rst`` excluding these four pages) is owned by ``APIReferenceAgent``.
 Asset-internal physical correlations (friction factor, heat-transfer coefficients, and similar
 constitutive relations) are owned by ``PhysicsAssetDocAgent`` under ``doc/physics``. Do not absorb
@@ -211,7 +211,7 @@ Link the adjacent material, for example:
 - the sibling solver pages,
 - :doc:`../physics/physics_main` for asset-internal constitutive relations,
 - :doc:`../controller/controller_behavior` for how setpoints become solver inputs,
-- :doc:`../reference/solver_reference` for class-level reference.
+- :doc:`../developer/solver_reference` for class-level reference.
 
 Equation depth policy
 ----------------------
@@ -233,7 +233,8 @@ In particular:
 - do not write contributor extension guidance,
 - do not write class/module API reference (that belongs to ``APIReferenceAgent``),
 - per the single-toctree-path rule, the three sibling pages are toctreed only once from
-  ``doc/solver/solver_main.rst``; never add them to a ``doc/reference/`` page or any other toctree.
+  ``doc/solver/solver_main.rst``; never add them to a curated reference page
+  (``doc/developer/*_reference.rst``) or any other toctree.
 
 Style rules
 -----------
@@ -277,8 +278,8 @@ After writing or updating any page:
 5. Verify that quantity, linearization, convergence, and workflow claims are supported by the
    source files in the source-priority table.
 6. Verify the three sibling pages are toctreed only once from ``doc/solver/solver_main.rst`` and not
-   duplicated in any ``doc/reference/`` page.
-7. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the
+   duplicated in any curated reference page (``doc/developer/*_reference.rst``).
+7. If command execution or validation tools are available, run ``doc/run_sphinx.bat`` or the
    repository-preferred documentation build command.
 8. Inspect the build output for warnings and errors related to the new or edited page, including
    rst syntax errors, malformed tables, invalid math blocks, broken references, and broken

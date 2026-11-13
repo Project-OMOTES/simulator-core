@@ -25,7 +25,9 @@ Submodules
    omotes_simulator_core.entities.assets.asset_defaults
    omotes_simulator_core.entities.assets.ates_cluster
    omotes_simulator_core.entities.assets.demand_cluster
+   omotes_simulator_core.entities.assets.elec_boiler
    omotes_simulator_core.entities.assets.esdl_asset_object
+   omotes_simulator_core.entities.assets.gas_heater
    omotes_simulator_core.entities.assets.heat_exchanger
    omotes_simulator_core.entities.assets.heat_pump
    omotes_simulator_core.entities.assets.ideal_heat_storage
