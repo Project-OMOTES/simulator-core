@@ -47,24 +47,29 @@ class Interpolation:
         If this difference is more than 2% and value error is raised.
         """
         series_range = max(self.y) - min(self.y)
-        error = [np.divide(abs(y - self(x)), series_range) for x, y in zip(self.x, self.y)]
+        error = [abs(y - self(x)) / series_range for x, y in zip(self.x, self.y)]
         if any(e > 0.02 and e != np.inf for e in error):
             raise ValueError("Interpolation error: error is more then 2%.")
 
     def __call__(self, value: float) -> float:
         """Returns the interpolated value at a given point.
 
-        Horner evaluation uses repeated multiplication and addition instead of computing powers.
-        The input and coefficients are evaluated as Python floats to avoid NumPy scalar overhead.
+        The calculate the value at the given point, the coefficients of the polynomial are used.
+        A backwards loop is used, since the first value in the list is the one which is multiplied
+        with the highest order. In this way we can first use 1, then multiply it with the value to
+         get first order, then again multiply it with the value to get second order and so on.
+         In this way we can step by step multiply the temp value with the
+        value at the given point.
 
         :param value: The value to interpolate.
         :return: The interpolated value at the given point.
         """
         self._check_bounds(value=value)
-        value = float(value)
-        result = 0.0
-        for coefficient in self.coefficients.tolist():
-            result = result * value + coefficient
+        result = 0
+        temp_value = 1.0
+        for i in range(self.order, -1, -1):
+            result += self.coefficients[i] * temp_value
+            temp_value *= value
         return result
 
     def _check_bounds(self, value: float) -> None:

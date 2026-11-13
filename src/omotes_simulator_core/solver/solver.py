@@ -17,7 +17,7 @@
 import logging
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.matrix import Matrix, SingularMatrixError
+from omotes_simulator_core.solver.matrix.matrix import Matrix
 from omotes_simulator_core.solver.network.network import Network
 
 logger = logging.getLogger(__name__)
@@ -64,26 +64,18 @@ class Solver:
         return equations
 
     def solve(self) -> None:
-        """Solve the network, retrying once from cold estimates if a matrix is singular."""
+        """Method to solve the network."""
         iteration = 0
-        retried = False
-        while True:
+        self.matrix.reset_solution()
+        for asset in self.network.assets:
+            self.network.get_asset(asset).reset_prev_sol()
+        for node in self.network.nodes:
+            self.network.get_node(node).reset_prev_sol()
+        while not self.matrix.is_converged():
             iteration += 1
             equations = self.get_equations()
-            try:
-                self.matrix.solve(equations, dump=False)
-            except SingularMatrixError:
-                if retried:
-                    raise
-                logger.warning("Singular matrix encountered; resetting solution and retrying once")
-                retried = True
-                self.matrix.reset_solution()
-                self.network.reset_prev_solution()
-                iteration = 0
-                continue
+            self.matrix.solve(equations, dump=False)
             self.results_to_assets()
-            if self.matrix.is_converged():
-                break
             if iteration > self._iteration_limit:
                 logger.warning("No converged solution reached")
                 break
