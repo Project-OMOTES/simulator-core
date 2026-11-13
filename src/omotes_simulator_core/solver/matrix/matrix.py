@@ -35,8 +35,8 @@ class Matrix:
     num_unknowns: int = 0
     sol_new: npt.NDArray = np.array([], dtype=float)
     sol_old: npt.NDArray = np.array([], dtype=float)
-    relative_convergence: float = 1e-6
-    absolute_convergence: float = 1e-6
+    relative_convergence: float = 1.0e-6
+    absolute_convergence: float = 1.0e-6
 
     def __init__(self) -> None:
         """Constructor of matrix class."""
@@ -108,7 +108,11 @@ class Matrix:
             or not np.array_equal(cache["lengths"], lengths)
             or not np.array_equal(cache["columns"], columns)
         ):
+            # creating matrix, the column and coefficient is known, this
+            # creates the row for each equation
             rows = np.repeat(np.arange(len(lengths), dtype=np.int32), lengths)
+            # switch to sorting of based on column to get the correct order for csc_matrix,
+            # which is column based
             permutation = np.lexsort((rows, columns))
             sorted_rows = rows[permutation]
             sorted_columns = columns[permutation]
@@ -123,6 +127,8 @@ class Matrix:
                 np.bincount(sorted_columns[starts], minlength=self.num_unknowns),
                 out=indptr[1:],
             )
+            # storing the column sorted space matrix pattern for reuse,
+            # the coefficients will be updated on every call
             cache = {
                 "num_unknowns": self.num_unknowns,
                 "lengths": lengths.copy(),
