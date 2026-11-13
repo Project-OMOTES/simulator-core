@@ -20,10 +20,7 @@ from uuid import uuid4
 
 import numpy.testing as npt
 
-from omotes_simulator_core.solver.matrix.index_core_quantity import (
-    NUMBER_OF_CORE_QUANTITIES,
-    CoreQuantity,
-)
+from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.network.assets.node import Node
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -166,7 +163,8 @@ class BaseAssetTest(unittest.TestCase):
         connection_point_id = 0
         self.asset.connect_node(node=self.supply_node, connection_point=connection_point_id)
         self.asset.prev_sol[
-            CoreQuantity.MASS_FLOW_RATE + connection_point_id * NUMBER_OF_CORE_QUANTITIES
+            index_core_quantity.mass_flow_rate
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = 1.0
 
         # Act
@@ -177,7 +175,10 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(equation_object.coefficients, [1.0])
         npt.assert_array_equal(
             equation_object.indices,
-            [CoreQuantity.INTERNAL_ENERGY + connection_point_id * NUMBER_OF_CORE_QUANTITIES],
+            [
+                index_core_quantity.internal_energy
+                + connection_point_id * index_core_quantity.number_core_quantities
+            ],
         )
 
     def test_base_get_thermal_equations_no_discharge(self) -> None:
@@ -197,7 +198,7 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(equation_object.coefficients, [1.0, -1.0])
         npt.assert_array_equal(
             equation_object.indices,
-            [CoreQuantity.INTERNAL_ENERGY, CoreQuantity.INTERNAL_ENERGY],
+            [index_core_quantity.internal_energy, index_core_quantity.internal_energy],
         )
 
     def test_base_get_thermal_equations_no_discharge_not_connected(self) -> None:
@@ -239,9 +240,10 @@ class BaseAssetTest(unittest.TestCase):
         npt.assert_array_equal(
             equation_object.indices,
             [
-                CoreQuantity.PRESSURE + connection_point_id * NUMBER_OF_CORE_QUANTITIES,
+                index_core_quantity.pressure
+                + connection_point_id * index_core_quantity.number_core_quantities,
                 self.asset.connected_nodes[connection_point_id].matrix_index
-                + CoreQuantity.PRESSURE,
+                + index_core_quantity.pressure,
             ],
         )
 
@@ -269,7 +271,8 @@ class BaseAssetTest(unittest.TestCase):
         # Arrange
         connection_point_id = 0
         self.asset.prev_sol[
-            CoreQuantity.PRESSURE + connection_point_id * NUMBER_OF_CORE_QUANTITIES
+            index_core_quantity.pressure
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = 10000.0
 
         # Act
@@ -283,7 +286,8 @@ class BaseAssetTest(unittest.TestCase):
         # Arrange
         connection_point_id = 0
         self.asset.prev_sol[
-            CoreQuantity.MASS_FLOW_RATE + connection_point_id * NUMBER_OF_CORE_QUANTITIES
+            index_core_quantity.mass_flow_rate
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = 1.0
 
         # Act
@@ -298,7 +302,8 @@ class BaseAssetTest(unittest.TestCase):
         connection_point_id = 0
         temperature = 300.0
         self.asset.prev_sol[
-            CoreQuantity.INTERNAL_ENERGY + connection_point_id * NUMBER_OF_CORE_QUANTITIES
+            index_core_quantity.internal_energy
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = fluid_props.get_ie(temperature)
 
         # Act
@@ -313,7 +318,8 @@ class BaseAssetTest(unittest.TestCase):
         connection_point_id = 0
         temperature = 300.0
         self.asset.prev_sol[
-            CoreQuantity.INTERNAL_ENERGY + connection_point_id * NUMBER_OF_CORE_QUANTITIES
+            index_core_quantity.internal_energy
+            + connection_point_id * index_core_quantity.number_core_quantities
         ] = fluid_props.get_ie(temperature)
 
         # Act
