@@ -23,6 +23,16 @@ import numpy.testing as npt
 from omotes_simulator_core.solver.utils.fluid_properties import Interpolation, OmotesFluidProperties
 
 
+def _power_sum(interpolation: Interpolation, value: float) -> float:
+    """Evaluate the fitted polynomial using the original explicit-power algorithm."""
+    result = 0.0
+    power = 1.0
+    for index in range(interpolation.order, -1, -1):
+        result += interpolation.coefficients[index] * power
+        power *= value
+    return float(result)
+
+
 class InterpolationTest(unittest.TestCase):
     """Test the Interpolation class."""
 
@@ -85,6 +95,51 @@ class InterpolationTest(unittest.TestCase):
 
         # Assert
         self.assertAlmostEqual(interpolated_value, 32)
+
+    def test_horner_evaluation_for_scalar_types_and_polynomial_orders(self) -> None:
+        for order in (1, 5, 6):
+            coefficients = np.array([(-1.0) ** i / (i + 1) for i in range(order + 1)])
+            x = np.linspace(1.0, 2.0, 12)
+            interpolation = Interpolation(x.tolist(), np.polyval(coefficients, x).tolist(), order)
+            self.assertIsInstance(interpolation.coefficients, np.ndarray)
+            for value in np.linspace(0.9, 2.2, 21):
+                for scalar_type in (float, np.float64):
+                    with self.subTest(order=order, value=value, scalar_type=scalar_type):
+                        scalar = scalar_type(value)
+                        result = interpolation(scalar)
+                        self.assertIs(type(result), float)
+                        npt.assert_allclose(result, _power_sum(interpolation, scalar), rtol=1e-10)
+                        npt.assert_allclose(
+                            result, np.polyval(coefficients, scalar), rtol=1e-10, atol=1e-10
+                        )
+
+    def test_constant_polynomial_preserves_numpy_validation_semantics(self) -> None:
+        for constant in (0.0, 2.0):
+            with self.subTest(constant=constant):
+                with self.assertWarns(RuntimeWarning):
+                    interpolation = Interpolation([1.0, 2.0, 3.0], [constant] * 3, 0)
+                self.assertAlmostEqual(interpolation(1.5), constant)
+                self.assertIs(type(interpolation(np.float64(1.5))), float)
+
+    def test_evaluation_at_and_immediately_outside_bounds(self) -> None:
+        interpolation = Interpolation([1.0, 2.0, 3.0], [2.0, 4.0, 6.0], 1)
+        lower = interpolation.x[0] * (1.0 - interpolation.bounds)
+        upper = interpolation.x[-1] * (1.0 + interpolation.bounds)
+        for value in (lower, interpolation.x[0], interpolation.x[-1], upper):
+            with self.subTest(value=value):
+                self.assertAlmostEqual(interpolation(value), 2.0 * value)
+        for value in (np.nextafter(lower, -np.inf), np.nextafter(upper, np.inf)):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, r"^Value is out of bounds\.$"):
+                    interpolation(value)
+
+    def test_evaluation_observes_coefficient_mutations(self) -> None:
+        interpolation = Interpolation([1.0, 2.0, 3.0], [2.0, 4.0, 6.0], 1)
+        self.assertAlmostEqual(interpolation(2.0), 4.0)
+        interpolation.coefficients[:] = [3.0, -1.0]
+        self.assertAlmostEqual(interpolation(2.0), 5.0)
+        interpolation.coefficients = np.array([4.0, 5.0])
+        self.assertAlmostEqual(interpolation(2.0), 13.0)
 
     def test_validation_error(self):
         """Test the validation error method of the Interpolation class."""
@@ -157,6 +212,29 @@ class OmotesFluidPropertiesTest(unittest.TestCase):
         self.assertAlmostEqual(len(omotes_fluid_properties.therm_cond), 150)
         self.assertAlmostEqual(len(omotes_fluid_properties.cp), 150)
         self.assertAlmostEqual(len(omotes_fluid_properties.IE), 150)
+
+    def test_all_property_fits_match_power_sums_over_accepted_bounds(self) -> None:
+        for name in (
+            "ie_func",
+            "temp_func",
+            "density_func",
+            "visc_func",
+            "heat_cap_func",
+            "therm_cond_func",
+        ):
+            with self.subTest(property=name):
+                interpolation = getattr(self.omotes_fluid_properties, name)
+                lower = interpolation.x[0] * (1.0 - interpolation.bounds)
+                upper = interpolation.x[-1] * (1.0 + interpolation.bounds)
+                values = np.unique(
+                    np.concatenate((np.linspace(lower, upper, 1001), interpolation.x))
+                )
+                reference = np.array([_power_sum(interpolation, value) for value in values])
+                evaluated = [interpolation(value) for value in values]
+                self.assertTrue(all(type(value) is float for value in evaluated))
+                magnitudes = np.polyval(np.abs(interpolation.coefficients), np.abs(values))
+                roundoff_bound = 32 * np.finfo(float).eps * magnitudes
+                npt.assert_array_less(np.abs(evaluated - reference), roundoff_bound)
 
     def test_get_density(self):
         """Test the get_density method of the OmotesFluidProperties class."""

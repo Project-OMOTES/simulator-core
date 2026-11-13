@@ -20,6 +20,7 @@ import math
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.base_item import BaseItem
 from omotes_simulator_core.solver.network.assets.base_node_item import BaseNodeItem
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -59,6 +60,9 @@ class BaseAsset(BaseItem):
         )
         self.supply_temperature = supply_temperature
         self.connected_nodes = {}
+        self.pressure_to_node_equations: dict[int, EquationObject] = {}
+        self.prescribe_temperature_equations: dict[int, EquationObject] = {}
+        self.internal_energy_to_node_equations: dict[int, EquationObject] = {}
 
     def check_connection_point_valid(self, connection_point: int) -> bool:
         """Checks if the connection point is valid for the asset.
@@ -151,7 +155,7 @@ class BaseAsset(BaseItem):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -175,19 +179,27 @@ class BaseAsset(BaseItem):
                 f"Connection point {connection_point} of asset {self.name} is not connected to a"
                 + " node."
             )
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
+        if connection_point in self.prescribe_temperature_equations:
+            self.prescribe_temperature_equations[connection_point].rhs = fluid_props.get_ie(
+                self.supply_temperature
+            )
+            return self.prescribe_temperature_equations[connection_point]
+
+        self.prescribe_temperature_equations[connection_point] = EquationObject()
+        self.prescribe_temperature_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
             ]
         )
-        equation_object.coefficients = np.array([1.0])
-        equation_object.rhs = fluid_props.get_ie(self.supply_temperature)
-        return equation_object
+        self.prescribe_temperature_equations[connection_point].coefficients = np.array([1.0])
+        self.prescribe_temperature_equations[connection_point].rhs = fluid_props.get_ie(
+            self.supply_temperature
+        )
+        return self.prescribe_temperature_equations[connection_point]
 
     def get_internal_energy_to_node_equation(self, connection_point: int) -> EquationObject:
         """Gets a temperature to node equation for a connection point of the asset.
@@ -203,23 +215,27 @@ class BaseAsset(BaseItem):
                 f"Connection point {connection_point} of asset {self.name} is not connected to a"
                 + " node."
             )
+        if connection_point in self.internal_energy_to_node_equations:
+            return self.internal_energy_to_node_equations[connection_point]
 
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
+        self.internal_energy_to_node_equations[connection_point] = EquationObject()
+        self.internal_energy_to_node_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 ),
                 self.get_connected_node(connection_point).get_index_matrix(
-                    property_name="internal_energy", use_relative_indexing=False
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY, use_relative_indexing=False
                 ),
             ]
         )
-        equation_object.coefficients = np.array([1.0, -1.0])
-        equation_object.rhs = 0.0
-        return equation_object
+        self.internal_energy_to_node_equations[connection_point].coefficients = np.array(
+            [1.0, -1.0]
+        )
+        self.internal_energy_to_node_equations[connection_point].rhs = 0.0
+        return self.internal_energy_to_node_equations[connection_point]
 
     def set_physical_properties(self, physical_properties: dict[str, float]) -> None:
         """Method to set the physical properties of the asset.
@@ -241,23 +257,25 @@ class BaseAsset(BaseItem):
                 f"Connection point {connection_point} of asset {self.name} is not connected to a"
                 + " node."
             )
+        if connection_point in self.pressure_to_node_equations:
+            return self.pressure_to_node_equations[connection_point]
 
-        equation_object = EquationObject()
-        equation_object.indices = np.array(
+        self.pressure_to_node_equations[connection_point] = EquationObject()
+        self.pressure_to_node_equations[connection_point].indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 ),
                 self.get_connected_node(connection_point).get_index_matrix(
-                    property_name="pressure", use_relative_indexing=False
+                    core_quantity=CoreQuantity.PRESSURE, use_relative_indexing=False
                 ),
             ]
         )
-        equation_object.coefficients = np.array([1.0, -1.0])
-        equation_object.rhs = 0.0
-        return equation_object
+        self.pressure_to_node_equations[connection_point].coefficients = np.array([1.0, -1.0])
+        self.pressure_to_node_equations[connection_point].rhs = 0.0
+        return self.pressure_to_node_equations[connection_point]
 
     def add_massflow_to_node_equation(self, connection_point: int) -> EquationObject:
         """Adds a pressure to node equation for a connection point of the asset.
@@ -278,10 +296,12 @@ class BaseAsset(BaseItem):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="mass_flow_rate", connection_point=0, use_relative_indexing=False
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
+                    connection_point=0,
+                    use_relative_indexing=False,
                 ),
                 self.connected_nodes[connection_point].get_index_matrix(
-                    property_name="mass_flow_rate", use_relative_indexing=False
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE, use_relative_indexing=False
                 ),
             ]
         )
@@ -337,7 +357,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -353,7 +373,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -369,7 +389,7 @@ class BaseAsset(BaseItem):
         return fluid_props.get_t(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -385,7 +405,7 @@ class BaseAsset(BaseItem):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )

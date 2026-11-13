@@ -20,7 +20,10 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    CoreQuantity,
+    get_index_property,
+)
 from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
 
 
@@ -63,20 +66,20 @@ class BaseItem(ABC):
         self.matrix_index = index
 
     def get_index_matrix(
-        self, property_name: str, connection_point: int, use_relative_indexing: bool
+        self, core_quantity: CoreQuantity, connection_point: int, use_relative_indexing: bool
     ) -> int:
-        """Returns the index of the property&connection point in the coefficient array or matrix.
+        """Return the index of a core quantity at a connection point.
 
-        :param str property_name: The property name for which the matrix index is needed.
+        :param CoreQuantity core_quantity: The core quantity for which the matrix index is needed.
         :param int connection_point: The connection point for which the matrix index is needed.
         :param bool use_relative_indexing: returns the index into coefficient array for the current
             component matrix if true, otherwise return the index in the complete matrix if false.
 
         :return: The matrix index for the property and connection point.
         """
-        return index_core_quantity.get_index_property(
-            property_name=property_name, connection_point=connection_point
-        ) + (0 if use_relative_indexing else self.matrix_index)
+        return get_index_property(core_quantity, connection_point) + (
+            0 if use_relative_indexing else self.matrix_index
+        )
 
     @abstractmethod
     def get_equations(self) -> list[EquationObject]:
