@@ -203,7 +203,7 @@ python-dateutil==3.0.0
     #   pandas
 pytokens==0.4.1
     # via black
-pytz==2026.5
+pytz==2026.6
     # via
     #   -c ../../requirements.txt
     #   influxdb
@@ -262,7 +262,7 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tornado==6.6
     # via snakeviz
-types-requests==2.33.0.20261006
+types-requests==2.33.0.20261030
     # via omotes-simulator-core (../../pyproject.toml)
 typing-extensions==4.16.0
     # via

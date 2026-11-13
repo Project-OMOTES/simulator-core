@@ -167,6 +167,33 @@ The required mass flow follows the standard thermal power balance:
 where :math:`c_p` is fluid specific heat capacity and :math:`T_{in}, T_{out}` are the active ATES
 boundary temperatures for the current mode.
 
+Sand-production flow limit
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The requested mass flow is capped by both the existing charge/discharge well capacity and
+the NVOE extraction limit of the producing well. Charging produces from the cold well;
+discharging produces from the hot well. If the limit is reached, the thermal allocation is
+reduced to the power that the capped flow can exchange with the network.
+
+The extraction limit is:
+
+.. math::
+
+   \dot{V}_{max} = 2 \pi r H \frac{2 (3600) k \rho_s g}{\mu_s} f_d
+
+Here :math:`\dot{V}_{max}` is in m3/h, :math:`r` is the casing radius in metres,
+:math:`H` is aquifer thickness, :math:`k` is permeability in m2, and :math:`\rho_s`
+and :math:`\mu_s` are saline density and viscosity at the producing-well temperature.
+Pressure is estimated from the hydrostatic head; saline properties use the Batzle-Wang
+correlations. The casing diameter is converted from inches before calculating the radius.
+Network fluid density at the mean connection temperature converts this volumetric limit
+to a network-side mass-flow limit.
+
+The legacy depth factor :math:`f_d = 0.01 d`, with depth :math:`d` in metres, is retained.
+It is an expert-judgment correction for deeper ATES wells, not part of the NVOE guideline.
+This restriction addresses sand production only; the NVOE injection/clogging limit is
+not included.
+
 Temperature coupling with wells
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -226,3 +253,4 @@ References
 
 - TNO and Geological Survey of the Netherlands (NLOG), tools overview including ROSIM:
   https://www.nlog.nl/en/tools
+- NVOE, Richtlijnen Ondergrondse Energieopslag, November 2006.
