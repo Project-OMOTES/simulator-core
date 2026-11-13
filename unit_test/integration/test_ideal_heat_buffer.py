@@ -18,6 +18,7 @@
 import unittest
 from uuid import uuid4
 
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.buffer_asset import HeatBufferAsset
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
 from omotes_simulator_core.solver.network.network import Network
@@ -133,7 +134,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.production_asset.prev_sol[
                     self.production_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -147,7 +148,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.production_asset.prev_sol[
                     self.production_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=1,
                         use_relative_indexing=True,
                     )
@@ -160,7 +161,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.production_asset.prev_sol[
                 self.production_asset.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=1,
                     use_relative_indexing=True,
                 )
@@ -175,7 +176,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.demand_asset.prev_sol[
                     self.demand_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -189,7 +190,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.demand_asset.prev_sol[
                     self.demand_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=1,
                         use_relative_indexing=True,
                     )
@@ -202,7 +203,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.demand_asset.prev_sol[
                 self.demand_asset.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=1,
                     use_relative_indexing=True,
                 )
@@ -217,7 +218,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.heat_buffer_asset.prev_sol[
                     self.heat_buffer_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=0,
                         use_relative_indexing=True,
                     )
@@ -231,7 +232,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
             fluid_props.get_t(
                 self.heat_buffer_asset.prev_sol[
                     self.heat_buffer_asset.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=1,
                         use_relative_indexing=True,
                     )
@@ -244,7 +245,7 @@ class HeatBufferAssetIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             self.heat_buffer_asset.prev_sol[
                 self.heat_buffer_asset.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=1,
                     use_relative_indexing=True,
                 )

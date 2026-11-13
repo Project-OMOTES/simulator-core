@@ -50,6 +50,8 @@ class ControllerConsumer(AssetControllerAbstract):
         self.temperatures = temperatures
         self.max_power: float = max_power
         self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
+        self.latest_time: datetime.datetime | None = None
+        self.latest_value: float = 0.0
 
     def get_heat_demand(self, time: datetime.datetime) -> float:
         """Method to get the heat demand of the consumer.
@@ -59,16 +61,19 @@ class ControllerConsumer(AssetControllerAbstract):
         """
         if self.profile.empty:
             return 0.0
-
+        if self.latest_time == time:
+            return self.latest_value
         try:
-            demand = float(self.profile.loc[time, "values"])
+            demand = float(self.profile.at[time, "values"])
         except KeyError:
             return 0.0
-
+        self.latest_time = time
         if demand > self.max_power:
             logging.warning(
                 f"Demand of {self.name} is higher than maximum power of asset at time {time}."
             )
+            self.latest_value = self.max_power
             return self.max_power
         else:
+            self.latest_value = demand
             return demand
