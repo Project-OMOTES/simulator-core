@@ -509,14 +509,13 @@ energy continuity.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_index_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">core_quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../developer/api/omotes_simulator_core.solver.matrix.index_core_quantity.html#omotes_simulator_core.solver.matrix.index_core_quantity.CoreQuantity" title="omotes_simulator_core.solver.matrix.index_core_quantity.CoreQuantity"><span class="pre">CoreQuantity</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_relative_indexing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span></dt>
-<dd><p>Return a relative or absolute index for a node’s core quantity.</p>
+<span class="sig-name descname"><span class="pre">get_index_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_relative_indexing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span></dt>
+<dd><p>Method to get matrix index of a certain property for a connection point.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>core_quantity</strong> (<a class="reference internal" href="../../developer/api/omotes_simulator_core.solver.matrix.index_core_quantity.html#omotes_simulator_core.solver.matrix.index_core_quantity.CoreQuantity" title="omotes_simulator_core.solver.matrix.index_core_quantity.CoreQuantity"><em>CoreQuantity</em></a>) – The core quantity for which the matrix index is needed.</p></li>
-<li><p><strong>use_relative_indexing</strong> (<em>bool</em>) – Return an index into <code class="docutils literal notranslate"><span class="pre">prev_sol</span></code> if true,
-otherwise include the current matrix base.</p></li>
+<li><p><strong>property_name</strong> (<em>str</em>) – The property name for which the matrix index is needed.</p></li>
+<li><p><strong>matrix</strong> (<em>bool</em>) – Whether the index in the matrix should be included.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -628,10 +627,6 @@ value of the equation.</p>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_energy_equation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../developer/api/omotes_simulator_core.solver.matrix.equation_object.html#omotes_simulator_core.solver.matrix.equation_object.EquationObject" title="omotes_simulator_core.solver.matrix.equation_object.EquationObject"><span class="pre">EquationObject</span></a></span></span></dt>
 <dd><p>Returns an EquationObject that represents the energy equation for the node.</p>
-<p>Indices and coefficient storage are initialized on the first call, after which
-connections and matrix indices must remain fixed. Coefficients and RHS are
-refreshed from the current solution on every call. The returned object is reused,
-so it represents the latest equation rather than an independent snapshot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>EquationObject
