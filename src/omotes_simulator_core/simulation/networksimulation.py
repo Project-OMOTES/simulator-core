@@ -75,7 +75,6 @@ class NetworkSimulation:
             max_iterations = 20
             iteration = 0
             is_converged = False
-            self.network.network.reset_prev_solution()
             while not is_converged and iteration < max_iterations:
                 # Run time step
 

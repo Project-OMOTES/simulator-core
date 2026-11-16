@@ -21,7 +21,10 @@ from enum import Enum
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
-from omotes_simulator_core.solver.matrix.index_core_quantity import index_core_quantity
+from omotes_simulator_core.solver.matrix.index_core_quantity import (
+    NUMBER_OF_CORE_QUANTITIES,
+    CoreQuantity,
+)
 from omotes_simulator_core.solver.network.assets.base_asset import BaseAsset
 from omotes_simulator_core.solver.solver_constants import MASSFLOW_ZERO_LIMIT
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
@@ -88,7 +91,7 @@ class HeatTransferAsset(BaseAsset):
         super().__init__(
             name=name,
             _id=_id,
-            number_of_unknowns=index_core_quantity.number_core_quantities * 4,
+            number_of_unknowns=NUMBER_OF_CORE_QUANTITIES * 4,
             number_connection_points=4,
         )
         # Define the outlet temperature of the asset on the cold side
@@ -292,7 +295,7 @@ class HeatTransferAsset(BaseAsset):
             self.iteration_flow_direction_primary = self.flow_direction(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=self.primary_side_inflow,
                         use_relative_indexing=True,
                     )
@@ -301,7 +304,7 @@ class HeatTransferAsset(BaseAsset):
             self.iteration_flow_direction_secondary = self.flow_direction(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=self.secondary_side_inflow,
                         use_relative_indexing=True,
                     )
@@ -572,12 +575,12 @@ class HeatTransferAsset(BaseAsset):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=con_point1,
                     use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=con_point2,
                     use_relative_indexing=False,
                 ),
@@ -607,14 +610,14 @@ class HeatTransferAsset(BaseAsset):
         internal_energy_difference_primary = (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=self.primary_side_inflow,
                     use_relative_indexing=True,
                 )
             ]
             - self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=self.primary_side_outflow,
                     use_relative_indexing=True,
                 )
@@ -624,28 +627,28 @@ class HeatTransferAsset(BaseAsset):
         energy_secondary_side = self.heat_transfer_coefficient * (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=self.secondary_side_inflow,
                     use_relative_indexing=True,
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=self.secondary_side_inflow,
                     use_relative_indexing=True,
                 )
             ]
             + self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=self.secondary_side_outflow,
                     use_relative_indexing=True,
                 )
             ]
             * self.prev_sol[
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=self.secondary_side_outflow,
                     use_relative_indexing=True,
                 )
@@ -655,7 +658,7 @@ class HeatTransferAsset(BaseAsset):
             return float(
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=self.primary_side_inflow,
                         use_relative_indexing=True,
                     )
@@ -684,7 +687,7 @@ class HeatTransferAsset(BaseAsset):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -711,7 +714,7 @@ class HeatTransferAsset(BaseAsset):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -739,7 +742,7 @@ class HeatTransferAsset(BaseAsset):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -761,7 +764,7 @@ class HeatTransferAsset(BaseAsset):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=self.primary_side_inflow,
                     use_relative_indexing=True,
                 )
@@ -769,14 +772,14 @@ class HeatTransferAsset(BaseAsset):
             * (
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=self.primary_side_outflow,
                         use_relative_indexing=True,
                     )
                 ]
                 - self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=self.primary_side_inflow,
                         use_relative_indexing=True,
                     )
@@ -796,7 +799,7 @@ class HeatTransferAsset(BaseAsset):
         return float(
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=self.secondary_side_inflow,
                     use_relative_indexing=True,
                 )
@@ -804,14 +807,14 @@ class HeatTransferAsset(BaseAsset):
             * (
                 self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=self.secondary_side_outflow,
                         use_relative_indexing=True,
                     )
                 ]
                 - self.prev_sol[
                     self.get_index_matrix(
-                        property_name="internal_energy",
+                        core_quantity=CoreQuantity.INTERNAL_ENERGY,
                         connection_point=self.secondary_side_inflow,
                         use_relative_indexing=True,
                     )

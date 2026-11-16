@@ -52,6 +52,8 @@ class ControllerProducer(AssetControllerAbstract):
         self.marginal_costs: float = marginal_costs
         self.priority: None | int = priority
         self.profile: pd.DataFrame = profile.set_index("date") if not profile.empty else profile
+        self.latest_time: datetime.datetime | None = None
+        self.latest_value: float = 0.0
 
     def get_max_power(self, time: datetime.datetime) -> float:
         """Gets the maximum producer power at the given timestep.
@@ -60,11 +62,13 @@ class ControllerProducer(AssetControllerAbstract):
         maximum power defined in the esdl parameter.
         """
         if self.profile.empty:
+            return self.power
+        if self.latest_time == time:
+            return self.latest_value
+        self.latest_time = time
+        try:
+            max_power = float(self.profile.at[time, "values"])
+        except KeyError:
             max_power = self.power
-        else:
-            try:
-                max_power = float(self.profile.loc[time, "values"])
-            except KeyError:
-                max_power = self.power
-
+        self.latest_value = max_power
         return max_power

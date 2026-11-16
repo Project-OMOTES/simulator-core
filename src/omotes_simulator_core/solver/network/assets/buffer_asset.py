@@ -17,6 +17,7 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 from omotes_simulator_core.solver.utils.fluid_properties import fluid_props
 
@@ -135,12 +136,12 @@ class HeatBufferAsset(FallType):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=0,
                     use_relative_indexing=False,
                 ),
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=1,
                     use_relative_indexing=False,
                 ),
@@ -174,7 +175,7 @@ class HeatBufferAsset(FallType):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -202,7 +203,7 @@ class HeatBufferAsset(FallType):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="internal_energy",
+                    core_quantity=CoreQuantity.INTERNAL_ENERGY,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )
@@ -231,7 +232,7 @@ class HeatBufferAsset(FallType):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
@@ -254,7 +255,7 @@ class HeatBufferAsset(FallType):
         equation_object.indices = np.array(
             [
                 self.get_index_matrix(
-                    property_name="pressure",
+                    core_quantity=CoreQuantity.PRESSURE,
                     connection_point=connection_point,
                     use_relative_indexing=False,
                 )

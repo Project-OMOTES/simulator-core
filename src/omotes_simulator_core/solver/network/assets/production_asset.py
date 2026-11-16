@@ -17,6 +17,7 @@
 import numpy as np
 
 from omotes_simulator_core.solver.matrix.equation_object import EquationObject
+from omotes_simulator_core.solver.matrix.index_core_quantity import CoreQuantity
 from omotes_simulator_core.solver.network.assets.fall_type import FallType
 
 
@@ -92,6 +93,8 @@ class HeatBoundary(FallType):
         self.pre_scribe_mass_flow = pre_scribe_mass_flow
         self.mass_flow_rate_set_point = mass_flow_rate_set_point
         self.set_pressure = set_pressure
+        self.prescribe_mass_flow_equations: dict[int, EquationObject] = {}
+        self.prescribe_pressure_equations: dict[int, EquationObject] = {}
 
         super().__init__(
             name=name,
@@ -149,35 +152,49 @@ class HeatBoundary(FallType):
             raise IndexError("The connection point is not available.")
 
         # Create equation object
-        equation_object = EquationObject()
         if self.pre_scribe_mass_flow:
-            equation_object.indices = np.array(
+            if connection_point in self.prescribe_mass_flow_equations:
+                self.prescribe_mass_flow_equations[connection_point].rhs = (
+                    self.mass_flow_rate_set_point
+                )
+                return self.prescribe_mass_flow_equations[connection_point]
+            self.prescribe_mass_flow_equations[connection_point] = EquationObject()
+            self.prescribe_mass_flow_equations[connection_point].indices = np.array(
                 [
                     self.get_index_matrix(
-                        property_name="mass_flow_rate",
+                        core_quantity=CoreQuantity.MASS_FLOW_RATE,
                         connection_point=connection_point,
                         use_relative_indexing=False,
                     )
                 ]
             )
-            equation_object.coefficients = np.array([-1.0 + 2 * connection_point])
-            equation_object.rhs = self.mass_flow_rate_set_point
-        else:
-            equation_object.indices = np.array(
-                [
-                    self.get_index_matrix(
-                        property_name="pressure",
-                        connection_point=connection_point,
-                        use_relative_indexing=False,
-                    )
-                ]
+            self.prescribe_mass_flow_equations[connection_point].coefficients = np.array(
+                [-1.0 + 2 * connection_point]
             )
-            equation_object.coefficients = np.array([1.0])
+            self.prescribe_mass_flow_equations[connection_point].rhs = self.mass_flow_rate_set_point
+            return self.prescribe_mass_flow_equations[connection_point]
+        if connection_point in self.prescribe_pressure_equations:
             if connection_point == 0:
-                equation_object.rhs = 0.5 * self.set_pressure
+                self.prescribe_pressure_equations[connection_point].rhs = 0.5 * self.set_pressure
             else:
-                equation_object.rhs = self.set_pressure
-        return equation_object
+                self.prescribe_pressure_equations[connection_point].rhs = self.set_pressure
+            return self.prescribe_pressure_equations[connection_point]
+        self.prescribe_pressure_equations[connection_point] = EquationObject()
+        self.prescribe_pressure_equations[connection_point].indices = np.array(
+            [
+                self.get_index_matrix(
+                    core_quantity=CoreQuantity.PRESSURE,
+                    connection_point=connection_point,
+                    use_relative_indexing=False,
+                )
+            ]
+        )
+        self.prescribe_pressure_equations[connection_point].coefficients = np.array([1.0])
+        if connection_point == 0:
+            self.prescribe_pressure_equations[connection_point].rhs = 0.5 * self.set_pressure
+        else:
+            self.prescribe_pressure_equations[connection_point].rhs = self.set_pressure
+        return self.prescribe_pressure_equations[connection_point]
 
     def get_thermal_equations(self, connection_point: int) -> EquationObject:
         """Gets a thermal equation for a connection point of the asset.
@@ -190,7 +207,7 @@ class HeatBoundary(FallType):
         if (
             self.prev_sol[
                 self.get_index_matrix(
-                    property_name="mass_flow_rate",
+                    core_quantity=CoreQuantity.MASS_FLOW_RATE,
                     connection_point=connection_point,
                     use_relative_indexing=True,
                 )
