@@ -103,7 +103,11 @@ class EsdlAssetObject:
         """Get the profile of the asset's ports."""
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
-                return get_data_from_profile(esdl_port.profile[0])
+                for profile in esdl_port.profile:
+                    # We skip all profiles labeled as OUTPUT, since these are not used in the simulation.
+                    if profile.profileType == esdl.ProfileTypeEnum.OUTPUT:
+                        continue
+                    return get_data_from_profile(profile)
         logger.error(
             f"No profile found for asset: {self.esdl_asset.name}",
             extra={"esdl_object_id": self.get_id()},
