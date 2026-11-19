@@ -21,6 +21,7 @@ from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_DIAMETER,
     DEFAULT_POWER,
+    DEFAULT_POWER_CONVERGENCE,
     DEFAULT_PRESSURE,
     DEFAULT_TEMPERATURE,
     DEFAULT_TEMPERATURE_DIFFERENCE,
@@ -28,7 +29,6 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND_SET_POINT,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
-    DEFAULT_POWER_CONVERGENCE
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
@@ -139,7 +139,10 @@ class DemandCluster(AssetAbstract):
 
         :return: True if the asset has converged, False otherwise
         """
-        return (abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
-            abs(self.thermal_power_allocation) * 0.001
-        )) | (abs(self.get_heat_supplied() - self.thermal_power_allocation) <
-              DEFAULT_POWER_CONVERGENCE)
+        return (
+            abs(self.get_heat_supplied() - self.thermal_power_allocation)
+            < (abs(self.thermal_power_allocation) * 0.001)
+        ) | (
+            abs(self.get_heat_supplied() - self.thermal_power_allocation)
+            < DEFAULT_POWER_CONVERGENCE
+        )
