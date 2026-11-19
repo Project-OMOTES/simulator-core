@@ -22,7 +22,7 @@ dependencies = [
     "numpy>=2.4,<3",
     "pandas>=3.0.0,<4.0",
     "scipy>=1.16.1,<2",
-    "pyESDL[profiles]>=26.2,<27",
+    "pyESDL[profiles]>=26.10.4,<27",
     "dataclass-wizard>=0.22.3,<1",
     "influxdb>=5.3.2,<6",
     "pyjnius>=1.9,<2",
@@ -86,6 +86,7 @@ zip-safe = false
 ]
 
 [tool.pytest.ini_options]
+addopts = "--cov=omotes_simulator_core --cov-report html --cov-report term-missing --cov-fail-under 90"
 testpaths = ["unit_test"]
 
 [tool.coverage.run]
