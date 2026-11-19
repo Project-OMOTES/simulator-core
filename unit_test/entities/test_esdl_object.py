@@ -28,6 +28,7 @@ from omotes_simulator_core.adapter.transforms.string_to_esdl import (
     StringEsdlAssetMapper,
 )
 from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
+from omotes_simulator_core.entities.assets.esdl_asset_object import RETURN_SIDE, SUPPLY_SIDE
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.esdl_object import EsdlObject
@@ -506,6 +507,90 @@ class EsdlObjectTest(unittest.TestCase):
         temp_prim_in = heatpump.get_temperature_port(ports[3], "Return")
         # Assert
         self.assertEqual(temp_prim_in, 50 + 273.15)
+
+    def test_get_port_side_consumer_producer_pipe(self):
+        """Consumer in and producer out are supply, the opposite ports return, pipes None."""
+        # Arrange
+        consumer = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)[0]
+        producer = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)[0]
+        pipe = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PIPE)[0]
+
+        def side(asset, port_type):
+            port = next(p for p in asset.esdl_asset.port if isinstance(p, port_type))
+            return asset.get_port_side(port.id)
+
+        # Act / Assert
+        self.assertEqual(side(consumer, esdl.InPort), SUPPLY_SIDE)
+        self.assertEqual(side(consumer, esdl.OutPort), RETURN_SIDE)
+        self.assertEqual(side(producer, esdl.InPort), RETURN_SIDE)
+        self.assertEqual(side(producer, esdl.OutPort), SUPPLY_SIDE)
+        self.assertIsNone(side(pipe, esdl.InPort))
+        self.assertIsNone(side(pipe, esdl.OutPort))
+
+    def test_get_port_side_heat_pump(self):
+        """Primary in and secondary out are supply, primary out and secondary in return."""
+        # Arrange
+        esdl_file_path = Path(__file__).parent / ".." / ".." / "testdata" / "simple_heat_pump.esdl"
+        esdl_object = EsdlObject(pyesdl_from_file(str(esdl_file_path)))
+        heatpump = esdl_object.get_all_assets_of_type(OmotesAssetLabels.HEAT_PUMP)[0]
+        ports = heatpump.get_port_ids()
+
+        # Act
+        sides = [heatpump.get_port_side(port_id) for port_id in ports]
+
+        # Assert
+        self.assertEqual(sides, [SUPPLY_SIDE, RETURN_SIDE, RETURN_SIDE, SUPPLY_SIDE])
+
+    def test_get_port_carrier_temperatures(self):
+        """Only the temperatures set on the carrier are returned."""
+        # Arrange
+        consumer = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.CONSUMER)[0]
+        in_port = next(p for p in consumer.esdl_asset.port if isinstance(p, esdl.InPort))
+        out_port = next(p for p in consumer.esdl_asset.port if isinstance(p, esdl.OutPort))
+
+        # Act
+        in_temperatures = consumer.get_port_carrier_temperatures(in_port.id)
+        out_temperatures = consumer.get_port_carrier_temperatures(out_port.id)
+        in_port.carrier = None
+        no_carrier_temperatures = consumer.get_port_carrier_temperatures(in_port.id)
+
+        # Assert
+        self.assertEqual(in_temperatures, (80.0 + 273.15, None))
+        self.assertEqual(out_temperatures, (None, 40.0 + 273.15))
+        self.assertEqual(no_carrier_temperatures, (None, None))
+        with self.assertRaises(ValueError):
+            consumer.get_port_carrier_temperatures("unknown")
+
+    def test_get_port_sides(self):
+        """Pipe ports get the side of the producer/consumer ports they are connected to."""
+        # Arrange
+        pipe = self.esdl_object.get_asset_by_id("Pipe1")
+        pipe_ret = self.esdl_object.get_asset_by_id("Pipe1_ret")
+
+        # Act
+        port_sides = self.esdl_object.get_port_sides()
+
+        # Assert
+        for port in pipe.esdl_asset.port:
+            self.assertEqual(port_sides[port.id], SUPPLY_SIDE)
+        for port in pipe_ret.esdl_asset.port:
+            self.assertEqual(port_sides[port.id], RETURN_SIDE)
+
+    def test_get_port_sides_conflict(self):
+        """A pipe connecting a supply port to a return port gives an undetermined side."""
+        # Arrange
+        producer = self.esdl_object.get_all_assets_of_type(OmotesAssetLabels.PRODUCER)[0]
+        in_port = next(p for p in producer.esdl_asset.port if isinstance(p, esdl.InPort))
+        pipe = self.esdl_object.get_asset_by_id("Pipe1")
+        pipe_out = next(p for p in pipe.esdl_asset.port if isinstance(p, esdl.OutPort))
+        pipe_out.connectedTo.append(in_port)
+
+        # Act
+        port_sides = self.esdl_object.get_port_sides()
+
+        # Assert
+        self.assertIsNone(port_sides[pipe_out.id])
+        self.assertIsNone(port_sides[in_port.id])
 
 
 class StringEsdlAssetMapperTest(unittest.TestCase):

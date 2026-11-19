@@ -98,3 +98,45 @@ class EsdlObject:
         :return: EsdlAssetObject with the asset.
         """
         return EsdlAssetObject(self.energy_system_handler.get_by_id(asset_id))
+
+    def get_port_sides(self) -> dict[str, str | None]:
+        """Determine for every port of an enabled asset whether it is on the supply or return side.
+
+        Ports are grouped into connected components through port connections and through
+        pass-through assets (pipes, joints and other transport assets), which keep the side the
+        same. A component gets the side of the side-defining ports it contains
+        (see EsdlAssetObject.get_port_side). When no or conflicting sides are found the side of
+        the component is None.
+
+        :return: Dictionary with port id as key and SUPPLY_SIDE, RETURN_SIDE or None as value.
+        """
+        port_sides: dict[str, str | None] = {}
+        for start_asset in self.get_all_assets_of_type(OmotesAssetLabels.ASSET):
+            if start_asset.get_state() != "ENABLED":
+                continue
+            for start_port in start_asset.esdl_asset.port:
+                if start_port.id in port_sides:
+                    continue
+                component: list[str] = []
+                sides: set[str] = set()
+                seen = {start_port.id}
+                stack = [start_port]
+                while stack:
+                    port = stack.pop()
+                    component.append(port.id)
+                    asset = EsdlAssetObject(port.energyasset)
+                    side = asset.get_port_side(port.id)
+                    neighbours = list(port.connectedTo)
+                    if side is not None:
+                        sides.add(side)
+                    elif asset.is_pass_through_asset():
+                        neighbours += [p for p in asset.esdl_asset.port if p.id != port.id]
+                    for neighbour in neighbours:
+                        if neighbour.id in seen or str(neighbour.energyasset.state) != "ENABLED":
+                            continue
+                        seen.add(neighbour.id)
+                        stack.append(neighbour)
+                component_side = next(iter(sides)) if len(sides) == 1 else None
+                for port_id in component:
+                    port_sides[port_id] = component_side
+        return port_sides
