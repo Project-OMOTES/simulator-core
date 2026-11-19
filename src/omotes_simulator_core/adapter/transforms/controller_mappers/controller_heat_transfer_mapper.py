@@ -18,12 +18,12 @@
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     PRIMARY,
+    PROPERTY_COP,
+    PROPERTY_EFFICIENCY,
+    PROPERTY_POWER,
     SECONDARY,
     HeatExchangerDefaults,
     HeatPumpDefaults,
-    PROPERTY_POWER,
-    PROPERTY_COP,
-    PROPERTY_EFFICIENCY,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
@@ -51,7 +51,8 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         coefficient_of_performance = esdl_asset.get_property(
-            esdl_property_name=PROPERTY_COP, default_value=HeatPumpDefaults.coefficient_of_performance
+            esdl_property_name=PROPERTY_COP,
+            default_value=HeatPumpDefaults.coefficient_of_performance,
         )
         max_electrical_power = esdl_asset.get_property(
             esdl_property_name=PROPERTY_POWER, default_value=None

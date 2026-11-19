@@ -28,10 +28,10 @@ from omotes_simulator_core.adapter.transforms.string_to_esdl import (
 from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
 from omotes_simulator_core.adapter.utility.load_asset_from_edr import get_diameter_from_edr
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PRIMARY,
-    SECONDARY,
-    PROPERTY_INNER_DIAMETER,
     PIPE_DEFAULTS,
+    PRIMARY,
+    PROPERTY_INNER_DIAMETER,
+    SECONDARY,
 )
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolationMethod,
@@ -348,7 +348,7 @@ class EsdlAssetObject:
 
         """
         # Use default schedule since schedule is not a valid ESDL Pipe attribute
-        if not(hasattr(self.esdl_asset, PROPERTY_INNER_DIAMETER)):
+        if not (hasattr(self.esdl_asset, PROPERTY_INNER_DIAMETER)):
             logger.error(f"{self.get_name()} does not have an inner diameter.")
             raise ValueError(f"{self.get_name()} does not have an inner diameter.")
 

@@ -15,6 +15,7 @@
 """Module containing the Esdl to Pipe asset mapper class."""
 
 import logging
+
 import numpy as np
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
@@ -87,6 +88,3 @@ class EsdlAssetPipeMapper(EsdlMapperAbstract):
             return 1.0 / float(inverse_heat_transfer_coefficient)
         else:
             return PIPE_DEFAULTS.alpha_value
-
-
-

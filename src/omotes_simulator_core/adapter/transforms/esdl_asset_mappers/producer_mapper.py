@@ -18,8 +18,10 @@
 import esdl
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_EFFICIENCY, \
-    DEFAULT_EFFICIENCY
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    DEFAULT_EFFICIENCY,
+    PROPERTY_EFFICIENCY,
+)
 from omotes_simulator_core.entities.assets.elec_boiler import ElecBoiler
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.gas_heater import GasHeater
