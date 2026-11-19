@@ -39,6 +39,22 @@ from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from
 
 logger = logging.getLogger(__name__)
 
+SUPPLY_SIDE = "Supply"
+RETURN_SIDE = "Return"
+
+CONSUMER_LIKE_LABELS = (
+    OmotesAssetLabels.CONSUMER,
+    OmotesAssetLabels.ATES,
+    OmotesAssetLabels.STORAGE,
+)
+PRODUCER_LIKE_LABELS = (
+    OmotesAssetLabels.PRODUCER,
+    OmotesAssetLabels.GEOTHERMAL,
+    OmotesAssetLabels.GAS_HEATER,
+    OmotesAssetLabels.ELECTRIC_BOILER,
+    OmotesAssetLabels.RESIDUAL_HEAT,
+)
+
 
 class EsdlAssetObject:
     """
@@ -230,6 +246,63 @@ class EsdlAssetObject:
             logger.error(f"Unknown esdl type for temperatures: {self.esdl_asset.name}")
             raise ValueError(f"Unknown esdl type for temperatures: {self.esdl_asset.name}")
         return temperatures
+
+    def get_port_side(self, port_id: str) -> str | None:
+        """Return whether the given port lies on the supply or the return side of the network.
+
+        Consumer-like assets (consumers, ATES, storage) take in supply water at their in port and
+        deliver return water at their out port. Producer-like assets do the opposite. For heat
+        transfer assets with four ports the primary side is consumer-like and the secondary side
+        is producer-like. For all other assets (e.g. pipes and joints) None is returned.
+
+        :param str port_id: Id of the port to classify.
+        :return: SUPPLY_SIDE, RETURN_SIDE or None when the side cannot be derived from the asset.
+        """
+        try:
+            esdl_type = self.get_esdl_type()
+        except NotImplementedError:
+            return None
+        port = next((p for p in self.esdl_asset.port if p.id == port_id), None)
+        if port is None:
+            raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
+        is_in_port = isinstance(port, esdl.InPort)
+        if esdl_type in CONSUMER_LIKE_LABELS:
+            return SUPPLY_SIDE if is_in_port else RETURN_SIDE
+        if esdl_type in PRODUCER_LIKE_LABELS or (
+            esdl_type == OmotesAssetLabels.HEAT_PUMP and self.get_number_of_ports() == 2
+        ):
+            return RETURN_SIDE if is_in_port else SUPPLY_SIDE
+        if esdl_type in (OmotesAssetLabels.HEAT_EXCHANGER, OmotesAssetLabels.HEAT_PUMP):
+            # Sorted port order: primary in, primary out, secondary in, secondary out.
+            port_index = self.get_port_ids().index(port_id)
+            return SUPPLY_SIDE if port_index in (0, 3) else RETURN_SIDE
+        return None
+
+    def get_port_carrier_temperatures(self, port_id: str) -> tuple[float | None, float | None]:
+        """Return the supply and return temperature [K] of the carrier of the given port.
+
+        :param str port_id: Id of the port.
+        :return: Tuple of supply and return temperature, None for a temperature that is not set.
+        """
+        for esdl_port in self.esdl_asset.port:
+            if esdl_port.id == port_id:
+                carrier = esdl_port.carrier
+                temperatures: list[float | None] = []
+                for attribute in ("supplyTemperature", "returnTemperature"):
+                    if (
+                        carrier is not None
+                        and hasattr(carrier, attribute)
+                        and carrier.eIsSet(attribute)
+                    ):
+                        temperatures.append(float(celcius_to_kelvin(getattr(carrier, attribute))))
+                    else:
+                        temperatures.append(None)
+                return temperatures[0], temperatures[1]
+        raise ValueError(f"No port found with id: {port_id} for asset: {self.esdl_asset.name}")
+
+    def is_pass_through_asset(self) -> bool:
+        """Check if the asset keeps the supply/return side of its ports (e.g. pipe or joint)."""
+        return isinstance(self.esdl_asset, esdl.Transport) and not self.is_heat_transfer_asset()
 
     def get_port_ids(self) -> list[str]:
         """Returns a sorted list of the port ids of the asset."""
