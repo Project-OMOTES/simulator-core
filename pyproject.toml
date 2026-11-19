@@ -28,6 +28,9 @@ dependencies = [
     "pyjnius>=1.9,<2",
     "CoolProp>=8,<9",
     "NetworkX>=3.4,<4",
+    "psycopg>=3.3.9",
+    "psycopg-binary>=3.3.9",
+    "openpyxl>=3.1.5"
 ]
 
 [project.optional-dependencies]
