@@ -19,49 +19,10 @@ import logging
 
 import esdl
 import pandas as pd
-from esdl.esdl_handler import EnergySystemHandler
-from esdl.profiles.influxdbprofilemanager import ConnectionSettings, InfluxDBProfileManager
 from esdl.profiles.profile_utils import load_profile_data_and_header
 from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 
 logger = logging.getLogger(__name__)
-
-
-def _normalize_influx_filters(filters: str | None) -> list[dict[str, str]]:
-    """Parse and normalize filters to the format expected by load_influxdb.
-
-    The upstream parser may return dictionaries with a `key` field while
-    load_influxdb expects `tag`. This shim keeps compatibility across versions.
-    """
-    parsed_filters = InfluxDBProfileManager._parse_esdl_profile_filters(filters)
-    normalized_filters: list[dict[str, str]] = []
-    for influx_filter in parsed_filters:
-        tag = influx_filter.get("tag") or influx_filter.get("key")
-        value = influx_filter.get("value")
-        if not tag or value is None:
-            continue
-        normalized_filters.append(
-            {
-                "tag": str(tag),
-                "value": str(value).strip().strip('"').strip("'"),
-            }
-        )
-    return normalized_filters
-
-
-def parse_esdl_profiles(esh: EnergySystemHandler) -> dict[str, pd.DataFrame]:
-    """Method to parse the esdl profiles from an energy system.
-
-    This method tries to parse the esdl profiles from an energy system.
-    :param esh: EnergySystemHandler with the energy system
-    :param start_date: datetime.datetime with the start date
-    :param end_date: datetime.datetime with the end date
-    :return: dict with the parsed profiles
-    """
-    data_set = {}
-    for profile in esh.get_all_instances_of_type(esdl.InfluxDBProfile):
-        data_set[profile.id] = get_data_from_profile(profile)
-    return data_set
 
 
 def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
