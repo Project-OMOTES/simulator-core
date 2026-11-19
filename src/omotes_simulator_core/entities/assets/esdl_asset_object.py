@@ -104,7 +104,7 @@ class EsdlAssetObject:
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 for profile in esdl_port.profile:
-                    # We skip all profiles labeled as OUTPUT, since these are not used in the simulation.
+                    # We skip all profiles labeled as OUTPUT.
                     if profile.profileType == esdl.ProfileTypeEnum.OUTPUT:
                         continue
                     return get_data_from_profile(profile)

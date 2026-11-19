@@ -16,9 +16,6 @@
 """Module to read the esdl profiles from an energy system."""
 
 import logging
-import os
-from datetime import datetime
-from typing import cast
 
 import esdl
 import pandas as pd
