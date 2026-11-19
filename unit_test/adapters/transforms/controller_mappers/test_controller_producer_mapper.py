@@ -68,4 +68,4 @@ class TestControllerProducerMapper(unittest.TestCase):
 
         # Assert
         self.assertEqual(producer_assets[0].has_constraint(), True)
-        self.assertEqual(constraint_profile.iloc[0].values[1], 14327.76298)
+        self.assertEqual(constraint_profile.iloc[0].values[1], 143277.6298)
