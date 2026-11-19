@@ -32,14 +32,13 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    profile_data = load_profile_data_and_header(esdl_profile)
+    profile_data = load_profile_data_and_header(esdl_profile, apply_multiplier=True)
     unit = get_unit(esdl_profile)
     return pd.DataFrame(
         (
             (
                 time_stamp,
                 convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit)
-                * esdl_profile.multiplier,
             )
             for time_stamp, value in profile_data[0]
         ),
