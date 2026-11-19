@@ -15,8 +15,10 @@
 
 """Module containing the Esdl to Producer asset mapper class."""
 
-import esdl
-
+from omotes_simulator_core.adapter.transforms.string_to_esdl import (
+    OmotesAssetLabels,
+    StringEsdlAssetMapper,
+)
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_EFFICIENCY,
@@ -43,7 +45,12 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
         :return: Producer object.
         """
         producer_entity: AssetAbstract
-        if isinstance(esdl_asset.esdl_asset, esdl.ElectricBoiler):
+        if all(
+            [
+                isinstance(esdl_asset.esdl_asset, esdl_type)
+                for esdl_type in StringEsdlAssetMapper.to_esdl(OmotesAssetLabels.ELECTRIC_BOILER)
+            ]
+        ):
             producer_entity = ElecBoiler(
                 asset_name=esdl_asset.get_name(),
                 asset_id=esdl_asset.get_id(),
@@ -51,7 +58,12 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
                 efficiency=esdl_asset.get_property(PROPERTY_EFFICIENCY, DEFAULT_EFFICIENCY),
             )
 
-        elif isinstance(esdl_asset.esdl_asset, esdl.GasHeater):
+        elif all(
+            [
+                isinstance(esdl_asset.esdl_asset, esdl_type)
+                for esdl_type in StringEsdlAssetMapper.to_esdl(OmotesAssetLabels.GAS_HEATER)
+            ]
+        ):
             producer_entity = GasHeater(
                 asset_name=esdl_asset.get_name(),
                 asset_id=esdl_asset.get_id(),
