@@ -152,7 +152,7 @@ class JunctionTemperatureTest(unittest.TestCase):
         for asset in asset_list:
             for con_point, port_id in enumerate(asset.connected_ports):
                 node = asset.solver_asset.get_connected_node(con_point)
-                temperatures[port_id] = node.initial_temperature
+                temperatures[port_id] = node.initial_temperature  # type: ignore
         for junction in junction_list:
             self.assertEqual(junction.tfluid_k, junction.solver_junction.initial_temperature)
         return temperatures
