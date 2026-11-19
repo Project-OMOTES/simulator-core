@@ -28,6 +28,7 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_HEAT_DEMAND_SET_POINT,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
+    DEFAULT_POWER_CONVERGENCE
 )
 from omotes_simulator_core.entities.assets.utils import heat_demand_and_temperature_to_mass_flow
 from omotes_simulator_core.solver.network.assets.production_asset import HeatBoundary
@@ -94,7 +95,7 @@ class DemandCluster(AssetAbstract):
             # After the first time step: use solver temperature
             self.temperature_in = self.solver_asset.get_temperature(0)
             # The input temeprature can become lower when the flow ahs become zero.
-            if self.temperature_in < self.temperature_out:
+            if self.temperature_in <= self.temperature_out:
                 self.temperature_in = setpoints[PROPERTY_TEMPERATURE_IN]
 
         adjusted_mass_flowrate = heat_demand_and_temperature_to_mass_flow(
@@ -140,4 +141,5 @@ class DemandCluster(AssetAbstract):
         """
         return (abs(self.get_heat_supplied() - self.thermal_power_allocation) < (
             abs(self.thermal_power_allocation) * 0.001
-        )) | (abs(self.get_heat_supplied() - self.thermal_power_allocation) < 1000)
+        )) | (abs(self.get_heat_supplied() - self.thermal_power_allocation) <
+              DEFAULT_POWER_CONVERGENCE)
