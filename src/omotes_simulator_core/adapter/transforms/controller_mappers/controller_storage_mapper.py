@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    PROPERTY_FILL_LEVEL,
+    ESDL_PROPERTY_FILL_LEVEL,
     PROPERTY_MAX_CHARGE_RATE,
     PROPERTY_MAX_DISCHARGE_RATE,
     PROPERTY_VOLUME,
@@ -107,7 +107,9 @@ class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
             temperatures=esdl_asset.get_temperatures_asset(),
             max_charge_power=esdl_asset.get_property(PROPERTY_MAX_CHARGE_RATE, np.inf),
             max_discharge_power=esdl_asset.get_property(PROPERTY_MAX_DISCHARGE_RATE, np.inf),
-            fill_level=esdl_asset.get_property(PROPERTY_FILL_LEVEL, HeatBufferDefaults.fill_level),
+            fill_level=esdl_asset.get_property(
+                ESDL_PROPERTY_FILL_LEVEL, HeatBufferDefaults.fill_level
+            ),
             volume=esdl_asset.get_property(PROPERTY_VOLUME, HeatBufferDefaults.volume),
             profile=resampled_profile,
         )

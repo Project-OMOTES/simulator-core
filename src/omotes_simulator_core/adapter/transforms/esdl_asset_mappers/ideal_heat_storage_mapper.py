@@ -15,7 +15,11 @@
 """Module containing the Esdl to IdealHeatStorage asset mapper class."""
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
-from omotes_simulator_core.entities.assets.asset_defaults import HeatBufferDefaults
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    ESDL_PROPERTY_FILL_LEVEL,
+    PROPERTY_VOLUME,
+    HeatBufferDefaults,
+)
 from omotes_simulator_core.entities.assets.esdl_asset_object import EsdlAssetObject
 from omotes_simulator_core.entities.assets.ideal_heat_storage import IdealHeatStorage
 from omotes_simulator_core.simulation.mappers.mappers import EsdlMapperAbstract
@@ -38,8 +42,10 @@ class EsdlIdealHeatStorageMapper(EsdlMapperAbstract):
             asset_name=esdl_asset.get_name(),
             asset_id=esdl_asset.get_id(),
             port_ids=esdl_asset.get_port_ids(),
-            volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
-            initial_fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
+            volume=esdl_asset.get_property(PROPERTY_VOLUME, HeatBufferDefaults.volume),
+            initial_fill_level=esdl_asset.get_property(
+                ESDL_PROPERTY_FILL_LEVEL, HeatBufferDefaults.fill_level
+            ),
             temperature_in=esdl_asset.get_temperature("In", "Supply"),
             temperature_out=esdl_asset.get_temperature("Out", "Return"),
         )

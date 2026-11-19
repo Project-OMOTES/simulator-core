@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Module containing the Esdl to Pipe asset mapper class."""
+"""Module containing utilities to retrieve asset data from the ESDL Energy Data Repository."""
 
 from esdl.edr.client import EDRClient
 
@@ -27,11 +27,11 @@ def get_diameter_from_edr(
     dn_diameter: str, schedule: PipeSchedules = PIPE_DEFAULTS.default_schedule
 ) -> float:
     """
-    Retrieves a specific ESDL object from the EDR list based on the nominal diameter.
+    Retrieves the inner diameter of a pipe from the EDR list based on the nominal diameter.
 
     :param dn_diameter: the nominal diameter of the pipe.
     :param schedule: the insulation schedule (PipeSchedules enum: S1, S2, or S3).
-    :return: EsdlAssetObject from the EDR based on the DN diameter.
+    :return: Inner diameter [m] of the EDR pipe matching the DN diameter and schedule.
 
     """
     try:
@@ -39,6 +39,6 @@ def get_diameter_from_edr(
         title = f"/edr/Public/Assets/Logstor/Steel-{schedule.name}-DN-{diameter}.edd"
         edr_client = EDRClient()
         esdl_object = edr_client.get_object_esdl(title)
-        return getattr(esdl_object, PROPERTY_INNER_DIAMETER, PIPE_DEFAULTS.diameter)
+        return float(getattr(esdl_object, PROPERTY_INNER_DIAMETER, PIPE_DEFAULTS.diameter))
     except Exception as e:
         raise RuntimeError(f"Failed to retrieve ESDL object for DN diameter '{dn_diameter}': {e}")

@@ -45,11 +45,10 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
         :return: Producer object.
         """
         producer_entity: AssetAbstract
-        if all(
-            [
-                isinstance(esdl_asset.esdl_asset, esdl_type)
-                for esdl_type in StringEsdlAssetMapper.to_esdl(OmotesAssetLabels.ELECTRIC_BOILER)
-            ]
+        type_mapper = StringEsdlAssetMapper()
+        if isinstance(
+            esdl_asset.esdl_asset,
+            tuple(type_mapper.to_esdl(OmotesAssetLabels.ELECTRIC_BOILER)),
         ):
             producer_entity = ElecBoiler(
                 asset_name=esdl_asset.get_name(),
@@ -58,11 +57,9 @@ class EsdlAssetProducerMapper(EsdlMapperAbstract):
                 efficiency=esdl_asset.get_property(PROPERTY_EFFICIENCY, DEFAULT_EFFICIENCY),
             )
 
-        elif all(
-            [
-                isinstance(esdl_asset.esdl_asset, esdl_type)
-                for esdl_type in StringEsdlAssetMapper.to_esdl(OmotesAssetLabels.GAS_HEATER)
-            ]
+        elif isinstance(
+            esdl_asset.esdl_asset,
+            tuple(type_mapper.to_esdl(OmotesAssetLabels.GAS_HEATER)),
         ):
             producer_entity = GasHeater(
                 asset_name=esdl_asset.get_name(),
