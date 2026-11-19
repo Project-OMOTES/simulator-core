@@ -29,7 +29,7 @@ charset-normalizer==3.5.2
     # via
     #   -c ../../requirements.txt
     #   requests
-click==8.5.0
+click==8.5.1
     # via black
 colorama==0.4.6
     # via
@@ -40,7 +40,7 @@ coolprop==8.0.0
     # via
     #   -c ../../requirements.txt
     #   omotes-simulator-core (../../pyproject.toml)
-coverage[toml]==7.17.0
+coverage[toml]==7.17.3
     # via pytest-cov
 dataclass-wizard==0.39.1
     # via
@@ -48,6 +48,10 @@ dataclass-wizard==0.39.1
     #   omotes-simulator-core (../../pyproject.toml)
 docutils==0.21.2
     # via sphinx
+et-xmlfile==2.0.0
+    # via
+    #   -c ../../requirements.txt
+    #   openpyxl
 flake8==7.4.1
     # via
     #   flake8-bugbear
@@ -84,6 +88,7 @@ influxdb==5.3.2
     # via
     #   -c ../../requirements.txt
     #   omotes-simulator-core (../../pyproject.toml)
+    #   pyesdl
 iniconfig==2.3.1
     # via pytest
 isort==9.0.2
@@ -107,18 +112,18 @@ msgpack==1.2.4
     #   influxdb
 mypy==2.4.1
     # via omotes-simulator-core (../../pyproject.toml)
-mypy-extensions==1.1.0
+mypy-extensions==1.2.0
     # via
     #   black
     #   isort
     #   mypy
-narwhals==2.28.0
+narwhals==2.29.0
     # via plotly
 networkx==3.7
     # via
     #   -c ../../requirements.txt
     #   omotes-simulator-core (../../pyproject.toml)
-numpy==2.5.4
+numpy==2.5.5
     # via
     #   -c ../../requirements.txt
     #   coolprop
@@ -128,6 +133,10 @@ numpy==2.5.4
     #   pyogrio
     #   scipy
     #   shapely
+openpyxl==3.1.5
+    # via
+    #   -c ../../requirements.txt
+    #   pyesdl
 ordered-set==4.1.0
     # via
     #   -c ../../requirements.txt
@@ -144,7 +153,7 @@ packaging==26.3
     #   setuptools-git-versioning
     #   sphinx
     #   wheel
-pandas==3.1.0
+pandas==3.1.1
     # via
     #   -c ../../requirements.txt
     #   geopandas
@@ -153,7 +162,7 @@ pathspec==1.1.1
     # via
     #   black
     #   mypy
-platformdirs==4.14.0
+platformdirs==4.14.7
     # via black
 plotly==7.1.0
     # via omotes-simulator-core (../../pyproject.toml)
@@ -161,6 +170,14 @@ pluggy==1.7.0
     # via
     #   pytest
     #   pytest-cov
+psycopg[binary]==3.3.9
+    # via
+    #   -c ../../requirements.txt
+    #   pyesdl
+psycopg-binary==3.3.9
+    # via
+    #   -c ../../requirements.txt
+    #   psycopg
 pycodestyle==2.15.0
     # via flake8
 pydocstyle==6.3.0
@@ -169,10 +186,11 @@ pyecore==0.15.2
     # via
     #   -c ../../requirements.txt
     #   pyesdl
-pyesdl==26.10.4
+pyesdl[profiles]==26.10.4
     # via
     #   -c ../../requirements.txt
     #   omotes-simulator-core (../../pyproject.toml)
+    #   pyesdl
 pyflakes==4.0.3
     # via flake8
 pygments==2.21.0
@@ -196,14 +214,14 @@ pytest==9.2.0
     #   pytest-cov
 pytest-cov==7.1.0
     # via omotes-simulator-core (../../pyproject.toml)
-python-dateutil==3.0.0
+python-dateutil==4.0.0
     # via
     #   -c ../../requirements.txt
     #   influxdb
     #   pandas
 pytokens==0.4.1
     # via black
-pytz==2026.5
+pytz==2026.6
     # via
     #   -c ../../requirements.txt
     #   influxdb
@@ -213,7 +231,7 @@ requests==2.34.2
     #   influxdb
     #   pyesdl
     #   sphinx
-restrictedpython==8.5
+restrictedpython==9.0
     # via
     #   -c ../../requirements.txt
     #   pyecore
@@ -221,7 +239,7 @@ scipy==1.18.1
     # via
     #   -c ../../requirements.txt
     #   omotes-simulator-core (../../pyproject.toml)
-setuptools-git-versioning==3.2.0
+setuptools-git-versioning==3.2.2
     # via omotes-simulator-core (../../pyproject.toml)
 shapely==2.2.0
     # via
@@ -232,14 +250,13 @@ six==1.17.0
     #   -c ../../requirements.txt
     #   flake8-tuple
     #   influxdb
-    #   python-dateutil
 snakeviz==2.2.0
     # via omotes-simulator-core (../../pyproject.toml)
 snowballstemmer==3.1.1
     # via
     #   pydocstyle
     #   sphinx
-soupsieve==3.0.4
+soupsieve==4.1.2
     # via beautifulsoup4
 sphinx==8.0.2
     # via
@@ -260,9 +277,9 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-tornado==6.6
+tornado==6.6.1
     # via snakeviz
-types-requests==2.33.0.20261006
+types-requests==2.33.0.20261030
     # via omotes-simulator-core (../../pyproject.toml)
 typing-extensions==4.16.0
     # via
@@ -272,6 +289,7 @@ tzdata==2026.6
     # via
     #   -c ../../requirements.txt
     #   pandas
+    #   psycopg
     #   python-dateutil
 urllib3==2.8.0
     # via
