@@ -20,6 +20,7 @@ from typing import Optional
 
 import pandas as pd
 
+from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_POWER
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -50,7 +51,7 @@ class ControllerProducerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        power = esdl_asset.get_property(esdl_property_name="power", default_value=0)
+        power = esdl_asset.get_property(esdl_property_name=PROPERTY_POWER, default_value=0)
         marginal_costs = esdl_asset.get_marginal_costs()
         temperatures = esdl_asset.get_temperatures_asset()
         strategy_priority = esdl_asset.get_strategy_priority()
@@ -76,8 +77,8 @@ class ControllerProducerMapper(EsdlMapperAbstract):
             resampled_profile = pd.DataFrame()
 
         contr_producer = ControllerProducer(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             temperatures=temperatures,
             power=power,
             marginal_costs=marginal_costs,

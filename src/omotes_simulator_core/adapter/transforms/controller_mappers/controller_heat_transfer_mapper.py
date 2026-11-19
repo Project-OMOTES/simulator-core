@@ -21,6 +21,9 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     SECONDARY,
     HeatExchangerDefaults,
     HeatPumpDefaults,
+    PROPERTY_POWER,
+    PROPERTY_COP,
+    PROPERTY_EFFICIENCY,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
@@ -48,17 +51,17 @@ class ControllerHeatPumpMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         coefficient_of_performance = esdl_asset.get_property(
-            esdl_property_name="COP", default_value=HeatPumpDefaults.coefficient_of_performance
+            esdl_property_name=PROPERTY_COP, default_value=HeatPumpDefaults.coefficient_of_performance
         )
         max_electrical_power = esdl_asset.get_property(
-            esdl_property_name="power", default_value=None
+            esdl_property_name=PROPERTY_POWER, default_value=None
         )
         temperatures_primary = esdl_asset.get_temperatures_asset(side=PRIMARY)
         temperatures_secondary = esdl_asset.get_temperatures_asset(side=SECONDARY)
 
         contr_heat_transfer = ControllerHeatTransferAsset(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             factor=coefficient_of_performance,
             heat_transfer_type=HeatTransferAssetType.HEAT_PUMP,
             temperatures_primary=temperatures_primary,
@@ -83,14 +86,14 @@ class ControllerHeatExchangeMapper(EsdlMapperAbstract):
         :return: Entity object.
         """
         coefficient_of_performance = esdl_asset.get_property(
-            esdl_property_name="Efficiency",
+            esdl_property_name=PROPERTY_EFFICIENCY,
             default_value=HeatExchangerDefaults.heat_transfer_efficiency,
         )
         temperatures_primary = esdl_asset.get_temperatures_asset(side=PRIMARY)
         temperatures_secondary = esdl_asset.get_temperatures_asset(side=SECONDARY)
         contr_heat_transfer = ControllerHeatTransferAsset(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             factor=coefficient_of_performance,
             temperatures_primary=temperatures_primary,
             temperatures_secondary=temperatures_secondary,

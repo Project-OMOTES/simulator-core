@@ -19,6 +19,7 @@ from typing import Optional
 
 import numpy as np
 
+from omotes_simulator_core.entities.assets.asset_defaults import PROPERTY_POWER
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -47,7 +48,7 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
 
         :return: Entity object.
         """
-        power = esdl_asset.get_property(esdl_property_name="power", default_value=np.inf)
+        power = esdl_asset.get_property(esdl_property_name=PROPERTY_POWER, default_value=np.inf)
         # It looks like they are switch, but this is because of the definition used in ESDL,
         # which is different as what we use.
         temperatures = esdl_asset.get_temperatures_asset()
@@ -61,8 +62,8 @@ class ControllerConsumerMapper(EsdlMapperAbstract):
         resampled_profile = profile_interpolator.get_resampled_profile()
 
         contr_consumer = ControllerConsumer(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             temperatures=temperatures,
             max_power=power,
             profile=resampled_profile,

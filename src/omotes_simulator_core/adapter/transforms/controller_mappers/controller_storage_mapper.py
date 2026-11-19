@@ -20,7 +20,12 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from omotes_simulator_core.entities.assets.asset_defaults import HeatBufferDefaults
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    HeatBufferDefaults,
+    PROPERTY_MAX_CHARGE_RATE,
+    PROPERTY_MAX_DISCHARGE_RATE,
+    PROPERTY_FILL_LEVEL, PROPERTY_VOLUME,
+)
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
     AssetControllerAbstract,
 )
@@ -61,11 +66,11 @@ class ControllerAtesStorageMapper(EsdlMapperAbstract):
         resampled_profile = profile_interpolator.get_resampled_profile()
 
         return ControllerAtesStorage(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             temperatures=esdl_asset.get_temperatures_asset(),
-            max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
-            max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
+            max_charge_power=esdl_asset.get_property(PROPERTY_MAX_CHARGE_RATE, np.inf),
+            max_discharge_power=esdl_asset.get_property(PROPERTY_MAX_DISCHARGE_RATE, np.inf),
             profile=resampled_profile,
         )
 
@@ -96,12 +101,12 @@ class ControllerIdealHeatStorageMapper(EsdlMapperAbstract):
         resampled_profile = profile_interpolator.get_resampled_profile()
 
         return ControllerIdealHeatStorage(
-            name=esdl_asset.esdl_asset.name,
-            identifier=esdl_asset.esdl_asset.id,
+            name=esdl_asset.get_name(),
+            identifier=esdl_asset.get_id(),
             temperatures=esdl_asset.get_temperatures_asset(),
-            max_charge_power=esdl_asset.get_property("maxChargeRate", np.inf),
-            max_discharge_power=esdl_asset.get_property("maxDischargeRate", np.inf),
-            fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),
-            volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
+            max_charge_power=esdl_asset.get_property(PROPERTY_MAX_CHARGE_RATE, np.inf),
+            max_discharge_power=esdl_asset.get_property(PROPERTY_MAX_DISCHARGE_RATE, np.inf),
+            fill_level=esdl_asset.get_property(PROPERTY_FILL_LEVEL, HeatBufferDefaults.fill_level),
+            volume=esdl_asset.get_property(PROPERTY_VOLUME, HeatBufferDefaults.volume),
             profile=resampled_profile,
         )
