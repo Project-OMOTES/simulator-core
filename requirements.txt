@@ -14,12 +14,16 @@ coolprop==8.0.0
     # via omotes-simulator-core (../../pyproject.toml)
 dataclass-wizard==0.39.1
     # via omotes-simulator-core (../../pyproject.toml)
+et-xmlfile==2.0.0
+    # via openpyxl
 future-fstrings==1.2.0
     # via pyecore
 idna==3.20
     # via requests
 influxdb==5.3.2
-    # via omotes-simulator-core (../../pyproject.toml)
+    # via
+    #   omotes-simulator-core (../../pyproject.toml)
+    #   pyesdl
 lxml==6.1.3
     # via
     #   pyecore
@@ -28,25 +32,33 @@ msgpack==1.2.4
     # via influxdb
 networkx==3.7
     # via omotes-simulator-core (../../pyproject.toml)
-numpy==2.5.4
+numpy==2.5.5
     # via
     #   coolprop
     #   omotes-simulator-core (../../pyproject.toml)
     #   pandas
     #   scipy
+openpyxl==3.1.5
+    # via pyesdl
 ordered-set==4.1.0
     # via
     #   pyecore
     #   pyesdl
-pandas==3.1.0
+pandas==3.1.1
     # via omotes-simulator-core (../../pyproject.toml)
+psycopg[binary]==3.3.9
+    # via pyesdl
+psycopg-binary==3.3.9
+    # via psycopg
 pyecore==0.15.2
     # via pyesdl
-pyesdl==26.10.4
-    # via omotes-simulator-core (../../pyproject.toml)
+pyesdl[profiles]==26.10.4
+    # via
+    #   omotes-simulator-core (../../pyproject.toml)
+    #   pyesdl
 pyjnius==1.9.0
     # via omotes-simulator-core (../../pyproject.toml)
-python-dateutil==3.0.0
+python-dateutil==4.0.0
     # via
     #   influxdb
     #   pandas
@@ -56,17 +68,16 @@ requests==2.34.2
     # via
     #   influxdb
     #   pyesdl
-restrictedpython==8.5
+restrictedpython==9.0
     # via pyecore
 scipy==1.18.1
     # via omotes-simulator-core (../../pyproject.toml)
 six==1.17.0
-    # via
-    #   influxdb
-    #   python-dateutil
+    # via influxdb
 tzdata==2026.6
     # via
     #   pandas
+    #   psycopg
     #   python-dateutil
 urllib3==2.8.0
     # via requests
