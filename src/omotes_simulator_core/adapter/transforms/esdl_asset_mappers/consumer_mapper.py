@@ -34,8 +34,8 @@ class EsdlAssetConsumerMapper(EsdlMapperAbstract):
         :return: Consumer object.
         """
         consumer_entity = DemandCluster(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
+            asset_name=esdl_asset.get_name(),
+            asset_id=esdl_asset.get_id(),
             port_ids=esdl_asset.get_port_ids(),
         )
 

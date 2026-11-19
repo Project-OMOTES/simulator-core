@@ -35,8 +35,8 @@ class EsdlAssetHeatExchangerMapper(EsdlMapperAbstract):
         :return: HeatExchanger object.
         """
         heat_exchanger_entity = HeatExchanger(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
+            asset_name=esdl_asset.get_name(),
+            asset_id=esdl_asset.get_id(),
             connected_ports=esdl_asset.get_port_ids(),
             heat_transfer_efficiency=esdl_asset.get_property(
                 "Efficiency", HeatExchangerDefaults.heat_transfer_efficiency

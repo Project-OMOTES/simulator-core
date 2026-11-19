@@ -35,8 +35,8 @@ class EsdlIdealHeatStorageMapper(EsdlMapperAbstract):
         :return: IdealHeatStorage object.
         """
         return IdealHeatStorage(
-            asset_name=esdl_asset.esdl_asset.name,
-            asset_id=esdl_asset.esdl_asset.id,
+            asset_name=esdl_asset.get_name(),
+            asset_id=esdl_asset.get_id(),
             port_ids=esdl_asset.get_port_ids(),
             volume=esdl_asset.get_property("volume", HeatBufferDefaults.volume),
             initial_fill_level=esdl_asset.get_property("fillLevel", HeatBufferDefaults.fill_level),

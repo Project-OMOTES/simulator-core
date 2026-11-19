@@ -26,7 +26,13 @@ from omotes_simulator_core.adapter.transforms.string_to_esdl import (
     StringEsdlAssetMapper,
 )
 from omotes_simulator_core.adapter.transforms.transform_utils import Port, PortType, sort_ports
-from omotes_simulator_core.entities.assets.asset_defaults import PRIMARY, SECONDARY
+from omotes_simulator_core.adapter.utility.load_asset_from_edr import get_diameter_from_edr
+from omotes_simulator_core.entities.assets.asset_defaults import (
+    PRIMARY,
+    SECONDARY,
+    PROPERTY_INNER_DIAMETER,
+    PIPE_DEFAULTS,
+)
 from omotes_simulator_core.entities.assets.controller.profile_interpolation import (
     ProfileInterpolationMethod,
     ProfileSamplingMethod,
@@ -329,3 +335,39 @@ class EsdlAssetObject:
     def get_esdl_type(self) -> str:
         """Returns the ESDL type of the asset as a string."""
         return StringEsdlAssetMapper().to_entity(type(self.esdl_asset))
+
+    def get_diameter(self) -> float:
+        """Retrieve the diameter of the pipe and convert it if necessary.
+
+        :param EsdlAssetObject esdl_asset: The ESDL asset object associated with the
+            current pipe object.
+        :return: The inner diameter of the pipe if specified, otherwise it uses the nominal
+        diameter to retrieve the inner diameter from the EDR list. If neither is available,
+        a default diameter is returned. When only the nominal diameter is specified,
+        the insulation schedule must be provided; in this case, it is assumed to be 1.
+
+        """
+        # Use default schedule since schedule is not a valid ESDL Pipe attribute
+        if not(hasattr(self.esdl_asset, PROPERTY_INNER_DIAMETER)):
+            logger.error(f"{self.get_name()} does not have an inner diameter.")
+            raise ValueError(f"{self.get_name()} does not have an inner diameter.")
+
+        # diameter is an esdl.PipeDiameterEnum; VALUE_SPECIFIED means no DN size is given.
+        dn_diameter = self.esdl_asset.diameter
+        if dn_diameter == esdl.PipeDiameterEnum.VALUE_SPECIFIED:
+            logger.warning(
+                f"Property innerDiameter is not set for: {self.get_name()}. "
+                f"Returning default value: {PIPE_DEFAULTS.diameter} m.",
+                extra={"esdl_object_id": self.get_id()},
+            )
+            return PIPE_DEFAULTS.diameter
+        schedule = PIPE_DEFAULTS.default_schedule
+        inner_diameter = get_diameter_from_edr(dn_diameter.name, schedule)
+
+        logger.warning(
+            f"Property innerDiameter is not set for: {self.get_name()}. "
+            f"Schedule {schedule.name} is assumed for retrieval of pipe inner diameter from the "
+            f"EDR list.Returning value: {inner_diameter} m.",
+            extra={"esdl_object_id": self.get_id()},
+        )
+        return inner_diameter
