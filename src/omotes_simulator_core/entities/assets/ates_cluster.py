@@ -24,13 +24,13 @@ from scipy.constants import g
 
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    ATES_DEFAULTS,
     DEFAULT_ATMOSPHERIC_PRESSURE,
-    DEFAULT_TEMPERATURE,
     PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HOT_WELL_TEMPERATURE,
     PROPERTY_MASSFLOW,
+    PROPERTY_MAXIMUM_FLOW_CHARGE,
+    PROPERTY_MAXIMUM_FLOW_DISCHARGE,
     PROPERTY_PRESSURE_RETURN,
     PROPERTY_PRESSURE_SUPPLY,
     PROPERTY_SET_PRESSURE,
@@ -118,6 +118,12 @@ class AtesCluster(AssetAbstract):
     well_distance: float
     """The distance of the well [m]."""
 
+    maximum_flow_charge: float
+    """Configured charging capacity derived from initial temperatures and power [m3/h]."""
+
+    maximum_flow_discharge: float
+    """Configured discharging capacity derived from initial temperatures and power [m3/h]."""
+
     solver_asset: HeatBoundary
     """The heat boundary used by the network solver."""
 
@@ -139,8 +145,10 @@ class AtesCluster(AssetAbstract):
         salinity: float,
         well_casing_size: float,
         well_distance: float,
-        hot_well_temperature: float = DEFAULT_TEMPERATURE,
-        cold_well_temperature: float = DEFAULT_TEMPERATURE,
+        hot_well_temperature: float,
+        cold_well_temperature: float,
+        max_charge_power: float,
+        max_discharge_power: float,
     ) -> None:
         """Initialize a AtesCluster object.
 
@@ -166,6 +174,16 @@ class AtesCluster(AssetAbstract):
         self.salinity = salinity  # ppm
         self.well_casing_size = well_casing_size  # inch
         self.well_distance = well_distance  # meters
+        self.maximum_flow_charge = self._flow_from_power(
+            thermal_power=max_charge_power,
+            temperature_hot=self.temperature_connection_0,
+            temperature_cold=self.temperature_connection_1,
+        )  # m3/h
+        self.maximum_flow_discharge = self._flow_from_power(
+            thermal_power=max_discharge_power,
+            temperature_hot=self.temperature_connection_0,
+            temperature_cold=self.temperature_connection_1,
+        )  # m3/h
 
         # Output list
         self.output: list = []
@@ -175,6 +193,35 @@ class AtesCluster(AssetAbstract):
         self._init_rosim()
         self.first_time_step = True
         self.charging = True
+
+    def _flow_from_power(
+        self,
+        thermal_power: float,
+        temperature_hot: float,
+        temperature_cold: float,
+    ) -> float:
+        """Calculate volume-flow capacity from power and the initial well temperatures.
+
+        :param float thermal_power: Thermal power to be exchanged [W].
+        :param float temperature_hot: Temperature of the hot side of the asset [K].
+        :param float temperature_cold: Temperature of the cold side of the asset [K].
+        :return: float with volume flow rate [m3/h].
+        """
+        if temperature_hot <= temperature_cold:
+            return 0.0
+
+        mass_flowrate = heat_demand_and_temperature_to_mass_flow(
+            thermal_power,
+            temperature_hot,
+            temperature_cold,
+        )
+        volume_flowrate = (
+            mass_flowrate
+            / fluid_props.get_density((temperature_hot + temperature_cold) / 2.0)
+            * 3600.0
+        )  # m3/h
+
+        return volume_flowrate
 
     def _calculate_massflowrate(self) -> None:
         """Calculate the mass flow rate set point of the asset.
@@ -207,26 +254,35 @@ class AtesCluster(AssetAbstract):
 
         :return float: The maximum mass flow rate of the asset [kg/s].
         """
-        if self.charging:
-            maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_charge  # m3/h
-        else:
-            maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
+        maximum_volume_flow_rate = self._get_maximum_volume_flow_rate(self.charging)
+        average_temperature = (self.temperature_connection_0 + self.temperature_connection_1) / 2
+        density = fluid_props.get_density(average_temperature)
+        return maximum_volume_flow_rate / 3600 * density
+
+    def _get_maximum_volume_flow_rate(self, charging: bool) -> float:
+        """Get the current NVOE-limited volume-flow capacity without changing configuration.
+
+        :param charging: True for charging, False for discharging.
+        :return: Maximum volume flow rate for the requested mode [m3/h].
+        """
         average_temperature = (self.temperature_connection_0 + self.temperature_connection_1) / 2
         downhole_pressure = (
             self._get_saline_density(DEFAULT_ATMOSPHERIC_PRESSURE, average_temperature)
             * g
             * self.aquifer_depth
         )
-        # Charging produces from the cold well; discharging produces from the hot well.
+        # Charging produces from the cold well and injects into the hot well; discharging reverses.
         production_temperature = (
-            self.cold_well_temperature if self.charging else self.hot_well_temperature
+            self.cold_well_temperature if charging else self.hot_well_temperature
         )
-        maximum_volume_flow_rate = min(
-            maximum_volume_flow_rate,
+        injection_temperature = (
+            self.hot_well_temperature if charging else self.cold_well_temperature
+        )
+        return min(
+            self.maximum_flow_charge if charging else self.maximum_flow_discharge,
+            self._get_max_flowrate_injection_norm(downhole_pressure, injection_temperature),
             self._get_max_flowrate_extraction_norm(downhole_pressure, production_temperature),
         )
-        density = fluid_props.get_density(average_temperature)
-        return maximum_volume_flow_rate / 3600 * density
 
     def _get_max_flowrate_extraction_norm(self, pressure: float, temperature: float) -> float:
         """Calculate the NVOE extraction limit for sand production [m3/h].
@@ -254,6 +310,32 @@ class AtesCluster(AssetAbstract):
             * self.aquifer_depth
             * 0.01
         )
+
+    def _get_max_flowrate_injection_norm(self, pressure: float, temperature: float) -> float:
+        """Calculate the NVOE injection limit for clogging [m3/h].
+
+        Uses the NVOE Richtlijnen Ondergrondse Energieopslag (November 2006) with
+        the legacy clogging velocity, membrane filter index and annual load hours.
+        The extraction-only depth correction does not apply to injection.
+
+        :param pressure: Downhole pressure [Pa].
+        :param temperature: Injecting well temperature [K].
+        """
+        saline_density = self._get_saline_density(pressure, temperature)
+        saline_viscosity = self._get_saline_viscosity(temperature)
+        permeability = self.aquifer_permeability * 9.8692326671601e-16  # mD to m2
+        well_radius = 0.5 * self.well_casing_size * 0.0254  # inch to m
+        clogging_velocity = 0.3  # m/year
+        membrane_filter_index = 0.1  # s/l2
+        equivalent_load_hours_per_year = 3500  # hours/year
+        maximum_injection_velocity: float = (
+            1000
+            * math.pow(576 * permeability * saline_density * g / saline_viscosity, 0.6)
+            * math.sqrt(
+                clogging_velocity / (2 * membrane_filter_index * equivalent_load_hours_per_year)
+            )
+        )
+        return 2 * math.pi * well_radius * self.aquifer_thickness * maximum_injection_velocity
 
     def _get_saline_density(self, pressure: float, temperature: float) -> float:
         """Calculate saline density using the Batzle-Wang correlation [kg/m3].
@@ -407,6 +489,8 @@ class AtesCluster(AssetAbstract):
             PROPERTY_HOT_WELL_TEMPERATURE: self.hot_well_temperature,
             PROPERTY_COLD_WELL_TEMPERATURE: self.cold_well_temperature,
             PROPERTY_TIMESTEP: self.time_step,
+            PROPERTY_MAXIMUM_FLOW_CHARGE: self._get_maximum_volume_flow_rate(charging=True),
+            PROPERTY_MAXIMUM_FLOW_DISCHARGE: self._get_maximum_volume_flow_rate(charging=False),
         }
 
     def write_to_output(self) -> None:

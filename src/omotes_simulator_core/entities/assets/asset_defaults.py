@@ -85,6 +85,8 @@ class AtesDefaults:
     well_distance: float = 150.0  # meters
     maximum_flow_charge: float = 200.0  # m3/h
     maximum_flow_discharge: float = 200.0  # m3/h
+    maximum_charge_power: float = 10000000.0  # W
+    maximum_discharge_power: float = 10000000.0  # W
 
 
 @dataclass
@@ -156,6 +158,8 @@ PROPERTY_FILL_LEVEL = "fill_level"
 PROPERTY_TIMESTEP = "time_step"
 PRIMARY = "primary"
 SECONDARY = "secondary"
+PROPERTY_MAXIMUM_FLOW_CHARGE = "maximum_flow_charge"
+PROPERTY_MAXIMUM_FLOW_DISCHARGE = "maximum_flow_discharge"
 
 # Buffer names
 PROPERTY_BUFFER_HOT_TEMPERATURE = "buffer_hot_temperature"
