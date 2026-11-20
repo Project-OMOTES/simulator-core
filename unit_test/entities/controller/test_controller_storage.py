@@ -31,6 +31,8 @@ from omotes_simulator_core.entities.assets.asset_defaults import (
     PROPERTY_FILL_LEVEL,
     PROPERTY_HOT_WELL_TEMPERATURE,
     PROPERTY_TIMESTEP,
+    PROPERTY_MAXIMUM_FLOW_CHARGE,
+    PROPERTY_MAXIMUM_FLOW_DISCHARGE,
 )
 from omotes_simulator_core.entities.assets.controller.controller_storage import (
     ControllerAtesStorage,
@@ -164,6 +166,9 @@ class ControllerAtestStorageTest(unittest.TestCase):
                 PROPERTY_HOT_WELL_TEMPERATURE: hot_well_temperature,
                 PROPERTY_COLD_WELL_TEMPERATURE: cold_well_temperature,
                 PROPERTY_TIMESTEP: 3600,
+                PROPERTY_MAXIMUM_FLOW_CHARGE: ATES_DEFAULTS.maximum_flow_charge,
+                PROPERTY_MAXIMUM_FLOW_DISCHARGE: ATES_DEFAULTS.maximum_flow_discharge,
+
             }
         )
 
@@ -200,6 +205,8 @@ class ControllerAtestStorageTest(unittest.TestCase):
                 PROPERTY_HOT_WELL_TEMPERATURE: 333.15,  # below the minimum discharge temperature
                 PROPERTY_COLD_WELL_TEMPERATURE: 313.15,
                 PROPERTY_TIMESTEP: 3600,
+                PROPERTY_MAXIMUM_FLOW_CHARGE: ATES_DEFAULTS.maximum_flow_charge,
+                PROPERTY_MAXIMUM_FLOW_DISCHARGE: ATES_DEFAULTS.maximum_flow_discharge,
             }
         )
 
@@ -224,6 +231,9 @@ class ControllerAtestStorageTest(unittest.TestCase):
                 PROPERTY_HOT_WELL_TEMPERATURE: 352.15,  # just below the supply temperature
                 PROPERTY_COLD_WELL_TEMPERATURE: 313.15,
                 PROPERTY_TIMESTEP: 3600,
+                PROPERTY_MAXIMUM_FLOW_CHARGE: ATES_DEFAULTS.maximum_flow_charge,
+                PROPERTY_MAXIMUM_FLOW_DISCHARGE: ATES_DEFAULTS.maximum_flow_discharge,
+
             }
         )
 
