@@ -76,8 +76,7 @@ class EsdlAssetAtesMapper(EsdlMapperAbstract):
             hot_well_temperature=temperatures.out_flow,
             cold_well_temperature=temperatures.in_flow,
             max_charge_power=esdl_asset.get_property(
-                esdl_property_name="maxChargeRate",
-                default_value=ATES_DEFAULTS.maximum_charge_power
+                esdl_property_name="maxChargeRate", default_value=ATES_DEFAULTS.maximum_charge_power
             ),
             max_discharge_power=esdl_asset.get_property(
                 esdl_property_name="maxDischargeRate",
