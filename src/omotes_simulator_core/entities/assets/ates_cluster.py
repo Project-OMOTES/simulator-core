@@ -25,6 +25,7 @@ from scipy.constants import g
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
+    DEFAULT_ATMOSPHERIC_PRESSURE,
     DEFAULT_TEMPERATURE,
     PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_HEAT_DEMAND,
@@ -212,7 +213,9 @@ class AtesCluster(AssetAbstract):
             maximum_volume_flow_rate = ATES_DEFAULTS.maximum_flow_discharge  # m3/h
         average_temperature = (self.temperature_connection_0 + self.temperature_connection_1) / 2
         downhole_pressure = (
-            self._get_saline_density(101325, average_temperature) * g * self.aquifer_depth
+            self._get_saline_density(DEFAULT_ATMOSPHERIC_PRESSURE, average_temperature)
+            * g
+            * self.aquifer_depth
         )
         # Charging produces from the cold well; discharging produces from the hot well.
         production_temperature = (
