@@ -188,8 +188,9 @@ class NetworkController(NetworkControllerAbstract):
                         for consumer in network.consumers:
                             total_heat_demand += asset_setpoints[consumer.id][PROPERTY_HEAT_DEMAND]
                         for storage in network.storages:
-                            total_storage_demand += (
-                                asset_setpoints)[storage.id][PROPERTY_HEAT_DEMAND]
+                            total_storage_demand += (asset_setpoints)[storage.id][
+                                PROPERTY_HEAT_DEMAND
+                            ]
                             total_heat_demand += asset_setpoints[storage.id][PROPERTY_HEAT_DEMAND]
 
             # this might look weird, but we know there is only one primary or secondary asset.
