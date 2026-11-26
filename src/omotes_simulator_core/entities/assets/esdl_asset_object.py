@@ -35,7 +35,7 @@ from omotes_simulator_core.entities.assets.controller.temperature_data import (
     Temperatures,
     celcius_to_kelvin,
 )
-from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.entities.utility.database_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
 

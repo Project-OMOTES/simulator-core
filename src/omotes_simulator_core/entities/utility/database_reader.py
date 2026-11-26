@@ -25,14 +25,16 @@ from esdl.units.conversion import ENERGY_IN_J, POWER_IN_W, convert_to_unit
 logger = logging.getLogger(__name__)
 
 
-def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
-    """Method to get the data from the esdl influxdb profile.
+def get_data_from_profile(esdl_profile: esdl.DataTableProfile | esdl.InfluxDBProfile
+                                        | esdl.TimeSeriesProfile | esdl.DateTimeProfile
+                                        | esdl.ProfileReference) -> pd.DataFrame:
+    """Method to get the data from the esdl  profile.
 
     This method tries to get the data from the esdl profile.
     :param esdl_profile: esdl.Profile with the profile
     :return: pandas.DataFrame with the data
     """
-    profile_data = load_profile_data_and_header(esdl_profile, apply_multiplier=True)
+    profile_data, _ = load_profile_data_and_header(esdl_profile, apply_multiplier=True)
     unit = get_unit(esdl_profile)
     return pd.DataFrame(
         (
@@ -40,13 +42,14 @@ def get_data_from_profile(esdl_profile: esdl.InfluxDBProfile) -> pd.DataFrame:
                 time_stamp,
                 convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit)
             )
-            for time_stamp, value in profile_data[0]
+            for time_stamp, value in profile_data # type-ignore
         ),
         columns=["date", "values"],
     )
 
 
-def get_unit(profile: esdl.InfluxDBProfile) -> esdl.PhysicalQuantityEnum:
+def get_unit(profile: esdl.DataTableProfile | esdl.InfluxDBProfile| esdl.TimeSeriesProfile
+                      | esdl.DateTimeProfile | esdl.ProfileReference) -> esdl.PhysicalQuantityEnum:
     """Method to get the SI unit of the profile.
 
     This method tries to get the unit of the profile.
