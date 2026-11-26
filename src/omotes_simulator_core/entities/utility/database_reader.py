@@ -36,6 +36,12 @@ def get_data_from_profile(esdl_profile: esdl.DataTableProfile | esdl.InfluxDBPro
     """
     profile_data, _ = load_profile_data_and_header(esdl_profile, apply_multiplier=True)
     unit = get_unit(esdl_profile)
+    if profile_data is None:
+        logger.error(
+            f"No profile data found for asset: {esdl_profile.name}",
+            extra={"esdl_object_id": esdl_profile.id},
+        )
+        raise ValueError(f"No profile data found for asset: {esdl_profile.name}")
     return pd.DataFrame(
         (
             (
