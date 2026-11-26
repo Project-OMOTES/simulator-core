@@ -35,7 +35,7 @@ from omotes_simulator_core.entities.assets.controller.temperature_data import (
     Temperatures,
     celcius_to_kelvin,
 )
-from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.entities.utility.database_reader import get_data_from_profile
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,18 @@ class EsdlAssetObject:
             return getattr(self.esdl_asset, esdl_property_name, default_value)
 
     def get_profile(self) -> pd.DataFrame:
-        """Get the profile of the asset's ports."""
+        """Get the profile of the asset's ports.
+
+        Output profiles are skipped, and the first input profile found is returned.
+        If no profile is found, a ValueError is raised.
+        """
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
-                return get_data_from_profile(esdl_port.profile[0])
+                for profile in esdl_port.profile:
+                    # We skip all profiles labeled as OUTPUT.
+                    if profile.profileType == esdl.ProfileTypeEnum.OUTPUT:
+                        continue
+                    return get_data_from_profile(profile)
         logger.error(
             f"No profile found for asset: {self.esdl_asset.name}",
             extra={"esdl_object_id": self.get_id()},

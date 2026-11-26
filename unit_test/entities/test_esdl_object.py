@@ -31,7 +31,7 @@ from omotes_simulator_core.entities.assets.demand_cluster import DemandCluster
 from omotes_simulator_core.entities.assets.pipe import Pipe
 from omotes_simulator_core.entities.assets.production_cluster import ProductionCluster
 from omotes_simulator_core.entities.esdl_object import EsdlObject
-from omotes_simulator_core.entities.utility.influxdb_reader import get_data_from_profile
+from omotes_simulator_core.entities.utility.database_reader import get_data_from_profile
 from omotes_simulator_core.infrastructure.utils import pyesdl_from_file
 
 
