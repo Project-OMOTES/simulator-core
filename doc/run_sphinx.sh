@@ -24,9 +24,9 @@ fi
 
 # shellcheck source=/dev/null
 source "./.venv/bin/activate"
-
-cd ..
-python -m pip install -r requirements.txt
+cd "$SCRIPT_DIR"
+python -m pip install -r requirements.txt	
+python -m pip install -e "$SCRIPT_DIR/.."
 
 make clean
 make html

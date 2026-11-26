@@ -113,7 +113,8 @@ Implementation notes
 - ``set_setpoints`` usually checks that all required keys are present and raises an error
   otherwise. Keep the keys aligned with the controller; see :doc:`controller_reference`.
 - ``write_standard_output`` writes mass flow, pressure, temperature and volume flow per
-  port. Call it from ``write_to_output`` and add asset-specific values afterwards; see
+  port. It is called automatically by ``HeatNetwork``. 
+- ``write_to_output`` should update the ``self.output`` dictionary  with any asset-specific values afterwards; see
   :doc:`AddOutputFormat`.
 - Override ``is_converged`` when the asset changes solver settings based on the solved
   state. ``ProductionCluster``, ``DemandCluster``, ``AtesCluster`` and

@@ -41,7 +41,7 @@ When reviewing the RST content, consider the following aspects:
 Commandline tools and scripts
 -----------------------------
 Do NOT run command-line tools or scripts without explicit permission. 
-Do not run any tools that modify files or content. You may run read-only commands to validate syntax and formatting, but do not make any changes to the files.
+Do not rewrite sections of the RST content. Your role is limited to reviewing and validating the content for syntax, formatting, and structural consistency. Small repairs in RST syntax and formatting are allowed if necessary. Changes should be minimal and only made to correct clear errors. For larger issues or structural changes, notify the user and provide recommendations rather than making the changes directly.
 
 You can use the following tools to assist in your review:
 
