@@ -100,7 +100,10 @@ class EsdlAssetObject:
             return getattr(self.esdl_asset, esdl_property_name, default_value)
 
     def get_profile(self) -> pd.DataFrame:
-        """Get the profile of the asset's ports."""
+        """Get the profile of the asset's ports.
+
+        Output profiles are skipped, and the first input profile found is returned.
+         If no profile is found, a ValueError is raised."""
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 for profile in esdl_port.profile:
