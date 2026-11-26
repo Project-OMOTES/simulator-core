@@ -82,6 +82,8 @@ class Network:
         """
         if asset.name in self.assets:
             raise ValueError(f"{asset.name} already exists in network.")
+        if asset.id in [asset_list.id for _, asset_list in self.assets.items()]:
+            raise ValueError(f"{asset.id} already exists in network.")
         self.assets[asset.name] = asset
         return asset.name
 
