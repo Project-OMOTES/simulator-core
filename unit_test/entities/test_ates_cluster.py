@@ -17,12 +17,17 @@
 
 import unittest
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+from scipy.constants import g
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
     ATES_DEFAULTS,
     PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_HEAT_DEMAND,
     PROPERTY_HOT_WELL_TEMPERATURE,
+    PROPERTY_MAXIMUM_FLOW_CHARGE,
+    PROPERTY_MAXIMUM_FLOW_DISCHARGE,
     PROPERTY_SET_PRESSURE,
     PROPERTY_TEMPERATURE_IN,
     PROPERTY_TEMPERATURE_OUT,
@@ -47,6 +52,8 @@ class AtesClusterTest(unittest.TestCase):
         self.salinity = ATES_DEFAULTS.salinity
         self.well_casing_size = ATES_DEFAULTS.well_casing_size
         self.well_distance = ATES_DEFAULTS.well_distance
+        self.max_charge_power = ATES_DEFAULTS.maximum_charge_power
+        self.max_discharge_power = ATES_DEFAULTS.maximum_discharge_power
         # Create a production cluster object
         self.ates_cluster = AtesCluster(
             asset_name="ates_cluster",
@@ -62,6 +69,10 @@ class AtesClusterTest(unittest.TestCase):
             salinity=self.salinity,
             well_casing_size=self.well_casing_size,
             well_distance=self.well_distance,
+            hot_well_temperature=85 + 273.15,
+            cold_well_temperature=35 + 273.15,
+            max_charge_power=self.max_charge_power,
+            max_discharge_power=self.max_discharge_power,
         )
 
     def test_injection_ates(self) -> None:
@@ -81,7 +92,7 @@ class AtesClusterTest(unittest.TestCase):
         self.ates_cluster.set_setpoints(setpoints=setpoints)
 
         # Assert
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.5675951445794, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 358.155, delta=0.1)
         self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 290.155, delta=0.1)
 
     def test_injection_ates_sign_conventions(self) -> None:
@@ -108,7 +119,7 @@ class AtesClusterTest(unittest.TestCase):
         # Charging: flow from connection point 0 to 1, so a positive mass flow rate set point.
         self.assertGreater(self.ates_cluster.mass_flowrate, 0.0)
         self.assertEqual(
-            self.ates_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
+            self.ates_cluster.solver_asset.mass_flow_rate_set_point,
             self.ates_cluster.mass_flowrate,
         )
         # Charging: the flow leaves the asset at connection point 1 at the cold well temperature.
@@ -135,7 +146,7 @@ class AtesClusterTest(unittest.TestCase):
 
         # Assert
         # The hot well is produced, so it cools down slightly with respect to the charged state.
-        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 299.8607679761124, delta=0.1)
+        self.assertAlmostEqual(self.ates_cluster.hot_well_temperature, 355.53, delta=0.1)
         # The cold well is injected with the return temperature of the network.
         self.assertAlmostEqual(self.ates_cluster.cold_well_temperature, 308.17, delta=0.1)
 
@@ -163,7 +174,7 @@ class AtesClusterTest(unittest.TestCase):
         # Discharging: flow from connection point 1 to 0, so a negative mass flow rate set point.
         self.assertLess(self.ates_cluster.mass_flowrate, 0.0)
         self.assertEqual(
-            self.ates_cluster.solver_asset.mass_flow_rate_set_point,  # type: ignore
+            self.ates_cluster.solver_asset.mass_flow_rate_set_point,
             self.ates_cluster.mass_flowrate,
         )
         # Discharging: the flow leaves the asset at connection point 0 at the hot well temperature.
@@ -215,7 +226,17 @@ class AtesClusterTest(unittest.TestCase):
             PROPERTY_SET_PRESSURE: False,
         }
         maximum_mass_flow_rate = (
-            ATES_DEFAULTS.maximum_flow_charge
+            min(
+                self.ates_cluster.maximum_flow_charge,
+                self.ates_cluster._get_max_flowrate_extraction_norm(
+                    self.ates_cluster._get_saline_density(101325, 333.15) * g * self.aquifer_depth,
+                    self.ates_cluster.cold_well_temperature,
+                ),
+                self.ates_cluster._get_max_flowrate_injection_norm(
+                    self.ates_cluster._get_saline_density(101325, 333.15) * g * self.aquifer_depth,
+                    self.ates_cluster.hot_well_temperature,
+                ),
+            )
             / 3600
             * fluid_props.get_density((85 + 273.15 + 35 + 273.15) / 2)
         )
@@ -231,3 +252,268 @@ class AtesClusterTest(unittest.TestCase):
         # The thermal power allocation is reduced to the power the asset can exchange.
         self.assertLess(self.ates_cluster.thermal_power_allocation, 1e9)
         self.assertGreater(self.ates_cluster.thermal_power_allocation, 0.0)
+
+
+class AtesClusterNvoeTest(unittest.TestCase):
+    """Test extraction and injection restrictions independently of the Java aquifer model."""
+
+    def setUp(self) -> None:
+        """Set up for the test case."""
+        self.aquifer_depth = ATES_DEFAULTS.aquifer_depth
+        self.aquifer_thickness = ATES_DEFAULTS.aquifer_thickness
+        self.aquifer_mid_temperature = ATES_DEFAULTS.aquifer_mid_temperature
+        self.aquifer_net_to_gross = ATES_DEFAULTS.aquifer_net_to_gross
+        self.aquifer_porosity = ATES_DEFAULTS.aquifer_porosity
+        self.aquifer_permeability = ATES_DEFAULTS.aquifer_permeability
+        self.aquifer_anisotropy = ATES_DEFAULTS.aquifer_anisotropy
+        self.salinity = ATES_DEFAULTS.salinity
+        self.well_casing_size = ATES_DEFAULTS.well_casing_size
+        self.well_distance = ATES_DEFAULTS.well_distance
+        self.max_charge_power = ATES_DEFAULTS.maximum_charge_power
+        self.max_discharge_power = ATES_DEFAULTS.maximum_discharge_power
+        with (
+            patch.object(AtesCluster, "_init_rosim"),
+            patch("omotes_simulator_core.entities.assets.ates_cluster.PyjniusLoader.get_loader"),
+        ):
+            self.asset = AtesCluster(
+                asset_name="ates_cluster",
+                asset_id="ates_cluster_id",
+                port_ids=["test1", "test2"],
+                aquifer_depth=self.aquifer_depth,
+                aquifer_thickness=self.aquifer_thickness,
+                aquifer_mid_temperature=self.aquifer_mid_temperature,
+                aquifer_net_to_gross=self.aquifer_net_to_gross,
+                aquifer_porosity=self.aquifer_porosity,
+                aquifer_permeability=self.aquifer_permeability,
+                aquifer_anisotropy=self.aquifer_anisotropy,
+                salinity=self.salinity,
+                well_casing_size=self.well_casing_size,
+                well_distance=self.well_distance,
+                hot_well_temperature=85 + 273.15,
+                cold_well_temperature=35 + 273.15,
+                max_charge_power=self.max_charge_power,
+                max_discharge_power=self.max_discharge_power,
+            )
+
+    def test_saline_properties(self) -> None:
+        """Retain the legacy saline correlations with Pa and K inputs."""
+        self.assertAlmostEqual(self.asset._get_saline_density(1e7, 323.15), 998.98665)
+        self.assertAlmostEqual(
+            self.asset._get_saline_viscosity(323.15), 0.0005853902867162903, places=12
+        )
+
+    def test_extraction_norm_units_and_depth_factor(self) -> None:
+        """Convert casing inches and permeability mD before applying the depth factor."""
+        with (
+            patch.object(self.asset, "_get_saline_density", return_value=1000.0),
+            patch.object(self.asset, "_get_saline_viscosity", return_value=0.001),
+        ):
+            expected_flow = (
+                3.141592653589793
+                * (self.well_casing_size * 0.0254)
+                * self.aquifer_thickness
+                * (2 * 3600 * self.aquifer_permeability * 9.8692326671601e-16 * 1000.0 * g / 0.001)
+                * self.aquifer_depth
+                * 0.01
+            )
+            self.assertAlmostEqual(
+                self.asset._get_max_flowrate_extraction_norm(1e7, 323.15), expected_flow
+            )
+
+    def test_injection_norm_units_and_depth_independence(self) -> None:
+        """Convert casing inches and permeability mD without the extraction depth factor."""
+        with (
+            patch.object(self.asset, "_get_saline_density", return_value=1000.0),
+            patch.object(self.asset, "_get_saline_viscosity", return_value=0.001),
+        ):
+            expected_flow = (
+                3.141592653589793
+                * (self.well_casing_size * 0.0254)
+                * self.aquifer_thickness
+                * 1000
+                * (576 * self.aquifer_permeability * 9.8692326671601e-16 * 1000.0 * g / 0.001)
+                ** 0.6
+                * (0.3 / (2 * 0.1 * 3500)) ** 0.5
+            )
+            for depth in [300.0, 600.0]:
+                with self.subTest(depth=depth):
+                    self.asset.aquifer_depth = depth
+                    self.assertAlmostEqual(
+                        self.asset._get_max_flowrate_injection_norm(1e7, 323.15), expected_flow
+                    )
+
+    def test_well_limits_both_modes(self) -> None:
+        """Apply each norm to the correct well and use the more restrictive limit."""
+        for charging, production_temperature, injection_temperature in [
+            (True, 308.15, 358.15),
+            (False, 358.15, 308.15),
+        ]:
+            for extraction_flow, injection_flow in [(40.0, 80.0), (80.0, 40.0)]:
+                with (
+                    self.subTest(charging=charging, extraction_flow=extraction_flow),
+                    patch.object(self.asset, "_get_saline_density", return_value=1000.0),
+                    patch.object(
+                        self.asset,
+                        "_get_max_flowrate_extraction_norm",
+                        return_value=extraction_flow,
+                    ) as extraction_norm,
+                    patch.object(
+                        self.asset, "_get_max_flowrate_injection_norm", return_value=injection_flow
+                    ) as injection_norm,
+                ):
+                    self.asset.charging = charging
+                    maximum_mass_flow = self.asset._get_maximum_mass_flow_rate()
+                    extraction_norm.assert_called_once_with(
+                        1000.0 * g * self.aquifer_depth, production_temperature
+                    )
+                    injection_norm.assert_called_once_with(
+                        1000.0 * g * self.aquifer_depth, injection_temperature
+                    )
+                    self.assertAlmostEqual(
+                        maximum_mass_flow, 40.0 / 3600 * fluid_props.get_density(333.15)
+                    )
+
+    def test_power_derived_capacity_remains_an_upper_bound(self) -> None:
+        """The NVOE restrictions never raise the capacity derived from configured power."""
+        energy_difference = fluid_props.get_ie(358.15) - fluid_props.get_ie(308.15)
+        for charging, power in [
+            (True, self.max_charge_power),
+            (False, self.max_discharge_power),
+        ]:
+            with (
+                self.subTest(charging=charging),
+                patch.object(self.asset, "_get_max_flowrate_extraction_norm", return_value=1e6),
+                patch.object(self.asset, "_get_max_flowrate_injection_norm", return_value=1e6),
+            ):
+                self.asset.charging = charging
+                self.assertAlmostEqual(
+                    self.asset._get_maximum_mass_flow_rate(),
+                    power / energy_difference,
+                )
+
+    def test_charge_and_discharge_capacities_are_independent(self) -> None:
+        """The active mode uses its own configured capacity, not the smaller of both."""
+        self.asset.maximum_flow_charge = 20.0
+        self.asset.maximum_flow_discharge = 80.0
+        with (
+            patch.object(self.asset, "_get_max_flowrate_extraction_norm", return_value=1e6),
+            patch.object(self.asset, "_get_max_flowrate_injection_norm", return_value=1e6),
+        ):
+            for charging, volume_flow in [(True, 20.0), (False, 80.0)]:
+                with self.subTest(charging=charging):
+                    self.asset.charging = charging
+                    self.assertAlmostEqual(
+                        self.asset._get_maximum_mass_flow_rate(),
+                        volume_flow / 3600 * fluid_props.get_density(333.15),
+                    )
+        self.assertEqual(self.asset.maximum_flow_charge, 20.0)
+        self.assertEqual(self.asset.maximum_flow_discharge, 80.0)
+
+    def test_flow_limit_recovers_when_nvoe_limit_increases(self) -> None:
+        """A temporary NVOE restriction must not permanently reduce configured capacity."""
+        configured_charge = self.asset.maximum_flow_charge
+        configured_discharge = self.asset.maximum_flow_discharge
+        for charging, volume_flow in [
+            (True, configured_charge),
+            (False, configured_discharge),
+        ]:
+            with (
+                self.subTest(charging=charging),
+                patch.object(
+                    self.asset, "_get_max_flowrate_extraction_norm", side_effect=[10.0, 1e6]
+                ),
+                patch.object(self.asset, "_get_max_flowrate_injection_norm", return_value=1e6),
+            ):
+                self.asset.charging = charging
+                self.assertAlmostEqual(
+                    self.asset._get_maximum_mass_flow_rate(),
+                    10.0 / 3600 * fluid_props.get_density(333.15),
+                )
+                self.assertAlmostEqual(
+                    self.asset._get_maximum_mass_flow_rate(),
+                    volume_flow / 3600 * fluid_props.get_density(333.15),
+                )
+        self.assertEqual(self.asset.maximum_flow_charge, configured_charge)
+        self.assertEqual(self.asset.maximum_flow_discharge, configured_discharge)
+
+    def test_get_state_reports_current_limits_for_each_mode(self) -> None:
+        """Report both modes to the controller without changing configured capacities."""
+        self.asset.maximum_flow_charge = 100.0
+        self.asset.maximum_flow_discharge = 120.0
+        self.asset.charging = False
+        with (
+            patch.object(self.asset, "_get_max_flowrate_extraction_norm", side_effect=[60.0, 90.0]),
+            patch.object(self.asset, "_get_max_flowrate_injection_norm", side_effect=[80.0, 30.0]),
+        ):
+            state = self.asset.get_state()
+        self.assertEqual(state[PROPERTY_MAXIMUM_FLOW_CHARGE], 60.0)
+        self.assertEqual(state[PROPERTY_MAXIMUM_FLOW_DISCHARGE], 30.0)
+        self.assertEqual(self.asset.maximum_flow_charge, 100.0)
+        self.assertEqual(self.asset.maximum_flow_discharge, 120.0)
+
+    def test_limited_flow_reaches_solver_and_rosim(self) -> None:
+        """Limit flow before passing it to either model and reduce the thermal allocation."""
+        for charging, extraction_flow, injection_flow in [
+            (True, 40.0, 80.0),
+            (False, 40.0, 80.0),
+            (True, 80.0, 40.0),
+            (False, 80.0, 40.0),
+        ]:
+            with (
+                self.subTest(charging=charging, extraction_flow=extraction_flow),
+                patch.object(
+                    self.asset, "_get_max_flowrate_extraction_norm", return_value=extraction_flow
+                ),
+                patch.object(
+                    self.asset, "_get_max_flowrate_injection_norm", return_value=injection_flow
+                ),
+            ):
+                self.asset.first_time_step = True
+                self.asset.rosim = Mock()
+                self.asset.rosim.calcTimeStepAndGetTemps.return_value = [85.0, 35.0]
+                self.asset.set_time(datetime(2024, 1, 1 if charging else 2))
+                self.asset.set_time_step(3600)
+                self.asset.set_setpoints(
+                    {
+                        PROPERTY_HEAT_DEMAND: 1e9 if charging else -1e9,
+                        PROPERTY_TEMPERATURE_IN: 358.15 if charging else 308.15,
+                        PROPERTY_TEMPERATURE_OUT: 308.15 if charging else 358.15,
+                        PROPERTY_SET_PRESSURE: False,
+                    }
+                )
+                expected_mass_flow = 40.0 / 3600 * fluid_props.get_density(333.15)
+                if not charging:
+                    expected_mass_flow *= -1
+                self.assertAlmostEqual(self.asset.mass_flowrate, expected_mass_flow)
+                self.assertAlmostEqual(
+                    self.asset.solver_asset.mass_flow_rate_set_point, expected_mass_flow
+                )
+                self.assertLess(abs(self.asset.thermal_power_allocation), 1e9)
+                self.assertGreater(self.asset.thermal_power_allocation * expected_mass_flow, 0.0)
+                volume_flow = expected_mass_flow * 3600 / 1027
+                self.asset.rosim.calcTimeStepAndGetTemps.assert_called_once_with(
+                    [volume_flow, -volume_flow],
+                    [85.0, -1] if charging else [-1, 35.0],
+                    1.0,
+                )
+
+    def test_extraction_limit_tracks_well_temperature(self) -> None:
+        """Warmer water has a higher extraction limit through reduced viscosity."""
+        cold_limit = self.asset._get_max_flowrate_extraction_norm(1e7, 308.15)
+        hot_limit = self.asset._get_max_flowrate_extraction_norm(1e7, 358.15)
+        self.assertGreater(hot_limit, cold_limit)
+
+    def test_injection_limit_tracks_well_temperature(self) -> None:
+        """Warmer water has a higher injection limit through reduced viscosity."""
+        cold_limit = self.asset._get_max_flowrate_injection_norm(1e7, 308.15)
+        hot_limit = self.asset._get_max_flowrate_injection_norm(1e7, 358.15)
+        self.assertGreater(hot_limit, cold_limit)
+
+    def test_zero_permeability_stops_flow(self) -> None:
+        """An impermeable aquifer cannot exchange flow or thermal power."""
+        self.asset.aquifer_permeability = 0.0
+        self.assertEqual(self.asset._get_max_flowrate_injection_norm(1e7, 323.15), 0.0)
+        self.asset.thermal_power_allocation = 1e6
+        self.asset._calculate_massflowrate()
+        self.assertEqual(self.asset.mass_flowrate, 0.0)
+        self.assertEqual(self.asset.thermal_power_allocation, 0.0)

@@ -167,6 +167,54 @@ The required mass flow follows the standard thermal power balance:
 where :math:`c_p` is fluid specific heat capacity and :math:`T_{in}, T_{out}` are the active ATES
 boundary temperatures for the current mode.
 
+NVOE flow limits
+~~~~~~~~~~~~~~~~
+
+The requested mass flow is capped by the lowest of the existing charge/discharge well
+capacity, the NVOE extraction limit of the producing well, and the NVOE injection limit
+of the injecting well. Charging produces from the cold well and injects into the hot
+well; discharging produces from the hot well and injects into the cold well. If a limit
+is reached, the thermal allocation is reduced to the power that the capped flow can
+exchange with the network.
+
+The configured charge and discharge volume-flow capacities are derived separately from
+``maxChargeRate`` and ``maxDischargeRate`` and the initial well temperatures, rather than
+a fixed 200 m3/h default. Each mode retains its own configured capacity. NVOE restrictions
+are recalculated from current well conditions without permanently reducing these
+capacities, and both current mode limits are reported to the controller.
+
+The extraction limit is:
+
+.. math::
+
+   \dot{V}_{max} = 2 \pi r H \frac{2 (3600) k \rho_s g}{\mu_s} f_d
+
+Here :math:`\dot{V}_{max}` is in m3/h, :math:`r` is the casing radius in metres,
+:math:`H` is aquifer thickness, :math:`k` is permeability in m2, and :math:`\rho_s`
+and :math:`\mu_s` are saline density and viscosity at the producing-well temperature.
+Pressure is estimated from the hydrostatic head; saline properties use the Batzle-Wang
+correlations. The casing diameter is converted from inches before calculating the radius.
+Network fluid density at the mean connection temperature converts this volumetric limit
+to a network-side mass-flow limit.
+
+The legacy depth factor :math:`f_d = 0.01 d`, with depth :math:`d` in metres, is retained.
+It is an expert-judgment correction for deeper ATES wells, not part of the NVOE guideline.
+
+The injection limit addresses clogging:
+
+.. math::
+
+   \dot{V}_{inj,max} =
+   2 \pi r H (1000)
+   \left(\frac{576 k \rho_s g}{\mu_s}\right)^{0.6}
+   \sqrt{\frac{v_c}{2 M t_{eq}}}
+
+Here :math:`\dot{V}_{inj,max}` is in m3/h, and saline properties are evaluated at the
+injecting-well temperature and the same estimated downhole pressure. The retained legacy
+assumptions are clogging velocity :math:`v_c = 0.3` m/year, membrane filter index
+:math:`M = 0.1` s/l2, and equivalent annual load hours :math:`t_{eq} = 3500` hours/year.
+No depth correction is applied to the injection limit.
+
 Temperature coupling with wells
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -226,3 +274,4 @@ References
 
 - TNO and Geological Survey of the Netherlands (NLOG), tools overview including ROSIM:
   https://www.nlog.nl/en/tools
+- NVOE, Richtlijnen Ondergrondse Energieopslag, November 2006.

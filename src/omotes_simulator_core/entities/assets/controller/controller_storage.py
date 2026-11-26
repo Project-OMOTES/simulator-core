@@ -21,12 +21,13 @@ import numpy as np
 import pandas as pd
 
 from omotes_simulator_core.entities.assets.asset_defaults import (
-    ATES_DEFAULTS,
     PROPERTY_BUFFER_COLD_TEMPERATURE,
     PROPERTY_BUFFER_HOT_TEMPERATURE,
     PROPERTY_COLD_WELL_TEMPERATURE,
     PROPERTY_FILL_LEVEL,
     PROPERTY_HOT_WELL_TEMPERATURE,
+    PROPERTY_MAXIMUM_FLOW_CHARGE,
+    PROPERTY_MAXIMUM_FLOW_DISCHARGE,
     PROPERTY_TIMESTEP,
 )
 from omotes_simulator_core.entities.assets.controller.asset_controller_abstract import (
@@ -157,6 +158,12 @@ class ControllerAtesStorage(ControllerStorageAbstract):
     cold_well_temperature: float
     """The temperature of the cold well of the aquifer [K]."""
 
+    maximum_flow_charge: float
+    """The maximum flow of the charge well of the aquifer [m3/h]."""
+
+    maximum_flow_discharge: float
+    """The maximum flow of the discharge well of the aquifer [m3/h]."""
+
     def __init__(
         self,
         name: str,
@@ -240,7 +247,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
         return min(
             self.max_discharge_power,
             self._power_from_maximum_flow(
-                maximum_volume_flow=ATES_DEFAULTS.maximum_flow_discharge,
+                maximum_volume_flow=self.maximum_flow_discharge,
                 temperature_hot=self.hot_well_temperature,
                 temperature_cold=self.temperatures.in_flow,
             ),
@@ -258,7 +265,7 @@ class ControllerAtesStorage(ControllerStorageAbstract):
         return min(
             self.max_charge_power,
             self._power_from_maximum_flow(
-                maximum_volume_flow=ATES_DEFAULTS.maximum_flow_charge,
+                maximum_volume_flow=self.maximum_flow_charge,
                 temperature_hot=self.temperatures.out_flow,
                 temperature_cold=self.cold_well_temperature,
             ),
@@ -274,6 +281,8 @@ class ControllerAtesStorage(ControllerStorageAbstract):
             PROPERTY_HOT_WELL_TEMPERATURE,
             PROPERTY_COLD_WELL_TEMPERATURE,
             PROPERTY_TIMESTEP,
+            PROPERTY_MAXIMUM_FLOW_CHARGE,
+            PROPERTY_MAXIMUM_FLOW_DISCHARGE,
         }
         if not available_state_keys.issubset(state.keys()):
             missing_keys = sorted(available_state_keys.difference(state.keys()))
@@ -282,6 +291,8 @@ class ControllerAtesStorage(ControllerStorageAbstract):
         self.hot_well_temperature = state[PROPERTY_HOT_WELL_TEMPERATURE]
         self.cold_well_temperature = state[PROPERTY_COLD_WELL_TEMPERATURE]
         self.timestep = state[PROPERTY_TIMESTEP]
+        self.maximum_flow_charge = state[PROPERTY_MAXIMUM_FLOW_CHARGE]
+        self.maximum_flow_discharge = state[PROPERTY_MAXIMUM_FLOW_DISCHARGE]
 
         # Update the effective maximum charge and discharge power of the asset.
         self.effective_max_charge_power = self.get_effective_max_charge_power()
