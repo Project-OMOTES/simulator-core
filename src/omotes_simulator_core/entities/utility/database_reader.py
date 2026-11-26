@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_data_from_profile(esdl_profile: esdl.DataTableProfile | esdl.InfluxDBProfile
-                                        | esdl.TimeSeriesProfile | esdl.DateTimeProfile
-                                        | esdl.ProfileReference) -> pd.DataFrame:
+                          | esdl.TimeSeriesProfile | esdl.DateTimeProfile
+                          | esdl.ProfileReference) -> pd.DataFrame:
     """Method to get the data from the esdl  profile.
 
     This method tries to get the data from the esdl profile.
@@ -42,14 +42,14 @@ def get_data_from_profile(esdl_profile: esdl.DataTableProfile | esdl.InfluxDBPro
                 time_stamp,
                 convert_to_unit(value, esdl_profile.profileQuantityAndUnit, unit)
             )
-            for time_stamp, value in profile_data # type-ignore
+            for time_stamp, value in profile_data  # type-ignore
         ),
         columns=["date", "values"],
     )
 
 
-def get_unit(profile: esdl.DataTableProfile | esdl.InfluxDBProfile| esdl.TimeSeriesProfile
-                      | esdl.DateTimeProfile | esdl.ProfileReference) -> esdl.PhysicalQuantityEnum:
+def get_unit(profile: esdl.DataTableProfile | esdl.InfluxDBProfile | esdl.TimeSeriesProfile
+             | esdl.DateTimeProfile | esdl.ProfileReference) -> esdl.PhysicalQuantityEnum:
     """Method to get the SI unit of the profile.
 
     This method tries to get the unit of the profile.
