@@ -1,0 +1,797 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Testing strategy" href="testing_strategy.html"><link rel="prev" title="Pyjnius loader class" href="../assets/pyjnius_loader_asset.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Simulation flow - OMOTES Simulator documentation documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">OMOTES Simulator documentation  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">OMOTES Simulator documentation  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/intro_main.html">Introduction</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../solver/solver_main.html">Solver</a><input aria-label="Toggle navigation of Solver" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../solver/solver_workflow.html">Solve Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solver/solver_unknowns.html">Solved Unknowns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solver/solver_convergence.html">Convergence</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../network/network_main.html">Network layer</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../physics/physics_main.html">Physics</a><input aria-label="Toggle navigation of Physics" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../physics/junction_physics.html">Junction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/producer_physics.html">ProductionCluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/consumer_physics.html">DemandCluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/pipe_physics.html">Pipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/heat_exchanger_physics.html">Heat Exchanger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/heat_pump_physics.html">Heat Pump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/air_to_water_heat_pump_physics.html">Air To Water Heat Pump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/ideal_heat_storage_physics.html">Ideal Heat Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../physics/ates_cluster_physics.html">AtesCluster</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../controller/controller.html">Control</a><input aria-label="Toggle navigation of Control" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../controller/controller_behavior.html">Controller Behavior</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="developer_main.html">Developer documentation</a><input aria-label="Toggle navigation of Developer documentation" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="developer_navigation.html">Developer navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Package architecture</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="network_reference.html">Network reference</a><input aria-label="Toggle navigation of Network reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../solver/network.html">Network class</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="controller_reference.html">Controller reference</a><input aria-label="Toggle navigation of Controller reference" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../controller/main_controller_class.html">Network controller class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/sub_network_class.html">Subnetwork controller class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/asset_controller_abstract.html">Asset controller abstract class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/producer.html">Producer controller class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/consumer.html">Consumer controller class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/controller_storage.html">Controller storage classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/ates.html">Ates controller class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/controller_heat_transfer.html">Controller heat transfer class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/controller_network.html">Controller network class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../controller/assets/profile_interpolation.html">Profile interpolation module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="solver_reference.html">Solver reference</a><input aria-label="Toggle navigation of Solver reference" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../solver/solver.html">Solver class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/matrix.html">Matrix class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/equation_object.html">Equation object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/solver_utility.html">Solver utility functions</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../solver/asset_main.html">Asset classes</a><input aria-label="Toggle navigation of Asset classes" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/base_item.html">Base item class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/base_asset.html">Base asset class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/fall_type.html">Fall type class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/solver_pipe.html">Solver pipe class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/solver_heatboundary.html">Solver HeatBoundary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../solver/assets/solver_node.html">Solver node class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/base_node_item.html">Base node item class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/solver_boundary.html">Solver boundary classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/solver_production_asset.html">Solver production asset class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/solver_buffer_asset.html">Solver buffer asset class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/solver_heat_transfer_asset.html">Solver heat transfer asset class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../solver/assets/solver_air_to_water_heat_pump_asset.html">Solver air-to-water heat pump asset class</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="asset_reference.html">Asset reference</a><input aria-label="Toggle navigation of Asset reference" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../assets/asset_abstract_asset.html">Asset abstract class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/asset_defaults_asset.html">Asset defaults module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/asset_utils_asset.html">Asset utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/esdl_asset_object_asset.html">ESDL asset object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/producer_asset.html">Producer asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/air_to_water_heat_pump_asset.html">Air-to-water heat pump asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/consumer_asset.html">Consumer asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/pipe_asset.html">Pipe asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/heat_pump_asset.html">Heat pump asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/heat_exchanger_asset.html">Heat exchanger asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/ates_asset.html">Ates asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/ideal_heat_storage_asset.html">Ideal heat storage asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/junction_asset.html">Junction asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../assets/pyjnius_loader_asset.html">Pyjnius loader class</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Simulation flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_strategy.html">Testing strategy</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="developer_guides.html">Developer how-to guides</a><input aria-label="Toggle navigation of Developer how-to guides" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="AddEntityLayerAsset.html">Adding an entity-layer asset for an existing solver asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AddSolverLayerAssets.html">Adding a new solver asset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ControlExtension.html">Extending control behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AddOutputFormat.html">Adding a new output format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="documentation_with_ai_agents.html">Writing documentation with AI agents</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/omotes_simulator_core.html">API Root Index</a><input aria-label="Toggle navigation of API Root Index" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/omotes_simulator_core.adapter.html">adapter</a><input aria-label="Toggle navigation of adapter" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.adapter.presentation.html">adapter.presentation</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.html">adapter.transforms</a><input aria-label="Toggle navigation of adapter.transforms" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mappers.html">adapter.transforms.controller_mappers</a><input aria-label="Toggle navigation of adapter.transforms.controller_mappers" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mappers.controller_consumer_mapper.html">adapter.transforms.controller_mappers.controller_consumer_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mappers.controller_heat_transfer_mapper.html">adapter.transforms.controller_mappers.controller_heat_transfer_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mappers.controller_producer_mapper.html">adapter.transforms.controller_mappers.controller_producer_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mappers.controller_storage_mapper.html">adapter.transforms.controller_mappers.controller_storage_mapper</a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.html">adapter.transforms.esdl_asset_mappers</a><input aria-label="Toggle navigation of adapter.transforms.esdl_asset_mappers" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ates_mapper.html">adapter.transforms.esdl_asset_mappers.ates_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.consumer_mapper.html">adapter.transforms.esdl_asset_mappers.consumer_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_exchanger_mapper.html">adapter.transforms.esdl_asset_mappers.heat_exchanger_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.heat_pump_mapper.html">adapter.transforms.esdl_asset_mappers.heat_pump_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.ideal_heat_storage_mapper.html">adapter.transforms.esdl_asset_mappers.ideal_heat_storage_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.pipe_mapper.html">adapter.transforms.esdl_asset_mappers.pipe_mapper</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mappers.producer_mapper.html">adapter.transforms.esdl_asset_mappers.producer_mapper</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.controller_mapper.html">adapter.transforms.controller_mapper</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_asset_mapper.html">adapter.transforms.esdl_asset_mapper</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.esdl_graph_mapper.html">adapter.transforms.esdl_graph_mapper</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.mappers.html">adapter.transforms.mappers</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.string_to_esdl.html">adapter.transforms.string_to_esdl</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.transforms.transform_utils.html">adapter.transforms.transform_utils</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.adapter.utility.html">adapter.utility</a><input aria-label="Toggle navigation of adapter.utility" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.adapter.utility.graph.html">adapter.utility.graph</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/omotes_simulator_core.entities.html">entities</a><input aria-label="Toggle navigation of entities" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.html">entities.assets</a><input aria-label="Toggle navigation of entities.assets" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.html">entities.assets.controller</a><input aria-label="Toggle navigation of entities.assets.controller" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.asset_controller_abstract.html">entities.assets.controller.asset_controller_abstract</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.controller_consumer.html">entities.assets.controller.controller_consumer</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.controller_heat_transfer.html">entities.assets.controller.controller_heat_transfer</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.controller_network.html">entities.assets.controller.controller_network</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.controller_producer.html">entities.assets.controller.controller_producer</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.controller_storage.html">entities.assets.controller.controller_storage</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.profile_interpolation.html">entities.assets.controller.profile_interpolation</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.controller.temperature_data.html">entities.assets.controller.temperature_data</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.air_to_water_heat_pump.html">entities.assets.air_to_water_heat_pump</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.asset_abstract.html">entities.assets.asset_abstract</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.asset_defaults.html">entities.assets.asset_defaults</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.ates_cluster.html">entities.assets.ates_cluster</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.demand_cluster.html">entities.assets.demand_cluster</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.elec_boiler.html">entities.assets.elec_boiler</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.esdl_asset_object.html">entities.assets.esdl_asset_object</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.gas_heater.html">entities.assets.gas_heater</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.heat_exchanger.html">entities.assets.heat_exchanger</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.heat_pump.html">entities.assets.heat_pump</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.ideal_heat_storage.html">entities.assets.ideal_heat_storage</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.junction.html">entities.assets.junction</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.pipe.html">entities.assets.pipe</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.production_cluster.html">entities.assets.production_cluster</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.pyjnius_loader.html">entities.assets.pyjnius_loader</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.assets.utils.html">entities.assets.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.entities.utility.html">entities.utility</a><input aria-label="Toggle navigation of entities.utility" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.entities.utility.influxdb_reader.html">entities.utility.influxdb_reader</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.entities.esdl_object.html">entities.esdl_object</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.entities.heat_network.html">entities.heat_network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.entities.network_controller.html">entities.network_controller</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.entities.network_controller_abstract.html">entities.network_controller_abstract</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.entities.simulation_configuration.html">entities.simulation_configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.html">infrastructure</a><input aria-label="Toggle navigation of infrastructure" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.app.html">infrastructure.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.plotting.html">infrastructure.plotting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.profiling.html">infrastructure.profiling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.simulation_manager.html">infrastructure.simulation_manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.infrastructure.utils.html">infrastructure.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/omotes_simulator_core.simulation.html">simulation</a><input aria-label="Toggle navigation of simulation" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.simulation.mappers.html">simulation.mappers</a><input aria-label="Toggle navigation of simulation.mappers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.simulation.mappers.mappers.html">simulation.mappers.mappers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.simulation.networksimulation.html">simulation.networksimulation</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/omotes_simulator_core.solver.html">solver</a><input aria-label="Toggle navigation of solver" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.solver.matrix.html">solver.matrix</a><input aria-label="Toggle navigation of solver.matrix" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.solver.matrix.equation_object.html">solver.matrix.equation_object</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.solver.matrix.index_core_quantity.html">solver.matrix.index_core_quantity</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.solver.matrix.matrix.html">solver.matrix.matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/omotes_simulator_core.solver.network.html">solver.network</a><input aria-label="Toggle navigation of solver.network" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.html">solver.network.assets</a><input aria-label="Toggle navigation of solver.network.assets" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.air_to_water_heat_pump.html">solver.network.assets.air_to_water_heat_pump</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.base_asset.html">solver.network.assets.base_asset</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.base_item.html">solver.network.assets.base_item</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.base_node_item.html">solver.network.assets.base_node_item</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.boundary.html">solver.network.assets.boundary</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.buffer_asset.html">solver.network.assets.buffer_asset</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.fall_type.html">solver.network.assets.fall_type</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.heat_transfer_asset.html">solver.network.assets.heat_transfer_asset</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.node.html">solver.network.assets.node</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.production_asset.html">solver.network.assets.production_asset</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/omotes_simulator_core.solver.network.assets.solver_pipe.html">solver.network.assets.solver_pipe</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/omotes_simulator_core.solver.network.network.html">solver.network.network</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.solver.solver.html">solver.solver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/omotes_simulator_core.solver.solver_constants.html">solver.solver_constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../support/support.html">Support</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/developer/simulation_flow.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="simulation-flow">
+<h1>Simulation flow<a class="headerlink" href="#simulation-flow" title="Link to this heading">¶</a></h1>
+<section id="purpose">
+<h2>Purpose<a class="headerlink" href="#purpose" title="Link to this heading">¶</a></h2>
+<p>This guide traces a simulation run from the application entrypoint to the solver and back
+to the output table. Use it when you need to know where a step happens, in which order calls
+are made, or which entry level to use for a test or debugging session.</p>
+<p>It is written for contributors. For what the simulator computes, see the Intro, Network,
+Solver, and Control sections. For package boundaries and the two-layer asset model, see
+<a class="reference internal" href="architecture.html"><span class="doc">Package architecture</span></a>. For class-level signatures, use <a class="reference internal" href="api/omotes_simulator_core.html"><span class="doc">API Root Index</span></a>.</p>
+</section>
+<section id="relevant-modules-and-files">
+<h2>Relevant modules and files<a class="headerlink" href="#relevant-modules-and-files" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38.0%" />
+<col style="width: 22.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>File or Module</p></th>
+<th class="head"><p>Role</p></th>
+<th class="head"><p>Why it matters for this topic</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/infrastructure/app.py</span></code></p></td>
+<td><p>Entrypoint</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run(file_path)</span></code> builds a <code class="docutils literal notranslate"><span class="pre">SimulationConfiguration</span></code>, loads the ESDL file with
+<code class="docutils literal notranslate"><span class="pre">pyesdl_from_file</span></code> into an <code class="docutils literal notranslate"><span class="pre">EsdlObject</span></code>, and calls
+<code class="docutils literal notranslate"><span class="pre">SimulationManager.execute(progressLogger)</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/infrastructure/simulation_manager.py</span></code></p></td>
+<td><p>Orchestrator</p></td>
+<td><p>Creates <code class="docutils literal notranslate"><span class="pre">HeatNetwork</span></code> and <code class="docutils literal notranslate"><span class="pre">NetworkController</span></code> from the ESDL object, runs
+<code class="docutils literal notranslate"><span class="pre">NetworkSimulation</span></code>, and returns <code class="docutils literal notranslate"><span class="pre">gather_output()</span></code>. Logs and re-raises any
+exception from the run.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/entities/simulation_configuration.py</span></code></p></td>
+<td><p>Configuration dataclass</p></td>
+<td><p>Holds <code class="docutils literal notranslate"><span class="pre">simulation_id</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">timestep</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, and <code class="docutils literal notranslate"><span class="pre">stop</span></code>.
+Passed from the entrypoint through to <code class="docutils literal notranslate"><span class="pre">NetworkSimulation</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/simulation/networksimulation.py</span></code></p></td>
+<td><p>Time-step loop</p></td>
+<td><p>Owns the time loop, the controller call order, the convergence retry loop (at most
+20 passes per timestep), and the progress callback interval.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/entities/heat_network.py</span></code></p></td>
+<td><p>Runtime network wrapper</p></td>
+<td><p>Holds entity assets, junctions, the solver <code class="docutils literal notranslate"><span class="pre">Network</span></code>, and the <code class="docutils literal notranslate"><span class="pre">Solver</span></code>. Applies
+setpoints, solves, checks convergence, post-processes, and stores output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/entities/assets/asset_abstract.py</span></code></p></td>
+<td><p>Entity-layer base class</p></td>
+<td><p>Declares the abstract <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code>, <code class="docutils literal notranslate"><span class="pre">write_to_output</span></code>, and <code class="docutils literal notranslate"><span class="pre">postprocess</span></code>
+methods and implements <code class="docutils literal notranslate"><span class="pre">write_standard_output</span></code> and <code class="docutils literal notranslate"><span class="pre">get_timeseries</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/solver/network/network.py</span></code></p></td>
+<td><p>Solver graph model</p></td>
+<td><p>Holds solver assets and nodes. Assets are added by <code class="docutils literal notranslate"><span class="pre">EsdlEnergySystemMapper</span></code> via
+<code class="docutils literal notranslate"><span class="pre">add_existing_asset</span></code> and connected via <code class="docutils literal notranslate"><span class="pre">connect_assets</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/solver/solver.py</span></code></p></td>
+<td><p>Nonlinear solve loop</p></td>
+<td><p>Collects <code class="docutils literal notranslate"><span class="pre">get_equations()</span></code> from all solver assets and nodes, solves the matrix,
+and repeats until <code class="docutils literal notranslate"><span class="pre">Matrix.is_converged()</span></code> or the iteration limit of 100.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/entities/network_controller_abstract.py</span></code></p></td>
+<td><p>Control abstraction</p></td>
+<td><p>Declares one abstract method, <code class="docutils literal notranslate"><span class="pre">update_setpoints(time)</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/entities/network_controller.py</span></code></p></td>
+<td><p>Concrete controller</p></td>
+<td><p>Implements <code class="docutils literal notranslate"><span class="pre">update_setpoints</span></code> and <code class="docutils literal notranslate"><span class="pre">update_network_state</span></code>. Holds one
+<code class="docutils literal notranslate"><span class="pre">ControllerNetwork</span></code> per hydraulically separated sub-network.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/adapter/transforms/mappers.py</span></code></p></td>
+<td><p>ESDL-to-entity mapper</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EsdlEnergySystemMapper.to_entity(network)</span></code> creates the entity assets, registers
+their solver assets in <code class="docutils literal notranslate"><span class="pre">network</span></code>, connects them, and returns
+<code class="docutils literal notranslate"><span class="pre">(list[AssetAbstract],</span> <span class="pre">list[Junction])</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/adapter/transforms/controller_mapper.py</span></code></p></td>
+<td><p>ESDL-to-controller mapper</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EsdlControllerMapper.to_entity(esdl,</span> <span class="pre">timestep)</span></code> creates the asset controllers and
+the <code class="docutils literal notranslate"><span class="pre">NetworkController</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src/omotes_simulator_core/adapter/transforms/esdl_asset_mapper.py</span></code></p></td>
+<td><p>Asset dispatch table</p></td>
+<td><p>Maps ESDL asset types to mapper classes via <code class="docutils literal notranslate"><span class="pre">conversion_dict_mappers</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit_test/infrastructure/test_simulationmanager.py</span></code></p></td>
+<td><p>Orchestration test</p></td>
+<td><p>Runs <code class="docutils literal notranslate"><span class="pre">SimulationManager.execute</span></code> on <code class="docutils literal notranslate"><span class="pre">testdata/test1.esdl</span></code> and checks the shape of
+the result table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit_test/simulation/test_networksimulation.py</span></code></p></td>
+<td><p>Time-loop test</p></td>
+<td><p>Checks construction with mocks and runs <code class="docutils literal notranslate"><span class="pre">NetworkSimulation.run</span></code> on
+<code class="docutils literal notranslate"><span class="pre">testdata/test1.esdl</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_heat_physics.py</span></code></p></td>
+<td><p>End-to-end integration test</p></td>
+<td><p>Runs a full simulation through <code class="docutils literal notranslate"><span class="pre">SimulationManager</span></code> and asserts physical results
+such as heat power and primary inlet temperature.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="execution-or-extension-flow">
+<h2>Execution or extension flow<a class="headerlink" href="#execution-or-extension-flow" title="Link to this heading">¶</a></h2>
+<section id="high-level-run">
+<h3>High-level run<a class="headerlink" href="#high-level-run" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Entrypoint.</strong> <code class="docutils literal notranslate"><span class="pre">app.run()</span></code> creates a <code class="docutils literal notranslate"><span class="pre">SimulationConfiguration</span></code>, loads the ESDL
+file into an <code class="docutils literal notranslate"><span class="pre">EsdlObject</span></code>, and calls <code class="docutils literal notranslate"><span class="pre">SimulationManager.execute(callback)</span></code>.</p></li>
+<li><p><strong>Build.</strong> <code class="docutils literal notranslate"><span class="pre">SimulationManager.execute</span></code> creates two runtime objects:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HeatNetwork(EsdlEnergySystemMapper(esdl).to_entity)</span></code>. <code class="docutils literal notranslate"><span class="pre">HeatNetwork</span></code> creates an
+empty solver <code class="docutils literal notranslate"><span class="pre">Network</span></code> and passes it to <code class="docutils literal notranslate"><span class="pre">to_entity</span></code>. For each enabled ESDL asset
+the mapper creates an entity asset through <code class="docutils literal notranslate"><span class="pre">EsdlAssetMapper.to_entity</span></code> and calls
+<code class="docutils literal notranslate"><span class="pre">network.add_existing_asset(entity.solver_asset)</span></code>. Disabled assets are skipped with
+a warning. The mapper then connects the solver assets and wraps the created solver
+nodes in <code class="docutils literal notranslate"><span class="pre">Junction</span></code> objects. <code class="docutils literal notranslate"><span class="pre">HeatNetwork</span></code> finally creates the <code class="docutils literal notranslate"><span class="pre">Solver</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EsdlControllerMapper().to_entity(esdl,</span> <span class="pre">timestep=config.timestep)</span></code>, which returns a
+<code class="docutils literal notranslate"><span class="pre">NetworkController</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>Time loop.</strong> <code class="docutils literal notranslate"><span class="pre">NetworkSimulation(network,</span> <span class="pre">controller).run(config,</span> <span class="pre">callback)</span></code>
+computes the number of timesteps from <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>, and <code class="docutils literal notranslate"><span class="pre">timestep</span></code>. For each
+timestep it:</p>
+<ol class="loweralpha simple">
+<li><p>Sets <code class="docutils literal notranslate"><span class="pre">time</span></code> to <code class="docutils literal notranslate"><span class="pre">start</span></code> plus the elapsed seconds, with the UTC timezone.</p></li>
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">controller.update_network_state(heat_network)</span></code>. The controller reads
+<code class="docutils literal notranslate"><span class="pre">get_state()</span></code> from producer, consumer, and storage entity assets and passes it to
+their asset controllers.</p></li>
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">controller.update_setpoints(time)</span></code>, which returns <code class="docutils literal notranslate"><span class="pre">controller_input</span></code>: a
+dictionary from asset ID to a dictionary of <code class="docutils literal notranslate"><span class="pre">PROPERTY_*</span></code> setpoints.</p></li>
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">network.network.reset_prev_solution()</span></code> to clear the previous solver
+solution.</p></li>
+<li><p>Runs up to 20 passes of <code class="docutils literal notranslate"><span class="pre">network.run_time_step(time,</span> <span class="pre">timestep,</span> <span class="pre">controller_input)</span></code>
+followed by <code class="docutils literal notranslate"><span class="pre">network.check_convergence()</span></code>. <code class="docutils literal notranslate"><span class="pre">run_time_step</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">set_time_step</span></code>, <code class="docutils literal notranslate"><span class="pre">set_time</span></code>, and <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code> only on assets whose ID is a
+key in <code class="docutils literal notranslate"><span class="pre">controller_input</span></code>, then calls <code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code>. <code class="docutils literal notranslate"><span class="pre">check_convergence</span></code>
+returns <code class="docutils literal notranslate"><span class="pre">False</span></code> as soon as one asset’s <code class="docutils literal notranslate"><span class="pre">is_converged()</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">network.post_process_assets()</span></code>, which calls <code class="docutils literal notranslate"><span class="pre">postprocess()</span></code> on every
+asset, then <code class="docutils literal notranslate"><span class="pre">network.store_output()</span></code>, which calls <code class="docutils literal notranslate"><span class="pre">write_standard_output()</span></code> and
+then <code class="docutils literal notranslate"><span class="pre">write_to_output()</span></code> on every asset.</p></li>
+<li><p>Calls the progress callback every <code class="docutils literal notranslate"><span class="pre">progress_interval</span></code> timesteps, which limits the
+number of progress messages to about <code class="docutils literal notranslate"><span class="pre">MAX_NUMBER_MESSAGES</span></code> (15).</p></li>
+</ol>
+</li>
+<li><p><strong>Solve.</strong> <code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code> resets the matrix solution and the previous solution of
+every solver asset and node, then repeats: collect equations from all assets and nodes,
+solve the matrix, and write the results back to assets and nodes. It stops when the
+matrix has converged or after more than 100 iterations, in which case it logs a
+warning.</p></li>
+<li><p><strong>Output.</strong> <code class="docutils literal notranslate"><span class="pre">SimulationManager</span></code> calls <code class="docutils literal notranslate"><span class="pre">worker.gather_output()</span></code>, which concatenates
+<code class="docutils literal notranslate"><span class="pre">get_timeseries()</span></code> of every asset into a single <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p></li>
+</ol>
+</section>
+<section id="lower-level-entry-points">
+<h3>Lower-level entry points<a class="headerlink" href="#lower-level-entry-points" title="Link to this heading">¶</a></h3>
+<p>Tests and debugging sessions often skip part of the stack:</p>
+<ul class="simple">
+<li><p><strong>Network level.</strong> Build <code class="docutils literal notranslate"><span class="pre">HeatNetwork(EsdlEnergySystemMapper(esdl).to_entity)</span></code>, write
+a <code class="docutils literal notranslate"><span class="pre">controller_input</span></code> dictionary by hand, and call <code class="docutils literal notranslate"><span class="pre">run_time_step</span></code> directly. This skips
+the controller. <code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_ates_network.py</span></code> uses this pattern.</p></li>
+<li><p><strong>Solver level.</strong> Create a solver <code class="docutils literal notranslate"><span class="pre">Network()</span></code>, add solver assets with
+<code class="docutils literal notranslate"><span class="pre">add_existing_asset</span></code>, connect them with <code class="docutils literal notranslate"><span class="pre">connect_assets</span></code>, set boundary values on the
+solver assets, and call <code class="docutils literal notranslate"><span class="pre">Solver(network).solve()</span></code>. This skips entities, ESDL, and
+control. <code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_zero_flow_physics.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_heat_transfer_asset.py</span></code> use this pattern.</p></li>
+</ul>
+</section>
+</section>
+<section id="implementation-notes">
+<h2>Implementation notes<a class="headerlink" href="#implementation-notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NetworkSimulation</span></code> is typed against <code class="docutils literal notranslate"><span class="pre">NetworkController</span></code> and calls
+<code class="docutils literal notranslate"><span class="pre">update_network_state</span></code>, which is not part of <code class="docutils literal notranslate"><span class="pre">NetworkControllerAbstract</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NetworkSimulation</span></code> does not raise when the 20 retry passes end without convergence; it
+logs the number of passes at debug level and continues. <code class="docutils literal notranslate"><span class="pre">Solver.solve</span></code> also only logs a
+warning when it reaches its iteration limit.</p></li>
+<li><p>Setpoints are computed once per timestep, before the retry loop. Retry passes only
+re-run <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code> and the solve with the same <code class="docutils literal notranslate"><span class="pre">controller_input</span></code>; assets can use
+the previous pass’s solver results inside <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code> and <code class="docutils literal notranslate"><span class="pre">is_converged</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">postprocess</span></code> runs before <code class="docutils literal notranslate"><span class="pre">store_output</span></code>, so output written in <code class="docutils literal notranslate"><span class="pre">write_to_output</span></code>
+reflects state after post-processing.</p></li>
+<li><p>The ESDL is read only in the build phase. Nothing in the time loop accesses ESDL objects.</p></li>
+</ul>
+</section>
+<section id="testing-and-validation">
+<h2>Testing and validation<a class="headerlink" href="#testing-and-validation" title="Link to this heading">¶</a></h2>
+<p>Choose the test level that matches the part of the flow you changed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">unit_test/infrastructure/test_simulationmanager.py</span></code> covers the build and the full run
+through <code class="docutils literal notranslate"><span class="pre">SimulationManager</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unit_test/simulation/test_networksimulation.py</span></code> covers <code class="docutils literal notranslate"><span class="pre">NetworkSimulation</span></code>
+construction (with <code class="docutils literal notranslate"><span class="pre">Mock</span></code> objects) and a real run on <code class="docutils literal notranslate"><span class="pre">testdata/test1.esdl</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_communication_controller_network.py</span></code> wraps assets and
+asset controllers in <code class="docutils literal notranslate"><span class="pre">Mock(wraps=...)</span></code> and checks that <code class="docutils literal notranslate"><span class="pre">update_network_state</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">set_state</span></code> on every producer, consumer, and storage controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_heat_physics.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">unit_test/integration/test_pressure_physics.py</span></code> check physical results of full runs.</p></li>
+<li><p>The network-level and solver-level tests listed under <a class="reference internal" href="#lower-level-entry-points">Lower-level entry points</a> check
+behavior without the controller or without entities.</p></li>
+</ul>
+<p>Run the full suite with <code class="docutils literal notranslate"><span class="pre">ci/linux/test_unit.sh</span></code> or <code class="docutils literal notranslate"><span class="pre">ci\win32\test_unit.cmd</span></code>. To run a
+single file, see <a class="reference internal" href="testing_strategy.html"><span class="doc">Testing strategy</span></a>; targeted runs need <code class="docutils literal notranslate"><span class="pre">--no-cov</span></code> because of the
+coverage threshold in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
+</section>
+<section id="common-pitfalls">
+<h2>Common pitfalls<a class="headerlink" href="#common-pitfalls" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Missing controller entry.</strong> <code class="docutils literal notranslate"><span class="pre">run_time_step</span></code> only updates assets whose ID is in
+<code class="docutils literal notranslate"><span class="pre">controller_input</span></code>. An asset without a controller keeps its previous setpoints without
+any warning.</p></li>
+<li><p><strong>Unregistered ESDL type.</strong> An ESDL asset type missing from <code class="docutils literal notranslate"><span class="pre">conversion_dict_mappers</span></code>
+raises <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> in <code class="docutils literal notranslate"><span class="pre">EsdlAssetMapper.to_entity</span></code> during the build phase.</p></li>
+<li><p><strong>State that accumulates across retry passes.</strong> <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code> and <code class="docutils literal notranslate"><span class="pre">Solver.solve</span></code> can
+run up to 20 times per timestep. Update time-integrated state, such as a storage fill
+level, in <code class="docutils literal notranslate"><span class="pre">postprocess</span></code> and not in <code class="docutils literal notranslate"><span class="pre">set_setpoints</span></code>.</p></li>
+<li><p><strong>New controller state.</strong> Asset controllers only receive what
+<code class="docutils literal notranslate"><span class="pre">NetworkController.update_network_state</span></code> passes from <code class="docutils literal notranslate"><span class="pre">AssetAbstract.get_state()</span></code>. To
+give a controller more state, extend both <code class="docutils literal notranslate"><span class="pre">get_state</span></code> on the entity asset and
+<code class="docutils literal notranslate"><span class="pre">update_network_state</span></code>.</p></li>
+<li><p><strong>Two iteration loops.</strong> The retry loop in <code class="docutils literal notranslate"><span class="pre">NetworkSimulation.run</span></code> (at most 20 passes)
+couples setpoint handling and physics; the loop in <code class="docutils literal notranslate"><span class="pre">Solver.solve</span></code> (at most 100
+iterations) solves the nonlinear equations. Neither raises an error when its limit is
+reached.</p></li>
+</ul>
+</section>
+<section id="related-documentation">
+<h2>Related documentation<a class="headerlink" href="#related-documentation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../intro/intro_main.html"><span class="doc">Introduction</span></a> — what the simulator does.</p></li>
+<li><p><a class="reference internal" href="architecture.html"><span class="doc">Package architecture</span></a> — package boundaries and the two-layer asset model.</p></li>
+<li><p><a class="reference internal" href="../solver/solver_main.html"><span class="doc">Solver</span></a> — solver behavior and equation assembly.</p></li>
+<li><p><a class="reference internal" href="../network/network_main.html"><span class="doc">Network layer</span></a> — network representation.</p></li>
+<li><p><a class="reference internal" href="../controller/controller.html"><span class="doc">Control</span></a> — control behavior and setpoint logic.</p></li>
+<li><p><a class="reference internal" href="developer_guides.html"><span class="doc">Developer how-to guides</span></a> — how-to guides for extending the simulator.</p></li>
+<li><p><a class="reference internal" href="testing_strategy.html"><span class="doc">Testing strategy</span></a> — test layout and commands.</p></li>
+<li><p><a class="reference internal" href="api/omotes_simulator_core.html"><span class="doc">API Root Index</span></a> — generated class and module reference.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+
+        <div class="related-pages">
+          <a class="next-page" href="testing_strategy.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Testing strategy</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../assets/pyjnius_loader_asset.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Pyjnius loader class</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, NieuweWarmteNu Design Toolkit
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+<p class="ai-disclosure">
+  Parts of this documentation were produced with the assistance of generative AI via the
+  agent-based documentation pipeline defined in <a
+    href="https://github.com/Project-OMOTES/simulator-core/tree/main/.github/agents"><code>.github/agents/</code></a>.
+  This
+  applies to the documentation only. All content has been reviewed and verified
+  by the maintainers of this project.
+</p>
+
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Simulation flow</a><ul>
+<li><a class="reference internal" href="#purpose">Purpose</a></li>
+<li><a class="reference internal" href="#relevant-modules-and-files">Relevant modules and files</a></li>
+<li><a class="reference internal" href="#execution-or-extension-flow">Execution or extension flow</a><ul>
+<li><a class="reference internal" href="#high-level-run">High-level run</a></li>
+<li><a class="reference internal" href="#lower-level-entry-points">Lower-level entry points</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementation-notes">Implementation notes</a></li>
+<li><a class="reference internal" href="#testing-and-validation">Testing and validation</a></li>
+<li><a class="reference internal" href="#common-pitfalls">Common pitfalls</a></li>
+<li><a class="reference internal" href="#related-documentation">Related documentation</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

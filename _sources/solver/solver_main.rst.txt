@@ -47,4 +47,4 @@ Related Documentation
 - :doc:`../network/network_main` — how assets and nodes are connected into the network.
 - :doc:`../physics/physics_main` — the asset-internal constitutive relations.
 - :doc:`../controller/controller_behavior` — how setpoints become solver inputs.
-- :doc:`../reference/solver_reference` — class-level reference.
+- :doc:`../developer/solver_reference` — class-level reference.
