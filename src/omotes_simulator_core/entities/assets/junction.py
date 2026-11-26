@@ -56,6 +56,7 @@ class Junction:
         self.index = index
         # Initialize the junction
         self.solver_junction = solver_node
+        self.solver_junction.initial_temperature = tfluid_k
 
     def write_to_output(self) -> None:
         """Placeholder to write the asset to the output.

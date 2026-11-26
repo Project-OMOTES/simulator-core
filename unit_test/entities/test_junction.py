@@ -21,6 +21,7 @@ from unittest.mock import Mock
 from omotes_simulator_core.entities.assets.asset_defaults import (
     DEFAULT_NODE_HEIGHT,
     DEFAULT_PRESSURE,
+    DEFAULT_TEMPERATURE,
 )
 from omotes_simulator_core.entities.assets.junction import Junction
 
@@ -41,3 +42,16 @@ class JunctionTest(unittest.TestCase):
         self.assertEqual(from_junction.name, "from_junction")
         self.assertEqual(from_junction.height_m, DEFAULT_NODE_HEIGHT)
         self.assertEqual(from_junction.pn_bar, DEFAULT_PRESSURE)
+        self.assertEqual(from_junction.tfluid_k, DEFAULT_TEMPERATURE)
+        self.assertEqual(node.initial_temperature, DEFAULT_TEMPERATURE)
+
+    def test_junction_sets_solver_node_temperature(self):
+        """The junction temperature is passed to the solver node."""
+        # Arrange
+        node = Mock()
+
+        # Act
+        Junction(node, tfluid_k=350.0)
+
+        # Assert
+        self.assertEqual(node.initial_temperature, 350.0)

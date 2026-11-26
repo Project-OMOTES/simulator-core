@@ -21,6 +21,8 @@ from esdl.esdl import Joint as esdl_junction
 from omotes_simulator_core.adapter.transforms.esdl_asset_mapper import EsdlAssetMapper
 from omotes_simulator_core.adapter.transforms.string_to_esdl import OmotesAssetLabels
 from omotes_simulator_core.entities.assets.asset_abstract import AssetAbstract
+from omotes_simulator_core.entities.assets.asset_defaults import DEFAULT_TEMPERATURE
+from omotes_simulator_core.entities.assets.esdl_asset_object import RETURN_SIDE, SUPPLY_SIDE
 from omotes_simulator_core.entities.assets.junction import Junction
 from omotes_simulator_core.entities.esdl_object import EsdlObject
 from omotes_simulator_core.entities.heat_network import HeatNetwork
@@ -150,7 +152,83 @@ class EsdlEnergySystemMapper(EsdlMapperAbstract):
                         py_junction_list.append(
                             Junction(network.get_node(node_id), name=str(node_id))
                         )
+        self._set_junction_temperatures(network, py_assets_list, py_junction_list)
         return py_junction_list
+
+    def _set_junction_temperatures(
+        self,
+        network: Network,
+        py_assets_list: list[AssetAbstract],
+        py_junction_list: list[Junction],
+    ) -> None:
+        """Set the initial temperature of every node based on the carriers in the esdl.
+
+        :param network: network containing the nodes.
+        :param py_assets_list: list of assets connected to the nodes.
+        :param py_junction_list: list of junctions to update the temperature of.
+        """
+        node_ports: dict[str, list[tuple[str, str]]] = {}
+        # create a dictionary with the node id as key and a list of
+        # tuples with the asset id and port id as value
+        for py_asset in py_assets_list:
+            for con_point in range(0, py_asset.number_of_con_points):
+                if not py_asset.solver_asset.is_connected(con_point):
+                    continue
+                node = py_asset.solver_asset.get_connected_node(con_point)
+                node_ports.setdefault(node.name, []).append(
+                    (py_asset.asset_id, py_asset.connected_ports[con_point])
+                )
+
+        port_sides = self.esdl_object.get_port_sides()
+        for node_id, ports in node_ports.items():
+            network.get_node(node_id).initial_temperature = self._determine_node_temperature(
+                ports, port_sides
+            )
+        for junction in py_junction_list:
+            junction.tfluid_k = junction.solver_junction.initial_temperature
+
+    def _determine_node_temperature(
+        self, ports: list[tuple[str, str]], port_sides: dict[str, str | None]
+    ) -> float:
+        """Determine the initial temperature of a node from the carriers of its ports.
+
+        When only a supply or only a return temperature is available that one is used. When both
+        are available the side of the node (supply or return) determines which one is used. When
+        the side can not be determined the supply temperature is used and a warning is logged.
+
+        :param ports: list of (asset id, port id) tuples of the ports connected to the node.
+        :param port_sides: dictionary with the side of each port, see EsdlObject.get_port_sides.
+        :return: Initial temperature of the node [K].
+        """
+        supply_temperatures: list[float] = []
+        return_temperatures: list[float] = []
+        sides: set[str] = set()
+        for asset_id, port_id in ports:
+            supply, return_ = self.esdl_object.get_asset_by_id(
+                asset_id
+            ).get_port_carrier_temperatures(port_id)
+            if supply is not None:
+                supply_temperatures.append(supply)
+            if return_ is not None:
+                return_temperatures.append(return_)
+            side = port_sides.get(port_id)
+            if side is not None:
+                sides.add(side)
+        if not supply_temperatures and not return_temperatures:
+            return DEFAULT_TEMPERATURE
+        if not return_temperatures:
+            return supply_temperatures[0]
+        if not supply_temperatures:
+            return return_temperatures[0]
+        if sides == {RETURN_SIDE}:
+            return return_temperatures[0]
+        if sides != {SUPPLY_SIDE}:
+            logger.warning(
+                "Could not determine if the junction connecting ports "
+                f"{[port_id for _, port_id in ports]} is on the supply or return side. "
+                "Using the supply temperature as initial temperature."
+            )
+        return supply_temperatures[0]
 
     def _convert_assets(self, network: Network) -> list[AssetAbstract]:
         """Method to convert all assets from the esdl to a list of pyassets.
