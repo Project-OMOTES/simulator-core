@@ -103,7 +103,8 @@ class EsdlAssetObject:
         """Get the profile of the asset's ports.
 
         Output profiles are skipped, and the first input profile found is returned.
-         If no profile is found, a ValueError is raised."""
+        If no profile is found, a ValueError is raised.
+        """
         for esdl_port in self.esdl_asset.port:
             if esdl_port.profile:
                 for profile in esdl_port.profile:
