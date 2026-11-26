@@ -46,7 +46,7 @@ connection points between assets where hydraulic and thermal state is shared.
      - Entity-level network container; owns a solver ``Network``, a list of asset
        entities, and a list of ``Junction`` objects.
 
-For class and implementation details see :doc:`../reference/solver_reference`.
+For class and implementation details see :doc:`../developer/network_reference`.
 
 Each asset exposes a fixed number of connection points (typically two: inlet at index 0
 and outlet at index 1). Each connection point maps to a single ``Node``; a node may be
@@ -108,7 +108,7 @@ The partitioning determines which producers, consumers, and storage devices shar
 common hydraulic circuit. The controller dispatches setpoints per sub-network, and the
 conversion factors across heat transfer assets relate thermal demands between connected
 sub-networks. How those setpoints are computed and applied is the responsibility of the
-controller; see :doc:`../reference/controller_reference`.
+controller; see :doc:`../developer/controller_reference`.
 
 Node connectivity rules
 ------------------------
@@ -165,9 +165,9 @@ Related controller, solver, and junction limitations are documented in
 Implementation reference
 -------------------------
 
-For solver-side network class details, see :doc:`../reference/solver_reference`
+For solver-side network class details, see :doc:`../developer/network_reference`
 (:ref:`network-class`). For controller-side sub-network behavior, see
-:doc:`../reference/controller_reference` (:ref:`sub_network_class`). For network
-simulation orchestration, see :doc:`../reference/architecture_reference`. For
+:doc:`../developer/controller_reference` (:ref:`sub_network_class`). For network
+simulation orchestration, see :doc:`../developer/simulation_flow`. For
 node-level mass flow, energy, and pressure equations, see
 :doc:`../physics/junction_physics`.

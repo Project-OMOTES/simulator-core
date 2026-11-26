@@ -1,7 +1,7 @@
 ---
 name: ControllerBehaviorDocAgent
 description: Create detailed controller-behavior documentation in reStructuredText for doc/controller, explaining what the network controller decides each timestep and how those decisions change the solved physical model, at a level of detail comparable to the physics asset pages.
-argument-hint: Behavior page target, source controller module(s), page title, and output file name (for example: Network dispatch, control_behavior.rst, or Storage control, behavior/storage.rst).
+argument-hint: Behavior page target, source controller module(s), page title, and output file name (for example: Network dispatch, controller_behavior.rst, or Storage control, behavior/storage.rst).
 tools: [read, search, edit, execute/runInTerminal, web]
 agents: []
 ---
@@ -21,7 +21,7 @@ Inputs
 - Behavior page target: ``<BEHAVIOR_TARGET>``
 - Source controller module(s): ``<SOURCE_MODULES>``
 - Page title: ``<PAGE_TITLE>``
-- Output file: ``doc/controller/control_behavior.rst`` for network-level dispatch, or
+- Output file: ``doc/controller/controller_behavior.rst`` for network-level dispatch, or
   ``doc/controller/behavior/<component>.rst`` for a per-component controller page.
 
 Primary objective
@@ -53,7 +53,7 @@ Control documentation is split into four distinct types. This agent owns exactly
 - Developer control extension guides: owned by ``DeveloperGuideAgent``.
 - Controller API reference (``doc/controller/assets/*.rst``,
   ``doc/controller/main_controller_class.rst``, ``doc/controller/sub_network_class.rst``, and
-  the ``doc/reference/controller_reference*`` wrappers): owned by ``APIReferenceAgent``.
+  the ``doc/developer/controller_reference.rst`` API reference toctree): owned by ``APIReferenceAgent``.
 
 Do not absorb any of the other three roles into a behavior page.
 
@@ -72,7 +72,7 @@ existing ``doc/controller/behavior`` page as the structural template.
 
       * - behavior page
         - source file(s)
-      * - control_behavior.rst (network dispatch)
+      * - controller_behavior.rst (network dispatch)
         - entities/network_controller.py (``NetworkController``),
           entities/network_controller_abstract.py (``NetworkControllerAbstract``),
           entities/assets/controller/controller_network.py (``ControllerNetwork`` — subnetwork
@@ -251,7 +251,7 @@ Link readers to the adjacent material they are likely to need next, for example:
 - :doc:`controller` for the conceptual control overview,
 - the matching ``doc/physics`` asset page for asset-internal behavior,
 - :doc:`../network/network_main` for how decisions affect the solved network,
-- :doc:`../reference/controller_reference` for class-level reference.
+- :doc:`../developer/controller_reference` for class-level reference.
 
 Equation depth policy
 ---------------------
@@ -275,7 +275,7 @@ In particular:
 - do not write class/module API reference (that belongs to ``APIReferenceAgent``),
 - per the single-toctree-path rule, behavior pages are toctreed only from
   ``doc/controller/controller.rst``'s "Control topics" toctree; never add them to a
-  ``doc/reference/`` page or any other toctree.
+  curated reference page (``doc/developer/*_reference.rst``) or any other toctree.
 
 Style rules
 -----------
@@ -323,8 +323,8 @@ After writing or updating a behavior page:
   ``water-to-water heat-pump`` and that storage-dispatch explanations include fill-level impact
   and clipping context with a physics cross-link.
 7. Verify the page is toctreed only from ``doc/controller/controller.rst`` and not duplicated in
-   any ``doc/reference/`` page.
-8. If command execution or validation tools are available, run ``doc/run_spinx.bat`` or the
+   any curated reference page (``doc/developer/*_reference.rst``).
+8. If command execution or validation tools are available, run ``doc/run_sphinx.bat`` or the
    repository-preferred documentation build command.
 9. Inspect the build output for warnings and errors related to the new or edited page,
    including rst syntax errors, malformed tables, invalid math blocks, broken references, and
